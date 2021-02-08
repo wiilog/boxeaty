@@ -6,12 +6,23 @@
             <img src="{{ asset('images/white-logo.svg') }}" class="logo" alt="Logo BoxEaty"/>
             <div class="menu-container">
                 <div class="current-user">
-                    <img src="{{ asset('images/person.svg') }}"/>
+                    <img src="{{ asset('images/user.svg') }}"/>
                     Yann
                 </div>
-                <button class="menu">
-                    <img src="{{ asset('images/menu.svg') }}"/>
-                </button>
+                <img class="display-menu" src="{{ asset('images/menu.svg') }}"/>
+                <div class="menu-dropdown" style="display:none">
+                    <a href="{{ path('home') }}" class="active"><i class="icon fas fa-home"></i> Accueil</a>
+                    <div class="category">
+                        <i class="chevron fas fa-chevron-left"></i> <i class="icon fas fa-bullseye"></i> Traçabilité
+
+                        <div class="category-dropdown" style="display:none">
+                            <a href="{{ path('home') }}">Box</a>
+                            <a href="{{ path('home') }}">Numéro consigne</a>
+                            <a href="{{ path('home') }}">Mouvements</a>
+                        </div>
+                    </div>
+                    <a href="{{ path('home') }}"><i class="icon fas fa-sign-out-alt"></i> Déconnexion</a>
+                </div>
             </div>
         </div>
         <div class="breadcrumb">

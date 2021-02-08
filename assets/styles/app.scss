@@ -8,6 +8,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import "~datatables.net-buttons-dt/css/buttons.dataTables.css";
 
 @import "variables";
+@import "mixins";
 @import "fonts";
 @import "header";
 @import "forms";
@@ -16,13 +17,6 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 body {
     font-family: 'Retroyal', sans-serif;
     background-color: $grey;
-}
-
-@mixin box() {
-    background: #FFFFFF;
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
-    border-radius: 8px;
-    padding: 10px 20px;
 }
 
 h1, h2, h3 {
@@ -35,7 +29,7 @@ h1 {
 }
 
 main:not(.login) {
-    margin: 0 2%;
+    margin: 0 30px;
 
     .filters  {
         @include box();
@@ -52,6 +46,17 @@ main:not(.login) {
         display: flex;
         justify-content: space-between;
         align-items: center;
+    }
+}
+
+.alert-container {
+    position: fixed;
+    top: 0;
+    width: 100%;
+
+    .alert {
+        margin-bottom: 0;
+        border-radius: 0;
     }
 }
 

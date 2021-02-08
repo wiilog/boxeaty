@@ -25,6 +25,7 @@ class Authenticator extends AbstractFormLoginAuthenticator {
 
     public const LOGIN_ERROR = "Identifiants incorrects";
     public const LOGIN_ROUTE = "login";
+    public const HOME_ROUTE = "home";
 
     /** @Required */
     public EntityManagerInterface $entityManager;
@@ -61,7 +62,7 @@ class Authenticator extends AbstractFormLoginAuthenticator {
         }
 
         $user = $this->entityManager->getRepository(User::class)->findByLogin($credentials["email"]);
-
+dump($user);
         if (!$user) {
             throw new CustomUserMessageAuthenticationException(self::LOGIN_ERROR);
         }
@@ -70,6 +71,8 @@ class Authenticator extends AbstractFormLoginAuthenticator {
     }
 
     public function checkCredentials($credentials, UserInterface $user) {
+        dump($user, $user instanceof User && $user->isActive() &&
+            $this->encoder->isPasswordValid($user, $credentials["password"]));
         return $user instanceof User && $user->isActive() &&
             $this->encoder->isPasswordValid($user, $credentials["password"]);
     }
@@ -79,8 +82,7 @@ class Authenticator extends AbstractFormLoginAuthenticator {
             return new RedirectResponse($targetPath);
         }
 
-        // For example : return new RedirectResponse($this->urlGenerator->generate("some_route"));
-        throw new \Exception("TODO: provide a valid redirect inside " . __FILE__);
+        return new RedirectResponse($this->urlGenerator->generate(self::HOME_ROUTE));
     }
 
     protected function getLoginUrl() {

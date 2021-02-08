@@ -17,11 +17,10 @@ class UserRepository extends EntityRepository {
 
     public function findByLogin(string $login) {
         return $this->createQueryBuilder("user")
-            ->where("user.username LIKE :login")
-            ->orWhere("user.email LIKE :login")
+            ->where("user.email LIKE :login")
             ->setParameter("login", $login)
             ->getQuery()
-            ->getResult();
+            ->getOneOrNullResult();
     }
 
 }

@@ -19,11 +19,15 @@ input {
     }
 }
 
-button {
+button, a[role="button"] {
+    display: inline-block;
     border-radius: 4px;
     border: 1px solid $orange;
     height: 37px;
+    line-height: 37px;
     padding: 0 20px;
+    text-decoration: none;
+    text-align: center;
 
     &.primary {
         background: $orange;

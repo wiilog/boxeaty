@@ -2,9 +2,7 @@
 
 {% block title %}BoxEaty - Connexion{% endblock %}
 
-{% block bodyattributes %}
-style="background:white"
-{% endblock %}
+{% block bodyattributes %}style="background:white"{% endblock %}
 {% block body %}
     <main class="login">
         <img src="{{ asset('images/logo.svg') }}" class="logo" alt="Logo BoxEaty">
@@ -21,7 +19,7 @@ style="background:white"
             </label>
 
             <label class="d-block mt-2">
-                Password
+                Mot de passe
                 <input type="password" name="password" class="d-block w-100" required>
             </label>
 
@@ -38,7 +36,7 @@ style="background:white"
             </div>
 
             <button class="primary w-100 mt-3" type="submit">Se connecter</button>
-            <button class="secondary w-100 mt-1" type="submit">Créer un compte</button>
+            <a href="{{ path('register') }}" class="secondary w-100 mt-1" role="button">Créer un compte</a>
         </form>
     </main>
 {% endblock %}

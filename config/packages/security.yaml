@@ -1,7 +1,15 @@
 security:
-    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    encoders:
+        App\Entity\User:
+            algorithm: auto
+
     providers:
-        users_in_memory: { memory: null }
+        users:
+            entity:
+                class: App\Entity\User
+                property: 'email'
+        in_memory: { memory: ~ }
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -9,14 +17,12 @@ security:
         main:
             anonymous: true
             lazy: true
-            provider: users_in_memory
+            provider: users
             guard:
                 authenticators:
                     - App\Security\Authenticator
             logout:
-                path: app_logout
-                # where to redirect after logout
-                # target: app_any_route
+                path: logout
 
             remember_me:
                 secret:   '%kernel.secret%'
@@ -27,5 +33,6 @@ security:
 
     access_control:
         - { path: ^/login, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/password-forgotten, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/, role: IS_AUTHENTICATED_REMEMBERED }

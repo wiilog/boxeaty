@@ -8,6 +8,7 @@
     {% endblock %}
 </head>
 <body {% block bodyattributes %}{% endblock %}>
+{% include 'utils/alerts.html.twig' %}
 {% block body %}{% endblock %}
 </body>
 {% block javascripts %}

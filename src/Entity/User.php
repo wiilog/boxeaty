@@ -22,11 +22,6 @@ class User implements UserInterface {
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private ?string $username = null;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
     private ?string $email = null;
 
     /**
@@ -37,7 +32,7 @@ class User implements UserInterface {
     /**
      * @ORM\Column(type="datetime")
      */
-    private ?DateTime $creationDate;
+    private ?DateTime $creationDate = null;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -47,24 +42,14 @@ class User implements UserInterface {
     /**
      * @ORM\Column(type="boolean", options={"default": false})
      */
-    private ?bool $active = false;
-
-    public function __construct() {
-        $this->creationDate = new DateTime();
-    }
+    private ?bool $active = null;
 
     public function getId(): ?int {
         return $this->id;
     }
 
     public function getUsername(): ?string {
-        return $this->username;
-    }
-
-    public function setUsername(string $username): self {
-        $this->username = $username;
-
-        return $this;
+        return $this->email;
     }
 
     public function getEmail(): ?string {

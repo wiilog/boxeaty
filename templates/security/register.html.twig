@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}BoxEaty - Créer un compte{% endblock %}
+
+{% block bodyattributes %}style="background:white"{% endblock %}
+{% block body %}
+    <main class="login">
+        <img src="{{ asset('images/logo.svg') }}" class="logo" alt="Logo BoxEaty">
+
+        <h1>Créer un compte</h1>
+        <form method="post">
+            <label class="d-block">
+                Adresse email
+                <input type="text" name="email" class="d-block w-100" value="{{ user.email }}" required autofocus>
+            </label>
+
+            <label class="d-block mt-2">
+                Mot de passe
+                <input type="password" name="password" class="d-block w-100" required>
+            </label>
+
+            <label class="d-block mt-2">
+                Confirmer le mot de passe
+                <input type="password" name="password-repeat" class="d-block w-100" required>
+            </label>
+
+            <button class="primary w-100 mt-3" type="submit">Créer mon compte</button>
+            <a href="{{ path('register') }}" class="secondary w-100 mt-1" role="button">Retour à la connexion</a>
+        </form>
+    </main>
+{% endblock %}
