@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block menu %}Traçabilité{% endblock %}
+{% block page %}Mouvements{% endblock %}
+
+{% block body %}
+    <div class="filters">
+        <div class="left">
+            <input type="text" placeholder="Exemple">
+            <input type="text" placeholder="Champ de texte">
+        </div>
+        <div class="right">
+            <button class="primary">Filtrer</button>
+            <button class="tertiary"><i class="icon fas fa-redo"></i> Réinitialiser les filtres</button>
+        </div>
+    </div>
+
+    <div class="box mt-4">
+        <div class="content-menu">
+            <input type="search" placeholder="Rechercher">
+            <div class="right">
+                <button class="secondary"><i class="icon fas fa-download"></i> Export au format CSV</button>
+                <button class="primary"><i class="icon fas fa-plus"></i> Nouvelle commande</button>
+            </div>
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+    </div>
+{% endblock %}
