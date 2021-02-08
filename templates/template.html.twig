@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <header>
+        <div class="top">
+            <img src="{{ asset('images/white-logo.svg') }}" class="logo" alt="Logo BoxEaty"/>
+            <div class="menu-container">
+                <div class="current-user">
+                    <img src="{{ asset('images/person.svg') }}"/>
+                    Yann
+                </div>
+                <button class="menu">
+                    <img src="{{ asset('images/menu.svg') }}"/>
+                </button>
+            </div>
+        </div>
+        <div class="breadcrumb">
+            <span class="menu">{% apply upper %}{% block menu %}???{% endblock %}{% endapply %}</span>
+            <i class="separator">|</i>
+            <span>{% block page %}???{% endblock %}</span>
+        </div>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+{% endblock %}

@@ -1,0 +1,75 @@
+@import "variables";
+
+label {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+input {
+    &[type="text"], &[type="password"], &[type="search"] {
+        min-width: 150px;
+        border: none;
+        border-bottom: 1px solid #E5E5E5;
+        padding: 2px 5px;
+    }
+
+    &[type="search"] {
+        background: url(../images/search.svg) no-repeat scroll right;
+        width: 200px;
+    }
+}
+
+button {
+    border-radius: 4px;
+    border: 1px solid $orange;
+    height: 37px;
+    padding: 0 20px;
+
+    &.primary {
+        background: $orange;
+        border-color: $orange;
+        color: white;
+
+        &:hover {
+            background: $orange-light;
+            border-color: $orange-light;
+        }
+    }
+
+    &.secondary {
+        background: $orange-lightest;
+        border-color: $orange-lightest;
+        color: $orange;
+
+        &:hover {
+            border-color: $orange-light;
+            color: $orange-light;
+        }
+    }
+
+    &.outline {
+        background: white;
+        border-color: $orange;
+        color: $orange;
+
+        &:hover {
+            border-color: $orange-light;
+            color: $orange-light;
+        }
+    }
+
+    &.tertiary {
+        background: transparent;
+        border-color: transparent;
+        color: $blue-lighter;
+
+        &:hover {
+            color: $blue;
+        }
+    }
+
+    .icon {
+        display: inline-block;
+        margin-right: 5px;
+    }
+}

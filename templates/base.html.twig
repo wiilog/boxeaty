@@ -7,29 +7,8 @@
         {{ encore_entry_link_tags('app') }}
     {% endblock %}
 </head>
-<body>
-<header>
-    <div class="top">
-        <img src="{{ asset('images/white-logo.svg') }}" class="logo" alt="Logo BoxEaty"/>
-        <div class="menu-container">
-            <div class="current-user">
-                <img src="{{ asset('images/person.svg') }}"/>
-                Yann
-            </div>
-            <button class="menu">
-                <img src="{{ asset('images/menu.svg') }}"/>
-            </button>
-        </div>
-    </div>
-    <div class="breadcrumb">
-        <span class="menu">{% apply upper %}{% block menu %}???{% endblock %}{% endapply %}</span>
-        <i class="separator">|</i>
-        <span>{% block page %}???{% endblock %}</span>
-    </div>
-</header>
-<div class="content">
-    {% block body %}{% endblock %}
-</div>
+<body {% block bodyattributes %}{% endblock %}>
+{% block body %}{% endblock %}
 </body>
 {% block javascripts %}
     {{ encore_entry_script_tags('app') }}

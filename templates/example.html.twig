@@ -1,9 +1,9 @@
-{% extends 'base.html.twig' %}
+{% extends 'template.html.twig' %}
 
 {% block menu %}Traçabilité{% endblock %}
 {% block page %}Mouvements{% endblock %}
 
-{% block body %}
+{% block content %}
     <div class="filters">
         <div class="left">
             <input type="text" placeholder="Exemple">
@@ -19,7 +19,7 @@
         <div class="content-menu">
             <input type="search" placeholder="Rechercher">
             <div class="right">
-                <button class="secondary"><i class="icon fas fa-download"></i> Export au format CSV</button>
+                <button class="outline"><i class="icon fas fa-download"></i> Export au format CSV</button>
                 <button class="primary"><i class="icon fas fa-plus"></i> Nouvelle commande</button>
             </div>
         </div>
