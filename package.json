@@ -9,12 +9,21 @@
     "license": "UNLICENSED",
     "private": true,
     "scripts": {
-        "dev-server": "encore dev-server",
-        "dev": "encore dev",
-        "watch": "encore dev --watch",
-        "build": "encore production --progress"
+        "generate-routes": "php bin/console fos:js-routing:dump --format=json --target=public/generated/routes.json",
+        "dev": "yarn generate-routes && encore dev",
+        "watch": "yarn generate-routes && encore dev --watch",
+        "build": "yarn generate-routes && encore production --progress"
     },
     "dependencies": {
-        "cash-dom": "^8.1.0"
+        "@fortawesome/fontawesome-free": "^5.15.2",
+        "@fortawesome/free-solid-svg-icons": "^5.15.2",
+        "@popperjs/core": "^2.6.0",
+        "bootstrap": "5.0.0-beta1",
+        "jquery": "^3.5.1",
+        "datatables.net": "^1.10.22",
+        "datatables.net-buttons": "^1.6.4",
+        "datatables.net-buttons-dt": "^1.6.4",
+        "datatables.net-dt": "^1.10.22",
+        "datatables.net-responsive": "^2.2.6"
     }
 }
