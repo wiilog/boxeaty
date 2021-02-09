@@ -1,0 +1,42 @@
+parameters:
+  menu:
+    - name: Accueil
+      icon: home
+      type: link
+      route: home
+    - name: Traçabilité
+      icon: bullseye
+      type: category
+      items:
+        - name: Box
+          route: missing_route
+        - name: Numéro consigne
+          route: missing_route
+        - name: Mouvements
+          route: missing_route
+    - name: Référentiel
+      icon: address-card
+      type: category
+      items:
+        - name: Client
+          route: missing_route
+        - name: Groupe
+          route: missing_route
+        - name: Emplacement
+          route: missing_route
+    - name: Paramétrage
+      icon: cog
+      type: category
+      items:
+        - name: Global
+          route: missing_route
+        - name: Rôles
+          route: missing_route
+        - name: Utilisateurs
+          route: missing_route
+        - name: Imports et mises à jour
+          route: missing_route
+    - name: Déconnexion
+      icon: sign-out-alt
+      type: link
+      route: logout

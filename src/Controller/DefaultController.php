@@ -14,4 +14,11 @@ class DefaultController extends AbstractController {
         return $this->render("example.html.twig");
     }
 
+    /**
+     * @Route("/lost", name="missing_route")
+     */
+    public function missingRoute() {
+        return $this->render("example.html.twig");
+    }
+
 }
