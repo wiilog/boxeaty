@@ -4,8 +4,6 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import '~@fortawesome/fontawesome-free/scss/solid';
 @import '~@fortawesome/fontawesome-free/scss/regular';
 @import '~@fortawesome/fontawesome-free/scss/brands';
-@import "~datatables.net-dt/css/jquery.dataTables.css";
-@import "~datatables.net-buttons-dt/css/buttons.dataTables.css";
 
 @import "variables";
 @import "mixins";
@@ -13,6 +11,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import "header";
 @import "forms";
 @import "login";
+@import "datatable";
 
 body {
     font-family: 'Retroyal', sans-serif;
@@ -31,13 +30,20 @@ h1 {
 main:not(.login) {
     margin: 0 30px;
 
+    .box.first-box, .filters.first-box {
+        margin-top: -30px;
+    }
+
+    .box:not(.first-box) {
+        margin-top: 1.5rem;
+    }
+
     .filters  {
         @include box();
 
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: -30px;
         min-height: 65px;
         padding: 0 20px;
     }
@@ -46,6 +52,7 @@ main:not(.login) {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        margin: 15px 0;
     }
 }
 

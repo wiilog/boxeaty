@@ -1,0 +1,18 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Paramétrage{% endblock %}
+{% block page %}Utilisateurs{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <button class="outline"><i class="icon fas fa-download"></i> Export au format CSV</button>
+                <button class="primary"><i class="icon fas fa-plus"></i> Nouvel utilisateur</button>
+            </div>
+        </div>
+
+        <table id="table-users"></table>
+    </div>
+{% endblock %}

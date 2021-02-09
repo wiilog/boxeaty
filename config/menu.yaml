@@ -33,7 +33,7 @@ parameters:
         - name: Rôles
           route: missing_route
         - name: Utilisateurs
-          route: missing_route
+          route: users_list
         - name: Imports et mises à jour
           route: missing_route
     - name: Déconnexion

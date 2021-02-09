@@ -1,0 +1,63 @@
+@import "variables";
+@import "mixins";
+
+.dataTables_paginate  {
+    text-align: right;
+}
+
+.paging_simple_numbers {
+    .paginate_button {
+        @include button();
+
+        margin: 0 2px;
+
+        &:not(.previous):not(.next) {
+            background: $orange;
+            color: white;
+        }
+
+        &.previous, &.next {
+            background: white;
+            border: white;
+            color: $blue;
+        }
+    }
+
+    .ellipsis {
+        @include button();
+
+        background: $grey;
+        border: $grey;
+        color: $blue;
+        margin: 0 2px;
+    }
+}
+
+.dataTables_wrapper {
+    thead {
+        background: $grey;
+
+        th {
+            padding: 10px;
+
+            &:first-child {
+                border-bottom-left-radius: 4px;
+                border-top-left-radius: 4px;
+            }
+
+            &:last-child {
+                border-bottom-right-radius: 4px;
+                border-top-right-radius: 4px;
+            }
+        }
+    }
+
+    td {
+        padding: 10px;
+        border-bottom: 1px solid $grey;
+    }
+
+    label {
+        font-weight: normal;
+    }
+}
