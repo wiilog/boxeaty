@@ -1,5 +1,5 @@
 imports:
-    - { resource: menu.yaml }
+    - { resource: settings.yaml }
 
 parameters:
 
@@ -21,8 +21,12 @@ services:
 
     App\Controller\:
         resource: '../src/Controller/'
-        tags: ['controller.service_arguments']
+        tags: ['controllers.service_arguments']
 
     App\Twig\MenuExtension:
         arguments:
             $config: '%menu%'
+
+    App\Listener\AnnotationListener:
+        tags:
+            - { name: 'kernel.event_listener', event: 'kernel.controller_arguments', method: 'onRequest' }

@@ -15,4 +15,10 @@
 
         <table id="table-users"></table>
     </div>
+
+    {% include 'settings/user/modal/delete_user.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('user_list') }}
 {% endblock %}

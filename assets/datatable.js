@@ -1,21 +1,41 @@
-export const DATATABLE_ACTIONS_TITLE = `<span style="display:block;text-align:right">Actions</span>`;
+import $ from "jquery";
 
-export function initDatatable(id, config) {
-    const $table = $(`#${id}`);
+export const DATATABLE_ACTIONS_TITLE = `<span style="display:block;text-align:right">Actions</span>`;
+export const DATATABLE_ACTIONS = {
+    data: `actions`,
+    title: DATATABLE_ACTIONS_TITLE,
+    orderable: false,
+};
+
+export function initDatatable(table, config) {
+    const $table = $(table);
     $table.addClass(`w-100`);
 
-    for(let column of config.columns) {
+    for(const [id, column] of Object.entries(config.columns)) {
         if(!column.name) {
             column.name = column.data;
         }
+
+        if(config.order && Array.isArray(config.order)) {
+            const newOrder = [];
+            for(let [name, order] of config.order) {
+                if(name === column.data) {
+                    name = id;
+                }
+
+                newOrder.push([Number(name), order]);
+            }
+
+            config.order = newOrder;
+        }
     }
 
-    return $table
-        .on(`error.dt`, (e, settings, techNote, message) => console.error(`An error has been reported by DataTables: `, message, e, config.id))
-        .dataTable({
+    const $datatable = $table
+        .on(`error.dt`, (e, settings, techNote, message) => console.error(`An error has been reported by DataTables: `, message, e, table))
+        .DataTable({
             processing: true,
             serverSide: true,
-            fixedColumns:   {
+            fixedColumns: {
                 heightMatch: `auto`
             },
             autoWidth: true,
@@ -33,6 +53,20 @@ export function initDatatable(id, config) {
             },
             ...config
         });
+
+
+    $(`${table} tbody`)
+        .on(`dblclick`, `tr`, function() {
+            config.listeners.onAction($datatable.row(this).data());
+        })
+        .on(`click`, `.datatable-action [data-listener]`, function() {
+            const $button = $(this);
+            const callback = config.listeners[$(this).data(`listener`)];
+
+            callback($datatable.row($button.parents(`tr`)).data())
+        });
+
+    return $datatable;
 }
 
 function moveSearchInputToHeader($table) {

@@ -44,6 +44,12 @@ class User implements UserInterface {
      */
     private ?bool $active = null;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Role::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private ?Role $role = null;
+
     public function getId(): ?int {
         return $this->id;
     }
@@ -92,6 +98,28 @@ class User implements UserInterface {
         return $this;
     }
 
+    public function isActive(): ?bool {
+        return $this->active;
+    }
+
+    public function setActive(bool $active): self {
+        $this->active = $active;
+
+        return $this;
+    }
+
+    public function getRole(): ?Role
+    {
+        return $this->role;
+    }
+
+    public function setRole(?Role $role): self
+    {
+        $this->role = $role;
+
+        return $this;
+    }
+
     public function getRoles() {
         return [];
     }
@@ -102,16 +130,6 @@ class User implements UserInterface {
 
     public function eraseCredentials() {
 
-    }
-
-    public function isActive(): ?bool {
-        return $this->active;
-    }
-
-    public function setActive(bool $active): self {
-        $this->active = $active;
-
-        return $this;
     }
 
 }

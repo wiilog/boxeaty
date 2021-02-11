@@ -1,7 +1,7 @@
 @import "variables";
 @import "mixins";
 
-.dataTables_paginate  {
+.dataTables_paginate {
     text-align: right;
 }
 
@@ -34,6 +34,8 @@
 }
 
 .dataTables_wrapper {
+    position: relative;
+
     thead {
         background: $grey;
 
@@ -49,6 +51,25 @@
                 border-bottom-right-radius: 4px;
                 border-top-right-radius: 4px;
             }
+
+            @mixin order-icon($url) {
+                background-image: url($url);
+                background-repeat: no-repeat;
+                background-position: center right;
+                background-size: 15px;
+            }
+
+            &.sorting {
+                @include order-icon("../images/sort.svg");
+            }
+
+            &.sorting_asc {
+                @include order-icon("../images/sort_ascending.svg");
+            }
+
+            &.sorting_desc {
+                @include order-icon("../images/sort_descending.svg");
+            }
         }
     }
 
@@ -57,7 +78,24 @@
         border-bottom: 1px solid $grey;
     }
 
+    tr:hover {
+        background: $grey;
+    }
+
     label {
         font-weight: normal;
     }
+
+   .dataTables_processing {
+       position: absolute;
+       top: 60px;
+       left: 0;
+       width: 100%;
+       text-align: center;
+    }
+}
+
+.datatable-action {
+    text-align: right;
+    padding-right: 5px;
 }

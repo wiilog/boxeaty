@@ -1,11 +1,12 @@
+@import "variables";
+
 $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
-@import "~bootstrap/scss/bootstrap";
+@import "bootstrap";
 @import '~@fortawesome/fontawesome-free/scss/fontawesome';
 @import '~@fortawesome/fontawesome-free/scss/solid';
 @import '~@fortawesome/fontawesome-free/scss/regular';
 @import '~@fortawesome/fontawesome-free/scss/brands';
 
-@import "variables";
 @import "mixins";
 @import "fonts";
 @import "header";
@@ -28,6 +29,9 @@ h1 {
 }
 
 main:not(.login) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     margin: 0 30px;
 
     .box.first-box, .filters.first-box {
@@ -69,6 +73,11 @@ main:not(.login) {
 
 .box {
     @include box();
+
+    &.box-small {
+        min-width: 350px;
+        width: 40%;
+    }
 }
 
 .text-reset {

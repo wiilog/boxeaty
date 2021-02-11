@@ -11,6 +11,8 @@ Encore
     .setPublicPath("/build")
 
     .addEntry("app", "./assets/app.js")
+    .addEntry("user_list", "./assets/controllers/user-list.js")
+    .autoProvidejQuery()
 
     .splitEntryChunks()
     .enableSingleRuntimeChunk()

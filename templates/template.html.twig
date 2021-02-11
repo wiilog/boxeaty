@@ -4,13 +4,15 @@
     <header>
         <div class="top">
             <img src="{{ asset('images/white-logo.svg') }}" class="logo" alt="Logo BoxEaty"/>
-            <div class="menu-container">
+            <div class="header-right">
                 <div class="current-user">
                     <img src="{{ asset('images/user.svg') }}"/>
                     Yann
                 </div>
-                <img class="display-menu" src="{{ asset('images/menu.svg') }}"/>
-                {% include 'menu.html.twig' %}
+                <div class="menu-container">
+                    <img class="display-menu" src="{{ asset('images/menu.svg') }}"/>
+                    {% include 'menu.html.twig' %}
+                </div>
             </div>
         </div>
         <div class="breadcrumb">
