@@ -34,6 +34,7 @@ class UserController extends AbstractController {
         foreach($users["data"] as $user) {
             $data[] = [
                 "id" => $user->getId(),
+                "username" => $user->getUsername(),
                 "email" => $user->getEmail(),
                 "lastLogin" => $user->getLastLogin() ? $user->getLastLogin()->format("d/m/Y H:i") : "/",
                 "role" => "Administrateur",

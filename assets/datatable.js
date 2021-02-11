@@ -23,13 +23,13 @@ export function initDatatable(table, config) {
                     name = id;
                 }
 
-                newOrder.push([Number(name), order]);
+                newOrder.push([name, order]);
             }
 
             config.order = newOrder;
         }
     }
-
+    console.log(config);
     const $datatable = $table
         .on(`error.dt`, (e, settings, techNote, message) => console.error(`An error has been reported by DataTables: `, message, e, table))
         .DataTable({

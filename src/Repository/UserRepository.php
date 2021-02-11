@@ -22,11 +22,10 @@ class UserRepository extends EntityRepository {
         $qb = $this->createQueryBuilder("user");
         $total = QueryCounter::count($qb, "user");
 
-
-
         if($search) {
-            $qb->where("user.email LIKE :search")
-                ->setParameter("search", $search);
+            $qb->where("user.username LIKE :search")
+                ->orWhere("user.email LIKE :search")
+                ->setParameter("search", "%$search%");
         }
 
         if(isset($params["order"])) {

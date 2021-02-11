@@ -1,5 +1,6 @@
 import Flash from './flash';
 import AJAX from './ajax';
+import {LOADING_CLASS} from "./app";
 
 export default class Modal {
     element;
@@ -15,22 +16,31 @@ export default class Modal {
             return null;
         }
 
-        modal.element.find(`button[type="submit"]`).click(() => {
+        modal.element.find(`button[type="submit"]`).click(function() {
+            const $button = $(this);
+            if($button.hasClass(LOADING_CLASS)) {
+                Flash.add(Flash.WARNING, `Opération en cours d'exécution`);
+            }
+
+            $button.pushLoader(`small`);
+
             const data = processForm(modal.element);
-            modal.config.ajax.json(data).then(result => {
-                if(result.status === 500) {
-                    console.error(result);
-                    Flash.add("Une erreur est survenue lors du traitement de votre requête par le serveur");
-                }
+            modal.config.ajax.json(data)
+                .then(result => {
+                    if(result.status === 500) {
+                        console.error(result);
+                        Flash.add(Flash.DANGER, `Une erreur est survenue lors du traitement de votre requête par le serveur`);
+                    }
 
-                if(result.success) {
-                    Flash.add(Flash.SUCCESS, result.msg);
-                } else {
-                    Flash.add(Flash.DANGER, result.msg);
-                }
+                    if(result.success) {
+                        Flash.add(Flash.SUCCESS, result.msg);
+                    } else {
+                        Flash.add(Flash.DANGER, result.msg);
+                    }
 
-                modal.element.modal(`hide`);
-            })
+                    modal.element.modal(`hide`);
+                })
+                .finally(() => $button.popLoader())
         });
 
         return modal;

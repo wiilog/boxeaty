@@ -3,7 +3,6 @@
 namespace App\DataFixtures;
 
 use App\Entity\Role;
-use App\Helper\Stream;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;

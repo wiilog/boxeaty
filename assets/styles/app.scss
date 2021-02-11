@@ -64,6 +64,7 @@ main:not(.login) {
     position: fixed;
     top: 0;
     width: 100%;
+    z-index: 1000;
 
     .alert {
         margin-bottom: 0;
@@ -90,3 +91,22 @@ main:not(.login) {
 .text-semi-bold {
     font-weight: 600;
 }
+
+.loading {
+    position: relative;
+
+    /* slightly transparent fallback */
+    .spinner-border-container {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(2px);
+        background-color: initial;
+    }
+}
+

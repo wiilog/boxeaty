@@ -22,6 +22,11 @@ class User implements UserInterface {
     /**
      * @ORM\Column(type="string", length=255)
      */
+    private ?string $username = null;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
     private ?string $email = null;
 
     /**
@@ -55,7 +60,13 @@ class User implements UserInterface {
     }
 
     public function getUsername(): ?string {
-        return $this->email;
+        return $this->username;
+    }
+
+    public function setUsername(string $username): self {
+        $this->username = $username;
+
+        return $this;
     }
 
     public function getEmail(): ?string {
@@ -108,13 +119,11 @@ class User implements UserInterface {
         return $this;
     }
 
-    public function getRole(): ?Role
-    {
+    public function getRole(): ?Role {
         return $this->role;
     }
 
-    public function setRole(?Role $role): self
-    {
+    public function setRole(?Role $role): self {
         $this->role = $role;
 
         return $this;

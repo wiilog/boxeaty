@@ -11,8 +11,6 @@ import Routing from '../public/bundles/fosjsrouting/js/router.min.js';
 global.$ = $;
 global.Routing = Routing;
 
-import {DATATABLE_ACTIONS, initDatatable} from './datatable';
-
 const routes = require(`../public/generated/routes.json`);
 Routing.setRoutingData(routes);
 
@@ -32,6 +30,9 @@ $(`.category`).click((e) => {
 //     }
 // });
 
+export const SPINNER_WRAPPER_CLASS = `spinner-border-container`;
+export const LOADING_CLASS = `loading`;
+
 /**
  * Tests jQuery found an element
  *
@@ -40,3 +41,37 @@ $(`.category`).click((e) => {
 $.fn.exists = function () {
     return this.length !== 0;
 }
+
+/**
+ * Add a loader to the element
+ *
+ * @returns {jQuery}
+ */
+jQuery.fn.pushLoader = function(size = `small`) {
+    const $element = $(this[0]); //the element on which the function was called
+
+    if (!$element.find(`.${SPINNER_WRAPPER_CLASS}`).exists()) {
+        size = size === `small` ? `spinner-border-sm` : ``;
+
+        $element.append(`<div class="spinner-border-container"><div class="spinner-border ${size}" role="status"></div></div>`);
+        $element.addClass(LOADING_CLASS);
+    }
+
+    return this;
+};
+
+/**
+ * Remove the loader from the element
+ * @returns {jQuery}
+ */
+jQuery.fn.popLoader = function() {
+    const $element = $(this[0]); //the element on which the function was called
+    $element.removeClass(LOADING_CLASS);
+
+    const $loaderWrapper = $element.find(`.${SPINNER_WRAPPER_CLASS}`)
+    if ($loaderWrapper.exists()) {
+        $loaderWrapper.remove();
+    }
+
+    return this;
+};
