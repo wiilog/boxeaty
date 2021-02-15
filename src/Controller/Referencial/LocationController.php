@@ -70,7 +70,7 @@ class LocationController extends AbstractController {
         if ($existing) {
             $form->addError("name", "Un emplacement avec ce nom existe déjà");
         }
-        dump($content);
+
         if ($form->isValid()) {
             $location = new Location();
             $location
