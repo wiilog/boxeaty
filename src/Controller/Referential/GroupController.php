@@ -5,6 +5,9 @@ namespace App\Controller\Referential;
 use App\Annotation\HasPermission;
 use App\Entity\Group;
 use App\Entity\Role;
+use App\Entity\User;
+use App\Service\ExportService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Helper\Form;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,8 +25,6 @@ class GroupController extends AbstractController {
      * @HasPermission(Role::MANAGE_GROUPS)
      */
     public function list(EntityManagerInterface $manager): Response {
-        $roles = $manager->getRepository(Role::class)->findAll();
-
         return $this->render("referential/group/index.html.twig", [
             "new_group" => new Group(),
         ]);
@@ -90,8 +91,6 @@ class GroupController extends AbstractController {
      * @HasPermission(Role::MANAGE_GROUPS)
      */
     public function editTemplate(EntityManagerInterface $manager, Group $group) {
-        $roles = $manager->getRepository(Role::class)->findAll();
-
         return $this->json([
             "submit" => $this->generateUrl("group_edit", ["group" => $group->getId()]),
             "template" => $this->renderView("referential/group/modal/edit_group.html.twig", [
@@ -127,6 +126,29 @@ class GroupController extends AbstractController {
         } else {
             return $form->errors();
         }
+    }
+
+    /**
+     * @Route("/export", name="groups_export", options={"expose": true})
+     * @HasPermission(Role::MANAGE_GROUPS)
+     */
+    public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
+        $users = $manager->getRepository(Group::class)->iterateAll();
+
+        $today = new DateTime();
+        $today = $today->format("d-m-Y-H-i-s");
+
+        $header = array_merge([
+            "Nom de groupe",
+            "Nom d'établissement",
+            "Actif",
+        ]);
+
+        return $exportService->export(function($output) use ($exportService, $users) {
+            foreach ($users as $user) {
+                $exportService->putLine($output, $user);
+            }
+        }, "export-groupes-$today.csv", $header);
     }
 
 }
