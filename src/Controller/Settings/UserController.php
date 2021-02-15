@@ -5,6 +5,8 @@ namespace App\Controller\Settings;
 use App\Annotation\HasPermission;
 use App\Entity\Role;
 use App\Entity\User;
+use App\Service\ExportService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Helper\Form;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -75,7 +77,7 @@ class UserController extends AbstractController {
             $form->addError("role", "Le rôle sélectionné n'existe plus, merci de rafraichir la page");
         }
 
-        if($form->isValid()) {
+        if ($form->isValid()) {
             //TODO: set group and location
             $user = new User();
             $user->setUsername($content->username)
@@ -131,7 +133,7 @@ class UserController extends AbstractController {
             $form->addError("role", "Le rôle sélectionné n'existe plus, merci de rafraichir la page");
         }
 
-        if($form->isValid()) {
+        if ($form->isValid()) {
             //TODO: set group and location
             $user->setUsername($content->username)
                 ->setEmail($content->email)
@@ -139,7 +141,7 @@ class UserController extends AbstractController {
                 ->setActive($content->active)
                 ->setCreationDate(new \DateTime());
 
-            if($content->password) {
+            if ($content->password) {
                 $user->setPassword($encoder->encodePassword($user, $content->password));
             }
 
@@ -182,6 +184,32 @@ class UserController extends AbstractController {
                 "msg" => "L'utilisateur n'existe pas"
             ]);
         }
+    }
+
+    /**
+     * @Route("/export", name="users_export", options={"expose": true})
+     * @HasPermission(Role::MANAGE_USERS)
+     */
+    public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
+        $users = $manager->getRepository(User::class)->iterateAll();
+
+        $today = new DateTime();
+        $today = $today->format("d-m-Y-H-i-s");
+
+        $header = array_merge([
+            "Nom d'utilisateur",
+            "Adresse email",
+            "Rôle",
+            "Active",
+            "Date de création",
+            "Dernière connexion",
+        ]);
+
+        return $exportService->export(function($output) use ($exportService, $users) {
+            foreach ($users as $user) {
+                $exportService->putLine($output, $user);
+            }
+        }, "export-arrivages-$today.csv", $header);
     }
 
 }

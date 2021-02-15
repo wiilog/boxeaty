@@ -5,8 +5,6 @@ namespace App\Controller\Settings;
 use App\Annotation\HasPermission;
 use App\Entity\Role;
 use App\Helper\StringHelper;
-use App\Twig\MenuExtension;
-use App\Twig\RoleExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use Helper\Form;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -45,7 +43,7 @@ class RoleController extends AbstractController {
         foreach ($roles["data"] as $role) {
             $data[] = [
                 "id" => $role->getId(),
-                "label" => $role->getLabel(),
+                "label" => $role->getName(),
                 "active" => $role->isActive() ? "Oui" : "Non",
                 "actions" => $this->renderView("settings/role/datatable_actions.html.twig", [
                     "deletable" => $deletable[$role->getId()],
@@ -76,7 +74,7 @@ class RoleController extends AbstractController {
         if ($form->isValid()) {
             $role = new Role();
             $role->setCode(strtoupper(StringHelper::slugify($content->label)))
-                ->setLabel($content->label)
+                ->setName($content->label)
                 ->setActive($content->active)
                 ->setPermissions($content->permissions);
 
@@ -123,7 +121,7 @@ class RoleController extends AbstractController {
 
         if ($form->isValid()) {
             $role->setCode(strtoupper(StringHelper::slugify($content->label)))
-                ->setLabel($content->label)
+                ->setName($content->label)
                 ->setActive($content->active)
                 ->setPermissions($content->permissions);
 
@@ -153,7 +151,7 @@ class RoleController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Rôle {$role->getLabel()} supprimé avec succès"
+                "msg" => "Rôle {$role->getName()} supprimé avec succès"
             ]);
         } else {
             return $this->json([

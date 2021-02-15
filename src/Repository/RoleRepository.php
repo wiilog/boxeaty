@@ -23,7 +23,7 @@ class RoleRepository extends EntityRepository {
         $total = QueryCounter::count($qb, "role");
 
         if ($search) {
-            $qb->where("role.label LIKE :search")
+            $qb->where("role.name LIKE :search")
                 ->orWhere("role.code LIKE :search")
                 ->setParameter("search", "%$search%");
         }
