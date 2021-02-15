@@ -24,7 +24,7 @@ export default class AJAX {
         return ajax;
     }
 
-    async json(body, callback) {
+    json(body, callback) {
         if(typeof body === 'function') {
             callback = body;
             body = undefined;

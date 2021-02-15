@@ -1,0 +1,24 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Paramétrage{% endblock %}
+{% block page %}Groupes{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <button class="outline"><i class="icon fas fa-download"></i> Export au format CSV</button>
+                <button class="primary new-group"><i class="icon fas fa-plus"></i> Nouveau groupe</button>
+            </div>
+        </div>
+
+        <table id="table-groups"></table>
+    </div>
+
+    {% include 'referential/group/modal/new_group.html.twig' with {group: new_group} %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('group_list') }}
+{% endblock %}

@@ -131,7 +131,7 @@ class RoleController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Utilisateur modifié avec succès",
+                "msg" => "Rôle modifié avec succès",
             ]);
         } else {
             return $form->errors();

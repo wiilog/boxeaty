@@ -25,6 +25,7 @@
         "datatables.net-buttons-dt": "^1.6.4",
         "datatables.net-dt": "^1.10.22",
         "datatables.net-responsive": "^2.2.6",
-        "jquery": "^3.5.1"
+        "jquery": "^3.5.1",
+        "select2": "4.1.0-rc.0"
     }
 }

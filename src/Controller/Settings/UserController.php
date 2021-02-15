@@ -162,6 +162,7 @@ class UserController extends AbstractController {
         $content = json_decode($request->getContent());
         $user = $manager->getRepository(User::class)->find($content->id);
 
+        //TODO: check for movements
         if ($user === $this->getUser()) {
             return $this->json([
                 "success" => false,

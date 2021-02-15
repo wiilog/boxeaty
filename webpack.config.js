@@ -11,8 +11,9 @@ Encore
     .setPublicPath("/build")
 
     .addEntry("app", "./assets/app.js")
-    .addEntry("user_list", "./assets/controllers/user-list.js")
-    .addEntry("role_list", "./assets/controllers/role-list.js")
+    .addEntry("user_list", "./assets/pages/user-list.js")
+    .addEntry("role_list", "./assets/pages/role-list.js")
+    .addEntry("group_list", "./assets/pages/group-list.js")
     .autoProvidejQuery()
 
     .splitEntryChunks()

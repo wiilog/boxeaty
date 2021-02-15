@@ -44,7 +44,7 @@ parameters:
         - name: Client
           route: missing_route
         - name: Groupe
-          route: missing_route
+          route: groups_list
         - name: Emplacement
           route: missing_route
     - name: Paramétrage
