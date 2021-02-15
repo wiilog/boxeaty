@@ -12,6 +12,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class User implements UserInterface {
 
+    use Active;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -43,11 +45,6 @@ class User implements UserInterface {
      * @ORM\Column(type="datetime", nullable=true)
      */
     private ?DateTime $lastLogin = null;
-
-    /**
-     * @ORM\Column(type="boolean", options={"default": false})
-     */
-    private ?bool $active = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Role::class)
@@ -105,16 +102,6 @@ class User implements UserInterface {
 
     public function setLastLogin(DateTime $lastLogin): self {
         $this->lastLogin = $lastLogin;
-
-        return $this;
-    }
-
-    public function isActive(): ?bool {
-        return $this->active;
-    }
-
-    public function setActive(bool $active): self {
-        $this->active = $active;
 
         return $this;
     }

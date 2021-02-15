@@ -1,0 +1,25 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Paramétrage{% endblock %}
+{% block page %}Rôles{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <button class="outline"><i class="icon fas fa-download"></i> Export au format CSV</button>
+                <button class="primary new-role"><i class="icon fas fa-plus"></i> Nouveau rôle</button>
+            </div>
+        </div>
+
+        <table id="table-roles"></table>
+    </div>
+
+    {% include 'settings/role/modal/new_role.html.twig' with {role: new_role} %}
+    {% include 'settings/role/modal/delete_role.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('role_list') }}
+{% endblock %}

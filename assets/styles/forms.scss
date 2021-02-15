@@ -48,10 +48,9 @@ input[type="search"] {
     }
 
     input[type="radio"] + label {
+        @include button(secondary);
         width: 200px;
         margin-top: 0;
-
-        @include button(secondary);
     }
 
     input[type="radio"]:checked + label {
@@ -85,7 +84,7 @@ button, a[role="button"] {
 }
 
 .modal {
-    input, select {
+    input:not([type="checkbox"]), select {
         width: 100%;
     }
 }

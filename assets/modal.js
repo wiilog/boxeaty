@@ -34,6 +34,10 @@ export default class Modal {
             $modal.appendTo(`body`);
             $modal.modal(`show`);
 
+            $modal.on('hidden.bs.modal', function (e) {
+                $(this).remove();
+            })
+
             $modal.find(`button[type="submit"]`).click(function() {
                 const $button = $(this);
                 if($button.hasClass(LOADING_CLASS)) {
@@ -47,18 +51,28 @@ export default class Modal {
                     ...config
                 };
 
-                $button.load(() => modal.handleSubmit(() => $modal.remove()));
+                $button.load(() => modal.handleSubmit());
             });
         })
     }
 
-    handleSubmit(then) {
+    handleSubmit() {
         const data = processForm(this.element);
         if(data === false) {
             return;
         }
 
         this.config.ajax.json(data, result => {
+            if(!result.success && result.errors !== undefined) {
+                for(const error of result.errors.fields) {
+                    const $element = this.element.find(`[name="${error.field}"]`);
+                    $element.addClass(`is-invalid`);
+                    $element.parents(`label`).append(`<span class="invalid-feedback">${error.message}</span>`);
+                }
+
+                return;
+            }
+
             //refresh the datatable
             if(this.config && this.config.table) {
                 if(this.config.table.ajax) {
@@ -69,9 +83,6 @@ export default class Modal {
             }
 
             this.element.modal(`hide`);
-            if(then) {
-                then();
-            }
         });
     }
 
@@ -106,7 +117,7 @@ function processForm($parent) {
         let $input = $(input);
 
         if($input.attr(`type`) === `radio`) {
-            $input = $parent.find(`input[type="radio"][name="${$input.name}"]:checked`);
+            $input = $parent.find(`input[type="radio"][name="${input.name}"]:checked`);
         }
 
         if($input.data(`repeat`)) {
@@ -128,8 +139,31 @@ function processForm($parent) {
         }
 
         if(input.name) {
-            data[input.name] = input.value;
+            data[input.name] = $input.val();
         }
+    }
+
+    const $arrays = $parent.find(`select.data-array, input.data-array`);
+    const grouped = {};
+    for(const element of $arrays) {
+        if(grouped[element.name] === undefined) {
+            grouped[element.name] = [];
+        }
+
+        grouped[element.name].push(element);
+    }
+
+    for(const [name, elements] of Object.entries(grouped)) {
+        data[name] = elements
+            .map(elem => $(elem))
+            .map($elem => {
+                if($elem.attr(`type`) === `checkbox`) {
+                    return $elem.is(`:checked`) ? $elem.val() : null;
+                } else {
+                    return $elem.val()
+                }
+            })
+            .filter(val => val !== null);
     }
 
     for(const error of errors) {

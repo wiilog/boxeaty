@@ -23,12 +23,12 @@ $(`.category`).click((e) => {
 });
 
 //remove the menu when clicking outside
-// $(document).click(e => {
-//     const $target = $(e.target);
-//     if(!$target.hasClass(`display-menu`) && !$target.closest(`.menu-dropdown`).length && $(`.menu-dropdown`).is(`:visible`)) {
-//         $(`#menu-dropdown, .category-dropdown`).hide();
-//     }
-// });
+$(document).click(e => {
+    const $target = $(e.target);
+    if(!$target.hasClass(`display-menu`) && !$target.closest(`#menu-dropdown`).exists() && $(`#menu-dropdown`).is(`:visible`)) {
+        $(`#menu-dropdown, .category-dropdown`).hide();
+    }
+});
 
 export const SPINNER_WRAPPER_CLASS = `spinner-border-container`;
 export const LOADING_CLASS = `loading`;

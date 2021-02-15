@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-export const DATATABLE_ACTIONS_TITLE = `<span style="display:block;text-align:right">Actions</span>`;
+export const DATATABLE_ACTIONS_TITLE = `<span style="display:block;text-align:center">Actions</span>`;
 export const DATATABLE_ACTIONS = {
     data: `actions`,
     title: DATATABLE_ACTIONS_TITLE,
@@ -29,7 +29,7 @@ export function initDatatable(table, config) {
             config.order = newOrder;
         }
     }
-    console.log(config);
+
     const $datatable = $table
         .on(`error.dt`, (e, settings, techNote, message) => console.error(`An error has been reported by DataTables: `, message, e, table))
         .DataTable({
@@ -41,6 +41,9 @@ export function initDatatable(table, config) {
             fixedColumns: {
                 heightMatch: `auto`
             },
+            columnDefs: [
+                {width: `30px`, targets: config.columns.length - 1}
+            ],
             language: {
                 url: `/i18n/datatableLanguage.json`,
             },

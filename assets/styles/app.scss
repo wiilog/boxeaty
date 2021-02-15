@@ -19,7 +19,7 @@ body {
     background-color: $grey;
 }
 
-h1, h2, h3 {
+h1, h2 {
     font-family: 'Autumn Collection', serif;
     color: $blue;
 }
@@ -28,10 +28,17 @@ h1 {
     font-size: 3rem;
 }
 
+h3 {
+    font-weight: bold;
+    color: $blue;
+    font-size: 1.1rem;
+}
+
 main:not(.login) {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     margin: 0 30px;
 
     .box.first-box, .filters.first-box {
@@ -40,6 +47,10 @@ main:not(.login) {
 
     .box:not(.first-box) {
         margin-top: 1.5rem;
+    }
+
+    .box:not(.box-small) {
+        width: 100%;
     }
 
     .filters  {

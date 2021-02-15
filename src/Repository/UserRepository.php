@@ -22,21 +22,19 @@ class UserRepository extends EntityRepository {
         $qb = $this->createQueryBuilder("user");
         $total = QueryCounter::count($qb, "user");
 
-        if($search) {
+        if ($search) {
             $qb->where("user.username LIKE :search")
                 ->orWhere("user.email LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 
-        if(isset($params["order"])) {
-            foreach($params["order"] as $order) {
-                $column = $params["columns"][$order["column"]]["data"];
-                if($column === "role") {
-                    $qb->join("user.role", "role")
-                        ->addOrderBy("role.label", $order["dir"]);
-                } else {
-                    $qb->addOrderBy("user.$column", $order["dir"]);
-                }
+        foreach ($params["order"] ?? [] as $order) {
+            $column = $params["columns"][$order["column"]]["data"];
+            if ($column === "role") {
+                $qb->join("user.role", "role")
+                    ->addOrderBy("role.label", $order["dir"]);
+            } else {
+                $qb->addOrderBy("user.$column", $order["dir"]);
             }
         }
 

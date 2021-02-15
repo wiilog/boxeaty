@@ -27,6 +27,10 @@ services:
         arguments:
             $config: '%menu%'
 
+    App\Twig\RoleExtension:
+        arguments:
+            $permissions: '%permissions%'
+
     App\Listener\AnnotationListener:
         tags:
             - { name: 'kernel.event_listener', event: 'kernel.controller_arguments', method: 'onRequest' }

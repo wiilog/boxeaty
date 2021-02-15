@@ -12,9 +12,16 @@ class RoleExtension extends AbstractExtension {
     /** @Required */
     public Security $security;
 
+    private array $permissions;
+
+    public function __construct($permissions) {
+        $this->permissions = $permissions;
+    }
+
     public function getFunctions(): array {
         return [
-            new TwigFunction("has_permission", [$this, "hasPermission"])
+            new TwigFunction("has_permission", [$this, "hasPermission"]),
+            new TwigFunction("permissions", [$this, "getPermissions"]),
         ];
     }
 
@@ -31,6 +38,10 @@ class RoleExtension extends AbstractExtension {
         } else {
             return false;
         }
+    }
+
+    public function getPermissions(): array {
+        return $this->permissions;
     }
 
 }

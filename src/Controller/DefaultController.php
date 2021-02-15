@@ -11,7 +11,6 @@ class DefaultController extends AbstractController {
 
     /**
      * @Route("/accueil", name="home")
-     * @HasPermission(Role::MANAGE_USERS)
      */
     public function home() {
         return $this->render("example.html.twig");

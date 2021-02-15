@@ -18,6 +18,21 @@ class Role {
     public const MANAGE_GROUPS = "MANAGE_GROUPS";
     public const MANAGE_CLIENTS = "MANAGE_CLIENTS";
 
+    public const CREATE_BOX = "CREATE_BOX";
+    public const EDIT_BOX = "EDIT_BOX";
+    public const DEACTIVATE_BOX = "DEACTIVATE_BOX";
+    public const IMPORT_BOX = "IMPORT_BOX";
+    public const EXPORT_BOX = "EXPORT_BOX";
+    public const CHECKOUT = "CHECKOUT";
+    public const DELETE_MOVEMENT = "DELETE_MOVEMENT";
+
+    public const MANAGE_CLIENT = "MANAGE_CLIENT";
+    public const DEACTIVATE_CLIENT = "DEACTIVATE_CLIENT";
+    public const DELETE_CLIENT = "DELETE_CLIENT";
+    public const MANAGE_LOCATIONS = "MANAGE_LOCATIONS";
+
+    use Active;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -34,11 +49,6 @@ class Role {
      * @ORM\Column(type="string", length=255)
      */
     private ?string $label = null;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private ?bool $active = null;
 
     /**
      * @ORM\Column(type="json")
@@ -65,16 +75,6 @@ class Role {
 
     public function setLabel(string $label): self {
         $this->label = $label;
-
-        return $this;
-    }
-
-    public function getActive(): ?bool {
-        return $this->active;
-    }
-
-    public function setActive(bool $active): self {
-        $this->active = $active;
 
         return $this;
     }

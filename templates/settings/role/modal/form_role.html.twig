@@ -1,0 +1,33 @@
+<div class="row">
+    <div class="col-12">
+        <label>
+            Libellé
+            <input type="text" name="label" class="data" placeholder="Administrateur" value="{{ role.label }}" required/>
+        </label>
+    </div>
+    <div class="col-12 toggle">
+        <span class="label">Statut</span>
+
+        <input type="radio" id="{{ role.id ? 'edit' : 'new' }}-role-active" name="active" class="data" value="1" {{ role.active ? 'checked' }}/>
+        <label for="{{ role.id ? 'edit' : 'new' }}-role-active">Actif</label>
+
+        <input type="radio" id="{{ role.id ? 'edit' : 'new' }}-role-inactive" name="active" class="data" value="0" {{ not role.active ? 'checked' }}/>
+        <label for="{{ role.id ? 'edit' : 'new' }}-role-inactive">Inactif</label>
+    </div>
+
+    {% for menu, permissions in permissions() %}
+        <div class="col-md-6 col-12 mt-3">
+            <h3>{{ menu }}</h3>
+
+            {% for key, label in permissions %}
+                {% set key = constant(key) %}
+
+                <div class="form-check form-switch">
+                    <input class="form-check-input data-array" type="checkbox" name="permissions"
+                           id="{{ key }}" value="{{ key }}" {{ key in role.permissions ? 'checked' }}>
+                    <label class="form-check-label" for="{{ key }}">{{ label }}</label>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
