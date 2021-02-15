@@ -37,8 +37,9 @@ class RoleController extends AbstractController {
      * @HasPermission(Role::MANAGE_ROLES)
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
-        $roles = $manager->getRepository(Role::class)
-            ->findForDatatable($request->request->all());
+        $roleRepository = $manager->getRepository(Role::class);
+        $roles = $roleRepository->findForDatatable($request->request->all());
+        $deletable = $roleRepository->getDeletable($roles["data"]);
 
         $data = [];
         foreach ($roles["data"] as $role) {
@@ -46,7 +47,9 @@ class RoleController extends AbstractController {
                 "id" => $role->getId(),
                 "label" => $role->getLabel(),
                 "active" => $role->isActive() ? "Oui" : "Non",
-                "actions" => $this->renderView("settings/role/datatable_actions.html.twig"),
+                "actions" => $this->renderView("settings/role/datatable_actions.html.twig", [
+                    "deletable" => $deletable[$role->getId()],
+                ]),
             ];
         }
 
