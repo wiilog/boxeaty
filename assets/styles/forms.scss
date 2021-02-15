@@ -1,79 +1,91 @@
 @import "variables";
 @import "mixins";
 
+//temporary should be replaced with custom style
+input:focus, select:focus { outline: none; }
+
 label {
-    font-weight: bold;
+    display: block;
     font-size: 1.2rem;
-}
+    margin-top: 1rem;
 
-input {
-    &[type="text"], &[type="password"], &[type="search"] {
-        min-width: 150px;
-        border: none;
-        border-bottom: 1px solid #E5E5E5;
-        padding: 5px 6px;
+    input, select {
+        display: block;
+        width: 100%;
     }
 
-    &[type="search"] {
-        background: url(../images/search.svg) no-repeat scroll right;
+    &:not(:first-child) {
+        margin-top: 0.5rem;
+    }
+
+    .invalid-feedback {
+        font-size: 0.9rem;
+        font-weight: normal;
+        color: $invalid;
+    }
+}
+
+input[type="text"], input[type="password"], input[type="search"], select {
+    @include input();
+}
+
+input[type="search"] {
+    background: url(../images/search.svg) no-repeat scroll right;
+    width: 200px;
+}
+
+.toggle {
+    font-weight: normal;
+
+    span.label {
+        display: block;
+        font-size: 1.2rem;
+        margin-top: 1rem;
+    }
+
+    input[type="radio"] {
+        display: none;
+    }
+
+    input[type="radio"] + label {
         width: 200px;
-    }
-}
+        margin-top: 0;
 
-select {
-    border: 1px solid $grey-dark;
-    padding: 6px 6px;
-    border-radius: 4px;
+        @include button(secondary);
+    }
+
+    input[type="radio"]:checked + label {
+        @include button(primary);
+    }
 }
 
 button, a[role="button"] {
-    @include button();
+    text-align: left;
 
     &.primary {
-        background: $orange;
-        border-color: $orange;
-        color: white;
-
-        &:hover {
-            background: $orange-light;
-            border-color: $orange-light;
-        }
+        @include button(primary);
     }
 
     &.secondary {
-        background: $orange-lightest;
-        border-color: $orange-lightest;
-        color: $orange;
-
-        &:hover {
-            border-color: $orange-light;
-            color: $orange-light;
-        }
+        @include button(secondary);
     }
 
     &.outline {
-        background: white;
-        border-color: $orange;
-        color: $orange;
-
-        &:hover {
-            border-color: $orange-light;
-            color: $orange-light;
-        }
+        @include button(outline);
     }
 
-    &.tertiary {
-        background: transparent;
-        border-color: transparent;
-        color: $blue-lighter;
-
-        &:hover {
-            color: $blue;
-        }
+    &.silent {
+        @include button(silent);
     }
 
     .icon {
         display: inline-block;
         margin-right: 5px;
+    }
+}
+
+.modal {
+    input, select {
+        width: 100%;
     }
 }

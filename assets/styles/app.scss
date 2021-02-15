@@ -44,18 +44,15 @@ main:not(.login) {
 
     .filters  {
         @include box();
+        @include content-apart();
 
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
         min-height: 65px;
         padding: 0 20px;
     }
 
     .content-menu {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        @include content-apart();
+
         margin: 15px 0;
     }
 }

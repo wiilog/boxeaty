@@ -38,9 +38,21 @@ export const LOADING_CLASS = `loading`;
  *
  * @returns boolean
  */
-$.fn.exists = function () {
+jQuery.fn.exists = function () {
     return this.length !== 0;
 }
+
+jQuery.fn.load = function(callback, size = `small`) {
+    const $element = $(this[0]); //the element on which the function was called
+
+    $element.pushLoader(size);
+
+    try {
+        callback();
+    } finally {
+        $element.popLoader();
+    }
+};
 
 /**
  * Add a loader to the element

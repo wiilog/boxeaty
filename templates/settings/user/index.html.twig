@@ -9,13 +9,14 @@
             <div id="table-search-container"></div>
             <div class="right">
                 <button class="outline"><i class="icon fas fa-download"></i> Export au format CSV</button>
-                <button class="primary"><i class="icon fas fa-plus"></i> Nouvel utilisateur</button>
+                <button class="primary new-user"><i class="icon fas fa-plus"></i> Nouvel utilisateur</button>
             </div>
         </div>
 
         <table id="table-users"></table>
     </div>
 
+    {% include 'settings/user/modal/new_user.html.twig' %}
     {% include 'settings/user/modal/delete_user.html.twig' %}
 {% endblock %}
 

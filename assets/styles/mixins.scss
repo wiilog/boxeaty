@@ -7,7 +7,21 @@
     padding: 10px 20px;
 }
 
-@mixin button() {
+@mixin input() {
+    box-sizing: border-box;
+    min-width: 150px;
+    border: none;
+    border-bottom: 1px solid #E5E5E5;
+    height: 38px;
+    padding: 5px 6px;
+
+    &.is-invalid {
+        background: $invalid-lighter;
+        border-bottom-color: $invalid;
+    }
+}
+
+@mixin button($type: primary) {
     display: inline-block;
     border-radius: 4px;
     border: 1px solid $orange;
@@ -17,4 +31,47 @@
     text-decoration: none;
     text-align: center;
     cursor: pointer;
+
+    @if $type == primary {
+        background: $orange;
+        border-color: $orange;
+        color: white;
+
+        &:hover {
+            background: $orange-light;
+            border-color: $orange-light;
+        }
+    } @else if $type == secondary {
+        background: $orange-lightest;
+        border-color: $orange-lightest;
+        color: $orange;
+
+        &:hover {
+            border-color: $orange-light;
+            color: $orange-light;
+        }
+    } @else if $type == outline {
+        background: white;
+        border-color: $orange;
+        color: $orange;
+
+        &:hover {
+            border-color: $orange-light;
+            color: $orange-light;
+        }
+    } @else if $type == silent {
+        background: transparent;
+        border-color: transparent;
+        color: $blue-lighter;
+
+        &:hover {
+            color: $blue;
+        }
+    }
+}
+
+@mixin content-apart() {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }

@@ -9,19 +9,19 @@
 
         <h1>Créer un compte</h1>
         <form method="post">
-            <label class="d-block">
+            <label>
                 Adresse email
-                <input type="text" name="email" class="d-block w-100" value="{{ user.email }}" required autofocus>
+                <input type="text" name="email" value="{{ user.email }}" required autofocus>
             </label>
 
-            <label class="d-block mt-2">
+            <label>
                 Mot de passe
-                <input type="password" name="password" class="d-block w-100" required>
+                <input type="password" name="password" required>
             </label>
 
-            <label class="d-block mt-2">
+            <label>
                 Confirmer le mot de passe
-                <input type="password" name="password-repeat" class="d-block w-100" required>
+                <input type="password" name="password-repeat" required>
             </label>
 
             <button class="primary w-100 mt-3" type="submit">Créer mon compte</button>

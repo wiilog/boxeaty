@@ -6,9 +6,15 @@ import AJAX from "../ajax";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
 
 $(document).ready(() => {
-    const deleteUserModal = Modal.init(`#modal-delete-user`, AJAX.for(`POST`, `user_delete`));
+    const newUserModal = Modal.static(`#modal-new-user`, {
+        ajax: AJAX.route(`POST`, `user_new`),
+        table: `#table-users`,
+    });
+    const deleteUserModal = Modal.static(`#modal-delete-user`, AJAX.route(`POST`, `user_delete`));
 
-    initDatatable(`#table-users`, {
+    $(`.new-user`).click(() => newUserModal.open());
+
+    const table = initDatatable(`#table-users`, {
         ajax: {
             url: Routing.generate(`users_api`),
             method: `POST`,
@@ -22,10 +28,17 @@ $(document).ready(() => {
         ],
         order: [[`email`, `asc`]],
         listeners: {
-            onAction: (data) => {
+            action: data => {
                 alert(`You double clicked on row ${data.id}`);
             },
-            onDelete: (data) => deleteUserModal.open(data),
+            edit: data => {
+                const ajax = AJAX.route(`POST`, `user_edit_template`, {
+                    user: data.id
+                });
+
+                Modal.load(ajax, {table})
+            },
+            delete: data => deleteUserModal.open(data),
         }
     });
 });

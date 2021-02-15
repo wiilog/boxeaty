@@ -52,12 +52,4 @@ class UserRepository extends EntityRepository {
         ];
     }
 
-    public function findByLogin(string $login): ?User {
-        return $this->createQueryBuilder("user")
-            ->where("user.email LIKE :login")
-            ->setParameter("login", $login)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
-
 }

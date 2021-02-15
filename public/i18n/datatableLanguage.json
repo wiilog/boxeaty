@@ -1,5 +1,5 @@
 {
-  "sProcessing":     "Traitement en cours",
+  "sProcessing":     "<span class=\"content\">Traitement en cours</span>",
   "sSearch":         "Rechercher&nbsp;:",
   "sLengthMenu":     "Afficher _MENU_ &eacute;l&eacute;ments",
   "sInfo":           "_START_ &agrave; _END_ sur _TOTAL_",

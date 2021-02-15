@@ -35,18 +35,19 @@ export function initDatatable(table, config) {
         .DataTable({
             processing: true,
             serverSide: true,
+            responsive: true,
+            scrollX: false,
+            autoWidth: true,
             fixedColumns: {
                 heightMatch: `auto`
             },
-            autoWidth: true,
-            scrollX: true,
             language: {
                 url: `/i18n/datatableLanguage.json`,
             },
-            dom: `<"row mb-2"<"col-auto d-none"f>>t<"row align-items-center mt-4 mb-2"
-                <"col-auto"l>
-                <"col-auto"i>
-                <"col"p>
+            dom: `<"row mb-2"<"col-auto d-none"f>>t
+            <"footer"
+                <"left" li>
+                p
             >r`,
             initComplete: () => {
                 moveSearchInputToHeader($table);
@@ -57,13 +58,14 @@ export function initDatatable(table, config) {
 
     $(`${table} tbody`)
         .on(`dblclick`, `tr`, function() {
-            config.listeners.onAction($datatable.row(this).data());
+            config.listeners.action($datatable.row(this).data());
         })
         .on(`click`, `.datatable-action [data-listener]`, function() {
             const $button = $(this);
+            const row = $datatable.row($button.parents(`tr`));
             const callback = config.listeners[$(this).data(`listener`)];
 
-            callback($datatable.row($button.parents(`tr`)).data())
+            callback(row.data())
         });
 
     return $datatable;

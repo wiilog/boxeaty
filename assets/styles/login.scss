@@ -17,9 +17,7 @@ main.login {
     }
 
     .separated {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        @include content-apart();
     }
 
     form {
