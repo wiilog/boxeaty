@@ -106,7 +106,7 @@ class UserController extends AbstractController {
 
         return $this->json([
             "submit" => $this->generateUrl("user_edit", ["user" => $user->getId()]),
-            "template" => $this->renderView("settings/user/modal/edit_role.html.twig", [
+            "template" => $this->renderView("settings/user/modal/edit_user.html.twig", [
                 "user" => $user,
                 "roles" => $roles,
             ])

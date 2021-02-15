@@ -3,7 +3,9 @@
 {% block body %}
     <header>
         <div class="top">
-            <img src="{{ asset('images/white-logo.svg') }}" class="logo" alt="Logo BoxEaty"/>
+            <a href="{{ path('home') }}">
+                <img src="{{ asset('images/white-logo.svg') }}" class="logo" alt="Logo BoxEaty"/>
+            </a>
             <div class="header-right">
                 <div class="current-user">
                     <img src="{{ asset('images/user.svg') }}"/>
