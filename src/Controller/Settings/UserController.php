@@ -200,7 +200,7 @@ class UserController extends AbstractController {
             "Nom d'utilisateur",
             "Adresse email",
             "Rôle",
-            "Active",
+            "Actif",
             "Date de création",
             "Dernière connexion",
         ]);
