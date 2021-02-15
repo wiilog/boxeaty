@@ -4,9 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Role;
 use App\Helper\QueryCounter;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Role|null find($id, $lockMode = null, $lockVersion = null)

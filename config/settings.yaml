@@ -46,7 +46,7 @@ parameters:
         - name: Groupe
           route: missing_route
         - name: Emplacement
-          route: missing_route
+          route: locations_list
     - name: Paramétrage
       icon: cog
       type: category

@@ -25,8 +25,19 @@ label {
     }
 }
 
-input[type="text"], input[type="password"], input[type="search"], select {
+input[type="text"], input[type="password"], input[type="search"], input[type="date"], select {
     @include input();
+}
+
+textarea {
+    @include input();
+    min-height: 100px;
+    width: 100%;
+    resize: none;
+
+    &:focus {
+        outline: none;
+    }
 }
 
 input[type="search"] {

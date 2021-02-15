@@ -107,7 +107,7 @@ export default class Modal {
 function processForm($parent) {
     const errors = [];
     const data = {};
-    const $inputs = $parent.find(`select.data, input.data, input[data-repeat]`);
+    const $inputs = $parent.find(`select.data, input.data, input[data-repeat], textarea.data`);
 
     //clear previous errors
     $parent.find(`.is-invalid`).removeClass(`is-invalid`);

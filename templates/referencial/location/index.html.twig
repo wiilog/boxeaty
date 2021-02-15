@@ -1,0 +1,29 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Référentiel{% endblock %}
+{% block page %}Emplacement{% endblock %}
+
+{% block filter_header %}
+    {% include 'filters/location_filters.html.twig' %}
+{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <button class="outline"><i class="icon fas fa-download"></i> Export au format CSV</button>
+                <button class="primary new-location"><i class="icon fas fa-plus"></i> Nouvel emplacement</button>
+            </div>
+        </div>
+
+        <table id="table-locations"></table>
+    </div>
+
+    {% include 'referencial/location/modal/new_location.html.twig' with {location: new_location} %}
+    {% include 'referencial/location/modal/delete_location.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('location_list') }}
+{% endblock %}

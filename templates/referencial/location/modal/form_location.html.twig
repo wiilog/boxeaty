@@ -1,0 +1,23 @@
+<div class="row">
+    <div class="col-12">
+        <label>
+            Nom
+            <input type="text" name="name" class="data" placeholder="Nom de votre emplacement" value="{{ location.name }}" required/>
+        </label>
+    </div>
+    <div class="col-12 toggle">
+        <span class="label">Statut</span>
+
+        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-active" name="active" class="data" value="1" {{ location.active ? 'checked' }}/>
+        <label for="{{ location.id ? 'edit' : 'new' }}-location-active">Actif</label>
+
+        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-inactive" name="active" class="data" value="0" {{ not location.active ? 'checked' }}/>
+        <label for="{{ location.id ? 'edit' : 'new' }}-location-inactive">Inactif</label>
+    </div>
+    <div class="col-12">
+        <label>
+            Description
+            <textarea type="text" name="description" class="data" placeholder="Votre description" required>{{ location.description }}</textarea>
+        </label>
+    </div>
+</div>
