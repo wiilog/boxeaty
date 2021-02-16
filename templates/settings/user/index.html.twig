@@ -16,7 +16,7 @@
         <table id="table-users"></table>
     </div>
 
-    {% include 'settings/user/modal/new_user.html.twig' %}
+    {% include 'settings/user/modal/new.html.twig' with {user: new_user} %}
     {% include 'settings/user/modal/delete_user.html.twig' %}
 {% endblock %}
 

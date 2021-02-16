@@ -99,7 +99,7 @@ class RoleController extends AbstractController {
 
         return $this->json([
             "submit" => $this->generateUrl("role_edit", ["role" => $role->getId()]),
-            "template" => $this->renderView("settings/role/modal/edit_role.html.twig", [
+            "template" => $this->renderView("settings/role/modal/edit.html.twig", [
                 "role" => $role,
                 "roles" => $roles,
             ])

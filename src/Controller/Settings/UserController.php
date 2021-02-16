@@ -29,7 +29,8 @@ class UserController extends AbstractController {
         $roles = $manager->getRepository(Role::class)->findAll();
 
         return $this->render("settings/user/index.html.twig", [
-            "roles" => $roles
+            "new_user" => new User(),
+            "roles" => $roles,
         ]);
     }
 
@@ -113,7 +114,7 @@ class UserController extends AbstractController {
 
         return $this->json([
             "submit" => $this->generateUrl("user_edit", ["user" => $user->getId()]),
-            "template" => $this->renderView("settings/user/modal/edit_user.html.twig", [
+            "template" => $this->renderView("settings/user/modal/edit.html.twig", [
                 "user" => $user,
                 "roles" => $roles,
             ])

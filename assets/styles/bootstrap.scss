@@ -74,3 +74,45 @@
         display: block;
     }
 }
+
+.modal-content {
+    border-radius: 16px;
+    padding: 3rem;
+
+    h1 {
+        width: 100%;
+        text-align: center;
+    }
+
+    .body {
+        padding: 1rem 0;
+    }
+
+    .footer {
+        display: flex;
+        margin-top: 1rem;
+
+        button, a {
+            flex: 1;
+
+            &:not(:first-child) {
+                margin-left: 10px;
+            }
+
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+        }
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 2rem;
+        right: 1.5rem;
+        background: url(../images/close-modal.svg);
+        background-size: 20px;
+        width: 20px;
+        height: 20px;
+        border: none;
+    }
+}

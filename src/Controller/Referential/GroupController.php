@@ -93,7 +93,7 @@ class GroupController extends AbstractController {
     public function editTemplate(EntityManagerInterface $manager, Group $group) {
         return $this->json([
             "submit" => $this->generateUrl("group_edit", ["group" => $group->getId()]),
-            "template" => $this->renderView("referential/group/modal/edit_group.html.twig", [
+            "template" => $this->renderView("referential/group/modal/edit.html.twig", [
                 "group" => $group,
             ])
         ]);
