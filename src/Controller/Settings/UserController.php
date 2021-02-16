@@ -209,7 +209,7 @@ class UserController extends AbstractController {
             foreach ($users as $user) {
                 $exportService->putLine($output, $user);
             }
-        }, "export-arrivages-$today.csv", $header);
+        }, "export-utilisateurs-$today.csv", $header);
     }
 
 }

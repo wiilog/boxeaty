@@ -43,6 +43,8 @@ class ExportService {
         $row = array_map(function($cell) {
             if($cell instanceof DateTime) {
                 return $cell->format("d/m/Y H:i:s");
+            } else if (is_bool($cell)) {
+                return $cell ? 'oui' : 'non';
             } else {
                 return $cell;
             }
@@ -54,5 +56,4 @@ class ExportService {
 
         fputcsv($handle, $encodedRow, ";");
     }
-
 }
