@@ -15,10 +15,10 @@ use Doctrine\ORM\EntityRepository;
 class GroupRepository extends EntityRepository {
 
     public function iterateAll() {
-        return $this->createQueryBuilder("group")
-            ->select("group.name AS name")
-            ->addSelect("group.establishment AS establishment")
-            ->addSelect("group.active AS active")
+        return $this->createQueryBuilder("g")
+            ->select("g.name AS name")
+            ->addSelect("g.establishment AS establishment")
+            ->addSelect("g.active AS active")
             ->getQuery()
             ->getResult();
     }
