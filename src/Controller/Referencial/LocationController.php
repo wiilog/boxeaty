@@ -22,12 +22,9 @@ class LocationController extends AbstractController {
      * @Route("/liste", name="locations_list")
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function list(EntityManagerInterface $manager): Response
+    public function list(): Response
     {
-        $locations = $manager->getRepository(Location::class)->findAll();
-
         return $this->render("referencial/location/index.html.twig", [
-            "locations" => $locations,
             "new_location" => new Location(),
         ]);
     }
@@ -94,14 +91,11 @@ class LocationController extends AbstractController {
      * @Route("/modifier/template/{location}", name="location_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function editTemplate(EntityManagerInterface $manager, Location $location) {
-        $locations = $manager->getRepository(Location::class)->findAll();
-
+    public function editTemplate(Location $location) {
         return $this->json([
             "submit" => $this->generateUrl("location_edit", ["location" => $location->getId()]),
             "template" => $this->renderView("referencial/location/modal/edit_location.html.twig", [
                 "location" => $location,
-                "locations" => $locations,
             ])
         ]);
     }

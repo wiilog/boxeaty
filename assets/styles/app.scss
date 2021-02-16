@@ -63,15 +63,27 @@ main:not(.login) {
         z-index: 1;
         width: 100%;
 
+        .filter-items {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+
+            &>* {
+                margin-right: 25px;
+            }
+        }
+
         label {
             margin-top: 5px;
             margin-bottom: 5px;
             margin-right: 5px;
-        }
 
-        input {
-            @include input();
-            margin-right: 40px;
+            &.dates {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                margin-right: 10px;
+            }
         }
     }
 
@@ -131,4 +143,3 @@ main:not(.login) {
         background-color: initial;
     }
 }
-

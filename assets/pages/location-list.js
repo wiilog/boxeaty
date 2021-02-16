@@ -27,9 +27,6 @@ $(document).ready(() => {
         ],
         order: [[`name`, `asc`]],
         listeners: {
-            action: data => {
-                alert(`You double clicked on row ${data.id}`);
-            },
             edit: data => {
                 const ajax = AJAX.route(`POST`, `location_edit_template`, {
                     location: data.id
