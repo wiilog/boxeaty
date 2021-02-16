@@ -15,12 +15,12 @@
 
             <label class="d-block">
                 Adresse email
-                <input type="text" value="{{ last_username }}" name="email" class="d-block w-100" required autofocus>
+                <input type="text" value="{{ last_username }}" name="email" placeholder="Adresse email" class="d-block w-100" required autofocus>
             </label>
 
             <label class="d-block mt-2">
                 Mot de passe
-                <input type="password" name="password" class="d-block w-100" required>
+                <input type="password" name="password" placeholder="Mot de passe" class="d-block w-100" required>
             </label>
 
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">

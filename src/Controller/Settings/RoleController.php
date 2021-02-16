@@ -4,11 +4,9 @@ namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
 use App\Entity\Role;
+use App\Helper\Form;
 use App\Helper\StringHelper;
-use App\Twig\MenuExtension;
-use App\Twig\RoleExtension;
 use Doctrine\ORM\EntityManagerInterface;
-use Helper\Form;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,16 +35,19 @@ class RoleController extends AbstractController {
      * @HasPermission(Role::MANAGE_ROLES)
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
-        $roles = $manager->getRepository(Role::class)
-            ->findForDatatable($request->request->all());
+        $roleRepository = $manager->getRepository(Role::class);
+        $roles = $roleRepository->findForDatatable($request->request->all());
+        $deletable = $roleRepository->getDeletable($roles["data"]);
 
         $data = [];
         foreach ($roles["data"] as $role) {
             $data[] = [
                 "id" => $role->getId(),
-                "label" => $role->getLabel(),
+                "name" => $role->getName(),
                 "active" => $role->isActive() ? "Oui" : "Non",
-                "actions" => $this->renderView("settings/role/datatable_actions.html.twig"),
+                "actions" => $this->renderView("settings/role/datatable_actions.html.twig", [
+                    "deletable" => $deletable[$role->getId()],
+                ]),
             ];
         }
 
@@ -65,15 +66,15 @@ class RoleController extends AbstractController {
         $form = Form::create();
 
         $content = json_decode($request->getContent());
-        $existing = $manager->getRepository(Role::class)->findOneBy(["label" => $content->label]);
+        $existing = $manager->getRepository(Role::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
-            $form->addError("label", "Un rôle avec ce label existe déjà");
+            $form->addError("name", "Un rôle avec ce nom existe déjà");
         }
 
         if ($form->isValid()) {
             $role = new Role();
-            $role->setCode(strtoupper(StringHelper::slugify($content->label)))
-                ->setLabel($content->label)
+            $role->setCode(strtoupper(StringHelper::slugify($content->name)))
+                ->setName($content->name)
                 ->setActive($content->active)
                 ->setPermissions($content->permissions);
 
@@ -98,7 +99,7 @@ class RoleController extends AbstractController {
 
         return $this->json([
             "submit" => $this->generateUrl("role_edit", ["role" => $role->getId()]),
-            "template" => $this->renderView("settings/role/modal/edit_role.html.twig", [
+            "template" => $this->renderView("settings/role/modal/edit.html.twig", [
                 "role" => $role,
                 "roles" => $roles,
             ])
@@ -113,14 +114,18 @@ class RoleController extends AbstractController {
         $form = Form::create();
 
         $content = json_decode($request->getContent());
-        $existing = $manager->getRepository(Role::class)->findOneBy(["label" => $content->label]);
+        $existing = $manager->getRepository(Role::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $role) {
-            $form->addError("label", "Un autre rôle avec ce label existe déjà");
+            $form->addError("name", "Un autre rôle avec ce nom existe déjà");
         }
 
         if ($form->isValid()) {
-            $role->setCode(strtoupper(StringHelper::slugify($content->label)))
-                ->setLabel($content->label)
+            //don't edit slug for the base roles
+            if(!in_array($role->getCode(), [Role::ROLE_NO_ACCESS, Role::ROLE_ADMIN])) {
+                $role->setCode(strtoupper(StringHelper::slugify($content->name)));
+            }
+
+            $role->setName($content->name)
                 ->setActive($content->active)
                 ->setPermissions($content->permissions);
 
@@ -128,7 +133,7 @@ class RoleController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Utilisateur modifié avec succès",
+                "msg" => "Rôle modifié avec succès",
             ]);
         } else {
             return $form->errors();
@@ -150,7 +155,7 @@ class RoleController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Rôle {$role->getLabel()} supprimé avec succès"
+                "msg" => "Rôle {$role->getName()} supprimé avec succès"
             ]);
         } else {
             return $this->json([

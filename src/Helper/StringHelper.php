@@ -19,6 +19,10 @@ class StringHelper {
         return strtr($str, $map);
     }
 
+    public static function stripAccents($string) {
+        return strtr(utf8_decode($string), utf8_decode('àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ'), 'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
+    }
+
     public static function levenshtein($s1, $s2) {
         $charMap = [];
         $s1 = self::stripUTF8Accents($s1, $charMap);
@@ -29,7 +33,7 @@ class StringHelper {
 
     public static function slugify($string) {
         $map = [];
-        return strtolower(trim(preg_replace("/[^A-Za-z0-9-]/", "_", self::stripUTF8Accents($string, $map))));
+        return strtolower(trim(preg_replace("/[^A-Za-z0-9-]/", "_", self::stripAccents($string))));
     }
 
 }

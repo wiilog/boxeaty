@@ -10,8 +10,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Role {
 
-    public const ROLE_NO_ACCESS = "ROLE_NO_ACCESS";
-    public const ROLE_ADMIN = "ROLE_ADMIN";
+    public const ROLE_NO_ACCESS = "AUCUN_ACCES";
+    public const ROLE_ADMIN = "ADMINISTRATEUR";
 
     public const MANAGE_USERS = "MANAGE_USERS";
     public const MANAGE_ROLES = "MANAGE_ROLES";
@@ -48,7 +48,7 @@ class Role {
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private ?string $label = null;
+    private ?string $name = null;
 
     /**
      * @ORM\Column(type="json")
@@ -69,12 +69,12 @@ class Role {
         return $this;
     }
 
-    public function getLabel(): ?string {
-        return $this->label;
+    public function getName(): ?string {
+        return $this->name;
     }
 
-    public function setLabel(string $label): self {
-        $this->label = $label;
+    public function setName(string $name): self {
+        $this->name = $name;
 
         return $this;
     }

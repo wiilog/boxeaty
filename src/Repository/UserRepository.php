@@ -4,9 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use App\Helper\QueryCounter;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -15,6 +13,20 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class UserRepository extends EntityRepository {
+
+    public function iterateAll() {
+        return $this->createQueryBuilder("user")
+            ->select("user.username AS username")
+            ->addSelect("user.email AS email")
+            ->addSelect("role.name AS role_name")
+            ->addSelect("user.active AS active")
+            ->addSelect("user.creationDate AS creationDate")
+            ->addSelect("user.lastLogin as lastLogin")
+            ->join("user.role", "role")
+            ->getQuery()
+            ->getResult();
+
+    }
 
     public function findForDatatable(array $params): array {
         $search = $params["search"]["value"] ?? null;
@@ -32,7 +44,7 @@ class UserRepository extends EntityRepository {
             $column = $params["columns"][$order["column"]]["data"];
             if ($column === "role") {
                 $qb->join("user.role", "role")
-                    ->addOrderBy("role.label", $order["dir"]);
+                    ->addOrderBy("role.name", $order["dir"]);
             } else {
                 $qb->addOrderBy("user.$column", $order["dir"]);
             }

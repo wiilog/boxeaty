@@ -8,7 +8,7 @@
         <div class="content-menu">
             <div id="table-search-container"></div>
             <div class="right">
-                <button class="outline"><i class="icon fas fa-download"></i> Export au format CSV</button>
+                <a href="{{ path('users_export') }}" class="outline"><i class="icon fas fa-download"></i> Export au format CSV</a>
                 <button class="primary new-user"><i class="icon fas fa-plus"></i> Nouvel utilisateur</button>
             </div>
         </div>
@@ -16,7 +16,7 @@
         <table id="table-users"></table>
     </div>
 
-    {% include 'settings/user/modal/new_user.html.twig' %}
+    {% include 'settings/user/modal/new.html.twig' with {user: new_user} %}
     {% include 'settings/user/modal/delete_user.html.twig' %}
 {% endblock %}
 

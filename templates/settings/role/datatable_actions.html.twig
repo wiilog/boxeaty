@@ -4,6 +4,9 @@
     </span>
     <div class="dropdown-menu">
         <button data-listener="edit"><i class="icon fas fa-pen"></i> Modifier</button>
-        <button data-listener="delete"><i class="icon fas fa-trash-alt"></i> Supprimer</button>
+
+        {% if deletable %}
+            <button data-listener="delete"><i class="icon fas fa-trash-alt"></i> Supprimer</button>
+        {% endif %}
     </div>
 </div>

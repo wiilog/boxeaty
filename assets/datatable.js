@@ -11,7 +11,12 @@ export function initDatatable(table, config) {
     const $table = $(table);
     $table.addClass(`w-100`);
 
+    let actionId = null;
     for(const [id, column] of Object.entries(config.columns)) {
+        if(column.name === `action`) {
+            actionId = id;
+        }
+
         if(!column.name) {
             column.name = column.data;
         }
@@ -41,9 +46,7 @@ export function initDatatable(table, config) {
             fixedColumns: {
                 heightMatch: `auto`
             },
-            columnDefs: [
-                {width: `30px`, targets: config.columns.length - 1}
-            ],
+            columnDefs: actionId ? [{width: `30px`, targets: actionId}] : undefined,
             language: {
                 url: `/i18n/datatableLanguage.json`,
             },
@@ -61,14 +64,18 @@ export function initDatatable(table, config) {
 
     $(`${table} tbody`)
         .on(`dblclick`, `tr`, function() {
-            config.listeners.action($datatable.row(this).data());
+            if(config.listeners.action) {
+                config.listeners.action($datatable.row(this).data());
+            }
         })
         .on(`click`, `.datatable-action [data-listener]`, function() {
             const $button = $(this);
             const row = $datatable.row($button.parents(`tr`));
             const callback = config.listeners[$(this).data(`listener`)];
 
-            callback(row.data())
+            if(callback) {
+                callback(row.data())
+            }
         });
 
     return $datatable;

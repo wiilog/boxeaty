@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Role;
+use App\Entity\User;
 use App\Helper\QueryCounter;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 
 /**
  * @method Role|null find($id, $lockMode = null, $lockVersion = null)
@@ -21,7 +23,7 @@ class RoleRepository extends EntityRepository {
         $total = QueryCounter::count($qb, "role");
 
         if ($search) {
-            $qb->where("role.label LIKE :search")
+            $qb->where("role.name LIKE :search")
                 ->orWhere("role.code LIKE :search")
                 ->setParameter("search", "%$search%");
         }
@@ -41,6 +43,24 @@ class RoleRepository extends EntityRepository {
             "total" => $total,
             "filtered" => $filtered,
         ];
+    }
+
+    public function getDeletable(array $roles): array {
+        $uses = $this->createQueryBuilder("role")
+            ->select("role.id AS id, COUNT(user) AS uses")
+            ->leftJoin(User::class, "user", Join::WITH, "user.role = role.id")
+            ->where("role.id IN (:roles)")
+            ->groupBy("role")
+            ->setParameter("roles", $roles)
+            ->getQuery()
+            ->getResult();
+
+        $deletable = [];
+        foreach($uses as $use) {
+            $deletable[$use["id"]] = $use["uses"] === 0;
+        }
+
+        return $deletable;
     }
 
 }

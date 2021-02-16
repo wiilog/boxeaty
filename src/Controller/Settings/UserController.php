@@ -5,8 +5,11 @@ namespace App\Controller\Settings;
 use App\Annotation\HasPermission;
 use App\Entity\Role;
 use App\Entity\User;
+use App\Helper\Form;
+use App\Security\Authenticator;
+use App\Service\ExportService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Helper\Form;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,7 +29,8 @@ class UserController extends AbstractController {
         $roles = $manager->getRepository(Role::class)->findAll();
 
         return $this->render("settings/user/index.html.twig", [
-            "roles" => $roles
+            "new_user" => new User(),
+            "roles" => $roles,
         ]);
     }
 
@@ -75,7 +79,11 @@ class UserController extends AbstractController {
             $form->addError("role", "Le rôle sélectionné n'existe plus, merci de rafraichir la page");
         }
 
-        if($form->isValid()) {
+        if (!Authenticator::isPasswordSecure($content->password)) {
+            $form->addError("password", Authenticator::PASSWORD_ERROR);
+        }
+
+        if ($form->isValid()) {
             //TODO: set group and location
             $user = new User();
             $user->setUsername($content->username)
@@ -106,7 +114,7 @@ class UserController extends AbstractController {
 
         return $this->json([
             "submit" => $this->generateUrl("user_edit", ["user" => $user->getId()]),
-            "template" => $this->renderView("settings/user/modal/edit_user.html.twig", [
+            "template" => $this->renderView("settings/user/modal/edit.html.twig", [
                 "user" => $user,
                 "roles" => $roles,
             ])
@@ -131,7 +139,11 @@ class UserController extends AbstractController {
             $form->addError("role", "Le rôle sélectionné n'existe plus, merci de rafraichir la page");
         }
 
-        if($form->isValid()) {
+        if ($content->password && !Authenticator::isPasswordSecure($content->password)) {
+            $form->addError("password", Authenticator::PASSWORD_ERROR);
+        }
+
+        if ($form->isValid()) {
             //TODO: set group and location
             $user->setUsername($content->username)
                 ->setEmail($content->email)
@@ -139,7 +151,7 @@ class UserController extends AbstractController {
                 ->setActive($content->active)
                 ->setCreationDate(new \DateTime());
 
-            if($content->password) {
+            if ($content->password) {
                 $user->setPassword($encoder->encodePassword($user, $content->password));
             }
 
@@ -162,6 +174,7 @@ class UserController extends AbstractController {
         $content = json_decode($request->getContent());
         $user = $manager->getRepository(User::class)->find($content->id);
 
+        //TODO: check for movements
         if ($user === $this->getUser()) {
             return $this->json([
                 "success" => false,
@@ -181,6 +194,32 @@ class UserController extends AbstractController {
                 "msg" => "L'utilisateur n'existe pas"
             ]);
         }
+    }
+
+    /**
+     * @Route("/export", name="users_export", options={"expose": true})
+     * @HasPermission(Role::MANAGE_USERS)
+     */
+    public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
+        $users = $manager->getRepository(User::class)->iterateAll();
+
+        $today = new DateTime();
+        $today = $today->format("d-m-Y-H-i-s");
+
+        $header = array_merge([
+            "Nom d'utilisateur",
+            "Adresse email",
+            "Rôle",
+            "Actif",
+            "Date de création",
+            "Dernière connexion",
+        ]);
+
+        return $exportService->export(function($output) use ($exportService, $users) {
+            foreach ($users as $user) {
+                $exportService->putLine($output, $user);
+            }
+        }, "export-utilisateurs-$today.csv", $header);
     }
 
 }

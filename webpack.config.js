@@ -14,6 +14,7 @@ Encore
     .addEntry("user_list", "./assets/pages/user-list.js")
     .addEntry("role_list", "./assets/pages/role-list.js")
     .addEntry("location_list", "./assets/pages/location-list.js")
+    .addEntry("group_list", "./assets/pages/group-list.js")
     .autoProvidejQuery()
 
     .splitEntryChunks()

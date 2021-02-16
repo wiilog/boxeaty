@@ -21,7 +21,7 @@ services:
 
     App\Controller\:
         resource: '../src/Controller/'
-        tags: ['controllers.service_arguments']
+        tags: ['pages.service_arguments']
 
     App\Twig\MenuExtension:
         arguments:

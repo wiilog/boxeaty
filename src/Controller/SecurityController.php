@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Role;
 use App\Entity\User;
-use App\Form\RegisterType;
 use App\Security\Authenticator;
 use DateTime;
 use LogicException;
@@ -54,36 +54,44 @@ class SecurityController extends AbstractController {
 
         $user = new User();
 
-        if($request->getMethod() === "POST") {
+        if ($request->getMethod() === "POST") {
             $em = $this->getDoctrine()->getManager();
 
             $valid = true;
             $email = $request->request->get("email");
             $password = $request->request->get("password");
-            $existing = $em->getRepository(User::class)->findByLogin($email);
+            $existing = $em->getRepository(User::class)->findBy(["email" => $email]);
 
-            $user->setEmail($email);
+            $user->setEmail($request->request->get("email"))
+            ->setUsername($request->request->get("username"));
 
-            if($existing) {
+            if ($existing) {
                 $this->addFlash("danger", "Un utilisateur existe déjà avec cet email");
                 $valid = false;
             }
 
-            if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $this->addFlash("danger", "L'adresse email n'est pas valide");
                 $valid = false;
             }
 
-            if($password !== $request->request->get("password-repeat")) {
+            if ($password !== $request->request->get("password-repeat")) {
                 $this->addFlash("danger", "Les mots de passe sont différents");
                 $valid = false;
             }
 
-            if($valid) {
-                $user->setEmail($email)
-                    ->setPassword($encoder->encodePassword($user, $password))
-                ->setActive(true)
-                ->setCreationDate(new DateTime());
+            if (!Authenticator::isPasswordSecure($password)) {
+                $this->addFlash("danger", Authenticator::PASSWORD_ERROR);
+                $valid = false;
+            }
+
+            if ($valid) {
+                $noAccess = $em->getRepository(Role::class)->findOneBy(["code" => Role::ROLE_NO_ACCESS]);
+
+                $user->setPassword($encoder->encodePassword($user, $password))
+                    ->setActive(true)
+                    ->setRole($noAccess)
+                    ->setCreationDate(new DateTime());
 
                 $em->persist($user);
                 $em->flush();
