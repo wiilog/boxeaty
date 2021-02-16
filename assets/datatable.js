@@ -64,14 +64,18 @@ export function initDatatable(table, config) {
 
     $(`${table} tbody`)
         .on(`dblclick`, `tr`, function() {
-            config.listeners.action($datatable.row(this).data());
+            if(config.listeners.action) {
+                config.listeners.action($datatable.row(this).data());
+            }
         })
         .on(`click`, `.datatable-action [data-listener]`, function() {
             const $button = $(this);
             const row = $datatable.row($button.parents(`tr`));
             const callback = config.listeners[$(this).data(`listener`)];
 
-            callback(row.data())
+            if(callback) {
+                callback(row.data())
+            }
         });
 
     return $datatable;

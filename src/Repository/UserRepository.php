@@ -18,7 +18,7 @@ class UserRepository extends EntityRepository {
         return $this->createQueryBuilder("user")
             ->select("user.username AS username")
             ->addSelect("user.email AS email")
-            ->addSelect("role.name AS role_label")
+            ->addSelect("role.name AS role_name")
             ->addSelect("user.active AS active")
             ->addSelect("user.creationDate AS creationDate")
             ->addSelect("user.lastLogin as lastLogin")

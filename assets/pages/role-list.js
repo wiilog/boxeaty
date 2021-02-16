@@ -20,15 +20,12 @@ $(document).ready(() => {
             method: `POST`,
         },
         columns: [
-            {data: `label`, title: `Label`},
+            {data: `name`, title: `Nom`},
             {data: `active`, title: `Actif`},
             DATATABLE_ACTIONS,
         ],
-        order: [[`label`, `asc`]],
+        order: [[`name`, `asc`]],
         listeners: {
-            action: data => {
-                alert(`You double clicked on row ${data.id}`);
-            },
             edit: data => {
                 const ajax = AJAX.route(`POST`, `role_edit_template`, {
                     role: data.id

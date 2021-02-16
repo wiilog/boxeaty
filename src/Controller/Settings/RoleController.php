@@ -43,7 +43,7 @@ class RoleController extends AbstractController {
         foreach ($roles["data"] as $role) {
             $data[] = [
                 "id" => $role->getId(),
-                "label" => $role->getName(),
+                "name" => $role->getName(),
                 "active" => $role->isActive() ? "Oui" : "Non",
                 "actions" => $this->renderView("settings/role/datatable_actions.html.twig", [
                     "deletable" => $deletable[$role->getId()],
@@ -66,15 +66,15 @@ class RoleController extends AbstractController {
         $form = Form::create();
 
         $content = json_decode($request->getContent());
-        $existing = $manager->getRepository(Role::class)->findOneBy(["label" => $content->label]);
+        $existing = $manager->getRepository(Role::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
-            $form->addError("label", "Un rôle avec ce label existe déjà");
+            $form->addError("name", "Un rôle avec ce nom existe déjà");
         }
 
         if ($form->isValid()) {
             $role = new Role();
-            $role->setCode(strtoupper(StringHelper::slugify($content->label)))
-                ->setName($content->label)
+            $role->setCode(strtoupper(StringHelper::slugify($content->name)))
+                ->setName($content->name)
                 ->setActive($content->active)
                 ->setPermissions($content->permissions);
 
@@ -114,14 +114,14 @@ class RoleController extends AbstractController {
         $form = Form::create();
 
         $content = json_decode($request->getContent());
-        $existing = $manager->getRepository(Role::class)->findOneBy(["label" => $content->label]);
+        $existing = $manager->getRepository(Role::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $role) {
-            $form->addError("label", "Un autre rôle avec ce label existe déjà");
+            $form->addError("name", "Un autre rôle avec ce nom existe déjà");
         }
 
         if ($form->isValid()) {
-            $role->setCode(strtoupper(StringHelper::slugify($content->label)))
-                ->setName($content->label)
+            $role->setCode(strtoupper(StringHelper::slugify($content->name)))
+                ->setName($content->name)
                 ->setActive($content->active)
                 ->setPermissions($content->permissions);
 
