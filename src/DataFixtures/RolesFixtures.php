@@ -34,11 +34,11 @@ class RolesFixtures extends Fixture implements FixtureGroupInterface {
             if($roleRepository->findOneBy(["code" => $code]) === null) {
                 $role = (new Role())
                     ->setCode($code)
-                    ->setLabel($label)
+                    ->setName($label)
                     ->setPermissions(self::PERMISSIONS[$code])
                     ->setActive(true);
 
-                $output->writeln("Created role \"{$role->getLabel()}\"");
+                $output->writeln("Created role \"{$role->getName()}\"");
                 $manager->persist($role);
             }
         }

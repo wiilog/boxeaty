@@ -34,7 +34,7 @@
                             <select name="role" class="data" required>
                                 <option disabled selected>Sélectionnez un role</option>
                                 {% for role in roles %}
-                                    <option value="{{ role.id }}">{{ role.label }}</option>
+                                    <option value="{{ role.id }}">{{ role.name }}</option>
                                 {% endfor %}
                             </select>
                         </label>
