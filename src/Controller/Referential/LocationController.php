@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Controller\Referencial;
+namespace App\Controller\Referential;
 
 use App\Annotation\HasPermission;
 use App\Entity\Location;
 use App\Entity\Role;
+use App\Helper\Form;
 use App\Helper\StringHelper;
 use Doctrine\ORM\EntityManagerInterface;
-use Helper\Form;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
