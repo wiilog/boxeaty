@@ -1,0 +1,31 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Paramétrage{% endblock %}
+{% block page %}Global{% endblock %}
+
+{% block content %}
+    <div class="box first-box global-settings">
+        <h1>Configuration des exports CSV</h1>
+
+        <div class="input-with-validation">
+            <label>
+                Encodage des exports CSV
+                <select name="{{ constant('App\\Entity\\Setting::CSV_EXPORTS_ENCODING') }}" class="data">
+                    <option value="{{ constant('App\\Service\\ExportService::ENCODING_UTF8') }}"
+                            {{ csv_encoding.value == constant('App\\Service\\ExportService::ENCODING_UTF8') ? 'selected' }}>
+                        UTF8
+                    </option>
+                    <option value="{{ constant('App\\Service\\ExportService::ENCODING_WINDOWS') }}"
+                            {{ csv_encoding.value == constant('App\\Service\\ExportService::ENCODING_WINDOWS') ? 'selected' }}>
+                        1252 Europe de l'ouest Windows
+                    </option>
+                </select>
+            </label>
+            <button class="secondary" type="submit">Enregistrer</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('setting') }}
+{% endblock %}

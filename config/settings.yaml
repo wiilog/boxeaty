@@ -52,7 +52,7 @@ parameters:
       type: category
       items:
         - name: Global
-          route: missing_route
+          route: settings
         - name: Rôles
           route: roles_list
         - name: Utilisateurs
