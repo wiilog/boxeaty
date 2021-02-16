@@ -24,7 +24,7 @@ class GroupController extends AbstractController {
      * @Route("/liste", name="groups_list")
      * @HasPermission(Role::MANAGE_GROUPS)
      */
-    public function list(EntityManagerInterface $manager): Response {
+    public function list(): Response {
         return $this->render("referential/group/index.html.twig", [
             "new_group" => new Group(),
         ]);
@@ -36,7 +36,7 @@ class GroupController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $groups = $manager->getRepository(Group::class)
-            ->findForDatatable($request->request->all());
+            ->findForDatatable(json_decode($request->getContent(), true));
 
         $data = [];
         foreach ($groups["data"] as $group) {
@@ -90,7 +90,7 @@ class GroupController extends AbstractController {
      * @Route("/modifier/template/{group}", name="group_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_GROUPS)
      */
-    public function editTemplate(EntityManagerInterface $manager, Group $group) {
+    public function editTemplate(Group $group): Response {
         return $this->json([
             "submit" => $this->generateUrl("group_edit", ["group" => $group->getId()]),
             "template" => $this->renderView("referential/group/modal/edit.html.twig", [

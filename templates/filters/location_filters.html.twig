@@ -1,7 +1,6 @@
 {% extends 'filters/template.html.twig' %}
 
 {% block filters %}
-    {% include 'filters/filter_items/date_item.html.twig' %}
-    {% include 'filters/filter_items/location_item.html.twig' %}
-    {% include 'filters/filter_items/status_item.html.twig' %}
+    {% include 'filters/filter_items/name_item.html.twig' with {placeholder: 'Emplacement'} %}
+    {% include 'filters/filter_items/active_item.html.twig' %}
 {% endblock %}
