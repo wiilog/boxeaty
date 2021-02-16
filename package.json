@@ -12,7 +12,8 @@
         "generate-routes": "php bin/console fos:js-routing:dump --format=json --target=public/generated/routes.json",
         "dev": "yarn generate-routes && encore dev",
         "watch": "yarn generate-routes && encore dev --watch",
-        "build": "yarn generate-routes && encore production --progress"
+        "build": "yarn generate-routes && encore production --progress",
+        "production": "encore production --progress"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.15.2",
