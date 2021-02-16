@@ -14,6 +14,15 @@ use Doctrine\ORM\EntityRepository;
  */
 class GroupRepository extends EntityRepository {
 
+    public function iterateAll() {
+        return $this->createQueryBuilder("g")
+            ->select("g.name AS name")
+            ->addSelect("g.establishment AS establishment")
+            ->addSelect("g.active AS active")
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findForDatatable(array $params): array {
         $search = $params["search"]["value"] ?? null;
 
