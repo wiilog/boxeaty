@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Entity\User;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,6 +27,8 @@ class Authenticator extends AbstractFormLoginAuthenticator {
     public const LOGIN_ERROR = "Identifiants incorrects";
     public const LOGIN_ROUTE = "login";
     public const HOME_ROUTE = "home";
+
+    public const PASSWORD_ERROR = "Le mot de passe doit contenir au moins un chiffre, une lettre majuscule et une lettre minuscule";
 
     /** @Required */
     public EntityManagerInterface $entityManager;
@@ -75,6 +78,11 @@ class Authenticator extends AbstractFormLoginAuthenticator {
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey) {
+        if($token->getUser() instanceof User) {
+            $token->getUser()->setLastLogin(new DateTime());
+            $this->entityManager->flush();
+        }
+
         if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
             return new RedirectResponse($targetPath);
         }
@@ -84,6 +92,13 @@ class Authenticator extends AbstractFormLoginAuthenticator {
 
     protected function getLoginUrl() {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
+    }
+
+    public static function isPasswordSecure(string $password): bool {
+        return strlen($password) >= 8 &&
+            preg_match("/[A-Z]/", $password) &&
+            preg_match("/[a-z]/", $password) &&
+            preg_match("/[0-9]/", $password);
     }
 
 }

@@ -10,8 +10,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Role {
 
-    public const ROLE_NO_ACCESS = "ROLE_NO_ACCESS";
-    public const ROLE_ADMIN = "ROLE_ADMIN";
+    public const ROLE_NO_ACCESS = "AUCUN_ACCES";
+    public const ROLE_ADMIN = "ADMINISTRATEUR";
 
     public const MANAGE_USERS = "MANAGE_USERS";
     public const MANAGE_ROLES = "MANAGE_ROLES";

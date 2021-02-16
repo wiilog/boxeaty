@@ -49,7 +49,7 @@ main:not(.login) {
         margin-top: 1.5rem;
     }
 
-    .box:not(.box-small) {
+    .box:not(.box-small), .filters:not(.box-small) {
         width: 100%;
     }
 

@@ -4,9 +4,9 @@ namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
 use App\Entity\Role;
+use App\Helper\Form;
 use App\Helper\StringHelper;
 use Doctrine\ORM\EntityManagerInterface;
-use Helper\Form;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -120,8 +120,12 @@ class RoleController extends AbstractController {
         }
 
         if ($form->isValid()) {
-            $role->setCode(strtoupper(StringHelper::slugify($content->name)))
-                ->setName($content->name)
+            //don't edit slug for the base roles
+            if(!in_array($role->getCode(), [Role::ROLE_NO_ACCESS, Role::ROLE_ADMIN])) {
+                $role->setCode(strtoupper(StringHelper::slugify($content->name)));
+            }
+
+            $role->setName($content->name)
                 ->setActive($content->active)
                 ->setPermissions($content->permissions);
 

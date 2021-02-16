@@ -5,10 +5,11 @@ namespace App\Controller\Settings;
 use App\Annotation\HasPermission;
 use App\Entity\Role;
 use App\Entity\User;
+use App\Helper\Form;
+use App\Security\Authenticator;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Helper\Form;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -77,6 +78,10 @@ class UserController extends AbstractController {
             $form->addError("role", "Le rôle sélectionné n'existe plus, merci de rafraichir la page");
         }
 
+        if (!Authenticator::isPasswordSecure($content->password)) {
+            $form->addError("password", Authenticator::PASSWORD_ERROR);
+        }
+
         if ($form->isValid()) {
             //TODO: set group and location
             $user = new User();
@@ -131,6 +136,10 @@ class UserController extends AbstractController {
         $role = $manager->getRepository(Role::class)->find($content->role);
         if (!$role) {
             $form->addError("role", "Le rôle sélectionné n'existe plus, merci de rafraichir la page");
+        }
+
+        if ($content->password && !Authenticator::isPasswordSecure($content->password)) {
+            $form->addError("password", Authenticator::PASSWORD_ERROR);
         }
 
         if ($form->isValid()) {
