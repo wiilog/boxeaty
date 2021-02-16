@@ -6,7 +6,7 @@ import 'datatables.net-dt/js/dataTables.dataTables';
 import '@fortawesome/fontawesome-free/js/all.js';
 
 import $ from 'jquery';
-import Routing from '../public/bundles/fosjsrouting/js/router.min.js';
+import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 
 global.$ = $;
 global.Routing = Routing;
