@@ -6,12 +6,14 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import '~@fortawesome/fontawesome-free/scss/solid';
 @import '~@fortawesome/fontawesome-free/scss/regular';
 @import '~@fortawesome/fontawesome-free/scss/brands';
+@import "~select2/src/scss/core";
 
 @import "mixins";
 @import "fonts";
 @import "header";
 @import "forms";
 @import "login";
+@import "select2";
 @import "datatable";
 
 html {

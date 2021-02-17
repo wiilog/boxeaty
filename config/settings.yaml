@@ -42,7 +42,7 @@ parameters:
       type: category
       items:
         - name: Client
-          route: missing_route
+          route: clients_list
         - name: Groupe
           route: groups_list
         - name: Emplacement

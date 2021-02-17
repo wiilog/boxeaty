@@ -1,0 +1,24 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Paramétrage{% endblock %}
+{% block page %}Client{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <a href="{{ path('clients_export') }}" class="outline"><i class="icon fas fa-download"></i> Export au format CSV</a>
+                <button class="primary new-client"><i class="icon fas fa-plus"></i> Nouveau client</button>
+            </div>
+        </div>
+
+        <table id="table-clients"></table>
+    </div>
+
+    {% include 'referential/client/modal/new.html.twig' with {client: new_client} %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('client_list') }}
+{% endblock %}

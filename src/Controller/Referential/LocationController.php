@@ -24,7 +24,7 @@ class LocationController extends AbstractController {
      */
     public function list(): Response
     {
-        return $this->render("referencial/location/index.html.twig", [
+        return $this->render("referential/location/index.html.twig", [
             "new_location" => new Location(),
         ]);
     }
@@ -44,7 +44,7 @@ class LocationController extends AbstractController {
                 "name" => $location->getName(),
                 "active" => $location->isActive() ? "Actif" : "Inactif",
                 "description" => $location->getDescription(),
-                "actions" => $this->renderView("referencial/location/datatable_actions.html.twig"),
+                "actions" => $this->renderView("referential/location/datatable_actions.html.twig"),
             ];
         }
 
@@ -94,7 +94,7 @@ class LocationController extends AbstractController {
     public function editTemplate(Location $location) {
         return $this->json([
             "submit" => $this->generateUrl("location_edit", ["location" => $location->getId()]),
-            "template" => $this->renderView("referencial/location/modal/edit_location.html.twig", [
+            "template" => $this->renderView("referential/location/modal/edit_location.html.twig", [
                 "location" => $location,
             ])
         ]);

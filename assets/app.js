@@ -1,5 +1,6 @@
 import './styles/app.scss';
 import 'bootstrap';
+import 'select2';
 
 import 'datatables.net';
 import 'datatables.net-dt/js/dataTables.dataTables';
