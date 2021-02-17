@@ -16,6 +16,10 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import "select2";
 @import "datatable";
 
+html {
+    height: 100%;
+}
+
 body {
     font-family: 'Retroyal', sans-serif;
     background-color: $grey;
