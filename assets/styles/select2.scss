@@ -1,5 +1,42 @@
 @import "mixins";
+@import "variables";
 
 .select2-container {
   width: 100% !important;
+}
+
+.select2-selection {
+  border: none !important;
+  border-radius: 0 !important;
+  border-bottom: 1px solid #E5E5E5 !important;
+  padding: 0 !important;
+  outline: none;
+}
+
+.select2-selection__arrow > b {
+  border-color: black transparent transparent transparent !important;
+}
+
+.select2-container--open .select2-selection__arrow > b {
+  border-color: transparent transparent black transparent !important;
+}
+
+.select2-search {
+  border: none !important;
+}
+
+.select2-search__field {
+  border: none !important;
+  background: url(../images/search.svg) no-repeat scroll 98% !important;
+}
+
+.select2-dropdown {
+  border-bottom-left-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
+  border: none !important;
+  box-shadow: 0 2px 8px -2px !important;
+}
+
+.select2-results__option--highlighted.select2-results__option--selectable {
+  background-color: $blue-lighter !important;
 }

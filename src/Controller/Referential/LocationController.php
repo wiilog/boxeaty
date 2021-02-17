@@ -91,10 +91,10 @@ class LocationController extends AbstractController {
      * @Route("/modifier/template/{location}", name="location_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function editTemplate(Location $location) {
+    public function editTemplate(Location $location): Response {
         return $this->json([
             "submit" => $this->generateUrl("location_edit", ["location" => $location->getId()]),
-            "template" => $this->renderView("referential/location/modal/edit_location.html.twig", [
+            "template" => $this->renderView("referential/location/modal/edit.html.twig", [
                 "location" => $location,
             ])
         ]);

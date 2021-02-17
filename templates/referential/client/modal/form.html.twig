@@ -30,8 +30,8 @@
             {% endfor %}
         </select>
     </div>
-    <div class="col-12">
-        <h2>Contact principal</h2>
+    <div class="col-12 mt-4">
+        <h3 class="fs-3">Contact principal</h3>
     </div>
     <div class="col-12">
         <label>
@@ -44,7 +44,7 @@
         </select>
         <label>
             Téléphone
-            <input type="number" name="phoneNumber" class="data" placeholder="Adresse" value="{{ client.phoneNumber }}" required/>
+            <input type="tel" name="phoneNumber" class="data" placeholder="Numéro de téléphone" value="{{ client.phoneNumber }}" required/>
         </label>
     </div>
 </div>
