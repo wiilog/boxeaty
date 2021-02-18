@@ -4,11 +4,9 @@ parameters:
       App\Entity\Role::MANAGE_SETTINGS: Modifier le paramétrage global
       App\Entity\Role::MANAGE_USERS: Créer et modifier les utilisateurs
       App\Entity\Role::MANAGE_ROLES: Créer et modifier les rôles
-      App\Entity\Role::MANAGE_GROUPS: Créer et modifier les groupes
-      App\Entity\Role::MANAGE_CLIENTS: Créer et modifier les clients
 
     Menu référentiel:
-      App\Entity\Role::MANAGE_CLIENT: Créer et modifier un client #voir avec laure si on le garde
+      App\Entity\Role::MANAGE_CLIENTS: Créer et modifier les clients
       App\Entity\Role::DEACTIVATE_CLIENT: Désactivation client
       App\Entity\Role::DELETE_CLIENT: Suppression client
       App\Entity\Role::MANAGE_GROUPS: Gérer les groupes
