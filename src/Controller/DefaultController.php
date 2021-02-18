@@ -6,6 +6,7 @@ use App\Annotation\HasPermission;
 use App\Entity\Client;
 use App\Entity\Group;
 use App\Entity\Role;
+use App\Entity\TrackingMovement;
 use App\Entity\User;
 use App\Helper\Stream;
 use App\Service\ExportService;
@@ -37,6 +38,7 @@ class DefaultController extends AbstractController {
         $exportService->createWorksheet($spreadsheet, "Clients", Client::class, ExportService::CLIENT_HEADER);
         $exportService->createWorksheet($spreadsheet, "Groupes", Group::class, ExportService::GROUP_HEADER);
         $exportService->createWorksheet($spreadsheet, "Utilisateurs", User::class, ExportService::USER_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Mouvements", TrackingMovement::class, ExportService::MOVEMENT_HEADER);
 
         $file = "exports/export-general-" . bin2hex(random_bytes(8)) . ".xlsx";
 

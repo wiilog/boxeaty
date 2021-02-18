@@ -20,10 +20,10 @@
         <div class="breadcrumb">
             <span class="menu">{% apply upper %}{% block menu %}???{% endblock %}{% endapply %}</span>
 
-            {% set _page = block('page') %}
+            {% set _page = block('page') ?? null %}
             {% if _page is not empty %}
             <i class="separator">|</i>
-            <span>{% block page %}???{% endblock %}</span>
+            <span>{{ _page }}</span>
             {% endif %}
         </div>
     </header>

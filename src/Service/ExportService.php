@@ -36,6 +36,15 @@ class ExportService {
         "Actif",
     ];
 
+    public const MOVEMENT_HEADER = [
+        "Date",
+        "Numéro de box",
+        "Qualité",
+        "Etat",
+        "Client",
+        "Commentaire",
+    ];
+
     public const ENCODING_UTF8 = "UTF8";
     public const ENCODING_WINDOWS = "WINDOWS";
 
