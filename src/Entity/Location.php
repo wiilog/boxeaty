@@ -26,7 +26,7 @@ class Location
     private ?string $name = null;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     private ?string $description = null;
 
@@ -52,7 +52,7 @@ class Location
         return $this->description;
     }
 
-    public function setDescription(string $description): self
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
 

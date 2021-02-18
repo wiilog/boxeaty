@@ -15,10 +15,7 @@ $(document).ready(() => {
     $(`.new-role`).click(() => newRoleModal.open());
 
     const table = initDatatable(`#table-roles`, {
-        ajax: {
-            url: Routing.generate(`roles_api`),
-            method: `POST`,
-        },
+        ajax: AJAX.route(`POST`, `roles_api`),
         columns: [
             {data: `name`, title: `Nom`},
             {data: `active`, title: `Actif`},

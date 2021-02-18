@@ -15,10 +15,7 @@ $(document).ready(() => {
     $(`.new-user`).click(() => newUserModal.open());
 
     const table = initDatatable(`#table-users`, {
-        ajax: {
-            url: Routing.generate(`users_api`),
-            method: `POST`,
-        },
+        ajax: AJAX.route(`POST`, `users_api`),
         columns: [
             {data: `email`, title: `Email`},
             {data: `username`, title: `Nom d'utilisateur`},
