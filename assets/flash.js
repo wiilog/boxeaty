@@ -11,5 +11,9 @@ export default class Flash {
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         `);
+        setTimeout(function () {
+            $(`.alert-${type} .alert-dismissible`).hide();
+            }, 5000
+        );
     }
 }
