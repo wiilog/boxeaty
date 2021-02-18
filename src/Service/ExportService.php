@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Entity\Setting;
+use App\Entity\GlobalSetting;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -16,8 +16,8 @@ class ExportService {
     private ?string $encoding;
 
     public function __construct(EntityManagerInterface $manager) {
-        $this->encoding = $manager->getRepository(Setting::class)
-            ->findOneBy(["name" => Setting::CSV_EXPORTS_ENCODING])
+        $this->encoding = $manager->getRepository(GlobalSetting::class)
+            ->findOneBy(["name" => GlobalSetting::CSV_EXPORTS_ENCODING])
             ->getValue();
     }
 

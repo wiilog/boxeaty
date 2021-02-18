@@ -2,8 +2,7 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Setting;
-use App\Entity\Role;
+use App\Entity\GlobalSetting;
 use App\Service\ExportService;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
@@ -13,17 +12,17 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 class SettingFixtures extends Fixture implements FixtureGroupInterface {
 
     private const DEFAULTS = [
-        Setting::CSV_EXPORTS_ENCODING => ExportService::ENCODING_UTF8,
+        GlobalSetting::CSV_EXPORTS_ENCODING => ExportService::ENCODING_UTF8,
     ];
 
     public function load(ObjectManager $manager) {
         $output = new ConsoleOutput();
 
-        $settingRepository = $manager->getRepository(Setting::class);
+        $settingRepository = $manager->getRepository(GlobalSetting::class);
 
         foreach (self::DEFAULTS as $name => $default) {
             if ($settingRepository->findOneBy(["name" => $name]) === null) {
-                $setting = (new Setting())
+                $setting = (new GlobalSetting())
                     ->setName($name)
                     ->setValue($default);;
 

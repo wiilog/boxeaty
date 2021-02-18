@@ -10,7 +10,7 @@
         <div class="input-with-validation">
             <label>
                 Encodage des exports CSV
-                <select name="{{ constant('App\\Entity\\Setting::CSV_EXPORTS_ENCODING') }}" class="data">
+                <select name="{{ constant('App\\Entity\\GlobalSetting::CSV_EXPORTS_ENCODING') }}" class="data" data-s2 data-no-empty-option>
                     <option value="{{ constant('App\\Service\\ExportService::ENCODING_UTF8') }}"
                             {{ csv_encoding.value == constant('App\\Service\\ExportService::ENCODING_UTF8') ? 'selected' }}>
                         UTF8

@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\SettingRepository;
+use App\Repository\GlobalSettingRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=SettingRepository::class)
+ * @ORM\Entity(repositoryClass=GlobalSettingRepository::class)
  */
-class Setting {
+class GlobalSetting {
 
     public const CSV_EXPORTS_ENCODING = "CSV_EXPORTS_ENCODING";
 

@@ -3,7 +3,7 @@
 namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
-use App\Entity\Setting;
+use App\Entity\GlobalSetting;
 use App\Entity\Role;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,17 +11,17 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class SettingController extends AbstractController {
+class GlobalSettingController extends AbstractController {
 
     /**
      * @Route("/parametrage/global", name="settings")
      * @HasPermission(Role::MANAGE_SETTINGS)
      */
     public function settings(EntityManagerInterface $manager): Response {
-        $settings = $manager->getRepository(Setting::class)->getAll();
+        $settings = $manager->getRepository(GlobalSetting::class)->getAll();
 
-        return $this->render("settings/setting/index.html.twig", [
-            "csv_encoding" => $settings[Setting::CSV_EXPORTS_ENCODING],
+        return $this->render("settings/global_settings/index.html.twig", [
+            "csv_encoding" => $settings[GlobalSetting::CSV_EXPORTS_ENCODING],
         ]);
     }
 
@@ -32,12 +32,12 @@ class SettingController extends AbstractController {
     public function update(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent(), true);
 
-        $settings = $manager->getRepository(Setting::class)->getAll();
+        $settings = $manager->getRepository(GlobalSetting::class)->getAll();
         foreach ($content as $name => $value) {
             if (isset($settings[$name])) {
                 $setting = $settings[$name];
             } else {
-                $setting = (new Setting())->setName($name);
+                $setting = (new GlobalSetting())->setName($name);
                 $manager->persist($setting);
             }
 
