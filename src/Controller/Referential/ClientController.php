@@ -154,30 +154,6 @@ class ClientController extends AbstractController {
     }
 
     /**
-     * @Route("/supprimer", name="client_delete", options={"expose": true})
-     * @HasPermission(Role::MANAGE_CLIENTS)
-     */
-    public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent());
-        $client = $manager->getRepository(Client::class)->find($content->id);
-
-        if ($client) {
-            $manager->remove($client);
-            $manager->flush();
-
-            return $this->json([
-                "success" => true,
-                "msg" => "Client <strong>{$client->getName()}<strong> supprimé avec succès"
-            ]);
-        } else {
-            return $this->json([
-                "success" => false,
-                "msg" => "Le client n'existe pas"
-            ]);
-        }
-    }
-
-    /**
      * @Route("/export", name="clients_export", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */

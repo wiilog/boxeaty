@@ -1,13 +1,15 @@
 import './styles/app.scss';
-import 'bootstrap';
-import 'select2';
 
+import 'bootstrap';
+import 'arrive';
 import 'datatables.net';
 import 'datatables.net-dt/js/dataTables.dataTables';
 import '@fortawesome/fontawesome-free/js/all.js';
-
+import 'select2';
 import $ from 'jquery';
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+
+import './select2';
 
 global.$ = $;
 global.Routing = Routing;

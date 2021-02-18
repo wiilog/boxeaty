@@ -4,14 +4,12 @@ import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
-import Select2 from "../select2";
 
 $(document).ready(() => {
     const newClientModal = Modal.static(`#modal-new-client`, {
         ajax: AJAX.route(`POST`, `client_new`),
         table: `#table-clients`,
     });
-    Select2.init($(`[name=group], [name=user]`));
 
     $(`.new-client`).click(() => newClientModal.open());
 

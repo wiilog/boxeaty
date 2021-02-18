@@ -20,8 +20,8 @@
         <table id="table-locations"></table>
     </div>
 
-    {% include 'referential/location/modal/new_location.html.twig' with {location: new_location} %}
-    {% include 'referential/location/modal/delete_location.html.twig' %}
+    {% include 'referential/location/modal/new.html.twig' with {location: new_location} %}
+    {% include 'referential/location/modal/delete.html.twig' %}
 {% endblock %}
 
 {% block javascripts %}
