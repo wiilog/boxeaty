@@ -1,0 +1,42 @@
+<div class="row">
+    <div class="col-12">
+        <label>
+            Date du mouvement
+            <input type="text" name="date" class="data" placeholder="Date du mouvement" value="{{ movement.date | date }}" required/>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>
+            Box
+            <select name="box" class="data" data-select2="box">
+                {% if movement.box %}
+                    <option value="{{ movement.box.id }}" selected>{{ movement.box.number }}</option>
+                {% endif %}
+            </select>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>
+            Qualité
+            <select name="quality" class="data" data-select2="quality">
+                {% if movement.quality %}
+                    <option value="{{ movement.quality.id }}" selected>{{ movement.quality.name }}</option>
+                {% endif %}
+            </select>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>
+            Etat
+            <select name="state" class="data" data-select2="state">
+                {% if movement.state %}
+                    <option value="{{ movement.state.id }}" selected>{{ movement.state.name }}</option>
+                {% endif %}
+            </select>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>Commentaire</label>
+        <textarea data-wysiwyg></textarea>
+    </div>
+</div>

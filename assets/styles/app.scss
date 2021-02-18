@@ -7,6 +7,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import '~@fortawesome/fontawesome-free/scss/regular';
 @import '~@fortawesome/fontawesome-free/scss/brands';
 @import "~select2/src/scss/core";
+@import '~froala-editor/css/froala_editor.css';
 
 @import "mixins";
 @import "fonts";
@@ -147,5 +148,16 @@ main:not(.login) {
         justify-content: center;
         backdrop-filter: blur(2px);
         background-color: initial;
+    }
+}
+
+//FROALA OVERRIDES
+.fr-box.fr-basic {
+    .fr-second-toolbar {
+        display: none;
+    }
+
+    .fr-toolbar, .fr-wrapper {
+        border: none;
     }
 }

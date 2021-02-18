@@ -20,6 +20,7 @@ parameters:
       App\Entity\Role::IMPORT_BOX: Import de Box
       App\Entity\Role::EXPORT_BOX: Export de Box
       App\Entity\Role::CHECKOUT: Passage en caisse
+      App\Entity\Role::MANAGE_MOVEMENTS: Créer et modifier des mouvements
       App\Entity\Role::DELETE_MOVEMENT: Suppression de mouvement
 
   menu:
@@ -36,7 +37,7 @@ parameters:
         - name: Numéro consigne
           route: missing_route
         - name: Mouvements
-          route: missing_route
+          route: tracking_movements_list
     - name: Référentiel
       icon: address-card
       type: category

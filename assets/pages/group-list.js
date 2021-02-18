@@ -3,10 +3,10 @@ import '../app';
 import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
-import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
+import {initDatatable} from "../datatable";
 
 $(document).ready(() => {
-    const newGroupModal = Modal.static(`#modal-new-role`, {
+    const newGroupModal = Modal.static(`#modal-new-group`, {
         ajax: AJAX.route(`POST`, `group_new`),
         table: `#table-groups`,
     });

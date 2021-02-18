@@ -24,6 +24,7 @@ class Role {
     public const IMPORT_BOX = "IMPORT_BOX";
     public const EXPORT_BOX = "EXPORT_BOX";
     public const CHECKOUT = "CHECKOUT";
+    public const MANAGE_MOVEMENTS = "MANAGE_MOVEMENTS";
     public const DELETE_MOVEMENT = "DELETE_MOVEMENT";
 
     public const MANAGE_CLIENT = "MANAGE_CLIENT";
