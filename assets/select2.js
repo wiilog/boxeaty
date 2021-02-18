@@ -8,7 +8,7 @@ const ROUTES = {
 
 export default class Select2 {
     static init($element) {
-        if(!$element.find(`option`).exists() && !$element.is(`[data-no-empty-option]`)) {
+        if(!$element.find(`option[selected]`).exists() && !$element.is(`[data-no-empty-option]`)) {
             $element.prepend(`<option selected>`);
         }
 
