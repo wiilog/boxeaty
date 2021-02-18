@@ -1,0 +1,50 @@
+<div class="row">
+    <div class="col-12">
+        <label>
+            Nom
+            <input type="text" name="name" class="data" placeholder="Nom du client" value="{{ client.name }}" required/>
+        </label>
+    </div>
+    <div class="col-12 toggle">
+        <span class="label">Statut</span>
+
+        <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-active" name="active" class="data" value="1" {{ client.active ? 'checked' }}/>
+        <label for="{{ client.id ? 'edit' : 'new' }}-client-active">Actif</label>
+
+        <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-inactive" name="active" class="data" value="0" {{ not client.active ? 'checked' }}/>
+        <label for="{{ client.id ? 'edit' : 'new' }}-client-inactive">Inactif</label>
+    </div>
+    <div class="col-12">
+        <label>
+            Adresse
+            <input type="text" name="address" class="data" placeholder="Adresse" value="{{ client.address }}" required/>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>
+            Groupe
+        </label>
+        <select class="data" name="group" data-s2 data-placeholder="Sélectionnez un groupe...">
+            {% for group in groups %}
+                <option value="{{ group.id }}" {{ client.group and client.group.id == group.id ? 'selected' : '' }}>{{ group.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-12 mt-4">
+        <h3 class="fs-5 mb-0">Contact principal</h3>
+    </div>
+    <div class="col-12">
+        <label>
+            Utilisateur
+        </label>
+        <select class="data" name="user" data-s2 data-placeholder="Sélectionnez un utilisateur...">
+            {% for user in users %}
+                <option value="{{ user.id }}" {{ client.user and client.user.id == user.id ? 'selected' : '' }}>{{ user.username }}</option>
+            {% endfor %}
+        </select>
+        <label>
+            Téléphone
+            <input type="tel" name="phoneNumber" class="data" placeholder="Numéro de téléphone" value="{{ client.phoneNumber }}" required/>
+        </label>
+    </div>
+</div>

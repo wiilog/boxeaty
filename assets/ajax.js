@@ -38,7 +38,7 @@ export default class AJAX {
             body
         };
 
-        fetch(url, config)
+        return fetch(url, config)
             .then(response => response.json())
             .then(json => {
                 if(json.status === 500) {

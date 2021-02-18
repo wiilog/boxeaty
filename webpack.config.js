@@ -15,6 +15,7 @@ Encore
     .addEntry("role_list", "./assets/pages/role-list.js")
     .addEntry("location_list", "./assets/pages/location-list.js")
     .addEntry("group_list", "./assets/pages/group-list.js")
+    .addEntry("client_list", "./assets/pages/client-list.js")
     .addEntry("setting", "./assets/pages/setting.js")
     .autoProvidejQuery()
 

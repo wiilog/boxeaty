@@ -10,7 +10,11 @@ $(document).ready(() => {
         ajax: AJAX.route(`POST`, `user_new`),
         table: `#table-users`,
     });
-    const deleteUserModal = Modal.static(`#modal-delete-user`, AJAX.route(`POST`, `user_delete`));
+
+    const deleteUserModal = Modal.static(`#modal-delete-user`, {
+        ajax: AJAX.route(`POST`, `user_delete`),
+        table: `#table-users`,
+    });
 
     $(`.new-user`).click(() => newUserModal.open());
 

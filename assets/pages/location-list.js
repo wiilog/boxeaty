@@ -10,7 +10,11 @@ $(document).ready(() => {
         ajax: AJAX.route(`POST`, `location_new`),
         table: `#table-locations`,
     });
-    const deleteLocationModal = Modal.static(`#modal-delete-location`, AJAX.route(`POST`, `location_delete`));
+
+    const deleteLocationModal = Modal.static(`#modal-delete-location`, {
+        ajax: AJAX.route(`POST`, `location_delete`),
+        table: `#table-locations`,
+    });
 
     const table = initDatatable(`#table-locations`, {
         ajax: AJAX.route(`POST`, `locations_api`),
