@@ -18,6 +18,7 @@ class RolesFixtures extends Fixture implements FixtureGroupInterface {
     private const PERMISSIONS = [
         Role::ROLE_NO_ACCESS => [],
         Role::ROLE_ADMIN => [
+            Role::GENERAL_EXPORT,
             Role::MANAGE_SETTINGS,
             Role::MANAGE_USERS,
             Role::MANAGE_ROLES,

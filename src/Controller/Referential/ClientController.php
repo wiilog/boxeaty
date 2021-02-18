@@ -163,18 +163,11 @@ class ClientController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        $header = array_merge([
-            "Nom d'utilisateur",
-            "Actif",
-            "Adresse",
-            "Utilisateur attribué",
-        ]);
-
         return $exportService->export(function($output) use ($exportService, $users) {
             foreach ($users as $user) {
                 $exportService->putLine($output, $user);
             }
-        }, "export-clients-$today.csv", $header);
+        }, "export-clients-$today.csv", ExportService::CLIENT_HEADER);
     }
 
 }
