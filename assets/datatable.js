@@ -1,22 +1,19 @@
 import $ from "jquery";
+import {processForm} from "./modal";
 
 export const DATATABLE_ACTIONS_TITLE = `<span style="display:block;text-align:center">Actions</span>`;
 export const DATATABLE_ACTIONS = {
     data: `actions`,
     title: DATATABLE_ACTIONS_TITLE,
     orderable: false,
+    width: `10px`,
 };
 
 export function initDatatable(table, config) {
     const $table = $(table);
     $table.addClass(`w-100`);
 
-    let actionId = null;
     for(const [id, column] of Object.entries(config.columns)) {
-        if(column.name === `action`) {
-            actionId = id;
-        }
-
         if(!column.name) {
             column.name = column.data;
         }
@@ -35,6 +32,18 @@ export function initDatatable(table, config) {
         }
     }
 
+    const ajax = config.ajax;
+    config.ajax = (content, callback) => {
+        const $filters = $(`.filters`);
+        if($filters.exists()) {
+            content.filters = processForm($filters);
+        }
+
+        ajax.json(content, data => {
+            callback(data);
+        });
+    };
+
     const $datatable = $table
         .on(`error.dt`, (e, settings, techNote, message) => console.error(`An error has been reported by DataTables: `, message, e, table))
         .DataTable({
@@ -46,15 +55,10 @@ export function initDatatable(table, config) {
             fixedColumns: {
                 heightMatch: `auto`
             },
-            columnDefs: actionId ? [{width: `30px`, targets: actionId}] : undefined,
             language: {
                 url: `/i18n/datatableLanguage.json`,
             },
-            dom: `<"row mb-2"<"col-auto d-none"f>>t
-            <"footer"
-                <"left" li>
-                p
-            >r`,
+            dom: `<"row mb-2"<"col-auto d-none"f>>t<"footer"<"left" li>p>r`,
             initComplete: () => {
                 moveSearchInputToHeader($table);
             },

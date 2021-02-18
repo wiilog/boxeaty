@@ -57,7 +57,7 @@ class User implements UserInterface {
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Client", mappedBy="user")
      */
-    private $clients;
+    private Collection $clients;
 
     public function __construct() {
         $this->clients = new ArrayCollection();

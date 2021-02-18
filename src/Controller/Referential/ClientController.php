@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/parametrage/clients")
+ * @Route("/referentiel/clients")
  */
 class ClientController extends AbstractController {
 
@@ -42,7 +42,7 @@ class ClientController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $clients = $manager->getRepository(Client::class)
-            ->findForDatatable($request->request->all());
+            ->findForDatatable(json_decode($request->getContent(), true));
 
         $data = [];
         foreach ($clients["data"] as $client) {
@@ -150,30 +150,6 @@ class ClientController extends AbstractController {
             ]);
         } else {
             return $form->errors();
-        }
-    }
-
-    /**
-     * @Route("/supprimer", name="client_delete", options={"expose": true})
-     * @HasPermission(Role::MANAGE_CLIENTS)
-     */
-    public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent());
-        $client = $manager->getRepository(Client::class)->find($content->id);
-
-        if ($client) {
-            $manager->remove($client);
-            $manager->flush();
-
-            return $this->json([
-                "success" => true,
-                "msg" => "Client <strong>{$client->getName()}<strong> supprimé avec succès"
-            ]);
-        } else {
-            return $this->json([
-                "success" => false,
-                "msg" => "Le client n'existe pas"
-            ]);
         }
     }
 

@@ -22,6 +22,7 @@ export default class Modal {
                 Flash.add(Flash.WARNING, `Opération en cours d'exécution`);
             }
 
+            console.log("ok?");
             $button.load(() => modal.handleSubmit());
         });
 
@@ -62,7 +63,7 @@ export default class Modal {
             return;
         }
 
-        this.config.ajax.json(data, result => {
+        return this.config.ajax.json(data, result => {
             if(!result.success && result.errors !== undefined) {
                 for(const error of result.errors.fields) {
                     const $element = this.element.find(`[name="${error.field}"]`);
@@ -104,7 +105,7 @@ export default class Modal {
     }
 }
 
-function processForm($parent) {
+export function processForm($parent) {
     const errors = [];
     const data = {};
     const $inputs = $parent.find(`select.data, input.data, input[data-repeat], textarea.data`);
@@ -138,7 +139,7 @@ function processForm($parent) {
             });
         }
 
-        if(input.name) {
+        if(input.name && $input.val() !== "") {
             data[input.name] = $input.val();
         }
     }

@@ -6,7 +6,6 @@ use App\Annotation\HasPermission;
 use App\Entity\Location;
 use App\Entity\Role;
 use App\Helper\Form;
-use App\Helper\StringHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,7 +34,7 @@ class LocationController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $locations = $manager->getRepository(Location::class)
-            ->findForDatatable($request->request->all());
+            ->findForDatatable(json_decode($request->getContent(), true));
 
         $data = [];
         foreach ($locations["data"] as $location) {
@@ -71,9 +70,9 @@ class LocationController extends AbstractController {
         if ($form->isValid()) {
             $location = new Location();
             $location
-                ->setName(strtoupper(StringHelper::slugify($content->name)))
+                ->setName($content->name)
                 ->setActive($content->active)
-                ->setDescription($content->description);
+                ->setDescription($content->description ?? null);
 
             $manager->persist($location);
             $manager->flush();
@@ -91,10 +90,10 @@ class LocationController extends AbstractController {
      * @Route("/modifier/template/{location}", name="location_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function editTemplate(Location $location) {
+    public function editTemplate(Location $location): Response {
         return $this->json([
             "submit" => $this->generateUrl("location_edit", ["location" => $location->getId()]),
-            "template" => $this->renderView("referential/location/modal/edit_location.html.twig", [
+            "template" => $this->renderView("referential/location/modal/edit.html.twig", [
                 "location" => $location,
             ])
         ]);
@@ -115,9 +114,9 @@ class LocationController extends AbstractController {
 
         if ($form->isValid()) {
             $location
-                ->setName(strtoupper(StringHelper::slugify($content->name)))
+                ->setName($content->name)
                 ->setActive($content->active)
-                ->setDescription($content->description);
+                ->setDescription($content->description ?? null);
 
             $manager->flush();
 
@@ -144,7 +143,7 @@ class LocationController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Emplacement <strong>{$location->getName()}<strong> supprimé avec succès"
+                "msg" => "Emplacement <strong>{$location->getName()}</strong> supprimé avec succès"
             ]);
         } else {
             return $this->json([

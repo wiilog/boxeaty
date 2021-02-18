@@ -10,15 +10,16 @@ $(document).ready(() => {
         ajax: AJAX.route(`POST`, `user_new`),
         table: `#table-users`,
     });
-    const deleteUserModal = Modal.static(`#modal-delete-user`, AJAX.route(`POST`, `user_delete`));
+
+    const deleteUserModal = Modal.static(`#modal-delete-user`, {
+        ajax: AJAX.route(`POST`, `user_delete`),
+        table: `#table-users`,
+    });
 
     $(`.new-user`).click(() => newUserModal.open());
 
     const table = initDatatable(`#table-users`, {
-        ajax: {
-            url: Routing.generate(`users_api`),
-            method: `POST`,
-        },
+        ajax: AJAX.route(`POST`, `users_api`),
         columns: [
             {data: `email`, title: `Email`},
             {data: `username`, title: `Nom d'utilisateur`},

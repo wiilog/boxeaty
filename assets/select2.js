@@ -1,5 +1,20 @@
-class Select2 {
-    static group($element) {
-        $element.select2()
+import $ from 'jquery';
+
+export default class Select2 {
+    static init($element) {
+        $element.prepend(`<option selected>`);
+        $element.select2({
+            placeholder: $element.data(`placeholder`),
+            language: {
+                noResults: function () {
+                    return 'Aucun résultat';
+                }
+            },
+        });
     }
 }
+
+$(document).ready(() => $(`[data-s2]`).each((id, elem) => Select2.init($(elem))))
+    .arrive(`[data-s2]`, function() {
+        Select2.init($(this));
+    });

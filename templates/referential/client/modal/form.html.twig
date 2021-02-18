@@ -24,27 +24,27 @@
         <label>
             Groupe
         </label>
-        <select class="data" name="group">
+        <select class="data" name="group" data-s2 data-placeholder="Sélectionnez un groupe...">
             {% for group in groups %}
                 <option value="{{ group.id }}" {{ client.group and client.group.id == group.id ? 'selected' : '' }}>{{ group.name }}</option>
             {% endfor %}
         </select>
     </div>
-    <div class="col-12">
-        <h2>Contact principal</h2>
+    <div class="col-12 mt-4">
+        <h3 class="fs-5 mb-0">Contact principal</h3>
     </div>
     <div class="col-12">
         <label>
             Utilisateur
         </label>
-        <select class="data" name="user">
+        <select class="data" name="user" data-s2 data-placeholder="Sélectionnez un utilisateur...">
             {% for user in users %}
                 <option value="{{ user.id }}" {{ client.user and client.user.id == user.id ? 'selected' : '' }}>{{ user.username }}</option>
             {% endfor %}
         </select>
         <label>
             Téléphone
-            <input type="number" name="phoneNumber" class="data" placeholder="Adresse" value="{{ client.phoneNumber }}" required/>
+            <input type="tel" name="phoneNumber" class="data" placeholder="Numéro de téléphone" value="{{ client.phoneNumber }}" required/>
         </label>
     </div>
 </div>

@@ -14,10 +14,7 @@ $(document).ready(() => {
     $(`.new-group`).click(() => newGroupModal.open());
 
     const table = initDatatable(`#table-groups`, {
-        ajax: {
-            url: Routing.generate(`groups_api`),
-            method: `POST`,
-        },
+        ajax: AJAX.route(`POST`, `groups_api`),
         columns: [
             {data: `name`, title: `Nom du groupe`},
             {data: `establishment`, title: `Nom de l'établissement`},

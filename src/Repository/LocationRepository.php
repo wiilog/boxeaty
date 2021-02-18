@@ -21,9 +21,13 @@ class LocationRepository extends EntityRepository
         $total = QueryCounter::count($qb, "location");
 
         if ($search) {
-            $qb->where("location.name LIKE :search")
-                ->orWhere("location.description LIKE :search")
+            $qb->andWhere("location.name LIKE :search OR location.description LIKE :search")
                 ->setParameter("search", "%$search%");
+        }
+
+        foreach($params["filters"] as $name => $value) {
+            $qb->andWhere("location.$name LIKE :filter_$name")
+                ->setParameter("filter_$name", "%$value%");
         }
 
         foreach ($params["order"] ?? [] as $order) {

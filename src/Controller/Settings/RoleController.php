@@ -36,7 +36,7 @@ class RoleController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $roleRepository = $manager->getRepository(Role::class);
-        $roles = $roleRepository->findForDatatable($request->request->all());
+        $roles = $roleRepository->findForDatatable(json_decode($request->getContent(), true));
         $deletable = $roleRepository->getDeletable($roles["data"]);
 
         $data = [];
@@ -94,7 +94,7 @@ class RoleController extends AbstractController {
      * @Route("/modifier/template/{role}", name="role_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_ROLES)
      */
-    public function editTemplate(EntityManagerInterface $manager, Role $role) {
+    public function editTemplate(EntityManagerInterface $manager, Role $role): Response {
         $roles = $manager->getRepository(Role::class)->findAll();
 
         return $this->json([
@@ -155,7 +155,7 @@ class RoleController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Rôle {$role->getName()} supprimé avec succès"
+                "msg" => "Rôle <strong>{$role->getName()}</strong> supprimé avec succès"
             ]);
         } else {
             return $this->json([

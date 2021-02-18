@@ -10,15 +10,11 @@ $(document).ready(() => {
         ajax: AJAX.route(`POST`, `client_new`),
         table: `#table-clients`,
     });
-    $(`[name=group], [name=user]`).select2();
 
     $(`.new-client`).click(() => newClientModal.open());
 
     const table = initDatatable(`#table-clients`, {
-        ajax: {
-            url: Routing.generate(`clients_api`),
-            method: `POST`,
-        },
+        ajax: AJAX.route(`POST`, `clients_api`),
         columns: [
             {data: `name`, title: `Nom du client`},
             {data: `active`, title: `Actif`},

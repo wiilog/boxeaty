@@ -40,7 +40,7 @@ class UserController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $users = $manager->getRepository(User::class)
-            ->findForDatatable($request->request->all());
+            ->findForDatatable(json_decode($request->getContent(), true));
 
         $data = [];
         foreach ($users["data"] as $user) {
@@ -91,7 +91,7 @@ class UserController extends AbstractController {
                 ->setRole($role)
                 ->setActive($content->active)
                 ->setPassword($encoder->encodePassword($user, $content->password))
-                ->setCreationDate(new \DateTime());
+                ->setCreationDate(new DateTime());
 
             $manager->persist($user);
             $manager->flush();
@@ -109,7 +109,7 @@ class UserController extends AbstractController {
      * @Route("/modifier/template/{user}", name="user_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_USERS)
      */
-    public function editTemplate(EntityManagerInterface $manager, User $user) {
+    public function editTemplate(EntityManagerInterface $manager, User $user): Response {
         $roles = $manager->getRepository(Role::class)->findAll();
 
         return $this->json([
@@ -139,7 +139,7 @@ class UserController extends AbstractController {
             $form->addError("role", "Le rôle sélectionné n'existe plus, merci de rafraichir la page");
         }
 
-        if ($content->password && !Authenticator::isPasswordSecure($content->password)) {
+        if (isset($content->password) && !Authenticator::isPasswordSecure($content->password)) {
             $form->addError("password", Authenticator::PASSWORD_ERROR);
         }
 
@@ -149,9 +149,9 @@ class UserController extends AbstractController {
                 ->setEmail($content->email)
                 ->setRole($role)
                 ->setActive($content->active)
-                ->setCreationDate(new \DateTime());
+                ->setCreationDate(new DateTime());
 
-            if ($content->password) {
+            if (isset($content->password)) {
                 $user->setPassword($encoder->encodePassword($user, $content->password));
             }
 
@@ -186,7 +186,7 @@ class UserController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Utilisateur {$user->getUsername()} supprimé avec succès"
+                "msg" => "Utilisateur <strong>{$user->getUsername()}</strong> supprimé avec succès"
             ]);
         } else {
             return $this->json([

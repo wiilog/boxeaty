@@ -35,7 +35,7 @@ class Group {
     /**
      * @ORM\OneToMany(targetEntity=Client::class, mappedBy="group")
      */
-    private $clients;
+    private Collection $clients;
 
     public function __construct()
     {
