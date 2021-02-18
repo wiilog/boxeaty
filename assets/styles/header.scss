@@ -60,6 +60,10 @@ header {
                 white-space: nowrap;
                 cursor: pointer;
 
+                &:hover {
+                    color: $orange;
+                }
+
                 &.category {
                     padding-left: 0;
                 }
