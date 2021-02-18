@@ -3,7 +3,7 @@
 namespace App\Listener;
 
 use App\Annotation\HasPermission;
-use App\Twig\RoleExtension;
+use App\Twig\AppExtension;
 use Doctrine\Common\Annotations\AnnotationReader;
 use ReflectionClass;
 use ReflectionException;
@@ -16,7 +16,7 @@ use Twig\Environment;
 class AnnotationListener {
 
     /** @Required */
-    public RoleExtension $roleExtension;
+    public AppExtension $appExtension;
 
     /** @Required */
     public Environment $templating;
@@ -43,7 +43,7 @@ class AnnotationListener {
     }
 
     private function handleHasPermission(ControllerArgumentsEvent $event, HasPermission $annotation) {
-        if (!$this->roleExtension->hasPermission(...$annotation->value)) {
+        if (!$this->appExtension->hasPermission(...$annotation->value)) {
             $event->setController(function() use ($annotation) {
                 if ($annotation->mode == HasPermission::IN_JSON) {
                     return new JsonResponse([

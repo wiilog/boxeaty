@@ -5,7 +5,6 @@ namespace App\Controller\Tracking;
 use App\Annotation\HasPermission;
 use App\Entity\Box;
 use App\Entity\Client;
-use App\Entity\Group;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\State;
@@ -27,22 +26,31 @@ class TrackingMovementController extends AbstractController {
 
     /**
      * @Route("/liste", name="tracking_movements_list")
+     * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
-    public function list(): Response {
+    public function list(EntityManagerInterface $manager): Response {
+        $qualities = $manager->getRepository(Quality::class)->findAll();
+        $states = $manager->getRepository(State::class)->findAll();
+
         return $this->render("tracking/movement/index.html.twig", [
             "new_movement" => new TrackingMovement(),
+            "qualities" => $qualities,
+            "states" => $states,
         ]);
     }
 
     /**
      * @Route("/api", name="tracking_movements_api", options={"expose": true})
+     * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
-        $groups = $manager->getRepository(TrackingMovement::class)
-            ->findForDatatable($request->request->all());
+        $movements = $manager->getRepository(TrackingMovement::class)
+            ->findForDatatable(json_decode($request->getContent(), true));
+
+        $actions = $this->renderView("tracking/movement/datatable_actions.html.twig");
 
         $data = [];
-        foreach ($groups["data"] as $movement) {
+        foreach ($movements["data"] as $movement) {
             $data[] = [
                 "id" => $movement->getId(),
                 "date" => $movement->getDate()->format("d/m/Y H:i"),
@@ -50,24 +58,26 @@ class TrackingMovementController extends AbstractController {
                 "quality" => $movement->getQuality()->getName(),
                 "state" => $movement->getState()->getName(),
                 "client" => $movement->getClient()->getName(),
+                "actions" => $actions,
             ];
         }
 
         return $this->json([
             "data" => $data,
-            "recordsTotal" => $groups["total"],
-            "recordsFiltered" => $groups["filtered"],
+            "recordsTotal" => $movements["total"],
+            "recordsFiltered" => $movements["filtered"],
         ]);
     }
 
     /**
      * @Route("/nouveau", name="tracking_movement_new", options={"expose": true})
+     * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
         $content = json_decode($request->getContent());
-        $box = $manager->getRepository(Box::class)->findOneBy(["number" => $content->box]);
+        $box = $manager->getRepository(Box::class)->find($content->box);
         if (!$box) {
             $form->addError("box", "Cette Box n'existe pas ou a changé de numéro");
         }
@@ -110,34 +120,41 @@ class TrackingMovementController extends AbstractController {
 
     /**
      * @Route("/modifier/template/{movement}", name="tracking_movement_edit_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
-    public function editTemplate(TrackingMovement $movement): Response {
+    public function editTemplate(EntityManagerInterface $manager, TrackingMovement $movement): Response {
+        $qualities = $manager->getRepository(Quality::class)->findAll();
+        $states = $manager->getRepository(State::class)->findAll();
+
         return $this->json([
             "submit" => $this->generateUrl("tracking_movement_edit", ["movement" => $movement->getId()]),
             "template" => $this->renderView("tracking/movement/modal/edit.html.twig", [
                 "movement" => $movement,
+                "qualities" => $qualities,
+                "states" => $states,
             ])
         ]);
     }
 
     /**
-     * @Route("/modifier/{group}", name="tracking_movement_edit", options={"expose": true})
+     * @Route("/modifier/{movement}", name="tracking_movement_edit", options={"expose": true})
+     * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
     public function edit(Request $request, EntityManagerInterface $manager, TrackingMovement $movement): Response {
         $form = Form::create();
 
         $content = json_decode($request->getContent());
-        $box = $manager->getRepository(Box::class)->findOneBy(["number" => $content->box]);
+        $box = $manager->getRepository(Box::class)->find($content->box);
         if (!$box) {
             $form->addError("box", "Cette Box n'existe pas ou a changé de numéro");
         }
 
-        $quality = $manager->getRepository(Quality::class)->findOneBy(["name" => $content->quality]);
+        $quality = $manager->getRepository(Quality::class)->find($content->quality);
         if (!$quality) {
             $form->addError("quality", "Cette qualité n'existe plus");
         }
 
-        $state = $manager->getRepository(State::class)->findOneBy(["name" => $content->state]);
+        $state = $manager->getRepository(State::class)->find($content->state);
         if (!$state) {
             $form->addError("state", "Cet état n'existe pas");
         }
@@ -167,7 +184,32 @@ class TrackingMovementController extends AbstractController {
     }
 
     /**
+     * @Route("/supprimer", name="tracking_movement_delete", options={"expose": true})
+     * @HasPermission(Role::MANAGE_MOVEMENTS)
+     */
+    public function delete(Request $request, EntityManagerInterface $manager): Response {
+        $content = json_decode($request->getContent());
+        $movement = $manager->getRepository(User::class)->find($content->id);
+
+        if ($movement) {
+            $manager->remove($movement);
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+                "msg" => "Mouvement de traçabilité supprimé avec succès"
+            ]);
+        } else {
+            return $this->json([
+                "success" => false,
+                "msg" => "Le mouvement de traçabilité a déjà été supprimé",
+            ]);
+        }
+    }
+
+    /**
      * @Route("/export", name="tracking_movement_export", options={"expose": true})
+     * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
     public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
         $movements = $manager->getRepository(TrackingMovement::class)->iterateAll();

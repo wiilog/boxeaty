@@ -57,7 +57,10 @@ class Box {
     public function addTrackingMovement(TrackingMovement $trackingMovement): self {
         if (!$this->trackingMovements->contains($trackingMovement)) {
             $this->trackingMovements[] = $trackingMovement;
-            $trackingMovement->setBox($this);
+
+            if($trackingMovement->getBox() !== $this) {
+                $trackingMovement->setBox($this);
+            }
         }
 
         return $this;

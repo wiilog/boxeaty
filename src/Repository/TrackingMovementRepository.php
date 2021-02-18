@@ -42,10 +42,10 @@ class TrackingMovementRepository extends EntityRepository {
 
         foreach ($params["order"] ?? [] as $order) {
             $column = $params["columns"][$order["column"]]["data"];
-            $qb->addOrderBy("g.$column", $order["dir"]);
+            $qb->addOrderBy("movement.$column", $order["dir"]);
         }
 
-        $filtered = QueryCounter::count($qb, "g");
+        $filtered = QueryCounter::count($qb, "movement");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);

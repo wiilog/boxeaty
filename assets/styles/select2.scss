@@ -18,6 +18,11 @@
     height: 38px !important;
     line-height: 38px;
     padding: 5px 6px;
+
+    &.is-invalid {
+        background: $invalid-lighter;
+        border-bottom-color: $invalid !important;
+    }
 }
 
 .select2-selection__arrow > b {

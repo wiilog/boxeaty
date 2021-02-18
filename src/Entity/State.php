@@ -10,6 +10,12 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class State {
 
+    public const AVAILABLE = "BoxEaty - dispo";
+    public const UNAVAILABLE = "BoxEaty - indispo";
+    public const CLIENT = "Client";
+    public const CONSUMER = "Consommateur";
+    public const OUT = "Sorti";
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

@@ -46,7 +46,7 @@ class TrackingMovement {
      * @ORM\ManyToOne(targetEntity=Client::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private ?Client $client;
+    private ?Client $client = null;
 
     /**
      * @ORM\Column(type="text", nullable=true)
@@ -72,14 +72,13 @@ class TrackingMovement {
     }
 
     public function setBox(?Box $box): self {
-        if ($this->getBox()) {
-            $this->getBox()->removeTrackingMovement($this);
+        $previous = $this->getBox();
+        if ($previous) {
+            $previous->removeTrackingMovement($this);
         }
 
         $this->box = $box;
-        if ($box && !$box->getTrackingMovements()->contains($this)) {
-            $box->addTrackingMovement($this);
-        }
+        $box->addTrackingMovement($this);
 
         return $this;
     }

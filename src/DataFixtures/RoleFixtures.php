@@ -8,7 +8,7 @@ use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
-class RolesFixtures extends Fixture implements FixtureGroupInterface {
+class RoleFixtures extends Fixture implements FixtureGroupInterface {
 
     private const ROLES = [
         Role::ROLE_NO_ACCESS => "Aucun accès",

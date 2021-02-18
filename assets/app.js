@@ -59,7 +59,7 @@ jQuery.fn.load = function(callback, size = `small`) {
     $element.pushLoader(size);
 
     const result = callback();
-    if(result.finally) {
+    if(result !== undefined && result.finally) {
         result.finally(() => $element.popLoader())
     } else {
         $element.popLoader();

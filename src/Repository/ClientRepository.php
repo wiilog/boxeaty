@@ -62,4 +62,16 @@ class ClientRepository extends EntityRepository {
             "filtered" => $filtered,
         ];
     }
+
+    public function getForSelect(?string $search) {
+        return $this->createQueryBuilder("client")
+            ->select("client.id AS id, client.name AS text")
+            ->where("client.name LIKE :search")
+            ->andWhere("client.active = 1")
+            ->setMaxResults(50)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
 }

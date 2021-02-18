@@ -13,4 +13,14 @@ use Doctrine\ORM\EntityRepository;
  */
 class BoxRepository extends EntityRepository {
 
+    public function getForSelect(?string $search) {
+        return $this->createQueryBuilder("box")
+            ->select("box.id AS id, box.number AS text")
+            ->where("box.number LIKE :search")
+            ->setMaxResults(50)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
 }

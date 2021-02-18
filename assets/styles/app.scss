@@ -164,3 +164,20 @@ main:not(.login) {
         border: none;
     }
 }
+
+.modal.delete {
+    h1 {
+        font-family: 'Retroyal', sans-serif;
+        font-size: 1.5rem;
+        font-style: normal;
+        font-weight: normal;
+    }
+
+    .delete-image {
+        width: 100%;
+        height: 100px;
+        background: url(../images/delete.svg) no-repeat scroll center;
+        background-size: 100px;
+        margin-bottom: 25px;
+    }
+}
