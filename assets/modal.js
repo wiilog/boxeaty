@@ -83,6 +83,8 @@ export default class Modal {
                 }
             }
 
+            this.clear();
+
             this.element.modal(`hide`);
         });
     }
@@ -97,6 +99,14 @@ export default class Modal {
     }
 
     clear() {
+        const $inputs = this.element.find(`input.data, select.data, input[data-repeat], textarea.data`);
+        for(const input of $inputs) {
+            $(input).val(null).trigger(`change`);
+        }
+
+        this.element.find(`.is-invalid`).removeClass(`is-invalid`);
+        this.element.find(`.invalid-feedback`).remove();
+
         console.error("Modal clearing not implemented");
     }
 
