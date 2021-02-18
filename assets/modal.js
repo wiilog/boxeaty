@@ -16,6 +16,7 @@ export default class Modal {
             return null;
         }
 
+        modal.element.on('hidden.bs.modal', () => modal.clear());
         modal.element.find(`button[type="submit"]`).click(function() {
             const $button = $(this);
             if($button.hasClass(LOADING_CLASS)) {
@@ -94,6 +95,15 @@ export default class Modal {
     }
 
     clear() {
+        this.element.find(`input.data, select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
+
+        for(const check of this.element.find(`input[type=checkbox], input[type=radio]`)) {
+            $(check).prop(`checked`, check.hasAttribute(`checked`));
+        }
+
+        this.element.find(`.is-invalid`).removeClass(`is-invalid`);
+        this.element.find(`.invalid-feedback`).remove();
+
         console.error("Modal clearing not implemented");
     }
 
