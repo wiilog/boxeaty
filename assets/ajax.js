@@ -53,7 +53,9 @@ export default class AJAX {
                     Flash.add("success", json.msg);
                 }
 
-                callback(json);
+                if(callback) {
+                    callback(json);
+                }
             })
             .catch(error => {
                 console.error(error);

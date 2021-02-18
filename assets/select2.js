@@ -2,7 +2,9 @@ import $ from 'jquery';
 
 export default class Select2 {
     static init($element) {
-        $element.prepend(`<option selected>`);
+        if($element.data('noEmptyOption') !== "") {
+            $element.prepend(`<option selected>`);
+        }
         $element.select2({
             placeholder: $element.data(`placeholder`),
             language: {

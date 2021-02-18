@@ -2,7 +2,9 @@
 
 namespace App\Service;
 
+use App\Entity\GlobalSetting;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -11,10 +13,16 @@ class ExportService {
     public const ENCODING_UTF8 = "UTF8";
     public const ENCODING_WINDOWS = "WINDOWS";
 
-    private string $encoding = self::ENCODING_UTF8;
+    private ?string $encoding;
+
+    public function __construct(EntityManagerInterface $manager) {
+        $this->encoding = $manager->getRepository(GlobalSetting::class)
+            ->findOneBy(["name" => GlobalSetting::CSV_EXPORTS_ENCODING])
+            ->getValue();
+    }
 
     public function export(callable $generator, string $name, ?array $headers = null): StreamedResponse {
-        $response = new StreamedResponse(function () use ($generator, $headers) {
+        $response = new StreamedResponse(function() use ($generator, $headers) {
             $output = fopen("php://output", "wb");
             if ($headers) {
                 $firstCell = $headers[0] ?? null;
@@ -22,8 +30,7 @@ class ExportService {
                     foreach ($headers as $headerLine) {
                         $this->putLine($output, $headerLine);
                     }
-                }
-                else {
+                } else {
                     $this->putLine($output, $headers);
                 }
             }
@@ -41,7 +48,7 @@ class ExportService {
 
     public function putLine($handle, array $row) {
         $row = array_map(function($cell) {
-            if($cell instanceof DateTime) {
+            if ($cell instanceof DateTime) {
                 return $cell->format("d/m/Y H:i:s");
             } else if (is_bool($cell)) {
                 return $cell ? 'oui' : 'non';
@@ -56,4 +63,5 @@ class ExportService {
 
         fputcsv($handle, $encodedRow, ";");
     }
+
 }

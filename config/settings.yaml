@@ -1,6 +1,7 @@
 parameters:
   permissions:
     Menu paramétrage:
+      App\Entity\Role::MANAGE_SETTINGS: Créer et modifier le paramétrage
       App\Entity\Role::MANAGE_USERS: Créer et modifier les utilisateurs
       App\Entity\Role::MANAGE_ROLES: Créer et modifier les rôles
       App\Entity\Role::MANAGE_GROUPS: Créer et modifier les groupes
@@ -53,7 +54,7 @@ parameters:
       type: category
       items:
         - name: Global
-          route: missing_route
+          route: settings
         - name: Rôles
           route: roles_list
         - name: Utilisateurs

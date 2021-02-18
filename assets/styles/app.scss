@@ -16,6 +16,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import "login";
 @import "select2";
 @import "datatable";
+@import "settings";
 
 html {
     height: 100%;
@@ -24,6 +25,7 @@ html {
 body {
     font-family: 'Retroyal', sans-serif;
     background-color: $grey;
+    max-width: 100%;
 }
 
 h1, h2 {
@@ -65,10 +67,11 @@ main:not(.login) {
         @include content-apart();
 
         min-height: 65px;
-        padding: 0 20px;
+        padding: 16px;
         margin-bottom: 40px;
         z-index: 1;
         width: 100%;
+        border-radius: 8px;
 
         .filter-items {
             display: flex;

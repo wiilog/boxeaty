@@ -13,6 +13,7 @@ class Role {
     public const ROLE_NO_ACCESS = "AUCUN_ACCES";
     public const ROLE_ADMIN = "ADMINISTRATEUR";
 
+    public const MANAGE_SETTINGS = "MANAGE_SETTINGS";
     public const MANAGE_USERS = "MANAGE_USERS";
     public const MANAGE_ROLES = "MANAGE_ROLES";
     public const MANAGE_GROUPS = "MANAGE_GROUPS";
