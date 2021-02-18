@@ -5,7 +5,6 @@ namespace App\Controller\Referential;
 use App\Annotation\HasPermission;
 use App\Entity\Group;
 use App\Entity\Role;
-use App\Entity\User;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/parametrage/groupes")
+ * @Route("/referentiel/groupes")
  */
 class GroupController extends AbstractController {
 
