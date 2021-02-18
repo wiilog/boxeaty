@@ -18,12 +18,12 @@
             </div>
         </div>
         <div class="breadcrumb">
-            <span class="menu">{% apply upper %}{% block menu %}???{% endblock %}{% endapply %}</span>
+            <span class="menu">{% apply upper %}{% block menu %}{% endblock %}{% endapply %}</span>
 
             {% set _page = block('page') %}
             {% if _page is not empty %}
             <i class="separator">|</i>
-            <span>{% block page %}???{% endblock %}</span>
+            <span>{% block page %}{% endblock %}</span>
             {% endif %}
         </div>
     </header>

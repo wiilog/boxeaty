@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ClientRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -45,6 +47,16 @@ class Client {
      * @ORM\Column(type="string", length=255)
      */
     private ?string $phoneNumber = null;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Kiosk::class, mappedBy="client")
+     */
+    private $kiosks;
+
+    public function __construct()
+    {
+        $this->kiosks = new ArrayCollection();
+    }
 
     public function getId(): ?int {
         return $this->id;
@@ -96,6 +108,36 @@ class Client {
 
     public function setPhoneNumber(string $phoneNumber): self {
         $this->phoneNumber = $phoneNumber;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Kiosk[]
+     */
+    public function getKiosks(): Collection
+    {
+        return $this->kiosks;
+    }
+
+    public function addKiosk(Kiosk $kiosk): self
+    {
+        if (!$this->kiosks->contains($kiosk)) {
+            $this->kiosks[] = $kiosk;
+            $kiosk->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeKiosk(Kiosk $kiosk): self
+    {
+        if ($this->kiosks->removeElement($kiosk)) {
+            // set the owning side to null (unless already changed)
+            if ($kiosk->getClient() === $this) {
+                $kiosk->setClient(null);
+            }
+        }
 
         return $this;
     }

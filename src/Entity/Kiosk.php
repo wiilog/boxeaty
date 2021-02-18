@@ -2,38 +2,35 @@
 
 namespace App\Entity;
 
-use App\Repository\LocationRepository;
+use App\Repository\KioskRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=LocationRepository::class)
+ * @ORM\Entity(repositoryClass=KioskRepository::class)
  */
-class Location
+class Kiosk
 {
-
-    use Active;
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private ?int $id = null;
+    private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private ?string $name = null;
+    private $name;
 
     /**
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="kiosks")
      */
-    private ?string $description = null;
+    private $client;
 
     /**
-     * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="location")
+     * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="kiosk")
      */
     private $depositTickets;
 
@@ -59,14 +56,14 @@ class Location
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getClient(): ?Client
     {
-        return $this->description;
+        return $this->client;
     }
 
-    public function setDescription(?string $description): self
+    public function setClient(?Client $client): self
     {
-        $this->description = $description;
+        $this->client = $client;
 
         return $this;
     }
@@ -83,7 +80,7 @@ class Location
     {
         if (!$this->depositTickets->contains($depositTicket)) {
             $this->depositTickets[] = $depositTicket;
-            $depositTicket->setLocation($this);
+            $depositTicket->setKiosk($this);
         }
 
         return $this;
@@ -93,8 +90,8 @@ class Location
     {
         if ($this->depositTickets->removeElement($depositTicket)) {
             // set the owning side to null (unless already changed)
-            if ($depositTicket->getLocation() === $this) {
-                $depositTicket->setLocation(null);
+            if ($depositTicket->getKiosk() === $this) {
+                $depositTicket->setKiosk(null);
             }
         }
 

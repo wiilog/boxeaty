@@ -1,0 +1,24 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Référentiel{% endblock %}
+{% block page %}Borne{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <a href="{{ path('kiosks_export') }}" class="outline"><i class="icon fas fa-download"></i> Export au format CSV</a>
+                <button class="primary new-kiosk"><i class="icon fas fa-plus"></i> Nouvelle borne</button>
+            </div>
+        </div>
+
+        <table id="table-kiosks"></table>
+    </div>
+
+    {% include 'referential/kiosk/modal/new.html.twig' with {kiosk: new_kiosk} %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('kiosk_list') }}
+{% endblock %}
