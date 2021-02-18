@@ -104,7 +104,7 @@ export default class Modal {
     }
 }
 
-function processForm($parent) {
+export function processForm($parent) {
     const errors = [];
     const data = {};
     const $inputs = $parent.find(`select.data, input.data, input[data-repeat], textarea.data`);
@@ -138,7 +138,7 @@ function processForm($parent) {
             });
         }
 
-        if(input.name) {
+        if(input.name && $input.val() !== "") {
             data[input.name] = $input.val();
         }
     }

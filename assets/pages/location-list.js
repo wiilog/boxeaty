@@ -12,13 +12,8 @@ $(document).ready(() => {
     });
     const deleteLocationModal = Modal.static(`#modal-delete-location`, AJAX.route(`POST`, `location_delete`));
 
-    $(`.new-location`).click(() => newLocationModal.open());
-
     const table = initDatatable(`#table-locations`, {
-        ajax: {
-            url: Routing.generate(`locations_api`),
-            method: `POST`,
-        },
+        ajax: AJAX.route(`POST`, `locations_api`),
         columns: [
             {data: `name`, title: `Nom de l'emplacement`},
             {data: `active`, title: `Statut`},
@@ -37,4 +32,7 @@ $(document).ready(() => {
             delete: data => deleteLocationModal.open(data),
         }
     });
+
+    $(`.new-location`).click(() => newLocationModal.open());
+    $(`.filter`).click(() => table.ajax.reload());
 });
