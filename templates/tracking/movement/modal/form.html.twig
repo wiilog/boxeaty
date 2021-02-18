@@ -1,0 +1,52 @@
+<div class="row">
+    <div class="col-12">
+        <label>
+            Date du mouvement
+            <input type="datetime-local" name="date" class="data" placeholder="Date du mouvement" value="{{ movement.date | date('Y-m-d\\TH:i') }}" required/>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>
+            Box
+            <select name="box" class="data" data-s2="box" data-placeholder="Sélectionnez une box" required>
+                {% if movement.box %}
+                    <option value="{{ movement.box.id }}" selected>{{ movement.box.number }}</option>
+                {% endif %}
+            </select>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>
+            Qualité
+            <select name="quality" class="data" data-s2 data-placeholder="Sélectionnez une qualité" required>
+                {% for quality in qualities %}
+                    <option value="{{ quality.id }}" {{ movement.quality and movement.quality == quality ? 'selected' }}>{{ quality.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>
+            Etat
+            <select name="state" class="data" data-s2 data-placeholder="Sélectionnez un état" required>
+                {% for state in states %}
+                    <option value="{{ state.id }}" {{ movement.state and movement.state == state ? 'selected' }}>{{ state.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>
+            Client
+            <select name="client" class="data" data-s2="client" data-placeholder="Sélectionnez un client" required>
+                {% if movement.client %}
+                    <option value="{{ movement.client.id }}" selected>{{ movement.client.name }}</option>
+                {% endif %}
+            </select>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>Commentaire</label>
+        <textarea data-wysiwyg>{{ movement.comment|raw }}</textarea>
+    </div>
+</div>

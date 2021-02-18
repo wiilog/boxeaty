@@ -5,8 +5,10 @@ import 'arrive';
 import 'datatables.net';
 import 'datatables.net-dt/js/dataTables.dataTables';
 import '@fortawesome/fontawesome-free/js/all.js';
-import 'select2';
+import '../node_modules/froala-editor/js/languages/fr.js'
+
 import $ from 'jquery';
+import FroalaEditor from 'froala-editor';
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 
 import './select2';
@@ -33,6 +35,15 @@ $(document).click(e => {
     }
 });
 
+$(document).ready(initializeWYSIWYG)
+    .arrive(`[data-wysiwyg]`, initializeWYSIWYG);
+
+function initializeWYSIWYG() {
+    new FroalaEditor(`[data-wysiwyg]`, {
+        language: 'fr'
+    });
+}
+
 export const SPINNER_WRAPPER_CLASS = `spinner-border-container`;
 export const LOADING_CLASS = `loading`;
 
@@ -51,7 +62,7 @@ jQuery.fn.load = function(callback, size = `small`) {
     $element.pushLoader(size);
 
     const result = callback();
-    if(result.finally) {
+    if(result !== undefined && result.finally) {
         result.finally(() => $element.popLoader())
     } else {
         $element.popLoader();

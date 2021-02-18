@@ -17,8 +17,12 @@ class Role {
     public const MANAGE_SETTINGS = "MANAGE_SETTINGS";
     public const MANAGE_USERS = "MANAGE_USERS";
     public const MANAGE_ROLES = "MANAGE_ROLES";
-    public const MANAGE_GROUPS = "MANAGE_GROUPS";
+
     public const MANAGE_CLIENTS = "MANAGE_CLIENTS";
+    public const DEACTIVATE_CLIENT = "DEACTIVATE_CLIENT";
+    public const DELETE_CLIENT = "DELETE_CLIENT";
+    public const MANAGE_LOCATIONS = "MANAGE_LOCATIONS";
+    public const MANAGE_GROUPS = "MANAGE_GROUPS";
 
     public const CREATE_BOX = "CREATE_BOX";
     public const EDIT_BOX = "EDIT_BOX";
@@ -26,12 +30,8 @@ class Role {
     public const IMPORT_BOX = "IMPORT_BOX";
     public const EXPORT_BOX = "EXPORT_BOX";
     public const CHECKOUT = "CHECKOUT";
+    public const MANAGE_MOVEMENTS = "MANAGE_MOVEMENTS";
     public const DELETE_MOVEMENT = "DELETE_MOVEMENT";
-
-    public const MANAGE_CLIENT = "MANAGE_CLIENT";
-    public const DEACTIVATE_CLIENT = "DEACTIVATE_CLIENT";
-    public const DELETE_CLIENT = "DELETE_CLIENT";
-    public const MANAGE_LOCATIONS = "MANAGE_LOCATIONS";
 
     use Active;
 

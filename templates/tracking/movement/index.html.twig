@@ -1,0 +1,29 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Traçabilité{% endblock %}
+{% block page %}Mouvements{% endblock %}
+
+{% block filter_header %}
+    {% include 'filters/tracking_movement_filters.html.twig' %}
+{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <a href="{{ path('tracking_movement_export') }}" class="outline"><i class="icon fas fa-download"></i> Export au format CSV</a>
+                <button class="primary new-movement"><i class="icon fas fa-plus"></i> Nouveau mouvement</button>
+            </div>
+        </div>
+
+        <table id="table-movements"></table>
+    </div>
+
+    {% include 'tracking/movement/modal/new.html.twig' with {movement: new_movement} %}
+    {% include 'tracking/movement/modal/delete.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('movement_list') }}
+{% endblock %}

@@ -23,12 +23,9 @@ services:
         resource: '../src/Controller/'
         tags: ['pages.service_arguments']
 
-    App\Twig\MenuExtension:
+    App\Twig\AppExtension:
         arguments:
             $config: '%menu%'
-
-    App\Twig\RoleExtension:
-        arguments:
             $permissions: '%permissions%'
 
     App\Listener\AnnotationListener:

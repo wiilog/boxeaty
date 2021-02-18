@@ -1,0 +1,5 @@
+<select name="client" class="data" data-s2 data-placeholder="Client">>
+    {% for group in groups %}
+        <option value="{{ group.id }}">{{ group.name }}</option>
+    {% endfor %}
+</select>

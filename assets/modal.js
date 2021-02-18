@@ -23,7 +23,6 @@ export default class Modal {
                 Flash.add(Flash.WARNING, `Opération en cours d'exécution`);
             }
 
-            console.log("ok?");
             $button.load(() => modal.handleSubmit());
         });
 
@@ -67,9 +66,7 @@ export default class Modal {
         return this.config.ajax.json(data, result => {
             if(!result.success && result.errors !== undefined) {
                 for(const error of result.errors.fields) {
-                    const $element = this.element.find(`[name="${error.field}"]`);
-                    $element.addClass(`is-invalid`);
-                    $element.parents(`label`).append(`<span class="invalid-feedback">${error.message}</span>`);
+                    showInvalid(this.element.find(`[name="${error.field}"]`), error.message);
                 }
 
                 return;
@@ -178,11 +175,18 @@ export function processForm($parent) {
     }
 
     for(const error of errors) {
-        error.elements.forEach($elem => {
-            $elem.addClass(`is-invalid`);
-            $elem.parents(`label`).append(`<span class="invalid-feedback">${error.message}</span>`);
-        });
+        error.elements.forEach($elem => showInvalid($elem, error.message));
     }
 
     return errors.length === 0 ? data : false;
+}
+
+function showInvalid($field, message) {
+    $field.addClass(`is-invalid`);
+
+    if($field.is(`[data-s2]`)) {
+        $field = $field.parent().find(`.select2-selection`);
+    }
+
+    $field.parents(`label`).append(`<span class="invalid-feedback">${message}</span>`);
 }

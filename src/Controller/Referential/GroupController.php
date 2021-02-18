@@ -132,14 +132,14 @@ class GroupController extends AbstractController {
      * @HasPermission(Role::MANAGE_GROUPS)
      */
     public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
-        $users = $manager->getRepository(Group::class)->iterateAll();
+        $groups = $manager->getRepository(Group::class)->iterateAll();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function($output) use ($exportService, $users) {
-            foreach ($users as $user) {
-                $exportService->putLine($output, $user);
+        return $exportService->export(function($output) use ($exportService, $groups) {
+            foreach ($groups as $group) {
+                $exportService->putLine($output, $group);
             }
         }, "export-groupes-$today.csv", ExportService::GROUP_HEADER);
     }

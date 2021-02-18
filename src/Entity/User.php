@@ -59,8 +59,14 @@ class User implements UserInterface {
      */
     private Collection $clients;
 
+    /**
+     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="operator")
+     */
+    private $trackingMovements;
+
     public function __construct() {
         $this->clients = new ArrayCollection();
+        $this->trackingMovements = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -164,6 +170,36 @@ class User implements UserInterface {
             // set the owning side to null (unless already changed)
             if ($client->getUser() === $this) {
                 $client->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|TrackingMovement[]
+     */
+    public function getTrackingMovements(): Collection
+    {
+        return $this->trackingMovements;
+    }
+
+    public function addTrackingMovement(TrackingMovement $trackingMovement): self
+    {
+        if (!$this->trackingMovements->contains($trackingMovement)) {
+            $this->trackingMovements[] = $trackingMovement;
+            $trackingMovement->setOperator($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTrackingMovement(TrackingMovement $trackingMovement): self
+    {
+        if ($this->trackingMovements->removeElement($trackingMovement)) {
+            // set the owning side to null (unless already changed)
+            if ($trackingMovement->getOperator() === $this) {
+                $trackingMovement->setOperator(null);
             }
         }
 

@@ -2,14 +2,12 @@ parameters:
   permissions:
     Menu paramétrage:
       App\Entity\Role::GENERAL_EXPORT: Export général
-      App\Entity\Role::MANAGE_SETTINGS: Créer et modifier le paramétrage
+      App\Entity\Role::MANAGE_SETTINGS: Modifier le paramétrage global
       App\Entity\Role::MANAGE_USERS: Créer et modifier les utilisateurs
       App\Entity\Role::MANAGE_ROLES: Créer et modifier les rôles
-      App\Entity\Role::MANAGE_GROUPS: Créer et modifier les groupes
-      App\Entity\Role::MANAGE_CLIENTS: Créer et modifier les clients
 
     Menu référentiel:
-      App\Entity\Role::MANAGE_CLIENT: Créer et modifier un client #voir avec laure si on le garde
+      App\Entity\Role::MANAGE_CLIENTS: Créer et modifier les clients
       App\Entity\Role::DEACTIVATE_CLIENT: Désactivation client
       App\Entity\Role::DELETE_CLIENT: Suppression client
       App\Entity\Role::MANAGE_GROUPS: Gérer les groupes
@@ -22,6 +20,7 @@ parameters:
       App\Entity\Role::IMPORT_BOX: Import de Box
       App\Entity\Role::EXPORT_BOX: Export de Box
       App\Entity\Role::CHECKOUT: Passage en caisse
+      App\Entity\Role::MANAGE_MOVEMENTS: Créer et modifier des mouvements
       App\Entity\Role::DELETE_MOVEMENT: Suppression de mouvement
 
   menu:
@@ -38,27 +37,34 @@ parameters:
         - name: Numéro consigne
           route: missing_route
         - name: Mouvements
-          route: missing_route
+          permission: App\Entity\Role::MANAGE_MOVEMENTS
+          route: tracking_movements_list
     - name: Référentiel
       icon: address-card
       type: category
       items:
         - name: Client
           route: clients_list
+          permission: App\Entity\Role::MANAGE_CLIENTS
         - name: Groupe
           route: groups_list
+          permission: App\Entity\Role::MANAGE_GROUPS
         - name: Emplacement
           route: locations_list
+          permission: App\Entity\Role::MANAGE_LOCATIONS
     - name: Paramétrage
       icon: cog
       type: category
       items:
         - name: Global
           route: settings
+          permission: App\Entity\Role::MANAGE_SETTINGS
         - name: Rôles
           route: roles_list
+          permission: App\Entity\Role::MANAGE_ROLES
         - name: Utilisateurs
           route: users_list
+          permission: App\Entity\Role::MANAGE_USERS
         - name: Imports et mises à jour
           route: missing_route
     - name: Déconnexion

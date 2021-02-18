@@ -34,10 +34,7 @@ $(document).ready(() => {
 
                 Modal.load(ajax, {table})
             },
-            delete: data => {
-                deleteRoleModal.elem().find(`.not-deletable`)
-                deleteRoleModal.open(data);
-            },
+            delete: data => deleteRoleModal.open(data),
         }
     });
 });
