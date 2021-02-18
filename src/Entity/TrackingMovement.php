@@ -53,6 +53,11 @@ class TrackingMovement {
      */
     private ?string $comment = null;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="trackingMovements")
+     */
+    private $operator;
+
     public function getId(): ?int {
         return $this->id;
     }
@@ -119,6 +124,18 @@ class TrackingMovement {
 
     public function setComment(?string $comment): self {
         $this->comment = $comment;
+
+        return $this;
+    }
+
+    public function getOperator(): ?User
+    {
+        return $this->operator;
+    }
+
+    public function setOperator(?User $operator): self
+    {
+        $this->operator = $operator;
 
         return $this;
     }

@@ -5,6 +5,7 @@ namespace App\Controller\Tracking;
 use App\Annotation\HasPermission;
 use App\Entity\Box;
 use App\Entity\Client;
+use App\Entity\Group;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\State;
@@ -31,11 +32,15 @@ class TrackingMovementController extends AbstractController {
     public function list(EntityManagerInterface $manager): Response {
         $qualities = $manager->getRepository(Quality::class)->findAll();
         $states = $manager->getRepository(State::class)->findAll();
+        $groups = $manager->getRepository(Group::class)->findAll();
+        $users = $manager->getRepository(User::class)->findAll();
 
         return $this->render("tracking/movement/index.html.twig", [
             "new_movement" => new TrackingMovement(),
             "qualities" => $qualities,
             "states" => $states,
+            "groups" => $groups,
+            "users" => $users
         ]);
     }
 
@@ -104,7 +109,7 @@ class TrackingMovementController extends AbstractController {
                 ->setQuality($quality)
                 ->setState($state)
                 ->setClient($client)
-                ->setComment($content->comment ?? null);
+                ->setComment(strip_tags($content->comment) ?? null);
 
             $manager->persist($movement);
             $manager->flush();

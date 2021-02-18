@@ -40,4 +40,6 @@ $(document).ready(() => {
             delete: data => deleteMovementModal.open(data),
         }
     });
+
+    $(`.filter`).click(() => table.ajax.reload());
 });

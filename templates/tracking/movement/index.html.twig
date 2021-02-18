@@ -3,6 +3,10 @@
 {% block menu %}Traçabilité{% endblock %}
 {% block page %}Mouvements{% endblock %}
 
+{% block filter_header %}
+    {% include 'filters/tracking_movement_filters.html.twig' %}
+{% endblock %}
+
 {% block content %}
     <div class="box first-box">
         <div class="content-menu">

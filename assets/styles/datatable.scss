@@ -155,3 +155,7 @@
 .dataTables_empty {
     text-align: center;
 }
+
+.dataTables_wrapper thead th:not(.sorting_disabled) {
+    cursor: pointer;
+}

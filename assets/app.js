@@ -5,6 +5,7 @@ import 'arrive';
 import 'datatables.net';
 import 'datatables.net-dt/js/dataTables.dataTables';
 import '@fortawesome/fontawesome-free/js/all.js';
+import '../node_modules/froala-editor/js/languages/fr.js'
 
 import $ from 'jquery';
 import FroalaEditor from 'froala-editor';
@@ -38,7 +39,9 @@ $(document).ready(initializeWYSIWYG)
     .arrive(`[data-wysiwyg]`, initializeWYSIWYG);
 
 function initializeWYSIWYG() {
-    new FroalaEditor(`[data-wysiwyg]`);
+    new FroalaEditor(`[data-wysiwyg]`, {
+        language: 'fr'
+    });
 }
 
 export const SPINNER_WRAPPER_CLASS = `spinner-border-container`;

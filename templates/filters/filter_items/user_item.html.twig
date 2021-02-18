@@ -1,0 +1,6 @@
+<select name="{{ name is defined and name ? name : 'user' }}"
+        class="data" data-s2 data-placeholder="{{ placeholder is defined and placeholder ? placeholder : 'Utilisateur' }}">>
+    {% for user in users %}
+        <option value="{{ user.id }}">{{ user.username }}</option>
+    {% endfor %}
+</select>

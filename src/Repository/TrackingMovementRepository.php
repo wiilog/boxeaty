@@ -40,6 +40,33 @@ class TrackingMovementRepository extends EntityRepository {
             //TODO: recherche rapide
         }
 
+        foreach($params["filters"] as $name => $value) {
+            switch($name) {
+                case 'from':
+                    $qb->andWhere('movement.date >= :from')
+                        ->setParameter('from', "%$value%" . " 00:00:00");
+                    break;
+                case 'to':
+                    $qb->andWhere('movement.date <= :to')
+                        ->setParameter('to', "%$value%" . " 23:59:59");
+                    break;
+                case("client"):
+                    $qb->leftJoin("movement.client", "filter_client")
+                        ->andWhere("filter_client.name LIKE :value")
+                        ->setParameter("value", "%$value%");
+                break;
+                case("operator"):
+                    $qb->leftJoin("movement.operator", "filter_operator")
+                        ->andWhere("filter_operator.username LIKE :value")
+                        ->setParameter("value", "%$value%");
+                break;
+                default:
+                    $qb->andWhere("location.$name LIKE :filter_$name")
+                        ->setParameter("filter_$name", "%$value%");
+                break;
+            }
+        }
+
         foreach ($params["order"] ?? [] as $order) {
             $column = $params["columns"][$order["column"]]["data"];
             $qb->addOrderBy("movement.$column", $order["dir"]);
