@@ -22,6 +22,7 @@ export default class Modal {
                 Flash.add(Flash.WARNING, `Opération en cours d'exécution`);
             }
 
+            console.log("ok?");
             $button.load(() => modal.handleSubmit());
         });
 
@@ -62,7 +63,7 @@ export default class Modal {
             return;
         }
 
-        this.config.ajax.json(data, result => {
+        return this.config.ajax.json(data, result => {
             if(!result.success && result.errors !== undefined) {
                 for(const error of result.errors.fields) {
                     const $element = this.element.find(`[name="${error.field}"]`);

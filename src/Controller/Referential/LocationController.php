@@ -143,7 +143,7 @@ class LocationController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Emplacement <strong>{$location->getName()}<strong> supprimé avec succès"
+                "msg" => "Emplacement <strong>{$location->getName()}</strong> supprimé avec succès"
             ]);
         } else {
             return $this->json([

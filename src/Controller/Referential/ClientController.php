@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/parametrage/clients")
+ * @Route("/referentiel/clients")
  */
 class ClientController extends AbstractController {
 
@@ -42,7 +42,7 @@ class ClientController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $clients = $manager->getRepository(Client::class)
-            ->findForDatatable($request->request->all());
+            ->findForDatatable(json_decode($request->getContent(), true));
 
         $data = [];
         foreach ($clients["data"] as $client) {

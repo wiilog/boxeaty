@@ -41,7 +41,7 @@ export const LOADING_CLASS = `loading`;
  *
  * @returns boolean
  */
-jQuery.fn.exists = function () {
+jQuery.fn.exists = function() {
     return this.length !== 0;
 }
 
@@ -50,9 +50,10 @@ jQuery.fn.load = function(callback, size = `small`) {
 
     $element.pushLoader(size);
 
-    try {
-        callback();
-    } finally {
+    const result = callback();
+    if(result.finally) {
+        result.finally(() => $element.popLoader())
+    } else {
         $element.popLoader();
     }
 };
@@ -65,7 +66,7 @@ jQuery.fn.load = function(callback, size = `small`) {
 jQuery.fn.pushLoader = function(size = `small`) {
     const $element = $(this[0]); //the element on which the function was called
 
-    if (!$element.find(`.${SPINNER_WRAPPER_CLASS}`).exists()) {
+    if(!$element.find(`.${SPINNER_WRAPPER_CLASS}`).exists()) {
         size = size === `small` ? `spinner-border-sm` : ``;
 
         $element.append(`<div class="spinner-border-container"><div class="spinner-border ${size}" role="status"></div></div>`);
@@ -84,7 +85,7 @@ jQuery.fn.popLoader = function() {
     $element.removeClass(LOADING_CLASS);
 
     const $loaderWrapper = $element.find(`.${SPINNER_WRAPPER_CLASS}`)
-    if ($loaderWrapper.exists()) {
+    if($loaderWrapper.exists()) {
         $loaderWrapper.remove();
     }
 

@@ -186,7 +186,7 @@ class UserController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Utilisateur {$user->getUsername()} supprimé avec succès"
+                "msg" => "Utilisateur <strong>{$user->getUsername()}</strong> supprimé avec succès"
             ]);
         } else {
             return $this->json([

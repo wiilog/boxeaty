@@ -1,14 +1,14 @@
 <div id="modal-new-location" class="modal">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Nouvel emplacement</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Nouvel emplacement</h1>
+
+            <div class="body">
                 {% include 'referential/location/modal/form.html.twig' %}
             </div>
-            <div class="modal-footer">
+
+            <div class="footer">
                 <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
                 <button type="submit" class="primary">Enregistrer</button>
             </div>

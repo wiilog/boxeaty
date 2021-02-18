@@ -155,7 +155,7 @@ class RoleController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Rôle {$role->getName()} supprimé avec succès"
+                "msg" => "Rôle <strong>{$role->getName()}</strong> supprimé avec succès"
             ]);
         } else {
             return $this->json([
