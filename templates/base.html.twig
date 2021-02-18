@@ -8,7 +8,7 @@
         {{ encore_entry_link_tags('app') }}
     {% endblock %}
 </head>
-<body {% block bodyattributes %}{% endblock %}>
+<body class="{% block bodyclass %}{% endblock %}">
 {% include 'utils/alerts.html.twig' %}
 {% block body %}{% endblock %}
 </body>
