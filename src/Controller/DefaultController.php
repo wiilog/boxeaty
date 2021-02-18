@@ -14,14 +14,14 @@ class DefaultController extends AbstractController {
      * @Route("/accueil", name="home")
      */
     public function home(): Response {
-        return $this->render("example.html.twig");
+        return $this->render("home.html.twig");
     }
 
     /**
      * @Route("/lost", name="missing_route")
      */
     public function missingRoute(): Response {
-        return $this->render("example.html.twig");
+        return $this->render("home.html.twig");
     }
 
 }

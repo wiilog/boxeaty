@@ -28,6 +28,20 @@ body {
     max-width: 100%;
 }
 
+body.home {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    main {
+        flex: 1 1 auto;
+
+        .box {
+            height: 100%;
+        }
+    }
+}
+
 h1, h2 {
     font-family: 'Autumn Collection', serif;
     color: $blue;
@@ -122,6 +136,13 @@ main:not(.login) {
     &.box-small {
         min-width: 350px;
         width: 40%;
+    }
+
+    &.home {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 }
 
