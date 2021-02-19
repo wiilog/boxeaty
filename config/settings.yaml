@@ -5,6 +5,7 @@ parameters:
       App\Entity\Role::MANAGE_SETTINGS: Modifier le paramétrage global
       App\Entity\Role::MANAGE_USERS: Créer et modifier les utilisateurs
       App\Entity\Role::MANAGE_ROLES: Créer et modifier les rôles
+      App\Entity\Role::MANAGE_QUALITIES: Créer et modifier les qualités
 
     Menu référentiel:
       App\Entity\Role::MANAGE_CLIENTS: Créer et modifier les clients
@@ -65,6 +66,9 @@ parameters:
         - name: Utilisateurs
           route: users_list
           permission: App\Entity\Role::MANAGE_USERS
+        - name: Qualités
+          route: qualities_list
+          permission: App\Entity\Role::MANAGE_QUALITIES
         - name: Imports et mises à jour
           route: missing_route
     - name: Déconnexion

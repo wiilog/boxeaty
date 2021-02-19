@@ -22,6 +22,7 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
             Role::MANAGE_SETTINGS,
             Role::MANAGE_USERS,
             Role::MANAGE_ROLES,
+            Role::MANAGE_QUALITIES,
             Role::MANAGE_GROUPS,
             Role::MANAGE_CLIENTS,
             Role::DEACTIVATE_CLIENT,

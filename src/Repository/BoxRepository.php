@@ -17,7 +17,7 @@ class BoxRepository extends EntityRepository {
         return $this->createQueryBuilder("box")
             ->select("box.id AS id, box.number AS text")
             ->where("box.number LIKE :search")
-            ->setMaxResults(50)
+            ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
             ->getArrayResult();

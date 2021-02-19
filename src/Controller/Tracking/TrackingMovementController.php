@@ -102,7 +102,7 @@ class TrackingMovementController extends AbstractController {
             $form->addError("client", "Ce client n'existe pas ou plus");
         }
 
-        if($form->isValid()) {
+        if ($form->isValid()) {
             $movement = new TrackingMovement();
             $movement->setDate(new DateTime($content->date))
                 ->setBox($box)
@@ -169,12 +169,15 @@ class TrackingMovementController extends AbstractController {
             $form->addError("client", "Ce client n'existe pas ou plus");
         }
 
-        if($form->isValid()) {
+        $user = $manager->getRepository(User::class)->find($content->user);
+
+        if ($form->isValid()) {
             $movement->setDate(new DateTime($content->date))
                 ->setBox($box)
                 ->setQuality($quality)
                 ->setState($state)
                 ->setClient($client)
+                ->setUser($user)
                 ->setComment($content->comment ?? null);
 
             $manager->flush();

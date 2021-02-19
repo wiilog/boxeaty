@@ -17,6 +17,7 @@ Encore
     .addEntry("group_list", "./assets/pages/group-list.js")
     .addEntry("client_list", "./assets/pages/client-list.js")
     .addEntry("movement_list", "./assets/pages/movement-list.js")
+    .addEntry("quality_list", "./assets/pages/quality-list.js")
     .addEntry("setting", "./assets/pages/setting.js")
     .autoProvidejQuery()
 

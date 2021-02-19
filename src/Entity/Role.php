@@ -17,6 +17,7 @@ class Role {
     public const MANAGE_SETTINGS = "MANAGE_SETTINGS";
     public const MANAGE_USERS = "MANAGE_USERS";
     public const MANAGE_ROLES = "MANAGE_ROLES";
+    public const MANAGE_QUALITIES = "MANAGE_QUALITIES";
 
     public const MANAGE_CLIENTS = "MANAGE_CLIENTS";
     public const DEACTIVATE_CLIENT = "DEACTIVATE_CLIENT";

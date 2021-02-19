@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ClientRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -30,21 +32,24 @@ class Client {
     private ?string $address = null;
 
     /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private ?string $phoneNumber = null;
+
+    /**
      * @ORM\ManyToOne(targetEntity=Group::class, inversedBy="clients")
      * @ORM\JoinColumn(name="`group`", nullable=false)
      */
     private ?Group $group = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="clients")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="clients")
      */
-    private ?User $user = null;
+    private Collection $users;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $phoneNumber = null;
+    public function __construct() {
+        $this->users = new ArrayCollection();
+    }
 
     public function getId(): ?int {
         return $this->id;
@@ -80,22 +85,39 @@ class Client {
         return $this;
     }
 
-    public function getUser(): ?User {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self {
-        $this->user = $user;
-
-        return $this;
-    }
-
     public function getPhoneNumber(): ?string {
         return $this->phoneNumber;
     }
 
     public function setPhoneNumber(string $phoneNumber): self {
         $this->phoneNumber = $phoneNumber;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->addClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeClient($this);
+        }
 
         return $this;
     }

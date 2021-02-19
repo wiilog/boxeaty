@@ -44,6 +44,13 @@ function initializeWYSIWYG() {
     });
 }
 
+$(document).ready(() => $(`[data-toggle="tooltip"]`).tooltip())
+    .arrive(`[data-toggle="tooltip"]`, function() {
+        $(this).tooltip();
+    });
+
+;
+
 export const SPINNER_WRAPPER_CLASS = `spinner-border-container`;
 export const LOADING_CLASS = `loading`;
 

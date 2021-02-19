@@ -95,16 +95,15 @@ export default class Modal {
     }
 
     clear() {
-        this.element.find(`input.data, select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
+        this.element.find(`input.data:not([type=checkbox]):not([type=radio]), select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
+        this.element.find(`input[type=checkbox][checked], input[type=radio][checked]`).prop(`checked`, false);
 
-        for(const check of this.element.find(`input[type=checkbox], input[type=radio]`)) {
-            $(check).prop(`checked`, check.hasAttribute(`checked`));
+        for(const check of this.element.find(`input[type=checkbox][checked], input[type=radio][checked]`)) {
+            $(check).prop(`checked`, true);
         }
 
         this.element.find(`.is-invalid`).removeClass(`is-invalid`);
         this.element.find(`.invalid-feedback`).remove();
-
-        console.error("Modal clearing not implemented");
     }
 
     elem() {
@@ -182,11 +181,10 @@ export function processForm($parent) {
 }
 
 function showInvalid($field, message) {
-    $field.addClass(`is-invalid`);
-
     if($field.is(`[data-s2]`)) {
         $field = $field.parent().find(`.select2-selection`);
     }
 
+    $field.addClass(`is-invalid`);
     $field.parents(`label`).append(`<span class="invalid-feedback">${message}</span>`);
 }
