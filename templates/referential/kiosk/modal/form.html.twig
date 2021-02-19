@@ -1,0 +1,18 @@
+<div class="row">
+    <div class="col-12">
+        <label>
+            Nom
+            <input type="text" name="name" class="data" placeholder="Nom de la borne" value="{{ kiosk.name }}" required/>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>
+            Client
+            <select name="client" class="data" data-s2 data-placeholder="Sélectionnez un ou plusieurs clients" required>
+                {% if kiosk.client %}
+                    <option value="{{ kiosk.client.id }}" selected>{{ kiosk.client.name }}</option>
+                {% endif %}
+            </select>
+        </label>
+    </div>
+</div>

@@ -1,0 +1,29 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Traçabilité{% endblock %}
+{% block page %}Suivi ticket consigne{% endblock %}
+
+{% block filter_header %}
+    {% include 'filters/deposit_ticket_filters.html.twig' %}
+{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <a href="{{ path('deposit_tickets_export') }}" class="outline"><i class="icon fas fa-download"></i> Export au format CSV</a>
+                <button class="primary new-deposit-ticket"><i class="icon fas fa-plus"></i> Nouveau numéro de consigne</button>
+            </div>
+        </div>
+
+        <table id="table-deposit-tickets"></table>
+    </div>
+
+    {% include 'tracking/deposit_ticket/modal/new.html.twig' with {deposit_ticket: new_deposit_ticket} %}
+    {% include 'tracking/deposit_ticket/modal/delete.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('deposit_ticket_list') }}
+{% endblock %}

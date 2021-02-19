@@ -47,8 +47,14 @@ class Client {
      */
     private Collection $users;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Kiosk::class, mappedBy="client")
+     */
+    private Collection $kiosks;
+
     public function __construct() {
         $this->users = new ArrayCollection();
+        $this->kiosks = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -117,6 +123,36 @@ class Client {
     {
         if ($this->users->removeElement($user)) {
             $user->removeClient($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Kiosk[]
+     */
+    public function getKiosks(): Collection
+    {
+        return $this->kiosks;
+    }
+
+    public function addKiosk(Kiosk $kiosk): self
+    {
+        if (!$this->kiosks->contains($kiosk)) {
+            $this->kiosks[] = $kiosk;
+            $kiosk->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeKiosk(Kiosk $kiosk): self
+    {
+        if ($this->kiosks->removeElement($kiosk)) {
+            // set the owning side to null (unless already changed)
+            if ($kiosk->getClient() === $this) {
+                $kiosk->setClient(null);
+            }
         }
 
         return $this;
