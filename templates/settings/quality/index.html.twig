@@ -1,0 +1,25 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Paramétrage{% endblock %}
+{% block page %}Qualités{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <button class="outline"><i class="icon fas fa-download"></i> Export au format CSV</button>
+                <button class="primary new-quality"><i class="icon fas fa-plus"></i> Nouvelle qualité</button>
+            </div>
+        </div>
+
+        <table id="table-qualities"></table>
+    </div>
+
+    {% include 'settings/quality/modal/new.html.twig' with {quality: new_quality} %}
+    {% include 'settings/quality/modal/delete.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('quality_list') }}
+{% endblock %}
