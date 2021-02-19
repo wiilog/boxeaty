@@ -78,8 +78,12 @@
         border-bottom: 1px solid $grey;
     }
 
-    tr:hover {
-        background: $grey;
+    tr {
+        transition: background 400ms;
+
+        &:hover {
+            background: $grey;
+        }
     }
 
     label {

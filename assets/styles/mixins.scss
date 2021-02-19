@@ -31,6 +31,7 @@
     text-decoration: none;
     text-align: center;
     cursor: pointer;
+    transition: all 200ms;
 
     @if $type == primary {
         background: $orange;

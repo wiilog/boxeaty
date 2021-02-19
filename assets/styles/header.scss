@@ -59,6 +59,7 @@ header {
                 line-height: 30px;
                 white-space: nowrap;
                 cursor: pointer;
+                transition: color 200ms;
 
                 &:hover {
                     color: $orange;
