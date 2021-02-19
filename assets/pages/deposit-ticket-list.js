@@ -26,15 +26,15 @@ $(document).ready(() => {
             {data: `validityDate`, title: `Date de validité`},
             {data: `number`, title: `Numéro de consigne`},
             {data: `useDate`, title: `Date et heure d'utilisation de la consigne`},
-            {data: `location`, title: `Emplacement de la consigne`},
+            {data: `client`, title: `Emplacement de la consigne`},
             {data: `condition`, title: `Etat`},
             DATATABLE_ACTIONS,
         ],
         order: [[`creationDate`, `asc`]],
         listeners: {
-            action: data => {
+            edit: data => {
                 const ajax = AJAX.route(`POST`, `deposit_ticket_edit_template`, {
-                    deposit_ticket: data.id
+                    depositTicket: data.id
                 });
 
                 Modal.load(ajax, {table})

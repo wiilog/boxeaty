@@ -21,10 +21,10 @@ class DepositTicketRepository extends EntityRepository
             ->addSelect("deposit_ticket.validityDate AS validity_date")
             ->addSelect("deposit_ticket.number AS number")
             ->addSelect("deposit_ticket.useDate AS use_date")
-            ->addSelect("join_location.name AS location")
+            ->addSelect("join_client.name AS client")
             ->addSelect("deposit_ticket.condition AS condition")
-            ->join("deposit_ticket.location", "join_location")
             ->join("deposit_ticket.kiosk", "join_kiosk")
+            ->join("join_kiosk.client", "join_client")
             ->getQuery()
             ->getResult();
     }
@@ -38,10 +38,10 @@ class DepositTicketRepository extends EntityRepository
         if ($search) {
             $qb->where("search_kiosk.name LIKE :search")
                 ->orWhere("deposit_ticket.number LIKE :search")
-                ->orWhere("search_location.name LIKE :search")
+                ->orWhere("search_client.name LIKE :search")
                 ->orWhere("deposit_ticket.condition LIKE :search")
                 ->join("deposit_ticket.kiosk", "search_kiosk")
-                ->join("deposit_ticket.location", "search_location")
+                ->join("search_kiosk.client", "search_client")
                 ->setParameter("search", "%$search%");
         }
 
@@ -72,9 +72,10 @@ class DepositTicketRepository extends EntityRepository
             if ($column === "kiosk") {
                 $qb->join("deposit_ticket.kiosk", "order_kiosk")
                     ->addOrderBy("order_kiosk.name", $order["dir"]);
-            } else if ($column === "location") {
-                $qb->join("deposit_ticket.location", "location")
-                    ->addOrderBy("location.name", $order["dir"]);
+            } else if ($column === "client") {
+                $qb->join("deposit_ticket.kiosk", "order_kiosk")
+                    ->join("order_kiosk.client", "order_client")
+                    ->addOrderBy("order_client.name", $order["dir"]);
             } else {
                 $qb->addOrderBy("deposit_ticket.$column", $order["dir"]);
             }
