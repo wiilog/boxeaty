@@ -5,10 +5,8 @@ namespace App\Controller\Tracking;
 use App\Annotation\HasPermission;
 use App\Entity\Client;
 use App\Entity\DepositTicket;
-use App\Entity\Group;
 use App\Entity\Kiosk;
 use App\Entity\Role;
-use App\Entity\User;
 use App\Helper\Form;
 use App\Service\ExportService;
 use DateTime;
@@ -53,7 +51,7 @@ class DepositTicketController extends AbstractController {
                 "validityDate" => $depositTicket->getValidityDate()->format('Y/m/d H:i') ?? '',
                 "number" => $depositTicket->getNumber() ?? '',
                 "useDate" => $depositTicket->getUseDate()->format('Y/m/d H:i') ?? '',
-                "location" => $depositTicket->getLocation() ? $depositTicket->getLocation()->getName() : '',
+                "client" => $depositTicket->getKiosk() ? $depositTicket->getKiosk()->getClient()->getName() : '',
                 "condition" => $depositTicket->getCondition() ?? '',
                 "actions" => $this->renderView("tracking/deposit_ticket/datatable_actions.html.twig"),
             ];
@@ -74,29 +72,30 @@ class DepositTicketController extends AbstractController {
         $form = Form::create();
 
         $content = json_decode($request->getContent());
-        $group = $manager->getRepository(Group::class)->find($content->group);
-        $user = $manager->getRepository(User::class)->find($content->user);
-        $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
+        $kiosk = $manager->getRepository(Kiosk::class)->find($content->kiosk);
+        $now = new DateTime();
+        $validityDate = (clone $now)->modify("+3 months");
+        $existing = $manager->getRepository(DepositTicket::class)->findOneBy(["number" => $content->number]);
         if ($existing) {
-            $form->addError("email", "Ce client existe déjà");
+            $form->addError("number", "Ce ticket consigne existe déjà");
         }
 
         if($form->isValid()) {
-            $client = new Client();
-            $client
-                ->setName($content->name)
-                ->setAddress($content->address)
-                ->setPhoneNumber($content->phoneNumber)
-                ->setActive($content->active)
-                ->setGroup($group)
-                ->setUser($user);
+            $depositTicket = new DepositTicket();
+            $depositTicket
+                ->setCreationDate($now)
+                ->setKiosk($kiosk)
+                ->setValidityDate($validityDate)
+                ->setNumber($content->number)
+                ->setUseDate($now)
+                ->setCondition($content->condition);
 
-            $manager->persist($client);
+            $manager->persist($depositTicket);
             $manager->flush();
 
             return $this->json([
                 "success" => true,
-                "msg" => "Client créé avec succès",
+                "msg" => "Ticket consigne créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -104,55 +103,73 @@ class DepositTicketController extends AbstractController {
     }
 
     /**
-     * @Route("/modifier/template/{ticket-consigne}", name="deposit_ticket_edit_template", options={"expose": true})
+     * @Route("/modifier/template/{depositTicket}", name="deposit_ticket_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
      */
-    public function editTemplate(EntityManagerInterface $manager, Client $client): Response {
-        $groups = $manager->getRepository(Group::class)->findAll();
-        $users = $manager->getRepository(User::class)->findAll();
+    public function editTemplate(EntityManagerInterface $manager, DepositTicket $depositTicket): Response {
+        $kiosks = $manager->getRepository(Kiosk::class)->findAll();
 
         return $this->json([
-            "submit" => $this->generateUrl("client_edit", ["client" => $client->getId()]),
-            "template" => $this->renderView("referential/client/modal/edit.html.twig", [
-                "client" => $client,
-                "groups" => $groups,
-                "users" => $users
+            "submit" => $this->generateUrl("deposit_ticket_edit", ["depositTicket" => $depositTicket->getId()]),
+            "template" => $this->renderView("tracking/deposit_ticket/modal/edit.html.twig", [
+                "deposit_ticket" => $depositTicket,
+                "kiosks" => $kiosks,
             ])
         ]);
     }
 
     /**
-     * @Route("/modifier/{ticket-consigne}", name="deposit_ticket_edit", options={"expose": true})
+     * @Route("/modifier/{depositTicket}", name="deposit_ticket_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
      */
-    public function edit(Request $request, EntityManagerInterface $manager, Client $client): Response {
+    public function edit(Request $request, EntityManagerInterface $manager, DepositTicket $depositTicket): Response {
         $form = Form::create();
 
         $content = json_decode($request->getContent());
-        $group = $manager->getRepository(Group::class)->find($content->group);
-        $user = $manager->getRepository(User::class)->find($content->user);
-        $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
-        if ($existing !== null && $existing !== $client) {
-            $form->addError("email", "Un autre client avec ce nom existe déjà");
+        $kiosk = $manager->getRepository(Kiosk::class)->find($content->kiosk);
+        $existing = $manager->getRepository(DepositTicket::class)->findOneBy(["number" => $content->number]);
+        if ($existing !== null && $existing !== $depositTicket) {
+            $form->addError("name", "Un autre ticket consigne avec ce numéro existe déjà");
         }
 
         if($form->isValid()) {
-            $client
-                ->setName($content->name)
-                ->setAddress($content->address)
-                ->setPhoneNumber($content->phoneNumber)
-                ->setActive($content->active)
-                ->setGroup($group)
-                ->setUser($user);
+            $depositTicket
+                ->setKiosk($kiosk)
+                ->setNumber($content->number)
+                ->setCondition($content->condition);
 
             $manager->flush();
 
             return $this->json([
                 "success" => true,
-                "msg" => "Client modifié avec succès",
+                "msg" => "Ticket consigne modifié avec succès",
             ]);
         } else {
             return $form->errors();
+        }
+    }
+
+    /**
+     * @Route("/supprimer", name="deposit_ticket_delete", options={"expose": true})
+     * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
+     */
+    public function delete(Request $request, EntityManagerInterface $manager): Response {
+        $content = json_decode($request->getContent());
+        $depositTicket = $manager->getRepository(DepositTicket::class)->find($content->id);
+
+        if ($depositTicket) {
+            $manager->remove($depositTicket);
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+                "msg" => "Ticket consigne <strong>{$depositTicket->getNumber()}</strong> supprimé avec succès"
+            ]);
+        } else {
+            return $this->json([
+                "success" => false,
+                "msg" => "Le ticket consigne n'existe pas"
+            ]);
         }
     }
 

@@ -32,16 +32,6 @@ class Location
      */
     private ?string $description = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="location")
-     */
-    private $depositTickets;
-
-    public function __construct()
-    {
-        $this->depositTickets = new ArrayCollection();
-    }
-
     public function getId(): ?int
     {
         return $this->id;
@@ -67,36 +57,6 @@ class Location
     public function setDescription(?string $description): self
     {
         $this->description = $description;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|DepositTicket[]
-     */
-    public function getDepositTickets(): Collection
-    {
-        return $this->depositTickets;
-    }
-
-    public function addDepositTicket(DepositTicket $depositTicket): self
-    {
-        if (!$this->depositTickets->contains($depositTicket)) {
-            $this->depositTickets[] = $depositTicket;
-            $depositTicket->setLocation($this);
-        }
-
-        return $this;
-    }
-
-    public function removeDepositTicket(DepositTicket $depositTicket): self
-    {
-        if ($this->depositTickets->removeElement($depositTicket)) {
-            // set the owning side to null (unless already changed)
-            if ($depositTicket->getLocation() === $this) {
-                $depositTicket->setLocation(null);
-            }
-        }
 
         return $this;
     }

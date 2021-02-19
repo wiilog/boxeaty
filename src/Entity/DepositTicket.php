@@ -33,13 +33,7 @@ class DepositTicket
     private $number;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="depositTickets")
-     */
-    private $location;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @ORM\JoinColumn(name="`condition`", nullable=false)
+     * @ORM\Column(type="string", length=255, name="`condition`", nullable=false)
      */
     private $condition;
 
@@ -90,18 +84,6 @@ class DepositTicket
     public function setNumber(string $number): self
     {
         $this->number = $number;
-
-        return $this;
-    }
-
-    public function getLocation(): ?Location
-    {
-        return $this->location;
-    }
-
-    public function setLocation(?Location $location): self
-    {
-        $this->location = $location;
 
         return $this;
     }
