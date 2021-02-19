@@ -3,17 +3,19 @@ import 'select2';
 
 const ROUTES = {
     box: `ajax_select_boxes`,
+    group: `ajax_select_groups`,
     client: `ajax_select_clients`,
     user: `ajax_select_users`,
 }
 
 class Select2 {
     static init($element) {
-        if(!$element.find(`option[selected]`).exists() && !$element.is(`[data-no-empty-option]`)) {
+        const type = $element.data(`s2`);
+
+        if(!$element.find(`option[selected]`).exists() && !type && !$element.is(`[data-no-empty-option]`)) {
             $element.prepend(`<option selected>`);
         }
 
-        const type = $element.data(`s2`);
         const config = {};
         if(type) {
             if(!ROUTES[type]) {
@@ -30,7 +32,7 @@ class Select2 {
             placeholder: $element.data(`placeholder`),
             language: {
                 noResults: () => `Aucun résultat`,
-                searching: () => `Recherche en cours`,
+                searching: () => null,
             },
             ...config,
         });

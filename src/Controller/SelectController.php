@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Box;
 use App\Entity\Client;
+use App\Entity\Group;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +19,17 @@ class SelectController extends AbstractController {
      */
     public function boxes(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(Box::class)->getForSelect($request->query->get("term"));
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/group", name="ajax_select_groups", options={"expose": true})
+     */
+    public function groups(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Group::class)->getForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,

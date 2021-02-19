@@ -3,9 +3,12 @@
 namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
+use App\Entity\Client;
+use App\Entity\Group;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
+use App\Helper\Stream;
 use App\Security\Authenticator;
 use App\Service\ExportService;
 use DateTime;
@@ -83,6 +86,9 @@ class UserController extends AbstractController {
             $form->addError("password", Authenticator::PASSWORD_ERROR);
         }
 
+        $clients = $manager->getRepository(Client::class)->findBy(["id" => $content->clients]);
+        $groups = $manager->getRepository(Group::class)->findBy(["id" => $content->groups]);
+
         if ($form->isValid()) {
             //TODO: set group and location
             $user = new User();
@@ -91,6 +97,8 @@ class UserController extends AbstractController {
                 ->setRole($role)
                 ->setActive($content->active)
                 ->setPassword($encoder->encodePassword($user, $content->password))
+                ->setGroups($groups)
+                ->setClients($clients)
                 ->setCreationDate(new DateTime());
 
             $manager->persist($user);
@@ -143,12 +151,17 @@ class UserController extends AbstractController {
             $form->addError("password", Authenticator::PASSWORD_ERROR);
         }
 
+        $clients = $manager->getRepository(Client::class)->findBy(["id" => $content->clients]);
+        $groups = $manager->getRepository(Group::class)->findBy(["id" => $content->groups]);
+
         if ($form->isValid()) {
             //TODO: set group and location
             $user->setUsername($content->username)
                 ->setEmail($content->email)
                 ->setRole($role)
                 ->setActive($content->active)
+                ->setGroups($groups)
+                ->setClients($clients)
                 ->setCreationDate(new DateTime());
 
             if (isset($content->password)) {

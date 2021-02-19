@@ -3,8 +3,5 @@
 {% block filters %}
     {% include 'filters/filter_items/date_item.html.twig' %}
     {% include 'filters/filter_items/client_item.html.twig' %}
-    {% include 'filters/filter_items/user_item.html.twig' with {
-        placeholder: 'Opérateur',
-        name: 'operator'
-    } %}
+    {% include 'filters/filter_items/user_item.html.twig' %}
 {% endblock %}

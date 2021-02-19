@@ -37,9 +37,14 @@ class Group {
      */
     private Collection $clients;
 
-    public function __construct()
-    {
+    /**
+     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="groups")
+     */
+    private Collection $users;
+
+    public function __construct() {
         $this->clients = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -69,13 +74,11 @@ class Group {
     /**
      * @return Collection|Client[]
      */
-    public function getClients(): Collection
-    {
+    public function getClients(): Collection {
         return $this->clients;
     }
 
-    public function addClient(Client $client): self
-    {
+    public function addClient(Client $client): self {
         if (!$this->clients->contains($client)) {
             $this->clients[] = $client;
             $client->setGroup($this);
@@ -84,13 +87,36 @@ class Group {
         return $this;
     }
 
-    public function removeClient(Client $client): self
-    {
+    public function removeClient(Client $client): self {
         if ($this->clients->removeElement($client)) {
             // set the owning side to null (unless already changed)
             if ($client->getGroup() === $this) {
                 $client->setGroup(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers(): Collection {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->addGroup($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self {
+        if ($this->users->removeElement($user)) {
+            $user->removeGroup($this);
         }
 
         return $this;

@@ -68,7 +68,7 @@ class ClientRepository extends EntityRepository {
             ->select("client.id AS id, client.name AS text")
             ->where("client.name LIKE :search")
             ->andWhere("client.active = 1")
-            ->setMaxResults(50)
+            ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
             ->getArrayResult();

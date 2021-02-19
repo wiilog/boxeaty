@@ -67,7 +67,7 @@ class UserRepository extends EntityRepository {
             ->select("user.id AS id, user.username AS text")
             ->where("user.name LIKE :search")
             ->andWhere("user.active = 1")
-            ->setMaxResults(50)
+            ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
             ->getArrayResult();

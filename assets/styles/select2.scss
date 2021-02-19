@@ -17,7 +17,11 @@
     outline: none;
     height: 38px !important;
     line-height: 38px;
-    padding: 5px 6px;
+
+    &.select2-selection--multiple {
+        display: flex;
+        max-height: 38px;
+    }
 
     &.is-invalid {
         background: $invalid-lighter;
@@ -35,11 +39,25 @@
 
 .select2-search {
     border: none !important;
+    width: 100%;
+
+    textarea, input {
+        min-width: initial;
+    }
 }
 
 .select2-search__field {
+    box-sizing: initial;
+    font-family: Retroyal, sans-serif !important;
+    font-size: 1.2rem !important;
     border: none !important;
-    background: url(../images/search.svg) no-repeat scroll 98% !important;
+    min-height: initial;
+    height: 38px !important;
+    line-height: 38px !important;
+    padding: 5px 6px !important;
+    margin-top: 0 !important;
+    margin: 0 !important;
+    background: none !important;
 }
 
 .select2-dropdown {
@@ -51,4 +69,21 @@
 
 .select2-results__option--highlighted.select2-results__option--selectable {
     background-color: $blue-lighter !important;
+}
+
+.select2-selection {
+    line-height: initial !important;
+}
+
+.select2-selection__choice {
+    height: 1.2rem;
+    font-size: 1rem;
+    line-height: 1.2rem;
+    margin: 0;
+}
+
+.select2-selection__rendered {
+    display: inline-flex !important;
+    align-items: center;
+    height: 38px !important;
 }

@@ -51,7 +51,7 @@ class TrackingMovement {
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="trackingMovements")
      */
-    private ?User $operator = null;
+    private ?User $user = null;
 
     /**
      * @ORM\Column(type="text", nullable=true)
@@ -118,14 +118,14 @@ class TrackingMovement {
         return $this;
     }
 
-    public function getOperator(): ?User
+    public function getUser(): ?User
     {
-        return $this->operator;
+        return $this->user;
     }
 
-    public function setOperator(?User $operator): self
+    public function setUser(?User $user): self
     {
-        $this->operator = $operator;
+        $this->user = $user;
 
         return $this;
     }

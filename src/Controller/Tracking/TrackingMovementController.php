@@ -169,7 +169,7 @@ class TrackingMovementController extends AbstractController {
             $form->addError("client", "Ce client n'existe pas ou plus");
         }
 
-        $operator = $manager->getRepository(User::class)->find($content->operator);
+        $user = $manager->getRepository(User::class)->find($content->user);
 
         if ($form->isValid()) {
             $movement->setDate(new DateTime($content->date))
@@ -177,7 +177,7 @@ class TrackingMovementController extends AbstractController {
                 ->setQuality($quality)
                 ->setState($state)
                 ->setClient($client)
-                ->setOperator($operator)
+                ->setUser($user)
                 ->setComment($content->comment ?? null);
 
             $manager->flush();

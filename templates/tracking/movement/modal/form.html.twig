@@ -47,10 +47,10 @@
     </div>
     <div class="col-12">
         <label>
-            Opérateur
-            <select name="operator" class="data" data-s2="user" data-placeholder="Sélectionnez un utilisateur">
-                {% if movement.operator %}
-                    <option value="{{ movement.operator.id }}" selected>{{ movement.operator.username }}</option>
+            Utilisateur
+            <select name="user" class="data" data-s2="user" data-placeholder="Sélectionnez un utilisateur">
+                {% if movement.user %}
+                    <option value="{{ movement.user.id }}" selected>{{ movement.user.username }}</option>
                 {% endif %}
             </select>
         </label>
