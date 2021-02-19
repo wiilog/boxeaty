@@ -67,10 +67,11 @@ class KioskController extends AbstractController {
 
         $content = json_decode($request->getContent());
         $existing = $manager->getRepository(Kiosk::class)->findOneBy(["name" => $content->name]);
-        $client = $manager->getRepository(Client::class)->find($content->client);
         if ($existing) {
             $form->addError("name", "Cette borne existe déjà");
         }
+
+        $client = $manager->getRepository(Client::class)->find($content->client);
 
         if($form->isValid()) {
             $kiosk = new Kiosk();
@@ -90,7 +91,7 @@ class KioskController extends AbstractController {
     }
 
     /**
-     * @Route("/modifier/template/{borne}", name="kiosk_edit_template", options={"expose": true})
+     * @Route("/modifier/template/{kiosk}", name="kiosk_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_KIOSKS)
      */
     public function editTemplate(Kiosk $kiosk): Response {
@@ -103,7 +104,7 @@ class KioskController extends AbstractController {
     }
 
     /**
-     * @Route("/modifier/{borne}", name="kiosk_edit", options={"expose": true})
+     * @Route("/modifier/{kiosk}", name="kiosk_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_KIOSKS)
      */
     public function edit(Request $request, EntityManagerInterface $manager, Kiosk $kiosk): Response {

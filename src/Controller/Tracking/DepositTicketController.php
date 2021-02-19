@@ -3,11 +3,11 @@
 namespace App\Controller\Tracking;
 
 use App\Annotation\HasPermission;
-use App\Entity\Client;
 use App\Entity\DepositTicket;
 use App\Entity\Kiosk;
 use App\Entity\Role;
 use App\Helper\Form;
+use App\Helper\FormatHelper;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -46,13 +46,13 @@ class DepositTicketController extends AbstractController {
         foreach ($depositTickets["data"] as $depositTicket) {
             $data[] = [
                 "id" => $depositTicket->getId(),
-                "creationDate" => $depositTicket->getCreationDate()->format('Y/m/d H:i') ?? '',
-                "kiosk" => $depositTicket->getKiosk() ? $depositTicket->getKiosk()->getName() : '',
-                "validityDate" => $depositTicket->getValidityDate()->format('Y/m/d H:i') ?? '',
-                "number" => $depositTicket->getNumber() ?? '',
-                "useDate" => $depositTicket->getUseDate()->format('Y/m/d H:i') ?? '',
-                "client" => $depositTicket->getKiosk() ? $depositTicket->getKiosk()->getClient()->getName() : '',
-                "condition" => $depositTicket->getCondition() ?? '',
+                "creationDate" => FormatHelper::datetime($depositTicket->getCreationDate()),
+                "kiosk" => FormatHelper::named($depositTicket->getKiosk()),
+                "validityDate" => FormatHelper::datetime($depositTicket->getValidityDate()),
+                "number" => $depositTicket->getNumber() ?? "",
+                "useDate" => FormatHelper::datetime($depositTicket->getUseDate()) ?: "Inutilisé",
+                "client" => $depositTicket->getKiosk() ? FormatHelper::named($depositTicket->getKiosk()->getClient()) : "",
+                "condition" => DepositTicket::NAMES[$depositTicket->getCondition()] ?? "",
                 "actions" => $this->renderView("tracking/deposit_ticket/datatable_actions.html.twig"),
             ];
         }
@@ -87,7 +87,6 @@ class DepositTicketController extends AbstractController {
                 ->setKiosk($kiosk)
                 ->setValidityDate($validityDate)
                 ->setNumber($content->number)
-                ->setUseDate($now)
                 ->setCondition($content->condition);
 
             $manager->persist($depositTicket);

@@ -17,22 +17,22 @@ class Kiosk
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id = null;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $name;
+    private ?string $name = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="kiosks")
      */
-    private $client;
+    private ?Client $client = null;
 
     /**
      * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="kiosk")
      */
-    private $depositTickets;
+    private Collection $depositTickets;
 
     public function __construct()
     {

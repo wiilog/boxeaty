@@ -1,23 +1,30 @@
 <div class="row">
-    <div class="col-6">
+    <div class="col-md-6 col-12">
         <label>
             Numéro ticket-consigne
             <input type="text" name="number" class="data" placeholder="Numéro du ticket-consigne"
                    value="{{ deposit_ticket.number }}" required/>
         </label>
     </div>
-    <div class="col-6">
+    <div class="col-md-6 col-12">
         <label>
             Etat
             <select name="condition" class="data" data-s2 data-placeholder="Sélectionnez un état" required>
-                <option value="périmé" {{ deposit_ticket.condition is defined and deposit_ticket.condition == "périmé" ? 'selected' }}>périmé</option>
-                <option value="valable" {{ deposit_ticket.condition is defined and deposit_ticket.condition == "valable" ? 'selected' }}>valable</option>
-                <option value="utilisé" {{ deposit_ticket.condition is defined and deposit_ticket.condition == "utilisé" ? 'selected' }}>utilisé</option>
+                <option value="{{ constant('App\\Entity\\DepositTicket::VALID') }}"
+                        {{ deposit_ticket.condition == constant('App\\Entity\\DepositTicket::VALID') ? 'selected' }}>
+                    Valable
+                </option>
+                <option value="{{ constant('App\\Entity\\DepositTicket::SPENT') }}"
+                        {{ deposit_ticket.condition == constant('App\\Entity\\DepositTicket::SPENT') ? 'selected' }}>
+                    Utilisé
+                </option>
+                <option value="{{ constant('App\\Entity\\DepositTicket::EXPIRED') }}"
+                        {{ deposit_ticket.condition == constant('App\\Entity\\DepositTicket::EXPIRED') ? 'selected' }}>
+                    Périmé
+                </option>
             </select>
         </label>
     </div>
-</div>
-<div class="row">
     <div class="col-12">
         <label>
             Borne

@@ -3,124 +3,123 @@
 namespace App\Entity;
 
 use App\Repository\DepositTicketRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=DepositTicketRepository::class)
  */
-class DepositTicket
-{
+class DepositTicket {
+
+    public const VALID = 1;
+    public const SPENT = 2;
+    public const EXPIRED = 3;
+
+    public const NAMES = [
+        self::VALID => "Valide",
+        self::SPENT => "Utilisé",
+        self::EXPIRED => "Expiré",
+    ];
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id = null;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $creationDate;
+    private ?DateTime $creationDate = null;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $validityDate;
+    private ?DateTime $validityDate = null;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $number;
+    private ?string $number = null;
 
     /**
-     * @ORM\Column(type="string", length=255, name="`condition`", nullable=false)
+     * @ORM\Column(type="integer", length=255, name="`condition`")
      */
-    private $condition;
+    private ?int $condition = null;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
-    private $useDate;
+    private ?DateTime $useDate = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Kiosk::class, inversedBy="depositTickets")
      */
-    private $kiosk;
+    private ?Kiosk $kiosk = null;
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getCreationDate(): ?\DateTimeInterface
-    {
+    public function getCreationDate(): ?DateTime {
         return $this->creationDate;
     }
 
-    public function setCreationDate(\DateTimeInterface $creationDate): self
-    {
+    public function setCreationDate(DateTime $creationDate): self {
         $this->creationDate = $creationDate;
 
         return $this;
     }
 
-    public function getValidityDate(): ?\DateTimeInterface
-    {
+    public function getValidityDate(): ?DateTime {
         return $this->validityDate;
     }
 
-    public function setValidityDate(\DateTimeInterface $validityDate): self
-    {
+    public function setValidityDate(DateTime $validityDate): self {
         $this->validityDate = $validityDate;
 
         return $this;
     }
 
-    public function getNumber(): ?string
-    {
+    public function getNumber(): ?string {
         return $this->number;
     }
 
-    public function setNumber(string $number): self
-    {
+    public function setNumber(string $number): self {
         $this->number = $number;
 
         return $this;
     }
 
-    public function getCondition(): ?string
-    {
+    public function getCondition(): ?int {
         return $this->condition;
     }
 
-    public function setCondition(string $condition): self
-    {
+    public function setCondition(int $condition): self {
         $this->condition = $condition;
 
         return $this;
     }
 
-    public function getUseDate(): ?\DateTimeInterface
-    {
+    public function getUseDate(): ?DateTime {
         return $this->useDate;
     }
 
-    public function setUseDate(\DateTimeInterface $useDate): self
-    {
+    public function setUseDate(DateTime $useDate): self {
         $this->useDate = $useDate;
 
         return $this;
     }
 
-    public function getKiosk(): ?Kiosk
-    {
+    public function getKiosk(): ?Kiosk {
         return $this->kiosk;
     }
 
-    public function setKiosk(?Kiosk $kiosk): self
-    {
+    public function setKiosk(?Kiosk $kiosk): self {
         $this->kiosk = $kiosk;
 
         return $this;
     }
+
 }

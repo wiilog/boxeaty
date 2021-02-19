@@ -8,10 +8,10 @@
     <div class="col-12">
         <label>
             Client
-            <select name="client" class="data" data-s2 data-placeholder="Sélectionnez un ou plusieurs clients" required multiple>
-                {% for client in clients %}
-                    <option value="{{ client.id }}">{{ client.name }}</option>
-                {% endfor %}
+            <select name="client" class="data" data-s2 data-placeholder="Sélectionnez un ou plusieurs clients" required>
+                {% if kiosk.client %}
+                    <option value="{{ kiosk.client.id }}" selected>{{ kiosk.client.name }}</option>
+                {% endif %}
             </select>
         </label>
     </div>

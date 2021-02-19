@@ -47,17 +47,13 @@ class Client {
      */
     private Collection $users;
 
-    public function __construct() {
-        $this->users = new ArrayCollection();
-    }
-
     /**
      * @ORM\OneToMany(targetEntity=Kiosk::class, mappedBy="client")
      */
-    private $kiosks;
+    private Collection $kiosks;
 
-    public function __construct()
-    {
+    public function __construct() {
+        $this->users = new ArrayCollection();
         $this->kiosks = new ArrayCollection();
     }
 
