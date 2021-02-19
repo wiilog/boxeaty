@@ -16,6 +16,13 @@ use Doctrine\ORM\Query\Expr\Join;
  */
 class QualityRepository extends EntityRepository
 {
+    public function iterateAll() {
+        return $this->createQueryBuilder("quality")
+            ->select("quality.name AS name")
+            ->getQuery()
+            ->getResult();
+
+    }
 
     public function findForDatatable(array $params): array {
         $search = $params["search"]["value"] ?? null;

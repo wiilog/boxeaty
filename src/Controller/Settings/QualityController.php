@@ -6,6 +6,8 @@ use App\Annotation\HasPermission;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Helper\Form;
+use App\Service\ExportService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -145,6 +147,27 @@ class QualityController extends AbstractController {
                 "msg" => "La qualité n'existe pas"
             ]);
         }
+    }
+
+    /**
+     * @Route("/export", name="qualities_export", options={"expose": true})
+     * @HasPermission(Role::MANAGE_QUALITIES)
+     */
+    public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
+        $qualities = $manager->getRepository(Quality::class)->iterateAll();
+
+        $today = new DateTime();
+        $today = $today->format("d-m-Y-H-i-s");
+
+        $header = array_merge([
+            "Nom",
+        ]);
+
+        return $exportService->export(function($output) use ($exportService, $qualities) {
+            foreach ($qualities as $quality) {
+                $exportService->putLine($output, $quality);
+            }
+        }, "export-qualites-$today.csv", $header);
     }
 
 }
