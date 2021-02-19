@@ -46,6 +46,16 @@
         </label>
     </div>
     <div class="col-12">
+        <label>
+            Opérateur
+            <select name="operator" class="data" data-s2="user" data-placeholder="Sélectionnez un utilisateur">
+                {% if movement.operator %}
+                    <option value="{{ movement.operator.id }}" selected>{{ movement.operator.username }}</option>
+                {% endif %}
+            </select>
+        </label>
+    </div>
+    <div class="col-12">
         <label>Commentaire</label>
         <textarea data-wysiwyg>{{ movement.comment|raw }}</textarea>
     </div>

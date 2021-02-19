@@ -4,9 +4,10 @@ import 'select2';
 const ROUTES = {
     box: `ajax_select_boxes`,
     client: `ajax_select_clients`,
+    user: `ajax_select_users`,
 }
 
-export default class Select2 {
+class Select2 {
     static init($element) {
         if(!$element.find(`option[selected]`).exists() && !$element.is(`[data-no-empty-option]`)) {
             $element.prepend(`<option selected>`);

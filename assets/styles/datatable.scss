@@ -138,8 +138,13 @@
 }
 
 .datatable-action {
+    display: block;
     width: 100%;
     text-align: center;
+
+    [data-bs-toggle="dropdown"] {
+        display: block;
+    }
 }
 
 .dropdown .dropdown-menu {

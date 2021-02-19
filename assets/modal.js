@@ -103,8 +103,6 @@ export default class Modal {
 
         this.element.find(`.is-invalid`).removeClass(`is-invalid`);
         this.element.find(`.invalid-feedback`).remove();
-
-        console.error("Modal clearing not implemented");
     }
 
     elem() {
