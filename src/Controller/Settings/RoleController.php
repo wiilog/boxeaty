@@ -21,11 +21,8 @@ class RoleController extends AbstractController {
      * @Route("/liste", name="roles_list")
      * @HasPermission(Role::MANAGE_ROLES)
      */
-    public function list(EntityManagerInterface $manager): Response {
-        $roles = $manager->getRepository(Role::class)->findAll();
-
+    public function list(): Response {
         return $this->render("settings/role/index.html.twig", [
-            "roles" => $roles,
             "new_role" => new Role(),
         ]);
     }
