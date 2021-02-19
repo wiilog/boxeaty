@@ -55,9 +55,9 @@ class TrackingMovementRepository extends EntityRepository {
                         ->andWhere("filter_client.name LIKE :value")
                         ->setParameter("value", "%$value%");
                 break;
-                case("operator"):
-                    $qb->leftJoin("movement.operator", "filter_operator")
-                        ->andWhere("filter_operator.username LIKE :value")
+                case("user"):
+                    $qb->leftJoin("movement.user", "filter_user")
+                        ->andWhere("filter_user.username LIKE :value")
                         ->setParameter("value", "%$value%");
                 break;
                 default:

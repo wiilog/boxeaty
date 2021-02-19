@@ -52,4 +52,15 @@ class GroupRepository extends EntityRepository {
         ];
     }
 
+    public function getForSelect(?string $search) {
+        return $this->createQueryBuilder("g")
+            ->select("g.id AS id, g.name AS text")
+            ->where("g.name LIKE :search")
+            ->andWhere("g.active = 1")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
 }

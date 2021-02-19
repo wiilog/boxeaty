@@ -86,7 +86,7 @@ class ClientController extends AbstractController {
                 ->setPhoneNumber($content->phoneNumber)
                 ->setActive($content->active)
                 ->setGroup($group)
-                ->setUser($user);
+                ->setUsers($user);
 
             $manager->persist($client);
             $manager->flush();
@@ -140,7 +140,7 @@ class ClientController extends AbstractController {
                 ->setPhoneNumber($content->phoneNumber)
                 ->setActive($content->active)
                 ->setGroup($group)
-                ->setUser($user);
+                ->setUsers($user);
 
             $manager->flush();
 

@@ -9,6 +9,14 @@ label {
     font-size: 1.2rem;
     margin-top: 1rem;
 
+    [data-toggle="tooltip"] {
+        display: inline-block;
+        background: url(../images/question-mark.svg) no-repeat;
+        width: 12px;
+        height: 12px;
+        margin-bottom: 5px;
+    }
+
     input {
         display: block;
         width: 100%;
@@ -19,6 +27,7 @@ label {
     }
 
     .invalid-feedback {
+        display: block;
         font-size: 0.9rem;
         font-weight: normal;
         color: $invalid;

@@ -39,4 +39,14 @@ $(document).ready(() => {
             delete: data => deleteUserModal.open(data),
         }
     });
+
+    $(document).on(`change`, `select[name="groups"]`, function() {
+        const $clients = $(`select[name="clients"]`);
+        const groups = $(this).val();
+
+        $clients.attr(`disabled`, groups.length > 1);
+        if(groups.length > 1) {
+            $clients.val(null).trigger(`change`);
+        }
+    });
 });

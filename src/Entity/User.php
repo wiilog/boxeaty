@@ -55,18 +55,24 @@ class User implements UserInterface {
     private ?Role $role = null;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Client", mappedBy="user")
+     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="user")
+     */
+    private Collection $trackingMovements;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Client::class, inversedBy="users")
      */
     private Collection $clients;
 
     /**
-     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="operator")
+     * @ORM\ManyToMany(targetEntity=Group::class, inversedBy="users")
      */
-    private $trackingMovements;
+    private Collection $groups;
 
     public function __construct() {
         $this->clients = new ArrayCollection();
         $this->trackingMovements = new ArrayCollection();
+        $this->groups = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -133,6 +139,105 @@ class User implements UserInterface {
         return $this;
     }
 
+    /**
+     * @return Collection|TrackingMovement[]
+     */
+    public function getTrackingMovements(): Collection {
+        return $this->trackingMovements;
+    }
+
+    public function addTrackingMovement(TrackingMovement $trackingMovement): self {
+        if (!$this->trackingMovements->contains($trackingMovement)) {
+            $this->trackingMovements[] = $trackingMovement;
+            $trackingMovement->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTrackingMovement(TrackingMovement $trackingMovement): self {
+        if ($this->trackingMovements->removeElement($trackingMovement)) {
+            // set the owning side to null (unless already changed)
+            if ($trackingMovement->getUser() === $this) {
+                $trackingMovement->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Client[]
+     */
+    public function getClients(): Collection {
+        return $this->clients;
+    }
+
+    public function addClient(Client $client): self {
+        if (!$this->clients->contains($client)) {
+            $this->clients[] = $client;
+        }
+
+        return $this;
+    }
+
+    public function removeClient(Client $client): self {
+        $this->clients->removeElement($client);
+
+        return $this;
+    }
+
+    public function setClients(array $clients): self {
+        if ($this->clients) {
+            foreach ($this->clients as $client) {
+                $client->removeUser($this);
+            }
+        }
+
+        $this->clients = new ArrayCollection($clients);
+        foreach ($this->clients as $client) {
+            $client->addUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Group[]
+     */
+    public function getGroups(): Collection {
+        return $this->groups;
+    }
+
+    public function addGroup(Group $group): self {
+        if (!$this->groups->contains($group)) {
+            $this->groups[] = $group;
+        }
+
+        return $this;
+    }
+
+    public function removeGroup(Group $group): self {
+        $this->groups->removeElement($group);
+
+        return $this;
+    }
+
+    public function setGroups(array $groups): self {
+        if ($this->groups) {
+            foreach ($this->groups as $group) {
+                $group->removeUser($this);
+            }
+        }
+
+        $this->groups = new ArrayCollection($groups);
+        foreach ($this->groups as $group) {
+            $group->addUser($this);
+        }
+
+        return $this;
+    }
+
     public function getRoles() {
         return [];
     }
@@ -143,67 +248,6 @@ class User implements UserInterface {
 
     public function eraseCredentials() {
 
-    }
-
-    /**
-     * @return Collection|Client[]
-     */
-    public function getClients(): Collection
-    {
-        return $this->clients;
-    }
-
-    public function addClient(Client $client): self
-    {
-        if (!$this->clients->contains($client)) {
-            $this->clients[] = $client;
-            $client->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTreatedHandling(Client $client): self
-    {
-        if ($this->clients->contains($client)) {
-            $this->clients->removeElement($client);
-            // set the owning side to null (unless already changed)
-            if ($client->getUser() === $this) {
-                $client->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|TrackingMovement[]
-     */
-    public function getTrackingMovements(): Collection
-    {
-        return $this->trackingMovements;
-    }
-
-    public function addTrackingMovement(TrackingMovement $trackingMovement): self
-    {
-        if (!$this->trackingMovements->contains($trackingMovement)) {
-            $this->trackingMovements[] = $trackingMovement;
-            $trackingMovement->setOperator($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTrackingMovement(TrackingMovement $trackingMovement): self
-    {
-        if ($this->trackingMovements->removeElement($trackingMovement)) {
-            // set the owning side to null (unless already changed)
-            if ($trackingMovement->getOperator() === $this) {
-                $trackingMovement->setOperator(null);
-            }
-        }
-
-        return $this;
     }
 
 }

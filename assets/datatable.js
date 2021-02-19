@@ -67,9 +67,9 @@ export function initDatatable(table, config) {
 
 
     $(`${table} tbody`)
-        .on(`dblclick`, `tr`, function() {
-            if(config.listeners.action) {
-                config.listeners.action($datatable.row(this).data());
+        .on(`click`, `tr`, function(event) {
+            if(!$(event.target).parents(`.datatable-action`).exists() && config.listeners.action) {
+                $(this).load(() => config.listeners.action($datatable.row(this).data()));
             }
         })
         .on(`click`, `.datatable-action [data-listener]`, function() {

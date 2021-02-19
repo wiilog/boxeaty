@@ -62,4 +62,15 @@ class UserRepository extends EntityRepository {
         ];
     }
 
+    public function getForSelect(?string $search) {
+        return $this->createQueryBuilder("user")
+            ->select("user.id AS id, user.username AS text")
+            ->where("user.name LIKE :search")
+            ->andWhere("user.active = 1")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
 }
