@@ -38,6 +38,16 @@ $(document).click(e => {
 $(document).ready(initializeWYSIWYG)
     .arrive(`[data-wysiwyg]`, initializeWYSIWYG);
 
+function bannerRemover() {
+    $(this).remove();
+}
+
+const $document = $(document);
+$document.ready(() => {
+    $document.find(`.fr-wrapper div:not([class])`).each(bannerRemover);
+    $document.arrive(`.fr-wrapper div:not([class])`, bannerRemover);
+});
+
 function initializeWYSIWYG() {
     new FroalaEditor(`[data-wysiwyg]`, {
         language: 'fr'
@@ -48,8 +58,6 @@ $(document).ready(() => $(`[data-toggle="tooltip"]`).tooltip())
     .arrive(`[data-toggle="tooltip"]`, function() {
         $(this).tooltip();
     });
-
-;
 
 export const SPINNER_WRAPPER_CLASS = `spinner-border-container`;
 export const LOADING_CLASS = `loading`;
