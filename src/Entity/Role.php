@@ -17,13 +17,14 @@ class Role {
     public const MANAGE_USERS = "MANAGE_USERS";
     public const MANAGE_ROLES = "MANAGE_ROLES";
     public const MANAGE_QUALITIES = "MANAGE_QUALITIES";
-    public const MANAGE_KIOSKS = "MANAGE_KIOSKS";
 
     public const MANAGE_CLIENTS = "MANAGE_CLIENTS";
     public const DEACTIVATE_CLIENT = "DEACTIVATE_CLIENT";
     public const DELETE_CLIENT = "DELETE_CLIENT";
     public const MANAGE_LOCATIONS = "MANAGE_LOCATIONS";
     public const MANAGE_GROUPS = "MANAGE_GROUPS";
+    public const MANAGE_KIOSKS = "MANAGE_KIOSKS";
+    public const MANAGE_BOX_TYPES = "MANAGE_BOX_TYPES";
 
     public const CREATE_BOX = "CREATE_BOX";
     public const EDIT_BOX = "EDIT_BOX";
@@ -46,12 +47,12 @@ class Role {
     private ?int $id = null;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     private ?string $code = null;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     private ?string $name = null;
 

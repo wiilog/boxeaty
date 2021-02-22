@@ -13,6 +13,7 @@ parameters:
       App\Entity\Role::MANAGE_GROUPS: Gérer les groupes
       App\Entity\Role::MANAGE_LOCATIONS: Gestion des emplacements
       App\Entity\Role::MANAGE_KIOSKS: Créer et modifier des bornes
+      App\Entity\Role::MANAGE_BOX_TYPES: Créer et modifier des types de box
 
     Menu traçabilité:
       App\Entity\Role::CREATE_BOX: Création Box
@@ -59,6 +60,9 @@ parameters:
         - name: Borne
           route: kiosks_list
           permission: App\Entity\Role::MANAGE_KIOSKS
+        - name: Type de box
+          route: box_types_list
+          permission: App\Entity\Role::MANAGE_BOX_TYPES
     - name: Paramétrage
       icon: cog
       type: category

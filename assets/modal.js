@@ -80,6 +80,10 @@ export default class Modal {
                     $(this.config.table).DataTable().ajax.reload();
                 }
             }
+console.log(result);
+            if(result.menu) {
+                $(`#menu-dropdown`).replaceWith(result.menu);
+            }
 
             this.element.modal(`hide`);
         });
@@ -146,10 +150,12 @@ export function processForm($parent) {
         }
 
         if($input.attr(`name`)) {
+            const trimmed = $input.val().trim();
+
             if($input.attr(`type`) === `checkbox`) {
                 data[$input.attr(`name`)] = $input.is(`:checked`);
-            } else if($input.val() !== "") {
-                data[$input.attr(`name`)] = $input.val();
+            } else if(trimmed !== "") {
+                data[$input.attr(`name`)] = trimmed;
             }
         }
     }

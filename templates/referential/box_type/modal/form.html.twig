@@ -1,0 +1,23 @@
+<div class="row">
+    <div class="col-12">
+        <label>
+            Nom du type de box
+            <input type="text" name="name" class="data" placeholder="Nom du type de box" value="{{ box_type.name }}" required/>
+        </label>
+    </div>
+    <div class="col-12 toggle">
+        <span class="label">Statut</span>
+
+        <input type="radio" id="{{ box_type.id ? 'edit' : 'new' }}-box-type-active" name="active" class="data" value="1" {{ box_type.active ? 'checked' }}/>
+        <label for="{{ box_type.id ? 'edit' : 'new' }}-box-type-active">Actif</label>
+
+        <input type="radio" id="{{ box_type.id ? 'edit' : 'new' }}-box-type-inactive" name="active" class="data" value="0" {{ not box_type.active ? 'checked' }}/>
+        <label for="{{ box_type.id ? 'edit' : 'new' }}-box-type-inactive">Inactif</label>
+    </div>
+    <div class="col-12">
+        <label>
+            Prix (€)
+            <input type="number" name="price" class="data" placeholder="6€" value="{{ box_type.price }}" required/>
+        </label>
+    </div>
+</div>

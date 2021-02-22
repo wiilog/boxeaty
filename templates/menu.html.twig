@@ -1,4 +1,4 @@
-{% set current_route = app.request.attributes.get('_route') %}
+{% set current_route = current_route ?? app.request.attributes.get('_route') %}
 
 <div id="menu-dropdown" style="display:none">
     {% for item in menu_configuration() %}

@@ -1,0 +1,24 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Référentiel{% endblock %}
+{% block page %}Type de box{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <a href="{{ path('box_types_export') }}" class="outline"><i class="icon fas fa-download"></i> Export au format CSV</a>
+                <button class="primary new-box-type"><i class="icon fas fa-plus"></i> Nouveau type de box</button>
+            </div>
+        </div>
+
+        <table id="table-box-types"></table>
+    </div>
+
+    {% include 'referential/box_type/modal/new.html.twig' with {box_type: new_box_type} %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('box_type_list') }}
+{% endblock %}

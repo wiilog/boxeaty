@@ -39,7 +39,7 @@ class DepositTicket {
     private ?DateTime $validityDate = null;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     private ?string $number = null;
 

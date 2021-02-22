@@ -90,7 +90,6 @@ class UserController extends AbstractController {
         $groups = $manager->getRepository(Group::class)->findBy(["id" => $content->groups]);
 
         if ($form->isValid()) {
-            //TODO: set group and location
             $user = new User();
             $user->setUsername($content->username)
                 ->setEmail($content->email)
@@ -155,7 +154,6 @@ class UserController extends AbstractController {
         $groups = $manager->getRepository(Group::class)->findBy(["id" => $content->groups]);
 
         if ($form->isValid()) {
-            //TODO: set group and location
             $user->setUsername($content->username)
                 ->setEmail($content->email)
                 ->setRole($role)
@@ -173,6 +171,9 @@ class UserController extends AbstractController {
             return $this->json([
                 "success" => true,
                 "msg" => "Utilisateur modifié avec succès",
+                "menu" => $this->getUser() === $user ? $this->renderView("menu.html.twig", [
+                    "current_route" => "users_list"
+                ]) : null,
             ]);
         } else {
             return $form->errors();

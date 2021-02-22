@@ -20,9 +20,9 @@ const routes = require(`../public/generated/routes.json`);
 Routing.setRoutingData(routes);
 
 //activate dropdowns
-$(`.display-menu`).click(() => $(`#menu-dropdown`).toggle());
 $(`.datatable-action`).click(() => $(`.datatable-action-dropdown`).toggle());
-$(`.category`).click((e) => {
+$(`.display-menu`).click(() => $(`#menu-dropdown`).toggle());
+$(`.menu-container`).on(`click`, `.category`, (e) => {
     $(`.category-dropdown`).hide();
     $(e.currentTarget).children(`.category-dropdown`).toggle();
 });

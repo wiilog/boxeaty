@@ -23,7 +23,7 @@ class Group {
     private ?int $id = null;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     private ?string $name = null;
 

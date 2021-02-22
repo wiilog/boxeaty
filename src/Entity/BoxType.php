@@ -2,19 +2,15 @@
 
 namespace App\Entity;
 
-use App\Repository\StateRepository;
+use App\Repository\BoxTypeRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=StateRepository::class)
+ * @ORM\Entity(repositoryClass=BoxTypeRepository::class)
  */
-class State {
+class BoxType {
 
-    public const AVAILABLE = "BoxEaty - dispo";
-    public const UNAVAILABLE = "BoxEaty - indispo";
-    public const CLIENT = "Client";
-    public const CONSUMER = "Consommateur";
-    public const OUT = "Sorti";
+    use Active;
 
     /**
      * @ORM\Id
@@ -28,6 +24,11 @@ class State {
      */
     private ?string $name = null;
 
+    /**
+     * @ORM\Column(type="decimal", precision=5, scale=2)
+     */
+    private ?string $price = null;
+
     public function getId(): ?int {
         return $this->id;
     }
@@ -38,6 +39,16 @@ class State {
 
     public function setName(string $name): self {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getPrice(): ?string {
+        return $this->price;
+    }
+
+    public function setPrice(string $price): self {
+        $this->price = $price;
 
         return $this;
     }

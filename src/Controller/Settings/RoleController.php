@@ -137,6 +137,9 @@ class RoleController extends AbstractController {
             return $this->json([
                 "success" => true,
                 "msg" => "Rôle modifié avec succès",
+                "menu" => $this->getUser()->getRole() === $role ? $this->renderView("menu.html.twig", [
+                    "current_route" => "roles_list"
+                ]) : null,
             ]);
         } else {
             return $form->errors();
