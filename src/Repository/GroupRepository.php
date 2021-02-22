@@ -17,7 +17,6 @@ class GroupRepository extends EntityRepository {
     public function iterateAll() {
         return $this->createQueryBuilder("g")
             ->select("g.name AS name")
-            ->addSelect("g.establishment AS establishment")
             ->addSelect("g.active AS active")
             ->getQuery()
             ->getResult();
@@ -31,7 +30,6 @@ class GroupRepository extends EntityRepository {
 
         if ($search) {
             $qb->where("g.name LIKE :search")
-                ->orWhere("g.establishment LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 

@@ -14,10 +14,4 @@
         <input type="radio" id="{{ group.id ? 'edit' : 'new' }}-group-inactive" name="active" class="data" value="0" {{ not group.active ? 'checked' }}/>
         <label for="{{ group.id ? 'edit' : 'new' }}-group-inactive">Inactif</label>
     </div>
-    <div class="col-12">
-        <label>
-            Nom de l'établissement
-            <input type="text" name="establishment" class="data" placeholder="Nom de l'établissement" value="{{ group.establishment }}" required/>
-        </label>
-    </div>
 </div>
