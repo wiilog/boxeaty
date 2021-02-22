@@ -54,3 +54,13 @@ h1 {
 .m-3 {
     margin: 20px;
 }
+
+.footer {
+    text-align: center;
+}
+
+.footer strong {
+    margin-top: 30px;
+    font-weight: 900;
+    font-size: 1.3rem;
+}

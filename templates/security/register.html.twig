@@ -7,7 +7,7 @@
     <form method="post">
         <label>
             Groupe
-            <select name="group" data-s2="group" data-placeholder="Sélectionnez votre groupe">
+            <select name="group" data-s2="group" data-placeholder="Sélectionnez votre groupe" required>
                 {% for group in user.groups %}
                     <option value="{{ group.id }}" selected>{{ group.name }}</option>
                 {% endfor %}
