@@ -10,6 +10,7 @@ Encore
     .setOutputPath("public/build/")
     .setPublicPath("/build")
 
+    .addStyleEntry("email", "./assets/styles/fonts.scss")
     .addEntry("app", "./assets/app.js")
     .addEntry("user_list", "./assets/pages/user-list.js")
     .addEntry("role_list", "./assets/pages/role-list.js")

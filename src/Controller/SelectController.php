@@ -26,7 +26,7 @@ class SelectController extends AbstractController {
     }
 
     /**
-     * @Route("/select/group", name="ajax_select_groups", options={"expose": true})
+     * @Route("/externe/select/group", name="ajax_select_groups", options={"expose": true})
      */
     public function groups(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(Group::class)->getForSelect($request->query->get("term"));

@@ -60,6 +60,21 @@ class Role {
      */
     private array $permissions = [];
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $allowEditOwnGroupOnly = null;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $redirectUserNewCommand = null;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $receiveMailsNewAccounts = null;
+
     public function getId(): ?int {
         return $this->id;
     }
@@ -91,6 +106,33 @@ class Role {
     public function setPermissions(array $permissions): self {
         $this->permissions = $permissions;
 
+        return $this;
+    }
+
+    public function getAllowEditOwnGroupOnly(): ?bool {
+        return $this->allowEditOwnGroupOnly;
+    }
+
+    public function setAllowEditOwnGroupOnly(?bool $allowEditOwnGroupOnly): self {
+        $this->allowEditOwnGroupOnly = $allowEditOwnGroupOnly;
+        return $this;
+    }
+
+    public function getRedirectUserNewCommand(): ?bool {
+        return $this->redirectUserNewCommand;
+    }
+
+    public function setRedirectUserNewCommand(?bool $redirectUserNewCommand): self {
+        $this->redirectUserNewCommand = $redirectUserNewCommand;
+        return $this;
+    }
+
+    public function getReceiveMailsNewAccounts(): ?bool {
+        return $this->receiveMailsNewAccounts;
+    }
+
+    public function setReceiveMailsNewAccounts(?bool $receiveMailsNewAccounts): self {
+        $this->receiveMailsNewAccounts = $receiveMailsNewAccounts;
         return $this;
     }
 

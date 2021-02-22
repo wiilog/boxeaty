@@ -35,4 +35,6 @@ security:
         - { path: ^/login, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/password-forgotten, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/externe, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/mot-de-passe, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/, role: IS_AUTHENTICATED_REMEMBERED }
