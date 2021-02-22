@@ -2,15 +2,20 @@
 
 namespace App\Controller;
 
+use App\Entity\Group;
 use App\Entity\Role;
 use App\Entity\User;
+use App\Form\PasswordForgottenType;
+use App\Form\PasswordResetType;
 use App\Security\Authenticator;
+use App\Service\Mailer;
 use DateTime;
 use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
@@ -47,7 +52,7 @@ class SecurityController extends AbstractController {
     /**
      * @Route("/register", name="register")
      */
-    public function register(Request $request, UserPasswordEncoderInterface $encoder): Response {
+    public function register(Request $request, Mailer $mailer, UserPasswordEncoderInterface $encoder): Response {
         if ($this->getUser()) {
             return $this->redirectToRoute(Authenticator::HOME_ROUTE);
         }
@@ -56,14 +61,16 @@ class SecurityController extends AbstractController {
 
         if ($request->getMethod() === "POST") {
             $em = $this->getDoctrine()->getManager();
+            $userRepository = $em->getRepository(User::class);
 
             $valid = true;
             $email = $request->request->get("email");
             $password = $request->request->get("password");
-            $existing = $em->getRepository(User::class)->findBy(["email" => $email]);
+            $existing = $userRepository->findBy(["email" => $email]);
 
             $user->setEmail($request->request->get("email"))
-            ->setUsername($request->request->get("username"));
+            ->setUsername($request->request->get("username"))
+            ->addGroup($em->getRepository(Group::class)->find($request->request->get("group")));
 
             if ($existing) {
                 $this->addFlash("danger", "Un utilisateur existe déjà avec cet email");
@@ -93,10 +100,15 @@ class SecurityController extends AbstractController {
                     ->setRole($noAccess)
                     ->setCreationDate(new DateTime());
 
+                $recipients = $userRepository->findNewUserRecipients($user->getGroups()->first());
+                $mailer->send($recipients, "BoxEaty - Nouvel utilisateur", $this->renderView("emails/new_user.html.twig", [
+                    "user" => $user,
+                ]));
+
                 $em->persist($user);
                 $em->flush();
 
-                $this->addFlash("success", "Compte créé avec succès");
+                $this->addFlash("success", "Compte créé avec succès, un email a été envoyé aux responsables");
 
                 return $this->redirectToRoute("login");
             }
@@ -115,10 +127,105 @@ class SecurityController extends AbstractController {
     }
 
     /**
-     * @Route("/reinitialiser-mot-de-passe", name="password_forgotten")
+     * @Route("/mot-de-passe/perdu", name="password_forgotten")
      */
-    public function resetPassword(): Response {
-        return $this->render("security/password_forgotten.html.twig");
+    public function passwordForgotten(Request $request, Mailer $mailer) {
+        $form = $this->createForm(PasswordForgottenType::class, [
+            "email" => $request->query->get("email")
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $forgotten = $form->getData();
+
+            $manager = $this->getDoctrine()->getManager();
+            $ur = $manager->getRepository(User::class);
+
+            $user = $ur->findOneBy(["email" => $forgotten["email"]]);
+
+            if ($user != null) {
+                $token = bin2hex(random_bytes(16));
+                $time = (new DateTime())->modify("+12 hours");
+
+                $tokenEncoder = new NativePasswordEncoder();
+
+                $user->setResetToken($tokenEncoder->encodePassword($token, $time->getTimestamp()));
+                $user->setResetTokenExpiration($time);
+                $manager->flush();
+
+                $mailer->send($user, "BoxEaty - Réinitialisation du mot de passe", $this->renderView("emails/reset_request.html.twig", [
+                    "user" => $user,
+                    "token" => $token,
+                ]));
+            }
+
+            $this->addFlash("success", "Un email a été envoyé au compte {$forgotten["email"]} si il existe");
+
+            return $this->redirectToRoute("password_forgotten_confirm", $forgotten);
+        }
+
+        return $this->render("security/password_forgotten.html.twig", [
+            "form" => $form->createView()
+        ]);
     }
+
+    /**
+     * @Route("/mot-de-passe/confirmation", name="password_forgotten_confirm")
+     */
+    public function passwordForgottenConfirm(Request $request) {
+        return $this->render("security/password_forgotten_confirm.html.twig", $request->query->all());
+    }
+
+    /**
+     * @Route("/mot-de-passe/reinitialiser/{user}", name="reset_password")
+     */
+    public function resetPassword(Request $request, UserPasswordEncoderInterface $encoder, User $user) {
+        if (!$request->query->has("token")) {
+            $this->addFlash("danger", "Lien de réinitialisation de mot de passe invalide");
+            $this->redirectToRoute("login");
+        }
+
+        $token = $request->query->get("token");
+        if (!$user->getResetToken() || !$user->getResetTokenExpiration() || $user->getResetTokenExpiration() < new DateTime()) {
+            $this->addFlash("warning", "Le lien a expiré, merci de recommencer la procédure de réinitialisation de mot de passe");
+            $this->redirectToRoute("password_forgotten");
+        }
+
+        $tokenEncoder = new NativePasswordEncoder();
+        if (!$tokenEncoder->isPasswordValid($user->getResetToken(), $token, $user->getResetTokenExpiration()->getTimestamp())) {
+            $this->addFlash("danger", "Le token de réinitialisation ne correspond pas");
+            $this->redirectToRoute("login");
+        }
+
+        $form = $this->createForm(PasswordResetType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $result = $form->getData();
+
+            if ($result["password"] != $result["confirmation"]) {
+                $this->addFlash("danger", "The passwords don't match");
+            } else if (!Authenticator::isPasswordSecure($result["password"])) {
+                $this->addFlash("danger", "Your password must be at least 8 characters long");
+            } else {
+                $manager = $this->getDoctrine()->getManager();
+
+                $user->setPassword($encoder->encodePassword($user, $result["password"]));
+                $user->setResetToken(null);
+                $user->setResetTokenExpiration(null);
+                $manager->flush();
+
+                $this->addFlash("success", "Your password has been changed");
+
+                return $this->redirectToRoute("login");
+            }
+        }
+
+        return $this->render("security/reset_password.html.twig", [
+            "form" => $form->createView()
+        ]);
+    }
+
 
 }

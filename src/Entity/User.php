@@ -69,6 +69,16 @@ class User implements UserInterface {
      */
     private Collection $groups;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $resetToken;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $resetTokenExpiration;
+
     public function __construct() {
         $this->clients = new ArrayCollection();
         $this->trackingMovements = new ArrayCollection();
@@ -248,6 +258,30 @@ class User implements UserInterface {
 
     public function eraseCredentials() {
 
+    }
+
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): self
+    {
+        $this->resetToken = $resetToken;
+
+        return $this;
+    }
+
+    public function getResetTokenExpiration(): ?\DateTimeInterface
+    {
+        return $this->resetTokenExpiration;
+    }
+
+    public function setResetTokenExpiration(?\DateTimeInterface $resetTokenExpiration): self
+    {
+        $this->resetTokenExpiration = $resetTokenExpiration;
+
+        return $this;
     }
 
 }

@@ -62,7 +62,7 @@ class UserRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search) {
+    public function getForSelect(?string $search): array {
         return $this->createQueryBuilder("user")
             ->select("user.id AS id, user.username AS text")
             ->where("user.name LIKE :search")
@@ -71,6 +71,18 @@ class UserRepository extends EntityRepository {
             ->setParameter("search", "%$search%")
             ->getQuery()
             ->getArrayResult();
+    }
+
+    public function findNewUserRecipients($group) {
+        return $this->createQueryBuilder("user")
+            ->join("user.role", "role")
+            ->leftJoin("user.groups", "groups")
+            ->where("role.receiveMailsNewAccounts = 1")
+            ->andWhere("role.allowEditOwnGroupOnly = 0 OR :group MEMBER OF user.groups")
+            ->andWhere("user.active = 1")
+            ->setParameter("group", $group)
+            ->getQuery()
+            ->getResult();
     }
 
 }

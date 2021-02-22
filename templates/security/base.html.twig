@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block bodyclass %}login{% endblock %}
+{% block body %}
+    <main class="login">
+        <img src="{{ asset('images/logo.svg') }}" class="logo" alt="Logo BoxEaty">
+
+        <h1>{% block header %}{% endblock %}</h1>
+        {% block content %}{% endblock %}
+    </main>
+{% endblock %}
