@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Kiosk;
-use App\Helper\QueryCounter;
+use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -27,7 +27,7 @@ class KioskRepository extends EntityRepository
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("kiosk");
-        $total = QueryCounter::count($qb, "kiosk");
+        $total = QueryHelper::count($qb, "kiosk");
 
         if ($search) {
             $qb->where("kiosk.name LIKE :search")
@@ -46,7 +46,7 @@ class KioskRepository extends EntityRepository
             }
         }
 
-        $filtered = QueryCounter::count($qb, "kiosk");
+        $filtered = QueryHelper::count($qb, "kiosk");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);

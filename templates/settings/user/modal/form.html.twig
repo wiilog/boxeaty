@@ -49,7 +49,7 @@
     <div class="col-md-6 col-12">
         <label>
             Groupe(s)
-            <select name="groups" class="data" data-s2="group" data-placeholder="Sélectionnez un ou plusieurs clients" multiple required>
+            <select name="groups" class="data" data-s2="group" data-placeholder="Sélectionnez un ou plusieurs groupes" multiple required>
                 {% for group in user.groups %}
                     <option value="{{ group.id }}" selected>{{ group.name }}</option>
                 {% endfor %}

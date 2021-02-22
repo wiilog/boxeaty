@@ -48,6 +48,17 @@ class SelectController extends AbstractController {
     }
 
     /**
+     * @Route("/select/multi-site", name="ajax_select_multi_sites", options={"expose": true})
+     */
+    public function multiSite(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Client::class)->getMultiSiteForSelect($request->query->get("term"));
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
      * @Route("/select/user", name="ajax_select_users", options={"expose": true})
      */
     public function users(Request $request, EntityManagerInterface $manager): Response {

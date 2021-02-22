@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
-use App\Helper\QueryCounter;
+use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -32,7 +32,7 @@ class UserRepository extends EntityRepository {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("user");
-        $total = QueryCounter::count($qb, "user");
+        $total = QueryHelper::count($qb, "user");
 
         if ($search) {
             $qb->where("user.username LIKE :search")
@@ -50,7 +50,7 @@ class UserRepository extends EntityRepository {
             }
         }
 
-        $filtered = QueryCounter::count($qb, "user");
+        $filtered = QueryHelper::count($qb, "user");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);
@@ -65,7 +65,7 @@ class UserRepository extends EntityRepository {
     public function getForSelect(?string $search) {
         return $this->createQueryBuilder("user")
             ->select("user.id AS id, user.username AS text")
-            ->where("user.name LIKE :search")
+            ->where("user.username LIKE :search")
             ->andWhere("user.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")

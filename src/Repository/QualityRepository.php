@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Quality;
 use App\Entity\TrackingMovement;
-use App\Helper\QueryCounter;
+use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 
@@ -28,7 +28,7 @@ class QualityRepository extends EntityRepository
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("quality");
-        $total = QueryCounter::count($qb, "quality");
+        $total = QueryHelper::count($qb, "quality");
 
         if ($search) {
             $qb->where("quality.name LIKE :search")
@@ -40,7 +40,7 @@ class QualityRepository extends EntityRepository
             $qb->addOrderBy("quality.$column", $order["dir"]);
         }
 
-        $filtered = QueryCounter::count($qb, "quality");
+        $filtered = QueryHelper::count($qb, "quality");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);

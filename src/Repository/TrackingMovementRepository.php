@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\TrackingMovement;
-use App\Helper\QueryCounter;
+use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -34,7 +34,7 @@ class TrackingMovementRepository extends EntityRepository {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("movement");
-        $total = QueryCounter::count($qb, "movement");
+        $total = QueryHelper::count($qb, "movement");
 
         if ($search) {
             //TODO: recherche rapide
@@ -72,7 +72,7 @@ class TrackingMovementRepository extends EntityRepository {
             $qb->addOrderBy("movement.$column", $order["dir"]);
         }
 
-        $filtered = QueryCounter::count($qb, "movement");
+        $filtered = QueryHelper::count($qb, "movement");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);

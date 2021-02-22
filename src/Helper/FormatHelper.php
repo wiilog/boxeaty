@@ -2,6 +2,7 @@
 
 namespace App\Helper;
 
+use App\Entity\User;
 use DateTimeInterface;
 
 class FormatHelper {
@@ -23,6 +24,10 @@ class FormatHelper {
 
     public static function named($entity): ?string {
         return $entity ? $entity->getName() : "";
+    }
+
+    public static function user(?User $user): ?string {
+        return $user ? $user->getUsername() : "";
     }
 
     public static function bool(?bool $bool, $else = ""): ?string {

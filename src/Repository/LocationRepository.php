@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Location;
-use App\Helper\QueryCounter;
+use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -18,7 +18,7 @@ class LocationRepository extends EntityRepository
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("location");
-        $total = QueryCounter::count($qb, "location");
+        $total = QueryHelper::count($qb, "location");
 
         if ($search) {
             $qb->andWhere("location.name LIKE :search OR location.description LIKE :search")
@@ -35,7 +35,7 @@ class LocationRepository extends EntityRepository
             $qb->addOrderBy("location.$column", $order["dir"]);
         }
 
-        $filtered = QueryCounter::count($qb, "location");
+        $filtered = QueryHelper::count($qb, "location");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);

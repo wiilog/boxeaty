@@ -14,37 +14,59 @@
         <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-inactive" name="active" class="data" value="0" {{ not client.active ? 'checked' }}/>
         <label for="{{ client.id ? 'edit' : 'new' }}-client-inactive">Inactif</label>
     </div>
-    <div class="col-12">
+    <div class="col-md-6 col-12">
         <label>
             Adresse
             <input type="text" name="address" class="data" placeholder="Adresse" value="{{ client.address }}" required/>
         </label>
     </div>
+    <div class="col-md-6 col-12">
+        <label>
+            Téléphone
+            <input type="tel" name="phoneNumber" class="data" placeholder="Numéro de téléphone" value="{{ client.phoneNumber }}" required/>
+        </label>
+    </div>
     <div class="col-12">
+        <label>
+            Contact principal
+        </label>
+        <select class="data" name="contact" data-s2="user" data-placeholder="Sélectionnez un utilisateur..." required>
+            {% if client.contact %}
+                <option value="{{ client.contact.id }}" selected>{{ client.contact.username }}</option>
+            {% endif %}
+        </select>
+    </div>
+    <div class="col-12">
+        <label>Propriétés</label>
+        <div class="form-check form-switch">
+            <input class="form-check-input data" type="checkbox" name="isMultiSite"
+                   id="{{ client.id ? 'edit' : 'new' }}-is-multi-site" {{ client.isMultiSite ? 'checked' }}>
+            <label class="form-check-label" for="{{ client.id ? 'edit' : 'new' }}-is-multi-site">Multi-site</label>
+        </div>
+        <div class="form-check form-switch">
+            <input class="form-check-input data" type="checkbox" name="allowAllDepositTickets"
+                   id="{{ client.id ? 'edit' : 'new' }}-allow-all-deposit-tickets" {{ client.allowAllDepositTickets ? 'checked' }}>
+            <label class="form-check-label" for="{{ client.id ? 'edit' : 'new' }}-allow-all-deposit-tickets">Ticket consigne valable dans tout le réseau</label>
+        </div>
+    </div>
+    <div class="col-md-6 col-12">
         <label>
             Groupe
         </label>
-        <select class="data" name="group" data-s2 data-placeholder="Sélectionnez un groupe...">
+        <select class="data" name="group" data-s2 data-placeholder="Sélectionnez un groupe..." required>
             {% for group in groups %}
                 <option value="{{ group.id }}" {{ client.group and client.group.id == group.id ? 'selected' : '' }}>{{ group.name }}</option>
             {% endfor %}
         </select>
     </div>
-    <div class="col-12 mt-4">
-        <h3 class="fs-5 mb-0">Contact principal</h3>
-    </div>
-    <div class="col-12">
+    <div class="col-md-6 col-12">
         <label>
-            Utilisateur
+            Client multi-site lié
         </label>
-        <select class="data" name="user" data-s2 data-placeholder="Sélectionnez un utilisateur...">
-            {% for user in users %}
-                <option value="{{ user.id }}" {{ client.user and client.user.id == user.id ? 'selected' : '' }}>{{ user.username }}</option>
-            {% endfor %}
+        <select class="data" name="linkedMultiSite" data-s2="multiSite" data-placeholder="Sélectionnez un client..." {{ client.isMultiSite ? 'disabled' }}>
+            {% if client.linkedMultiSite %}
+                <option value="{{ client.linkedMultiSite.id }}" selected>{{ client.linkedMultiSite.name }}</option>
+            {% endif %}
         </select>
-        <label>
-            Téléphone
-            <input type="tel" name="phoneNumber" class="data" placeholder="Numéro de téléphone" value="{{ client.phoneNumber }}" required/>
-        </label>
     </div>
 </div>

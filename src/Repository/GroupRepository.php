@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Group;
-use App\Helper\QueryCounter;
+use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -27,7 +27,7 @@ class GroupRepository extends EntityRepository {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("g");
-        $total = QueryCounter::count($qb, "g");
+        $total = QueryHelper::count($qb, "g");
 
         if ($search) {
             $qb->where("g.name LIKE :search")
@@ -40,7 +40,7 @@ class GroupRepository extends EntityRepository {
             $qb->addOrderBy("g.$column", $order["dir"]);
         }
 
-        $filtered = QueryCounter::count($qb, "g");
+        $filtered = QueryHelper::count($qb, "g");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);

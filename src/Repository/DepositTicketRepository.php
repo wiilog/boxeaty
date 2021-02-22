@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\DepositTicket;
-use App\Helper\QueryCounter;
+use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -33,7 +33,7 @@ class DepositTicketRepository extends EntityRepository
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("deposit_ticket");
-        $total = QueryCounter::count($qb, "deposit_ticket");
+        $total = QueryHelper::count($qb, "deposit_ticket");
 
         if ($search) {
             $qb->where("search_kiosk.name LIKE :search")
@@ -81,7 +81,7 @@ class DepositTicketRepository extends EntityRepository
             }
         }
 
-        $filtered = QueryCounter::count($qb, "deposit_ticket");
+        $filtered = QueryHelper::count($qb, "deposit_ticket");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);
