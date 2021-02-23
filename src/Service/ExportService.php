@@ -24,15 +24,16 @@ class ExportService {
     ];
 
     public const CLIENT_HEADER = [
-        "Nom d'utilisateur",
+        "Nom du client",
         "Actif",
         "Adresse",
-        "Utilisateur attribué",
+        "Contact attribué",
+        "Groupe",
+        "Multi-site"
     ];
 
     public const GROUP_HEADER = [
         "Nom de groupe",
-        "Nom d'établissement",
         "Actif",
     ];
 

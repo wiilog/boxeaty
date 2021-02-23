@@ -30,7 +30,7 @@ $(document).ready(() => {
             {data: `name`, title: `Nom du client`},
             {data: `active`, title: `Actif`},
             {data: `address`, title: `Adresse`},
-            {data: `contact`, title: `Utilisateur attribué`},
+            {data: `contact`, title: `Contact attribué`},
             {data: `group`, title: `Groupe`},
             {data: `multiSite`, title: `Multi-site`},
             DATATABLE_ACTIONS,

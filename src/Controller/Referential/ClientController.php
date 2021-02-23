@@ -9,6 +9,7 @@ use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
+use App\Helper\Stream;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
