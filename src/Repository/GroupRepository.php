@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Group;
-use App\Helper\QueryCounter;
+use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -17,7 +17,6 @@ class GroupRepository extends EntityRepository {
     public function iterateAll() {
         return $this->createQueryBuilder("g")
             ->select("g.name AS name")
-            ->addSelect("g.establishment AS establishment")
             ->addSelect("g.active AS active")
             ->getQuery()
             ->getResult();
@@ -27,11 +26,10 @@ class GroupRepository extends EntityRepository {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("g");
-        $total = QueryCounter::count($qb, "g");
+        $total = QueryHelper::count($qb, "g");
 
         if ($search) {
             $qb->where("g.name LIKE :search")
-                ->orWhere("g.establishment LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 
@@ -40,7 +38,7 @@ class GroupRepository extends EntityRepository {
             $qb->addOrderBy("g.$column", $order["dir"]);
         }
 
-        $filtered = QueryCounter::count($qb, "g");
+        $filtered = QueryHelper::count($qb, "g");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);

@@ -8,6 +8,7 @@ use App\Entity\Group;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
+use App\Helper\FormatHelper;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -51,7 +52,9 @@ class ClientController extends AbstractController {
                 "name" => $client->getName(),
                 "active" => $client->isActive() ? "Oui" : "Non",
                 "address" => $client->getAddress(),
-                "assignedUser" => $client->getUser() ? $client->getUser()->getUsername() : '',
+                "contact" => FormatHelper::user($client->getContact()),
+                "group" => FormatHelper::named($client->getGroup()),
+                "multiSite" => FormatHelper::named($client->getLinkedMultiSite()),
                 "actions" => $this->renderView("referential/client/datatable_actions.html.twig"),
             ];
         }
@@ -71,8 +74,9 @@ class ClientController extends AbstractController {
         $form = Form::create();
 
         $content = json_decode($request->getContent());
+        $contact = $manager->getRepository(User::class)->find($content->contact);
         $group = $manager->getRepository(Group::class)->find($content->group);
-        $user = $manager->getRepository(User::class)->find($content->user);
+        $multiSite = $content->linkedMultiSite ? $manager->getRepository(Client::class)->find($content->linkedMultiSite) : null;
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("email", "Ce client existe déjà");
@@ -85,8 +89,11 @@ class ClientController extends AbstractController {
                 ->setAddress($content->address)
                 ->setPhoneNumber($content->phoneNumber)
                 ->setActive($content->active)
+                ->setContact($contact)
+                ->setIsMultiSite($content->isMultiSite)
+                ->setAllowAllDepositTickets($content->allowAllDepositTickets)
                 ->setGroup($group)
-                ->setUsers($user);
+                ->setLinkedMultiSite($multiSite);
 
             $manager->persist($client);
             $manager->flush();
@@ -126,8 +133,9 @@ class ClientController extends AbstractController {
         $form = Form::create();
 
         $content = json_decode($request->getContent());
+        $contact = $manager->getRepository(User::class)->find($content->contact);
         $group = $manager->getRepository(Group::class)->find($content->group);
-        $user = $manager->getRepository(User::class)->find($content->user);
+        $multiSite = isset($content->linkedMultiSite) ? $manager->getRepository(Client::class)->find($content->linkedMultiSite) : null;
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $client) {
             $form->addError("email", "Un autre client avec ce nom existe déjà");
@@ -139,8 +147,11 @@ class ClientController extends AbstractController {
                 ->setAddress($content->address)
                 ->setPhoneNumber($content->phoneNumber)
                 ->setActive($content->active)
+                ->setContact($contact)
+                ->setIsMultiSite($content->isMultiSite)
+                ->setAllowAllDepositTickets($content->allowAllDepositTickets)
                 ->setGroup($group)
-                ->setUsers($user);
+                ->setLinkedMultiSite($multiSite);
 
             $manager->flush();
 

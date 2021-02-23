@@ -13,6 +13,7 @@ parameters:
       App\Entity\Role::DELETE_CLIENT: Suppression client
       App\Entity\Role::MANAGE_GROUPS: Gérer les groupes
       App\Entity\Role::MANAGE_LOCATIONS: Gestion des emplacements
+      App\Entity\Role::MANAGE_KIOSKS: Créer et modifier des bornes
 
     Menu traçabilité:
       App\Entity\Role::CREATE_BOX: Création Box
@@ -23,6 +24,9 @@ parameters:
       App\Entity\Role::CHECKOUT: Passage en caisse
       App\Entity\Role::MANAGE_MOVEMENTS: Créer et modifier des mouvements
       App\Entity\Role::DELETE_MOVEMENT: Suppression de mouvement
+      App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer et modifier des tickets consigne
+      App\Entity\Role::DELETE_DEPOSIT_TICKET: Suppression de ticket consigne
+
 
   menu:
     - name: Accueil
@@ -36,7 +40,7 @@ parameters:
         - name: Box
           route: missing_route
         - name: Numéro consigne
-          route: missing_route
+          route: deposit_tickets_list
         - name: Mouvements
           permission: App\Entity\Role::MANAGE_MOVEMENTS
           route: tracking_movements_list
@@ -53,6 +57,9 @@ parameters:
         - name: Emplacement
           route: locations_list
           permission: App\Entity\Role::MANAGE_LOCATIONS
+        - name: Borne
+          route: kiosks_list
+          permission: App\Entity\Role::MANAGE_KIOSKS
     - name: Paramétrage
       icon: cog
       type: category

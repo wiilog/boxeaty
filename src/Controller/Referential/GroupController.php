@@ -42,7 +42,6 @@ class GroupController extends AbstractController {
             $data[] = [
                 "id" => $group->getId(),
                 "name" => $group->getName(),
-                "establishment" => $group->getEstablishment(),
                 "active" => $group->isActive() ? "Oui" : "Non",
             ];
         }
@@ -70,7 +69,6 @@ class GroupController extends AbstractController {
         if($form->isValid()) {
             $group = new Group();
             $group->setName($content->name)
-                ->setEstablishment($content->establishment)
                 ->setActive($content->active);
 
             $manager->persist($group);
@@ -113,7 +111,6 @@ class GroupController extends AbstractController {
 
         if($form->isValid()) {
             $group->setName($content->name)
-                ->setEstablishment($content->establishment)
                 ->setActive($content->active);
 
             $manager->flush();

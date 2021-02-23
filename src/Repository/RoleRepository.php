@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Role;
 use App\Entity\User;
-use App\Helper\QueryCounter;
+use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 
@@ -20,7 +20,7 @@ class RoleRepository extends EntityRepository {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("role");
-        $total = QueryCounter::count($qb, "role");
+        $total = QueryHelper::count($qb, "role");
 
         if ($search) {
             $qb->where("role.name LIKE :search")
@@ -33,7 +33,7 @@ class RoleRepository extends EntityRepository {
             $qb->addOrderBy("role.$column", $order["dir"]);
         }
 
-        $filtered = QueryCounter::count($qb, "role");
+        $filtered = QueryHelper::count($qb, "role");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);

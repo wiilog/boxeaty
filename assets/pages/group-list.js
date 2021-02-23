@@ -17,7 +17,6 @@ $(document).ready(() => {
         ajax: AJAX.route(`POST`, `groups_api`),
         columns: [
             {data: `name`, title: `Nom du groupe`},
-            {data: `establishment`, title: `Nom de l'établissement`},
             {data: `active`, title: `Actif`},
         ],
         order: [[`name`, `asc`]],

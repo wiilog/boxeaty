@@ -28,11 +28,6 @@ class Group {
     private ?string $name = null;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $establishment = null;
-
-    /**
      * @ORM\OneToMany(targetEntity=Client::class, mappedBy="group")
      */
     private Collection $clients;
@@ -57,16 +52,6 @@ class Group {
 
     public function setName(string $name): self {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getEstablishment(): ?string {
-        return $this->establishment;
-    }
-
-    public function setEstablishment(string $establishment): self {
-        $this->establishment = $establishment;
 
         return $this;
     }

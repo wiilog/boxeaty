@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Client;
-use App\Helper\QueryCounter;
+use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -29,11 +29,10 @@ class ClientRepository extends EntityRepository {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("client");
-        $total = QueryCounter::count($qb, "client");
+        $total = QueryHelper::count($qb, "client");
 
         if ($search) {
-            $qb
-                ->where("client.name LIKE :search")
+            $qb->where("client.name LIKE :search")
                 ->orWhere("client.address LIKE :search")
                 ->orWhere("client.address LIKE :search")
                 ->orWhere("search_user.username LIKE :search")
@@ -43,15 +42,18 @@ class ClientRepository extends EntityRepository {
 
         foreach ($params["order"] ?? [] as $order) {
             $column = $params["columns"][$order["column"]]["data"];
-            if ($column === "assignedUser") {
-                $qb->join("client.user", "order_user")
-                    ->addOrderBy("order_user.username", $order["dir"]);
+            if ($column === "contact") {
+                QueryHelper::order($qb, "client.contact.username", $order["dir"]);
+            } else if ($column === "group") {
+                QueryHelper::order($qb, "client.group.name", $order["dir"]);
+            } else if ($column === "multiSite") {
+                QueryHelper::order($qb, "client.multiSite.name", $order["dir"]);
             } else {
                 $qb->addOrderBy("client.$column", $order["dir"]);
             }
         }
 
-        $filtered = QueryCounter::count($qb, "client");
+        $filtered = QueryHelper::count($qb, "client");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);
@@ -68,6 +70,18 @@ class ClientRepository extends EntityRepository {
             ->select("client.id AS id, client.name AS text")
             ->where("client.name LIKE :search")
             ->andWhere("client.active = 1")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    public function getMultiSiteForSelect(?string $search) {
+        return $this->createQueryBuilder("client")
+            ->select("client.id AS id, client.name AS text")
+            ->where("client.name LIKE :search")
+            ->andWhere("client.active = 1")
+            ->andWhere("client.isMultiSite = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()

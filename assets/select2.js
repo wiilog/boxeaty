@@ -5,6 +5,7 @@ const ROUTES = {
     box: `ajax_select_boxes`,
     group: `ajax_select_groups`,
     client: `ajax_select_clients`,
+    multiSite: `ajax_select_multi_sites`,
     user: `ajax_select_users`,
 }
 

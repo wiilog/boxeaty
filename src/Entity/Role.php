@@ -18,6 +18,7 @@ class Role {
     public const MANAGE_USERS = "MANAGE_USERS";
     public const MANAGE_ROLES = "MANAGE_ROLES";
     public const MANAGE_QUALITIES = "MANAGE_QUALITIES";
+    public const MANAGE_KIOSKS = "MANAGE_KIOSKS";
 
     public const MANAGE_CLIENTS = "MANAGE_CLIENTS";
     public const DEACTIVATE_CLIENT = "DEACTIVATE_CLIENT";
@@ -33,6 +34,8 @@ class Role {
     public const CHECKOUT = "CHECKOUT";
     public const MANAGE_MOVEMENTS = "MANAGE_MOVEMENTS";
     public const DELETE_MOVEMENT = "DELETE_MOVEMENT";
+    public const MANAGE_DEPOSIT_TICKETS = "MANAGE_DEPOSIT_TICKETS";
+    public const DELETE_DEPOSIT_TICKET = "DELETE_DEPOSIT_TICKET";
 
     use Active;
 
@@ -57,6 +60,21 @@ class Role {
      * @ORM\Column(type="json")
      */
     private array $permissions = [];
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $allowEditOwnGroupOnly = null;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $redirectUserNewCommand = null;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $receiveMailsNewAccounts = null;
 
     public function getId(): ?int {
         return $this->id;
@@ -89,6 +107,33 @@ class Role {
     public function setPermissions(array $permissions): self {
         $this->permissions = $permissions;
 
+        return $this;
+    }
+
+    public function getAllowEditOwnGroupOnly(): ?bool {
+        return $this->allowEditOwnGroupOnly;
+    }
+
+    public function setAllowEditOwnGroupOnly(?bool $allowEditOwnGroupOnly): self {
+        $this->allowEditOwnGroupOnly = $allowEditOwnGroupOnly;
+        return $this;
+    }
+
+    public function getRedirectUserNewCommand(): ?bool {
+        return $this->redirectUserNewCommand;
+    }
+
+    public function setRedirectUserNewCommand(?bool $redirectUserNewCommand): self {
+        $this->redirectUserNewCommand = $redirectUserNewCommand;
+        return $this;
+    }
+
+    public function getReceiveMailsNewAccounts(): ?bool {
+        return $this->receiveMailsNewAccounts;
+    }
+
+    public function setReceiveMailsNewAccounts(?bool $receiveMailsNewAccounts): self {
+        $this->receiveMailsNewAccounts = $receiveMailsNewAccounts;
         return $this;
     }
 

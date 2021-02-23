@@ -26,7 +26,7 @@ class SelectController extends AbstractController {
     }
 
     /**
-     * @Route("/select/group", name="ajax_select_groups", options={"expose": true})
+     * @Route("/externe/select/group", name="ajax_select_groups", options={"expose": true})
      */
     public function groups(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(Group::class)->getForSelect($request->query->get("term"));
@@ -41,6 +41,17 @@ class SelectController extends AbstractController {
      */
     public function clients(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(Client::class)->getForSelect($request->query->get("term"));
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/multi-site", name="ajax_select_multi_sites", options={"expose": true})
+     */
+    public function multiSite(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Client::class)->getMultiSiteForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,

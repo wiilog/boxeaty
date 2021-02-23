@@ -1,0 +1,38 @@
+<div class="row">
+    <div class="col-md-6 col-12">
+        <label>
+            Numéro ticket-consigne
+            <input type="text" name="number" class="data" placeholder="Numéro du ticket-consigne"
+                   value="{{ deposit_ticket.number }}" required/>
+        </label>
+    </div>
+    <div class="col-md-6 col-12">
+        <label>
+            Etat
+            <select name="condition" class="data" data-s2 data-placeholder="Sélectionnez un état" required>
+                <option value="{{ constant('App\\Entity\\DepositTicket::VALID') }}"
+                        {{ deposit_ticket.condition == constant('App\\Entity\\DepositTicket::VALID') ? 'selected' }}>
+                    Valable
+                </option>
+                <option value="{{ constant('App\\Entity\\DepositTicket::SPENT') }}"
+                        {{ deposit_ticket.condition == constant('App\\Entity\\DepositTicket::SPENT') ? 'selected' }}>
+                    Utilisé
+                </option>
+                <option value="{{ constant('App\\Entity\\DepositTicket::EXPIRED') }}"
+                        {{ deposit_ticket.condition == constant('App\\Entity\\DepositTicket::EXPIRED') ? 'selected' }}>
+                    Périmé
+                </option>
+            </select>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>
+            Borne
+            <select name="kiosk" class="data" data-s2 data-placeholder="Sélectionnez une borne" required>
+                {% for kiosk in kiosks %}
+                    <option value="{{ kiosk.id }}" {{ deposit_ticket.kiosk and deposit_ticket.kiosk.id == kiosk.id ? 'selected' }}>{{ kiosk.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+    </div>
+</div>

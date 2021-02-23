@@ -1,0 +1,23 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block content %}
+    <h1>Création d'un nouvel utilisateur</h1>
+
+    <div class="centered-box">
+        L'utilisateur <b>{{ user.username}}</b> vient de procéder à la création d'un compte sur l'application BoxEaty.
+        Ce compte est rattaché à l'adresse mail <b>{{ user.email }}</b>.<br><br>
+
+        Actuellement, cet utilisateur ne dispose d'aucun droit. Afin de lui en attribuer, vous devrez le paramétrer
+        dans l'application BoxEaty dans le menu <i>Paramétrage -> Utilisateurs</i>.<br><br>
+
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td align="center">
+                    <a class="primary m-3" href="{{ url('users_list') }}" target="_blank">
+                        Accéder à l'application Boxeaty
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endblock %}

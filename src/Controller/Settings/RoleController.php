@@ -73,7 +73,10 @@ class RoleController extends AbstractController {
             $role->setCode(strtoupper(StringHelper::slugify($content->name)))
                 ->setName($content->name)
                 ->setActive($content->active)
-                ->setPermissions($content->permissions);
+                ->setPermissions($content->permissions)
+                ->setAllowEditOwnGroupOnly($content->allowEditOwnGroupOnly)
+                ->setRedirectUserNewCommand($content->redirectUserNewCommand)
+                ->setReceiveMailsNewAccounts($content->receiveMailsNewAccounts);
 
             $manager->persist($role);
             $manager->flush();
@@ -124,7 +127,10 @@ class RoleController extends AbstractController {
 
             $role->setName($content->name)
                 ->setActive($content->active)
-                ->setPermissions($content->permissions);
+                ->setPermissions($content->permissions)
+                ->setAllowEditOwnGroupOnly($content->allowEditOwnGroupOnly)
+                ->setRedirectUserNewCommand($content->redirectUserNewCommand)
+                ->setReceiveMailsNewAccounts($content->receiveMailsNewAccounts);
 
             $manager->flush();
 

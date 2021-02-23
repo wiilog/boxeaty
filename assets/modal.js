@@ -145,8 +145,12 @@ export function processForm($parent) {
             });
         }
 
-        if(input.name && $input.val() !== "") {
-            data[input.name] = $input.val();
+        if($input.attr(`name`)) {
+            if($input.attr(`type`) === `checkbox`) {
+                data[$input.attr(`name`)] = $input.is(`:checked`);
+            } else if($input.val() !== "") {
+                data[$input.attr(`name`)] = $input.val();
+            }
         }
     }
 

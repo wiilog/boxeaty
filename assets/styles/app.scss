@@ -81,12 +81,21 @@ main:not(.login) {
         @include box();
         @include content-apart();
 
+        flex-wrap: wrap;
+        justify-content: space-between;
+        flex: 1 1 auto;
         min-height: 65px;
         padding: 16px;
         margin-bottom: 40px;
         z-index: 1;
         width: 100%;
         border-radius: 8px;
+
+        .right {
+            display: flex;
+            justify-content: flex-end;
+            flex: 1 1 auto;
+        }
 
         .filter-items {
             display: flex;

@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-GB">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Email</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <style type="text/css">
+        a[x-apple-data-detectors] {
+            color: inherit !important;
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0;">
+{% apply inline_css(source('@assets/styles/email.css'), encore_entry_link_tags('email')) %}
+    <table class="container" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td align="center">
+                <img src="http://boxeaty.fr/wp-content/uploads/2019/08/BoxEaty_Logo_Couleurs.png" class="logo" alt="Logo Boxeaty">
+            </td>
+        </tr>
+        <tr>
+            <td align="center">
+                {% block content %}{% endblock %}
+            </td>
+        </tr>
+        <tr>
+            <td align="center">
+                <div class="footer">
+                    <strong>Bonne journée,</strong><br>
+                    L'équipe Boxeaty
+                </div>
+            </td>
+        </tr>
+    </table>
+{% endapply %}
+</body>
+</html>

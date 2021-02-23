@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
-use App\Helper\QueryCounter;
+use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -32,7 +32,7 @@ class UserRepository extends EntityRepository {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("user");
-        $total = QueryCounter::count($qb, "user");
+        $total = QueryHelper::count($qb, "user");
 
         if ($search) {
             $qb->where("user.username LIKE :search")
@@ -50,7 +50,7 @@ class UserRepository extends EntityRepository {
             }
         }
 
-        $filtered = QueryCounter::count($qb, "user");
+        $filtered = QueryHelper::count($qb, "user");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);
@@ -62,15 +62,27 @@ class UserRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search) {
+    public function getForSelect(?string $search): array {
         return $this->createQueryBuilder("user")
             ->select("user.id AS id, user.username AS text")
-            ->where("user.name LIKE :search")
+            ->where("user.username LIKE :search")
             ->andWhere("user.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
             ->getArrayResult();
+    }
+
+    public function findNewUserRecipients($group) {
+        return $this->createQueryBuilder("user")
+            ->join("user.role", "role")
+            ->leftJoin("user.groups", "groups")
+            ->where("role.receiveMailsNewAccounts = 1")
+            ->andWhere("role.allowEditOwnGroupOnly = 0 OR :group MEMBER OF user.groups")
+            ->andWhere("user.active = 1")
+            ->setParameter("group", $group)
+            ->getQuery()
+            ->getResult();
     }
 
 }
