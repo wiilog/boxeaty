@@ -19,8 +19,12 @@ class ClientRepository extends EntityRepository {
             ->select("client.name AS name")
             ->addSelect("client.active AS active")
             ->addSelect("client.address AS address")
-            ->addSelect("user.username AS username")
-            ->leftJoin("client.user", "user")
+            ->addSelect("join_contact.username AS assignedContact")
+            ->addSelect("join_group.name AS group")
+            ->addSelect("join_linkedMultiSite.name AS multiSite")
+            ->leftJoin("client.group", "join_group")
+            ->leftJoin("client.linkedMultiSite", "join_linkedMultiSite")
+            ->leftJoin("client.contact", "join_contact")
             ->getQuery()
             ->getResult();
     }
@@ -36,7 +40,7 @@ class ClientRepository extends EntityRepository {
                 ->orWhere("client.address LIKE :search")
                 ->orWhere("client.address LIKE :search")
                 ->orWhere("search_user.username LIKE :search")
-                ->leftJoin("client.user", "search_user")
+                ->leftJoin("client.users", "search_user")
                 ->setParameter("search", "%$search%");
         }
 

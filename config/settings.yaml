@@ -1,6 +1,7 @@
 parameters:
   permissions:
     Menu paramétrage:
+      App\Entity\Role::GENERAL_EXPORT: Export général
       App\Entity\Role::MANAGE_SETTINGS: Modifier le paramétrage global
       App\Entity\Role::MANAGE_USERS: Créer et modifier les utilisateurs
       App\Entity\Role::MANAGE_ROLES: Créer et modifier les rôles

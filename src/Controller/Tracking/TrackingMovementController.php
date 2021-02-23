@@ -225,20 +225,11 @@ class TrackingMovementController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        $header = array_merge([
-            "Date",
-            "Numéro de box",
-            "Qualité",
-            "Etat",
-            "Client",
-            "Commentaire",
-        ]);
-
         return $exportService->export(function($output) use ($exportService, $movements) {
             foreach ($movements as $movement) {
                 $exportService->putLine($output, $movement);
             }
-        }, "export-tracabilite-$today.csv", $header);
+        }, "export-tracabilite-$today.csv", ExportService::MOVEMENT_HEADER);
     }
 
 }

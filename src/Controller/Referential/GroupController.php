@@ -134,17 +134,11 @@ class GroupController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        $header = array_merge([
-            "Nom de groupe",
-            "Nom d'établissement",
-            "Actif",
-        ]);
-
         return $exportService->export(function($output) use ($exportService, $groups) {
             foreach ($groups as $group) {
                 $exportService->putLine($output, $group);
             }
-        }, "export-groupes-$today.csv", $header);
+        }, "export-groupes-$today.csv", ExportService::GROUP_HEADER);
     }
 
 }

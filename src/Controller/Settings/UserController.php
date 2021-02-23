@@ -220,20 +220,11 @@ class UserController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        $header = array_merge([
-            "Nom d'utilisateur",
-            "Adresse email",
-            "Rôle",
-            "Actif",
-            "Date de création",
-            "Dernière connexion",
-        ]);
-
         return $exportService->export(function($output) use ($exportService, $users) {
             foreach ($users as $user) {
                 $exportService->putLine($output, $user);
             }
-        }, "export-utilisateurs-$today.csv", $header);
+        }, "export-utilisateurs-$today.csv", ExportService::USER_HEADER);
     }
 
 }

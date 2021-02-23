@@ -191,6 +191,11 @@ class Stream implements Countable, IteratorAggregate, ArrayAccess {
         return $this;
     }
 
+    public function prepend($item): self {
+        array_unshift($this->elements, $item);
+        return $this;
+    }
+
     public function unique(): self {
         $this->checkValidity();
 
