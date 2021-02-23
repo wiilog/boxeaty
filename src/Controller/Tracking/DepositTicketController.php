@@ -53,7 +53,10 @@ class DepositTicketController extends AbstractController {
                 "useDate" => FormatHelper::datetime($depositTicket->getUseDate()) ?: "Inutilisé",
                 "client" => $depositTicket->getKiosk() ? FormatHelper::named($depositTicket->getKiosk()->getClient()) : "",
                 "condition" => DepositTicket::NAMES[$depositTicket->getCondition()] ?? "",
-                "actions" => $this->renderView("tracking/deposit_ticket/datatable_actions.html.twig"),
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
+                    "deletable" => true,
+                ]),
             ];
         }
 

@@ -1,10 +1,13 @@
+{% set deletable = deletable is defined and deletable %}
+{% set editable = editable is defined and editable %}
 <div class="datatable-action dropdown">
     <span type="button" data-bs-toggle="dropdown">
         <i class="fas fa-ellipsis-h"></i>
     </span>
     <div class="dropdown-menu">
+        {% if editable %}
         <button data-listener="edit"><i class="icon fas fa-pen"></i> Modifier</button>
-
+        {% endif %}
         {% if deletable %}
             <button data-listener="delete"><i class="icon fas fa-trash-alt"></i> Supprimer</button>
         {% endif %}

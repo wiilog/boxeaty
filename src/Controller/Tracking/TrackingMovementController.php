@@ -52,7 +52,10 @@ class TrackingMovementController extends AbstractController {
         $movements = $manager->getRepository(TrackingMovement::class)
             ->findForDatatable(json_decode($request->getContent(), true));
 
-        $actions = $this->renderView("tracking/movement/datatable_actions.html.twig");
+        $actions = $this->renderView("datatable_actions.html.twig", [
+            "editable" => false,
+            "deletable" => true,
+        ]);
 
         $data = [];
         foreach ($movements["data"] as $movement) {

@@ -56,7 +56,10 @@ class ClientController extends AbstractController {
                 "contact" => FormatHelper::user($client->getContact()),
                 "group" => FormatHelper::named($client->getGroup()),
                 "multiSite" => FormatHelper::named($client->getLinkedMultiSite()),
-                "actions" => $this->renderView("referential/client/datatable_actions.html.twig"),
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
+                    "deletable" => false
+                ]),
             ];
         }
 

@@ -12,7 +12,7 @@ export default class Flash {
             </div>
         `);
         setTimeout(function () {
-            $(`.alert-${type} .alert-dismissible`).hide();
+            $(`.alert-${type}`).hide();
             }, 5000
         );
     }

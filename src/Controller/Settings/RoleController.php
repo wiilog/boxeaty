@@ -42,7 +42,8 @@ class RoleController extends AbstractController {
                 "id" => $role->getId(),
                 "name" => $role->getName(),
                 "active" => $role->isActive() ? "Oui" : "Non",
-                "actions" => $this->renderView("settings/role/datatable_actions.html.twig", [
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
                     "deletable" => $deletable[$role->getId()],
                 ]),
             ];

@@ -47,7 +47,10 @@ class KioskController extends AbstractController {
                 "id" => $kiosk->getId(),
                 "name" => $kiosk->getName(),
                 "client" => $kiosk->getClient() ? $kiosk->getClient()->getName() : '',
-                "actions" => $this->renderView("referential/kiosk/datatable_actions.html.twig"),
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
+                    "deletable" => true,
+                ]),
             ];
         }
 

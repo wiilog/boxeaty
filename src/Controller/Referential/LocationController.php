@@ -43,7 +43,10 @@ class LocationController extends AbstractController {
                 "name" => $location->getName(),
                 "active" => $location->isActive() ? "Oui" : "Non",
                 "description" => $location->getDescription(),
-                "actions" => $this->renderView("referential/location/datatable_actions.html.twig"),
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
+                    "deletable" => true,
+                ]),
             ];
         }
 

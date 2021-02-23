@@ -53,7 +53,10 @@ class UserController extends AbstractController {
                 "email" => $user->getEmail(),
                 "lastLogin" => $user->getLastLogin() ? $user->getLastLogin()->format("d/m/Y H:i") : "/",
                 "role" => $user->getRole()->getName(),
-                "actions" => $this->renderView("settings/user/datatable_actions.html.twig"),
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
+                    "deletable" => true,
+                ]),
             ];
         }
 

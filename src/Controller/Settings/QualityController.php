@@ -43,7 +43,8 @@ class QualityController extends AbstractController {
             $data[] = [
                 "id" => $quality->getId(),
                 "name" => $quality->getName(),
-                "actions" => $this->renderView("settings/quality/datatable_actions.html.twig", [
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
                     "deletable" => $deletable[$quality->getId()],
                 ]),
             ];
