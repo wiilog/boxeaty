@@ -182,21 +182,12 @@ class DepositTicketController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        $header = array_merge([
-            "Date de création",
-            "Lieu de création",
-            "Date de validité",
-            "Numéro de consigne",
-            "Date et heure d'utilisation de la consigne",
-            "Emplacement de la consigne",
-            "Etat",
-        ]);
-
         return $exportService->export(function($output) use ($exportService, $depositTickets) {
             foreach ($depositTickets as $depositTicket) {
+                $depositTicket["condition"] = DepositTicket::NAMES[$depositTicket["condition"]];
                 $exportService->putLine($output, $depositTicket);
             }
-        }, "export-tickets-consigne-$today.csv", $header);
+        }, "export-tickets-consigne-$today.csv", ExportService::DEPOSIT_TICKET_HEADER);
     }
 
 }

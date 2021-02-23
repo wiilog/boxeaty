@@ -159,15 +159,11 @@ class QualityController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        $header = array_merge([
-            "Nom",
-        ]);
-
         return $exportService->export(function($output) use ($exportService, $qualities) {
             foreach ($qualities as $quality) {
                 $exportService->putLine($output, $quality);
             }
-        }, "export-qualites-$today.csv", $header);
+        }, "export-qualites-$today.csv", ExportService::QUALITY_HEADER);
     }
 
 }

@@ -40,7 +40,7 @@ parameters:
       items:
         - name: Box
           route: missing_route
-        - name: Numéro consigne
+        - name: Suivi ticket-consigne
           route: deposit_tickets_list
         - name: Mouvements
           permission: App\Entity\Role::MANAGE_MOVEMENTS
