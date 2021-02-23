@@ -68,6 +68,10 @@ class BoxTypeController extends AbstractController {
             $form->addError("name", "Ce type de box existe déjà");
         }
 
+        if($content->price < 0) {
+            $form->addError("price", "Le prix doit être supérieur ou égal à 0");
+        }
+
         if($form->isValid()) {
             $boxType = new BoxType();
             $boxType->setName($content->name)
@@ -138,17 +142,11 @@ class BoxTypeController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        $header = array_merge([
-            "Type de box",
-            "Prix",
-            "Actif",
-        ]);
-
         return $exportService->export(function($output) use ($exportService, $boxTypes) {
             foreach ($boxTypes as $boxType) {
                 $exportService->putLine($output, $boxType);
             }
-        }, "export-box-type-$today.csv", $header);
+        }, "export-type-de-box-$today.csv", ExportService::BOX_TYPE_HEADER);
     }
 
 }

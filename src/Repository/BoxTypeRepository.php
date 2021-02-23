@@ -17,7 +17,7 @@ class BoxTypeRepository extends EntityRepository {
     public function iterateAll() {
         return $this->createQueryBuilder("box_type")
             ->select("box_type.name AS name")
-            ->select("box_type.price AS price")
+            ->addSelect("box_type.price AS price")
             ->addSelect("box_type.active AS active")
             ->getQuery()
             ->getResult();

@@ -46,6 +46,12 @@ class ExportService {
         "Commentaire",
     ];
 
+    public const BOX_TYPE_HEADER = [
+        "Type de box",
+        "Prix",
+        "Actif"
+    ];
+
     public const ENCODING_UTF8 = "UTF8";
     public const ENCODING_WINDOWS = "WINDOWS";
 
