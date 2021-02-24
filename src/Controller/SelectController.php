@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Box;
 use App\Entity\Client;
 use App\Entity\Group;
+use App\Entity\Kiosk;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -63,6 +64,17 @@ class SelectController extends AbstractController {
      */
     public function users(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(User::class)->getForSelect($request->query->get("term"));
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/kios", name="ajax_select_kiosks", options={"expose": true})
+     */
+    public function kiosk(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Kiosk::class)->getForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,

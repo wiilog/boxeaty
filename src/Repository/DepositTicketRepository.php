@@ -26,7 +26,7 @@ class DepositTicketRepository extends EntityRepository
             ->join("deposit_ticket.kiosk", "join_kiosk")
             ->join("join_kiosk.client", "join_client")
             ->getQuery()
-            ->getResult();
+            ->iterate();
     }
 
     public function findForDatatable(array $params): array {

@@ -20,4 +20,17 @@ class GlobalSettingRepository extends EntityRepository {
             ->toArray();
     }
 
+    public function getCorrespondingCode(string $code): array {
+        $setting = GlobalSetting::SETTING_CODE;
+        $emptyKiosk = GlobalSetting::EMPTY_KIOSK_CODE;
+
+        return $this->createQueryBuilder("setting")
+            ->select("setting.name")
+            ->where("setting.name = '$setting' OR setting.name = '$emptyKiosk'")
+            ->andWhere("setting.value = :code")
+            ->setParameter("code", $code)
+            ->getQuery()
+            ->getSingleResult();
+    }
+
 }

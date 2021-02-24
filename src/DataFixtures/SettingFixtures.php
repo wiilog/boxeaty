@@ -13,6 +13,8 @@ class SettingFixtures extends Fixture implements FixtureGroupInterface {
 
     private const DEFAULTS = [
         GlobalSetting::CSV_EXPORTS_ENCODING => ExportService::ENCODING_UTF8,
+        GlobalSetting::SETTING_CODE => "1532",
+        GlobalSetting::EMPTY_KIOSK_CODE => "4578",
     ];
 
     public function load(ObjectManager $manager) {

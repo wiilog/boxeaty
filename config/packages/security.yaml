@@ -37,4 +37,5 @@ security:
         - { path: ^/password-forgotten, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/externe, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/mot-de-passe, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/, role: IS_AUTHENTICATED_REMEMBERED }

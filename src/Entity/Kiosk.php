@@ -97,4 +97,5 @@ class Kiosk
 
         return $this;
     }
+
 }

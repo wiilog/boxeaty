@@ -20,8 +20,7 @@ class QualityRepository extends EntityRepository
         return $this->createQueryBuilder("quality")
             ->select("quality.name AS name")
             ->getQuery()
-            ->getResult();
-
+            ->iterate();
     }
 
     public function findForDatatable(array $params): array {

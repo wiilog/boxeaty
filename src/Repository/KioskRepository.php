@@ -12,15 +12,25 @@ use Doctrine\ORM\EntityRepository;
  * @method Kiosk[]    findAll()
  * @method Kiosk[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class KioskRepository extends EntityRepository
-{
+class KioskRepository extends EntityRepository {
+
+    public function getAll() {
+        return $this->createQueryBuilder("kiosk")
+            ->select("kiosk.id AS id")
+            ->addSelect("kiosk.name AS name")
+            ->addSelect("client_entity.id AS client")
+            ->join("kiosk.client", "client_entity")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
     public function iterateAll() {
         return $this->createQueryBuilder("kiosk")
             ->select("kiosk.name AS name")
             ->addSelect("join_client.name AS client")
             ->join("kiosk.client", "join_client")
             ->getQuery()
-            ->getResult();
+            ->iterate();
     }
 
     public function findForDatatable(array $params): array {
@@ -57,4 +67,15 @@ class KioskRepository extends EntityRepository
             "filtered" => $filtered,
         ];
     }
+
+    public function getForSelect(?string $search) {
+        return $this->createQueryBuilder("kiosk")
+            ->select("kiosk.id AS id, kiosk.name AS text")
+            ->where("kiosk.name LIKE :search")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
 }
