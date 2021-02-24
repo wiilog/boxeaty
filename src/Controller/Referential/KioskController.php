@@ -145,16 +145,11 @@ class KioskController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        $header = array_merge([
-            "Nom de la borne",
-            "Client",
-        ]);
-
         return $exportService->export(function($output) use ($exportService, $kiosks) {
             foreach ($kiosks as $kiosk) {
                 $exportService->putLine($output, $kiosk);
             }
-        }, "export-bornes-$today.csv", $header);
+        }, "export-bornes-$today.csv", ExportService::KIOSK_HEADER);
     }
 
 }

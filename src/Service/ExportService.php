@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\Entity\GlobalSetting;
-use App\Entity\User;
 use App\Helper\Stream;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -50,6 +49,25 @@ class ExportService {
         "Type de box",
         "Prix",
         "Actif"
+    ];
+
+    public const QUALITY_HEADER = [
+        "Nom",
+    ];
+
+    public const DEPOSIT_TICKET_HEADER = [
+        "Date de création",
+        "Lieu de création",
+        "Date de validité",
+        "Numéro de consigne",
+        "Date et heure d'utilisation de la consigne",
+        "Emplacement de la consigne",
+        "Etat",
+    ];
+
+    public const KIOSK_HEADER = [
+        "Nom de la borne",
+        "Client",
     ];
 
     public const ENCODING_UTF8 = "UTF8";
@@ -100,13 +118,19 @@ class ExportService {
         fputcsv($handle, $encodedRow, ";");
     }
 
-    public function createWorksheet(Spreadsheet $spreadsheet, string $name, string $class, array $header): Worksheet {
+    public function createWorksheet(Spreadsheet $spreadsheet, string $name, string $class, array $header, callable $transformer = null): Worksheet {
         $sheet = new Worksheet(null, $name);
-        $sheet->fromArray(Stream::from($this->manager->getRepository($class)->iterateAll())
-            ->map(fn(array $row) => $this->stringify($row))
+        $export = Stream::from($this->manager->getRepository($class)->iterateAll())
+            ->map(function(array $row) use ($transformer) {
+                if($transformer) {
+                    $row = $transformer($row);
+                }
+                return $this->stringify($row);
+            })
             ->prepend($header)
-            ->toArray());
+            ->toArray();
 
+        $sheet->fromArray($export);
         $spreadsheet->addSheet($sheet);
         return $sheet;
     }
