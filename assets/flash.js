@@ -5,15 +5,15 @@ export default class Flash {
     static DANGER = `danger`;
 
     static add(type, message) {
-        $(`.alert-container`).append(`
+        const $alert = $(`
             <div class="alert alert-${type} alert-dismissible fade show" role="alert">
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         `);
-        setTimeout(function () {
-            $(`.alert-${type}`).hide();
-            }, 5000
-        );
+
+        $alert.appendTo(`.alert-container`)
+
+        setTimeout(() => $alert.remove(), 5000);
     }
 }
