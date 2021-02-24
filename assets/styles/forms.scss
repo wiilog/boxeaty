@@ -2,7 +2,7 @@
 @import "mixins";
 
 //temporary should be replaced with custom style
-input:focus { outline: none; }
+input:focus, select { outline: none; }
 
 label {
     display: block;
@@ -17,7 +17,7 @@ label {
         margin-bottom: 5px;
     }
 
-    input {
+    input, select {
         display: block;
         width: 100%;
     }
@@ -34,7 +34,7 @@ label {
     }
 }
 
-input:not([type="checkbox"]):not([type="radio"]) {
+input:not([type="checkbox"]):not([type="radio"]), select {
     @include input();
 }
 

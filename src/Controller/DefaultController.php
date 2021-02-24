@@ -36,17 +36,19 @@ class DefaultController extends AbstractController {
         $spreadsheet = new Spreadsheet();
         $spreadsheet->disconnectWorksheets();
 
-        $exportService->createWorksheet($spreadsheet, "Clients", Client::class, ExportService::CLIENT_HEADER);
-        $exportService->createWorksheet($spreadsheet, "Groupes", Group::class, ExportService::GROUP_HEADER);
-        $exportService->createWorksheet($spreadsheet, "Utilisateurs", User::class, ExportService::USER_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Bornes", Kiosk::class, ExportService::KIOSK_HEADER);
         $exportService->createWorksheet($spreadsheet, "Mouvements", TrackingMovement::class, ExportService::MOVEMENT_HEADER);
-        $exportService->createWorksheet($spreadsheet, "Qualités", Quality::class, ExportService::QUALITY_HEADER);
-        $exportService->createWorksheet($spreadsheet, "Types de Box", BoxType::class, ExportService::BOX_TYPE_HEADER);
         $exportService->createWorksheet($spreadsheet, "Tickets-consigne", DepositTicket::class, ExportService::DEPOSIT_TICKET_HEADER, function (array $row) {
             $row["condition"] = DepositTicket::NAMES[$row["condition"]];
             return $row;
         });
-        $exportService->createWorksheet($spreadsheet, "Bornes", Kiosk::class, ExportService::KIOSK_HEADER);
+
+        $exportService->createWorksheet($spreadsheet, "Clients", Client::class, ExportService::CLIENT_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Groupes", Group::class, ExportService::GROUP_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Qualités", Quality::class, ExportService::QUALITY_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Types de Box", BoxType::class, ExportService::BOX_TYPE_HEADER);
+
+        $exportService->createWorksheet($spreadsheet, "Utilisateurs", User::class, ExportService::USER_HEADER);
 
         $file = "exports/export-general-" . bin2hex(random_bytes(8)) . ".xlsx";
 
