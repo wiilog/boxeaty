@@ -11,6 +11,7 @@ use App\Helper\FormatHelper;
 use App\Helper\Stream;
 use App\Helper\StringHelper;
 use App\Service\ExportService;
+use App\Service\ImportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -100,7 +101,7 @@ class ImportController extends AbstractController {
 
             $import = new Import();
             $import->setName($content->name)
-                ->setStatus(Import::UPCOMING)
+                ->setStatus(count($csv) >= 101 ? Import::UPCOMING : Import::INSTANT)
                 ->setDataType($content->type)
                 ->setCreationDate(new DateTime())
                 ->setFile($name);
@@ -148,7 +149,8 @@ class ImportController extends AbstractController {
      * @Route("/association-champs", name="import_fields_association", options={"expose": true})
      * @HasPermission(Role::MANAGE_IMPORTS)
      */
-    public function fieldsAssociation(Request $request, SessionInterface $session, EntityManagerInterface $manager): Response {
+    public function fieldsAssociation(Request $request, SessionInterface $session,
+                                      EntityManagerInterface $manager, ImportService $importService): Response {
         $import = $session->get("draft-import");
         if (!$import) {
             return $this->json([
@@ -164,6 +166,10 @@ class ImportController extends AbstractController {
         if ($form->isValid()) {
             $import->setFieldsAssociation(array_flip(explode(",", $content->associations)))
                 ->setUser($this->getUser());
+
+            if($import->getStatus() === Import::INSTANT) {
+                $importService->execute($import);
+            }
 
             $manager->persist($import);
             $manager->flush();

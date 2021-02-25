@@ -14,12 +14,14 @@ class Import {
     public const TYPE_BOX = "box";
 
     public const UPCOMING = 1;
-    public const RUNNING = 2;
-    public const COMPLETED = 3;
-    public const CANCELLED = 4;
+    public const INSTANT = 2;
+    public const RUNNING = 3;
+    public const COMPLETED = 4;
+    public const CANCELLED = 5;
 
     public const NAMES = [
         self::UPCOMING => "Planifié",
+        self::INSTANT => "Immédiat",
         self::RUNNING => "En cours",
         self::COMPLETED => "Terminé",
         self::CANCELLED => "Annulé",
