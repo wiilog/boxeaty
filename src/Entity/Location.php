@@ -32,6 +32,16 @@ class Location
      */
     private ?string $description = null;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Box::class, mappedBy="location")
+     */
+    private $boxes;
+
+    public function __construct()
+    {
+        $this->boxes = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -57,6 +67,36 @@ class Location
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Box[]
+     */
+    public function getBoxes(): Collection
+    {
+        return $this->boxes;
+    }
+
+    public function addBox(Box $box): self
+    {
+        if (!$this->boxes->contains($box)) {
+            $this->boxes[] = $box;
+            $box->setLocation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBox(Box $box): self
+    {
+        if ($this->boxes->removeElement($box)) {
+            // set the owning side to null (unless already changed)
+            if ($box->getLocation() === $this) {
+                $box->setLocation(null);
+            }
+        }
 
         return $this;
     }

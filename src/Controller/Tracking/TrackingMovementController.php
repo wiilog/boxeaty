@@ -112,7 +112,7 @@ class TrackingMovementController extends AbstractController {
                 ->setQuality($quality)
                 ->setState($state)
                 ->setClient($client)
-                ->setComment(strip_tags($content->comment) ?? null);
+                ->setComment($content->comment ?? null);
 
             $manager->persist($movement);
             $manager->flush();

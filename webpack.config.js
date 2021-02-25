@@ -23,6 +23,8 @@ Encore
     .addEntry("user_list", "./assets/pages/user-list.js")
     .addEntry("role_list", "./assets/pages/role-list.js")
     .addEntry("quality_list", "./assets/pages/quality-list.js")
+    .addEntry("box_list", "./assets/pages/box-list.js")
+    .addEntry("box_show", "./assets/pages/box-show.js")
     .autoProvidejQuery()
 
     .splitEntryChunks()

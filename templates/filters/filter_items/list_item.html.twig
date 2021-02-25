@@ -1,0 +1,8 @@
+{% set placeholder = placeholder is defined and placeholder ? placeholder : 'Etat' %}
+{% set name = name is defined and name ? name : 'state' %}
+{% set elements = elements is defined and elements is not empty ? elements : [] %}
+<select name="condition" class="data" data-s2 data-placeholder="Etat">
+    {% for index, element in elements %}
+        <option value="{{ index }}">{{ element }}</option>
+    {% endfor %}
+</select>

@@ -70,6 +70,15 @@ class ExportService {
         "Client",
     ];
 
+    public const BOX_HEADER = [
+        "Numéro Box",
+        "Emplacement",
+        "Etat",
+        "Qualité",
+        "Propriété",
+        "Type",
+    ];
+
     public const ENCODING_UTF8 = "UTF8";
     public const ENCODING_WINDOWS = "WINDOWS";
 

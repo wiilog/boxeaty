@@ -37,6 +37,8 @@ class Role {
     public const DELETE_MOVEMENT = "DELETE_MOVEMENT";
     public const MANAGE_DEPOSIT_TICKETS = "MANAGE_DEPOSIT_TICKETS";
     public const DELETE_DEPOSIT_TICKET = "DELETE_DEPOSIT_TICKET";
+    public const MANAGE_BOXES = "MANAGE_BOX";
+    public const DELETE_BOX = "DELETE_BOX";
 
     use Active;
 

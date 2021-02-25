@@ -50,7 +50,8 @@ $document.ready(() => {
 
 function initializeWYSIWYG() {
     new FroalaEditor(`[data-wysiwyg]`, {
-        language: 'fr'
+        language: 'fr',
+        placeholderText: 'Votre commentaire'
     });
 }
 

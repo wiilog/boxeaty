@@ -80,7 +80,7 @@ export default class Modal {
                     $(this.config.table).DataTable().ajax.reload();
                 }
             }
-console.log(result);
+
             if(result.menu) {
                 $(`#menu-dropdown`).replaceWith(result.menu);
             }
@@ -150,7 +150,7 @@ export function processForm($parent) {
         }
 
         if($input.attr(`name`)) {
-            const trimmed = $input.val().trim();
+            const trimmed = $input.val() ? $input.val().trim() : '';
 
             if($input.attr(`type`) === `checkbox`) {
                 data[$input.attr(`name`)] = $input.is(`:checked`);

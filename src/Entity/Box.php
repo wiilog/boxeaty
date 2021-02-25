@@ -12,6 +12,20 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Box {
 
+    public const AVAILABLE = 1;
+    public const UNAVAILABLE = 2;
+    public const CONSUMER = 3;
+    public const CLIENT = 4;
+    public const OUT = 5;
+
+    public const NAMES = [
+        self::AVAILABLE => "Disponible",
+        self::UNAVAILABLE => "Indisponible",
+        self::CONSUMER => "Consommateur",
+        self::CLIENT => "Client",
+        self::OUT => "Sorti",
+    ];
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -28,6 +42,36 @@ class Box {
      * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", orphanRemoval=true)
      */
     private Collection $trackingMovements;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="boxes")
+     */
+    private $location;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $state;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Quality::class, inversedBy="boxes")
+     */
+    private $quality;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="boxes")
+     */
+    private $owner;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=BoxType::class, inversedBy="boxes")
+     */
+    private $type;
+
+    /**
+     * @ORM\Column(type="text")
+     */
+    private $comment;
 
     public function __construct() {
         $this->trackingMovements = new ArrayCollection();
@@ -73,6 +117,78 @@ class Box {
                 $trackingMovement->setBox(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getLocation(): ?Location
+    {
+        return $this->location;
+    }
+
+    public function setLocation(?Location $location): self
+    {
+        $this->location = $location;
+
+        return $this;
+    }
+
+    public function getState(): ?string
+    {
+        return $this->state;
+    }
+
+    public function setState(string $state): self
+    {
+        $this->state = $state;
+
+        return $this;
+    }
+
+    public function getQuality(): ?quality
+    {
+        return $this->quality;
+    }
+
+    public function setQuality(?quality $quality): self
+    {
+        $this->quality = $quality;
+
+        return $this;
+    }
+
+    public function getOwner(): ?client
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?client $owner): self
+    {
+        $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function getType(): ?BoxType
+    {
+        return $this->type;
+    }
+
+    public function setType(?BoxType $type): self
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getComment(): ?string
+    {
+        return $this->comment;
+    }
+
+    public function setComment(string $comment): self
+    {
+        $this->comment = $comment;
 
         return $this;
     }

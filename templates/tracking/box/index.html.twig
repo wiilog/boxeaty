@@ -1,0 +1,29 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Traçabilité{% endblock %}
+{% block page %}Box{% endblock %}
+
+{% block filter_header %}
+    {% include 'filters/box_filters.html.twig' %}
+{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <a href="{{ path('boxes_export') }}" class="outline"><i class="icon fas fa-download"></i> Export au format CSV</a>
+                <button class="primary new-box"><i class="icon fas fa-plus"></i> Nouvelle Box</button>
+            </div>
+        </div>
+
+        <table id="table-boxes"></table>
+    </div>
+
+    {% include 'tracking/box/modal/new.html.twig' with {box: new_box} %}
+    {% include 'tracking/box/modal/delete.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('box_list') }}
+{% endblock %}

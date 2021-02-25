@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Annotation\HasPermission;
+use App\Entity\Box;
 use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\DepositTicket;
@@ -47,6 +48,10 @@ class DefaultController extends AbstractController {
         $exportService->createWorksheet($spreadsheet, "Groupes", Group::class, ExportService::GROUP_HEADER);
         $exportService->createWorksheet($spreadsheet, "Qualités", Quality::class, ExportService::QUALITY_HEADER);
         $exportService->createWorksheet($spreadsheet, "Types de Box", BoxType::class, ExportService::BOX_TYPE_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Box", Box::class, ExportService::BOX_HEADER, function (array $row) {
+            $row["state"] = Box::NAMES[$row["state"]];
+            return $row;
+        });
 
         $exportService->createWorksheet($spreadsheet, "Utilisateurs", User::class, ExportService::USER_HEADER);
 

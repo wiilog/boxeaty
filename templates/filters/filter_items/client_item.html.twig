@@ -1,5 +1,3 @@
-<select name="client" class="data" data-s2 data-placeholder="Client">>
-    {% for group in groups %}
-        <option value="{{ group.id }}">{{ group.name }}</option>
-    {% endfor %}
+{% set placeholder = placeholder is defined and placeholder ? placeholder : 'Client' %}
+<select name="client" class="data" data-s2="client" data-placeholder="{{ placeholder }}">>
 </select>
