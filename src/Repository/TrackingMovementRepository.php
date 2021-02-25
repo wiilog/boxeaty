@@ -37,6 +37,7 @@ class TrackingMovementRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "movement");
 
         if ($search) {
+            $qb->join("");
             //TODO: recherche rapide
         }
 

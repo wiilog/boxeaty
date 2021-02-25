@@ -64,7 +64,7 @@ class LocationController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Un emplacement avec ce nom existe déjà");
@@ -109,7 +109,7 @@ class LocationController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Location $location): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $location) {
             $form->addError("label", "Un autre emplacement avec ce nom existe déjà");
@@ -137,7 +137,7 @@ class LocationController extends AbstractController {
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $location = $manager->getRepository(Location::class)->find($content->id);
 
         if ($location) {

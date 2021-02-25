@@ -8,7 +8,6 @@ use App\Entity\Client;
 use App\Entity\Group;
 use App\Entity\Quality;
 use App\Entity\Role;
-use App\Entity\State;
 use App\Entity\TrackingMovement;
 use App\Entity\User;
 use App\Service\ExportService;
@@ -31,14 +30,13 @@ class TrackingMovementController extends AbstractController {
      */
     public function list(EntityManagerInterface $manager): Response {
         $qualities = $manager->getRepository(Quality::class)->findAll();
-        $states = $manager->getRepository(State::class)->findAll();
         $groups = $manager->getRepository(Group::class)->findAll();
         $users = $manager->getRepository(User::class)->findAll();
 
         return $this->render("tracking/movement/index.html.twig", [
             "new_movement" => new TrackingMovement(),
             "qualities" => $qualities,
-            "states" => $states,
+            "states" => Box::NAMES,
             "groups" => $groups,
             "users" => $users
         ]);
@@ -64,7 +62,7 @@ class TrackingMovementController extends AbstractController {
                 "date" => $movement->getDate()->format("d/m/Y H:i"),
                 "box" => $movement->getBox()->getNumber(),
                 "quality" => $movement->getQuality()->getName(),
-                "state" => $movement->getState()->getName(),
+                "state" => Box::NAMES[$movement->getState()],
                 "client" => $movement->getClient()->getName(),
                 "actions" => $actions,
             ];
@@ -84,7 +82,7 @@ class TrackingMovementController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $box = $manager->getRepository(Box::class)->find($content->box);
         if (!$box) {
             $form->addError("box", "Cette Box n'existe pas ou a changé de numéro");
@@ -93,11 +91,6 @@ class TrackingMovementController extends AbstractController {
         $quality = $manager->getRepository(Quality::class)->find($content->quality);
         if (!$quality) {
             $form->addError("quality", "Cette qualité n'existe pas ou plus");
-        }
-
-        $state = $manager->getRepository(State::class)->find($content->state);
-        if (!$state) {
-            $form->addError("state", "Cet état n'existe pas");
         }
 
         $client = $manager->getRepository(Client::class)->find($content->client);
@@ -110,7 +103,7 @@ class TrackingMovementController extends AbstractController {
             $movement->setDate(new DateTime($content->date))
                 ->setBox($box)
                 ->setQuality($quality)
-                ->setState($state)
+                ->setState($content->state)
                 ->setClient($client)
                 ->setComment($content->comment ?? null);
 
@@ -132,14 +125,13 @@ class TrackingMovementController extends AbstractController {
      */
     public function editTemplate(EntityManagerInterface $manager, TrackingMovement $movement): Response {
         $qualities = $manager->getRepository(Quality::class)->findAll();
-        $states = $manager->getRepository(State::class)->findAll();
 
         return $this->json([
             "submit" => $this->generateUrl("tracking_movement_edit", ["movement" => $movement->getId()]),
             "template" => $this->renderView("tracking/movement/modal/edit.html.twig", [
                 "movement" => $movement,
                 "qualities" => $qualities,
-                "states" => $states,
+                "states" => Box::NAMES,
             ])
         ]);
     }
@@ -151,7 +143,7 @@ class TrackingMovementController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, TrackingMovement $movement): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $box = $manager->getRepository(Box::class)->find($content->box);
         if (!$box) {
             $form->addError("box", "Cette Box n'existe pas ou a changé de numéro");
@@ -160,11 +152,6 @@ class TrackingMovementController extends AbstractController {
         $quality = $manager->getRepository(Quality::class)->find($content->quality);
         if (!$quality) {
             $form->addError("quality", "Cette qualité n'existe plus");
-        }
-
-        $state = $manager->getRepository(State::class)->find($content->state);
-        if (!$state) {
-            $form->addError("state", "Cet état n'existe pas");
         }
 
         $client = $manager->getRepository(Client::class)->find($content->client);
@@ -178,7 +165,7 @@ class TrackingMovementController extends AbstractController {
             $movement->setDate(new DateTime($content->date))
                 ->setBox($box)
                 ->setQuality($quality)
-                ->setState($state)
+                ->setState($content->state)
                 ->setClient($client)
                 ->setUser($user)
                 ->setComment($content->comment ?? null);
@@ -196,10 +183,10 @@ class TrackingMovementController extends AbstractController {
 
     /**
      * @Route("/supprimer", name="tracking_movement_delete", options={"expose": true})
-     * @HasPermission(Role::MANAGE_MOVEMENTS)
+     * @HasPermission(Role::DELETE_MOVEMENT)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $movement = $manager->getRepository(User::class)->find($content->id);
 
         if ($movement) {

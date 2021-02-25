@@ -63,7 +63,7 @@ class RoleController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Role::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Un rôle avec ce nom existe déjà");
@@ -74,7 +74,7 @@ class RoleController extends AbstractController {
             $role->setCode(strtoupper(StringHelper::slugify($content->name)))
                 ->setName($content->name)
                 ->setActive($content->active)
-                ->setPermissions($content->permissions)
+                ->setPermissions(explode(",", $content->permissions))
                 ->setAllowEditOwnGroupOnly($content->allowEditOwnGroupOnly)
                 ->setRedirectUserNewCommand($content->redirectUserNewCommand)
                 ->setReceiveMailsNewAccounts($content->receiveMailsNewAccounts);
@@ -114,7 +114,7 @@ class RoleController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Role $role): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Role::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $role) {
             $form->addError("name", "Un autre rôle avec ce nom existe déjà");
@@ -128,7 +128,7 @@ class RoleController extends AbstractController {
 
             $role->setName($content->name)
                 ->setActive($content->active)
-                ->setPermissions($content->permissions)
+                ->setPermissions(explode(",", $content->permissions))
                 ->setAllowEditOwnGroupOnly($content->allowEditOwnGroupOnly)
                 ->setRedirectUserNewCommand($content->redirectUserNewCommand)
                 ->setReceiveMailsNewAccounts($content->receiveMailsNewAccounts);
@@ -152,7 +152,7 @@ class RoleController extends AbstractController {
      * @HasPermission(Role::MANAGE_ROLES)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $role = $manager->getRepository(Role::class)->find($content->id);
 
         //TODO: check if role is used by users

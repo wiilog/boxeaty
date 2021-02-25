@@ -39,39 +39,43 @@ class Box {
     private ?string $number = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", orphanRemoval=true)
-     */
-    private Collection $trackingMovements;
-
-    /**
      * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="boxes")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $location;
+    private ?Location $location = null;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $state;
+    private ?int $state = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Quality::class, inversedBy="boxes")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $quality;
+    private ?Quality $quality = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="boxes")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $owner;
+    private ?Client $owner = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=BoxType::class, inversedBy="boxes")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $type;
+    private ?BoxType $type = null;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
-    private $comment;
+    private ?string $comment = null;
+
+    /**
+     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", orphanRemoval=true)
+     */
+    private Collection $trackingMovements;
 
     public function __construct() {
         $this->trackingMovements = new ArrayCollection();
@@ -110,17 +114,6 @@ class Box {
         return $this;
     }
 
-    public function removeTrackingMovement(TrackingMovement $trackingMovement): self {
-        if ($this->trackingMovements->removeElement($trackingMovement)) {
-            // set the owning side to null (unless already changed)
-            if ($trackingMovement->getBox() === $this) {
-                $trackingMovement->setBox(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function getLocation(): ?Location
     {
         return $this->location;
@@ -133,12 +126,12 @@ class Box {
         return $this;
     }
 
-    public function getState(): ?string
+    public function getState(): ?int
     {
         return $this->state;
     }
 
-    public function setState(string $state): self
+    public function setState(int $state): self
     {
         $this->state = $state;
 
@@ -189,6 +182,17 @@ class Box {
     public function setComment(string $comment): self
     {
         $this->comment = $comment;
+
+        return $this;
+    }
+
+    public function removeTrackingMovement(TrackingMovement $trackingMovement): self {
+        if ($this->trackingMovements->removeElement($trackingMovement)) {
+            // set the owning side to null (unless already changed)
+            if ($trackingMovement->getBox() === $this) {
+                $trackingMovement->setBox(null);
+            }
+        }
 
         return $this;
     }

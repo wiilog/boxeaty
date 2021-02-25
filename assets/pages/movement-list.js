@@ -28,7 +28,7 @@ $(document).ready(() => {
             {data: `client`, title: `Client`},
             DATATABLE_ACTIONS,
         ],
-        order: [[`date`, `asc`]],
+        order: [[`date`, `desc`]],
         listeners: {
             action: data => {
                 const ajax = AJAX.route(`POST`, `tracking_movement_edit_template`, {

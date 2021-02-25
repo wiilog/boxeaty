@@ -1,5 +1,8 @@
 {% set deletable = deletable is defined and deletable %}
 {% set editable = editable is defined and editable %}
+{% set cancellable = cancellable is defined and cancellable %}
+{% set trace = trace is defined and trace %}
+
 <div class="datatable-action dropdown">
     <span type="button" data-bs-toggle="dropdown">
         <i class="fas fa-ellipsis-h"></i>
@@ -10,6 +13,14 @@
         {% endif %}
         {% if deletable %}
             <button data-listener="delete"><i class="icon fas fa-trash-alt"></i> Supprimer</button>
+        {% endif %}
+        {% if cancellable %}
+            <button data-listener="cancel"><i class="icon fas fa-ban"></i> Annuler</button>
+        {% endif %}
+        {% if trace %}
+            <a href="/persistent/traces/{{ import.trace }}" target="_blank">
+                <i class="icon fas fa-clipboard-list"></i> Fichier trace
+            </a>
         {% endif %}
     </div>
 </div>

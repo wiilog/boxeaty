@@ -73,7 +73,7 @@ class BoxController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $location = $manager->getRepository(Location::class)->find($content->location);
         $owner = $manager->getRepository(Client::class)->find($content->owner);
         $quality = $manager->getRepository(Quality::class)->find($content->quality);
@@ -140,7 +140,7 @@ class BoxController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Box $box): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $location = $manager->getRepository(Location::class)->find($content->location);
         $owner = $manager->getRepository(Client::class)->find($content->owner);
         $quality = $manager->getRepository(Quality::class)->find($content->quality);
@@ -151,8 +151,7 @@ class BoxController extends AbstractController {
         }
 
         if($form->isValid()) {
-            $box
-                ->setNumber($content->number)
+            $box->setNumber($content->number)
                 ->setLocation($location)
                 ->setOwner($owner)
                 ->setQuality($quality)
@@ -176,7 +175,7 @@ class BoxController extends AbstractController {
      * @HasPermission(Role::MANAGE_BOXES)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $box = $manager->getRepository(Box::class)->find($content->id);
 
         if ($box) {

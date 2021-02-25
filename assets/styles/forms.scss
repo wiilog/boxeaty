@@ -114,6 +114,37 @@ button, a {
     }
 }
 
+.attachment-drop-frame {
+    background: $grey;
+    border-radius: 6px;
+    padding: 23px;
+    text-align: center;
+    line-height: 1.3rem;
+    transition: background 200ms;
+
+    &:hover {
+        background: $grey-dark;
+    }
+
+    .click-here {
+        cursor: pointer;
+        white-space: nowrap;
+        font-weight: bold;
+    }
+
+    input[type="file"] {
+        display: none;
+    }
+
+    &.is-valid {
+        background: $pale-green;
+    }
+
+    &.is-invalid {
+        background: $pale-red;
+    }
+}
+
 .modal {
     input:not([type="checkbox"]) {
         width: 100% !important;

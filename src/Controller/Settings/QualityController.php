@@ -64,7 +64,7 @@ class QualityController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Quality::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Une qualité avec ce nom existe déjà");
@@ -106,7 +106,7 @@ class QualityController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Quality $quality): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Quality::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $quality) {
             $form->addError("name", "Une autre qualité avec ce nom existe déjà");
@@ -130,7 +130,7 @@ class QualityController extends AbstractController {
      * @HasPermission(Role::MANAGE_QUALITIES)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $quality = $manager->getRepository(Quality::class)->find($content->id);
 
         //TODO: check if quality is used by users

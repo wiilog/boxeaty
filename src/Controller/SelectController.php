@@ -62,7 +62,7 @@ class SelectController extends AbstractController {
     }
 
     /**
-     * @Route("/select/user", name="ajax_select_users", options={"expose": true})
+     * @Route("/select/utilisateur", name="ajax_select_users", options={"expose": true})
      */
     public function users(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(User::class)->getForSelect($request->query->get("term"));
@@ -73,8 +73,8 @@ class SelectController extends AbstractController {
     }
 
     /**
- * @Route("/select/location", name="ajax_select_locations", options={"expose": true})
- */
+     * @Route("/select/emplacement", name="ajax_select_locations", options={"expose": true})
+     */
     public function locations(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(Location::class)->getForSelect($request->query->get("term"));
 
@@ -95,7 +95,7 @@ class SelectController extends AbstractController {
     }
 
     /**
-     * @Route("/select/type", name="ajax_select_quality", options={"expose": true})
+     * @Route("/select/qualite", name="ajax_select_quality", options={"expose": true})
      */
     public function qualities(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(Quality::class)->getForSelect($request->query->get("term"));

@@ -27,7 +27,7 @@ $(document).ready(() => {
             {data: `number`, title: `Numéro de consigne`},
             {data: `useDate`, title: `Date et heure d'utilisation de la consigne`},
             {data: `client`, title: `Emplacement de la consigne`},
-            {data: `condition`, title: `Etat`},
+            {data: `state`, title: `Etat`},
             DATATABLE_ACTIONS,
         ],
         order: [[`creationDate`, `asc`]],

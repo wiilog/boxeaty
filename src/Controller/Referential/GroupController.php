@@ -60,7 +60,7 @@ class GroupController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Group::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("email", "Ce groupe existe déjà");
@@ -103,7 +103,7 @@ class GroupController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Group $group): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Group::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $group) {
             $form->addError("email", "Un autre groupe avec ce nom existe déjà");

@@ -1,0 +1,40 @@
+<div id="modal-new-import-fields" class="modal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Import d'un fichier</h1>
+
+            <div class="body">
+                <table class="w-100">
+                    <thead>
+                    <tr>
+                        <th>Titre de colonne du fichier</th>
+                        <th>Aperçu (ligne 1)</th>
+                        <th>Champ de l'application</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for index, field in file_fields %}
+                        <tr>
+                            <td>{{ field.name }}</td>
+                            <td>{{ field.value }}</td>
+                            <td>
+                                <select name="associations" class="data-array" data-s2 data-placeholder="Sélectionnez un champ">
+                                    {% for code, name in fields %}
+                                        <option value="{{ code }}" {{ field.closest == code ? 'selected' }}>{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="footer">
+                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="primary">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>

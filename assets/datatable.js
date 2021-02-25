@@ -34,9 +34,13 @@ export function initDatatable(table, config) {
 
     const ajax = config.ajax;
     config.ajax = (content, callback) => {
+        content.filters = {};
+
         const $filters = $(`.filters`);
         if($filters.exists()) {
-            content.filters = processForm($filters);
+            processForm($filters).forEach((value, key) => {
+                content.filters[key] = value;
+            });
         }
 
         ajax.json(content, data => {

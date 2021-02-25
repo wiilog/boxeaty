@@ -44,9 +44,9 @@ class DepositTicket {
     private ?string $number = null;
 
     /**
-     * @ORM\Column(type="integer", length=255, name="`condition`")
+     * @ORM\Column(type="integer", length=255)
      */
-    private ?int $condition = null;
+    private ?int $state = null;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -92,12 +92,12 @@ class DepositTicket {
         return $this;
     }
 
-    public function getCondition(): ?int {
-        return $this->condition;
+    public function getState(): ?int {
+        return $this->state;
     }
 
-    public function setCondition(int $condition): self {
-        $this->condition = $condition;
+    public function setState(int $state): self {
+        $this->state = $state;
 
         return $this;
     }

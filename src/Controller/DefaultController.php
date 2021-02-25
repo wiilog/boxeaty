@@ -40,7 +40,7 @@ class DefaultController extends AbstractController {
         $exportService->createWorksheet($spreadsheet, "Bornes", Kiosk::class, ExportService::KIOSK_HEADER);
         $exportService->createWorksheet($spreadsheet, "Mouvements", TrackingMovement::class, ExportService::MOVEMENT_HEADER);
         $exportService->createWorksheet($spreadsheet, "Tickets-consigne", DepositTicket::class, ExportService::DEPOSIT_TICKET_HEADER, function (array $row) {
-            $row["condition"] = DepositTicket::NAMES[$row["condition"]];
+            $row["state"] = DepositTicket::NAMES[$row["state"]];
             return $row;
         });
 

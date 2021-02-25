@@ -29,8 +29,8 @@
         <label>
             Etat
             <select name="state" class="data" data-s2 data-placeholder="Sélectionnez un état" required>
-                {% for state in states %}
-                    <option value="{{ state.id }}" {{ movement.state and movement.state == state ? 'selected' }}>{{ state.name }}</option>
+                {% for id, state in states %}
+                    <option value="{{ id }}" {{ movement.state == id ? 'selected' }}>{{ state }}</option>
                 {% endfor %}
             </select>
         </label>

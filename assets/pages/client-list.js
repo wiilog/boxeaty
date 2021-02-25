@@ -33,6 +33,7 @@ $(document).ready(() => {
             {data: `contact`, title: `Contact attribué`},
             {data: `group`, title: `Groupe`},
             {data: `multiSite`, title: `Multi-site`},
+            {data: `linkedMultiSite`, title: `Multi-site lié`},
             DATATABLE_ACTIONS,
         ],
         order: [[`name`, `asc`]],

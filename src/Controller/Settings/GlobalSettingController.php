@@ -30,7 +30,7 @@ class GlobalSettingController extends AbstractController {
      * @HasPermission(Role::MANAGE_SETTINGS)
      */
     public function update(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent(), true);
+        $content = (object) $request->request->all();
 
         $settings = $manager->getRepository(GlobalSetting::class)->getAll();
         foreach ($content as $name => $value) {

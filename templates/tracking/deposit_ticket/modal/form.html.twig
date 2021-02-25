@@ -9,17 +9,17 @@
     <div class="col-md-6 col-12">
         <label>
             Etat
-            <select name="condition" class="data" data-s2 data-placeholder="Sélectionnez un état" required>
+            <select name="state" class="data" data-s2 data-placeholder="Sélectionnez un état" required>
                 <option value="{{ constant('App\\Entity\\DepositTicket::VALID') }}"
-                        {{ deposit_ticket.condition == constant('App\\Entity\\DepositTicket::VALID') ? 'selected' }}>
+                        {{ deposit_ticket.state == constant('App\\Entity\\DepositTicket::VALID') ? 'selected' }}>
                     Valable
                 </option>
                 <option value="{{ constant('App\\Entity\\DepositTicket::SPENT') }}"
-                        {{ deposit_ticket.condition == constant('App\\Entity\\DepositTicket::SPENT') ? 'selected' }}>
+                        {{ deposit_ticket.state == constant('App\\Entity\\DepositTicket::SPENT') ? 'selected' }}>
                     Utilisé
                 </option>
                 <option value="{{ constant('App\\Entity\\DepositTicket::EXPIRED') }}"
-                        {{ deposit_ticket.condition == constant('App\\Entity\\DepositTicket::EXPIRED') ? 'selected' }}>
+                        {{ deposit_ticket.state == constant('App\\Entity\\DepositTicket::EXPIRED') ? 'selected' }}>
                     Périmé
                 </option>
             </select>
