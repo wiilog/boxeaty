@@ -22,6 +22,8 @@ class GlobalSettingController extends AbstractController {
 
         return $this->render("settings/global_settings/index.html.twig", [
             "csv_encoding" => $settings[GlobalSetting::CSV_EXPORTS_ENCODING],
+            "setting_code" => $settings[GlobalSetting::SETTING_CODE],
+            "empty_kiosk_code" => $settings[GlobalSetting::EMPTY_KIOSK_CODE],
         ]);
     }
 
@@ -30,7 +32,7 @@ class GlobalSettingController extends AbstractController {
      * @HasPermission(Role::MANAGE_SETTINGS)
      */
     public function update(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent(), true);
+        $content = (object) $request->request->all();
 
         $settings = $manager->getRepository(GlobalSetting::class)->getAll();
         foreach ($content as $name => $value) {

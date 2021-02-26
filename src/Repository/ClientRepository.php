@@ -26,7 +26,7 @@ class ClientRepository extends EntityRepository {
             ->leftJoin("client.linkedMultiSite", "join_linkedMultiSite")
             ->leftJoin("client.contact", "join_contact")
             ->getQuery()
-            ->getResult();
+            ->iterate();
     }
 
     public function findForDatatable(array $params): array {
@@ -37,7 +37,6 @@ class ClientRepository extends EntityRepository {
 
         if ($search) {
             $qb->where("client.name LIKE :search")
-                ->orWhere("client.address LIKE :search")
                 ->orWhere("client.address LIKE :search")
                 ->orWhere("search_user.username LIKE :search")
                 ->leftJoin("client.users", "search_user")

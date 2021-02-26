@@ -24,3 +24,5 @@ yarn-error.log
 
 /.idea/
 /public/exports/
+/public/persistent/imports
+/public/persistent/traces

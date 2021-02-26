@@ -24,11 +24,12 @@ export default class AJAX {
         return ajax;
     }
 
+    //TODO: remove code duplication between .json and .run
     json(body, callback) {
         if(typeof body === 'function') {
             callback = body;
             body = undefined;
-        } else if(typeof body === `object` || Array.isArray(body)) {
+        } else if(!(body instanceof FormData) && (typeof body === `object` || Array.isArray(body))) {
             body = JSON.stringify(body);
         }
 
@@ -55,6 +56,45 @@ export default class AJAX {
 
                 if(callback) {
                     callback(json);
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                Flash.add("danger", `Une erreur est survenue lors du traitement de votre requête par le serveur`);
+            });
+    }
+
+    //TODO: remove code duplication between .json and .run
+    run(body) {
+        if(!(body instanceof FormData) && (typeof body === `object` || Array.isArray(body))) {
+            body = JSON.stringify(body);
+        }
+
+        const url = this.route ? Routing.generate(this.route, this.params) : this.url;
+        const config = {
+            method: this.method,
+            body
+        };
+
+        return fetch(url, config)
+            .then(response => response.json())
+            .then(json => {
+                if(json.status === 500) {
+                    console.error(json);
+                    Flash.add(Flash.DANGER, `Une erreur est survenue lors du traitement de votre requête par le serveur`);
+                    return;
+                }
+
+                if(json.success === false && json.msg) {
+                    Flash.add("danger", json.msg);
+                } else if(json.success === true && json.msg) {
+                    Flash.add("success", json.msg);
+                }
+
+                if(json.reload === true) {
+                    $.fn.dataTable
+                        .tables({visible: true, api: true})
+                        .ajax.reload();
                 }
             })
             .catch(error => {

@@ -20,14 +20,13 @@ class QualityRepository extends EntityRepository
         return $this->createQueryBuilder("quality")
             ->select("quality.name AS name")
             ->getQuery()
-            ->getResult();
-
+            ->iterate();
     }
 
     public function getForSelect(?string $search) {
         return $this->createQueryBuilder("quality")
-            ->select("quality.id AS id, quality.number AS text")
-            ->where("quality.number LIKE :search")
+            ->select("quality.id AS id, quality.name AS text")
+            ->where("quality.name LIKE :search")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()

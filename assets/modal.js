@@ -2,12 +2,25 @@ import Flash from './flash';
 import AJAX from './ajax';
 import {LOADING_CLASS} from "./app";
 
+const uploads = {};
+
+function addUpload(modal, name, file) {
+    if(uploads[modal.id] === undefined) {
+        uploads[modal.id] = {};
+    }
+
+    uploads[modal.id][name] = file;
+}
+
 export default class Modal {
+    id;
     element;
     config;
+    files;
 
     static static(element, config) {
         const modal = new Modal();
+        modal.id = Math.floor(Math.random() * 1000000);
         modal.element = typeof element === `string` ? $(element) : element;
         modal.config = config instanceof AJAX ? {ajax: config} : config;
 
@@ -15,6 +28,8 @@ export default class Modal {
             console.error(`Could not find HTML element of modal ${element}`);
             return null;
         }
+
+        modal.setupFileUploader();
 
         modal.element.on('hidden.bs.modal', () => modal.clear());
         modal.element.find(`button[type="submit"]`).click(function() {
@@ -30,14 +45,36 @@ export default class Modal {
     }
 
     static load(ajax, config) {
-        ajax.json(response => {
+        if(typeof ajax === 'string') {
+            withResponse({
+                template: ajax,
+            });
+        } else {
+            ajax.json(response => withResponse(response))
+        }
+
+        function withResponse(response) {
             const $modal = $(response.template);
             $modal.appendTo(`body`);
             $modal.modal(`show`);
 
-            $modal.on('hidden.bs.modal', function (e) {
+            $modal.on('hidden.bs.modal', function(e) {
                 $(this).remove();
             })
+
+            const modal = new Modal();
+            modal.id = Math.floor(Math.random() * 1000000);
+            modal.element = $modal;
+            modal.config = {
+                ajax: AJAX.url(`POST`, config.submit ?? response.submit),
+                ...config
+            };
+
+            modal.setupFileUploader();
+
+            if(config.afterOpen) {
+                config.afterOpen(modal);
+            }
 
             $modal.find(`button[type="submit"]`).click(function() {
                 const $button = $(this);
@@ -45,20 +82,60 @@ export default class Modal {
                     Flash.add(Flash.WARNING, `Opération en cours d'exécution`);
                 }
 
-                const modal = new Modal();
-                modal.element = $modal;
-                modal.config = {
-                    ajax: AJAX.url(`POST`, response.submit),
-                    ...config
-                };
-
                 $button.load(() => modal.handleSubmit());
             });
-        })
+        }
+    }
+
+    setupFileUploader() {
+        const modal = this;
+        const $dropframe = this.element.find(`.attachment-drop-frame`);
+        const $input = $dropframe.find(`input[type="file"]`);
+
+        if($dropframe.exists()) {
+            [`dragenter`, `dragover`, `dragleave`, `drop`].forEach(event => {
+                $dropframe.on(event, function(event) {
+                    event.preventDefault();
+                    return false;
+                });
+            })
+
+            $input.on(`change`, function() {
+                addUpload(modal, $input.attr(`name`), $(this)[0].files);
+                $dropframe.addClass(`is-valid`);
+            });
+
+            $dropframe.on(`drop`, function(event) {
+                const data = event.originalEvent.dataTransfer;
+                const $dropframe = $(this);
+
+                $dropframe.siblings(`.invalid-feedback`).remove();
+                $dropframe.removeClass(`is-valid is-invalid`);
+
+                if(data && data.files.length) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const supported = $input.data(`format`);
+                    const format = getExtension(data.files[0]);
+                    if(supported && format !== supported) {
+                        $dropframe.addClass(`is-invalid`);
+                        $dropframe.parents(`label`).append(`<span class="invalid-feedback">Seuls les fichier au format .${supported} sont supportés</span>`);
+                    } else {
+                        addUpload(modal, $input.attr(`name`), data.files[0]);
+                        $dropframe.addClass(`is-valid`);
+                    }
+                } else {
+                    $dropframe.addClass(`is-invalid`);
+                }
+
+                return false;
+            });
+        }
     }
 
     handleSubmit() {
-        const data = processForm(this.element);
+        const data = processForm(this);
         if(data === false) {
             return;
         }
@@ -86,6 +163,10 @@ export default class Modal {
             }
 
             this.element.modal(`hide`);
+
+            if(result.success && this.config.success) {
+                this.config.success(result);
+            }
         });
     }
 
@@ -99,15 +180,7 @@ export default class Modal {
     }
 
     clear() {
-        this.element.find(`input.data:not([type=checkbox]):not([type=radio]), select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
-        this.element.find(`input[type=checkbox][checked], input[type=radio][checked]`).prop(`checked`, false);
-
-        for(const check of this.element.find(`input[type=checkbox][checked], input[type=radio][checked]`)) {
-            $(check).prop(`checked`, true);
-        }
-
-        this.element.find(`.is-invalid`).removeClass(`is-invalid`);
-        this.element.find(`.invalid-feedback`).remove();
+        clearForm(this.element);
     }
 
     elem() {
@@ -115,9 +188,27 @@ export default class Modal {
     }
 }
 
+export function clearForm($elem) {
+    $elem.find(`input.data:not([type=checkbox]):not([type=radio]), select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
+    $elem.find(`input[type=checkbox][checked], input[type=radio][checked]`).prop(`checked`, false);
+
+    for(const check of $elem.find(`input[type=checkbox][checked], input[type=radio][checked]`)) {
+        $(check).prop(`checked`, true);
+    }
+
+    $elem.find(`.is-invalid .is-valid`).removeClass(`is-invalid is-valid`);
+    $elem.find(`.invalid-feedback`).remove();
+}
+
 export function processForm($parent) {
+    let modal = null;
+    if($parent instanceof Modal) {
+        modal = $parent;
+        $parent = modal.elem();
+    }
+
     const errors = [];
-    const data = {};
+    const data = new FormData();
     const $inputs = $parent.find(`select.data, input.data, input[data-repeat], textarea.data`);
 
     //clear previous errors
@@ -143,19 +234,21 @@ export function processForm($parent) {
         }
 
         if($input.is(`[required]`) && !$input.val()) {
-            errors.push({
-                elements: [$input],
-                message: `Ce champ est requis`,
-            });
+            if(!(modal && $input.is(`[type="file"]`)) || !uploads[modal.id][$input.attr(`name`)]) {
+                errors.push({
+                    elements: [$input],
+                    message: `Ce champ est requis`,
+                });
+            }
         }
 
         if($input.attr(`name`)) {
-            const trimmed = $input.val() ? $input.val().trim() : '';
+            const trimmed = $input.val() ? $input.val().trim() : ``;
 
             if($input.attr(`type`) === `checkbox`) {
-                data[$input.attr(`name`)] = $input.is(`:checked`);
-            } else if(trimmed !== "") {
-                data[$input.attr(`name`)] = trimmed;
+                data.append($input.attr(`name`), $input.is(`:checked`) ? `1` : `0`);
+            } else if(trimmed !== ``) {
+                data.append($input.attr(`name`), trimmed);
             }
         }
     }
@@ -171,7 +264,7 @@ export function processForm($parent) {
     }
 
     for(const [name, elements] of Object.entries(grouped)) {
-        data[name] = elements
+        data.append(name, elements
             .map(elem => $(elem))
             .map($elem => {
                 if($elem.attr(`type`) === `checkbox`) {
@@ -180,7 +273,13 @@ export function processForm($parent) {
                     return $elem.val()
                 }
             })
-            .filter(val => val !== null);
+            .filter(val => val !== null));
+    }
+
+    if(modal && uploads[modal.id]) {
+        for(const [name, file] of Object.entries(uploads[modal.id])) {
+            data.append(name, file)
+        }
     }
 
     for(const error of errors) {
@@ -193,8 +292,16 @@ export function processForm($parent) {
 function showInvalid($field, message) {
     if($field.is(`[data-s2]`)) {
         $field = $field.parent().find(`.select2-selection`);
+    } else if($field.is(`[type="file"]`)) {
+        console.log("go");
+        $field = $field.parent();
+        console.log($field);
     }
 
     $field.addClass(`is-invalid`);
     $field.parents(`label`).append(`<span class="invalid-feedback">${message}</span>`);
+}
+
+function getExtension(file) {
+    return file.name.split('.').pop();
 }

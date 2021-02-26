@@ -68,7 +68,7 @@ class KioskController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Kiosk::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Cette borne existe déjà");
@@ -113,7 +113,7 @@ class KioskController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Kiosk $kiosk): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Kiosk::class)->findOneBy(["name" => $content->name]);
         $client = $manager->getRepository(Client::class)->find($content->client);
         if ($existing !== null && $existing !== $kiosk) {

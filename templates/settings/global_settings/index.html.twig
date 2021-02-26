@@ -24,6 +24,25 @@
             <button class="secondary" type="submit">Enregistrer</button>
         </div>
     </div>
+
+    <div class="box global-settings">
+        <h1>Configuration mot de passe borne</h1>
+
+        <div class="input-with-validation">
+            <label>
+                Mot de passe de la borne - Visiteur
+                <input name="{{ constant('App\\Entity\\GlobalSetting::EMPTY_KIOSK_CODE') }}" class="data" value="{{ empty_kiosk_code.value }}" />
+            </label>
+            <button class="secondary" type="submit">Enregistrer</button>
+        </div>
+        <div class="input-with-validation">
+            <label>
+                Mot de passe de la borne - SuperAdmin
+                <input name="{{ constant('App\\Entity\\GlobalSetting::SETTING_CODE') }}" class="data" value="{{ setting_code.value }}"/>
+            </label>
+            <button class="secondary" type="submit">Enregistrer</button>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}

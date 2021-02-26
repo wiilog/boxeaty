@@ -2,6 +2,7 @@
 
 {% block filters %}
     {% include('filters/filter_items/client_item.html.twig') with {
+        name: 'client',
         placeholder: 'Propriété'
     } %}
     {% include('filters/filter_items/location_item.html.twig') %}

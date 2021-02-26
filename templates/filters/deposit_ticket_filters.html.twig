@@ -3,5 +3,9 @@
 {% block filters %}
     {% include 'filters/filter_items/date_item.html.twig' %}
     {% include 'filters/filter_items/kiosk_item.html.twig' %}
-    {% include 'filters/filter_items/condition_item.html.twig' %}
+    {% include 'filters/filter_items/list_item.html.twig' with {
+        elements: constant('App\\Entity\\DepositTicket::NAMES'),
+        name: 'state',
+        placeholder: 'Etat'
+    } %}
 {% endblock %}

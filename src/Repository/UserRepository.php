@@ -24,8 +24,7 @@ class UserRepository extends EntityRepository {
             ->addSelect("user.lastLogin as lastLogin")
             ->join("user.role", "role")
             ->getQuery()
-            ->getResult();
-
+            ->iterate();
     }
 
     public function findForDatatable(array $params): array {
@@ -81,6 +80,14 @@ class UserRepository extends EntityRepository {
             ->andWhere("role.allowEditOwnGroupOnly = 0 OR :group MEMBER OF user.groups")
             ->andWhere("user.active = 1")
             ->setParameter("group", $group)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByUsernameOrEmail($search) {
+        return $this->createQueryBuilder("user")
+            ->where("user.email LIKE :search OR user.username LIKE :search")
+            ->setParameter("search", $search)
             ->getQuery()
             ->getResult();
     }

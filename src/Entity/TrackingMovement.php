@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Repository\TrackingMovementRepository;
 use DateTime;
-use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -37,10 +36,9 @@ class TrackingMovement {
     private ?Quality $quality = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=State::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\Column(type="integer")
      */
-    private ?State $state = null;
+    private ?int $state = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Client::class)
@@ -98,11 +96,11 @@ class TrackingMovement {
         return $this;
     }
 
-    public function getState(): ?State {
+    public function getState(): ?int {
         return $this->state;
     }
 
-    public function setState(?State $state): self {
+    public function setState(?int $state): self {
         $this->state = $state;
 
         return $this;

@@ -1,3 +1,2 @@
-{% set placeholder = placeholder is defined and placeholder ? placeholder : 'Qualité' %}
-<select name="quality" class="data" data-s2="quality" data-placeholder="{{ placeholder }}">
+<select name="quality" class="data" data-s2="quality" data-placeholder="{{ placeholder ?? 'Qualité' }}">
 </select>

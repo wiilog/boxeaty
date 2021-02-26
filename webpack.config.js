@@ -12,8 +12,10 @@ Encore
 
     .addStyleEntry("email", "./assets/styles/fonts.scss")
     .addEntry("app", "./assets/app.js")
-    .addEntry("movement_list", "./assets/pages/movement-list.js")
+    .addEntry("box_list", "./assets/pages/box-list.js")
+    .addEntry("box_show", "./assets/pages/box-show.js")
     .addEntry("deposit_ticket_list", "./assets/pages/deposit-ticket-list.js")
+    .addEntry("movement_list", "./assets/pages/movement-list.js")
     .addEntry("location_list", "./assets/pages/location-list.js")
     .addEntry("group_list", "./assets/pages/group-list.js")
     .addEntry("client_list", "./assets/pages/client-list.js")
@@ -23,8 +25,7 @@ Encore
     .addEntry("user_list", "./assets/pages/user-list.js")
     .addEntry("role_list", "./assets/pages/role-list.js")
     .addEntry("quality_list", "./assets/pages/quality-list.js")
-    .addEntry("box_list", "./assets/pages/box-list.js")
-    .addEntry("box_show", "./assets/pages/box-show.js")
+    .addEntry("import_list", "./assets/pages/import-list.js")
     .autoProvidejQuery()
 
     .splitEntryChunks()

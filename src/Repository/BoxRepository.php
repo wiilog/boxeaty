@@ -61,34 +61,14 @@ class BoxRepository extends EntityRepository {
 
         foreach($params["filters"] as $name => $value) {
             switch($name) {
-                case("owner"):
-                    $qb->leftJoin("box.client", "filter_client")
-                        ->andWhere("filter_client.name LIKE :value")
-                        ->setParameter("value", "%$value%");
-                    break;
-                case("location"):
-                    $qb->leftJoin("box.location", "filter_location")
-                        ->andWhere("filter_location.name LIKE :value")
-                        ->setParameter("value", "%$value%");
-                    break;
-                case("state"):
-                    $qb->andWhere("box.state LIKE :value")
-                        ->setParameter("value", "%$value%");
-                    break;
-                case("quality"):
-                    $qb->leftJoin("box.quality", "filter_location")
-                        ->andWhere("filter_location.name LIKE :value")
-                        ->setParameter("value", "%$value%");
-                    break;
                 case("group"):
                     $qb->leftJoin("box.owner", "filter_client")
-                        ->leftJoin("filter_client.group", "filter_group")
-                        ->andWhere("filter_group.name LIKE :value")
-                        ->setParameter("value", "%$value%");
+                        ->andWhere("filter_client.group = :filter_group")
+                        ->setParameter("filter_group", $value);
                     break;
                 default:
-                    $qb->andWhere("box.$name LIKE :filter_$name")
-                        ->setParameter("filter_$name", "%$value%");
+                    $qb->andWhere("box.$name = :filter_$name")
+                        ->setParameter("filter_$name", $value);
                     break;
             }
         }

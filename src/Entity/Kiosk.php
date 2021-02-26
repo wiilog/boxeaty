@@ -30,6 +30,11 @@ class Kiosk
     private ?Client $client = null;
 
     /**
+     * @ORM\OneToMany(targetEntity=Box::class, mappedBy="kiosk")
+     */
+    private Collection $boxes;
+
+    /**
      * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="kiosk")
      */
     private Collection $depositTickets;
@@ -37,6 +42,7 @@ class Kiosk
     public function __construct()
     {
         $this->depositTickets = new ArrayCollection();
+        $this->boxes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -69,6 +75,36 @@ class Kiosk
     }
 
     /**
+     * @return Collection|Box[]
+     */
+    public function getBoxes(): Collection
+    {
+        return $this->boxes;
+    }
+
+    public function addBox(Box $box): self
+    {
+        if (!$this->boxes->contains($box)) {
+            $this->boxes[] = $box;
+            $box->setKiosk($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBox(Box $box): self
+    {
+        if ($this->boxes->removeElement($box)) {
+            // set the owning side to null (unless already changed)
+            if ($box->getKiosk() === $this) {
+                $box->setKiosk(null);
+            }
+        }
+
+        return $this;
+    }
+    
+    /**
      * @return Collection|DepositTicket[]
      */
     public function getDepositTickets(): Collection
@@ -97,4 +133,5 @@ class Kiosk
 
         return $this;
     }
+
 }

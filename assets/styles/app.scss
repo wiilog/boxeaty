@@ -101,6 +101,7 @@ main:not(.login) {
             display: flex;
             flex-direction: row;
             align-items: center;
+            flex-wrap: wrap;
 
             &>* {
                 margin-right: 25px;

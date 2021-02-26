@@ -38,5 +38,4 @@ $(document).ready(() => {
     });
 
     $(`.new-location`).click(() => newLocationModal.open());
-    $(`.filter`).click(() => table.ajax.reload());
 });
