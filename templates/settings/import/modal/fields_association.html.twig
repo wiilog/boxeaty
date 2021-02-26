@@ -20,8 +20,16 @@
                             <td>{{ field.value }}</td>
                             <td>
                                 <select name="associations" class="data-array" data-s2 data-placeholder="Sélectionnez un champ">
-                                    {% for code, name in fields %}
-                                        <option value="{{ code }}" {{ field.closest == code ? 'selected' }}>{{ name }}</option>
+                                    {% for code, config in fields %}
+                                        <option value="{{ code }}" {{ field.closest == code ? 'selected' }}>
+                                            {{ config.name }}
+
+                                            {% if config.unique is defined and config.unique %}
+                                                <u>(clé unique)</u>
+                                            {% else %}
+                                                {{ config.required ?? false ? '*' }}
+                                            {% endif %}
+                                        </option>
                                     {% endfor %}
                                 </select>
                             </td>
@@ -29,6 +37,12 @@
                     {% endfor %}
                     </tbody>
                 </table>
+
+                <p class="mt-2 mb-0 text-center">
+                    * Champ obligatoire à la création<br>
+                    La clé unique permet d'identifier une valeur unique d'enregistrement
+                    et sera utilisé pour effectuer une mise à jour
+                </p>
             </div>
 
             <div class="footer">

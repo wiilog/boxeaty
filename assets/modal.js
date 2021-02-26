@@ -180,20 +180,24 @@ export default class Modal {
     }
 
     clear() {
-        this.element.find(`input.data:not([type=checkbox]):not([type=radio]), select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
-        this.element.find(`input[type=checkbox][checked], input[type=radio][checked]`).prop(`checked`, false);
-
-        for(const check of this.element.find(`input[type=checkbox][checked], input[type=radio][checked]`)) {
-            $(check).prop(`checked`, true);
-        }
-
-        this.element.find(`.is-invalid .is-valid`).removeClass(`is-invalid is-valid`);
-        this.element.find(`.invalid-feedback`).remove();
+        clearForm(this.element);
     }
 
     elem() {
         return this.element;
     }
+}
+
+export function clearForm($elem) {
+    $elem.find(`input.data:not([type=checkbox]):not([type=radio]), select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
+    $elem.find(`input[type=checkbox][checked], input[type=radio][checked]`).prop(`checked`, false);
+
+    for(const check of $elem.find(`input[type=checkbox][checked], input[type=radio][checked]`)) {
+        $(check).prop(`checked`, true);
+    }
+
+    $elem.find(`.is-invalid .is-valid`).removeClass(`is-invalid is-valid`);
+    $elem.find(`.invalid-feedback`).remove();
 }
 
 export function processForm($parent) {

@@ -29,6 +29,7 @@ class Import {
 
     public const NUMBER = "number";
     public const LOCATION = "location";
+    public const KIOSK = "kiosk";
     public const STATE = "state";
     public const QUALITY = "quality";
     public const OWNER = "owner";
@@ -36,13 +37,35 @@ class Import {
     public const COMMENT = "comment";
 
     public const FIELDS = [
-        self::NUMBER => "Numéro",
-        self::LOCATION => "Emplacement",
-        self::STATE => "Etat",
-        self::QUALITY => "Qualité",
-        self::OWNER => "Propriétaire",
-        self::TYPE => "Type de box",
-        self::COMMENT => "Commentaire",
+        self::NUMBER => [
+            "name" => "Numéro",
+            "unique" => true,
+            "required" => true,
+        ],
+        self::LOCATION => [
+            "name" => "Emplacement",
+        ],
+        self::KIOSK => [
+            "name" => "Borne",
+        ],
+        self::STATE => [
+            "name" => "Etat",
+            "required" => true,
+        ],
+        self::QUALITY => [
+            "name" => "Qualité",
+            "required" => true,
+        ],
+        self::OWNER => [
+            "name" => "Propriétaire",
+        ],
+        self::TYPE => [
+            "name" => "Type de box",
+            "required" => true,
+        ],
+        self::COMMENT => [
+            "name" => "Commentaire",
+        ],
     ];
 
     /**

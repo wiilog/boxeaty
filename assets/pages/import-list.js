@@ -3,7 +3,7 @@ import '../app';
 import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
-import {initDatatable} from "../datatable";
+import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
 
 $(document).ready(() => {
     const newImportModal = Modal.static(`#modal-new-import`, {
@@ -33,7 +33,7 @@ $(document).ready(() => {
             {data: `updates`, title: `Mises à jour`},
             {data: `errors`, title: `Erreurs`},
             {data: `user`, title: `Utilisateur`},
-            {data: `actions`, title: `Actions`},
+            DATATABLE_ACTIONS,
         ],
         order: [[`creationDate`, `desc`]],
         listeners: {

@@ -42,6 +42,4 @@ $(document).ready(() => {
             delete: data => deleteDepositTicketModal.open(data),
         }
     });
-
-    $(`.filter`).click(() => table.ajax.reload());
 });

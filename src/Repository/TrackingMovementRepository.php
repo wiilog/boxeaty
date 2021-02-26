@@ -43,13 +43,13 @@ class TrackingMovementRepository extends EntityRepository {
 
         foreach($params["filters"] as $name => $value) {
             switch($name) {
-                case 'from':
-                    $qb->andWhere('movement.date >= :from')
-                        ->setParameter('from', "%$value%" . " 00:00:00");
+                case "from":
+                    $qb->andWhere("DATE(movement.date) >= :from")
+                        ->setParameter("from", $value);
                     break;
-                case 'to':
-                    $qb->andWhere('movement.date <= :to')
-                        ->setParameter('to', "%$value%" . " 23:59:59");
+                case "to":
+                    $qb->andWhere("DATE(movement.date) <= :to")
+                        ->setParameter("to", $value);
                     break;
                 case("client"):
                     $qb->leftJoin("movement.client", "filter_client")

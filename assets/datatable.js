@@ -1,5 +1,5 @@
 import $ from "jquery";
-import {processForm} from "./modal";
+import {clearForm, processForm} from "./modal";
 
 export const DATATABLE_ACTIONS_TITLE = `<span style="display:block;text-align:center">Actions</span>`;
 export const DATATABLE_ACTIONS = {
@@ -85,6 +85,12 @@ export function initDatatable(table, config) {
                 callback(row.data())
             }
         });
+
+    $(`.filters .filter`).click(() => $datatable.ajax.reload());
+    $(`.filters .empty-filters`).click(function() {
+        console.log("ok");
+        clearForm($(this).parents(`.filters`))
+    });
 
     return $datatable;
 }

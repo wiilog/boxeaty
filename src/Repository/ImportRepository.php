@@ -27,6 +27,23 @@ class ImportRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
+        foreach($params["filters"] as $name => $value) {
+            switch($name) {
+                case "from":
+                    $qb->andWhere("DATE(import.creationDate) >= :from")
+                        ->setParameter("from", $value);
+                    break;
+                case "to":
+                    $qb->andWhere("DATE(import.creationDate) <= :to")
+                        ->setParameter("to", $value);
+                    break;
+                case "status":
+                    $qb->andWhere("import.status = :filter_status")
+                        ->setParameter("filter_status", $value);
+                    break;
+            }
+        }
+
         foreach ($params["order"] ?? [] as $order) {
             $column = $params["columns"][$order["column"]]["data"];
             if ($column === "user") {

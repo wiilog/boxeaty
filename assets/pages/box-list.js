@@ -46,6 +46,4 @@ $(document).ready(() => {
             delete: data => deleteBoxModal.open(data),
         }
     });
-
-    $(`.filter`).click(() => table.ajax.reload());
 });

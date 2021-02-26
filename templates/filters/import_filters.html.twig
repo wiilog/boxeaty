@@ -1,0 +1,10 @@
+{% extends 'filters/template.html.twig' %}
+
+{% block filters %}
+    {% include('filters/filter_items/date_item.html.twig') %}
+    {% include('filters/filter_items/list_item.html.twig') with {
+        elements: constant('App\\Entity\\Import::NAMES'),
+        name: 'status',
+        placeholder: 'Statut'
+    } %}
+{% endblock %}

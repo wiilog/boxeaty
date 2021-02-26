@@ -109,12 +109,12 @@ class ImportController extends AbstractController {
             $session->set("draft-import", $import);
 
             $preAssignments = [];
-            foreach (Import::FIELDS as $code => $name) {
+            foreach (Import::FIELDS as $code => $config) {
                 $closest = null;
                 $closestDistance = PHP_INT_MAX;
 
                 foreach ($fields as $fileField) {
-                    $distance = StringHelper::levenshtein($fileField, $name);
+                    $distance = StringHelper::levenshtein($fileField, $config["name"]);
                     if ($distance < 5 && $distance < $closestDistance) {
                         $closest = $fileField;
                         $closestDistance = $distance;
@@ -125,7 +125,7 @@ class ImportController extends AbstractController {
                     $preAssignments[$closest] = $code;
                 }
             }
-
+dump(Import::FIELDS);
             return $this->json([
                 "success" => true,
                 "modal" => $this->renderView("settings/import/modal/fields_association.html.twig", [

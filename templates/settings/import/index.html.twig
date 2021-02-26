@@ -3,6 +3,10 @@
 {% block menu %}Paramétrage{% endblock %}
 {% block page %}Imports{% endblock %}
 
+{% block filter_header %}
+    {% include 'filters/import_filters.html.twig' %}
+{% endblock %}
+
 {% block content %}
     <div class="box first-box">
         <div class="content-menu">

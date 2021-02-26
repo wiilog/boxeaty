@@ -40,9 +40,13 @@ class Box {
 
     /**
      * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="boxes")
-     * @ORM\JoinColumn(nullable=false)
      */
     private ?Location $location = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Kiosk::class, inversedBy="boxes")
+     */
+    private ?Kiosk $kiosk = null;
 
     /**
      * @ORM\Column(type="integer")
@@ -135,6 +139,15 @@ class Box {
     {
         $this->state = $state;
 
+        return $this;
+    }
+
+    public function getKiosk(): ?Kiosk {
+        return $this->kiosk;
+    }
+
+    public function setKiosk(?Kiosk $kiosk): self {
+        $this->kiosk = $kiosk;
         return $this;
     }
 

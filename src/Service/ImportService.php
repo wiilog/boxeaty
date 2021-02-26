@@ -10,8 +10,6 @@ use App\Entity\Location;
 use App\Entity\Quality;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 class ImportService {
@@ -118,7 +116,7 @@ class ImportService {
     private function value(string $column, bool $required = false): ?string {
         $value = $this->data[$this->import->getFieldsAssociation()[$column]] ?? null;
         if ($required && !$value) {
-            $this->addError("Le champ " . Import::FIELDS[$column] . " est requis");
+            $this->addError("Le champ " . Import::FIELDS[$column]["name"] . " est requis");
         }
 
         return $value;
