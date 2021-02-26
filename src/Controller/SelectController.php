@@ -8,6 +8,7 @@ use App\Entity\Client;
 use App\Entity\Group;
 use App\Entity\Location;
 use App\Entity\Quality;
+use App\Entity\Kiosk;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -99,6 +100,17 @@ class SelectController extends AbstractController {
      */
     public function qualities(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(Quality::class)->getForSelect($request->query->get("term"));
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/kios", name="ajax_select_kiosks", options={"expose": true})
+     */
+    public function kiosk(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Kiosk::class)->getForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,

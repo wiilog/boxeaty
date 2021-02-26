@@ -133,4 +133,5 @@ class Kiosk
 
         return $this;
     }
+
 }

@@ -27,7 +27,7 @@ class TrackingMovementRepository extends EntityRepository {
             ->join("movement.state", "state")
             ->join("movement.client", "client")
             ->getQuery()
-            ->getResult();
+            ->iterate();
     }
 
     public function findForDatatable(array $params) {
