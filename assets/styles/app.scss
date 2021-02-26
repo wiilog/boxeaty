@@ -254,6 +254,7 @@ main:not(.login) {
 }
 
 .point {
+    display: inline-block;
     padding: 10px 40px;
     position: relative;
     background-color: inherit;
@@ -274,7 +275,7 @@ main:not(.login) {
 }
 
 .detail {
-    padding: 10px 40px;
+    padding: 10px 30px;
     position: relative;
     background-color: inherit;
     width: 28%;
@@ -289,10 +290,6 @@ main:not(.login) {
     bottom: 0;
     left: -7px;
     height: 100px;
-}
-
-.timeline-line:not(:first-of-type) {
-    margin-top: 28px !important;
 }
 
 .comment {
