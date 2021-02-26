@@ -101,7 +101,7 @@ export default class Modal {
             })
 
             $input.on(`change`, function() {
-                addUpload(modal, $input.attr(`name`), $(this)[0].files);
+                addUpload(modal, $input.attr(`name`), $(this)[0].files[0]);
                 $dropframe.addClass(`is-valid`);
             });
 
