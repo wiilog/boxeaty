@@ -78,10 +78,16 @@ class Client {
      */
     private Collection $clients;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Box::class, mappedBy="owner")
+     */
+    private $boxes;
+
     public function __construct() {
         $this->users = new ArrayCollection();
         $this->kiosks = new ArrayCollection();
         $this->clients = new ArrayCollection();
+        $this->boxes = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -240,6 +246,36 @@ class Client {
             // set the owning side to null (unless already changed)
             if ($client->getLinkedMultiSite() === $this) {
                 $client->setLinkedMultiSite(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Box[]
+     */
+    public function getBoxes(): Collection
+    {
+        return $this->boxes;
+    }
+
+    public function addBox(Box $box): self
+    {
+        if (!$this->boxes->contains($box)) {
+            $this->boxes[] = $box;
+            $box->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBox(Box $box): self
+    {
+        if ($this->boxes->removeElement($box)) {
+            // set the owning side to null (unless already changed)
+            if ($box->getOwner() === $this) {
+                $box->setOwner(null);
             }
         }
 

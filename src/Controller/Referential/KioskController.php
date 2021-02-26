@@ -47,7 +47,10 @@ class KioskController extends AbstractController {
                 "id" => $kiosk->getId(),
                 "name" => $kiosk->getName(),
                 "client" => $kiosk->getClient() ? $kiosk->getClient()->getName() : '',
-                "actions" => $this->renderView("referential/kiosk/datatable_actions.html.twig"),
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
+                    "deletable" => true,
+                ]),
             ];
         }
 
@@ -65,7 +68,7 @@ class KioskController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Kiosk::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Cette borne existe déjà");
@@ -110,7 +113,7 @@ class KioskController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Kiosk $kiosk): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Kiosk::class)->findOneBy(["name" => $content->name]);
         $client = $manager->getRepository(Client::class)->find($content->client);
         if ($existing !== null && $existing !== $kiosk) {
@@ -142,16 +145,11 @@ class KioskController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        $header = array_merge([
-            "Nom de la borne",
-            "Client",
-        ]);
-
         return $exportService->export(function($output) use ($exportService, $kiosks) {
             foreach ($kiosks as $kiosk) {
                 $exportService->putLine($output, $kiosk);
             }
-        }, "export-bornes-$today.csv", $header);
+        }, "export-bornes-$today.csv", ExportService::KIOSK_HEADER);
     }
 
 }

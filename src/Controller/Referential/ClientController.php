@@ -55,8 +55,12 @@ class ClientController extends AbstractController {
                 "address" => $client->getAddress(),
                 "contact" => FormatHelper::user($client->getContact()),
                 "group" => FormatHelper::named($client->getGroup()),
-                "multiSite" => FormatHelper::named($client->getLinkedMultiSite()),
-                "actions" => $this->renderView("referential/client/datatable_actions.html.twig"),
+                "multiSite" => $client->isMultiSite() ? "Oui" : "Non",
+                "linkedMultiSite" => FormatHelper::named($client->getLinkedMultiSite()),
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
+                    "deletable" => false
+                ]),
             ];
         }
 
@@ -74,10 +78,13 @@ class ClientController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $contact = $manager->getRepository(User::class)->find($content->contact);
         $group = $manager->getRepository(Group::class)->find($content->group);
-        $multiSite = $content->linkedMultiSite ? $manager->getRepository(Client::class)->find($content->linkedMultiSite) : null;
+        $multiSite = isset($content->linkedMultiSite)
+            ? $manager->getRepository(Client::class)->find($content->linkedMultiSite)
+            : null;
+
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("email", "Ce client existe déjà");
@@ -133,7 +140,7 @@ class ClientController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Client $client): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $contact = $manager->getRepository(User::class)->find($content->contact);
         $group = $manager->getRepository(Group::class)->find($content->group);
         $multiSite = isset($content->linkedMultiSite) ? $manager->getRepository(Client::class)->find($content->linkedMultiSite) : null;

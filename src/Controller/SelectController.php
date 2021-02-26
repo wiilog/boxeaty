@@ -3,8 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Box;
+use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\Group;
+use App\Entity\Location;
+use App\Entity\Quality;
 use App\Entity\Kiosk;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -60,10 +63,43 @@ class SelectController extends AbstractController {
     }
 
     /**
-     * @Route("/select/user", name="ajax_select_users", options={"expose": true})
+     * @Route("/select/utilisateur", name="ajax_select_users", options={"expose": true})
      */
     public function users(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(User::class)->getForSelect($request->query->get("term"));
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/emplacement", name="ajax_select_locations", options={"expose": true})
+     */
+    public function locations(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Location::class)->getForSelect($request->query->get("term"));
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/type", name="ajax_select_type", options={"expose": true})
+     */
+    public function types(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(BoxType::class)->getForSelect($request->query->get("term"));
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/qualite", name="ajax_select_quality", options={"expose": true})
+     */
+    public function qualities(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Quality::class)->getForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,

@@ -12,6 +12,20 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Box {
 
+    public const AVAILABLE = 1;
+    public const UNAVAILABLE = 2;
+    public const CONSUMER = 3;
+    public const CLIENT = 4;
+    public const OUT = 5;
+
+    public const NAMES = [
+        self::AVAILABLE => "Disponible",
+        self::UNAVAILABLE => "Indisponible",
+        self::CONSUMER => "Consommateur",
+        self::CLIENT => "Client",
+        self::OUT => "Sorti",
+    ];
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -23,6 +37,44 @@ class Box {
      * @ORM\Column(type="string", length=255, unique=true)
      */
     private ?string $number = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="boxes")
+     */
+    private ?Location $location = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Kiosk::class, inversedBy="boxes")
+     */
+    private ?Kiosk $kiosk = null;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private ?int $state = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Quality::class, inversedBy="boxes")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private ?Quality $quality = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="boxes")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private ?Client $owner = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=BoxType::class, inversedBy="boxes")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private ?BoxType $type = null;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private ?string $comment = null;
 
     /**
      * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", orphanRemoval=true)
@@ -62,6 +114,87 @@ class Box {
                 $trackingMovement->setBox($this);
             }
         }
+
+        return $this;
+    }
+
+    public function getLocation(): ?Location
+    {
+        return $this->location;
+    }
+
+    public function setLocation(?Location $location): self
+    {
+        $this->location = $location;
+
+        return $this;
+    }
+
+    public function getState(): ?int
+    {
+        return $this->state;
+    }
+
+    public function setState(int $state): self
+    {
+        $this->state = $state;
+
+        return $this;
+    }
+
+    public function getKiosk(): ?Kiosk {
+        return $this->kiosk;
+    }
+
+    public function setKiosk(?Kiosk $kiosk): self {
+        $this->kiosk = $kiosk;
+        return $this;
+    }
+
+    public function getQuality(): ?quality
+    {
+        return $this->quality;
+    }
+
+    public function setQuality(?quality $quality): self
+    {
+        $this->quality = $quality;
+
+        return $this;
+    }
+
+    public function getOwner(): ?client
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?client $owner): self
+    {
+        $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function getType(): ?BoxType
+    {
+        return $this->type;
+    }
+
+    public function setType(?BoxType $type): self
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getComment(): ?string
+    {
+        return $this->comment;
+    }
+
+    public function setComment(string $comment): self
+    {
+        $this->comment = $comment;
 
         return $this;
     }

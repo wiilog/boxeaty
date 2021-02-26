@@ -1,5 +1,5 @@
-<select name="condition" class="data" data-s2 data-placeholder="Etat">
-    <option value="{{ constant('App\\Entity\\DepositTicket::VALID') }}">Valable</option>
+<select name="state" class="data" data-s2 data-placeholder="Etat">
+    <option value="{{ constant('App\\Entity\\Box::VALID') }}">Valable</option>
     <option value="{{ constant('App\\Entity\\DepositTicket::SPENT') }}">Utilisé</option>
     <option value="{{ constant('App\\Entity\\DepositTicket::EXPIRED') }}">Périmé</option>
 </select>

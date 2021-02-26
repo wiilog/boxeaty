@@ -18,6 +18,7 @@ class Role {
     public const MANAGE_USERS = "MANAGE_USERS";
     public const MANAGE_ROLES = "MANAGE_ROLES";
     public const MANAGE_QUALITIES = "MANAGE_QUALITIES";
+    public const MANAGE_IMPORTS = "MANAGE_IMPORTS";
 
     public const MANAGE_CLIENTS = "MANAGE_CLIENTS";
     public const DEACTIVATE_CLIENT = "DEACTIVATE_CLIENT";
@@ -37,6 +38,8 @@ class Role {
     public const DELETE_MOVEMENT = "DELETE_MOVEMENT";
     public const MANAGE_DEPOSIT_TICKETS = "MANAGE_DEPOSIT_TICKETS";
     public const DELETE_DEPOSIT_TICKET = "DELETE_DEPOSIT_TICKET";
+    public const MANAGE_BOXES = "MANAGE_BOX";
+    public const DELETE_BOX = "DELETE_BOX";
 
     use Active;
 

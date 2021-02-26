@@ -1,0 +1,5 @@
+<select name="{{ name }}" class="data" data-s2 data-placeholder="{{ placeholder }}">
+    {% for index, element in elements %}
+        <option value="{{ index }}">{{ element }}</option>
+    {% endfor %}
+</select>

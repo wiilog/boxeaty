@@ -6,6 +6,7 @@ parameters:
       App\Entity\Role::MANAGE_USERS: Créer et modifier les utilisateurs
       App\Entity\Role::MANAGE_ROLES: Créer et modifier les rôles
       App\Entity\Role::MANAGE_QUALITIES: Créer et modifier les qualités
+      App\Entity\Role::MANAGE_IMPORTS: Créer et modifier les imports
 
     Menu référentiel:
       App\Entity\Role::MANAGE_CLIENTS: Créer et modifier les clients
@@ -26,7 +27,8 @@ parameters:
       App\Entity\Role::MANAGE_MOVEMENTS: Créer et modifier des mouvements
       App\Entity\Role::DELETE_MOVEMENT: Suppression de mouvement
       App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer et modifier des tickets consigne
-      App\Entity\Role::DELETE_DEPOSIT_TICKET: Suppression de ticket consigne
+      App\Entity\Role::MANAGE_BOXES: Créer et modifier des Box
+      App\Entity\Role::DELETE_BOX: Suppression de Box
 
 
   menu:
@@ -39,8 +41,10 @@ parameters:
       type: category
       items:
         - name: Box
-          route: missing_route
-        - name: Numéro consigne
+          permission: App\Entity\Role::MANAGE_BOXES
+          route: boxes_list
+        - name: Suivi ticket-consigne
+          permission: App\Entity\Role::MANAGE_DEPOSIT_TICKETS
           route: deposit_tickets_list
         - name: Mouvements
           permission: App\Entity\Role::MANAGE_MOVEMENTS
@@ -81,7 +85,8 @@ parameters:
           route: qualities_list
           permission: App\Entity\Role::MANAGE_QUALITIES
         - name: Imports et mises à jour
-          route: missing_route
+          route: imports_list
+          permission: App\Entity\Role::MANAGE_IMPORTS
     - name: Déconnexion
       icon: sign-out-alt
       type: link

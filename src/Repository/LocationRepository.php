@@ -46,4 +46,15 @@ class LocationRepository extends EntityRepository
             "filtered" => $filtered,
         ];
     }
+
+    public function getForSelect(?string $search) {
+        return $this->createQueryBuilder("location")
+            ->select("location.id AS id, location.name AS text")
+            ->where("location.name LIKE :search")
+            ->andWhere("location.active = 1")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
 }

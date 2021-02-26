@@ -20,7 +20,7 @@ $(document).ready(() => {
         ajax: AJAX.route(`POST`, `locations_api`),
         columns: [
             {data: `name`, title: `Nom de l'emplacement`},
-            {data: `active`, title: `Statut`},
+            {data: `active`, title: `Actif`},
             {data: `description`, title: `Description`},
             DATATABLE_ACTIONS,
         ],
@@ -38,5 +38,4 @@ $(document).ready(() => {
     });
 
     $(`.new-location`).click(() => newLocationModal.open());
-    $(`.filter`).click(() => table.ajax.reload());
 });

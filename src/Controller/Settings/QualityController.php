@@ -43,7 +43,8 @@ class QualityController extends AbstractController {
             $data[] = [
                 "id" => $quality->getId(),
                 "name" => $quality->getName(),
-                "actions" => $this->renderView("settings/quality/datatable_actions.html.twig", [
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
                     "deletable" => $deletable[$quality->getId()],
                 ]),
             ];
@@ -63,7 +64,7 @@ class QualityController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Quality::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Une qualité avec ce nom existe déjà");
@@ -105,7 +106,7 @@ class QualityController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Quality $quality): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(Quality::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $quality) {
             $form->addError("name", "Une autre qualité avec ce nom existe déjà");
@@ -129,7 +130,7 @@ class QualityController extends AbstractController {
      * @HasPermission(Role::MANAGE_QUALITIES)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $quality = $manager->getRepository(Quality::class)->find($content->id);
 
         //TODO: check if quality is used by users
@@ -159,15 +160,11 @@ class QualityController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        $header = array_merge([
-            "Nom",
-        ]);
-
         return $exportService->export(function($output) use ($exportService, $qualities) {
             foreach ($qualities as $quality) {
                 $exportService->putLine($output, $quality);
             }
-        }, "export-qualites-$today.csv", $header);
+        }, "export-qualites-$today.csv", ExportService::QUALITY_HEADER);
     }
 
 }

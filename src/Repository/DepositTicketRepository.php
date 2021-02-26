@@ -22,7 +22,7 @@ class DepositTicketRepository extends EntityRepository
             ->addSelect("deposit_ticket.number AS number")
             ->addSelect("deposit_ticket.useDate AS use_date")
             ->addSelect("join_client.name AS client")
-            ->addSelect("deposit_ticket.condition AS condition")
+            ->addSelect("deposit_ticket.state AS state")
             ->join("deposit_ticket.kiosk", "join_kiosk")
             ->join("join_kiosk.client", "join_client")
             ->getQuery()
@@ -39,7 +39,7 @@ class DepositTicketRepository extends EntityRepository
             $qb->where("search_kiosk.name LIKE :search")
                 ->orWhere("deposit_ticket.number LIKE :search")
                 ->orWhere("search_client.name LIKE :search")
-                ->orWhere("deposit_ticket.condition LIKE :search")
+                ->orWhere("deposit_ticket.state LIKE :search")
                 ->join("deposit_ticket.kiosk", "search_kiosk")
                 ->join("search_kiosk.client", "search_client")
                 ->setParameter("search", "%$search%");
@@ -47,18 +47,22 @@ class DepositTicketRepository extends EntityRepository
 
         foreach($params["filters"] as $name => $value) {
             switch($name) {
-                case 'from':
-                    $qb->andWhere('deposit_ticket.creationDate >= :from')
-                        ->setParameter('from', "%$value%" . " 00:00:00");
+                case "from":
+                    $qb->andWhere("DATE(deposit_ticket.creationDate) >= :from")
+                        ->setParameter("from", $value);
                     break;
-                case 'to':
-                    $qb->andWhere('deposit_ticket.creationDate <= :to')
-                        ->setParameter('to', "%$value%" . " 23:59:59");
+                case "to":
+                    $qb->andWhere("DATE(deposit_ticket.creationDate) <= :to")
+                        ->setParameter("to", $value);
                     break;
-                case("kiosk"):
+                case "kiosk":
                     $qb->leftJoin("deposit_ticket.kiosk", "filter_kiosk")
-                        ->andWhere("filter_kiosk.name LIKE :value")
-                        ->setParameter("value", "%$value%");
+                        ->andWhere("filter_kiosk.name LIKE :filter_kiosk")
+                        ->setParameter("filter_kiosk", "%$value%");
+                    break;
+                case "state":
+                    $qb->andWhere("deposit_ticket.state = :filter_state")
+                        ->setParameter("filter_state", $value);
                     break;
                 default:
                     $qb->andWhere("deposit_ticket.$name LIKE :filter_$name")

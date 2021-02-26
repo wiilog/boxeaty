@@ -2,7 +2,7 @@
 @import "mixins";
 
 //temporary should be replaced with custom style
-input:focus { outline: none; }
+input:focus, select { outline: none; }
 
 label {
     display: block;
@@ -17,7 +17,7 @@ label {
         margin-bottom: 5px;
     }
 
-    input {
+    input, select {
         display: block;
         width: 100%;
     }
@@ -34,7 +34,7 @@ label {
     }
 }
 
-input:not([type="checkbox"]):not([type="radio"]) {
+input:not([type="checkbox"]):not([type="radio"]), select {
     @include input();
 }
 
@@ -111,6 +111,37 @@ button, a {
     .icon {
         display: inline-block;
         margin-right: 5px;
+    }
+}
+
+.attachment-drop-frame {
+    background: $grey;
+    border-radius: 6px;
+    padding: 23px;
+    text-align: center;
+    line-height: 1.3rem;
+    transition: background 200ms;
+
+    &:hover {
+        background: $grey-dark;
+    }
+
+    .click-here {
+        cursor: pointer;
+        white-space: nowrap;
+        font-weight: bold;
+    }
+
+    input[type="file"] {
+        display: none;
+    }
+
+    &.is-valid {
+        background: $pale-green;
+    }
+
+    &.is-invalid {
+        background: $pale-red;
     }
 }
 

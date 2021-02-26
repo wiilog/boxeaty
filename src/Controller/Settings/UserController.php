@@ -53,7 +53,10 @@ class UserController extends AbstractController {
                 "email" => $user->getEmail(),
                 "lastLogin" => $user->getLastLogin() ? $user->getLastLogin()->format("d/m/Y H:i") : "/",
                 "role" => $user->getRole()->getName(),
-                "actions" => $this->renderView("settings/user/datatable_actions.html.twig"),
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
+                    "deletable" => true,
+                ]),
             ];
         }
 
@@ -71,7 +74,7 @@ class UserController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager, UserPasswordEncoderInterface $encoder): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(User::class)->findOneBy(["email" => $content->email]);
         if ($existing) {
             $form->addError("email", "L'adresse email est déjà utilisée par un autre utilisateur");
@@ -135,7 +138,7 @@ class UserController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, UserPasswordEncoderInterface $encoder, User $user): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(User::class)->findOneBy(["email" => $content->email]);
         if ($existing !== null && $existing !== $user) {
             $form->addError("email", "L'adresse email est déjà utilisée par un autre utilisateur");
@@ -185,7 +188,7 @@ class UserController extends AbstractController {
      * @HasPermission(Role::MANAGE_USERS)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $user = $manager->getRepository(User::class)->find($content->id);
 
         //TODO: check for movements

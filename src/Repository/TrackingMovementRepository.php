@@ -37,33 +37,41 @@ class TrackingMovementRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "movement");
 
         if ($search) {
-            //TODO: recherche rapide
+            $qb->join("movement.box", "search_box")
+                ->join("movement.client", "search_client")
+                ->join("movement.quality", "search_quality")
+                ->join("movement.user", "search_user")
+                ->andWhere("search_box.number LIKE :search")
+                ->andWhere("search_client.name LIKE :search")
+                ->andWhere("search_quality.name LIKE :search")
+                ->andWhere("search_user.username LIKE :search")
+                ->setParameter("search", "%$search%");
         }
 
-        foreach($params["filters"] as $name => $value) {
-            switch($name) {
-                case 'from':
-                    $qb->andWhere('movement.date >= :from')
-                        ->setParameter('from', "%$value%" . " 00:00:00");
+        foreach ($params["filters"] as $name => $value) {
+            switch ($name) {
+                case "from":
+                    $qb->andWhere("DATE(movement.date) >= :from")
+                        ->setParameter("from", $value);
                     break;
-                case 'to':
-                    $qb->andWhere('movement.date <= :to')
-                        ->setParameter('to', "%$value%" . " 23:59:59");
+                case "to":
+                    $qb->andWhere("DATE(movement.date) <= :to")
+                        ->setParameter("to", $value);
                     break;
-                case("client"):
+                case "client":
                     $qb->leftJoin("movement.client", "filter_client")
                         ->andWhere("filter_client.name LIKE :value")
                         ->setParameter("value", "%$value%");
-                break;
-                case("user"):
+                    break;
+                case "user":
                     $qb->leftJoin("movement.user", "filter_user")
                         ->andWhere("filter_user.username LIKE :value")
                         ->setParameter("value", "%$value%");
-                break;
+                    break;
                 default:
                     $qb->andWhere("location.$name LIKE :filter_$name")
                         ->setParameter("filter_$name", "%$value%");
-                break;
+                    break;
             }
         }
 

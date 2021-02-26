@@ -1,0 +1,27 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Paramétrage{% endblock %}
+{% block page %}Imports{% endblock %}
+
+{% block filter_header %}
+    {% include 'filters/import_filters.html.twig' %}
+{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <button class="primary new-import"><i class="icon fas fa-plus"></i> Nouvel import</button>
+            </div>
+        </div>
+
+        <table id="table-imports"></table>
+    </div>
+
+    {% include 'settings/import/modal/new.html.twig' with {import: new_import} %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('import_list') }}
+{% endblock %}

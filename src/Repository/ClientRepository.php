@@ -38,7 +38,6 @@ class ClientRepository extends EntityRepository {
         if ($search) {
             $qb->where("client.name LIKE :search")
                 ->orWhere("client.address LIKE :search")
-                ->orWhere("client.address LIKE :search")
                 ->orWhere("search_user.username LIKE :search")
                 ->leftJoin("client.users", "search_user")
                 ->setParameter("search", "%$search%");

@@ -62,7 +62,7 @@ class BoxTypeController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Ce type de box existe déjà");
@@ -110,7 +110,7 @@ class BoxTypeController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, BoxType $boxType): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $existing = $manager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $boxType) {
             $form->addError("name", "Un autre type de box avec ce nom existe déjà");

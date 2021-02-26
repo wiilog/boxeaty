@@ -8,6 +8,9 @@ const ROUTES = {
     multiSite: `ajax_select_multi_sites`,
     user: `ajax_select_users`,
     kiosk: `ajax_select_kiosks`,
+    location: `ajax_select_locations`,
+    type: `ajax_select_type`,
+    quality: `ajax_select_quality`,
 }
 
 class Select2 {

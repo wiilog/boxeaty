@@ -52,8 +52,11 @@ class DepositTicketController extends AbstractController {
                 "number" => $depositTicket->getNumber() ?? "",
                 "useDate" => FormatHelper::datetime($depositTicket->getUseDate()) ?: "Inutilisé",
                 "client" => $depositTicket->getKiosk() ? FormatHelper::named($depositTicket->getKiosk()->getClient()) : "",
-                "condition" => DepositTicket::NAMES[$depositTicket->getCondition()] ?? "",
-                "actions" => $this->renderView("tracking/deposit_ticket/datatable_actions.html.twig"),
+                "state" => DepositTicket::NAMES[$depositTicket->getState()] ?? "",
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
+                    "deletable" => true,
+                ]),
             ];
         }
 
@@ -71,7 +74,7 @@ class DepositTicketController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $kiosk = $manager->getRepository(Kiosk::class)->find($content->kiosk);
         $now = new DateTime();
         $validityDate = (clone $now)->modify("+3 months");
@@ -87,7 +90,7 @@ class DepositTicketController extends AbstractController {
                 ->setKiosk($kiosk)
                 ->setValidityDate($validityDate)
                 ->setNumber($content->number)
-                ->setCondition($content->condition);
+                ->setState($content->state);
 
             $manager->persist($depositTicket);
             $manager->flush();
@@ -124,7 +127,7 @@ class DepositTicketController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, DepositTicket $depositTicket): Response {
         $form = Form::create();
 
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $kiosk = $manager->getRepository(Kiosk::class)->find($content->kiosk);
         $existing = $manager->getRepository(DepositTicket::class)->findOneBy(["number" => $content->number]);
         if ($existing !== null && $existing !== $depositTicket) {
@@ -135,7 +138,7 @@ class DepositTicketController extends AbstractController {
             $depositTicket
                 ->setKiosk($kiosk)
                 ->setNumber($content->number)
-                ->setCondition($content->condition);
+                ->setState($content->state);
 
             $manager->flush();
 
@@ -153,7 +156,7 @@ class DepositTicketController extends AbstractController {
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent());
+        $content = (object) $request->request->all();
         $depositTicket = $manager->getRepository(DepositTicket::class)->find($content->id);
 
         if ($depositTicket) {
@@ -182,21 +185,12 @@ class DepositTicketController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        $header = array_merge([
-            "Date de création",
-            "Lieu de création",
-            "Date de validité",
-            "Numéro de consigne",
-            "Date et heure d'utilisation de la consigne",
-            "Emplacement de la consigne",
-            "Etat",
-        ]);
-
         return $exportService->export(function($output) use ($exportService, $depositTickets) {
             foreach ($depositTickets as $depositTicket) {
+                $depositTicket["state"] = DepositTicket::NAMES[$depositTicket["state"]];
                 $exportService->putLine($output, $depositTicket);
             }
-        }, "export-tickets-consigne-$today.csv", $header);
+        }, "export-tickets-consigne-$today.csv", ExportService::DEPOSIT_TICKET_HEADER);
     }
 
 }

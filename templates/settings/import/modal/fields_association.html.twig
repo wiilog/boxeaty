@@ -1,0 +1,54 @@
+<div id="modal-new-import-fields" class="modal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Import d'un fichier</h1>
+
+            <div class="body">
+                <table class="w-100">
+                    <thead>
+                    <tr>
+                        <th>Titre de colonne du fichier</th>
+                        <th>Aperçu (ligne 1)</th>
+                        <th>Champ de l'application</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for index, field in file_fields %}
+                        <tr>
+                            <td>{{ field.name }}</td>
+                            <td>{{ field.value }}</td>
+                            <td>
+                                <select name="associations" class="data-array" data-s2 data-placeholder="Sélectionnez un champ">
+                                    {% for code, config in fields %}
+                                        <option value="{{ code }}" {{ field.closest == code ? 'selected' }}>
+                                            {{ config.name }}
+
+                                            {% if config.unique is defined and config.unique %}
+                                                <u>(clé unique)</u>
+                                            {% else %}
+                                                {{ config.required ?? false ? '*' }}
+                                            {% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <p class="mt-2 mb-0 text-center">
+                    * Champ obligatoire à la création<br>
+                    La clé unique permet d'identifier une valeur unique d'enregistrement
+                    et sera utilisé pour effectuer une mise à jour
+                </p>
+            </div>
+
+            <div class="footer">
+                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="primary">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -23,6 +23,16 @@ class QualityRepository extends EntityRepository
             ->iterate();
     }
 
+    public function getForSelect(?string $search) {
+        return $this->createQueryBuilder("quality")
+            ->select("quality.id AS id, quality.name AS text")
+            ->where("quality.name LIKE :search")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
     public function findForDatatable(array $params): array {
         $search = $params["search"]["value"] ?? null;
 

@@ -8,7 +8,7 @@
     <div class="col-12">
         <label>
             Client
-            <select name="client" class="data" data-s2 data-placeholder="Sélectionnez un ou plusieurs clients" required>
+            <select name="client" class="data" data-s2="client" data-placeholder="Sélectionnez un ou plusieurs clients" required>
                 {% if kiosk.client %}
                     <option value="{{ kiosk.client.id }}" selected>{{ kiosk.client.name }}</option>
                 {% endif %}
