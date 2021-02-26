@@ -4,6 +4,7 @@ import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
+import Select2 from "../select2";
 
 $(document).ready(() => {
     const newClientModal = Modal.static(`#modal-new-client`, {
@@ -12,6 +13,11 @@ $(document).ready(() => {
     });
 
     $(`.new-client`).click(() => newClientModal.open());
+    $(`#modal-new-client input[name="name"]`).keyup(function() {
+        const $option = $(`.client-self-name`);
+        $option.text($(this).val());
+        Select2.init($option.parent());
+    });
 
     $(document).on(`change`, `[name="isMultiSite"]`, function () {
         const $isMultiSite = $(this);

@@ -54,14 +54,14 @@ class Client {
     private ?bool $isMultiSite = null;
 
     /**
-     * @ORM\Column(type="boolean")
-     */
-    private ?bool $allowAllDepositTickets = null;
-
-    /**
      * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="clients")
      */
     private ?Client $linkedMultiSite = null;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private ?int $depositTicketValidity = null;
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, mappedBy="clients")
@@ -81,13 +81,20 @@ class Client {
     /**
      * @ORM\OneToMany(targetEntity=Box::class, mappedBy="owner")
      */
-    private $boxes;
+    private Collection $boxes;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Client::class)
+     * @ORM\JoinTable(name="deposit_tickets_clients")
+     */
+    private Collection $depositTicketsClients;
 
     public function __construct() {
         $this->users = new ArrayCollection();
         $this->kiosks = new ArrayCollection();
         $this->clients = new ArrayCollection();
         $this->boxes = new ArrayCollection();
+        $this->depositTicketsClients = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -154,16 +161,6 @@ class Client {
         return $this;
     }
 
-    public function getAllowAllDepositTickets(): ?bool {
-        return $this->allowAllDepositTickets;
-    }
-
-    public function setAllowAllDepositTickets(bool $allowAllDepositTickets): self {
-        $this->allowAllDepositTickets = $allowAllDepositTickets;
-
-        return $this;
-    }
-
     public function getLinkedMultiSite(): ?self {
         return $this->linkedMultiSite;
     }
@@ -171,6 +168,15 @@ class Client {
     public function setLinkedMultiSite(?self $linkedMultiSite): self {
         $this->linkedMultiSite = $linkedMultiSite;
 
+        return $this;
+    }
+
+    public function getDepositTicketValidity(): ?int {
+        return $this->depositTicketValidity;
+    }
+
+    public function setDepositTicketValidity(?int $depositTicketValidity): self {
+        $this->depositTicketValidity = $depositTicketValidity;
         return $this;
     }
 
@@ -279,6 +285,36 @@ class Client {
             }
         }
 
+        return $this;
+    }
+
+    /**
+     * @return Collection|self[]
+     */
+    public function getDepositTicketsClients(): Collection
+    {
+        return $this->depositTicketsClients;
+    }
+
+    public function addDepositTicketsClient(self $depositTicketsClient): self
+    {
+        if (!$this->depositTicketsClients->contains($depositTicketsClient)) {
+            $this->depositTicketsClients[] = $depositTicketsClient;
+        }
+
+        return $this;
+    }
+
+    public function removeDepositTicketsClient(self $depositTicketsClient): self
+    {
+        $this->depositTicketsClients->removeElement($depositTicketsClient);
+
+        return $this;
+    }
+
+    public function setDepositTicketClients($depositTicketsClients): self
+    {
+        $this->depositTicketsClients = new ArrayCollection($depositTicketsClients);
         return $this;
     }
 

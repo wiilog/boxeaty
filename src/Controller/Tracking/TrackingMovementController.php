@@ -30,15 +30,11 @@ class TrackingMovementController extends AbstractController {
      */
     public function list(EntityManagerInterface $manager): Response {
         $qualities = $manager->getRepository(Quality::class)->findAll();
-        $groups = $manager->getRepository(Group::class)->findAll();
-        $users = $manager->getRepository(User::class)->findAll();
 
         return $this->render("tracking/movement/index.html.twig", [
             "new_movement" => new TrackingMovement(),
             "qualities" => $qualities,
             "states" => Box::NAMES,
-            "groups" => $groups,
-            "users" => $users
         ]);
     }
 

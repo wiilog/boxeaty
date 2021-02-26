@@ -12,7 +12,7 @@ const ROUTES = {
     quality: `ajax_select_quality`,
 }
 
-class Select2 {
+export default class Select2 {
     static init($element) {
         const type = $element.data(`s2`);
 

@@ -89,8 +89,8 @@ class UserController extends AbstractController {
             $form->addError("password", Authenticator::PASSWORD_ERROR);
         }
 
-        $clients = $manager->getRepository(Client::class)->findBy(["id" => $content->clients]);
-        $groups = $manager->getRepository(Group::class)->findBy(["id" => $content->groups]);
+        $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(",", $content->clients)]);
+        $groups = $manager->getRepository(Group::class)->findBy(["id" => explode(",", $content->groups)]);
 
         if ($form->isValid()) {
             $user = new User();
@@ -153,8 +153,8 @@ class UserController extends AbstractController {
             $form->addError("password", Authenticator::PASSWORD_ERROR);
         }
 
-        $clients = $manager->getRepository(Client::class)->findBy(["id" => $content->clients]);
-        $groups = $manager->getRepository(Group::class)->findBy(["id" => $content->groups]);
+        $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(",", $content->clients)]);
+        $groups = $manager->getRepository(Group::class)->findBy(["id" => explode(",", $content->groups)]);
 
         if ($form->isValid()) {
             $user->setUsername($content->username)

@@ -88,7 +88,6 @@ export function initDatatable(table, config) {
 
     $(`.filters .filter`).click(() => $datatable.ajax.reload());
     $(`.filters .empty-filters`).click(function() {
-        console.log("ok");
         clearForm($(this).parents(`.filters`))
     });
 

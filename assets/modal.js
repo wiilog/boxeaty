@@ -243,12 +243,15 @@ export function processForm($parent) {
         }
 
         if($input.attr(`name`)) {
-            const trimmed = $input.val() ? $input.val().trim() : ``;
-
+            let value = $input.val() || null;
             if($input.attr(`type`) === `checkbox`) {
-                data.append($input.attr(`name`), $input.is(`:checked`) ? `1` : `0`);
-            } else if(trimmed !== ``) {
-                data.append($input.attr(`name`), trimmed);
+                value = $input.is(`:checked`) ? `1` : `0`;
+            } else if(typeof value === 'string') {
+                value = $input.val().trim();
+            }
+
+            if(value !== null) {
+                data.append($input.attr(`name`), value);
             }
         }
     }
@@ -293,9 +296,7 @@ function showInvalid($field, message) {
     if($field.is(`[data-s2]`)) {
         $field = $field.parent().find(`.select2-selection`);
     } else if($field.is(`[type="file"]`)) {
-        console.log("go");
         $field = $field.parent();
-        console.log($field);
     }
 
     $field.addClass(`is-invalid`);

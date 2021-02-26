@@ -9,7 +9,6 @@ use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
-use App\Helper\Stream;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,14 +26,9 @@ class ClientController extends AbstractController {
      * @Route("/liste", name="clients_list")
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function list(EntityManagerInterface $manager): Response {
-        $groups = $manager->getRepository(Group::class)->findAll();
-        $users = $manager->getRepository(User::class)->findAll();
-
+    public function list(): Response {
         return $this->render("referential/client/index.html.twig", [
             "new_client" => new Client(),
-            "groups" => $groups,
-            "users" => $users
         ]);
     }
 
@@ -78,14 +72,15 @@ class ClientController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
+        $clientRepository = $manager->getRepository(Client::class);
+
         $content = (object) $request->request->all();
         $contact = $manager->getRepository(User::class)->find($content->contact);
         $group = $manager->getRepository(Group::class)->find($content->group);
-        $multiSite = isset($content->linkedMultiSite)
-            ? $manager->getRepository(Client::class)->find($content->linkedMultiSite)
-            : null;
+        $multiSite = isset($content->linkedMultiSite)? $clientRepository->find($content->linkedMultiSite) : null;
+        $depositTicketsClients = $clientRepository->findBy(["id" => $content->depositTicketsClients]);
 
-        $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
+        $existing = $clientRepository->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("email", "Ce client existe déjà");
         }
@@ -99,9 +94,15 @@ class ClientController extends AbstractController {
                 ->setActive($content->active)
                 ->setContact($contact)
                 ->setIsMultiSite($content->isMultiSite)
-                ->setAllowAllDepositTickets($content->allowAllDepositTickets)
                 ->setGroup($group)
-                ->setLinkedMultiSite($multiSite);
+                ->setLinkedMultiSite($multiSite)
+                ->setDepositTicketClients($depositTicketsClients)
+                ->setDepositTicketValidity($content->depositTicketValidity);
+
+            //0 is used to select the client we're creating
+            if(in_array(0, $content->depositTicketsClients)) {
+                $depositTicketsClients[] = $client;
+            }
 
             $manager->persist($client);
             $manager->flush();
@@ -119,16 +120,11 @@ class ClientController extends AbstractController {
      * @Route("/modifier/template/{client}", name="client_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function editTemplate(EntityManagerInterface $manager, Client $client): Response {
-        $groups = $manager->getRepository(Group::class)->findAll();
-        $users = $manager->getRepository(User::class)->findAll();
-
+    public function editTemplate(Client $client): Response {
         return $this->json([
             "submit" => $this->generateUrl("client_edit", ["client" => $client->getId()]),
             "template" => $this->renderView("referential/client/modal/edit.html.twig", [
                 "client" => $client,
-                "groups" => $groups,
-                "users" => $users
             ])
         ]);
     }
@@ -140,10 +136,14 @@ class ClientController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Client $client): Response {
         $form = Form::create();
 
+        $clientRepository = $manager->getRepository(Client::class);
+
         $content = (object) $request->request->all();
         $contact = $manager->getRepository(User::class)->find($content->contact);
         $group = $manager->getRepository(Group::class)->find($content->group);
-        $multiSite = isset($content->linkedMultiSite) ? $manager->getRepository(Client::class)->find($content->linkedMultiSite) : null;
+        $multiSite = isset($content->linkedMultiSite)? $clientRepository->find($content->linkedMultiSite) : null;
+        $depositTicketsClients =  $clientRepository->findBy(["id" => explode(",", $content->depositTicketsClients)]);
+
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $client) {
             $form->addError("email", "Un autre client avec ce nom existe déjà");
@@ -157,9 +157,10 @@ class ClientController extends AbstractController {
                 ->setActive($content->active)
                 ->setContact($contact)
                 ->setIsMultiSite($content->isMultiSite)
-                ->setAllowAllDepositTickets($content->allowAllDepositTickets)
                 ->setGroup($group)
-                ->setLinkedMultiSite($multiSite);
+                ->setLinkedMultiSite($multiSite)
+                ->setDepositTicketClients($depositTicketsClients)
+                ->setDepositTicketValidity($content->depositTicketValidity);
 
             $manager->flush();
 
