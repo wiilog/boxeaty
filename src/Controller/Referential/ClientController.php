@@ -75,10 +75,12 @@ class ClientController extends AbstractController {
         $clientRepository = $manager->getRepository(Client::class);
 
         $content = (object) $request->request->all();
+        $depositTicketsClientsIds = explode(",", $content->depositTicketsClients);
+
         $contact = $manager->getRepository(User::class)->find($content->contact);
         $group = $manager->getRepository(Group::class)->find($content->group);
         $multiSite = isset($content->linkedMultiSite)? $clientRepository->find($content->linkedMultiSite) : null;
-        $depositTicketsClients = $clientRepository->findBy(["id" => $content->depositTicketsClients]);
+        $depositTicketsClients = $clientRepository->findBy(["id" => $depositTicketsClientsIds]);
 
         $existing = $clientRepository->findOneBy(["name" => $content->name]);
         if ($existing) {
@@ -100,7 +102,7 @@ class ClientController extends AbstractController {
                 ->setDepositTicketValidity($content->depositTicketValidity);
 
             //0 is used to select the client we're creating
-            if(in_array(0, $content->depositTicketsClients)) {
+            if(in_array(0, $depositTicketsClientsIds)) {
                 $depositTicketsClients[] = $client;
             }
 
@@ -139,10 +141,12 @@ class ClientController extends AbstractController {
         $clientRepository = $manager->getRepository(Client::class);
 
         $content = (object) $request->request->all();
+        $depositTicketsClientsIds = explode(",", $content->depositTicketsClients);
+
         $contact = $manager->getRepository(User::class)->find($content->contact);
         $group = $manager->getRepository(Group::class)->find($content->group);
         $multiSite = isset($content->linkedMultiSite)? $clientRepository->find($content->linkedMultiSite) : null;
-        $depositTicketsClients =  $clientRepository->findBy(["id" => explode(",", $content->depositTicketsClients)]);
+        $depositTicketsClients =  $clientRepository->findBy(["id" => $depositTicketsClientsIds]);
 
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $client) {

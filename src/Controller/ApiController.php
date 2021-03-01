@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Box;
 use App\Entity\GlobalSetting;
-use App\Entity\Kiosk;
+use App\Entity\Location;
+use App\Helper\Stream;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NoResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,7 +31,20 @@ class ApiController extends AbstractController {
      * @Route("/kiosks", name="api_kiosks")
      */
     public function kiosks(EntityManagerInterface $manager): Response {
-        $kiosks = $manager->getRepository(Kiosk::class)->getAll();
+        $kiosks = Stream::from($manager->getRepository(Location::class)->findBy(["kiosk" => true]))
+            ->map(fn(Location $kiosk) => [
+                "id" => $kiosk->getId(),
+                "name" => $kiosk->getName(),
+                "capacity" => 50,
+                "client" => null,
+                "boxes" => Stream::from($kiosk->getBoxes())
+                    ->map(fn(Box $box) => [
+                        "id" => $box->getId(),
+                        "number" => $box->getNumber(),
+                    ])
+                    ->toArray(),
+            ])
+            ->toArray();
 
         return $this->json([
             "success" => true,
@@ -42,7 +57,7 @@ class ApiController extends AbstractController {
      */
     public function emptyKiosk(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
-        $kiosk = $manager->getRepository(Kiosk::class)->find($content->kiosk);
+        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
 
         //TODO: actually empty it
 
@@ -64,7 +79,7 @@ class ApiController extends AbstractController {
                 "success" => true,
                 "page" => $page["name"],
             ]);
-        } catch(NoResultException $ignored) {
+        } catch (NoResultException $ignored) {
             return $this->json([
                 "success" => false,
             ]);

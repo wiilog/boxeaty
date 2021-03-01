@@ -4,7 +4,7 @@ namespace App\Controller\Referential;
 
 use App\Annotation\HasPermission;
 use App\Entity\Client;
-use App\Entity\Kiosk;
+use App\Entity\Location;
 use App\Entity\Role;
 use App\Helper\Form;
 use App\Service\ExportService;
@@ -28,7 +28,7 @@ class KioskController extends AbstractController {
         $clients = $manager->getRepository(Client::class)->findAll();
 
         return $this->render("referential/kiosk/index.html.twig", [
-            "new_kiosk" => new Kiosk(),
+            "new_kiosk" => new Location(),
             "clients" => $clients
         ]);
     }
@@ -38,8 +38,8 @@ class KioskController extends AbstractController {
      * @HasPermission(Role::MANAGE_KIOSKS)
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
-        $kiosks = $manager->getRepository(Kiosk::class)
-            ->findForDatatable(json_decode($request->getContent(), true));
+        $kiosks = $manager->getRepository(Location::class)
+            ->findKiosksForDatatable(json_decode($request->getContent(), true));
 
         $data = [];
         foreach ($kiosks["data"] as $kiosk) {
@@ -69,16 +69,17 @@ class KioskController extends AbstractController {
         $form = Form::create();
 
         $content = (object) $request->request->all();
-        $existing = $manager->getRepository(Kiosk::class)->findOneBy(["name" => $content->name]);
+        $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
-            $form->addError("name", "Cette borne existe déjà");
+            $form->addError("name", "Un emplacement ou une borne avec le même nom existe déjà");
         }
 
         $client = $manager->getRepository(Client::class)->find($content->client);
 
         if($form->isValid()) {
-            $kiosk = new Kiosk();
-            $kiosk->setName($content->name)
+            $kiosk = new Location();
+            $kiosk->setKiosk(true)
+                ->setName($content->name)
                 ->setClient($client);
 
             $manager->persist($kiosk);
@@ -97,7 +98,7 @@ class KioskController extends AbstractController {
      * @Route("/modifier/template/{kiosk}", name="kiosk_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_KIOSKS)
      */
-    public function editTemplate(Kiosk $kiosk): Response {
+    public function editTemplate(Location $kiosk): Response {
         return $this->json([
             "submit" => $this->generateUrl("kiosk_edit", ["kiosk" => $kiosk->getId()]),
             "template" => $this->renderView("referential/kiosk/modal/edit.html.twig", [
@@ -110,14 +111,14 @@ class KioskController extends AbstractController {
      * @Route("/modifier/{kiosk}", name="kiosk_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_KIOSKS)
      */
-    public function edit(Request $request, EntityManagerInterface $manager, Kiosk $kiosk): Response {
+    public function edit(Request $request, EntityManagerInterface $manager, Location $kiosk): Response {
         $form = Form::create();
 
         $content = (object) $request->request->all();
-        $existing = $manager->getRepository(Kiosk::class)->findOneBy(["name" => $content->name]);
+        $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         $client = $manager->getRepository(Client::class)->find($content->client);
         if ($existing !== null && $existing !== $kiosk) {
-            $form->addError("name", "Une autre borne avec ce nom existe déjà");
+            $form->addError("name", "Un emplacement ou une borne avec le même nom existe déjà");
         }
 
         if($form->isValid()) {
@@ -140,7 +141,7 @@ class KioskController extends AbstractController {
      * @HasPermission(Role::MANAGE_KIOSKS)
      */
     public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
-        $kiosks = $manager->getRepository(Kiosk::class)->iterateAll();
+        $kiosks = $manager->getRepository(Location::class)->iterateAllKiosks();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");

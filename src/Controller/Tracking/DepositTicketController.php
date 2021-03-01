@@ -4,7 +4,7 @@ namespace App\Controller\Tracking;
 
 use App\Annotation\HasPermission;
 use App\Entity\DepositTicket;
-use App\Entity\Kiosk;
+use App\Entity\Location;
 use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
@@ -25,12 +25,9 @@ class DepositTicketController extends AbstractController {
      * @Route("/liste", name="deposit_tickets_list")
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
      */
-    public function list(EntityManagerInterface $manager): Response {
-        $kiosks = $manager->getRepository(Kiosk::class)->findAll();
-
+    public function list(): Response {
         return $this->render("tracking/deposit_ticket/index.html.twig", [
             "new_deposit_ticket" => new DepositTicket(),
-            "kiosks" => $kiosks
         ]);
     }
 
@@ -75,9 +72,7 @@ class DepositTicketController extends AbstractController {
         $form = Form::create();
 
         $content = (object) $request->request->all();
-        $kiosk = $manager->getRepository(Kiosk::class)->find($content->kiosk);
-        $now = new DateTime();
-        $validityDate = (clone $now)->modify("+3 months");
+        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
         $existing = $manager->getRepository(DepositTicket::class)->findOneBy(["number" => $content->number]);
         if ($existing) {
             $form->addError("number", "Ce ticket consigne existe déjà");
@@ -86,9 +81,9 @@ class DepositTicketController extends AbstractController {
         if($form->isValid()) {
             $depositTicket = new DepositTicket();
             $depositTicket
-                ->setCreationDate($now)
-                ->setKiosk($kiosk)
-                ->setValidityDate($validityDate)
+                ->setCreationDate(new DateTime())
+                ->setLocation($kiosk)
+                ->setValidityDate(new DateTime("+{$kiosk->getClient()->getDepositTicketValidity()} month"))
                 ->setNumber($content->number)
                 ->setState($content->state);
 
@@ -108,14 +103,11 @@ class DepositTicketController extends AbstractController {
      * @Route("/modifier/template/{depositTicket}", name="deposit_ticket_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
      */
-    public function editTemplate(EntityManagerInterface $manager, DepositTicket $depositTicket): Response {
-        $kiosks = $manager->getRepository(Kiosk::class)->findAll();
-
+    public function editTemplate(DepositTicket $depositTicket): Response {
         return $this->json([
             "submit" => $this->generateUrl("deposit_ticket_edit", ["depositTicket" => $depositTicket->getId()]),
             "template" => $this->renderView("tracking/deposit_ticket/modal/edit.html.twig", [
                 "deposit_ticket" => $depositTicket,
-                "kiosks" => $kiosks,
             ])
         ]);
     }
@@ -128,7 +120,7 @@ class DepositTicketController extends AbstractController {
         $form = Form::create();
 
         $content = (object) $request->request->all();
-        $kiosk = $manager->getRepository(Kiosk::class)->find($content->kiosk);
+        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
         $existing = $manager->getRepository(DepositTicket::class)->findOneBy(["number" => $content->number]);
         if ($existing !== null && $existing !== $depositTicket) {
             $form->addError("name", "Un autre ticket consigne avec ce numéro existe déjà");
@@ -136,7 +128,7 @@ class DepositTicketController extends AbstractController {
 
         if($form->isValid()) {
             $depositTicket
-                ->setKiosk($kiosk)
+                ->setLocation($kiosk)
                 ->setNumber($content->number)
                 ->setState($content->state);
 

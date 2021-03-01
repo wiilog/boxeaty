@@ -36,6 +36,11 @@ class ExportService {
         "Actif",
     ];
 
+    public const LOCATION_HEADER = [
+        "Nom",
+        "Actif",
+    ];
+
     public const MOVEMENT_HEADER = [
         "Date",
         "Numéro de box",
@@ -88,8 +93,9 @@ class ExportService {
     public function __construct(EntityManagerInterface $manager) {
         $this->manager = $manager;
         $this->encoding = $manager->getRepository(GlobalSetting::class)
-            ->findOneBy(["name" => GlobalSetting::CSV_EXPORTS_ENCODING])
-            ->getValue();
+            ->findOneBy(["name" => GlobalSetting::CSV_EXPORTS_ENCODING]);
+
+        $this->encoding = $this->encoding ? $this->encoding->getValue() : null;
     }
 
     public function export(callable $generator, string $name, ?array $headers = null): StreamedResponse {
@@ -127,9 +133,9 @@ class ExportService {
         fputcsv($handle, $encodedRow, ";");
     }
 
-    public function createWorksheet(Spreadsheet $spreadsheet, string $name, string $class, array $header, callable $transformer = null): Worksheet {
+    public function createWorksheet(Spreadsheet $spreadsheet, string $name, $class, array $header, callable $transformer = null): Worksheet {
         $sheet = new Worksheet(null, $name);
-        $export = Stream::from($this->manager->getRepository($class)->iterateAll())
+        $export = Stream::from(is_string($class) ? $this->manager->getRepository($class)->iterateAll() : $class)
             ->map(function(array $row) use ($transformer) {
                 if($transformer) {
                     $row = $transformer($row);

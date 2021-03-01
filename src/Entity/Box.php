@@ -44,11 +44,6 @@ class Box {
     private ?Location $location = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Kiosk::class, inversedBy="boxes")
-     */
-    private ?Kiosk $kiosk = null;
-
-    /**
      * @ORM\Column(type="integer")
      */
     private ?int $state = null;
@@ -110,7 +105,7 @@ class Box {
         if (!$this->trackingMovements->contains($trackingMovement)) {
             $this->trackingMovements[] = $trackingMovement;
 
-            if($trackingMovement->getBox() !== $this) {
+            if ($trackingMovement->getBox() !== $this) {
                 $trackingMovement->setBox($this);
             }
         }
@@ -118,82 +113,61 @@ class Box {
         return $this;
     }
 
-    public function getLocation(): ?Location
-    {
+    public function getLocation(): ?Location {
         return $this->location;
     }
 
-    public function setLocation(?Location $location): self
-    {
+    public function setLocation(?Location $location): self {
         $this->location = $location;
 
         return $this;
     }
 
-    public function getState(): ?int
-    {
+    public function getState(): ?int {
         return $this->state;
     }
 
-    public function setState(int $state): self
-    {
+    public function setState(int $state): self {
         $this->state = $state;
 
         return $this;
     }
 
-    public function getKiosk(): ?Kiosk {
-        return $this->kiosk;
-    }
-
-    public function setKiosk(?Kiosk $kiosk): self {
-        $this->kiosk = $kiosk;
-        return $this;
-    }
-
-    public function getQuality(): ?quality
-    {
+    public function getQuality(): ?quality {
         return $this->quality;
     }
 
-    public function setQuality(?quality $quality): self
-    {
+    public function setQuality(?quality $quality): self {
         $this->quality = $quality;
 
         return $this;
     }
 
-    public function getOwner(): ?client
-    {
+    public function getOwner(): ?client {
         return $this->owner;
     }
 
-    public function setOwner(?client $owner): self
-    {
+    public function setOwner(?client $owner): self {
         $this->owner = $owner;
 
         return $this;
     }
 
-    public function getType(): ?BoxType
-    {
+    public function getType(): ?BoxType {
         return $this->type;
     }
 
-    public function setType(?BoxType $type): self
-    {
+    public function setType(?BoxType $type): self {
         $this->type = $type;
 
         return $this;
     }
 
-    public function getComment(): ?string
-    {
+    public function getComment(): ?string {
         return $this->comment;
     }
 
-    public function setComment(string $comment): self
-    {
+    public function setComment(string $comment): self {
         $this->comment = $comment;
 
         return $this;

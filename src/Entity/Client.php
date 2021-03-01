@@ -69,7 +69,7 @@ class Client {
     private Collection $users;
 
     /**
-     * @ORM\OneToMany(targetEntity=Kiosk::class, mappedBy="client")
+     * @ORM\OneToMany(targetEntity=Location::class, mappedBy="client")
      */
     private Collection $kiosks;
 
@@ -205,13 +205,13 @@ class Client {
     }
 
     /**
-     * @return Collection|Kiosk[]
+     * @return Collection|Location[]
      */
     public function getKiosks(): Collection {
         return $this->kiosks;
     }
 
-    public function addKiosk(Kiosk $kiosk): self {
+    public function addKiosk(Location $kiosk): self {
         if (!$this->kiosks->contains($kiosk)) {
             $this->kiosks[] = $kiosk;
             $kiosk->setClient($this);
@@ -220,7 +220,7 @@ class Client {
         return $this;
     }
 
-    public function removeKiosk(Kiosk $kiosk): self {
+    public function removeKiosk(Location $kiosk): self {
         if ($this->kiosks->removeElement($kiosk)) {
             // set the owning side to null (unless already changed)
             if ($kiosk->getClient() === $this) {

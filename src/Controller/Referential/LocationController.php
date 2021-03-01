@@ -6,6 +6,8 @@ use App\Annotation\HasPermission;
 use App\Entity\Location;
 use App\Entity\Role;
 use App\Helper\Form;
+use App\Service\ExportService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,7 +36,7 @@ class LocationController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $locations = $manager->getRepository(Location::class)
-            ->findForDatatable(json_decode($request->getContent(), true));
+            ->findLocationsForDatatable(json_decode($request->getContent(), true));
 
         $data = [];
         foreach ($locations["data"] as $location) {
@@ -72,7 +74,7 @@ class LocationController extends AbstractController {
 
         if ($form->isValid()) {
             $location = new Location();
-            $location
+            $location->setKiosk(false)
                 ->setName($content->name)
                 ->setActive($content->active)
                 ->setDescription($content->description ?? null);
@@ -155,4 +157,22 @@ class LocationController extends AbstractController {
             ]);
         }
     }
+
+    /**
+     * @Route("/export", name="locations_export", options={"expose": true})
+     * @HasPermission(Role::MANAGE_LOCATIONS)
+     */
+    public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
+        $locations = $manager->getRepository(Location::class)->iterateAllLocations();
+
+        $today = new DateTime();
+        $today = $today->format("d-m-Y-H-i-s");
+
+        return $exportService->export(function($output) use ($exportService, $locations) {
+            foreach ($locations as $location) {
+                $exportService->putLine($output, $location);
+            }
+        }, "export-emplacement-$today.csv", ExportService::LOCATION_HEADER);
+    }
+
 }

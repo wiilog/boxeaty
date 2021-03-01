@@ -10,11 +10,20 @@ $(document).ready(() => {
     const newClientModal = Modal.static(`#modal-new-client`, {
         ajax: AJAX.route(`POST`, `client_new`),
         table: `#table-clients`,
+        success: () => {
+            const $modal = $(`#modal-new-client`);
+
+            $modal.find(`.client-self-name`).text(`Client actuel`);
+            $modal.find(`select[name="depositTicketsClients"]`)
+                .val(0)
+                .trigger(`change`);
+        }
     });
 
     $(`.new-client`).click(() => newClientModal.open());
+
     $(`#modal-new-client input[name="name"]`).keyup(function() {
-        const $option = $(`.client-self-name`);
+        let $option = $(`#modal-new-client`).find(`.client-self-name`);
         $option.text($(this).val());
         Select2.init($option.parent());
     });

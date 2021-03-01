@@ -28,10 +28,7 @@
     <div class="col-12">
         <label>
             Borne
-            <select name="kiosk" class="data" data-s2 data-placeholder="Sélectionnez une borne" required>
-                {% for kiosk in kiosks %}
-                    <option value="{{ kiosk.id }}" {{ deposit_ticket.kiosk and deposit_ticket.kiosk.id == kiosk.id ? 'selected' }}>{{ kiosk.name }}</option>
-                {% endfor %}
+            <select name="kiosk" class="data" data-s2="kiosk" data-placeholder="Sélectionnez une borne" required>
             </select>
         </label>
     </div>

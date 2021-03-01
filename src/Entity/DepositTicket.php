@@ -54,9 +54,9 @@ class DepositTicket {
     private ?DateTime $useDate = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Kiosk::class, inversedBy="depositTickets")
+     * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="depositTickets")
      */
-    private ?Kiosk $kiosk = null;
+    private ?Location $location = null;
 
     public function getId(): ?int {
         return $this->id;
@@ -112,12 +112,12 @@ class DepositTicket {
         return $this;
     }
 
-    public function getKiosk(): ?Kiosk {
-        return $this->kiosk;
+    public function getLocation(): ?Location {
+        return $this->location;
     }
 
-    public function setKiosk(?Kiosk $kiosk): self {
-        $this->kiosk = $kiosk;
+    public function setLocation(?Location $location): self {
+        $this->location = $location;
 
         return $this;
     }
