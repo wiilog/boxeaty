@@ -153,4 +153,16 @@ class ApiController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/deposit-ticket-statistics", name="api_check_code")
+     */
+    public function depositTicketStatistics(EntityManagerInterface $manager): Response {
+
+        return $this->json([
+            "collectedBoxes" => 1092,
+            "lessWaste" => 12,
+            "totalPackagingAvoided" => 35,
+        ]);
+    }
+
 }
