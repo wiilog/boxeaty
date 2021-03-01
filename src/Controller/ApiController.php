@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Entity\Box;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
+use App\Entity\TrackingMovement;
 use App\Helper\Stream;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NoResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -80,6 +82,71 @@ class ApiController extends AbstractController {
                 "page" => $page["name"],
             ]);
         } catch (NoResultException $ignored) {
+            return $this->json([
+                "success" => false,
+            ]);
+        }
+    }
+
+    /**
+     * @Route("/box/retrieve", name="api_retrieve_box")
+     */
+    public function retrieveBox(Request $request, EntityManagerInterface $manager): Response {
+        $content = json_decode($request->getContent());
+
+        $box = $manager->getRepository(Box::class)->findOneBy([
+            "number" => $content->number,
+            "state" => Box::CONSUMER,
+        ]);
+
+        if ($box) {
+            return $this->json([
+                "success" => true,
+                "box" => [
+                    "number" => $box->getNumber(),
+                ],
+            ]);
+        } else {
+            return $this->json([
+                "success" => false,
+            ]);
+        }
+    }
+
+    /**
+     * @Route("/box/drop", name="api_drop_box")
+     */
+    public function dropBox(Request $request, EntityManagerInterface $manager): Response {
+        $content = json_decode($request->getContent());
+
+        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
+        $box = $manager->getRepository(Box::class)->findOneBy([
+            "number" => $content->number,
+            "state" => Box::CONSUMER,
+        ]);
+
+        if ($box) {
+            $box->setState(Box::UNAVAILABLE)
+                ->setLocation($kiosk);
+
+            $movement = (new TrackingMovement())
+                ->setBox($box)
+                ->setState(Box::UNAVAILABLE)
+                ->setQuality($box->getQuality())
+                ->setClient($box->getOwner())
+                ->setDate(new DateTime())
+                ->setUser(null);
+
+            $manager->persist($movement);
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+                "box" => [
+                    "number" => $box->getNumber(),
+                ],
+            ]);
+        } else {
             return $this->json([
                 "success" => false,
             ]);

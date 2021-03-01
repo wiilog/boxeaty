@@ -94,7 +94,7 @@ class BoxController extends AbstractController {
                 ->setQuality($quality)
                 ->setState($content->state)
                 ->setType($type)
-                ->setComment($content->comment);
+                ->setComment($content->comment ?? null);
 
             $manager->persist($box);
             $manager->flush();
@@ -157,7 +157,7 @@ class BoxController extends AbstractController {
                 ->setQuality($quality)
                 ->setState($content->state)
                 ->setType($type)
-                ->setComment($content->comment);
+                ->setComment($content->comment ?? null);
 
             $manager->flush();
 
