@@ -15,6 +15,8 @@ class SettingFixtures extends Fixture implements FixtureGroupInterface {
         GlobalSetting::CSV_EXPORTS_ENCODING => ExportService::ENCODING_UTF8,
         GlobalSetting::SETTING_CODE => "1532",
         GlobalSetting::EMPTY_KIOSK_CODE => "4578",
+        GlobalSetting::BOX_CAPACITIES => null,
+        GlobalSetting::BOX_SHAPES => null,
     ];
 
     public function load(ObjectManager $manager) {
@@ -26,7 +28,7 @@ class SettingFixtures extends Fixture implements FixtureGroupInterface {
             if ($settingRepository->findOneBy(["name" => $name]) === null) {
                 $setting = (new GlobalSetting())
                     ->setName($name)
-                    ->setValue($default);;
+                    ->setValue($default);
 
                 $output->writeln("Created setting \"{$setting->getName()}\"");
                 $manager->persist($setting);

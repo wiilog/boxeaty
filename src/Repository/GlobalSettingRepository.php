@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\GlobalSetting;
 use App\Helper\Stream;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NoResultException;
 
 /**
  * @method GlobalSetting|null find($id, $lockMode = null, $lockVersion = null)
@@ -20,17 +21,33 @@ class GlobalSettingRepository extends EntityRepository {
             ->toArray();
     }
 
-    public function getCorrespondingCode(string $code): array {
+    public function getValue(string $key): ?string {
+        try {
+            return $this->createQueryBuilder("setting")
+                ->select("setting.value")
+                ->where("setting.name = '$key'")
+                ->getQuery()
+                ->getSingleResult()["value"];
+        } catch (NoResultException $ignored) {
+            return null;
+        }
+    }
+
+    public function getCorrespondingCode(string $code): ?string {
         $setting = GlobalSetting::SETTING_CODE;
         $emptyKiosk = GlobalSetting::EMPTY_KIOSK_CODE;
 
-        return $this->createQueryBuilder("setting")
-            ->select("setting.name")
-            ->where("setting.name = '$setting' OR setting.name = '$emptyKiosk'")
-            ->andWhere("setting.value = :code")
-            ->setParameter("code", $code)
-            ->getQuery()
-            ->getSingleResult();
+        try {
+            return $this->createQueryBuilder("setting")
+                ->select("setting.name")
+                ->where("setting.name = '$setting' OR setting.name = '$emptyKiosk'")
+                ->andWhere("setting.value = :code")
+                ->setParameter("code", $code)
+                ->getQuery()
+                ->getSingleResult()["name"];
+        } catch (NoResultException $ignored) {
+            return null;
+        }
     }
 
 }

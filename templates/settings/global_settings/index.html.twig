@@ -31,7 +31,7 @@
         <div class="input-with-validation">
             <label>
                 Mot de passe de la borne - Visiteur
-                <input name="{{ constant('App\\Entity\\GlobalSetting::EMPTY_KIOSK_CODE') }}" class="data" value="{{ empty_kiosk_code.value }}" />
+                <input name="{{ constant('App\\Entity\\GlobalSetting::EMPTY_KIOSK_CODE') }}" class="data" value="{{ empty_kiosk_code.value }}"/>
             </label>
             <button class="secondary" type="submit">Enregistrer</button>
         </div>
@@ -39,6 +39,35 @@
             <label>
                 Mot de passe de la borne - SuperAdmin
                 <input name="{{ constant('App\\Entity\\GlobalSetting::SETTING_CODE') }}" class="data" value="{{ setting_code.value }}"/>
+            </label>
+            <button class="secondary" type="submit">Enregistrer</button>
+        </div>
+    </div>
+
+    <div class="box global-settings">
+        <h1>Configuration des types de box</h1>
+
+        <div class="input-with-validation">
+            <label>
+                Contenance
+                <select name="{{ constant('App\\Entity\\GlobalSetting::BOX_CAPACITIES') }}" class="data"
+                        data-s2 data-placeholder="Entrez des capacités...">
+                    {% for capacity in box_capacities.value %}
+                        <option value="{{ capacity }}" selected>{{ capacity }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button class="secondary" type="submit">Enregistrer</button>
+        </div>
+        <div class="input-with-validation">
+            <label>
+                Forme
+                <select name="{{ constant('App\\Entity\\GlobalSetting::BOX_SHAPES') }}" class="data"
+                        data-s2 data-placeholder="Entrez des formes...">
+                    {% for shape in box_shapes.value %}
+                        <option value="{{ shape }}" selected>{{ shape }}</option>
+                    {% endfor %}
+                </select>
             </label>
             <button class="secondary" type="submit">Enregistrer</button>
         </div>

@@ -5,6 +5,7 @@ namespace App\Controller\Referential;
 use App\Annotation\HasPermission;
 use App\Entity\Client;
 use App\Entity\BoxType;
+use App\Entity\GlobalSetting;
 use App\Entity\Role;
 use App\Helper\Form;
 use App\Service\ExportService;
@@ -24,9 +25,15 @@ class BoxTypeController extends AbstractController {
      * @Route("/liste", name="box_types_list")
      * @HasPermission(Role::MANAGE_BOX_TYPES)
      */
-    public function list(): Response {
+    public function list(EntityManagerInterface $manager): Response {
+        $settingsRepository = $manager->getRepository(GlobalSetting::class);
+        $capacities = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_CAPACITIES));
+        $shapes = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_SHAPES));
+
         return $this->render("referential/box_type/index.html.twig", [
             "new_box_type" => new BoxType(),
+            "capacities" => $capacities ?: [],
+            "shapes" => $shapes ?: [],
         ]);
     }
 
@@ -44,7 +51,12 @@ class BoxTypeController extends AbstractController {
                 "id" => $boxType->getId(),
                 "name" => $boxType->getName(),
                 "price" => $boxType->getPrice(),
+                "capacity" => $boxType->getCapacity(),
+                "shape" => $boxType->getShape(),
                 "active" => $boxType->isActive() ? "Oui" : "Non",
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
+                ]),
             ];
         }
 
@@ -62,21 +74,23 @@ class BoxTypeController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $existing = $manager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Ce type de box existe déjà");
         }
 
-        if($content->price < 0) {
+        if ($content->price < 0) {
             $form->addError("price", "Le prix doit être supérieur ou égal à 0");
         }
 
-        if($form->isValid()) {
+        if ($form->isValid()) {
             $boxType = new BoxType();
             $boxType->setName($content->name)
                 ->setPrice($content->price)
-                ->setActive($content->active);
+                ->setActive($content->active)
+                ->setCapacity($content->capacity)
+                ->setShape($content->shape);
 
             $manager->persist($boxType);
             $manager->flush();
@@ -94,11 +108,17 @@ class BoxTypeController extends AbstractController {
      * @Route("/modifier/template/{boxType}", name="box_type_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOX_TYPES)
      */
-    public function editTemplate(BoxType $boxType): Response {
+    public function editTemplate(EntityManagerInterface $manager, BoxType $boxType): Response {
+        $settingsRepository = $manager->getRepository(GlobalSetting::class);
+        $capacities = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_CAPACITIES));
+        $shapes = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_SHAPES));
+
         return $this->json([
             "submit" => $this->generateUrl("box_type_edit", ["boxType" => $boxType->getId()]),
             "template" => $this->renderView("referential/box_type/modal/edit.html.twig", [
                 "box_type" => $boxType,
+                "capacities" => $capacities ?: [],
+                "shapes" => $shapes ?: [],
             ])
         ]);
     }
@@ -110,16 +130,18 @@ class BoxTypeController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, BoxType $boxType): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $existing = $manager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $boxType) {
             $form->addError("name", "Un autre type de box avec ce nom existe déjà");
         }
 
-        if($form->isValid()) {
+        if ($form->isValid()) {
             $boxType->setName($content->name)
                 ->setPrice($content->price)
-                ->setActive($content->active);
+                ->setActive($content->active)
+                ->setCapacity($content->capacity)
+                ->setShape($content->shape);
 
             $manager->flush();
 
