@@ -74,11 +74,11 @@ class DepositTicketRepository extends EntityRepository
         foreach ($params["order"] ?? [] as $order) {
             $column = $params["columns"][$order["column"]]["data"];
             if ($column === "kiosk") {
-                $qb->join("deposit_ticket.kiosk", "order_kiosk")
-                    ->addOrderBy("order_kiosk.name", $order["dir"]);
+                $qb->leftJoin("deposit_ticket.location", "order_location")
+                    ->addOrderBy("order_location.name", $order["dir"]);
             } else if ($column === "client") {
-                $qb->join("deposit_ticket.kiosk", "order_kiosk")
-                    ->join("order_kiosk.client", "order_client")
+                $qb->leftJoin("deposit_ticket.location", "order_client_location")
+                    ->leftJoin("order_client_location.client", "order_client")
                     ->addOrderBy("order_client.name", $order["dir"]);
             } else {
                 $qb->addOrderBy("deposit_ticket.$column", $order["dir"]);

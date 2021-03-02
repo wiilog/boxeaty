@@ -28,7 +28,7 @@
 
 h1 {
     margin: 0 10px 20px;
-    font-size: 25px;
+    font-size: 1.1rem;
     font-weight: bold;
     text-transform: uppercase;
     font-family: 'Autumn Collection', 'Helvetica', sans-serif;
@@ -47,7 +47,8 @@ h1 {
 }
 
 .qr-code-image {
-    width: 200px;
+    width: 300px;
+    margin-top: 15px;
 }
 
 .qr-code {
