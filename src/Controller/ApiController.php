@@ -176,11 +176,28 @@ class ApiController extends AbstractController {
     /**
      * @Route("/deposit-ticket/statistics", name="api_deposit_ticket_statistics")
      */
-    public function depositTicketStatistics(): Response {
+    public function depositTicketStatistics(Request $request, EntityManagerInterface $manager): Response {
+        $content = json_decode($request->getContent());
+
+        $locationRepository = $manager->getRepository(Location::class);
+        $kiosk = $locationRepository->find($content->kiosk);
+        $totalDeposits = $locationRepository->getTotalDeposits();
+
+        $lessWaste = $kiosk->getDeposits() * 32;
+        if($lessWaste > 1000) {
+            $prefix = "kg";
+            $lessWaste = round($lessWaste / 1000);
+        } else if($lessWaste > 1000000) {
+            $prefix = "t";
+            $lessWaste = round($lessWaste / 1000000);
+        } else {
+            $prefix = "g";
+        }
+
         return $this->json([
-            "collectedBoxes" => 1092,
-            "lessWaste" => 12,
-            "totalPackagingAvoided" => 35,
+            "collectedBoxes" => $kiosk->getDeposits(),
+            "lessWaste" => "$lessWaste $prefix",
+            "totalPackagingAvoided" => $totalDeposits,
         ]);
     }
 

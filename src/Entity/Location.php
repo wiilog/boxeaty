@@ -44,6 +44,11 @@ class Location {
     private ?Client $client = null;
 
     /**
+     * @ORM\Column(type="integer")
+     */
+    private ?int $deposits = null;
+
+    /**
      * @ORM\OneToMany(targetEntity=Box::class, mappedBy="location")
      */
     private Collection $boxes;
@@ -61,7 +66,7 @@ class Location {
         return $this->id;
     }
 
-    public function getKiosk(): ?bool {
+    public function isKiosk(): ?bool {
         return $this->kiosk;
     }
 
@@ -97,6 +102,15 @@ class Location {
     public function setClient(?Client $client): self {
         $this->client = $client;
 
+        return $this;
+    }
+
+    public function getDeposits(): ?int {
+        return $this->deposits;
+    }
+
+    public function setDeposits(?int $deposits): self {
+        $this->deposits = $deposits;
         return $this;
     }
 

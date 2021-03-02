@@ -77,6 +77,11 @@ class Box {
     private ?bool $canGenerateDepositTicket = null;
 
     /**
+     * @ORM\Column(type="integer")
+     */
+    private ?int $uses = null;
+
+    /**
      * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", cascade={"remove"}, orphanRemoval=true)
      */
     private Collection $trackingMovements;
@@ -184,6 +189,15 @@ class Box {
 
     public function setCanGenerateDepositTicket(?bool $canGenerateDepositTicket): self {
         $this->canGenerateDepositTicket = $canGenerateDepositTicket;
+        return $this;
+    }
+
+    public function getUses(): ?int {
+        return $this->uses;
+    }
+
+    public function setUses(?int $uses): self {
+        $this->uses = $uses;
         return $this;
     }
 

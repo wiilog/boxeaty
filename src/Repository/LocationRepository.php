@@ -128,10 +128,13 @@ class LocationRepository extends EntityRepository {
             ->getArrayResult();
     }
 
-    public function countAll(): int {
-        $qb = $this->createQueryBuilder("kiosk");
-
-        return QueryHelper::count($qb, "kiosk");
+    public function getTotalDeposits(): int {
+        return $this->createQueryBuilder("kiosk")
+            ->select("COUNT(kiosk.deposits)")
+            ->where("kiosk.kiosk = 1")
+            ->groupBy("kiosk")
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     public function findDeliverer(): Location {
