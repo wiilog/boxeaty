@@ -24,8 +24,8 @@ class GlobalSettingController extends AbstractController {
             "csv_encoding" => $settings[GlobalSetting::CSV_EXPORTS_ENCODING],
             "setting_code" => $settings[GlobalSetting::SETTING_CODE],
             "empty_kiosk_code" => $settings[GlobalSetting::EMPTY_KIOSK_CODE],
-            "box_capacities" => explode(",", $settings[GlobalSetting::BOX_CAPACITIES]) ?: [],
-            "box_shapes" => explode(",", $settings[GlobalSetting::BOX_SHAPES]) ?: [],
+            "box_capacities" => explode(",", $settings[GlobalSetting::BOX_CAPACITIES]->getValue()) ?: [],
+            "box_shapes" => explode(",", $settings[GlobalSetting::BOX_SHAPES]->getValue()) ?: [],
         ]);
     }
 
