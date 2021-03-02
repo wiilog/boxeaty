@@ -14,6 +14,7 @@ use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Helper\Form;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -74,6 +75,7 @@ class TrackingMovementController extends AbstractController {
     /**
      * @Route("/nouveau", name="tracking_movement_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_MOVEMENTS)
+     * @throws Exception
      */
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
@@ -102,6 +104,10 @@ class TrackingMovementController extends AbstractController {
                 ->setState($content->state)
                 ->setClient($client)
                 ->setComment($content->comment ?? null);
+
+            $box->setQuality($quality)
+                ->setState($content->state)
+                ->setOwner($client);
 
             $manager->persist($movement);
             $manager->flush();

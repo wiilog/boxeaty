@@ -127,4 +127,10 @@ class LocationRepository extends EntityRepository {
             ->getArrayResult();
     }
 
+    public function countAll(): int {
+        $qb = $this->createQueryBuilder("kiosk");
+
+        return QueryHelper::count($qb, "kiosk");
+    }
+
 }
