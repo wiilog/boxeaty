@@ -13,6 +13,8 @@ class GlobalSetting {
     public const CSV_EXPORTS_ENCODING = "CSV_EXPORTS_ENCODING";
     public const SETTING_CODE = "SETTING_CODE";
     public const EMPTY_KIOSK_CODE = "EMPTY_KIOSK_CODE";
+    public const BOX_CAPACITIES = "BOX_CAPACITIES";
+    public const BOX_SHAPES = "BOX_SHAPES";
 
     /**
      * @ORM\Id

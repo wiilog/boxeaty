@@ -3,7 +3,7 @@ import '../app';
 import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
-import {initDatatable} from "../datatable";
+import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
 
 $(document).ready(() => {
     const newBoxTypeModal = Modal.static(`#modal-new-box-type`, {
@@ -17,12 +17,15 @@ $(document).ready(() => {
         ajax: AJAX.route(`POST`, `box_types_api`),
         columns: [
             {data: `name`, title: `Type de box`},
-            {data: `price`, title: `Prix`},
             {data: `active`, title: `Actif`},
+            {data: `price`, title: `Prix`},
+            {data: `capacity`, title: `Contenance`},
+            {data: `shape`, title: `Forme`},
+            DATATABLE_ACTIONS
         ],
         order: [[`name`, `asc`]],
         listeners: {
-            action: data => {
+            edit: data => {
                 const ajax = AJAX.route(`POST`, `box_type_edit_template`, {
                     boxType: data.id
                 });

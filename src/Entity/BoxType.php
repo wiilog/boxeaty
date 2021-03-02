@@ -32,12 +32,21 @@ class BoxType {
     private ?string $price = null;
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private ?string $capacity = null;
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    private ?string $shape = null;
+
+    /**
      * @ORM\OneToMany(targetEntity=Box::class, mappedBy="type")
      */
-    private $boxes;
+    private Collection $boxes;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->boxes = new ArrayCollection();
     }
 
@@ -65,16 +74,32 @@ class BoxType {
         return $this;
     }
 
+    public function getCapacity(): ?string {
+        return $this->capacity;
+    }
+
+    public function setCapacity(?string $capacity): self {
+        $this->capacity = $capacity;
+        return $this;
+    }
+
+    public function getShape(): ?string {
+        return $this->shape;
+    }
+
+    public function setShape(?string $shape): self {
+        $this->shape = $shape;
+        return $this;
+    }
+
     /**
      * @return Collection|Box[]
      */
-    public function getBoxes(): Collection
-    {
+    public function getBoxes(): Collection {
         return $this->boxes;
     }
 
-    public function addBox(Box $box): self
-    {
+    public function addBox(Box $box): self {
         if (!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
             $box->setType($this);
@@ -83,8 +108,7 @@ class BoxType {
         return $this;
     }
 
-    public function removeBox(Box $box): self
-    {
+    public function removeBox(Box $box): self {
         if ($this->boxes->removeElement($box)) {
             // set the owning side to null (unless already changed)
             if ($box->getType() === $this) {

@@ -1,8 +1,14 @@
 <div class="row">
-    <div class="col-12">
+    <div class="col-12 col-md-6">
         <label>
             Nom du type de box
             <input type="text" name="name" class="data" placeholder="Nom du type de box" value="{{ box_type.name }}" required/>
+        </label>
+    </div>
+    <div class="col-12 col-md-6">
+        <label>
+            Prix (€)
+            <input type="number" name="price" class="data" placeholder="6€" value="{{ box_type.price }}" required min="0"/>
         </label>
     </div>
     <div class="col-12 toggle">
@@ -14,10 +20,24 @@
         <input type="radio" id="{{ box_type.id ? 'edit' : 'new' }}-box-type-inactive" name="active" class="data" value="0" {{ not box_type.active ? 'checked' }}/>
         <label for="{{ box_type.id ? 'edit' : 'new' }}-box-type-inactive">Inactif</label>
     </div>
-    <div class="col-12">
+    <div class="col-12 col-md-6">
         <label>
-            Prix (€)
-            <input type="number" name="price" class="data" placeholder="6€" value="{{ box_type.price }}" required min="0"/>
+            Contenance
+            <select name="capacity" class="data" data-s2 data-placeholder="Sélectionnez une contenance" required>
+                {% for capacity in capacities %}
+                    <option value="{{ capacity }}" {{ box_type.capacity == capacity ? 'selected' }}>{{ capacity }}</option>
+                {% endfor %}
+            </select>
+        </label>
+    </div>
+    <div class="col-12 col-md-6">
+        <label>
+            Forme
+            <select name="shape" class="data" data-s2 data-placeholder="Sélectionnez une forme" required>
+                {% for shape in shapes %}
+                    <option value="{{ shape }}" {{ box_type.shape == shape ? 'selected' }}>{{ shape }}</option>
+                {% endfor %}
+            </select>
         </label>
     </div>
 </div>

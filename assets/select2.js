@@ -17,7 +17,8 @@ export default class Select2 {
     static init($element) {
         const type = $element.data(`s2`);
 
-        if(!$element.find(`option[selected]`).exists() && !type && !$element.is(`[data-no-empty-option]`)) {
+        if(!$element.find(`option[selected]`).exists() && !type &&
+            !$element.is(`[data-no-empty-option]`) && !$element.is(`[data-editable]`)) {
             $element.prepend(`<option selected>`);
         }
 
@@ -35,6 +36,7 @@ export default class Select2 {
 
         $element.select2({
             placeholder: $element.data(`placeholder`),
+            tags: $element.is(`[data-editable]`),
             language: {
                 noResults: () => `Aucun résultat`,
                 searching: () => null,

@@ -93,9 +93,7 @@ class ExportService {
     public function __construct(EntityManagerInterface $manager) {
         $this->manager = $manager;
         $this->encoding = $manager->getRepository(GlobalSetting::class)
-            ->findOneBy(["name" => GlobalSetting::CSV_EXPORTS_ENCODING]);
-
-        $this->encoding = $this->encoding ? $this->encoding->getValue() : null;
+            ->getValue(GlobalSetting::CSV_EXPORTS_ENCODING);
     }
 
     public function export(callable $generator, string $name, ?array $headers = null): StreamedResponse {

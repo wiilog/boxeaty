@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Helper\Stream;
 use Symfony\Component\Security\Core\Security;
 use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class AppExtension extends AbstractExtension {

@@ -73,15 +73,14 @@ class ApiController extends AbstractController {
      */
     public function checkCode(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
+        $page = $manager->getRepository(GlobalSetting::class)->getCorrespondingCode($content->code);
 
-        try {
-            $page = $manager->getRepository(GlobalSetting::class)->getCorrespondingCode($content->code);
-
+        if ($page) {
             return $this->json([
                 "success" => true,
-                "page" => $page["name"],
+                "page" => $page,
             ]);
-        } catch (NoResultException $ignored) {
+        } else {
             return $this->json([
                 "success" => false,
             ]);
