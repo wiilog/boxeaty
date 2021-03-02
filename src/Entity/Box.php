@@ -77,7 +77,7 @@ class Box {
     private ?bool $canGenerateDepositTicket = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", cascade={"remove"}, orphanRemoval=true)
      */
     private Collection $trackingMovements;
 
@@ -196,6 +196,14 @@ class Box {
         }
 
         return $this;
+    }
+
+    public function fromTrackingMovement(TrackingMovement $movement): self {
+        return $this->setState($movement->getState())
+            ->setLocation($movement->getLocation())
+            ->setQuality($movement->getQuality())
+            ->setOwner($movement->getClient())
+            ->setComment($movement->getComment());
     }
 
 }

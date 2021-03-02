@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Box;
 use App\Entity\Quality;
 use App\Entity\TrackingMovement;
 use App\Helper\QueryHelper;
@@ -27,6 +28,7 @@ class QualityRepository extends EntityRepository
         return $this->createQueryBuilder("quality")
             ->select("quality.id AS id, quality.name AS text")
             ->where("quality.name LIKE :search")
+            ->andWhere("quality.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
@@ -63,9 +65,9 @@ class QualityRepository extends EntityRepository
 
     public function getDeletable(array $qualities): array {
         $uses = $this->createQueryBuilder("quality")
-            ->select("quality.id AS id, (COUNT(movement) + 0) AS uses") //TODO: replace 0 by COUNT(box)
+            ->select("quality.id AS id, (COUNT(movement) + COUNT(box)) AS uses")
             ->leftJoin(TrackingMovement::class, "movement", Join::WITH, "movement.quality = quality.id")
-            ->addSelect("0 AS box")//TODO: replace this line by a left join on boxes
+            ->addSelect(Box::class, "box", Join::WITH, "box.quality = quality.id")
             ->where("quality.id IN (:qualities)")
             ->groupBy("quality")
             ->setParameter("qualities", $qualities)

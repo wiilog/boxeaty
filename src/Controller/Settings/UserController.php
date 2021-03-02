@@ -191,11 +191,15 @@ class UserController extends AbstractController {
         $content = (object) $request->request->all();
         $user = $manager->getRepository(User::class)->find($content->id);
 
-        //TODO: check for movements
         if ($user === $this->getUser()) {
             return $this->json([
                 "success" => false,
                 "msg" => "Vous ne pouvez pas supprimer votre propre compte utilisateur"
+            ]);
+        } else if($user && !$user->getTrackingMovements()->isEmpty()) {
+            return $this->json([
+                "success" => true,
+                "msg" => "Cet utilisateur possède un ou plusieurs mouvements, vous ne pouvez pas le supprimer",
             ]);
         } else if ($user) {
             $manager->remove($user);

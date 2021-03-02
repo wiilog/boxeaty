@@ -8,6 +8,7 @@ use App\Entity\Client;
 use App\Entity\Import;
 use App\Entity\Location;
 use App\Entity\Quality;
+use App\Entity\TrackingMovement;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -88,12 +89,16 @@ class ImportService {
             }
 
             if (!$this->hasError()) {
-                $box->setState($state);
-                $box->setQuality($quality);
-                $box->setType($type);
-                $box->setLocation($location);
-                $box->setOwner($owner);
-                $box->setComment($this->value(Import::COMMENT));
+                $movement = (new TrackingMovement())
+                    ->setState($state)
+                    ->setQuality($quality)
+                    ->setLocation($location)
+                    ->setClient($owner)
+                    ->setComment($this->value(Import::COMMENT));
+
+                $box->setType($type)
+                    ->setCanGenerateDepositTicket(false)
+                    ->fromTrackingMovement($movement);
 
                 if (!$box->getId()) {
                     $this->manager->persist($box);

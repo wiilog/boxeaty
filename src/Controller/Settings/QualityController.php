@@ -45,7 +45,8 @@ class QualityController extends AbstractController {
                 "name" => $quality->getName(),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
-                    "deletable" => $deletable[$quality->getId()],
+                    "deletable" => true,
+                    "disableDelete" => !$deletable[$quality->getId()] ? "Cette qualité ne peut pas être supprimé car elle est utilisée par des Box" : null,
                 ]),
             ];
         }
@@ -64,7 +65,7 @@ class QualityController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $existing = $manager->getRepository(Quality::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Une qualité avec ce nom existe déjà");
@@ -72,7 +73,8 @@ class QualityController extends AbstractController {
 
         if ($form->isValid()) {
             $quality = new Quality();
-            $quality->setName($content->name);
+            $quality->setName($content->name)
+                ->setActive($content->active);
 
             $manager->persist($quality);
             $manager->flush();
@@ -106,14 +108,16 @@ class QualityController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Quality $quality): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $existing = $manager->getRepository(Quality::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $quality) {
             $form->addError("name", "Une autre qualité avec ce nom existe déjà");
         }
 
         if ($form->isValid()) {
-            $quality->setName($content->name);
+            $quality->setName($content->name)
+                ->setActive($content->active);
+
             $manager->flush();
 
             return $this->json([
@@ -130,11 +134,15 @@ class QualityController extends AbstractController {
      * @HasPermission(Role::MANAGE_QUALITIES)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $quality = $manager->getRepository(Quality::class)->find($content->id);
 
-        //TODO: check if quality is used by users
-        if ($quality) {
+        if (!$quality->getBoxes()->isEmpty()) {
+            return $this->json([
+                "success" => false,
+                "msg" => "Cette qualité est utilisée par une ou plusieurs Box vous ne poucez pas la supprimer",
+            ]);
+        } else if ($quality) {
             $manager->remove($quality);
             $manager->flush();
 

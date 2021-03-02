@@ -12,6 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Location {
 
+    public const DELIVERER = "Livreur";
+
     use Active;
 
     /**

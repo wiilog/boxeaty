@@ -121,6 +121,7 @@ class LocationRepository extends EntityRepository {
             ->select("kiosk.id AS id, kiosk.name AS text")
             ->where("kiosk.kiosk = 1")
             ->andWhere("kiosk.name LIKE :search")
+            ->andWhere("kiosk.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
@@ -131,6 +132,13 @@ class LocationRepository extends EntityRepository {
         $qb = $this->createQueryBuilder("kiosk");
 
         return QueryHelper::count($qb, "kiosk");
+    }
+
+    public function findDeliverer(): Location {
+        return $this->createQueryBuilder("location")
+            ->where("location.name = '" . Location::DELIVERER . "'")
+            ->getQuery()
+            ->getSingleResult();
     }
 
 }

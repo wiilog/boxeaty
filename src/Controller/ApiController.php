@@ -12,7 +12,6 @@ use App\Helper\StringHelper;
 use App\Service\Mailer;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NoResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -62,9 +61,24 @@ class ApiController extends AbstractController {
      */
     public function emptyKiosk(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
+
+        $deliverer = $manager->getRepository(Location::class)->findDeliverer();
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
 
-        //TODO: actually empty it
+        foreach($kiosk->getBoxes() as $box) {
+            $movement = (new TrackingMovement())
+                ->setDate(new DateTime())
+                ->setBox($box)
+                ->setState(Box::UNAVAILABLE)
+                ->setLocation($deliverer)
+                ->setUser(null);
+
+            $box->fromTrackingMovement($movement);
+
+            $manager->persist($movement);
+        }
+
+        $manager->flush();
 
         return $this->json([
             "success" => true,
@@ -111,6 +125,7 @@ class ApiController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "msg" => "La Box n'existe pas",
             ]);
         }
     }
@@ -128,18 +143,17 @@ class ApiController extends AbstractController {
         ]);
 
         if ($box) {
-            $box->setState(Box::UNAVAILABLE)
-                ->setLocation($kiosk)
-                ->setCanGenerateDepositTicket(true);
-
             $movement = (new TrackingMovement())
-                ->setBox($box)
-                ->setState(Box::UNAVAILABLE)
-                ->setLocation($kiosk)
-                ->setQuality($box->getQuality())
-                ->setClient($box->getOwner())
                 ->setDate(new DateTime())
+                ->setLocation($kiosk)
+                ->setClient($box->getOwner())
+                ->setQuality($box->getQuality())
+                ->setState(Box::UNAVAILABLE)
+                ->setComment($content->comment ?? null)
                 ->setUser(null);
+
+            $box->setCanGenerateDepositTicket(true)
+                ->fromTrackingMovement($movement);
 
             $manager->persist($movement);
             $manager->flush();
@@ -154,6 +168,7 @@ class ApiController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "msg" => "La Box n'existe pas",
             ]);
         }
     }
@@ -161,7 +176,7 @@ class ApiController extends AbstractController {
     /**
      * @Route("/deposit-ticket/statistics", name="api_deposit_ticket_statistics")
      */
-    public function depositTicketStatistics(EntityManagerInterface $manager): Response {
+    public function depositTicketStatistics(): Response {
         return $this->json([
             "collectedBoxes" => 1092,
             "lessWaste" => 12,
@@ -177,6 +192,13 @@ class ApiController extends AbstractController {
 
         $box = $manager->getRepository(Box::class)->find($content->box);
         $validity = $box->getLocation()->getClient()->getDepositTicketValidity();
+
+        if(!$box->getCanGenerateDepositTicket()) {
+            return $this->json([
+                "success" => false,
+                "msg" => "Cette box n'a pas été déposée",
+            ]);
+        }
 
         $depositTicket = (new DepositTicket())
             ->setBox($box)

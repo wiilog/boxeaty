@@ -44,7 +44,8 @@ class RoleController extends AbstractController {
                 "active" => $role->isActive() ? "Oui" : "Non",
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
-                    "deletable" => $deletable[$role->getId()],
+                    "deletable" => true,
+                    "disableDelete" => !$deletable[$role->getId()] ? "Ce rôle ne peut pas être supprimé car il est utilisé par des utilisateurs" : null,
                 ]),
             ];
         }
@@ -155,8 +156,12 @@ class RoleController extends AbstractController {
         $content = (object) $request->request->all();
         $role = $manager->getRepository(Role::class)->find($content->id);
 
-        //TODO: check if role is used by users
-        if ($role) {
+        if(!$role->getUsers()->isEmpty()) {
+            return $this->json([
+                "success" => false,
+                "msg" => "Ce rôle est utilisé par des utilisateurs, vous ne pouvez pas le supprimer",
+            ]);
+        } else if ($role) {
             $manager->remove($role);
             $manager->flush();
 

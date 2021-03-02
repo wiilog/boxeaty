@@ -12,6 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Quality {
 
+    use Active;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

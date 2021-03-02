@@ -19,6 +19,13 @@ global.Routing = Routing;
 const routes = require(`../public/generated/routes.json`);
 Routing.setRoutingData(routes);
 
+//tooltips
+$(document)
+    .ready(() => $('[data-toggle="tooltip"]').tooltip())
+    .arrive(`[data-toggle="tooltip"]`, function() {
+        $(this).tooltip();
+    });
+
 //activate dropdowns
 $(`.datatable-action`).click(() => $(`.datatable-action-dropdown`).toggle());
 $(`.display-menu`).click(() => $(`#menu-dropdown`).toggle());

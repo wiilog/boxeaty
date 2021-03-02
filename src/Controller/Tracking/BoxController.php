@@ -9,6 +9,7 @@ use App\Entity\Client;
 use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
+use App\Entity\TrackingMovement;
 use App\Helper\Form;
 use App\Service\ExportService;
 use DateTime;
@@ -73,7 +74,7 @@ class BoxController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $location = $manager->getRepository(Location::class)->find($content->location);
         $owner = $manager->getRepository(Client::class)->find($content->owner);
         $quality = $manager->getRepository(Quality::class)->find($content->quality);
@@ -85,16 +86,20 @@ class BoxController extends AbstractController {
             $form->addError("number", "Le numéro de Box ne peut excéder 50 caractères");
         }
 
-        if($form->isValid()) {
-            $box = new Box();
-            $box
-                ->setNumber($content->number)
+        if ($form->isValid()) {
+            $movement = (new TrackingMovement())
+                ->setDate(new DateTime())
                 ->setLocation($location)
-                ->setOwner($owner)
+                ->setClient($owner)
                 ->setQuality($quality)
                 ->setState($content->state)
-                ->setType($type)
                 ->setComment($content->comment ?? null);
+
+            $box = (new Box())
+                ->setNumber($content->number)
+                ->setType($type)
+                ->setCanGenerateDepositTicket(false)
+                ->fromTrackingMovement($movement);
 
             $manager->persist($box);
             $manager->flush();
@@ -140,7 +145,7 @@ class BoxController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Box $box): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $location = $manager->getRepository(Location::class)->find($content->location);
         $owner = $manager->getRepository(Client::class)->find($content->owner);
         $quality = $manager->getRepository(Quality::class)->find($content->quality);
@@ -150,15 +155,20 @@ class BoxController extends AbstractController {
             $form->addError("name", "Une autre Box avec ce numéro existe déjà");
         }
 
-        if($form->isValid()) {
-            $box->setNumber($content->number)
+        if ($form->isValid()) {
+            $movement = (new TrackingMovement())
+                ->setDate(new DateTime())
                 ->setLocation($location)
-                ->setOwner($owner)
+                ->setClient($owner)
                 ->setQuality($quality)
                 ->setState($content->state)
-                ->setType($type)
                 ->setComment($content->comment ?? null);
 
+            $box->setNumber($content->number)
+                ->setType($type)
+                ->fromTrackingMovement($movement);
+
+            $manager->persist($movement);
             $manager->flush();
 
             return $this->json([
@@ -175,7 +185,7 @@ class BoxController extends AbstractController {
      * @HasPermission(Role::MANAGE_BOXES)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $box = $manager->getRepository(Box::class)->find($content->id);
 
         if ($box) {
