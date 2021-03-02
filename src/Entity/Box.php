@@ -72,6 +72,11 @@ class Box {
     private ?string $comment = null;
 
     /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $canGenerateDepositTicket = null;
+
+    /**
      * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", orphanRemoval=true)
      */
     private Collection $trackingMovements;
@@ -170,6 +175,15 @@ class Box {
     public function setComment(?string $comment): self {
         $this->comment = $comment;
 
+        return $this;
+    }
+
+    public function getCanGenerateDepositTicket(): ?bool {
+        return $this->canGenerateDepositTicket;
+    }
+
+    public function setCanGenerateDepositTicket(?bool $canGenerateDepositTicket): self {
+        $this->canGenerateDepositTicket = $canGenerateDepositTicket;
         return $this;
     }
 

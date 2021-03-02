@@ -29,6 +29,11 @@ class DepositTicket {
     private ?int $id = null;
 
     /**
+     * @ORM\ManyToOne(targetEntity=Box::class)
+     */
+    private ?Box $box = null;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private ?DateTime $creationDate = null;
@@ -60,6 +65,15 @@ class DepositTicket {
 
     public function getId(): ?int {
         return $this->id;
+    }
+
+    public function getBox(): ?Box {
+        return $this->box;
+    }
+
+    public function setBox(?Box $box): self {
+        $this->box = $box;
+        return $this;
     }
 
     public function getCreationDate(): ?DateTime {

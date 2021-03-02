@@ -3,10 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Box;
+use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
 use App\Entity\TrackingMovement;
 use App\Helper\Stream;
+use App\Helper\StringHelper;
+use App\Service\Mailer;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NoResultException;
@@ -126,11 +129,13 @@ class ApiController extends AbstractController {
 
         if ($box) {
             $box->setState(Box::UNAVAILABLE)
-                ->setLocation($kiosk);
+                ->setLocation($kiosk)
+                ->setCanGenerateDepositTicket(true);
 
             $movement = (new TrackingMovement())
                 ->setBox($box)
                 ->setState(Box::UNAVAILABLE)
+                ->setLocation($kiosk)
                 ->setQuality($box->getQuality())
                 ->setClient($box->getOwner())
                 ->setDate(new DateTime())
@@ -142,6 +147,7 @@ class ApiController extends AbstractController {
             return $this->json([
                 "success" => true,
                 "box" => [
+                    "id" => $box->getId(),
                     "number" => $box->getNumber(),
                 ],
             ]);
@@ -153,13 +159,48 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/deposit-ticket-statistics", name="api_deposit_ticket_statistics")
+     * @Route("/deposit-ticket/statistics", name="api_deposit_ticket_statistics")
      */
     public function depositTicketStatistics(EntityManagerInterface $manager): Response {
         return $this->json([
             "collectedBoxes" => 1092,
             "lessWaste" => 12,
             "totalPackagingAvoided" => 35,
+        ]);
+    }
+
+    /**
+     * @Route("/deposit-ticket/mail", name="api_deposit_ticket_mail")
+     */
+    public function mailDepositTicket(Request $request, EntityManagerInterface $manager, Mailer $mailer): Response {
+        $content = json_decode($request->getContent());
+
+        $box = $manager->getRepository(Box::class)->find($content->box);
+        $validity = $box->getLocation()->getClient()->getDepositTicketValidity();
+
+        $depositTicket = (new DepositTicket())
+            ->setBox($box)
+            ->setNumber(StringHelper::random(5))
+            ->setState(DepositTicket::VALID)
+            ->setLocation($box->getLocation())
+            ->setCreationDate(new DateTime())
+            ->setValidityDate(new DateTime("+$validity month"));
+
+        $box->setCanGenerateDepositTicket(false);
+
+        $mailer->send(
+            $content->email,
+            "BoxEaty - Ticket consigne",
+            $this->renderView("emails/deposit_ticket.html.twig", [
+                "ticket" => $depositTicket,
+            ])
+        );
+
+        $manager->persist($depositTicket);
+        $manager->flush();
+
+        return $this->json([
+            "success" => true,
         ]);
     }
 

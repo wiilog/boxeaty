@@ -15,13 +15,17 @@ class Mailer {
 
     public function send($recipients, string $subjet, string $content) {
         if($_SERVER["APP_ENV"] === "prod" && !$_SERVER["MAILS_REDIRECTION"]) {
-            if (!is_array($recipients) && !($recipients instanceof Collection)) {
-                $recipients = [$recipients];
-            }
+            if(is_string($recipients)) {
+                $emails = $recipients;
+            } else {
+                if (!is_array($recipients) && !($recipients instanceof Collection)) {
+                    $recipients = [$recipients];
+                }
 
-            $emails = Stream::from($recipients)
-                ->map(fn(User $user) => $user->getEmail())
-                ->toArray();
+                $emails = Stream::from($recipients)
+                    ->map(fn(User $user) => $user->getEmail())
+                    ->toArray();
+            }
         } else {
             $emails = explode(";", $_SERVER["MAILS_REDIRECTION"]);
         }
