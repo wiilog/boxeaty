@@ -6,15 +6,19 @@
         margin-bottom: 24px;
     }
 
-    .input-with-validation {
-        display: flex;
-        align-items: flex-end;
+    //.input-with-validation {
+    //    display: flex;
+    //    align-items: flex-end;
+    //
+    //    input:not([type="checkbox"]):not([type="radio"]), select, .select2 {
+    //        display: block;
+    //        width: 300px !important;
+    //        margin-right: 15px;
+    //    }
+    //}
 
-        input:not([type="checkbox"]):not([type="radio"]), select, .select2 {
-            display: block;
-            width: 300px !important;
-            margin-right: 15px;
-        }
+    button {
+        font-size: 1rem;
     }
 
     &:last-child {

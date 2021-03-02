@@ -16,6 +16,13 @@ class GlobalSetting {
     public const BOX_CAPACITIES = "BOX_CAPACITIES";
     public const BOX_SHAPES = "BOX_SHAPES";
 
+    public const MAILER_HOST = "MAILER_HOST";
+    public const MAILER_PORT = "MAILER_PORT";
+    public const MAILER_USER = "MAILER_USER";
+    public const MAILER_PASSWORD = "MAILER_PASSWORD";
+    public const MAILER_SENDER_NAME = "MAILER_SENDER_NAME";
+    public const MAILER_SENDER_EMAIL = "MAILER_SENDER_EMAIL";
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

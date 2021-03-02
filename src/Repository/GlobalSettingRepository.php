@@ -50,4 +50,16 @@ class GlobalSettingRepository extends EntityRepository {
         }
     }
 
+    public function getMailer(): array {
+        $configs = $this->createQueryBuilder("setting")
+            ->select("setting.name, setting.value")
+            ->where("setting.name LIKE 'MAILER_%'")
+            ->getQuery()
+            ->getArrayResult();
+
+        return Stream::from($configs)
+            ->keymap(fn($input) => [$input["name"], $input["value"]])
+            ->toArray();
+    }
+
 }
