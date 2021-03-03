@@ -57,6 +57,38 @@ class ApiController extends AbstractController {
     }
 
     /**
+     * @Route("/kiosks/reload", name="api_kiosks_reload")
+     */
+    public function kiosk(Request $request, EntityManagerInterface $manager): Response {
+        $content = json_decode($request->getContent());
+
+        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
+
+        if($kiosk) {
+            return $this->json([
+                "success" => true,
+                "kiosk" => [
+                    "id" => $kiosk->getId(),
+                    "name" => $kiosk->getName(),
+                    "capacity" => 10,
+                    "client" => null,
+                    "boxes" => Stream::from($kiosk->getBoxes())
+                        ->map(fn(Box $box) => [
+                            "id" => $box->getId(),
+                            "number" => $box->getNumber(),
+                        ])
+                        ->toArray(),
+                ]
+            ]);
+        } else {
+            return $this->json([
+                "success" => false,
+                "msg" => "Borne inexistante",
+            ]);
+        }
+    }
+
+    /**
      * @Route("/kiosks/empty", name="api_empty_kiosk")
      */
     public function emptyKiosk(Request $request, EntityManagerInterface $manager): Response {
@@ -65,7 +97,7 @@ class ApiController extends AbstractController {
         $deliverer = $manager->getRepository(Location::class)->findDeliverer();
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
 
-        foreach($kiosk->getBoxes() as $box) {
+        foreach ($kiosk->getBoxes() as $box) {
             $movement = (new TrackingMovement())
                 ->setDate(new DateTime())
                 ->setBox($box)
@@ -181,14 +213,14 @@ class ApiController extends AbstractController {
         $content = json_decode($request->getContent());
 
         $locationRepository = $manager->getRepository(Location::class);
-        $kiosk = $locationRepository->find($content->kiosk);
+        $kiosk = $locationRepository->find($content->id);
         $totalDeposits = $locationRepository->getTotalDeposits();
 
         $lessWaste = $kiosk->getDeposits() * 32;
-        if($lessWaste > 1000) {
+        if ($lessWaste > 1000) {
             $prefix = "kg";
             $lessWaste = round($lessWaste / 1000);
-        } else if($lessWaste > 1000000) {
+        } else if ($lessWaste > 1000000) {
             $prefix = "t";
             $lessWaste = round($lessWaste / 1000000);
         } else {
@@ -209,9 +241,11 @@ class ApiController extends AbstractController {
         $content = json_decode($request->getContent());
 
         $box = $manager->getRepository(Box::class)->find($content->box);
-        $validity = $box->getLocation()->getClient()->getDepositTicketValidity();
+        $validity = $manager->getRepository(Location::class)->find($content->kiosk)
+            ->getClient()
+            ->getDepositTicketValidity();
 
-        if(!$box->getCanGenerateDepositTicket()) {
+        if (!$box->getCanGenerateDepositTicket()) {
             return $this->json([
                 "success" => false,
                 "msg" => "Cette box n'a pas été déposée",
