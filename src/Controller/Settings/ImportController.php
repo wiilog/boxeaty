@@ -125,7 +125,7 @@ class ImportController extends AbstractController {
                     $preAssignments[$closest] = $code;
                 }
             }
-dump(Import::FIELDS);
+
             return $this->json([
                 "success" => true,
                 "modal" => $this->renderView("settings/import/modal/fields_association.html.twig", [

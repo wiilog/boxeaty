@@ -138,7 +138,6 @@ class ExportService {
         $sheet = new Worksheet(null, $name);
         $export = Stream::from(is_string($class) ? $this->manager->getRepository($class)->iterateAll() : $class)
             ->map(function($row) use ($transformer) {
-                dump($row);
                 if($transformer) {
                     $row = $transformer($row);
                 }
