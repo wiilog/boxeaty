@@ -82,7 +82,7 @@ class Box {
     private ?int $uses = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", cascade={"remove"}, orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     private Collection $trackingMovements;
 
