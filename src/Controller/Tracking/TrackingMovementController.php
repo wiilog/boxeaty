@@ -6,6 +6,7 @@ use App\Annotation\HasPermission;
 use App\Entity\Box;
 use App\Entity\Client;
 use App\Entity\Group;
+use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\TrackingMovement;
@@ -96,7 +97,7 @@ class TrackingMovementController extends AbstractController {
             $form->addError("client", "Ce client n'existe pas ou plus");
         }
 
-        $location = $manager->getRepository(Client::class)->find($content->location);
+        $location = $manager->getRepository(Location::class)->find($content->location);
         if (!$location) {
             $form->addError("location", "Cet emplacement n'existe pas ou plus");
         }
@@ -168,7 +169,7 @@ class TrackingMovementController extends AbstractController {
             $form->addError("client", "Ce client n'existe pas ou plus");
         }
 
-        $location = $manager->getRepository(User::class)->find($content->location);
+        $location = $manager->getRepository(Location::class)->find($content->location);
         if (!$location) {
             $form->addError("location", "Cet emplacement n'existe pas ou plus");
         }
