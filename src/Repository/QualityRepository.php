@@ -67,7 +67,7 @@ class QualityRepository extends EntityRepository
         $uses = $this->createQueryBuilder("quality")
             ->select("quality.id AS id, (COUNT(movement) + COUNT(box)) AS uses")
             ->leftJoin(TrackingMovement::class, "movement", Join::WITH, "movement.quality = quality.id")
-            ->addSelect(Box::class, "box", Join::WITH, "box.quality = quality.id")
+            ->leftJoin(Box::class, "box", Join::WITH, "box.quality = quality.id")
             ->where("quality.id IN (:qualities)")
             ->groupBy("quality")
             ->setParameter("qualities", $qualities)
