@@ -106,10 +106,21 @@ class SelectController extends AbstractController {
     }
 
     /**
-     * @Route("/select/kios", name="ajax_select_kiosks", options={"expose": true})
+     * @Route("/select/kiosk", name="ajax_select_kiosks", options={"expose": true})
      */
     public function kiosk(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(Location::class)->getKiosksForSelect($request->query->get("term"));
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/any-location", name="ajax_select_any_location", options={"expose": true})
+     */
+    public function anyLocation(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Location::class)->getAnyForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,

@@ -95,7 +95,7 @@
 
         <label class="w-35">
             Contenance
-            <select name="{{ constant('App\\Entity\\GlobalSetting::BOX_CAPACITIES') }}" class="data"
+            <select name="{{ constant('App\\Entity\\GlobalSetting::BOX_CAPACITIES') }}" class="data" data-no-empty-option
                     data-s2 data-editable multiple data-placeholder="Entrez des capacités...">
                 {% for capacity in box_capacities %}
                     <option value="{{ capacity }}" selected>{{ capacity }}</option>
@@ -104,7 +104,7 @@
         </label>
         <label class="w-35">
             Forme
-            <select name="{{ constant('App\\Entity\\GlobalSetting::BOX_SHAPES') }}" class="data"
+            <select name="{{ constant('App\\Entity\\GlobalSetting::BOX_SHAPES') }}" class="data" data-no-empty-option
                     data-s2 data-editable multiple data-placeholder="Entrez des formes...">
                 {% for shape in box_shapes %}
                     <option value="{{ shape }}" selected>{{ shape }}</option>

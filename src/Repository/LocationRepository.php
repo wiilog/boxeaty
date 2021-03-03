@@ -128,6 +128,17 @@ class LocationRepository extends EntityRepository {
             ->getArrayResult();
     }
 
+    public function getAnyForSelect(?string $search) {
+        return $this->createQueryBuilder("kiosk")
+            ->select("kiosk.id AS id, kiosk.name AS text")
+            ->where("kiosk.name LIKE :search")
+            ->andWhere("kiosk.active = 1")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
     public function getTotalDeposits(): int {
         return $this->createQueryBuilder("kiosk")
             ->select("SUM(kiosk.deposits)")
