@@ -36,11 +36,6 @@ class LocationRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["filters"] as $name => $value) {
-            $qb->andWhere("location.$name LIKE :filter_$name")
-                ->setParameter("filter_$name", "%$value%");
-        }
-
         foreach ($params["order"] ?? [] as $order) {
             $column = $params["columns"][$order["column"]]["data"];
             $qb->addOrderBy("location.$column", $order["dir"]);
