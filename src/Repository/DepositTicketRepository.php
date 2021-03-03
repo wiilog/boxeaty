@@ -12,8 +12,8 @@ use Doctrine\ORM\EntityRepository;
  * @method DepositTicket[]    findAll()
  * @method DepositTicket[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class DepositTicketRepository extends EntityRepository
-{
+class DepositTicketRepository extends EntityRepository {
+
     public function iterateAll() {
         return $this->createQueryBuilder("deposit_ticket")
             ->select("deposit_ticket.creationDate AS creation_date")
@@ -45,8 +45,8 @@ class DepositTicketRepository extends EntityRepository
                 ->setParameter("search", "%$search%");
         }
 
-        foreach($params["filters"] as $name => $value) {
-            switch($name) {
+        foreach ($params["filters"] as $name => $value) {
+            switch ($name) {
                 case "from":
                     $qb->andWhere("DATE(deposit_ticket.creationDate) >= :from")
                         ->setParameter("from", $value);
@@ -56,9 +56,8 @@ class DepositTicketRepository extends EntityRepository
                         ->setParameter("to", $value);
                     break;
                 case "kiosk":
-                    $qb->leftJoin("deposit_ticket.kiosk", "filter_kiosk")
-                        ->andWhere("filter_kiosk.name LIKE :filter_kiosk")
-                        ->setParameter("filter_kiosk", "%$value%");
+                    $qb->andWhere("deposit_ticket.location = :filter_kiosk")
+                        ->setParameter("filter_kiosk", $value);
                     break;
                 case "state":
                     $qb->andWhere("deposit_ticket.state = :filter_state")
@@ -96,4 +95,5 @@ class DepositTicketRepository extends EntityRepository
             "filtered" => $filtered,
         ];
     }
+
 }

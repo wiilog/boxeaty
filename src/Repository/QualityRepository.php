@@ -20,6 +20,7 @@ class QualityRepository extends EntityRepository
     public function iterateAll() {
         return $this->createQueryBuilder("quality")
             ->select("quality.name AS name")
+            ->addSelect("quality.active AS active")
             ->getQuery()
             ->iterate();
     }

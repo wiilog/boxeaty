@@ -8,7 +8,9 @@
     <div class="centered-box">
         <span class="valid-until">Valable jusqu'au {{ ticket.validityDate | date('d/m/Y') }}</span>
         Utilisable dans
-        {% if (ticket.location.client.depositTicketsClients | length) > 1 %}
+        {% if (ticket.location.client.depositTicketsClients | length) == 0 %}
+            tout le réseau BoxEaty
+        {% elseif (ticket.location.client.depositTicketsClients | length) > 1 %}
             les restaurants
         {% else %}
             le restaurant

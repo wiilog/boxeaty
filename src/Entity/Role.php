@@ -125,7 +125,7 @@ class Role {
         return $this;
     }
 
-    public function getAllowEditOwnGroupOnly(): ?bool {
+    public function isAllowEditOwnGroupOnly(): ?bool {
         return $this->allowEditOwnGroupOnly;
     }
 

@@ -74,7 +74,7 @@ class UserController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager, UserPasswordEncoderInterface $encoder): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $existing = $manager->getRepository(User::class)->findOneBy(["email" => $content->email]);
         if ($existing) {
             $form->addError("email", "L'adresse email est déjà utilisée par un autre utilisateur");
@@ -138,7 +138,7 @@ class UserController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, UserPasswordEncoderInterface $encoder, User $user): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $existing = $manager->getRepository(User::class)->findOneBy(["email" => $content->email]);
         if ($existing !== null && $existing !== $user) {
             $form->addError("email", "L'adresse email est déjà utilisée par un autre utilisateur");
@@ -188,7 +188,7 @@ class UserController extends AbstractController {
      * @HasPermission(Role::MANAGE_USERS)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $user = $manager->getRepository(User::class)->find($content->id);
 
         if ($user === $this->getUser()) {

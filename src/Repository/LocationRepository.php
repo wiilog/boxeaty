@@ -17,7 +17,7 @@ class LocationRepository extends EntityRepository {
     public function iterateAllLocations() {
         return $this->createQueryBuilder("location")
             ->select("location.name AS name")
-            ->where("location.active = 1")
+            ->addSelect("location.active AS active")
             ->andWhere("location.kiosk = 0")
             ->getQuery()
             ->iterate();
@@ -73,9 +73,10 @@ class LocationRepository extends EntityRepository {
     public function iterateAllKiosks() {
         return $this->createQueryBuilder("kiosk")
             ->select("kiosk.name AS name")
+            ->addSelect("kiosk.active AS active")
             ->addSelect("join_client.name AS client")
             ->join("kiosk.client", "join_client")
-            ->where("kiosk.active = 1")
+            ->where("kiosk.kiosk = 1")
             ->getQuery()
             ->iterate();
     }
@@ -149,7 +150,7 @@ class LocationRepository extends EntityRepository {
 
     public function findDeliverer(): Location {
         return $this->createQueryBuilder("location")
-            ->where("location.name = '" . Location::DELIVERER . "'")
+            ->where("location.code = '" . Location::DELIVERER . "'")
             ->getQuery()
             ->getSingleResult();
     }

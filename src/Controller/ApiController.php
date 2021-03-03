@@ -39,7 +39,7 @@ class ApiController extends AbstractController {
             ->map(fn(Location $kiosk) => [
                 "id" => $kiosk->getId(),
                 "name" => $kiosk->getName(),
-                "capacity" => 10,
+                "capacity" => 6,
                 "client" => null,
                 "boxes" => Stream::from($kiosk->getBoxes())
                     ->map(fn(Box $box) => [
@@ -57,6 +57,25 @@ class ApiController extends AbstractController {
     }
 
     /**
+     * @Route("/check-code", name="api_check_code")
+     */
+    public function checkCode(Request $request, EntityManagerInterface $manager): Response {
+        $content = json_decode($request->getContent());
+        $page = $manager->getRepository(GlobalSetting::class)->getCorrespondingCode($content->code);
+
+        if ($page) {
+            return $this->json([
+                "success" => true,
+                "page" => $page,
+            ]);
+        } else {
+            return $this->json([
+                "success" => false,
+            ]);
+        }
+    }
+
+    /**
      * @Route("/kiosks/reload", name="api_kiosks_reload")
      */
     public function kiosk(Request $request, EntityManagerInterface $manager): Response {
@@ -64,7 +83,7 @@ class ApiController extends AbstractController {
 
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
 
-        if($kiosk) {
+        if ($kiosk) {
             return $this->json([
                 "success" => true,
                 "kiosk" => [
@@ -101,8 +120,11 @@ class ApiController extends AbstractController {
             $movement = (new TrackingMovement())
                 ->setDate(new DateTime())
                 ->setBox($box)
+                ->setClient($box->getOwner())
+                ->setQuality($box->getQuality())
                 ->setState(Box::UNAVAILABLE)
                 ->setLocation($deliverer)
+                ->setComment($content->comment ?? null)
                 ->setUser(null);
 
             $box->fromTrackingMovement($movement);
@@ -115,25 +137,6 @@ class ApiController extends AbstractController {
         return $this->json([
             "success" => true,
         ]);
-    }
-
-    /**
-     * @Route("/check-code", name="api_check_code")
-     */
-    public function checkCode(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent());
-        $page = $manager->getRepository(GlobalSetting::class)->getCorrespondingCode($content->code);
-
-        if ($page) {
-            return $this->json([
-                "success" => true,
-                "page" => $page,
-            ]);
-        } else {
-            return $this->json([
-                "success" => false,
-            ]);
-        }
     }
 
     /**
@@ -151,13 +154,14 @@ class ApiController extends AbstractController {
             return $this->json([
                 "success" => true,
                 "box" => [
+                    "id" => $box->getId(),
                     "number" => $box->getNumber(),
                 ],
             ]);
         } else {
             return $this->json([
                 "success" => false,
-                "msg" => "La Box n'existe pas",
+                "msg" => "La Box n'existe pas ou n'est pas sale",
             ]);
         }
     }
@@ -185,7 +189,10 @@ class ApiController extends AbstractController {
                 ->setComment($content->comment ?? null)
                 ->setUser(null);
 
+            $kiosk->setDeposits($kiosk->getDeposits() + 1);;
+
             $box->setCanGenerateDepositTicket(true)
+                ->setUses($box->getUses() + 1)
                 ->fromTrackingMovement($movement);
 
             $manager->persist($movement);
