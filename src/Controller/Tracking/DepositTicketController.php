@@ -44,11 +44,11 @@ class DepositTicketController extends AbstractController {
             $data[] = [
                 "id" => $depositTicket->getId(),
                 "creationDate" => FormatHelper::datetime($depositTicket->getCreationDate()),
-                "kiosk" => FormatHelper::named($depositTicket->getKiosk()),
+                "kiosk" => FormatHelper::named($depositTicket->getLocation()),
                 "validityDate" => FormatHelper::datetime($depositTicket->getValidityDate()),
                 "number" => $depositTicket->getNumber() ?? "",
                 "useDate" => FormatHelper::datetime($depositTicket->getUseDate()) ?: "Inutilisé",
-                "client" => $depositTicket->getKiosk() ? FormatHelper::named($depositTicket->getKiosk()->getClient()) : "",
+                "client" => $depositTicket->getLocation() ? FormatHelper::named($depositTicket->getLocation()->getClient()) : "",
                 "state" => DepositTicket::NAMES[$depositTicket->getState()] ?? "",
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,

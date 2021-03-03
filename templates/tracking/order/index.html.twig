@@ -1,0 +1,38 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Traçabilité{% endblock %}
+{% block page %}Nouvelle commande{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right new-order-container">
+                <button class="primary new-order"><i class="icon fas fa-plus"></i></button>
+            </div>
+        </div>
+
+        {% for order in orders %}
+            {% set unique = order.boxes.count == 1 %}
+            <div class="order-card">
+                <div class="header">
+                    <span>{{ unique ? "Code de la Box" : "Codes des Box" }} : <br><strong>{{ order.boxes is not empty ? (order.boxes | map(p => "#{p.number}") | join(', ')) : '' }}</strong></span>
+                    <span>Date du mouvement : <strong>{{ order.date | date('Y/m/d H:i:s') }}</strong></span>
+                    <button data-listener="delete" class="delete-order"><i class="icon fas fa-trash-alt"></i></button>
+                    <input type="hidden" value="{{ order.id }}" name="order-id">
+                </div>
+                <div class="content">
+                    <span class="price">Coût : <strong>{{ order.totalCost }} euros</strong></span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% include 'tracking/order/modal/new.html.twig' with {order: new_order} %}
+    {% include 'tracking/order/modal/delete.html.twig' %}
+    {% include 'tracking/order/modal/scan.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('order_list') }}
+{% endblock %}

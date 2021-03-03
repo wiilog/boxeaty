@@ -1,0 +1,39 @@
+<div class="row">
+    <div class="col-md-12 col-12">
+        <div class="scan-box"><i class="fas fa-camera fa-2x"></i></div>
+    </div>
+    <div class="col-md-12 col-12">
+        <label>
+            Code(s) Box
+            <select name="box" class="data" data-s2 data-no-empty-option data-placeholder="Sélectionnez une ou plusieurs Box" required multiple>
+                {% for box in boxes %}
+                    <option data-price="{{ box.type ? box.type.price : 0 }}" value="{{ box.number }}">{{ box.number }}</option>
+                {% endfor %}
+            </select>
+        </label>
+    </div>
+</div>
+<div class="row deposit-ticket-container d-none">
+    <div class="row">
+        <div class="col-11">
+            <label>
+                Validation du ticket-consigne
+                <select name="depositTicket" class="data"
+                        data-s2 data-no-empty-option data-placeholder="Entrez des tickets-consigne..." multiple required>
+                    {% for depositTicket in depositTickets %}
+                        <option data-price="{{ depositTicket.id }}" value="{{ depositTicket.number }}">{{ depositTicket.number }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+        <div class="col-1 mt-2 p-0">
+            <div class="deposit-ticket-scan"><i class="fas fa-qrcode fa-2x"></i></div>
+        </div>
+    </div>
+    <div class="col-12">
+        <label>
+            Coût total
+            <input type="number" name="totalCost" class="data" placeholder="Renseignez un coût total" value="{{ order.totalCost }}" required/>
+        </label>
+    </div>
+</div>

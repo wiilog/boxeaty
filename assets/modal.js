@@ -38,7 +38,7 @@ export default class Modal {
                 Flash.add(Flash.WARNING, `Opération en cours d'exécution`);
             }
 
-            $button.load(() => modal.handleSubmit());
+            $button.load(() => config.submitter ? config.submitter() : modal.handleSubmit());
         });
 
         return modal;
@@ -177,6 +177,10 @@ export default class Modal {
         }
 
         this.element.modal(`show`);
+    }
+
+    close() {
+        this.element.modal(`hide`);
     }
 
     clear() {
