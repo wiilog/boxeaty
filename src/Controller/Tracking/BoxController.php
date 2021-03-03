@@ -87,16 +87,18 @@ class BoxController extends AbstractController {
         }
 
         if ($form->isValid()) {
+            $box = new Box();
+
             $movement = (new TrackingMovement())
                 ->setDate(new DateTime())
+                ->setBox($box)
                 ->setLocation($location)
                 ->setClient($owner)
                 ->setQuality($quality)
                 ->setState($content->state)
                 ->setComment($content->comment ?? null);
 
-            $box = (new Box())
-                ->setNumber($content->number)
+            $box->setNumber($content->number)
                 ->setType($type)
                 ->setCanGenerateDepositTicket(false)
                 ->fromTrackingMovement($movement);
@@ -158,6 +160,7 @@ class BoxController extends AbstractController {
         if ($form->isValid()) {
             $movement = (new TrackingMovement())
                 ->setDate(new DateTime())
+                ->setBox($box)
                 ->setLocation($location)
                 ->setClient($owner)
                 ->setQuality($quality)

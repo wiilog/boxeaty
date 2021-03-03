@@ -145,6 +145,7 @@ class ApiController extends AbstractController {
         if ($box) {
             $movement = (new TrackingMovement())
                 ->setDate(new DateTime())
+                ->setBox($box)
                 ->setLocation($kiosk)
                 ->setClient($box->getOwner())
                 ->setQuality($box->getQuality())
