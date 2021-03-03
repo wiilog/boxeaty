@@ -39,7 +39,7 @@ class ApiController extends AbstractController {
             ->map(fn(Location $kiosk) => [
                 "id" => $kiosk->getId(),
                 "name" => $kiosk->getName(),
-                "capacity" => 50,
+                "capacity" => 10,
                 "client" => null,
                 "boxes" => Stream::from($kiosk->getBoxes())
                     ->map(fn(Box $box) => [

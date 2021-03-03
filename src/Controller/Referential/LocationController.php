@@ -23,8 +23,7 @@ class LocationController extends AbstractController {
      * @Route("/liste", name="locations_list")
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function list(): Response
-    {
+    public function list(): Response {
         return $this->render("referential/location/index.html.twig", [
             "new_location" => new Location(),
         ]);
@@ -66,7 +65,7 @@ class LocationController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Un emplacement avec ce nom existe déjà");
@@ -77,7 +76,8 @@ class LocationController extends AbstractController {
             $location->setKiosk(false)
                 ->setName($content->name)
                 ->setActive($content->active)
-                ->setDescription($content->description ?? null);
+                ->setDescription($content->description ?? null)
+                ->setDeposits(0);
 
             $manager->persist($location);
             $manager->flush();
@@ -111,7 +111,7 @@ class LocationController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Location $location): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $location) {
             $form->addError("label", "Un autre emplacement avec ce nom existe déjà");
@@ -139,7 +139,7 @@ class LocationController extends AbstractController {
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $location = $manager->getRepository(Location::class)->find($content->id);
 
         if ($location) {

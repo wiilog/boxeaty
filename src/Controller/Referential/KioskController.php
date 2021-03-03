@@ -80,7 +80,8 @@ class KioskController extends AbstractController {
             $kiosk = new Location();
             $kiosk->setKiosk(true)
                 ->setName($content->name)
-                ->setClient($client);
+                ->setClient($client)
+                ->setDeposits(0);
 
             $manager->persist($kiosk);
             $manager->flush();
