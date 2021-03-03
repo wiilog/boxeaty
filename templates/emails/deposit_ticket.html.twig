@@ -7,6 +7,13 @@
 
     <div class="centered-box">
         <span class="valid-until">Valable jusqu'au {{ ticket.validityDate | date('d/m/Y') }}</span>
+        <br>
+
+        <img class="qr-code-image" src="{{ qr_code_data_uri(ticket.number) }}" alt="QR code à scanner pour la consigne">
+        <span class="qr-code">{{ ticket.number }}</span>
+
+        Le {{ ticket.creationDate | date('d/m/Y H:i') }}<br><br>
+
         Utilisable dans
         {% if (ticket.location.client.depositTicketsClients | length) == 0 %}
             tout le réseau BoxEaty
@@ -19,13 +26,7 @@
         {% for location in ticket.location.client.depositTicketsClients %}
             <b>{{ location.name }}</b>{{ not loop.last ? ',' }}
         {% endfor %}
-
-        <br>
-
-        <img class="qr-code-image" src="{{ qr_code_data_uri(ticket.number) }}" alt="QR code à scanner pour la consigne">
-        <span class="qr-code">{{ ticket.number }}</span>
-
-        Le {{ ticket.creationDate | date('d/m/Y H:i') }}<br><br>
+        <br><br>
         *Remboursement possible en caisse
     </div>
 

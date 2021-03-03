@@ -24,7 +24,7 @@ class UserRepository extends EntityRepository {
             ->addSelect("user.lastLogin as lastLogin")
             ->join("user.role", "role")
             ->getQuery()
-            ->iterate();
+            ->toIterable();
     }
 
     public function findForDatatable(array $params): array {

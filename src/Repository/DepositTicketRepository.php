@@ -23,10 +23,10 @@ class DepositTicketRepository extends EntityRepository {
             ->addSelect("deposit_ticket.useDate AS use_date")
             ->addSelect("join_client.name AS client")
             ->addSelect("deposit_ticket.state AS state")
-            ->join("deposit_ticket.kiosk", "join_kiosk")
+            ->join("deposit_ticket.location", "join_kiosk")
             ->join("join_kiosk.client", "join_client")
             ->getQuery()
-            ->iterate();
+            ->toIterable();
     }
 
     public function findForDatatable(array $params): array {

@@ -20,7 +20,7 @@ class LocationRepository extends EntityRepository {
             ->addSelect("location.active AS active")
             ->andWhere("location.kiosk = 0")
             ->getQuery()
-            ->iterate();
+            ->toIterable();
     }
 
     public function findLocationsForDatatable(array $params): array {
@@ -73,7 +73,7 @@ class LocationRepository extends EntityRepository {
             ->join("kiosk.client", "join_client")
             ->where("kiosk.kiosk = 1")
             ->getQuery()
-            ->iterate();
+            ->toIterable();
     }
 
     public function findKiosksForDatatable(array $params): array {

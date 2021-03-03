@@ -22,7 +22,7 @@ class QualityRepository extends EntityRepository
             ->select("quality.name AS name")
             ->addSelect("quality.active AS active")
             ->getQuery()
-            ->iterate();
+            ->toIterable();
     }
 
     public function getForSelect(?string $search) {

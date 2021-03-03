@@ -19,15 +19,14 @@ class TrackingMovementRepository extends EntityRepository {
             ->select("movement.date AS date")
             ->addSelect("box.number AS box_number")
             ->addSelect("quality.name AS quality_name")
-            ->addSelect("state.name AS state_name")
+            ->addSelect("movement.state AS state")
             ->addSelect("client.name AS client_name")
             ->addSelect("movement.comment AS comment")
             ->join("movement.box", "box")
             ->join("movement.quality", "quality")
-            ->join("movement.state", "state")
             ->join("movement.client", "client")
             ->getQuery()
-            ->iterate();
+            ->toIterable();
     }
 
     public function findForDatatable(array $params) {
