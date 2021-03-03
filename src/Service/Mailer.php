@@ -56,7 +56,7 @@ class Mailer {
                     ->map(fn(User $user) => $user->getEmail())
                     ->toArray();
             }
-        } else {
+        } else if(!empty($_SERVER["MAILS_REDIRECTION"])) {
             $emails = explode(";", $_SERVER["MAILS_REDIRECTION"]);
         }
 

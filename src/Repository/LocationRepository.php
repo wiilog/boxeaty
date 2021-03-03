@@ -130,9 +130,8 @@ class LocationRepository extends EntityRepository {
 
     public function getTotalDeposits(): int {
         return $this->createQueryBuilder("kiosk")
-            ->select("COUNT(kiosk.deposits)")
+            ->select("SUM(kiosk.deposits)")
             ->where("kiosk.kiosk = 1")
-            ->groupBy("kiosk")
             ->getQuery()
             ->getSingleScalarResult();
     }
