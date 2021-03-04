@@ -100,6 +100,7 @@ class BoxController extends AbstractController {
 
             $box->setNumber($content->number)
                 ->setType($type)
+                ->setUses(0)
                 ->setCanGenerateDepositTicket(false)
                 ->fromTrackingMovement($movement);
 
