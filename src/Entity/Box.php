@@ -69,6 +69,11 @@ class Box {
     private ?string $comment = null;
 
     /**
+     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", orphanRemoval=true)
+     */
+    private Collection $trackingMovements;
+
+    /**
      * @ORM\Column(type="boolean", nullable=true)
      */
     private ?bool $canGenerateDepositTicket = null;
@@ -79,12 +84,13 @@ class Box {
     private ?int $uses = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\ManyToMany(targetEntity=Order::class, mappedBy="boxes")
      */
-    private Collection $trackingMovements;
+    private $orders;
 
     public function __construct() {
         $this->trackingMovements = new ArrayCollection();
+        $this->orders = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -204,6 +210,33 @@ class Box {
             if ($trackingMovement->getBox() === $this) {
                 $trackingMovement->setBox(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Order[]
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): self
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders[] = $order;
+            $order->addBox($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): self
+    {
+        if ($this->orders->removeElement($order)) {
+            $order->removeBox($this);
         }
 
         return $this;

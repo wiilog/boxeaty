@@ -1,7 +1,7 @@
 {% extends 'template.html.twig' %}
 
 {% block menu %}Traçabilité{% endblock %}
-{% block page %}Box > Détails{% endblock %}
+{% block page %}<a href="{{ path('boxes_list') }}" class="text-white text-decoration-none">Box</a> > Détails{% endblock %}
 
 {% block content %}
     <div class="row box-show">

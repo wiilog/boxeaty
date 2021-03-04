@@ -47,7 +47,8 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
             Role::DELETE_DEPOSIT_TICKET,
             Role::MANAGE_KIOSKS,
             Role::MANAGE_BOXES,
-            Role::DELETE_BOX
+            Role::DELETE_BOX,
+            Role::MANAGE_ORDERS
         ],
     ];
 

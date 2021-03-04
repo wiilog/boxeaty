@@ -49,6 +49,25 @@ class BoxRepository extends EntityRepository {
             ->getArrayResult();
     }
 
+    public function getAvailableForSelect(?string $search, ?User $user) {
+        $qb = $this->createQueryBuilder("box");
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $qb->join("box.owner", "owner")
+                ->andWhere("owner.group IN (:groups)")
+                ->setParameter("groups", $user->getGroups());
+        }
+
+        return $qb->select("box.id AS id, box.number AS text, type.price AS price")
+            ->join("box.type", "type")
+            ->andWhere("box.number LIKE :search")
+            ->andWhere("box.state = '" . Box::AVAILABLE . "'")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
     public function findForDatatable(array $params, ?User $user): array {
         $search = $params["search"]["value"] ?? null;
 

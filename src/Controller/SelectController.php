@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Box;
 use App\Entity\BoxType;
 use App\Entity\Client;
+use App\Entity\DepositTicket;
 use App\Entity\Group;
 use App\Entity\Location;
 use App\Entity\Quality;
@@ -22,6 +23,28 @@ class SelectController extends AbstractController {
      */
     public function boxes(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(Box::class)->getForSelect($request->query->get("term"), $this->getUser());
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/box/disponibles", name="ajax_select_available_boxes", options={"expose": true})
+     */
+    public function availableBoxes(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Box::class)->getAvailableForSelect($request->query->get("term"), $this->getUser());
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/ticket-consigne", name="ajax_select_deposit_tickets", options={"expose": true})
+     */
+    public function depositTickets(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(DepositTicket::class)->getForSelect($request->query->get("term"), $this->getUser());
 
         return $this->json([
             "results" => $results,
