@@ -79,6 +79,10 @@ class BoxRepository extends EntityRepository {
                         ->andWhere("filter_client.group = :filter_group")
                         ->setParameter("filter_group", $value);
                     break;
+                case("client"):
+                    $qb->andWhere("box.owner = :filter_owner")
+                        ->setParameter("filter_owner", $value);
+                    break;
                 default:
                     $qb->andWhere("box.$name = :filter_$name")
                         ->setParameter("filter_$name", $value);
