@@ -50,11 +50,12 @@ class QueryHelper {
 
             if($multiple) {
                 foreach ($user->getGroups() as $i => $group) {
-                    $query->andWhere(":__group_$i MEMBER OF $alias.$field")
+                    $query
+                        ->andWhere("$alias.$field IS NULL OR :__group_$i MEMBER OF $alias.$field")
                         ->setParameter("__group_$i", $group);
                 }
             } else {
-                $query->andWhere("$alias.$field IN (:__groups)")
+                $query->andWhere("$alias.$field IS NULL OR $alias.$field IN (:__groups)")
                     ->setParameter("__groups", $user->getGroups());
             }
         }

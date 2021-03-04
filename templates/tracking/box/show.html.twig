@@ -7,11 +7,11 @@
     <div class="row box-show">
         <div class="col-4 details box-details">
             <h3>Détails de la Box</h3>
-            <p>Code: {{ box.number }}</p>
-            <p>Emplacement: {{ box.location ? box.location.name }}</p>
-            <p>Qualité: {{ box.quality ? box.quality.name }}</p>
-            <p>Etat: {{ box.state }}</p>
-            <p>Prix: {{ box.type ? box.type.price }} euros</p>
+            <p>Code : {{ box.number }}</p>
+            <p>Emplacement : {{ box.location ? box.location.name }}</p>
+            <p>Qualité : {{ box.quality ? box.quality.name }}</p>
+            <p>Etat : {{ box.state }}</p>
+            <p>Prix : {{ box.type ? (box.type.price ~ ' euros') }} </p>
         </div>
         <div class="col-8 box-group">
             <div class="owner box-details">

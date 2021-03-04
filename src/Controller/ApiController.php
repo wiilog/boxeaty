@@ -150,7 +150,9 @@ class ApiController extends AbstractController {
             "state" => Box::CONSUMER,
         ]);
 
-        if ($box) {
+        if ($box
+            && $box->getType()
+            && $box->getOwner()) {
             return $this->json([
                 "success" => true,
                 "box" => [
@@ -178,7 +180,9 @@ class ApiController extends AbstractController {
             "state" => Box::CONSUMER,
         ]);
 
-        if ($box) {
+        if ($box
+            && $box->getType()
+            && $box->getOwner()) {
             $movement = (new TrackingMovement())
                 ->setDate(new DateTime())
                 ->setBox($box)
@@ -208,7 +212,7 @@ class ApiController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
-                "msg" => "La Box n'existe pas",
+                "msg" => "La Box n'existe pas, veuillez contacter un responsable d'établissement.",
             ]);
         }
     }
