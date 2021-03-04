@@ -8,11 +8,11 @@
     <div class="col-12 toggle">
         <span class="label">Statut</span>
 
-        <input type="radio" id="new-user-active" name="active" class="data" value="1" {{ user.active ? 'checked' }}/>
-        <label for="new-user-active">Actif</label>
+        <input type="radio" id="{{ user.id ? 'edit' : 'new' }}-user-active" name="active" class="data" value="1" {{ user.active ? 'checked' }}/>
+        <label for="{{ user.id ? 'edit' : 'new' }}-user-active">Actif</label>
 
-        <input type="radio" id="new-user-inactive" name="active" class="data" value="0" {{ not user.active ? 'checked' }}/>
-        <label for="new-user-inactive">Inactif</label>
+        <input type="radio" id="{{ user.id ? 'edit' : 'new' }}-user-inactive" name="active" class="data" value="0" {{ not user.active ? 'checked' }}/>
+        <label for="{{ user.id ? 'edit' : 'new' }}-user-inactive">Inactif</label>
     </div>
     <div class="col-md-6 col-12">
         <label>
