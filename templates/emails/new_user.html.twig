@@ -5,7 +5,7 @@
 
     <div class="centered-box">
         L'utilisateur <b>{{ user.username}}</b> vient de procéder à la création d'un compte sur l'application BoxEaty.
-        Ce compte est rattaché à l'adresse mail <b>{{ user.email }}</b> et au groupe {{ user.groups | join(', ') }}.<br><br>
+        Ce compte est rattaché à l'adresse mail <b>{{ user.email }}</b> et au groupe {{ user.groups | map(g => g.name) | join(', ') }}.<br><br>
 
         Actuellement, cet utilisateur ne dispose d'aucun droit. Afin de lui en attribuer, vous devrez le paramétrer
         dans l'application BoxEaty dans le menu <i>Paramétrage -> Utilisateurs</i>.<br><br>
