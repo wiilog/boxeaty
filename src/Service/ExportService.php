@@ -157,6 +157,8 @@ class ExportService {
                 return $cell->format("d/m/Y H:i:s");
             } else if (is_bool($cell)) {
                 return $cell ? 'oui' : 'non';
+            } else if(is_string($cell)) {
+                return strip_tags($cell);
             } else {
                 return $cell;
             }
