@@ -58,11 +58,11 @@ class BoxRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "box");
 
         if ($search) {
-            $qb->join("box.location", "search_location")
-                ->join("box.owner", "search_owner")
-                ->join("box.quality", "search_quality")
-                ->join("box.type", "search_type")
-                ->where($qb->expr()->orX(
+            $qb->leftJoin("box.location", "search_location")
+                ->leftJoin("box.owner", "search_owner")
+                ->leftJoin("box.quality", "search_quality")
+                ->leftJoin("box.type", "search_type")
+                ->andWhere($qb->expr()->orX(
                     "box.number LIKE :search",
                     "search_location.name LIKE :search",
                     "search_owner.name LIKE :search",

@@ -18,7 +18,7 @@
     <div class="col-12">
         <label>
             Qualité
-            <select name="quality" class="data" data-s2 data-placeholder="Sélectionnez une qualité" required>
+            <select name="quality" class="data" data-s2 data-placeholder="Sélectionnez une qualité">
                 {% for quality in qualities %}
                     <option value="{{ quality.id }}" {{ movement.quality and movement.quality == quality ? 'selected' }}>{{ quality.name }}</option>
                 {% endfor %}
@@ -28,7 +28,7 @@
     <div class="col-12">
         <label>
             Etat
-            <select name="state" class="data" data-s2 data-placeholder="Sélectionnez un état" required>
+            <select name="state" class="data" data-s2 data-placeholder="Sélectionnez un état">
                 {% for id, state in states %}
                     <option value="{{ id }}" {{ movement.state == id ? 'selected' }}>{{ state }}</option>
                 {% endfor %}
@@ -38,7 +38,7 @@
     <div class="col-12">
         <label>
             Client
-            <select name="client" class="data" data-s2="client" data-placeholder="Sélectionnez un client" required>
+            <select name="client" class="data" data-s2="client" data-placeholder="Sélectionnez un client">
                 {% if movement.client %}
                     <option value="{{ movement.client.id }}" selected>{{ movement.client.name }}</option>
                 {% endif %}

@@ -46,18 +46,15 @@ class Import {
         ],
         self::STATE => [
             "name" => "Etat",
-            "required" => true,
         ],
         self::QUALITY => [
             "name" => "Qualité",
-            "required" => true,
         ],
         self::OWNER => [
             "name" => "Propriétaire",
         ],
         self::TYPE => [
             "name" => "Type de box",
-            "required" => true,
         ],
         self::COMMENT => [
             "name" => "Commentaire",

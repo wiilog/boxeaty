@@ -28,6 +28,13 @@ $(document).ready(() => {
 
                 Modal.load(ajax, {table})
             },
+            empty: data => {
+                const ajax = AJAX.route(`POST`, `kiosk_edit_template`, {
+                    kiosk: data.id
+                });
+
+                Modal.load(ajax, {table})
+            }
         }
     });
 });

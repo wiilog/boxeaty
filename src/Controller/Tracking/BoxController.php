@@ -48,11 +48,11 @@ class BoxController extends AbstractController {
             $data[] = [
                 "id" => $box->getId(),
                 "number" => $box->getNumber(),
-                "location" => $box->getLocation() ? $box->getLocation()->getName() : '',
+                "location" => $box->getLocation() ? $box->getLocation()->getName() : "",
                 "state" => Box::NAMES[$box->getState()] ?? "",
-                "quality" => $box->getQuality() ? $box->getQuality()->getName() : '',
-                "owner" => $box->getOwner() ? $box->getOwner()->getName() : '',
-                "type" => $box->getType() ? $box->getType()->getName() : '',
+                "quality" => $box->getQuality() ? $box->getQuality()->getName() : "",
+                "owner" => $box->getOwner() ? $box->getOwner()->getName() : "",
+                "type" => $box->getType() ? $box->getType()->getName() : "",
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
@@ -75,10 +75,10 @@ class BoxController extends AbstractController {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $location = $manager->getRepository(Location::class)->find($content->location);
-        $owner = $manager->getRepository(Client::class)->find($content->owner);
-        $quality = $manager->getRepository(Quality::class)->find($content->quality);
-        $type = $manager->getRepository(BoxType::class)->find($content->type);
+        $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
+        $owner = isset($content->owner) ? $manager->getRepository(Client::class)->find($content->owner) : null;
+        $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
+        $type = isset($content->type) ? $manager->getRepository(BoxType::class)->find($content->type) : null;
         $existing = $manager->getRepository(Box::class)->findOneBy(["number" => $content->number]);
         if ($existing) {
             $form->addError("number", "Ce numéro de Box existe déjà");
@@ -95,7 +95,7 @@ class BoxController extends AbstractController {
                 ->setLocation($location)
                 ->setClient($owner)
                 ->setQuality($quality)
-                ->setState($content->state)
+                ->setState($content->state ?? null)
                 ->setComment($content->comment ?? null);
 
             $box->setNumber($content->number)
@@ -149,10 +149,10 @@ class BoxController extends AbstractController {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $location = $manager->getRepository(Location::class)->find($content->location);
-        $owner = $manager->getRepository(Client::class)->find($content->owner);
-        $quality = $manager->getRepository(Quality::class)->find($content->quality);
-        $type = $manager->getRepository(BoxType::class)->find($content->type);
+        $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
+        $owner = isset($content->owner) ? $manager->getRepository(Client::class)->find($content->owner) : null;
+        $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
+        $type = isset($content->type) ? $manager->getRepository(BoxType::class)->find($content->type) : null;
         $existing = $manager->getRepository(Box::class)->findOneBy(["number" => $content->number]);
         if ($existing !== null && $existing !== $box) {
             $form->addError("name", "Une autre Box avec ce numéro existe déjà");
@@ -165,7 +165,7 @@ class BoxController extends AbstractController {
                 ->setLocation($location)
                 ->setClient($owner)
                 ->setQuality($quality)
-                ->setState($content->state)
+                ->setState($content->state ?? null)
                 ->setComment($content->comment ?? null);
 
             $box->setNumber($content->number)

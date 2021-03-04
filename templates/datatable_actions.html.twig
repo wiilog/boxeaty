@@ -14,6 +14,9 @@
         {% if cancellable ?? false %}
             <button data-listener="cancel"><i class="icon fas fa-ban"></i> Annuler</button>
         {% endif %}
+        {% if empty ?? false %}
+            <button data-listener="empty"><i class="icon fas fa-times"></i> Vider la borne</button>
+        {% endif %}
         {% if trace ?? false %}
             <a href="/persistent/traces/{{ import.trace }}" target="_blank">
                 <i class="icon fas fa-clipboard-list"></i> Fichier trace

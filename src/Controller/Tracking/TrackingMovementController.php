@@ -59,9 +59,9 @@ class TrackingMovementController extends AbstractController {
                 "id" => $movement->getId(),
                 "date" => $movement->getDate()->format("d/m/Y H:i"),
                 "box" => $movement->getBox()->getNumber(),
-                "quality" => $movement->getQuality()->getName(),
-                "state" => Box::NAMES[$movement->getState()],
-                "client" => $movement->getClient()->getName(),
+                "quality" => $movement->getQuality() ? $movement->getQuality()->getName() : "",
+                "state" => Box::NAMES[$movement->getState()] ?? "",
+                "client" => $movement->getClient() ? $movement->getClient()->getName() : "",
                 "actions" => $actions,
             ];
         }
@@ -87,27 +87,16 @@ class TrackingMovementController extends AbstractController {
             $form->addError("box", "Cette Box n'existe pas ou a changé de numéro");
         }
 
-        $quality = $manager->getRepository(Quality::class)->find($content->quality);
-        if (!$quality) {
-            $form->addError("quality", "Cette qualité n'existe pas ou plus");
-        }
-
-        $client = $manager->getRepository(Client::class)->find($content->client);
-        if (!$client) {
-            $form->addError("client", "Ce client n'existe pas ou plus");
-        }
-
-        $location = $manager->getRepository(Location::class)->find($content->location);
-        if (!$location) {
-            $form->addError("location", "Cet emplacement n'existe pas ou plus");
-        }
+        $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
+        $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
+        $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
 
         if ($form->isValid()) {
             $movement = new TrackingMovement();
             $movement->setDate(new DateTime($content->date))
                 ->setBox($box)
                 ->setQuality($quality)
-                ->setState($content->state)
+                ->setState($content->state ?? null)
                 ->setClient($client)
                 ->setLocation($location)
                 ->setUser($this->getUser())
@@ -159,25 +148,14 @@ class TrackingMovementController extends AbstractController {
             $form->addError("box", "Cette Box n'existe pas ou a changé de numéro");
         }
 
-        $quality = $manager->getRepository(Quality::class)->find($content->quality);
-        if (!$quality) {
-            $form->addError("quality", "Cette qualité n'existe plus");
-        }
-
-        $client = $manager->getRepository(Client::class)->find($content->client);
-        if (!$client) {
-            $form->addError("client", "Ce client n'existe pas ou plus");
-        }
-
-        $location = $manager->getRepository(Location::class)->find($content->location);
-        if (!$location) {
-            $form->addError("location", "Cet emplacement n'existe pas ou plus");
-        }
+        $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
+        $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
+        $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
 
         if ($form->isValid()) {
             $movement->setDate(new DateTime($content->date))
                 ->setQuality($quality)
-                ->setState($content->state)
+                ->setState($content->state ?? null)
                 ->setClient($client)
                 ->setLocation($location)
                 ->setComment($content->comment ?? null);

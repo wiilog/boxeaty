@@ -50,6 +50,7 @@ class KioskController extends AbstractController {
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
+                    "empty" => true,
                 ]),
             ];
         }
