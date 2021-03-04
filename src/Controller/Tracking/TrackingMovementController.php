@@ -87,11 +87,11 @@ class TrackingMovementController extends AbstractController {
             $form->addError("box", "Cette Box n'existe pas ou a changé de numéro");
         }
 
-        $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
-        $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
-        $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
-
         if ($form->isValid()) {
+            $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
+            $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
+            $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
+
             $movement = new TrackingMovement();
             $movement->setDate(new DateTime($content->date))
                 ->setBox($box)
@@ -103,7 +103,7 @@ class TrackingMovementController extends AbstractController {
                 ->setComment($content->comment ?? null);
 
             $box->setQuality($quality)
-                ->setState($content->state)
+                ->setState($content->state ?? null)
                 ->setOwner($client);
 
             $manager->persist($movement);
