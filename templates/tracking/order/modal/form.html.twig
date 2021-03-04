@@ -5,10 +5,7 @@
     <div class="col-md-12 col-12">
         <label>
             Code(s) Box
-            <select name="box" class="data" data-s2 data-no-empty-option data-placeholder="Sélectionnez une ou plusieurs Box" required multiple>
-                {% for box in boxes %}
-                    <option data-price="{{ box.type.price }}" value="{{ box.number }}">{{ box.number }}</option>
-                {% endfor %}
+            <select name="box" class="data" data-s2="availableBox" data-no-empty-option data-placeholder="Sélectionnez une ou plusieurs Box" required multiple>
             </select>
         </label>
     </div>
@@ -19,11 +16,7 @@
             <div class="col">
                 <label>
                     Validation du ticket-consigne
-                    <select name="depositTicket" class="data"
-                            data-s2 data-no-empty-option data-placeholder="Entrez des tickets-consigne..." multiple required>
-                        {% for depositTicket in depositTickets %}
-                            <option data-price="{{ depositTicket.box ? depositTicket.box.type.price : 0 }}" value="{{ depositTicket.number }}">{{ depositTicket.number }}</option>
-                        {% endfor %}
+                    <select name="depositTicket" class="data" data-s2="depositTicket" data-no-empty-option data-placeholder="Entrez des tickets-consigne..." multiple required>
                     </select>
                 </label>
             </div>

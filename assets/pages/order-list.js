@@ -6,6 +6,9 @@ import AJAX from "../ajax";
 import QrScanner from "qr-scanner";
 import Flash from "../flash";
 
+const boxPrices = {};
+const depositTicketPrices = {};
+
 $(document).ready(() => {
     QrScanner.WORKER_PATH = '/build/vendor/qr-scanner-worker.min.js';
 
@@ -14,17 +17,18 @@ $(document).ready(() => {
     const confirmationOrderModal = Modal.static(`#modal-confirmation-order`, {
         submitter: () => {
             confirmationOrderModal.handleSubmit();
-        }
+            window.location.reload();
+        },
     });
 
     const newOrderModal = Modal.static(`#modal-new-order`, {
         ajax: AJAX.route(`POST`, `order_new`),
-        submitter: function () {
+        submitter: function() {
             const $depositTicketContainer = $('.deposit-ticket-container');
             const $depositTicket = $depositTicketContainer.find('.deposit-ticket');
             const $totalCost = $depositTicketContainer.find('.total-cost');
 
-            if ($depositTicketContainer.hasClass('d-none')) {
+            if($depositTicketContainer.hasClass('d-none')) {
                 $depositTicketContainer.removeClass('d-none');
                 $depositTicket.attr('required');
                 $totalCost.attr('required');
@@ -32,18 +36,14 @@ $(document).ready(() => {
                 $('select[name=box]').prop('disabled', true);
             } else {
                 newOrderModal.handleSubmit();
-                confirmationOrderModal.open(() => {
-                    return location.reload();
-                });
+                confirmationOrderModal.open();
             }
         }
     });
 
     const deleteOrderModal = Modal.static(`#modal-delete-order`, {
         ajax: AJAX.route(`POST`, `order_delete`),
-        success: () => {
-            return location.reload();
-        }
+        success: () => window.location.reload(),
     });
 
     const scanModal = Modal.static(`#modal-scan`);
@@ -57,56 +57,69 @@ $(document).ready(() => {
 
     $(`.delete-order`).click(() => deleteOrderModal.open());
 
-    $(`.scan-box`).click(function () {
+    $(`.scan-box`).click(function() {
         const $modal = $(this).closest('.modal');
-        scan(scanModal, $modal.find('select[name=box]'), {
+        scan(scanModal, $modal.find('select[name=box]'), `ajax_select_available_boxes`, {
             success: 'La Box a bien été ajoutée',
             warning: 'La Box n\'existe pas'
         });
     });
 
-    $(`.deposit-ticket-scan`).click(function () {
+    $(`.deposit-ticket-scan`).click(function() {
         const $modal = $(this).closest('.modal');
-        scan(scanModal, $modal.find('select[name=depositTicket]'), {
+        scan(scanModal, $modal.find('select[name=depositTicket]'), `ajax_select_deposit_tickets`, {
             success: 'Le ticket-consigne a bien été ajouté',
-            warning: 'Le ticket-consigne n\'existe pas'
+            warning: `Le ticket-consigne n'existe pas, a déjà été utilisé ou n'est plus valide`
         });
     });
 
-    $('select[name=box]').on('change', function () {
+    $('select[name=box]').on('change', function() {
         calculateTotalCost($('select[name=box]'));
     });
 
-    $('select[name=depositTicket]').on('change', function () {
+    $('select[name=depositTicket]').on('change', function() {
         calculateTotalCost($('select[name=depositTicket]'));
     });
 });
 
-function scan(scanModal, $select, msg, freeSelect = false) {
+function scan(scanModal, $select, route, msg) {
     scanModal.open()
     const qrScanner = new QrScanner($('.scan-element')[0], result => {
-        if (result) {
-            if (freeSelect) {
-                let option = new Option(result, result, true, true);
-                $select.append(option).trigger('change');
-            } else if ($select.find(`option[value='${result}']`).length > 0) {
-                let selectedOptions = $select.find(`option:selected`).map(function () {
-                    return $(this).val();
-                }).toArray();
+        if(result) {
+            AJAX.url(`GET`, Routing.generate(route) + `?term=${result}`).json(results => {
+                const idk = results.results.find(r => r.text === result);
 
-                selectedOptions.push(result);
+                if(idk) {
+                    if(route === `ajax_select_available_boxes`) {
+                        boxPrices[idk.text] = idk.price;
+                    } else {
+                        depositTicketPrices[idk.text] = idk.price;
+                    }
 
-                $select.val(selectedOptions).trigger("change");
-                Flash.add('success', msg.success);
-            } else {
-                Flash.add('warning', msg.warning)
-            }
+                    let selectedOptions = $select.find(`option:selected`).map(function() {
+                        return $(this).val();
+                    }).toArray();
+
+                    if($select.find(`option[value='${result}']`).length === 0) {
+                        let option = new Option(result, result, true, true);
+                        $select.append(option);
+                    }
+
+                    selectedOptions.push(result);
+                    $select.val(selectedOptions).trigger("change");
+                    Flash.add('success', msg.success);
+                } else {
+                    Flash.add('warning', msg.warning)
+                }
+
+                scanModal.close();
+            });
+
             qrScanner.destroy();
-            scanModal.close();
         }
     });
 
-    $('#modal-scan').on('hidden.bs.modal', function () {
+    $('#modal-scan').on('hidden.bs.modal', function() {
         qrScanner.destroy();
     });
     qrScanner.start();
@@ -115,21 +128,19 @@ function scan(scanModal, $select, msg, freeSelect = false) {
 function calculateTotalCost($select) {
     const $modal = $select.closest('.modal');
 
-    const $boxesSelect = $modal.find('select[name=box] option:selected');
-    const $depositTicketsSelect = $modal.find('select[name=depositTicket] option:selected');
+    const $boxesSelect = $modal.find('select[name=box]').select2('data');
+    const $depositTicketsSelect = $modal.find('select[name=depositTicket]').select2('data');
 
     const totalBoxesPrice = $boxesSelect
-        .map(function () {
-            return Number($(this).data('price'));
+        .map(function(item) {
+            return Number(item.price ? item.price : boxPrices[item.text]);
         })
-        .toArray()
         .reduce((carry, current) => carry + (current || 0), 0);
 
     const totalDepositTicketsPrice = $depositTicketsSelect
-        .map(function () {
-            return Number($(this).data('price'));
+        .map(function(item) {
+            return Number(item.price ? item.price : depositTicketPrices[item.text]);
         })
-        .toArray()
         .reduce((carry, current) => carry + (current || 0), 0);
 
     const totalCost = ((totalBoxesPrice - totalDepositTicketsPrice) || 0);

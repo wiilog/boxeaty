@@ -7,6 +7,7 @@ use App\Entity\Box;
 use App\Entity\DepositTicket;
 use App\Entity\Order;
 use App\Entity\Role;
+use App\Entity\TrackingMovement;
 use App\Helper\Form;
 use App\Helper\Stream;
 use DateTime;
@@ -27,29 +28,10 @@ class OrderController extends AbstractController {
      */
     public function list(EntityManagerInterface $manager): Response {
         $orders = $manager->getRepository(Order::class)->findBy([], ['id' => 'DESC']);
-        $boxes = $manager->getRepository(Box::class)->findAll();
-        $depositTickets = $manager->getRepository(DepositTicket::class)->findAll();
 
         return $this->render("tracking/order/index.html.twig", [
             "new_order" => new Order(),
             "orders" => $orders,
-            "boxes" => $boxes,
-            "depositTickets" => $depositTickets,
-        ]);
-    }
-
-    /**
-     * @Route("/api", name="orders_api", options={"expose": true})
-     * @HasPermission(Role::MANAGE_ORDERS)
-     */
-    public function api(Request $request, EntityManagerInterface $manager): Response {
-        $depositTickets = $manager->getRepository(DepositTicket::class)
-            ->findForDatatable(json_decode($request->getContent(), true));
-
-        $data = [];
-
-        return $this->json([
-            "success" => true,
         ]);
     }
 
@@ -60,45 +42,57 @@ class OrderController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $boxRepository = $manager->getRepository(Box::class);
         $depositTicketRepository = $manager->getRepository(DepositTicket::class);
 
         $boxes = explode(",", $content->box);
         $depositTickets = explode(",", $content->depositTicket);
 
-        if($form->isValid()) {
+        if ($form->isValid()) {
             $order = new Order();
-            $order
-                ->setDate(new DateTime());
+            $order->setDate(new DateTime());
 
             foreach ($boxes as $box) {
-                if($box) {
+                if ($box) {
                     $box = $boxRepository->findOneBy(['number' => $box]);
-                    if($box) {
+                    if ($box) {
                         $order->addBox($box);
                     }
                 }
             }
 
             $boxPrices = array_sum(Stream::from($order->getBoxes()->toArray())
-                ->map(function (Box $box) {
+                ->map(function(Box $box) use ($manager) {
+                    $movement = (new TrackingMovement())
+                        ->setBox($box)
+                        ->setDate(new DateTime())
+                        ->setState(Box::CONSUMER)
+                        ->setLocation(null)
+                        ->setQuality($box->getQuality())
+                        ->setClient($box->getOwner())
+                        ->setUser($this->getUser());
+
+                    $manager->persist($movement);
+                    $box->fromTrackingMovement($movement);
+
                     return $box->getType() ? $box->getType()->getPrice() : 0;
                 })
                 ->toArray());
 
             foreach ($depositTickets as $depositTicket) {
-                if($depositTicket) {
+                if ($depositTicket) {
                     $depositTicket = $depositTicketRepository->findOneBy(['number' => $depositTicket]);
-                    if($depositTicket) {
+                    if ($depositTicket) {
                         $order->addDepositTicket($depositTicket);
                     }
                 }
             }
 
             $depositTicketPrices = array_sum(Stream::from($order->getDepositTickets()->toArray())
-                ->map(function (DepositTicket $depositTicket) {
+                ->map(function(DepositTicket $depositTicket) {
                     $box = $depositTicket->getBox();
+                    $depositTicket->setState(DepositTicket::SPENT);
                     return $box->getType() ? $box->getType()->getPrice() : 0;
                 })
                 ->toArray());
@@ -122,10 +116,30 @@ class OrderController extends AbstractController {
      * @HasPermission(Role::MANAGE_ORDERS)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $order = $manager->getRepository(Order::class)->find($content->id);
 
         if ($order) {
+            foreach ($order->getBoxes() as $box) {
+                $previousMovement = $manager->getRepository(TrackingMovement::class)->findPreviousMovement($box);
+
+                $movement = (new TrackingMovement())
+                    ->setBox($box)
+                    ->setDate(new DateTime())
+                    ->setState(Box::AVAILABLE)
+                    ->setLocation($previousMovement->getLocation())
+                    ->setQuality($box->getQuality())
+                    ->setClient($box->getOwner())
+                    ->setUser($this->getUser());
+
+                $manager->persist($movement);
+                $box->fromTrackingMovement($movement);
+            }
+
+            foreach ($order->getDepositTickets() as $depositTicket) {
+                $depositTicket->setState(DepositTicket::SPENT);
+            }
+
             $manager->remove($order);
             $manager->flush();
 
@@ -134,10 +148,9 @@ class OrderController extends AbstractController {
                 "msg" => "Commande supprimée avec succès"
             ]);
         } else {
-            return $this->json([
-                "success" => false,
-                "msg" => "Cette commande n'existe pas"
-            ]);
+
+            return $this->json(["success" => false,
+                "msg" => "Cette commande n'existe pas"]);
         }
     }
 
