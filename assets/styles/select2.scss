@@ -15,6 +15,11 @@
     overflow-x: auto;
 }
 
+.select2-container--focus {
+    overflow-x: auto;
+    height: 60px;
+}
+
 .filters .select2-container {
     width: 200px !important;
 }
