@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Location;
+use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
@@ -23,11 +24,13 @@ class LocationRepository extends EntityRepository {
             ->toIterable();
     }
 
-    public function findLocationsForDatatable(array $params): array {
+    public function findLocationsForDatatable(array $params, ?User $user): array {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("location")
             ->where("location.kiosk = 0");
+
+        QueryHelper::withCurrentGroup($qb, "location.client.group", $user);
 
         $total = QueryHelper::count($qb, "location");
 
@@ -76,16 +79,18 @@ class LocationRepository extends EntityRepository {
             ->toIterable();
     }
 
-    public function findKiosksForDatatable(array $params): array {
+    public function findKiosksForDatatable(array $params, ?User $user): array {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("kiosk")
             ->where("kiosk.kiosk = 1");
 
+        QueryHelper::withCurrentGroup($qb, "kiosk.client.group", $user);
+
         $total = QueryHelper::count($qb, "kiosk");
 
         if ($search) {
-            $qb->where("kiosk.name LIKE :search OR search_client.name LIKE :search")
+            $qb->andWhere("kiosk.name LIKE :search OR search_client.name LIKE :search")
                 ->join("kiosk.client", "search_client")
                 ->setParameter("search", "%$search%");
         }

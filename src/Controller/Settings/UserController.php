@@ -43,7 +43,7 @@ class UserController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $users = $manager->getRepository(User::class)
-            ->findForDatatable(json_decode($request->getContent(), true));
+            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $data = [];
         foreach ($users["data"] as $user) {
@@ -53,6 +53,7 @@ class UserController extends AbstractController {
                 "email" => $user->getEmail(),
                 "lastLogin" => $user->getLastLogin() ? $user->getLastLogin()->format("d/m/Y H:i") : "/",
                 "role" => $user->getRole()->getName(),
+                "status" => $user->isActive() ? "Actif" : "Inactif",
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
@@ -184,22 +185,35 @@ class UserController extends AbstractController {
     }
 
     /**
-     * @Route("/supprimer", name="user_delete", options={"expose": true})
+     * @Route("/supprimer/template/{user}", name="user_delete_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_USERS)
      */
-    public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = (object)$request->request->all();
-        $user = $manager->getRepository(User::class)->find($content->id);
+    public function deleteTemplate(User $user): Response {
+        return $this->json([
+            "submit" => $this->generateUrl("user_delete", ["user" => $user->getId()]),
+            "template" => $this->renderView("settings/user/modal/delete.html.twig", [
+                "user" => $user,
+            ])
+        ]);
+    }
 
+    /**
+     * @Route("/supprimer/{user}", name="user_delete", options={"expose": true})
+     * @HasPermission(Role::MANAGE_USERS)
+     */
+    public function delete(EntityManagerInterface $manager, User $user): Response {
         if ($user === $this->getUser()) {
             return $this->json([
                 "success" => false,
                 "msg" => "Vous ne pouvez pas supprimer votre propre compte utilisateur"
             ]);
         } else if($user && !$user->getTrackingMovements()->isEmpty()) {
+            $user->setActive(false);
+            $manager->flush();
+
             return $this->json([
                 "success" => true,
-                "msg" => "Cet utilisateur possède un ou plusieurs mouvements, vous ne pouvez pas le supprimer",
+                "msg" => "Utilisateur <strong>{$user->getUsername()}</strong> désactivé avec succès"
             ]);
         } else if ($user) {
             $manager->remove($user);
@@ -208,11 +222,6 @@ class UserController extends AbstractController {
             return $this->json([
                 "success" => true,
                 "msg" => "Utilisateur <strong>{$user->getUsername()}</strong> supprimé avec succès"
-            ]);
-        } else {
-            return $this->json([
-                "success" => false,
-                "msg" => "L'utilisateur n'existe pas"
             ]);
         }
     }

@@ -11,8 +11,14 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 class RoleFixtures extends Fixture implements FixtureGroupInterface {
 
     private const ROLES = [
-        Role::ROLE_NO_ACCESS => "Aucun accès",
-        Role::ROLE_ADMIN => "Super Administrateur",
+        Role::ROLE_NO_ACCESS => [
+            "name" => "Aucun accès",
+            "emailsNewAccounts" => false,
+        ],
+        Role::ROLE_ADMIN => [
+            "name" => "Super Administrateur",
+            "emailsNewAccounts" => true,
+        ],
     ];
 
     private const PERMISSIONS = [
@@ -51,12 +57,15 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
 
         $roleRepository = $manager->getRepository(Role::class);
 
-        foreach (self::ROLES as $code => $label) {
+        foreach (self::ROLES as $code => $config) {
             if ($roleRepository->findOneBy(["code" => $code]) === null) {
                 $role = (new Role())
                     ->setCode($code)
-                    ->setName($label)
+                    ->setName($config["name"])
                     ->setPermissions(self::PERMISSIONS[$code])
+                    ->setAllowEditOwnGroupOnly(false)
+                    ->setReceiveMailsNewAccounts($config["emailsNewAccounts"])
+                    ->setRedirectUserNewCommand(false)
                     ->setActive(true);
 
                 $output->writeln("Created role \"{$role->getName()}\"");

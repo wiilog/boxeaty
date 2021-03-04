@@ -35,7 +35,7 @@ class LocationController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $locations = $manager->getRepository(Location::class)
-            ->findLocationsForDatatable(json_decode($request->getContent(), true));
+            ->findLocationsForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $data = [];
         foreach ($locations["data"] as $location) {

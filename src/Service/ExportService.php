@@ -18,7 +18,6 @@ class ExportService {
         "Adresse email",
         "Rôle",
         "Actif",
-        "Date de création",
         "Dernière connexion",
     ];
 
@@ -157,6 +156,8 @@ class ExportService {
                 return $cell->format("d/m/Y H:i:s");
             } else if (is_bool($cell)) {
                 return $cell ? 'oui' : 'non';
+            } else if(is_string($cell)) {
+                return str_replace("Powered by Froala Editor", "", strip_tags($cell));
             } else {
                 return $cell;
             }

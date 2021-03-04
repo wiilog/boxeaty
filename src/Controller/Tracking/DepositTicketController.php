@@ -37,7 +37,7 @@ class DepositTicketController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $depositTickets = $manager->getRepository(DepositTicket::class)
-            ->findForDatatable(json_decode($request->getContent(), true));
+            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $data = [];
         foreach ($depositTickets["data"] as $depositTicket) {

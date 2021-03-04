@@ -19,23 +19,23 @@ class UserRepository extends EntityRepository {
             ->select("user.username AS username")
             ->addSelect("user.email AS email")
             ->addSelect("role.name AS role_name")
-            ->addSelect("user.active AS active")
-            ->addSelect("user.creationDate AS creationDate")
+            ->addSelect("IF(user.active = 1, 'Actif', 'Inactif') AS active")
             ->addSelect("user.lastLogin as lastLogin")
             ->join("user.role", "role")
             ->getQuery()
             ->toIterable();
     }
 
-    public function findForDatatable(array $params): array {
+    public function findForDatatable(array $params, ?User $user): array {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("user");
+        QueryHelper::withCurrentGroup($qb, "multiple:user.groups", $user);
+
         $total = QueryHelper::count($qb, "user");
 
         if ($search) {
-            $qb->where("user.username LIKE :search")
-                ->orWhere("user.email LIKE :search")
+            $qb->andWhere("user.username LIKE :search OR user.email LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 

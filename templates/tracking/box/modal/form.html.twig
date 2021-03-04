@@ -3,12 +3,12 @@
         <label>
             Code box
             <input type="text" name="number" class="data" placeholder="BX00001"
-                   value="{{ box.number }}" max="50" required/>
+                   value="{{ box.number }}" max="50" required {{ box.id ? 'disabled' }}/>
         </label>
     </div>
     <div class="col-6">
         <label>
-            Client
+            Propriété
             <select name="owner" class="data" data-s2="client" data-placeholder="Sélectionnez un client" required>
                 {% if box.owner %}
                     <option value="{{ box.owner.id }}" selected>{{ box.owner.name }}</option>

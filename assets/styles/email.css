@@ -47,6 +47,7 @@ h1 {
 }
 
 .qr-code-image {
+    display: block;
     width: 300px;
     margin-top: 15px;
 }

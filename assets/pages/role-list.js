@@ -11,11 +11,6 @@ $(document).ready(() => {
         table: `#table-roles`,
     });
 
-    const deleteRoleModal = Modal.static(`#modal-delete-role`, {
-        ajax: AJAX.route(`POST`, `role_delete`),
-        table: `#table-roles`,
-    });
-
     $(`.new-role`).click(() => newRoleModal.open());
 
     const table = initDatatable(`#table-roles`, {
@@ -34,7 +29,13 @@ $(document).ready(() => {
 
                 Modal.load(ajax, {table})
             },
-            delete: data => deleteRoleModal.open(data),
+            delete: data => {
+                const ajax = AJAX.route(`POST`, `role_delete_template`, {
+                    role: data.id
+                });
+
+                Modal.load(ajax, {table})
+            },
         }
     });
 });

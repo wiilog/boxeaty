@@ -205,9 +205,9 @@ class SecurityController extends AbstractController {
             $result = $form->getData();
 
             if ($result["password"] != $result["confirmation"]) {
-                $this->addFlash("danger", "The passwords don't match");
+                $this->addFlash("danger", "Les mots de passe ne correspondent pas");
             } else if (!Authenticator::isPasswordSecure($result["password"])) {
-                $this->addFlash("danger", "Your password must be at least 8 characters long");
+                $this->addFlash("danger", Authenticator::PASSWORD_ERROR);
             } else {
                 $manager = $this->getDoctrine()->getManager();
 
@@ -216,7 +216,7 @@ class SecurityController extends AbstractController {
                 $user->setResetTokenExpiration(null);
                 $manager->flush();
 
-                $this->addFlash("success", "Your password has been changed");
+                $this->addFlash("success", "Votre mot de passe a été changé");
 
                 return $this->redirectToRoute("login");
             }

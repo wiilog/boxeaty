@@ -21,7 +21,7 @@ class SelectController extends AbstractController {
      * @Route("/select/box", name="ajax_select_boxes", options={"expose": true})
      */
     public function boxes(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Box::class)->getForSelect($request->query->get("term"));
+        $results = $manager->getRepository(Box::class)->getForSelect($request->query->get("term"), $this->getUser());
 
         return $this->json([
             "results" => $results,
@@ -32,7 +32,7 @@ class SelectController extends AbstractController {
      * @Route("/externe/select/group", name="ajax_select_groups", options={"expose": true})
      */
     public function groups(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Group::class)->getForSelect($request->query->get("term"));
+        $results = $manager->getRepository(Group::class)->getForSelect($request->query->get("term"), $this->getUser());
 
         return $this->json([
             "results" => $results,
@@ -43,7 +43,7 @@ class SelectController extends AbstractController {
      * @Route("/select/client", name="ajax_select_clients", options={"expose": true})
      */
     public function clients(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Client::class)->getForSelect($request->query->get("term"));
+        $results = $manager->getRepository(Client::class)->getForSelect($request->query->get("term"), $this->getUser());
 
         return $this->json([
             "results" => $results,
@@ -54,7 +54,7 @@ class SelectController extends AbstractController {
      * @Route("/select/multi-site", name="ajax_select_multi_sites", options={"expose": true})
      */
     public function multiSite(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Client::class)->getMultiSiteForSelect($request->query->get("term"));
+        $results = $manager->getRepository(Client::class)->getMultiSiteForSelect($request->query->get("term"), $this->getUser());
 
         return $this->json([
             "results" => $results,
@@ -65,7 +65,7 @@ class SelectController extends AbstractController {
      * @Route("/select/utilisateur", name="ajax_select_users", options={"expose": true})
      */
     public function users(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(User::class)->getForSelect($request->query->get("term"));
+        $results = $manager->getRepository(User::class)->getForSelect($request->query->get("term"), $this->getUser());
 
         return $this->json([
             "results" => $results,
@@ -76,7 +76,7 @@ class SelectController extends AbstractController {
      * @Route("/select/emplacement", name="ajax_select_locations", options={"expose": true})
      */
     public function locations(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Location::class)->getLocationsForSelect($request->query->get("term"));
+        $results = $manager->getRepository(Location::class)->getLocationsForSelect($request->query->get("term"), $this->getUser());
 
         return $this->json([
             "results" => $results,

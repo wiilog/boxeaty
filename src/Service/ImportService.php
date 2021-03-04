@@ -97,8 +97,11 @@ class ImportService {
                     ->setComment($this->value(Import::COMMENT));
 
                 $box->setType($type)
+                    ->setUses(0)
                     ->setCanGenerateDepositTicket(false)
                     ->fromTrackingMovement($movement);
+
+                $this->manager->persist($movement);
 
                 if (!$box->getId()) {
                     $this->manager->persist($box);
@@ -106,6 +109,10 @@ class ImportService {
                 } else {
                     $updates++;
                 }
+            }
+
+            if($creations % 500 == 0) {
+                $this->manager->flush();
             }
         }
 
@@ -115,11 +122,13 @@ class ImportService {
         $import->setExecutionDate(new DateTime());
         $import->setTrace($this->saveTrace());
 
+        $this->manager->flush();
+
         fclose($handle);
     }
 
     private function value(string $column, bool $required = false): ?string {
-        $value = $this->data[$this->import->getFieldsAssociation()[$column]] ?? null;
+        $value = $this->data[$this->import->getFieldsAssociation()[$column] ?? null] ?? null;
         if ($required && !$value) {
             $this->addError("Le champ " . Import::FIELDS[$column]["name"] . " est requis");
         }

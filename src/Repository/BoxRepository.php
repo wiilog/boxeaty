@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Box;
+use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
+use function Doctrine\ORM\QueryBuilder;
 
 /**
  * @method Box|null find($id, $lockMode = null, $lockVersion = null)
@@ -30,41 +32,56 @@ class BoxRepository extends EntityRepository {
             ->toIterable();
     }
 
-    public function getForSelect(?string $search) {
-        return $this->createQueryBuilder("box")
-            ->select("box.id AS id, box.number AS text")
-            ->where("box.number LIKE :search")
+    public function getForSelect(?string $search, ?User $user) {
+        $qb = $this->createQueryBuilder("box");
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $qb->join("box.owner", "owner")
+                ->andWhere("owner.group IN (:groups)")
+                ->setParameter("groups", $user->getGroups());
+        }
+
+        return $qb->select("box.id AS id, box.number AS text")
+            ->andWhere("box.number LIKE :search")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
             ->getArrayResult();
     }
 
-    public function findForDatatable(array $params): array {
+    public function findForDatatable(array $params, ?User $user): array {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("box");
+        QueryHelper::withCurrentGroup($qb, "box.owner.group", $user);
+
         $total = QueryHelper::count($qb, "box");
 
         if ($search) {
-            $qb->where("box.number LIKE :search")
-                ->orWhere("search_location.name LIKE :search")
-                ->orWhere("search_owner.name LIKE :search")
-                ->orWhere("search_quality.name LIKE :search")
-                ->orWhere("search_type.name LIKE :search")
-                ->join("box.location", "search_location")
+            $qb->join("box.location", "search_location")
                 ->join("box.owner", "search_owner")
                 ->join("box.quality", "search_quality")
                 ->join("box.type", "search_type")
+                ->where($qb->expr()->orX(
+                    "box.number LIKE :search",
+                    "search_location.name LIKE :search",
+                    "search_owner.name LIKE :search",
+                    "search_quality.name LIKE :search",
+                    "search_type.name LIKE :search"
+                ))
                 ->setParameter("search", "%$search%");
         }
 
-        foreach($params["filters"] as $name => $value) {
-            switch($name) {
+        foreach ($params["filters"] as $name => $value) {
+            switch ($name) {
                 case("group"):
                     $qb->leftJoin("box.owner", "filter_client")
                         ->andWhere("filter_client.group = :filter_group")
                         ->setParameter("filter_group", $value);
+                    break;
+                case("client"):
+                    $qb->andWhere("box.owner = :filter_owner")
+                        ->setParameter("filter_owner", $value);
                     break;
                 default:
                     $qb->andWhere("box.$name = :filter_$name")

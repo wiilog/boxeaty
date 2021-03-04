@@ -46,7 +46,7 @@ class TrackingMovementController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $movements = $manager->getRepository(TrackingMovement::class)
-            ->findForDatatable(json_decode($request->getContent(), true));
+            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $actions = $this->renderView("datatable_actions.html.twig", [
             "editable" => true,

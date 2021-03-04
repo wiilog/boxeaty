@@ -19,3 +19,4 @@ doctrine:
         dql:
             string_functions:
                 DATE: DoctrineExtensions\Query\Mysql\Date
+                IF: DoctrineExtensions\Query\Mysql\IfElse

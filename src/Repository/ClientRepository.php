@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Client;
+use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
+use function Doctrine\ORM\QueryBuilder;
 
 /**
  * @method Client|null find($id, $lockMode = null, $lockVersion = null)
@@ -29,17 +31,21 @@ class ClientRepository extends EntityRepository {
             ->toIterable();
     }
 
-    public function findForDatatable(array $params): array {
+    public function findForDatatable(array $params, ?User $user): array {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("client");
+        QueryHelper::withCurrentGroup($qb, "client.group", $user);
+
         $total = QueryHelper::count($qb, "client");
 
         if ($search) {
-            $qb->where("client.name LIKE :search")
-                ->orWhere("client.address LIKE :search")
-                ->orWhere("search_user.username LIKE :search")
-                ->leftJoin("client.users", "search_user")
+            $qb->leftJoin("client.users", "search_user")
+                ->andWhere($qb->expr()->orX(
+                    "client.name LIKE :search",
+                    "client.address LIKE :search",
+                    "search_user.username LIKE :search"
+                ))
                 ->setParameter("search", "%$search%");
         }
 

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\TrackingMovement;
+use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
@@ -29,10 +30,12 @@ class TrackingMovementRepository extends EntityRepository {
             ->toIterable();
     }
 
-    public function findForDatatable(array $params) {
+    public function findForDatatable(array $params, ?User $user) {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("movement");
+        QueryHelper::withCurrentGroup($qb, "movement.client.group", $user);
+
         $total = QueryHelper::count($qb, "movement");
 
         if ($search) {
@@ -40,10 +43,12 @@ class TrackingMovementRepository extends EntityRepository {
                 ->join("movement.client", "search_client")
                 ->join("movement.quality", "search_quality")
                 ->join("movement.user", "search_user")
-                ->andWhere("search_box.number LIKE :search")
-                ->andWhere("search_client.name LIKE :search")
-                ->andWhere("search_quality.name LIKE :search")
-                ->andWhere("search_user.username LIKE :search")
+                ->andWhere($qb->expr()->orX(
+                    "search_box.number LIKE :search",
+                    "search_client.name LIKE :search",
+                    "search_quality.name LIKE :search",
+                    "search_user.username LIKE :search"
+                ))
                 ->setParameter("search", "%$search%");
         }
 

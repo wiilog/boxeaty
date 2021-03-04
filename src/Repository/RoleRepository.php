@@ -45,22 +45,4 @@ class RoleRepository extends EntityRepository {
         ];
     }
 
-    public function getDeletable(array $roles): array {
-        $uses = $this->createQueryBuilder("role")
-            ->select("role.id AS id, COUNT(user) AS uses")
-            ->leftJoin(User::class, "user", Join::WITH, "user.role = role.id")
-            ->where("role.id IN (:roles)")
-            ->groupBy("role")
-            ->setParameter("roles", $roles)
-            ->getQuery()
-            ->getResult();
-
-        $deletable = [];
-        foreach($uses as $use) {
-            $deletable[$use["id"]] = $use["uses"] === 0;
-        }
-
-        return $deletable;
-    }
-
 }

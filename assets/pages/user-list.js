@@ -11,11 +11,6 @@ $(document).ready(() => {
         table: `#table-users`,
     });
 
-    const deleteUserModal = Modal.static(`#modal-delete-user`, {
-        ajax: AJAX.route(`POST`, `user_delete`),
-        table: `#table-users`,
-    });
-
     $(`.new-user`).click(() => newUserModal.open());
 
     const table = initDatatable(`#table-users`, {
@@ -25,6 +20,7 @@ $(document).ready(() => {
             {data: `username`, title: `Nom d'utilisateur`},
             {data: `role`, title: `Rôle`},
             {data: `lastLogin`, title: `Dernière connexion`},
+            {data: `status`, title: `Statut`},
             DATATABLE_ACTIONS,
         ],
         order: [[`email`, `asc`]],
@@ -36,7 +32,13 @@ $(document).ready(() => {
 
                 Modal.load(ajax, {table})
             },
-            delete: data => deleteUserModal.open(data),
+            delete: data => {
+                const ajax = AJAX.route(`POST`, `user_delete_template`, {
+                    user: data.id
+                });
+
+                Modal.load(ajax, {table})
+            },
         }
     });
 

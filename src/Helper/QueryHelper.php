@@ -2,6 +2,7 @@
 
 namespace App\Helper;
 
+use App\Entity\User;
 use Doctrine\ORM\QueryBuilder;
 
 class QueryHelper {
@@ -22,6 +23,43 @@ class QueryHelper {
 
         return $query->leftJoin("$alias.$field", "__order_{$alias}_{$field}")
             ->addOrderBy("__order_{$alias}_{$field}.$joinField", $direction);
+    }
+
+    public static function withCurrentGroup(QueryBuilder $query, string $field, User $user): QueryBuilder {
+        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $fields = explode(":", $field);
+            if(count($fields) === 2) {
+                $fields = $fields[1];
+                $multiple = true;
+            } else {
+                $fields = $fields[0];
+                $multiple = false;
+            }
+
+            $fields = explode(".", $fields);
+            $alias = $fields[0];
+            $join = $fields[1] ?? null;
+            $field = $fields[2] ?? null;
+
+            if ($field) {
+                $query->leftJoin("$alias.$join", "__entity_with_group");
+                $alias = "__entity_with_group";
+            } else {
+                $field = $join;
+            }
+
+            if($multiple) {
+                foreach ($user->getGroups() as $i => $group) {
+                    $query->andWhere(":__group_$i MEMBER OF $alias.$field")
+                        ->setParameter("__group_$i", $group);
+                }
+            } else {
+                $query->andWhere("$alias.$field IN (:__groups)")
+                    ->setParameter("__groups", $user->getGroups());
+            }
+        }
+
+        return $query;
     }
 
 }
