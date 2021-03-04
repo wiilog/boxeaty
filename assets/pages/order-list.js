@@ -59,7 +59,7 @@ $(document).ready(() => {
 
     $(`.scan-box`).click(function() {
         const $modal = $(this).closest('.modal');
-        scan(scanModal, $modal.find('select[name=box]'), `ajax_select_available_boxes`, {
+        scan(scanModal, $modal.find('select[name=box]'), `boxes`, {
             success: 'La Box a bien été ajoutée',
             warning: 'La Box n\'existe pas'
         });
@@ -67,7 +67,7 @@ $(document).ready(() => {
 
     $(`.deposit-ticket-scan`).click(function() {
         const $modal = $(this).closest('.modal');
-        scan(scanModal, $modal.find('select[name=depositTicket]'), `ajax_select_deposit_tickets`, {
+        scan(scanModal, $modal.find('select[name=depositTicket]'), `deposit_tickets`, {
             success: 'Le ticket-consigne a bien été ajouté',
             warning: `Le ticket-consigne n'existe pas, a déjà été utilisé ou n'est plus valide`
         });
@@ -82,15 +82,22 @@ $(document).ready(() => {
     });
 });
 
-function scan(scanModal, $select, route, msg) {
+function scan(scanModal, $select, type, msg) {
+    if(type === `boxes`) {
+        scanModal.elem().find(`.scan-container-title`).text(`Scan de la box`);
+    } else {
+        scanModal.elem().find(`.scan-container-title`).text(`Scan du ticket consigne`);
+    }
+
     scanModal.open()
     const qrScanner = new QrScanner($('.scan-element')[0], result => {
         if(result) {
-            AJAX.url(`GET`, Routing.generate(route) + `?term=${result}`).json(results => {
+            const url = Routing.generate(type === `boxes` ? `ajax_select_available_boxes` : `ajax_select_deposit_tickets`);
+            AJAX.url(`GET`, url + `?term=${result}`).json(results => {
                 const idk = results.results.find(r => r.text === result);
 
                 if(idk) {
-                    if(route === `ajax_select_available_boxes`) {
+                    if(type === `boxes`) {
                         boxPrices[idk.text] = idk.price;
                     } else {
                         depositTicketPrices[idk.text] = idk.price;
