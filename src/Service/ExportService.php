@@ -18,7 +18,6 @@ class ExportService {
         "Adresse email",
         "Rôle",
         "Actif",
-        "Date de création",
         "Dernière connexion",
     ];
 

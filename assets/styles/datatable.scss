@@ -12,8 +12,15 @@
         margin: 0 2px;
 
         &:not(.previous):not(.next) {
-            background: $orange;
-            color: white;
+            background: $grey;
+            border-color: $grey;
+            color: $blue;
+
+            &.current {
+                background: $orange;
+                border-color: $orange;
+                color: white;
+            }
         }
 
         &.previous, &.next {
@@ -30,6 +37,10 @@
         border: $grey;
         color: $blue;
         margin: 0 2px;
+
+        &:hover {
+            background: $grey;
+        }
     }
 }
 

@@ -25,6 +25,7 @@ $(document).ready(() => {
             {data: `username`, title: `Nom d'utilisateur`},
             {data: `role`, title: `Rôle`},
             {data: `lastLogin`, title: `Dernière connexion`},
+            {data: `status`, title: `Statut`},
             DATATABLE_ACTIONS,
         ],
         order: [[`email`, `asc`]],
