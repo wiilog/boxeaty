@@ -4,13 +4,21 @@
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
 
             <div class="delete-image"></div>
-            <h1>Voulez-vous vraiment supprimer l'utilisateur <b data-display="username"></b></h1>
+            <h1>
+                {% if user.trackingMovements | length > 0 %}
+                    Cet utilisateur possède un ou plusieurs mouvements. <br>
+                    Vous ne pouvez pas le supprimer.<br>
+                    Voulez-vous le désactiver ?
+                {% else %}
+                    Voulez-vous vraiment supprimer l'utilisateur <b data-display="username"></b>
+                {% endif %}
+            </h1>
 
             <input type="hidden" name="id" class="data">
 
             <div class="footer">
                 <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="submit" class="primary">Supprimer</button>
+                <button type="submit" class="primary">{{ (user.trackingMovements | length > 0) ? 'Désactiver' : 'Supprimer' }}</button>
             </div>
         </div>
     </div>

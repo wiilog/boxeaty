@@ -34,7 +34,6 @@ class RoleController extends AbstractController {
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $roleRepository = $manager->getRepository(Role::class);
         $roles = $roleRepository->findForDatatable(json_decode($request->getContent(), true));
-        $deletable = $roleRepository->getDeletable($roles["data"]);
 
         $data = [];
         foreach ($roles["data"] as $role) {
@@ -45,7 +44,6 @@ class RoleController extends AbstractController {
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
-                    "disableDelete" => !$deletable[$role->getId()] ? "Ce rôle ne peut pas être supprimé car il est utilisé par des utilisateurs" : null,
                 ]),
             ];
         }
@@ -149,17 +147,30 @@ class RoleController extends AbstractController {
     }
 
     /**
-     * @Route("/supprimer", name="role_delete", options={"expose": true})
+     * @Route("/supprimer/template/{role}", name="role_delete_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_ROLES)
      */
-    public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = (object) $request->request->all();
-        $role = $manager->getRepository(Role::class)->find($content->id);
+    public function deleteTemplate(Role $role): Response {
+        return $this->json([
+            "submit" => $this->generateUrl("role_delete", ["role" => $role->getId()]),
+            "template" => $this->renderView("settings/role/modal/delete.html.twig", [
+                "role" => $role,
+            ])
+        ]);
+    }
 
+    /**
+     * @Route("/supprimer/{role}", name="role_delete", options={"expose": true})
+     * @HasPermission(Role::MANAGE_ROLES)
+     */
+    public function delete(EntityManagerInterface $manager, Role $role): Response {
         if(!$role->getUsers()->isEmpty()) {
+            $role->setActive(false);
+            $manager->flush();
+
             return $this->json([
-                "success" => false,
-                "msg" => "Ce rôle est utilisé par des utilisateurs, vous ne pouvez pas le supprimer",
+                "success" => true,
+                "msg" => "Rôle <strong>{$role->getName()}</strong> désactivé avec succès"
             ]);
         } else if ($role) {
             $manager->remove($role);
