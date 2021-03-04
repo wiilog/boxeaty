@@ -98,6 +98,7 @@
 
     tr {
         transition: background 400ms;
+        cursor: default !important;
 
         &:hover {
             background: $grey;
