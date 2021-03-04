@@ -22,12 +22,13 @@ class ExportService {
     ];
 
     public const CLIENT_HEADER = [
-        "Nom du client",
+        "Nom Client",
         "Actif",
         "Adresse",
         "Contact attribué",
         "Groupe",
-        "Multi-site"
+        "Multi-site lié",
+        "Multi-site",
     ];
 
     public const GROUP_HEADER = [
