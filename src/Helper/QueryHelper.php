@@ -26,7 +26,6 @@ class QueryHelper {
     }
 
     public static function withCurrentGroup(QueryBuilder $query, string $field, User $user): QueryBuilder {
-        dump($user->getRole()->isAllowEditOwnGroupOnly());
         if ($user->getRole()->isAllowEditOwnGroupOnly()) {
             $fields = explode(".", $field);
             $alias = $fields[0];
