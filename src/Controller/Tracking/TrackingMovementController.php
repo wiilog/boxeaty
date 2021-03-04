@@ -62,6 +62,7 @@ class TrackingMovementController extends AbstractController {
                 "quality" => $movement->getQuality() ? $movement->getQuality()->getName() : "",
                 "state" => Box::NAMES[$movement->getState()] ?? "",
                 "client" => $movement->getClient() ? $movement->getClient()->getName() : "",
+                "user" => $movement->getUser() ? $movement->getUser()->getUsername() : "",
                 "actions" => $actions,
             ];
         }
@@ -207,6 +208,7 @@ class TrackingMovementController extends AbstractController {
 
         return $exportService->export(function($output) use ($exportService, $movements) {
             foreach ($movements as $movement) {
+                $movement["state"] = Box::NAMES[$movement["state"]];
                 $exportService->putLine($output, $movement);
             }
         }, "export-tracabilite-$today.csv", ExportService::MOVEMENT_HEADER);

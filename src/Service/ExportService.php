@@ -37,11 +37,11 @@ class ExportService {
 
     public const MOVEMENT_HEADER = [
         "Date",
-        "Numéro de box",
+        "Numéro Box",
         "Qualité",
         "Etat",
         "Client",
-        "Commentaire",
+        "Utilisateur",
     ];
 
     public const BOX_TYPE_HEADER = [
