@@ -3,13 +3,15 @@
 namespace App\Twig;
 
 use App\Entity\User;
-use App\Helper\Stream;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Security;
 use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class AppExtension extends AbstractExtension {
+
+    /** @Required */
+    public KernelInterface $kernel;
 
     /** @Required */
     public Security $security;
@@ -27,6 +29,7 @@ class AppExtension extends AbstractExtension {
             new TwigFunction("menu_configuration", [$this, "menuConfiguration"]),
             new TwigFunction("has_permission", [$this, "hasPermission"]),
             new TwigFunction("permissions", [$this, "getPermissions"]),
+            new TwigFunction("base64", [$this, "base64"]),
         ];
     }
 
@@ -69,6 +72,18 @@ class AppExtension extends AbstractExtension {
 
     public function getPermissions(): array {
         return $this->permissions;
+    }
+
+    public function base64(string $path) {
+        $absolutePath = $this->kernel->getProjectDir() . "/public/$path";
+        $type = pathinfo($absolutePath, PATHINFO_EXTENSION);
+        $content = base64_encode(file_get_contents($absolutePath));
+
+        if($type == "svg") {
+            $type = "svg+xml";
+        }
+
+        return "data:image/$type;base64,$content";
     }
 
 }

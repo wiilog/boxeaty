@@ -30,6 +30,11 @@ class TrackingMovement {
     private ?Box $box = null;
 
     /**
+     * @ORM\ManyToOne(targetEntity=Location::class)
+     */
+    private ?Location $location = null;
+
+    /**
      * @ORM\ManyToOne(targetEntity=Quality::class)
      * @ORM\JoinColumn(nullable=false)
      */
@@ -82,6 +87,16 @@ class TrackingMovement {
 
         $this->box = $box;
         $box->addTrackingMovement($this);
+
+        return $this;
+    }
+
+    public function getLocation(): ?Location {
+        return $this->location;
+    }
+
+    public function setLocation(?Location $location): self {
+        $this->location = $location;
 
         return $this;
     }

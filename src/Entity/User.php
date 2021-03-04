@@ -49,7 +49,7 @@ class User implements UserInterface {
     private ?DateTime $lastLogin = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Role::class)
+     * @ORM\ManyToOne(targetEntity=Role::class, inversedBy="users")
      * @ORM\JoinColumn(nullable=false)
      */
     private ?Role $role = null;

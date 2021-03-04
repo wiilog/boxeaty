@@ -6,6 +6,7 @@ use App\Annotation\HasPermission;
 use App\Entity\Box;
 use App\Entity\Client;
 use App\Entity\Group;
+use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\TrackingMovement;
@@ -48,7 +49,7 @@ class TrackingMovementController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true));
 
         $actions = $this->renderView("datatable_actions.html.twig", [
-            "editable" => false,
+            "editable" => true,
             "deletable" => true,
         ]);
 
@@ -96,6 +97,11 @@ class TrackingMovementController extends AbstractController {
             $form->addError("client", "Ce client n'existe pas ou plus");
         }
 
+        $location = $manager->getRepository(Location::class)->find($content->location);
+        if (!$location) {
+            $form->addError("location", "Cet emplacement n'existe pas ou plus");
+        }
+
         if ($form->isValid()) {
             $movement = new TrackingMovement();
             $movement->setDate(new DateTime($content->date))
@@ -103,6 +109,8 @@ class TrackingMovementController extends AbstractController {
                 ->setQuality($quality)
                 ->setState($content->state)
                 ->setClient($client)
+                ->setLocation($location)
+                ->setUser($this->getUser())
                 ->setComment($content->comment ?? null);
 
             $box->setQuality($quality)
@@ -161,15 +169,17 @@ class TrackingMovementController extends AbstractController {
             $form->addError("client", "Ce client n'existe pas ou plus");
         }
 
-        $user = $manager->getRepository(User::class)->find($content->user);
+        $location = $manager->getRepository(Location::class)->find($content->location);
+        if (!$location) {
+            $form->addError("location", "Cet emplacement n'existe pas ou plus");
+        }
 
         if ($form->isValid()) {
             $movement->setDate(new DateTime($content->date))
-                ->setBox($box)
                 ->setQuality($quality)
                 ->setState($content->state)
                 ->setClient($client)
-                ->setUser($user)
+                ->setLocation($location)
                 ->setComment($content->comment ?? null);
 
             $manager->flush();

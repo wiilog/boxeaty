@@ -12,8 +12,8 @@ use Doctrine\ORM\EntityRepository;
  * @method DepositTicket[]    findAll()
  * @method DepositTicket[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class DepositTicketRepository extends EntityRepository
-{
+class DepositTicketRepository extends EntityRepository {
+
     public function iterateAll() {
         return $this->createQueryBuilder("deposit_ticket")
             ->select("deposit_ticket.creationDate AS creation_date")
@@ -23,10 +23,10 @@ class DepositTicketRepository extends EntityRepository
             ->addSelect("deposit_ticket.useDate AS use_date")
             ->addSelect("join_client.name AS client")
             ->addSelect("deposit_ticket.state AS state")
-            ->join("deposit_ticket.kiosk", "join_kiosk")
+            ->join("deposit_ticket.location", "join_kiosk")
             ->join("join_kiosk.client", "join_client")
             ->getQuery()
-            ->iterate();
+            ->toIterable();
     }
 
     public function findForDatatable(array $params): array {
@@ -45,8 +45,8 @@ class DepositTicketRepository extends EntityRepository
                 ->setParameter("search", "%$search%");
         }
 
-        foreach($params["filters"] as $name => $value) {
-            switch($name) {
+        foreach ($params["filters"] as $name => $value) {
+            switch ($name) {
                 case "from":
                     $qb->andWhere("DATE(deposit_ticket.creationDate) >= :from")
                         ->setParameter("from", $value);
@@ -56,9 +56,8 @@ class DepositTicketRepository extends EntityRepository
                         ->setParameter("to", $value);
                     break;
                 case "kiosk":
-                    $qb->leftJoin("deposit_ticket.kiosk", "filter_kiosk")
-                        ->andWhere("filter_kiosk.name LIKE :filter_kiosk")
-                        ->setParameter("filter_kiosk", "%$value%");
+                    $qb->andWhere("deposit_ticket.location = :filter_kiosk")
+                        ->setParameter("filter_kiosk", $value);
                     break;
                 case "state":
                     $qb->andWhere("deposit_ticket.state = :filter_state")
@@ -74,11 +73,11 @@ class DepositTicketRepository extends EntityRepository
         foreach ($params["order"] ?? [] as $order) {
             $column = $params["columns"][$order["column"]]["data"];
             if ($column === "kiosk") {
-                $qb->join("deposit_ticket.kiosk", "order_kiosk")
-                    ->addOrderBy("order_kiosk.name", $order["dir"]);
+                $qb->leftJoin("deposit_ticket.location", "order_location")
+                    ->addOrderBy("order_location.name", $order["dir"]);
             } else if ($column === "client") {
-                $qb->join("deposit_ticket.kiosk", "order_kiosk")
-                    ->join("order_kiosk.client", "order_client")
+                $qb->leftJoin("deposit_ticket.location", "order_client_location")
+                    ->leftJoin("order_client_location.client", "order_client")
                     ->addOrderBy("order_client.name", $order["dir"]);
             } else {
                 $qb->addOrderBy("deposit_ticket.$column", $order["dir"]);
@@ -96,4 +95,5 @@ class DepositTicketRepository extends EntityRepository
             "filtered" => $filtered,
         ];
     }
+
 }

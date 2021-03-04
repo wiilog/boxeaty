@@ -1,0 +1,34 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block content %}
+    <h1>Bonjour</h1>
+    Voici votre ticket-consigne, échangez le en caisse contre une nouvelle Box
+    en scannant le QR-code ci-dessous !
+
+    <div class="centered-box">
+        <span class="valid-until">Valable jusqu'au {{ ticket.validityDate | date('d/m/Y') }}</span>
+        <br>
+
+        <img class="qr-code-image" src="{{ qr_code_data_uri(ticket.number) }}" alt="QR code à scanner pour la consigne">
+        <span class="qr-code">{{ ticket.number }}</span>
+
+        Le {{ ticket.creationDate | date('d/m/Y H:i') }}<br><br>
+
+        Utilisable dans
+        {% if (ticket.location.client.depositTicketsClients | length) == 0 %}
+            tout le réseau BoxEaty
+        {% elseif (ticket.location.client.depositTicketsClients | length) > 1 %}
+            les restaurants
+        {% else %}
+            le restaurant
+        {% endif %}
+
+        {% for location in ticket.location.client.depositTicketsClients %}
+            <b>{{ location.name }}</b>{{ not loop.last ? ',' }}
+        {% endfor %}
+        <br><br>
+        *Remboursement possible en caisse
+    </div>
+
+    Merci pour votre geste !
+{% endblock %}

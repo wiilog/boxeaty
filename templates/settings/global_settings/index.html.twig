@@ -5,72 +5,112 @@
 
 {% block content %}
     <div class="box first-box global-settings">
-        <h1>Configuration des exports CSV</h1>
+        <h1>
+            Configuration des exports CSV
+            <button class="secondary float-end" type="submit">Enregistrer</button>
+        </h1>
 
-        <div class="input-with-validation">
-            <label>
-                Encodage des exports CSV
-                <select name="{{ constant('App\\Entity\\GlobalSetting::CSV_EXPORTS_ENCODING') }}" class="data" data-s2 data-no-empty-option>
-                    <option value="{{ constant('App\\Service\\ExportService::ENCODING_UTF8') }}"
-                            {{ csv_encoding.value == constant('App\\Service\\ExportService::ENCODING_UTF8') ? 'selected' }}>
-                        UTF8
-                    </option>
-                    <option value="{{ constant('App\\Service\\ExportService::ENCODING_WINDOWS') }}"
-                            {{ csv_encoding.value == constant('App\\Service\\ExportService::ENCODING_WINDOWS') ? 'selected' }}>
-                        1252 Europe de l'ouest Windows
-                    </option>
-                </select>
-            </label>
-            <button class="secondary" type="submit">Enregistrer</button>
+        <label class="w-35">
+            Encodage des exports CSV
+            <select name="{{ constant('App\\Entity\\GlobalSetting::CSV_EXPORTS_ENCODING') }}" class="data" data-s2 data-no-empty-option>
+                <option value="{{ constant('App\\Service\\ExportService::ENCODING_UTF8') }}"
+                        {{ csv_encoding.value == constant('App\\Service\\ExportService::ENCODING_UTF8') ? 'selected' }}>
+                    UTF8
+                </option>
+                <option value="{{ constant('App\\Service\\ExportService::ENCODING_WINDOWS') }}"
+                        {{ csv_encoding.value == constant('App\\Service\\ExportService::ENCODING_WINDOWS') ? 'selected' }}>
+                    1252 Europe de l'ouest Windows
+                </option>
+            </select>
+        </label>
+    </div>
+
+    <div class="box global-settings">
+        <h1>
+            Configuration mot de passe borne
+            <button class="secondary float-end" type="submit">Enregistrer</button>
+        </h1>
+
+        <label class="w-35">
+            Mot de passe de la borne - Visiteur
+            <input name="{{ constant('App\\Entity\\GlobalSetting::EMPTY_KIOSK_CODE') }}" class="data" value="{{ empty_kiosk_code.value }}"/>
+        </label>
+        <label class="w-35">
+            Mot de passe de la borne - SuperAdmin
+            <input name="{{ constant('App\\Entity\\GlobalSetting::SETTING_CODE') }}" class="data" value="{{ setting_code.value }}"/>
+        </label>
+    </div>
+
+    <div class="box global-settings">
+        <h1>
+            Configuration des serveurs mails
+            <button class="secondary float-end" type="submit">Enregistrer</button>
+        </h1>
+
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <label>
+                    Serveur SMTP
+                    <input name="{{ constant('App\\Entity\\GlobalSetting::MAILER_HOST') }}" class="data" value="{{ mailer.host.value }}"/>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label>
+                    Port
+                    <input name="{{ constant('App\\Entity\\GlobalSetting::MAILER_PORT') }}" class="data" value="{{ mailer.port.value }}"/>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label>
+                    Utilisateur
+                    <input name="{{ constant('App\\Entity\\GlobalSetting::MAILER_USER') }}" class="data" value="{{ mailer.user.value }}"/>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label>
+                    Mot de passe
+                    <input type="password" name="{{ constant('App\\Entity\\GlobalSetting::MAILER_PASSWORD') }}" class="data" value="{{ mailer.password.value }}"/>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label>
+                    Adresse e-mail de l'expéditeur
+                    <input name="{{ constant('App\\Entity\\GlobalSetting::MAILER_SENDER_EMAIL') }}" class="data" value="{{ mailer.sender_email.value }}"/>
+                </label>
+            </div>
+            <div class="col-12 col-md-6">
+                <label>
+                    Nom de l'expéditeur
+                    <input name="{{ constant('App\\Entity\\GlobalSetting::MAILER_SENDER_NAME') }}" class="data" value="{{ mailer.sender_name.value }}"/>
+                </label>
+            </div>
         </div>
     </div>
 
     <div class="box global-settings">
-        <h1>Configuration mot de passe borne</h1>
+        <h1>
+            Configuration types de box
+            <button class="secondary float-end" type="submit">Enregistrer</button>
+        </h1>
 
-        <div class="input-with-validation">
-            <label>
-                Mot de passe de la borne - Visiteur
-                <input name="{{ constant('App\\Entity\\GlobalSetting::EMPTY_KIOSK_CODE') }}" class="data" value="{{ empty_kiosk_code.value }}"/>
-            </label>
-            <button class="secondary" type="submit">Enregistrer</button>
-        </div>
-        <div class="input-with-validation">
-            <label>
-                Mot de passe de la borne - SuperAdmin
-                <input name="{{ constant('App\\Entity\\GlobalSetting::SETTING_CODE') }}" class="data" value="{{ setting_code.value }}"/>
-            </label>
-            <button class="secondary" type="submit">Enregistrer</button>
-        </div>
-    </div>
-
-    <div class="box global-settings">
-        <h1>Configuration des types de box</h1>
-
-        <div class="input-with-validation">
-            <label>
-                Contenance
-                <select name="{{ constant('App\\Entity\\GlobalSetting::BOX_CAPACITIES') }}" class="data"
-                        data-s2 data-editable data-placeholder="Entrez des capacités..." multiple>
-                    {% for capacity in box_capacities %}
-                        <option value="{{ capacity }}" selected>{{ capacity }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <button class="secondary" type="submit">Enregistrer</button>
-        </div>
-        <div class="input-with-validation">
-            <label>
-                Forme
-                <select name="{{ constant('App\\Entity\\GlobalSetting::BOX_SHAPES') }}" class="data"
-                        data-s2 data-editable data-placeholder="Entrez des formes..." multiple>
-                    {% for shape in box_shapes %}
-                        <option value="{{ shape }}" selected>{{ shape }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <button class="secondary" type="submit">Enregistrer</button>
-        </div>
+        <label class="w-35">
+            Contenance
+            <select name="{{ constant('App\\Entity\\GlobalSetting::BOX_CAPACITIES') }}" class="data" data-no-empty-option
+                    data-s2 data-editable multiple data-placeholder="Entrez des capacités...">
+                {% for capacity in box_capacities %}
+                    <option value="{{ capacity }}" selected>{{ capacity }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="w-35">
+            Forme
+            <select name="{{ constant('App\\Entity\\GlobalSetting::BOX_SHAPES') }}" class="data" data-no-empty-option
+                    data-s2 data-editable multiple data-placeholder="Entrez des formes...">
+                {% for shape in box_shapes %}
+                    <option value="{{ shape }}" selected>{{ shape }}</option>
+                {% endfor %}
+            </select>
+        </label>
     </div>
 {% endblock %}
 

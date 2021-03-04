@@ -30,7 +30,7 @@ $(document).ready(() => {
             {data: `state`, title: `Etat`},
             DATATABLE_ACTIONS,
         ],
-        order: [[`creationDate`, `asc`]],
+        order: [[`creationDate`, `desc`]],
         listeners: {
             edit: data => {
                 const ajax = AJAX.route(`POST`, `deposit_ticket_edit_template`, {

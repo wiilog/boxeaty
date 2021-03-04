@@ -43,6 +43,9 @@ class GroupController extends AbstractController {
                 "id" => $group->getId(),
                 "name" => $group->getName(),
                 "active" => $group->isActive() ? "Oui" : "Non",
+                "actions" => $this->renderView("datatable_actions.html.twig", [
+                    "editable" => true,
+                ]),
             ];
         }
 

@@ -12,7 +12,7 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
 
     private const ROLES = [
         Role::ROLE_NO_ACCESS => "Aucun accès",
-        Role::ROLE_ADMIN => "Administrateur",
+        Role::ROLE_ADMIN => "Super Administrateur",
     ];
 
     private const PERMISSIONS = [

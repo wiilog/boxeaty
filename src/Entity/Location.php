@@ -12,6 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Location {
 
+    public const DELIVERER = "Livreur";
+
     use Active;
 
     /**
@@ -27,6 +29,11 @@ class Location {
     private ?bool $kiosk = null;
 
     /**
+     * @ORM\Column(type="string", length=255, unique=true, nullable=true)
+     */
+    private ?string $code = null;
+
+    /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
     private ?string $name = null;
@@ -40,6 +47,11 @@ class Location {
      * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="kiosks")
      */
     private ?Client $client = null;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private ?int $deposits = null;
 
     /**
      * @ORM\OneToMany(targetEntity=Box::class, mappedBy="location")
@@ -59,12 +71,22 @@ class Location {
         return $this->id;
     }
 
-    public function getKiosk(): ?bool {
+    public function isKiosk(): ?bool {
         return $this->kiosk;
     }
 
     public function setKiosk(?bool $kiosk): self {
         $this->kiosk = $kiosk;
+        return $this;
+    }
+
+    public function getCode(): ?string {
+        return $this->code;
+    }
+
+    public function setCode(string $code): self {
+        $this->code = $code;
+
         return $this;
     }
 
@@ -95,6 +117,15 @@ class Location {
     public function setClient(?Client $client): self {
         $this->client = $client;
 
+        return $this;
+    }
+
+    public function getDeposits(): ?int {
+        return $this->deposits;
+    }
+
+    public function setDeposits(?int $deposits): self {
+        $this->deposits = $deposits;
         return $this;
     }
 

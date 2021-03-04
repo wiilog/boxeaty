@@ -39,6 +39,7 @@ class ExportService {
     public const LOCATION_HEADER = [
         "Nom",
         "Actif",
+        "Client",
     ];
 
     public const MOVEMENT_HEADER = [
@@ -58,6 +59,7 @@ class ExportService {
 
     public const QUALITY_HEADER = [
         "Nom",
+        "Actif",
     ];
 
     public const DEPOSIT_TICKET_HEADER = [
@@ -72,6 +74,7 @@ class ExportService {
 
     public const KIOSK_HEADER = [
         "Nom de la borne",
+        "Actif",
         "Client",
     ];
 
@@ -134,7 +137,7 @@ class ExportService {
     public function createWorksheet(Spreadsheet $spreadsheet, string $name, $class, array $header, callable $transformer = null): Worksheet {
         $sheet = new Worksheet(null, $name);
         $export = Stream::from(is_string($class) ? $this->manager->getRepository($class)->iterateAll() : $class)
-            ->map(function(array $row) use ($transformer) {
+            ->map(function($row) use ($transformer) {
                 if($transformer) {
                     $row = $transformer($row);
                 }

@@ -202,6 +202,7 @@ export function clearForm($elem) {
 
     $elem.find(`.is-invalid .is-valid`).removeClass(`is-invalid is-valid`);
     $elem.find(`.invalid-feedback`).remove();
+    $elem.find(`[contenteditable="true"]`).html(``);
 }
 
 export function processForm($parent) {

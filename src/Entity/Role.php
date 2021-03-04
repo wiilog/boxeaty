@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\RoleRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -81,6 +83,15 @@ class Role {
      */
     private ?bool $receiveMailsNewAccounts = null;
 
+    /**
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="role")
+     */
+    private Collection $users;
+
+    public function __construct() {
+        $this->users = new ArrayCollection();
+    }
+
     public function getId(): ?int {
         return $this->id;
     }
@@ -115,7 +126,7 @@ class Role {
         return $this;
     }
 
-    public function getAllowEditOwnGroupOnly(): ?bool {
+    public function isAllowEditOwnGroupOnly(): ?bool {
         return $this->allowEditOwnGroupOnly;
     }
 
@@ -140,6 +151,13 @@ class Role {
     public function setReceiveMailsNewAccounts(?bool $receiveMailsNewAccounts): self {
         $this->receiveMailsNewAccounts = $receiveMailsNewAccounts;
         return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers() {
+        return $this->users;
     }
 
 }

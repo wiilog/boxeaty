@@ -27,7 +27,7 @@ class BoxRepository extends EntityRepository {
             ->leftJoin("box.owner", "join_owner")
             ->leftJoin("box.type", "join_type")
             ->getQuery()
-            ->getResult();
+            ->toIterable();
     }
 
     public function getForSelect(?string $search) {

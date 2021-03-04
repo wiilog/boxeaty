@@ -17,10 +17,10 @@ class LocationRepository extends EntityRepository {
     public function iterateAllLocations() {
         return $this->createQueryBuilder("location")
             ->select("location.name AS name")
-            ->where("location.active = 1")
+            ->addSelect("location.active AS active")
             ->andWhere("location.kiosk = 0")
             ->getQuery()
-            ->iterate();
+            ->toIterable();
     }
 
     public function findLocationsForDatatable(array $params): array {
@@ -34,11 +34,6 @@ class LocationRepository extends EntityRepository {
         if ($search) {
             $qb->andWhere("location.name LIKE :search OR location.description LIKE :search")
                 ->setParameter("search", "%$search%");
-        }
-
-        foreach ($params["filters"] as $name => $value) {
-            $qb->andWhere("location.$name LIKE :filter_$name")
-                ->setParameter("filter_$name", "%$value%");
         }
 
         foreach ($params["order"] ?? [] as $order) {
@@ -73,11 +68,12 @@ class LocationRepository extends EntityRepository {
     public function iterateAllKiosks() {
         return $this->createQueryBuilder("kiosk")
             ->select("kiosk.name AS name")
+            ->addSelect("kiosk.active AS active")
             ->addSelect("join_client.name AS client")
             ->join("kiosk.client", "join_client")
-            ->where("kiosk.active = 1")
+            ->where("kiosk.kiosk = 1")
             ->getQuery()
-            ->iterate();
+            ->toIterable();
     }
 
     public function findKiosksForDatatable(array $params): array {
@@ -121,16 +117,37 @@ class LocationRepository extends EntityRepository {
             ->select("kiosk.id AS id, kiosk.name AS text")
             ->where("kiosk.kiosk = 1")
             ->andWhere("kiosk.name LIKE :search")
+            ->andWhere("kiosk.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
             ->getArrayResult();
     }
 
-    public function countAll(): int {
-        $qb = $this->createQueryBuilder("kiosk");
+    public function getAnyForSelect(?string $search) {
+        return $this->createQueryBuilder("kiosk")
+            ->select("kiosk.id AS id, kiosk.name AS text")
+            ->where("kiosk.name LIKE :search")
+            ->andWhere("kiosk.active = 1")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
 
-        return QueryHelper::count($qb, "kiosk");
+    public function getTotalDeposits(): int {
+        return $this->createQueryBuilder("kiosk")
+            ->select("SUM(kiosk.deposits)")
+            ->where("kiosk.kiosk = 1")
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function findDeliverer(): Location {
+        return $this->createQueryBuilder("location")
+            ->where("location.code = '" . Location::DELIVERER . "'")
+            ->getQuery()
+            ->getSingleResult();
     }
 
 }

@@ -20,7 +20,7 @@ class BoxTypeRepository extends EntityRepository {
             ->addSelect("box_type.price AS price")
             ->addSelect("box_type.active AS active")
             ->getQuery()
-            ->iterate();
+            ->toIterable();
     }
 
     public function findForDatatable(array $params): array {

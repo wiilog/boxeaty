@@ -5,4 +5,13 @@
             <input type="text" name="name" class="data" placeholder="Qualité" value="{{ quality.name }}" required/>
         </label>
     </div>
+    <div class="col-12 toggle">
+        <span class="label">Statut</span>
+
+        <input type="radio" id="{{ quality.id ? 'edit' : 'new' }}-quality-active" name="active" class="data" value="1" {{ quality.active ? 'checked' }}/>
+        <label for="{{ quality.id ? 'edit' : 'new' }}-quality-active">Actif</label>
+
+        <input type="radio" id="{{ quality.id ? 'edit' : 'new' }}-quality-inactive" name="active" class="data" value="0" {{ not quality.active ? 'checked' }}/>
+        <label for="{{ quality.id ? 'edit' : 'new' }}-quality-inactive">Inactif</label>
+    </div>
 </div>

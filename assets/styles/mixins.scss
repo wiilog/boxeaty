@@ -63,7 +63,7 @@
     } @else if $type == silent {
         background: transparent;
         border-color: transparent;
-        color: $blue-lighter;
+        color: $blue-light;
 
         &:hover {
             color: $blue;

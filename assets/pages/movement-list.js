@@ -30,7 +30,7 @@ $(document).ready(() => {
         ],
         order: [[`date`, `desc`]],
         listeners: {
-            action: data => {
+            edit: data => {
                 const ajax = AJAX.route(`POST`, `tracking_movement_edit_template`, {
                     movement: data.id
                 });

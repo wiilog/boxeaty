@@ -19,7 +19,7 @@ class GroupRepository extends EntityRepository {
             ->select("g.name AS name")
             ->addSelect("g.active AS active")
             ->getQuery()
-            ->iterate();
+            ->toIterable();
     }
 
     public function findForDatatable(array $params): array {

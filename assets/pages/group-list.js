@@ -3,7 +3,7 @@ import '../app';
 import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
-import {initDatatable} from "../datatable";
+import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
 
 $(document).ready(() => {
     const newGroupModal = Modal.static(`#modal-new-group`, {
@@ -18,10 +18,11 @@ $(document).ready(() => {
         columns: [
             {data: `name`, title: `Nom du groupe`},
             {data: `active`, title: `Actif`},
+            DATATABLE_ACTIONS
         ],
         order: [[`name`, `asc`]],
         listeners: {
-            action: data => {
+            edit: data => {
                 const ajax = AJAX.route(`POST`, `group_edit_template`, {
                     group: data.id
                 });

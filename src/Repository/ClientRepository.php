@@ -26,7 +26,7 @@ class ClientRepository extends EntityRepository {
             ->leftJoin("client.linkedMultiSite", "join_linkedMultiSite")
             ->leftJoin("client.contact", "join_contact")
             ->getQuery()
-            ->iterate();
+            ->toIterable();
     }
 
     public function findForDatatable(array $params): array {

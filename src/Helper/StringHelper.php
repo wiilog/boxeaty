@@ -7,12 +7,12 @@ class StringHelper {
     private static function stripUTF8Accents($str, &$map) {
         // find all multibyte characters (cf. utf-8 encoding specs)
         $matches = [];
-        if(!preg_match_all("/[\xC0-\xF7][\x80-\xBF]+/", $str, $matches))
+        if (!preg_match_all("/[\xC0-\xF7][\x80-\xBF]+/", $str, $matches))
             return $str; // plain ascii string
 
         // update the encoding map with the characters not already met
-        foreach($matches[0] as $mbc)
-            if(!isset($map[$mbc]))
+        foreach ($matches[0] as $mbc)
+            if (!isset($map[$mbc]))
                 $map[$mbc] = chr(128 + count($map));
 
         // finally remap non-ascii characters
@@ -31,9 +31,12 @@ class StringHelper {
         return levenshtein($s1, $s2);
     }
 
-    public static function slugify($string) {
-        $map = [];
+    public static function slugify(string $string): string {
         return strtolower(trim(preg_replace("/[^A-Za-z0-9-]/", "_", self::stripAccents($string))));
+    }
+
+    public static function random(int $length): string {
+        return substr(str_shuffle(str_repeat($x = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil($length / strlen($x)))), 1, $length);
     }
 
 }

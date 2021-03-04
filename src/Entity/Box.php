@@ -77,6 +77,16 @@ class Box {
     private Collection $trackingMovements;
 
     /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $canGenerateDepositTicket = null;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private ?int $uses = null;
+
+    /**
      * @ORM\ManyToMany(targetEntity=Order::class, mappedBy="boxes")
      */
     private $orders;
@@ -179,6 +189,24 @@ class Box {
         return $this;
     }
 
+    public function getCanGenerateDepositTicket(): ?bool {
+        return $this->canGenerateDepositTicket;
+    }
+
+    public function setCanGenerateDepositTicket(?bool $canGenerateDepositTicket): self {
+        $this->canGenerateDepositTicket = $canGenerateDepositTicket;
+        return $this;
+    }
+
+    public function getUses(): ?int {
+        return $this->uses;
+    }
+
+    public function setUses(?int $uses): self {
+        $this->uses = $uses;
+        return $this;
+    }
+
     public function removeTrackingMovement(TrackingMovement $trackingMovement): self {
         if ($this->trackingMovements->removeElement($trackingMovement)) {
             // set the owning side to null (unless already changed)
@@ -215,6 +243,14 @@ class Box {
         }
 
         return $this;
+    }
+
+    public function fromTrackingMovement(TrackingMovement $movement): self {
+        return $this->setState($movement->getState())
+            ->setLocation($movement->getLocation())
+            ->setQuality($movement->getQuality())
+            ->setOwner($movement->getClient())
+            ->setComment($movement->getComment());
     }
 
 }

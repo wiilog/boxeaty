@@ -5,7 +5,7 @@
         name: 'client',
         placeholder: 'Propriété'
     } %}
-    {% include('filters/filter_items/location_item.html.twig') %}
+    {% include('filters/filter_items/any_location_item.html.twig') %}
     {% include('filters/filter_items/list_item.html.twig') with {
         elements: constant('App\\Entity\\Box::NAMES'),
         name: 'state',

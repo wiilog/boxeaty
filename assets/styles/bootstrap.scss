@@ -67,6 +67,11 @@
             &:active {
                 background: $grey-dark;
             }
+
+            &:disabled {
+                background: $grey-light;
+                color: $blue-lighter;
+            }
         }
     }
 

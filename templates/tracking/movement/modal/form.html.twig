@@ -8,7 +8,7 @@
     <div class="col-12">
         <label>
             Box
-            <select name="box" class="data" data-s2="box" data-placeholder="Sélectionnez une box" required>
+            <select name="box" class="data" data-s2="box" data-placeholder="Sélectionnez une box" required {{ movement.id ? 'disabled' }}>
                 {% if movement.box %}
                     <option value="{{ movement.box.id }}" selected>{{ movement.box.number }}</option>
                 {% endif %}
@@ -47,10 +47,10 @@
     </div>
     <div class="col-12">
         <label>
-            Utilisateur
-            <select name="user" class="data" data-s2="user" data-placeholder="Sélectionnez un utilisateur">
-                {% if movement.user %}
-                    <option value="{{ movement.user.id }}" selected>{{ movement.user.username }}</option>
+            Emplacement
+            <select name="location" class="data" data-s2="anyLocation" data-placeholder="Sélectionnez un emplacement">
+                {% if movement.location %}
+                    <option value="{{ movement.location.id }}" selected>{{ movement.location.name }}</option>
                 {% endif %}
             </select>
         </label>

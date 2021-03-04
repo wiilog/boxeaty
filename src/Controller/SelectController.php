@@ -116,4 +116,15 @@ class SelectController extends AbstractController {
         ]);
     }
 
+    /**
+     * @Route("/select/any-location", name="ajax_select_any_location", options={"expose": true})
+     */
+    public function anyLocation(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Location::class)->getAnyForSelect($request->query->get("term"));
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
 }
