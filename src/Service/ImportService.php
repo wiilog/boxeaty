@@ -101,6 +101,8 @@ class ImportService {
                     ->setCanGenerateDepositTicket(false)
                     ->fromTrackingMovement($movement);
 
+                $this->manager->persist($movement);
+
                 if (!$box->getId()) {
                     $this->manager->persist($box);
                     $creations++;
