@@ -41,7 +41,7 @@ class BoxController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $boxes = $manager->getRepository(Box::class)
-            ->findForDatatable(json_decode($request->getContent(), true));
+            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $data = [];
         foreach ($boxes["data"] as $box) {

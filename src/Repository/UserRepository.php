@@ -31,7 +31,7 @@ class UserRepository extends EntityRepository {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("user");
-        QueryHelper::withCurrentGroup($qb, "user", $user);
+        QueryHelper::withCurrentGroup($qb, "multiple:user.groups", $user);
 
         $total = QueryHelper::count($qb, "user");
 

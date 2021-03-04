@@ -39,7 +39,7 @@ class KioskController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $kiosks = $manager->getRepository(Location::class)
-            ->findKiosksForDatatable(json_decode($request->getContent(), true));
+            ->findKiosksForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $data = [];
         foreach ($kiosks["data"] as $kiosk) {

@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\DepositTicket;
+use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
+use function Doctrine\ORM\QueryBuilder;
 
 /**
  * @method DepositTicket|null find($id, $lockMode = null, $lockVersion = null)
@@ -29,19 +31,29 @@ class DepositTicketRepository extends EntityRepository {
             ->toIterable();
     }
 
-    public function findForDatatable(array $params): array {
+    public function findForDatatable(array $params, ?User $user): array {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("deposit_ticket");
+
+        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $qb->join("deposit_ticket.location", "current_group_location")
+                ->join("current_group_location.client", "current_group_client")
+                ->andWhere("current_group_client.group IN (:current_groups)")
+                ->setParameter("current_groups", $user->getGroups());
+        }
+
         $total = QueryHelper::count($qb, "deposit_ticket");
 
         if ($search) {
-            $qb->where("search_kiosk.name LIKE :search")
-                ->orWhere("deposit_ticket.number LIKE :search")
-                ->orWhere("search_client.name LIKE :search")
-                ->orWhere("deposit_ticket.state LIKE :search")
-                ->join("deposit_ticket.location", "search_kiosk")
+            $qb->join("deposit_ticket.location", "search_kiosk")
                 ->join("search_kiosk.client", "search_client")
+                ->where($qb->expr()->orX(
+                    "search_kiosk.name LIKE :search",
+                    "deposit_ticket.number LIKE :search",
+                    "search_client.name LIKE :search",
+                    "deposit_ticket.state LIKE :search",
+                ))
                 ->setParameter("search", "%$search%");
         }
 

@@ -26,21 +26,36 @@ class QueryHelper {
     }
 
     public static function withCurrentGroup(QueryBuilder $query, string $field, User $user): QueryBuilder {
-        if ($user->getRole()->isAllowEditOwnGroupOnly()) {
-            $fields = explode(".", $field);
-            $alias = $fields[0];
-            $field = $fields[1] ?? null;
-
-            if ($field) {
-                $join = "__current_group_user";
-                $query->leftJoin("$alias.$field", $join);
+        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $fields = explode(":", $field);
+            if(count($fields) === 2) {
+                $fields = $fields[1];
+                $multiple = true;
             } else {
-                $join = $alias;
+                $fields = $fields[0];
+                $multiple = false;
             }
 
-            foreach ($user->getGroups() as $i => $group) {
-                $query->andWhere(":group_$i MEMBER OF $join.groups")
-                    ->setParameter("group_$i", $group);
+            $fields = explode(".", $fields);
+            $alias = $fields[0];
+            $join = $fields[1] ?? null;
+            $field = $fields[2] ?? null;
+
+            if ($field) {
+                $query->leftJoin("$alias.$join", "__entity_with_group");
+                $alias = "__entity_with_group";
+            } else {
+                $field = $join;
+            }
+
+            if($multiple) {
+                foreach ($user->getGroups() as $i => $group) {
+                    $query->andWhere(":__group_$i MEMBER OF $alias.$field")
+                        ->setParameter("__group_$i", $group);
+                }
+            } else {
+                $query->andWhere("$alias.$field IN (:__groups)")
+                    ->setParameter("__groups", $user->getGroups());
             }
         }
 

@@ -38,7 +38,7 @@ class ClientController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $clients = $manager->getRepository(Client::class)
-            ->findForDatatable(json_decode($request->getContent(), true));
+            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $data = [];
         foreach ($clients["data"] as $client) {

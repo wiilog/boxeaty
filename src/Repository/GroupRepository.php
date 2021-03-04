@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Group;
+use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
@@ -50,15 +51,24 @@ class GroupRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search) {
-        return $this->createQueryBuilder("g")
-            ->select("g.id AS id, g.name AS text")
-            ->where("g.name LIKE :search")
-            ->andWhere("g.active = 1")
-            ->setMaxResults(15)
-            ->setParameter("search", "%$search%")
-            ->getQuery()
-            ->getArrayResult();
+    public function getForSelect(?string $search, ?User $user) {
+        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            return $user->getGroups()
+                ->map(fn(Group $group) => [
+                    "id" => $group->getId(),
+                    "text" => $group->getName(),
+                ])
+                ->toArray();
+        } else {
+            return $this->createQueryBuilder("g")
+                ->select("g.id AS id, g.name AS text")
+                ->where("g.name LIKE :search")
+                ->andWhere("g.active = 1")
+                ->setMaxResults(15)
+                ->setParameter("search", "%$search%")
+                ->getQuery()
+                ->getArrayResult();
+        }
     }
 
 }
