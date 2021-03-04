@@ -29,7 +29,6 @@ class Import {
 
     public const NUMBER = "number";
     public const LOCATION = "location";
-    public const KIOSK = "kiosk";
     public const STATE = "state";
     public const QUALITY = "quality";
     public const OWNER = "owner";
@@ -44,9 +43,6 @@ class Import {
         ],
         self::LOCATION => [
             "name" => "Emplacement",
-        ],
-        self::KIOSK => [
-            "name" => "Borne",
         ],
         self::STATE => [
             "name" => "Etat",

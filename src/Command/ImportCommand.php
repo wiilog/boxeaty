@@ -52,8 +52,6 @@ class ImportCommand extends Command {
             $this->importService->execute($import);
         }
 
-        $this->manager->flush();
-
         return 0;
     }
 

@@ -3,6 +3,7 @@
 namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
+use App\Entity\Box;
 use App\Entity\Group;
 use App\Entity\Import;
 use App\Entity\Role;
@@ -164,7 +165,17 @@ class ImportController extends AbstractController {
         $content = (object)$request->request->all();
 
         if ($form->isValid()) {
-            $import->setFieldsAssociation(array_flip(explode(",", $content->associations)))
+            $associations = explode(",", $content->associations);
+
+            foreach(Import::FIELDS as $name => $config) {
+                if(isset($config["required"]) && $config["required"] && !in_array($name, $associations)) {
+                    return $this->json([
+                        "success" => false,
+                        "msg" => "Le champ {$config['name']} est requis mais n'est associé à aucune colonne du fichier",
+                    ]);
+                }
+            }
+            $import->setFieldsAssociation(array_flip($associations))
                 ->setUser($this->getUser());
 
             if($import->getStatus() === Import::INSTANT) {
