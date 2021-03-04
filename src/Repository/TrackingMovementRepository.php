@@ -18,14 +18,16 @@ class TrackingMovementRepository extends EntityRepository {
     public function iterateAll() {
         return $this->createQueryBuilder("movement")
             ->select("movement.date AS date")
+            ->addSelect("location.name AS location_name")
             ->addSelect("box.number AS box_number")
             ->addSelect("quality.name AS quality_name")
             ->addSelect("movement.state AS state")
             ->addSelect("client.name AS client_name")
             ->addSelect("movement.comment AS comment")
-            ->join("movement.box", "box")
-            ->join("movement.quality", "quality")
-            ->join("movement.client", "client")
+            ->leftJoin("movement.box", "box")
+            ->leftJoin("movement.quality", "quality")
+            ->leftJoin("movement.client", "client")
+            ->leftJoin("movement.location", "location")
             ->getQuery()
             ->toIterable();
     }
@@ -72,8 +74,18 @@ class TrackingMovementRepository extends EntityRepository {
                         ->andWhere("filter_user.username LIKE :value")
                         ->setParameter("value", "%$value%");
                     break;
+                case "box":
+                    $qb->leftJoin("movement.box", "filter_box")
+                        ->andWhere("filter_box.id LIKE :value")
+                        ->setParameter("value", "%$value%");
+                    break;
+                case "location":
+                    $qb->leftJoin("movement.location", "filter_location")
+                        ->andWhere("filter_location.name LIKE :value")
+                        ->setParameter("value", "%$value%");
+                    break;
                 default:
-                    $qb->andWhere("location.$name LIKE :filter_$name")
+                    $qb->andWhere("movement.$name LIKE :filter_$name")
                         ->setParameter("filter_$name", "%$value%");
                     break;
             }

@@ -22,6 +22,7 @@ $(document).ready(() => {
         ajax: AJAX.route(`POST`, `tracking_movements_api`),
         columns: [
             {data: `date`, title: `Date`},
+            {data: `location`, title: `Emplacement`},
             {data: `box`, title: `Numéro box`},
             {data: `quality`, title: `Qualité`},
             {data: `state`, title: `Etat`},

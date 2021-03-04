@@ -44,7 +44,10 @@ class DefaultController extends AbstractController {
         $locations = $locationRepository->iterateAllLocations();
 
         $exportService->createWorksheet($spreadsheet, "Bornes", $kiosks, ExportService::KIOSK_HEADER);
-        $exportService->createWorksheet($spreadsheet, "Mouvements", TrackingMovement::class, ExportService::MOVEMENT_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Mouvements", TrackingMovement::class, ExportService::MOVEMENT_HEADER, function(array $row) {
+            $row["state"] = Box::NAMES[$row["state"]];
+            return $row;
+        });
         $exportService->createWorksheet($spreadsheet, "Tickets-consigne", DepositTicket::class, ExportService::DEPOSIT_TICKET_HEADER, function(array $row) {
             $row["state"] = DepositTicket::NAMES[$row["state"]];
             return $row;
