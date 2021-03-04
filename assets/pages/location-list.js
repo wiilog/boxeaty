@@ -33,7 +33,13 @@ $(document).ready(() => {
 
                 Modal.load(ajax, {table})
             },
-            delete: data => deleteLocationModal.open(data),
+            delete: data => {
+                const ajax = AJAX.route(`POST`, `location_delete_template`, {
+                    location: data.id
+                });
+
+                Modal.load(ajax, {table})
+            },
         }
     });
 
