@@ -38,7 +38,6 @@ class ExportService {
     public const LOCATION_HEADER = [
         "Nom",
         "Actif",
-        "Client",
     ];
 
     public const MOVEMENT_HEADER = [
