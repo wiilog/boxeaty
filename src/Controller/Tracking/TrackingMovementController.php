@@ -195,11 +195,11 @@ class TrackingMovementController extends AbstractController {
 
     /**
      * @Route("/supprimer", name="tracking_movement_delete", options={"expose": true})
-     * @HasPermission(Role::DELETE_MOVEMENT)
+     * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
         $content = (object) $request->request->all();
-        $movement = $manager->getRepository(User::class)->find($content->id);
+        $movement = $manager->getRepository(TrackingMovement::class)->find($content->id);
 
         if ($movement) {
             $manager->remove($movement);
