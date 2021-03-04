@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\DepositTicketRepository;
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -62,6 +64,16 @@ class DepositTicket {
      * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="depositTickets")
      */
     private ?Location $location = null;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Order::class, mappedBy="depositTickets")
+     */
+    private $orders;
+
+    public function __construct()
+    {
+        $this->orders = new ArrayCollection();
+    }
 
     public function getId(): ?int {
         return $this->id;
@@ -132,6 +144,33 @@ class DepositTicket {
 
     public function setLocation(?Location $location): self {
         $this->location = $location;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Order[]
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): self
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders[] = $order;
+            $order->addDepositTicket($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): self
+    {
+        if ($this->orders->removeElement($order)) {
+            $order->removeDepositTicket($this);
+        }
 
         return $this;
     }

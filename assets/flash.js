@@ -13,6 +13,7 @@ export default class Flash {
         `);
 
         $alert.appendTo(`.alert-container`)
+        $('.alert-container').css('z-index', 10000);
 
         setTimeout(() => $alert.fadeOut(500, function () {
             $(this).remove();

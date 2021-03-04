@@ -96,4 +96,14 @@ class TrackingMovementRepository extends EntityRepository {
         ];
     }
 
+    public function findPreviousMovement($box): TrackingMovement {
+        return $this->createQueryBuilder("movement")
+            ->where("movement.box = :box")
+            ->andWhere("movement.location IS NULL")
+            ->orderBy("movement.id", "DESC")
+            ->setParameter("box", $box)
+            ->getQuery()
+            ->getSingleResult();
+    }
+
 }

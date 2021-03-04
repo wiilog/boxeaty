@@ -150,3 +150,30 @@ button, a {
         width: 100% !important;
     }
 }
+
+.bx-input-group {
+
+    input {
+        width: initial !important;
+        flex: 1;
+    }
+
+    .input-group-text {
+        border: none !important;
+        background-color: #F8F8F8 !important;
+        width: 45px;
+        font-size: 18px;
+        display: flex;
+        justify-content: center;
+        font-weight: bold;
+        color: #6C757D;
+    }
+}
+
+.hint {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0;
+    margin-top: 10px;
+}

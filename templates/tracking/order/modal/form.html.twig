@@ -1,0 +1,41 @@
+<div class="row">
+    <div class="col-md-12 col-12">
+        <div class="scan-box"><i class="fas fa-camera fa-2x"></i></div>
+    </div>
+    <div class="col-md-12 col-12">
+        <label>
+            Code(s) Box
+            <select name="box" class="data" data-s2="availableBox" data-no-empty-option data-placeholder="Sélectionnez une ou plusieurs Box" required multiple>
+            </select>
+        </label>
+    </div>
+</div>
+<div class="row deposit-ticket-container d-none">
+    <div class="col-12">
+        <div class="row">
+            <div class="col">
+                <label>
+                    Validation du ticket-consigne
+                    <select name="depositTicket" class="data" data-s2="depositTicket" data-no-empty-option data-placeholder="Entrez des tickets-consigne..." multiple required>
+                    </select>
+                </label>
+            </div>
+            <div class="col-auto mt-2">
+                <div class="deposit-ticket-scan"><i class="fas fa-qrcode fa-2x"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <label>
+            <span class="cost-label">Coût total</span>
+            <div class="input-group bx-input-group">
+                <input type="text" class="bg-white" name="totalCost" disabled value="0,00"/>
+                <span class="input-group-text"><span>€</span></span>
+            </div>
+        </label>
+    </div>
+    <div class="col-12">
+        <div class="d-none hint alert alert-danger">
+        </div>
+    </div>
+</div>

@@ -29,6 +29,7 @@ parameters:
       App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer et modifier des tickets consigne
       App\Entity\Role::MANAGE_BOXES: Créer et modifier des Box
       App\Entity\Role::DELETE_BOX: Suppression de Box
+      App\Entity\Role::MANAGE_ORDERS: Gestion des commandes
 
 
   menu:
@@ -49,6 +50,9 @@ parameters:
         - name: Mouvements
           permission: App\Entity\Role::MANAGE_MOVEMENTS
           route: tracking_movements_list
+        - name: Commande
+          permission: App\Entity\Role::MANAGE_ORDERS
+          route: orders_list
     - name: Référentiel
       icon: address-card
       type: category
