@@ -43,7 +43,7 @@ class UserController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $users = $manager->getRepository(User::class)
-            ->findForDatatable(json_decode($request->getContent(), true));
+            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $data = [];
         foreach ($users["data"] as $user) {

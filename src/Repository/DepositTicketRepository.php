@@ -40,7 +40,7 @@ class DepositTicketRepository extends EntityRepository {
                 ->orWhere("deposit_ticket.number LIKE :search")
                 ->orWhere("search_client.name LIKE :search")
                 ->orWhere("deposit_ticket.state LIKE :search")
-                ->join("deposit_ticket.kiosk", "search_kiosk")
+                ->join("deposit_ticket.location", "search_kiosk")
                 ->join("search_kiosk.client", "search_client")
                 ->setParameter("search", "%$search%");
         }

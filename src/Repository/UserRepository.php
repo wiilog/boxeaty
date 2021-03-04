@@ -27,15 +27,16 @@ class UserRepository extends EntityRepository {
             ->toIterable();
     }
 
-    public function findForDatatable(array $params): array {
+    public function findForDatatable(array $params, ?User $user): array {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("user");
+        QueryHelper::withCurrentGroup($qb, "user", $user);
+
         $total = QueryHelper::count($qb, "user");
 
         if ($search) {
-            $qb->where("user.username LIKE :search")
-                ->orWhere("user.email LIKE :search")
+            $qb->andWhere("user.username LIKE :search OR user.email LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 
