@@ -20,7 +20,6 @@ Encore
     .addEntry("location_list", "./assets/pages/location-list.js")
     .addEntry("group_list", "./assets/pages/group-list.js")
     .addEntry("client_list", "./assets/pages/client-list.js")
-    .addEntry("kiosk_list", "./assets/pages/kiosk-list.js")
     .addEntry("box_type_list", "./assets/pages/box-type-list.js")
     .addEntry("setting", "./assets/pages/setting.js")
     .addEntry("user_list", "./assets/pages/user-list.js")

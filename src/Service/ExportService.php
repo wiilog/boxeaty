@@ -35,12 +35,6 @@ class ExportService {
         "Actif",
     ];
 
-    public const LOCATION_HEADER = [
-        "Nom",
-        "Actif",
-        "Client",
-    ];
-
     public const MOVEMENT_HEADER = [
         "Date",
         "Numéro de box",
@@ -71,8 +65,9 @@ class ExportService {
         "Etat",
     ];
 
-    public const KIOSK_HEADER = [
-        "Nom de la borne",
+    public const LOCATION_HEADER = [
+        "Type",
+        "Nom",
         "Actif",
         "Client",
     ];

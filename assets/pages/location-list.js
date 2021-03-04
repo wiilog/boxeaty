@@ -16,12 +16,19 @@ $(document).ready(() => {
         table: `#table-locations`,
     });
 
+    const emptyLocationModal = Modal.static(`#modal-empty-location`, {
+        ajax: AJAX.route(`POST`, `api_empty_kiosk`),
+        table: `#table-locations`,
+    });
+
     const table = initDatatable(`#table-locations`, {
         ajax: AJAX.route(`POST`, `locations_api`),
         columns: [
+            {data: `type`, title: `Type`},
             {data: `name`, title: `Nom de l'emplacement`},
             {data: `active`, title: `Actif`},
             {data: `description`, title: `Description`},
+            {data: `boxes`, title: `Nombre de Box`},
             DATATABLE_ACTIONS,
         ],
         order: [[`name`, `asc`]],
@@ -34,6 +41,7 @@ $(document).ready(() => {
                 Modal.load(ajax, {table})
             },
             delete: data => deleteLocationModal.open(data),
+            empty: data => emptyLocationModal.open(data),
         }
     });
 

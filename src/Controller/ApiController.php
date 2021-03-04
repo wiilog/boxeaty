@@ -110,13 +110,13 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/kiosks/empty", name="api_empty_kiosk")
+     * @Route("/kiosks/empty", name="api_empty_kiosk", options={"expose": true})
      */
     public function emptyKiosk(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
         $deliverer = $manager->getRepository(Location::class)->findDeliverer();
-        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
+        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk ?? $request->request->get("id"));
 
         foreach ($kiosk->getBoxes() as $box) {
             $movement = (new TrackingMovement())

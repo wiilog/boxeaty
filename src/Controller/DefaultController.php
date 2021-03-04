@@ -40,10 +40,7 @@ class DefaultController extends AbstractController {
         $spreadsheet->disconnectWorksheets();
 
         $locationRepository = $this->getDoctrine()->getRepository(Location::class);
-        $kiosks = $locationRepository->iterateAllKiosks();
-        $locations = $locationRepository->iterateAllLocations();
-
-        $exportService->createWorksheet($spreadsheet, "Bornes", $kiosks, ExportService::KIOSK_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Emplacements", Location::class, ExportService::LOCATION_HEADER);
         $exportService->createWorksheet($spreadsheet, "Mouvements", TrackingMovement::class, ExportService::MOVEMENT_HEADER);
         $exportService->createWorksheet($spreadsheet, "Tickets-consigne", DepositTicket::class, ExportService::DEPOSIT_TICKET_HEADER, function(array $row) {
             $row["state"] = DepositTicket::NAMES[$row["state"]];
@@ -52,7 +49,6 @@ class DefaultController extends AbstractController {
 
         $exportService->createWorksheet($spreadsheet, "Clients", Client::class, ExportService::CLIENT_HEADER);
         $exportService->createWorksheet($spreadsheet, "Groupes", Group::class, ExportService::GROUP_HEADER);
-        $exportService->createWorksheet($spreadsheet, "Emplacements", $locations, ExportService::LOCATION_HEADER);
         $exportService->createWorksheet($spreadsheet, "Qualités", Quality::class, ExportService::QUALITY_HEADER);
         $exportService->createWorksheet($spreadsheet, "Types de Box", BoxType::class, ExportService::BOX_TYPE_HEADER);
         $exportService->createWorksheet($spreadsheet, "Box", Box::class, ExportService::BOX_HEADER, function(array $row) {

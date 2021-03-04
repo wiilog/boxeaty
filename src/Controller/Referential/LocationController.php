@@ -3,9 +3,13 @@
 namespace App\Controller\Referential;
 
 use App\Annotation\HasPermission;
+use App\Entity\Box;
+use App\Entity\Client;
 use App\Entity\Location;
 use App\Entity\Role;
+use App\Entity\TrackingMovement;
 use App\Helper\Form;
+use App\Helper\FormatHelper;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -35,18 +39,22 @@ class LocationController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $locations = $manager->getRepository(Location::class)
-            ->findLocationsForDatatable(json_decode($request->getContent(), true), $this->getUser());
+            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $data = [];
         foreach ($locations["data"] as $location) {
             $data[] = [
                 "id" => $location->getId(),
+                "type" => $location->isKiosk() ? "Borne" : "Emplacement",
                 "name" => $location->getName(),
                 "active" => $location->isActive() ? "Oui" : "Non",
+                "client" => FormatHelper::named($location->getClient()),
+                "boxes" => $location->getBoxes()->count(),
                 "description" => $location->getDescription(),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
+                    "empty" => $location->isKiosk(),
                 ]),
             ];
         }
@@ -66,6 +74,8 @@ class LocationController extends AbstractController {
         $form = Form::create();
 
         $content = (object)$request->request->all();
+        $client = isset($content->client) ? $manager->getRepository(Client::class)->findOneBy(["name" => $content->client]) : null;
+
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Un emplacement avec ce nom existe déjà");
@@ -73,9 +83,10 @@ class LocationController extends AbstractController {
 
         if ($form->isValid()) {
             $location = new Location();
-            $location->setKiosk(false)
+            $location->setKiosk($content->type)
                 ->setName($content->name)
                 ->setActive($content->active)
+                ->setClient($client)
                 ->setDescription($content->description ?? null)
                 ->setDeposits(0);
 
@@ -112,14 +123,17 @@ class LocationController extends AbstractController {
         $form = Form::create();
 
         $content = (object)$request->request->all();
+        $client = isset($content->client) ? $manager->getRepository(Client::class)->findOneBy(["name" => $content->client]) : null;
+
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $location) {
             $form->addError("label", "Un autre emplacement avec ce nom existe déjà");
         }
 
         if ($form->isValid()) {
-            $location
+            $location->setKiosk($content->type)
                 ->setName($content->name)
+                ->setClient($client)
                 ->setActive($content->active)
                 ->setDescription($content->description ?? null);
 
@@ -163,7 +177,7 @@ class LocationController extends AbstractController {
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
     public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
-        $locations = $manager->getRepository(Location::class)->iterateAllLocations();
+        $locations = $manager->getRepository(Location::class)->iterateAll();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
