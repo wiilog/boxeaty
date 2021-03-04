@@ -226,6 +226,27 @@ main:not(.login) {
     }
 }
 
+.modal.confirmation {
+    h1 {
+        font-family: 'Retroyal', sans-serif;
+        font-size: 1.5rem;
+        font-style: normal;
+        font-weight: normal;
+    }
+
+    .confirmation-image {
+        width: 100%;
+        height: 100px;
+        background: url(../images/success.svg) no-repeat scroll center;
+        background-size: 100px;
+        margin-bottom: 25px;
+    }
+
+    p {
+        text-align: center;
+    }
+}
+
 .box-show {
     width: 100%;
     margin-top: -30px;
@@ -315,9 +336,13 @@ main:not(.login) {
         height: 70px !important;
         width: 70px !important;
         border-radius: 50% !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
         svg {
             margin-right: 0 !important;
+            font-size: 20px;
         }
     }
 }
@@ -348,6 +373,9 @@ main:not(.login) {
             color: white;
             text-align: center;
             padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
 
             &:hover {
                 background: #e23b4b;

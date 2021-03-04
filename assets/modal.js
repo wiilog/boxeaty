@@ -139,35 +139,40 @@ export default class Modal {
         if(data === false) {
             return;
         }
+        if(this.config.ajax) {
+            return this.config.ajax.json(data, result => {
+                if (!result.success && result.errors !== undefined) {
+                    for (const error of result.errors.fields) {
+                        showInvalid(this.element.find(`[name="${error.field}"]`), error.message);
+                    }
 
-        return this.config.ajax.json(data, result => {
-            if(!result.success && result.errors !== undefined) {
-                for(const error of result.errors.fields) {
-                    showInvalid(this.element.find(`[name="${error.field}"]`), error.message);
+                    return;
                 }
 
-                return;
-            }
-
-            //refresh the datatable
-            if(this.config && this.config.table) {
-                if(this.config.table.ajax) {
-                    this.config.table.ajax.reload();
-                } else {
-                    $(this.config.table).DataTable().ajax.reload();
+                //refresh the datatable
+                if (this.config && this.config.table) {
+                    if (this.config.table.ajax) {
+                        this.config.table.ajax.reload();
+                    } else {
+                        $(this.config.table).DataTable().ajax.reload();
+                    }
                 }
-            }
 
-            if(result.menu) {
-                $(`#menu-dropdown`).replaceWith(result.menu);
-            }
+                if (result.menu) {
+                    $(`#menu-dropdown`).replaceWith(result.menu);
+                }
 
-            this.element.modal(`hide`);
+                this.element.modal(`hide`);
 
-            if(result.success && this.config.success) {
-                this.config.success(result);
-            }
-        });
+                if (result.success && this.config.success) {
+                    this.config.success(result);
+                }
+            });
+        } else {
+           return new Promise(() => {
+               this.element.modal(`hide`);
+           });
+        }
     }
 
     open(data = {}) {

@@ -7,33 +7,42 @@
             Code(s) Box
             <select name="box" class="data" data-s2 data-no-empty-option data-placeholder="Sélectionnez une ou plusieurs Box" required multiple>
                 {% for box in boxes %}
-                    <option data-price="{{ box.type ? box.type.price : 0 }}" value="{{ box.number }}">{{ box.number }}</option>
+                    <option data-price="{{ box.type.price }}" value="{{ box.number }}">{{ box.number }}</option>
                 {% endfor %}
             </select>
         </label>
     </div>
 </div>
 <div class="row deposit-ticket-container d-none">
-    <div class="row">
-        <div class="col-11">
-            <label>
-                Validation du ticket-consigne
-                <select name="depositTicket" class="data"
-                        data-s2 data-no-empty-option data-placeholder="Entrez des tickets-consigne..." multiple required>
-                    {% for depositTicket in depositTickets %}
-                        <option data-price="{{ depositTicket.id }}" value="{{ depositTicket.number }}">{{ depositTicket.number }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-        </div>
-        <div class="col-1 mt-2 p-0">
-            <div class="deposit-ticket-scan"><i class="fas fa-qrcode fa-2x"></i></div>
+    <div class="col-12">
+        <div class="row">
+            <div class="col">
+                <label>
+                    Validation du ticket-consigne
+                    <select name="depositTicket" class="data"
+                            data-s2 data-no-empty-option data-placeholder="Entrez des tickets-consigne..." multiple required>
+                        {% for depositTicket in depositTickets %}
+                            <option data-price="{{ depositTicket.box ? depositTicket.box.type.price : 0 }}" value="{{ depositTicket.number }}">{{ depositTicket.number }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <div class="col-auto mt-2">
+                <div class="deposit-ticket-scan"><i class="fas fa-qrcode fa-2x"></i></div>
+            </div>
         </div>
     </div>
     <div class="col-12">
         <label>
-            Coût total
-            <input type="number" name="totalCost" class="data" placeholder="Renseignez un coût total" value="{{ order.totalCost }}" required/>
+            <span class="cost-label">Coût total</span>
+            <div class="input-group bx-input-group">
+                <input type="text" class="bg-white" name="totalCost" disabled value="0,00"/>
+                <span class="input-group-text"><span>€</span></span>
+            </div>
         </label>
+    </div>
+    <div class="col-12">
+        <div class="d-none hint alert alert-danger">
+        </div>
     </div>
 </div>

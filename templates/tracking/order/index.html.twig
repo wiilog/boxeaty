@@ -13,16 +13,17 @@
         </div>
 
         {% for order in orders %}
-            {% set unique = order.boxes.count == 1 %}
+            {% set unique = order.boxes.count == 0 ? 'Aucune Box' : order.boxes.count == 1 ? 'Code de la Box :' : 'Codes des Box :' %}
+            {% set costLabel = order.totalCost == 0 ? 'Aucun coût' : order.totalCost < 0 ? 'Restant dû :' : 'Coût :' %}
             <div class="order-card">
                 <div class="header">
-                    <span>{{ unique ? "Code de la Box" : "Codes des Box" }} : <br><strong>{{ order.boxes is not empty ? (order.boxes | map(p => "#{p.number}") | join(', ')) : '' }}</strong></span>
-                    <span>Date du mouvement : <strong>{{ order.date | date('Y/m/d H:i:s') }}</strong></span>
+                    <span>{{ unique }}<br><strong>{{ order.boxes is not empty ? (order.boxes | map(p => "#{p.number}") | join(', ')) : '' }}</strong></span>
+                    <span>Date du mouvement : <br><strong>{{ order.date | date('d/m/Y H:i:s') }}</strong></span>
                     <button data-listener="delete" class="delete-order"><i class="icon fas fa-trash-alt"></i></button>
                     <input type="hidden" value="{{ order.id }}" name="order-id">
                 </div>
                 <div class="content">
-                    <span class="price">Coût : <strong>{{ order.totalCost }} euros</strong></span>
+                    <span class="price">{{ costLabel }} <strong>{{ order.totalCost == 0 ? '' : (order.totalCost|abs ~ ' euros') }} </strong></span>
                 </div>
             </div>
         {% endfor %}
@@ -31,6 +32,7 @@
     {% include 'tracking/order/modal/new.html.twig' with {order: new_order} %}
     {% include 'tracking/order/modal/delete.html.twig' %}
     {% include 'tracking/order/modal/scan.html.twig' %}
+    {% include 'tracking/order/modal/confirmation.html.twig' %}
 {% endblock %}
 
 {% block javascripts %}

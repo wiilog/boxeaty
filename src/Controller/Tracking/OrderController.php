@@ -70,8 +70,7 @@ class OrderController extends AbstractController {
         if($form->isValid()) {
             $order = new Order();
             $order
-                ->setDate(new DateTime())
-                ->setTotalCost($content->totalCost);
+                ->setDate(new DateTime());
 
             foreach ($boxes as $box) {
                 if($box) {
@@ -82,10 +81,11 @@ class OrderController extends AbstractController {
                 }
             }
 
-            /*$boxPrices = array_sum(Stream::from($boxes)->map(function (Box $box) use ($boxRepository) {
-                $currentBox = $boxRepository->findOneBy(['number' => $box]);
-                return $currentBox->getType() ? $currentBox->getType()->getPrice() : '';
-            })->toArray());*/
+            $boxPrices = array_sum(Stream::from($order->getBoxes()->toArray())
+                ->map(function (Box $box) {
+                    return $box->getType() ? $box->getType()->getPrice() : 0;
+                })
+                ->toArray());
 
             foreach ($depositTickets as $depositTicket) {
                 if($depositTicket) {
@@ -96,12 +96,21 @@ class OrderController extends AbstractController {
                 }
             }
 
+            $depositTicketPrices = array_sum(Stream::from($order->getDepositTickets()->toArray())
+                ->map(function (DepositTicket $depositTicket) {
+                    $box = $depositTicket->getBox();
+                    return $box->getType() ? $box->getType()->getPrice() : 0;
+                })
+                ->toArray());
+
+            $totalPrice = $boxPrices - $depositTicketPrices;
+            $order->setTotalCost($totalPrice);
+
             $manager->persist($order);
             $manager->flush();
 
             return $this->json([
                 "success" => true,
-                "msg" => "Commande créée avec succès",
             ]);
         } else {
             return $form->errors();
