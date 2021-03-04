@@ -55,47 +55,45 @@ class OrderController extends AbstractController {
 
             foreach ($boxes as $box) {
                 if ($box) {
-                    $box = $boxRepository->findOneBy(['number' => $box]);
+                    $box = $boxRepository->find($box);
                     if ($box) {
                         $order->addBox($box);
+                        $movement = (new TrackingMovement())
+                            ->setBox($box)
+                            ->setDate(new DateTime())
+                            ->setState(Box::CONSUMER)
+                            ->setLocation(null)
+                            ->setQuality($box->getQuality())
+                            ->setClient($box->getOwner())
+                            ->setUser($this->getUser());
+
+                        $manager->persist($movement);
+                        $box->fromTrackingMovement($movement);
                     }
                 }
             }
 
-            $boxPrices = array_sum(Stream::from($order->getBoxes()->toArray())
-                ->map(function(Box $box) use ($manager) {
-                    $movement = (new TrackingMovement())
-                        ->setBox($box)
-                        ->setDate(new DateTime())
-                        ->setState(Box::CONSUMER)
-                        ->setLocation(null)
-                        ->setQuality($box->getQuality())
-                        ->setClient($box->getOwner())
-                        ->setUser($this->getUser());
-
-                    $manager->persist($movement);
-                    $box->fromTrackingMovement($movement);
-
-                    return $box->getType() ? $box->getType()->getPrice() : 0;
-                })
-                ->toArray());
+            $boxPrices = Stream::from($order->getBoxes()->toArray())
+                ->reduce(function(float $carry, Box $box) {
+                    dump($box->getType() ? $box->getType()->getPrice() : 0);
+                    return $carry + ($box->getType() ? $box->getType()->getPrice() : 0);
+                }, 0);
 
             foreach ($depositTickets as $depositTicket) {
                 if ($depositTicket) {
-                    $depositTicket = $depositTicketRepository->findOneBy(['number' => $depositTicket]);
+                    $depositTicket = $depositTicketRepository->find($depositTicket);
                     if ($depositTicket) {
                         $order->addDepositTicket($depositTicket);
+                        $depositTicket->setState(DepositTicket::SPENT);
                     }
                 }
             }
 
-            $depositTicketPrices = array_sum(Stream::from($order->getDepositTickets()->toArray())
-                ->map(function(DepositTicket $depositTicket) {
+            $depositTicketPrices = Stream::from($order->getDepositTickets()->toArray())
+                ->reduce(function(float $carry, DepositTicket $depositTicket) {
                     $box = $depositTicket->getBox();
-                    $depositTicket->setState(DepositTicket::SPENT);
-                    return $box->getType() ? $box->getType()->getPrice() : 0;
-                })
-                ->toArray());
+                    return $carry + ($box->getType() ? $box->getType()->getPrice() : 0);
+                }, 0);
 
             $totalPrice = $boxPrices - $depositTicketPrices;
             $order->setTotalCost($totalPrice);
