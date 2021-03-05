@@ -37,6 +37,7 @@ class ExportService {
 
     public const MOVEMENT_HEADER = [
         "Date",
+        "Emplacement",
         "Numéro de box",
         "Qualité",
         "Etat",
