@@ -66,7 +66,7 @@ class ImportService {
             $stateValue = $this->value(Import::STATE);
             $state = array_search($stateValue, Box::NAMES);
             if ($stateValue && $state === false) {
-                $this->addError("Etat de box inconnu \"$state\"");
+                $this->addError("Etat de Box inconnu \"$state\"");
             }
 
             $ownerValue = $this->value(Import::OWNER, true);

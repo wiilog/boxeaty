@@ -105,9 +105,9 @@ $(document).ready(() => {
 
 function scan(scanModal, $select, type, msg) {
     if(type === `boxes`) {
-        scanModal.elem().find(`.scan-container-title`).text(`Scan de la box`);
+        scanModal.elem().find(`.scan-container-title`).text(`Scan de la Box`);
     } else {
-        scanModal.elem().find(`.scan-container-title`).text(`Scan du ticket consigne`);
+        scanModal.elem().find(`.scan-container-title`).text(`Scan du ticket-consigne`);
     }
 
     scanModal.open()
