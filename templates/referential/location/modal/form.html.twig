@@ -2,11 +2,11 @@
     <div class="col-12 toggle">
         <span class="label">Type</span>
 
-        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type" name="type" class="data" value="1" {{ location.kiosk ? 'checked' }}/>
-        <label for="{{ location.id ? 'edit' : 'new' }}-location-type">Borne</label>
+        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-kiosk" name="type" class="data" value="1" {{ location.kiosk ? 'checked' }}/>
+        <label for="{{ location.id ? 'edit' : 'new' }}-location-type-kiosk">Borne</label>
 
-        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type" name="type" class="data" value="0" {{ not location.kiosk ? 'checked' }}/>
-        <label for="{{ location.id ? 'edit' : 'new' }}-location-type">Emplacement</label>
+        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-location" name="type" class="data" value="0" {{ not location.kiosk ? 'checked' }}/>
+        <label for="{{ location.id ? 'edit' : 'new' }}-location-type-location">Emplacement</label>
     </div>
     <div class="col-12">
         <label>
