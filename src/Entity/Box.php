@@ -26,6 +26,16 @@ class Box {
         self::OUT => "Sorti",
     ];
 
+    public const LINKED_COLORS = [
+        self::AVAILABLE => "success",
+        self::UNAVAILABLE => "danger",
+        self::CONSUMER => "primary",
+        self::CLIENT => "warning",
+        self::OUT => "secondary",
+    ];
+
+    public const DEFAULT_COLOR = 'light';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

@@ -11,6 +11,7 @@ use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\TrackingMovement;
 use App\Helper\Form;
+use App\Helper\Stream;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -226,4 +227,34 @@ class BoxController extends AbstractController {
         }, "export-box-$today.csv", ExportService::BOX_HEADER);
     }
 
+    /**
+     * @Route("/{box}/mouvements", name="get_box_mouvements", options={"expose": true}, methods={"GET"})
+     */
+    public function getTrackingMovements(Box $box,
+                                         Request $request,
+                                         EntityManagerInterface $manager) {
+        $trackingMovementRepository = $manager->getRepository(TrackingMovement::class);
+        $start = $request->query->getInt('start', 0);
+        $length = 10;
+
+        $boxMovements = $trackingMovementRepository->getBoxMovements($box, $start, $length);
+        $countBoxMovements = $box->getTrackingMovements()->count();
+
+        return $this->json([
+            'success' => true,
+            'isTail' => ($start + $length) >= $countBoxMovements,
+            'data' => Stream::from($boxMovements)
+                ->map(fn(array $movement) => [
+                    'comment' => $movement['comment'],
+                    'color' => (isset($movement['state']) && isset(Box::LINKED_COLORS[$movement['state']]))
+                        ? Box::LINKED_COLORS[$movement['state']]
+                        : Box::DEFAULT_COLOR,
+                    'date' => isset($movement['date']) ? $movement['date']->format('d/m/Y à H:i:s') : 'Non définie',
+                    'state' => (isset($movement['state']) && isset(Box::NAMES[$movement['state']]))
+                        ? Box::NAMES[$movement['state']]
+                        : '-',
+                ])
+                ->toArray(),
+        ]);
+    }
 }

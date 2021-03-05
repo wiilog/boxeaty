@@ -3,36 +3,33 @@
 {% block menu %}Traçabilité{% endblock %}
 {% block page %}<a href="{{ path('boxes_list') }}" class="text-white text-decoration-none">Box</a> > Détails{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('box_show') }}
+{% endblock %}
+
 {% block content %}
     <div class="row box-show">
         <div class="col-4 details box-details">
             <h3>Détails de la Box</h3>
-            <p>Code : {{ box.number }}</p>
-            <p>Emplacement : {{ box.location ? box.location.name }}</p>
-            <p>Qualité : {{ box.quality ? box.quality.name }}</p>
-            <p>Etat : {{ box.state }}</p>
-            <p>Prix : {{ box.type ? (box.type.price ~ ' euros') }} </p>
+            <p class="fs-5">Code : <strong>{{ box.number }}</strong></p>
+            <p class="fs-5">Emplacement : <strong>{{ box.location ? box.location.name }}</strong></p>
+            <p class="fs-5">Qualité : <strong>{{ box.quality ? box.quality.name }}</strong></p>
+            <p class="fs-5">Etat : <strong>{{ box.state ? constant('App\\Entity\\Box::NAMES')[box.state] }}</strong></p>
+            <p class="fs-5">Prix : <strong>{{ box.type and box.type.price ? ((box.type.price | replace({'.': ','})) ~ ' euros') }}</strong></p>
         </div>
         <div class="col-8 box-group">
             <div class="owner box-details">
                 <h3>Propriétaire</h3>
-                <p>{{ box.owner ? box.owner.name }}</p>
+                <p class="fs-5">{{ box.owner ? box.owner.name }}</p>
             </div>
             <div class="history box-details">
                 <h3>Historique de la Box</h3>
-                <div class="timeline-line">
-                    <span class="point"><strong>23/08/2020 à 11:34:32</strong></span>
-                    <span class="detail ml-3">Sortie de stock indispo</span>
-                    <div class="comment">La box est sale</div>
-                </div>
-                <div class="timeline-line">
-                    <span class="point"><strong>25/08/2020 à 13:23:42</strong></span>
-                    <span class="detail ml-3">Sortie de stock dispo</span>
-                    <div class="comment" style="background-color: #F2F8F6">La box est propre</div>
-                </div>
+                <div class="history-wrapper"></div>
             </div>
         </div>
     </div>
+    <input type="hidden" value="{{ box.id }}" id="box-id">
 {% endblock %}
 
 {% block javascripts %}

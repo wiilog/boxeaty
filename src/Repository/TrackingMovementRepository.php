@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Box;
 use App\Entity\TrackingMovement;
 use App\Entity\User;
 use App\Helper\QueryHelper;
@@ -106,4 +107,17 @@ class TrackingMovementRepository extends EntityRepository {
             ->getSingleResult();
     }
 
+    public function getBoxMovements(Box $box, int $start, int $length): array {
+        return $this->createQueryBuilder("tracking_movement")
+            ->select("tracking_movement.comment AS comment")
+            ->addSelect("tracking_movement.date AS date")
+            ->addSelect("tracking_movement.state AS state")
+            ->where("tracking_movement.box = :box")
+            ->addOrderBy("tracking_movement.date", "DESC")
+            ->setParameter("box", $box)
+            ->setMaxResults($length)
+            ->setFirstResult($start)
+            ->getQuery()
+            ->getResult();
+    }
 }

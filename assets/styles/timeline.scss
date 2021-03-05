@@ -1,0 +1,54 @@
+.timeline-line {
+    .timeline-line-comment {
+        border-radius: 5px;
+        min-height: 50px;
+        width: 36vw;
+        padding: 15px;
+        position: relative;
+        margin-left: 32%;
+        overflow-wrap: break-word;
+
+        &::before {
+            content: "";
+            position: absolute;
+            width: 1px;
+            background-color: #CECECE;
+            top: -20px;
+            bottom: -20px;
+            left: -7.5%;
+        }
+
+        p {
+            margin: 0 !important;
+        }
+    }
+
+    .timeline-line-title {
+        padding: 10px 30px;
+        position: relative;
+        background-color: inherit;
+        width: 28%;
+    }
+
+    .timeline-line-marker {
+        display: inline-block;
+        padding: 10px 40px 10px 0;
+        position: relative;
+        background-color: inherit;
+        width: 28%;
+        text-align: right;
+    }
+
+    .timeline-line-marker::after {
+        content: '';
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        right: -17px;
+        background-color: #1E1F44;
+        border: 3px solid white;
+        border-radius: 50%;
+        z-index: 1;
+        top: -3px;
+    }
+}
