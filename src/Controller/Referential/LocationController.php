@@ -48,6 +48,7 @@ class LocationController extends AbstractController {
                 "id" => $location->getId(),
                 "type" => $location->isKiosk() ? "Borne" : "Emplacement",
                 "name" => $location->getName(),
+                "client_name" => $location->getClient() ? $location->getClient()->getName() : '',
                 "active" => $location->isActive() ? "Oui" : "Non",
                 "client" => FormatHelper::named($location->getClient()),
                 "boxes" => $location->getBoxes()->count(),
