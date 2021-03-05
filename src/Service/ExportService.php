@@ -59,6 +59,11 @@ class ExportService {
         "Actif"
     ];
 
+    public const ROLE_HEADER = [
+        "Nom",
+        "Actif",
+    ];
+
     public const QUALITY_HEADER = [
         "Nom",
         "Actif",
