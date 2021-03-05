@@ -97,7 +97,8 @@ class BoxController extends AbstractController {
                 ->setClient($owner)
                 ->setQuality($quality)
                 ->setState($content->state ?? null)
-                ->setComment($content->comment ?? null);
+                ->setComment($content->comment ?? null)
+                ->setUser($this->getUser());
 
             $box->setNumber($content->number)
                 ->setType($type)
@@ -167,7 +168,8 @@ class BoxController extends AbstractController {
                 ->setClient($owner)
                 ->setQuality($quality)
                 ->setState($content->state ?? null)
-                ->setComment($content->comment ?? null);
+                ->setComment($content->comment ?? null)
+                ->setUser($this->getUser());
 
             $box->setNumber($content->number)
                 ->setType($type)
