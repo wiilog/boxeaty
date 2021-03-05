@@ -71,9 +71,6 @@ class BoxController extends AbstractController {
     /**
      * @Route("/nouveau", name="box_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
-     * @param Request $request
-     * @param EntityManagerInterface $manager
-     * @return Response
      */
     public function new(Request $request,
                         EntityManagerInterface $manager): Response {
@@ -125,9 +122,6 @@ class BoxController extends AbstractController {
     /**
      * @Route("/voir/{box}", name="box_show", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
-     * @param EntityManagerInterface $manager
-     * @param Box $box
-     * @return Response
      */
     public function show(EntityManagerInterface $manager,
                          Box $box): Response {
@@ -141,8 +135,6 @@ class BoxController extends AbstractController {
     /**
      * @Route("/modifier/template/{box}", name="box_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
-     * @param Box $box
-     * @return Response
      */
     public function editTemplate(Box $box): Response {
         return $this->json([
@@ -156,10 +148,6 @@ class BoxController extends AbstractController {
     /**
      * @Route("/modifier/{box}", name="box_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
-     * @param Request $request
-     * @param EntityManagerInterface $manager
-     * @param Box $box
-     * @return Response
      */
     public function edit(Request $request,
                          EntityManagerInterface $manager,
@@ -167,10 +155,6 @@ class BoxController extends AbstractController {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
-        $owner = isset($content->owner) ? $manager->getRepository(Client::class)->find($content->owner) : null;
-        $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
-        $type = isset($content->type) ? $manager->getRepository(BoxType::class)->find($content->type) : null;
         $existing = $manager->getRepository(Box::class)->findOneBy(["number" => $content->number]);
 
         if ($existing !== null && $existing !== $box) {

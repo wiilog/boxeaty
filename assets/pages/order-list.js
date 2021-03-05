@@ -21,8 +21,6 @@ $(document).ready(() => {
         success: () => window.location.reload(),
     });
 
-    $(`.new-box`).click(() => newBoxModal.open());
-
     const table = initDatatable(`#table-orders`, {
         ajax: AJAX.route(`POST`, `orders_api`),
         columns: [
