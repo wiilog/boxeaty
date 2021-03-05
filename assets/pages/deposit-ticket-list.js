@@ -5,6 +5,16 @@ import Modal from "../modal";
 import AJAX from "../ajax";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
 
+function randomString(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const charactersLength = characters.length;
+    for(let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
 $(document).ready(() => {
     const newDepositTicketModal = Modal.static(`#modal-new-deposit-ticket`, {
         ajax: AJAX.route(`POST`, `deposit_ticket_new`),
@@ -16,7 +26,10 @@ $(document).ready(() => {
         table: `#table-deposit-tickets`,
     });
 
-    $(`.new-deposit-ticket`).click(() => newDepositTicketModal.open());
+    $(`.new-deposit-ticket`).click(() => {
+        newDepositTicketModal.elem().find(`[name="number"]`).val(randomString(5))
+        newDepositTicketModal.open()
+    });
 
     const table = initDatatable(`#table-deposit-tickets`, {
         ajax: AJAX.route(`POST`, `deposit_tickets_api`),

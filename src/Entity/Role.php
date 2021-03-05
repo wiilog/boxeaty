@@ -23,25 +23,14 @@ class Role {
     public const MANAGE_IMPORTS = "MANAGE_IMPORTS";
 
     public const MANAGE_CLIENTS = "MANAGE_CLIENTS";
-    public const DEACTIVATE_CLIENT = "DEACTIVATE_CLIENT";
-    public const DELETE_CLIENT = "DELETE_CLIENT";
     public const MANAGE_LOCATIONS = "MANAGE_LOCATIONS";
     public const MANAGE_GROUPS = "MANAGE_GROUPS";
-    public const MANAGE_KIOSKS = "MANAGE_KIOSKS";
     public const MANAGE_BOX_TYPES = "MANAGE_BOX_TYPES";
 
-    public const CREATE_BOX = "CREATE_BOX";
-    public const EDIT_BOX = "EDIT_BOX";
-    public const DEACTIVATE_BOX = "DEACTIVATE_BOX";
-    public const IMPORT_BOX = "IMPORT_BOX";
-    public const EXPORT_BOX = "EXPORT_BOX";
-    public const CHECKOUT = "CHECKOUT";
+    public const MANAGE_BOXES = "MANAGE_BOXES";
     public const MANAGE_MOVEMENTS = "MANAGE_MOVEMENTS";
-    public const DELETE_MOVEMENT = "DELETE_MOVEMENT";
     public const MANAGE_DEPOSIT_TICKETS = "MANAGE_DEPOSIT_TICKETS";
-    public const DELETE_DEPOSIT_TICKET = "DELETE_DEPOSIT_TICKET";
-    public const MANAGE_BOXES = "MANAGE_BOX";
-    public const DELETE_BOX = "DELETE_BOX";
+    public const MANAGE_ORDERS = "MANAGE_ORDERS";
 
     use Active;
 

@@ -22,6 +22,8 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ApiController extends AbstractController {
 
+    private const BOX_CAPACITY = 6;
+
     /**
      * @Route("/ping", name="api_ping")
      */
@@ -39,7 +41,7 @@ class ApiController extends AbstractController {
             ->map(fn(Location $kiosk) => [
                 "id" => $kiosk->getId(),
                 "name" => $kiosk->getName(),
-                "capacity" => 6,
+                "capacity" => self::BOX_CAPACITY,
                 "client" => null,
                 "boxes" => Stream::from($kiosk->getBoxes())
                     ->map(fn(Box $box) => [
@@ -89,7 +91,7 @@ class ApiController extends AbstractController {
                 "kiosk" => [
                     "id" => $kiosk->getId(),
                     "name" => $kiosk->getName(),
-                    "capacity" => 10,
+                    "capacity" => self::BOX_CAPACITY,
                     "client" => null,
                     "boxes" => Stream::from($kiosk->getBoxes())
                         ->map(fn(Box $box) => [
@@ -108,13 +110,13 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/kiosks/empty", name="api_empty_kiosk")
+     * @Route("/kiosks/empty", name="api_empty_kiosk", options={"expose": true})
      */
     public function emptyKiosk(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
         $deliverer = $manager->getRepository(Location::class)->findDeliverer();
-        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
+        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk ?? $request->request->get("id"));
 
         foreach ($kiosk->getBoxes() as $box) {
             $movement = (new TrackingMovement())
@@ -150,7 +152,9 @@ class ApiController extends AbstractController {
             "state" => Box::CONSUMER,
         ]);
 
-        if ($box) {
+        if ($box
+            && $box->getType()
+            && $box->getOwner()) {
             return $this->json([
                 "success" => true,
                 "box" => [
@@ -178,7 +182,9 @@ class ApiController extends AbstractController {
             "state" => Box::CONSUMER,
         ]);
 
-        if ($box) {
+        if ($box
+            && $box->getType()
+            && $box->getOwner()) {
             $movement = (new TrackingMovement())
                 ->setDate(new DateTime())
                 ->setBox($box)
@@ -208,7 +214,7 @@ class ApiController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
-                "msg" => "La Box n'existe pas",
+                "msg" => "La Box n'existe pas, veuillez contacter un responsable d'établissement.",
             ]);
         }
     }

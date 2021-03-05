@@ -1,16 +1,16 @@
-<div id="modal-edit-deposit-ticket" class="modal">
-    <div class="modal-dialog modal-lg">
+<div id="modal-delete-order" class="modal delete">
+    <div class="modal-dialog">
         <div class="modal-content">
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
-            <h1>Modifier la borne</h1>
 
-            <div class="body">
-                {% include 'referential/kiosk/modal/form.html.twig' %}
-            </div>
+            <div class="delete-image"></div>
+            <h1>Voulez-vous vraiment supprimer cette commande ?</h1>
+
+            <input type="hidden" name="id" class="data">
 
             <div class="footer">
                 <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="submit" class="primary">Enregistrer</button>
+                <button type="submit" class="primary">Supprimer</button>
             </div>
         </div>
     </div>

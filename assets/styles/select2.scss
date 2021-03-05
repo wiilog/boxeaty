@@ -10,6 +10,20 @@
     width: 100% !important;
 }
 
+.select2-container:not(.select2-container--open) {
+    height: 60px;
+    overflow-x: auto;
+}
+
+.filters .select2-container:not(.select2-container--open) {
+    height: initial;
+}
+
+.select2-container--focus {
+    overflow-x: auto;
+    height: 60px;
+}
+
 .filters .select2-container {
     width: 200px !important;
 }
@@ -80,10 +94,34 @@
 }
 
 .select2-selection__choice {
-    height: 1.2rem;
     font-size: 1rem;
     line-height: 1.2rem;
     margin: 0;
+    background-color: $blue-lighter !important;
+    color: white;
+    height: 27px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    border: none !important;
+
+    .select2-selection__choice__remove {
+        border: none !important;
+        padding: 5px !important;
+
+        &:hover {
+            background-color: $blue-lighter !important;
+            color: white !important;
+        }
+
+        span:hover {
+            color: white !important;
+        }
+    }
+
+    .select2-selection__choice__display {
+        padding-top: 1px;
+    }
 }
 
 .select2-selection__rendered {

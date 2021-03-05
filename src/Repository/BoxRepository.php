@@ -49,6 +49,25 @@ class BoxRepository extends EntityRepository {
             ->getArrayResult();
     }
 
+    public function getAvailableForSelect(?string $search, ?User $user) {
+        $qb = $this->createQueryBuilder("box");
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $qb->join("box.owner", "owner")
+                ->andWhere("owner.group IN (:groups)")
+                ->setParameter("groups", $user->getGroups());
+        }
+
+        return $qb->select("box.id AS id, box.number AS text, type.price AS price")
+            ->join("box.type", "type")
+            ->andWhere("box.number LIKE :search")
+            ->andWhere("box.state = '" . Box::AVAILABLE . "'")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
     public function findForDatatable(array $params, ?User $user): array {
         $search = $params["search"]["value"] ?? null;
 
@@ -58,11 +77,11 @@ class BoxRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "box");
 
         if ($search) {
-            $qb->join("box.location", "search_location")
-                ->join("box.owner", "search_owner")
-                ->join("box.quality", "search_quality")
-                ->join("box.type", "search_type")
-                ->where($qb->expr()->orX(
+            $qb->leftJoin("box.location", "search_location")
+                ->leftJoin("box.owner", "search_owner")
+                ->leftJoin("box.quality", "search_quality")
+                ->leftJoin("box.type", "search_type")
+                ->andWhere($qb->expr()->orX(
                     "box.number LIKE :search",
                     "search_location.name LIKE :search",
                     "search_owner.name LIKE :search",
@@ -78,6 +97,10 @@ class BoxRepository extends EntityRepository {
                     $qb->leftJoin("box.owner", "filter_client")
                         ->andWhere("filter_client.group = :filter_group")
                         ->setParameter("filter_group", $value);
+                    break;
+                case("client"):
+                    $qb->andWhere("box.owner = :filter_owner")
+                        ->setParameter("filter_owner", $value);
                     break;
                 default:
                     $qb->andWhere("box.$name = :filter_$name")

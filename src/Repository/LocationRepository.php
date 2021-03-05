@@ -15,21 +15,21 @@ use Doctrine\ORM\EntityRepository;
  */
 class LocationRepository extends EntityRepository {
 
-    public function iterateAllLocations() {
+    public function iterateAll() {
         return $this->createQueryBuilder("location")
-            ->select("location.name AS name")
+            ->select("IF(location.kiosk = 0, 'Emplacement', 'Borne') AS type")
+            ->addSelect("location.name AS name")
+            ->addSelect("client.name AS client_name")
             ->addSelect("location.active AS active")
-            ->andWhere("location.kiosk = 0")
+            ->leftJoin("location.client", "client")
             ->getQuery()
             ->toIterable();
     }
 
-    public function findLocationsForDatatable(array $params, ?User $user): array {
+    public function findForDatatable(array $params, ?User $user): array {
         $search = $params["search"]["value"] ?? null;
 
-        $qb = $this->createQueryBuilder("location")
-            ->where("location.kiosk = 0");
-
+        $qb = $this->createQueryBuilder("location");
         QueryHelper::withCurrentGroup($qb, "location.client.group", $user);
 
         $total = QueryHelper::count($qb, "location");
@@ -66,55 +66,6 @@ class LocationRepository extends EntityRepository {
             ->setParameter("search", "%$search%")
             ->getQuery()
             ->getArrayResult();
-    }
-
-    public function iterateAllKiosks() {
-        return $this->createQueryBuilder("kiosk")
-            ->select("kiosk.name AS name")
-            ->addSelect("kiosk.active AS active")
-            ->addSelect("join_client.name AS client")
-            ->join("kiosk.client", "join_client")
-            ->where("kiosk.kiosk = 1")
-            ->getQuery()
-            ->toIterable();
-    }
-
-    public function findKiosksForDatatable(array $params, ?User $user): array {
-        $search = $params["search"]["value"] ?? null;
-
-        $qb = $this->createQueryBuilder("kiosk")
-            ->where("kiosk.kiosk = 1");
-
-        QueryHelper::withCurrentGroup($qb, "kiosk.client.group", $user);
-
-        $total = QueryHelper::count($qb, "kiosk");
-
-        if ($search) {
-            $qb->andWhere("kiosk.name LIKE :search OR search_client.name LIKE :search")
-                ->join("kiosk.client", "search_client")
-                ->setParameter("search", "%$search%");
-        }
-
-        foreach ($params["order"] ?? [] as $order) {
-            $column = $params["columns"][$order["column"]]["data"];
-            if ($column === "client") {
-                $qb->join("kiosk.client", "order_client")
-                    ->addOrderBy("order_client.name", $order["dir"]);
-            } else {
-                $qb->addOrderBy("kiosk.$column", $order["dir"]);
-            }
-        }
-
-        $filtered = QueryHelper::count($qb, "kiosk");
-
-        $qb->setFirstResult($params["start"])
-            ->setMaxResults($params["length"]);
-
-        return [
-            "data" => $qb->getQuery()->getResult(),
-            "total" => $total,
-            "filtered" => $filtered,
-        ];
     }
 
     public function getKiosksForSelect(?string $search) {

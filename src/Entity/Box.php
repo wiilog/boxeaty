@@ -26,6 +26,16 @@ class Box {
         self::OUT => "Sorti",
     ];
 
+    public const LINKED_COLORS = [
+        self::AVAILABLE => "success",
+        self::UNAVAILABLE => "danger",
+        self::CONSUMER => "primary",
+        self::CLIENT => "warning",
+        self::OUT => "secondary",
+    ];
+
+    public const DEFAULT_COLOR = 'light';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -44,25 +54,22 @@ class Box {
     private ?Location $location = null;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private ?int $state = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Quality::class, inversedBy="boxes")
-     * @ORM\JoinColumn(nullable=false)
      */
     private ?Quality $quality = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="boxes")
-     * @ORM\JoinColumn(nullable=false)
      */
     private ?Client $owner = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=BoxType::class, inversedBy="boxes")
-     * @ORM\JoinColumn(nullable=false)
      */
     private ?BoxType $type = null;
 
@@ -72,7 +79,12 @@ class Box {
     private ?string $comment = null;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", orphanRemoval=true)
+     */
+    private Collection $trackingMovements;
+
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
      */
     private ?bool $canGenerateDepositTicket = null;
 
@@ -82,12 +94,13 @@ class Box {
     private ?int $uses = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\ManyToMany(targetEntity=Order::class, mappedBy="boxes")
      */
-    private Collection $trackingMovements;
+    private $orders;
 
     public function __construct() {
         $this->trackingMovements = new ArrayCollection();
+        $this->orders = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -137,27 +150,27 @@ class Box {
         return $this->state;
     }
 
-    public function setState(int $state): self {
+    public function setState(?int $state): self {
         $this->state = $state;
 
         return $this;
     }
 
-    public function getQuality(): ?quality {
+    public function getQuality(): ?Quality {
         return $this->quality;
     }
 
-    public function setQuality(?quality $quality): self {
+    public function setQuality(?Quality $quality): self {
         $this->quality = $quality;
 
         return $this;
     }
 
-    public function getOwner(): ?client {
+    public function getOwner(): ?Client {
         return $this->owner;
     }
 
-    public function setOwner(?client $owner): self {
+    public function setOwner(?Client $owner): self {
         $this->owner = $owner;
 
         return $this;
@@ -207,6 +220,33 @@ class Box {
             if ($trackingMovement->getBox() === $this) {
                 $trackingMovement->setBox(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Order[]
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): self
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders[] = $order;
+            $order->addBox($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): self
+    {
+        if ($this->orders->removeElement($order)) {
+            $order->removeBox($this);
         }
 
         return $this;

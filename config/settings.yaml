@@ -10,25 +10,15 @@ parameters:
 
     Menu référentiel:
       App\Entity\Role::MANAGE_CLIENTS: Créer et modifier les clients
-      App\Entity\Role::DEACTIVATE_CLIENT: Désactivation client
-      App\Entity\Role::DELETE_CLIENT: Suppression client
       App\Entity\Role::MANAGE_GROUPS: Gérer les groupes
       App\Entity\Role::MANAGE_LOCATIONS: Gestion des emplacements
-      App\Entity\Role::MANAGE_KIOSKS: Créer et modifier des bornes
       App\Entity\Role::MANAGE_BOX_TYPES: Créer et modifier des types de box
 
     Menu traçabilité:
-      App\Entity\Role::CREATE_BOX: Création Box
-      App\Entity\Role::EDIT_BOX: Modification Box
-      App\Entity\Role::DEACTIVATE_BOX: Désactivation Box
-      App\Entity\Role::IMPORT_BOX: Import de Box
-      App\Entity\Role::EXPORT_BOX: Export de Box
-      App\Entity\Role::CHECKOUT: Passage en caisse
-      App\Entity\Role::MANAGE_MOVEMENTS: Créer et modifier des mouvements
-      App\Entity\Role::DELETE_MOVEMENT: Suppression de mouvement
-      App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer et modifier des tickets consigne
       App\Entity\Role::MANAGE_BOXES: Créer et modifier des Box
-      App\Entity\Role::DELETE_BOX: Suppression de Box
+      App\Entity\Role::MANAGE_MOVEMENTS: Créer et modifier des mouvements
+      App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer et modifier des tickets consigne
+      App\Entity\Role::MANAGE_ORDERS: Gestion des commandes
 
 
   menu:
@@ -49,6 +39,9 @@ parameters:
         - name: Mouvements
           permission: App\Entity\Role::MANAGE_MOVEMENTS
           route: tracking_movements_list
+        - name: Commande
+          permission: App\Entity\Role::MANAGE_ORDERS
+          route: orders_list
     - name: Référentiel
       icon: address-card
       type: category
@@ -62,9 +55,6 @@ parameters:
         - name: Emplacement
           route: locations_list
           permission: App\Entity\Role::MANAGE_LOCATIONS
-        - name: Borne
-          route: kiosks_list
-          permission: App\Entity\Role::MANAGE_KIOSKS
         - name: Type de box
           route: box_types_list
           permission: App\Entity\Role::MANAGE_BOX_TYPES

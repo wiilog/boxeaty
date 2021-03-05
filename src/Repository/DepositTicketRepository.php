@@ -108,4 +108,20 @@ class DepositTicketRepository extends EntityRepository {
         ];
     }
 
+    public function getForSelect(?string $search) {
+        return $this->createQueryBuilder("deposit_ticket")
+            ->select("deposit_ticket.id AS id, deposit_ticket.number AS text, type.price AS price")
+            ->join("deposit_ticket.box", "box")
+            ->join("box.type", "type")
+            ->andWhere("deposit_ticket.number LIKE :search")
+            ->andWhere("deposit_ticket.validityDate > :now")
+            ->andWhere("deposit_ticket.state = :valid")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->setParameter("now", new \DateTime())
+            ->setParameter("valid", DepositTicket::VALID)
+            ->getQuery()
+            ->getResult();
+    }
+
 }

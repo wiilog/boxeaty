@@ -21,7 +21,9 @@ class RoleRepository extends EntityRepository {
 
         $qb = $this->createQueryBuilder("role");
         $total = QueryHelper::count($qb, "role");
-
+        $qb
+            ->andWhere("role.code NOT LIKE :no_access")
+            ->setParameter('no_access', Role::ROLE_NO_ACCESS);
         if ($search) {
             $qb->where("role.name LIKE :search")
                 ->orWhere("role.code LIKE :search")

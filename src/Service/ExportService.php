@@ -22,12 +22,13 @@ class ExportService {
     ];
 
     public const CLIENT_HEADER = [
-        "Nom du client",
+        "Nom Client",
         "Actif",
         "Adresse",
         "Contact attribué",
         "Groupe",
-        "Multi-site"
+        "Multi-site lié",
+        "Multi-site",
     ];
 
     public const GROUP_HEADER = [
@@ -36,6 +37,7 @@ class ExportService {
     ];
 
     public const LOCATION_HEADER = [
+        "Type",
         "Nom",
         "Actif",
         "Client",
@@ -43,11 +45,12 @@ class ExportService {
 
     public const MOVEMENT_HEADER = [
         "Date",
-        "Numéro de box",
+        "Emplacement",
+        "Numéro Box",
         "Qualité",
         "Etat",
         "Client",
-        "Commentaire",
+        "Utilisateur",
     ];
 
     public const BOX_TYPE_HEADER = [
@@ -69,12 +72,6 @@ class ExportService {
         "Date et heure d'utilisation de la consigne",
         "Emplacement de la consigne",
         "Etat",
-    ];
-
-    public const KIOSK_HEADER = [
-        "Nom de la borne",
-        "Actif",
-        "Client",
     ];
 
     public const BOX_HEADER = [

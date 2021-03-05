@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Box;
 use App\Entity\TrackingMovement;
 use App\Entity\User;
 use App\Helper\QueryHelper;
@@ -18,14 +19,17 @@ class TrackingMovementRepository extends EntityRepository {
     public function iterateAll() {
         return $this->createQueryBuilder("movement")
             ->select("movement.date AS date")
+            ->addSelect("location.name AS location_name")
             ->addSelect("box.number AS box_number")
             ->addSelect("quality.name AS quality_name")
             ->addSelect("movement.state AS state")
             ->addSelect("client.name AS client_name")
-            ->addSelect("movement.comment AS comment")
-            ->join("movement.box", "box")
-            ->join("movement.quality", "quality")
-            ->join("movement.client", "client")
+            ->addSelect("user.username AS user_username")
+            ->leftJoin("movement.location", "location")
+            ->leftJoin("movement.box", "box")
+            ->leftJoin("movement.quality", "quality")
+            ->leftJoin("movement.client", "client")
+            ->leftJoin("movement.user", "user")
             ->getQuery()
             ->toIterable();
     }
@@ -73,8 +77,8 @@ class TrackingMovementRepository extends EntityRepository {
                         ->setParameter("value", "%$value%");
                     break;
                 default:
-                    $qb->andWhere("location.$name LIKE :filter_$name")
-                        ->setParameter("filter_$name", "%$value%");
+                    $qb->andWhere("movement.$name = :filter_$name")
+                        ->setParameter("filter_$name", $value);
                     break;
             }
         }
@@ -96,4 +100,27 @@ class TrackingMovementRepository extends EntityRepository {
         ];
     }
 
+    public function findPreviousMovement($box): TrackingMovement {
+        return $this->createQueryBuilder("movement")
+            ->where("movement.box = :box")
+            ->andWhere("movement.location IS NULL")
+            ->orderBy("movement.id", "DESC")
+            ->setParameter("box", $box)
+            ->getQuery()
+            ->getSingleResult();
+    }
+
+    public function getBoxMovements(Box $box, int $start, int $length): array {
+        return $this->createQueryBuilder("tracking_movement")
+            ->select("tracking_movement.comment AS comment")
+            ->addSelect("tracking_movement.date AS date")
+            ->addSelect("tracking_movement.state AS state")
+            ->where("tracking_movement.box = :box")
+            ->addOrderBy("tracking_movement.date", "DESC")
+            ->setParameter("box", $box)
+            ->setMaxResults($length)
+            ->setFirstResult($start)
+            ->getQuery()
+            ->getResult();
+    }
 }

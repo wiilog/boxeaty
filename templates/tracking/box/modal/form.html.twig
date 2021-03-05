@@ -3,13 +3,13 @@
         <label>
             Code box
             <input type="text" name="number" class="data" placeholder="BX00001"
-                   value="{{ box.number }}" max="50" required/>
+                   value="{{ box.number }}" max="50" required {{ box.id ? 'disabled' }}/>
         </label>
     </div>
     <div class="col-6">
         <label>
             Propriété
-            <select name="owner" class="data" data-s2="client" data-placeholder="Sélectionnez un client" required>
+            <select name="owner" class="data" data-s2="client" data-placeholder="Sélectionnez un client">
                 {% if box.owner %}
                     <option value="{{ box.owner.id }}" selected>{{ box.owner.name }}</option>
                 {% endif %}
@@ -21,7 +21,7 @@
     <div class="col-md-6 col-6">
         <label>
             Qualité
-            <select name="quality" class="data" data-s2="quality" data-placeholder="Sélectionnez une qualité" required>
+            <select name="quality" class="data" data-s2="quality" data-placeholder="Sélectionnez une qualité">
                 {% if box.quality %}
                     <option value="{{ box.quality.id }}" selected>{{ box.quality.name }}</option>
                 {% endif %}
@@ -31,7 +31,7 @@
     <div class="col-6">
         <label>
             État
-            <select name="state" class="data" data-s2 data-placeholder="Sélectionnez un état" required>
+            <select name="state" class="data" data-s2 data-placeholder="Sélectionnez un état">
                 <option value="{{ constant('App\\Entity\\Box::AVAILABLE') }}"
                         {{ box.state == constant('App\\Entity\\Box::AVAILABLE') ? 'selected' }}>
                     Disponible
@@ -60,7 +60,7 @@
     <div class="col-md-6 col-6">
         <label>
             Emplacement
-            <select name="location" class="data" data-s2="anyLocation" data-placeholder="Sélectionnez un emplacement" required>
+            <select name="location" class="data" data-s2="anyLocation" data-placeholder="Sélectionnez un emplacement">
                 {% if box.location %}
                     <option value="{{ box.location.id }}" selected>{{ box.location.name }}</option>
                 {% endif %}
@@ -70,7 +70,7 @@
     <div class="col-md-6 col-6">
         <label>
             Type
-            <select name="type" class="data" data-s2="type" data-placeholder="Sélectionnez un type" required>
+            <select name="type" class="data" data-s2="type" data-placeholder="Sélectionnez un type">
                 {% if box.type %}
                     <option value="{{ box.type.id }}" selected>{{ box.type.name }}</option>
                 {% endif %}

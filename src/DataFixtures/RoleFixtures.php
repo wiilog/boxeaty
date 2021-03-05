@@ -32,22 +32,12 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
             Role::MANAGE_IMPORTS,
             Role::MANAGE_GROUPS,
             Role::MANAGE_CLIENTS,
-            Role::DEACTIVATE_CLIENT,
-            Role::DELETE_CLIENT,
             Role::MANAGE_LOCATIONS,
-            Role::CREATE_BOX,
-            Role::EDIT_BOX,
-            Role::DEACTIVATE_BOX,
-            Role::IMPORT_BOX,
-            Role::EXPORT_BOX,
-            Role::CHECKOUT,
             Role::MANAGE_MOVEMENTS,
-            Role::DELETE_MOVEMENT,
             Role::MANAGE_DEPOSIT_TICKETS,
-            Role::DELETE_DEPOSIT_TICKET,
-            Role::MANAGE_KIOSKS,
+            Role::MANAGE_BOX_TYPES,
             Role::MANAGE_BOXES,
-            Role::DELETE_BOX
+            Role::MANAGE_ORDERS
         ],
     ];
 

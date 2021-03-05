@@ -24,6 +24,7 @@ class ClientRepository extends EntityRepository {
             ->addSelect("join_contact.username AS assignedContact")
             ->addSelect("join_group.name AS group")
             ->addSelect("join_linkedMultiSite.name AS multiSite")
+            ->addSelect("client.isMultiSite AS isMultiSite")
             ->leftJoin("client.group", "join_group")
             ->leftJoin("client.linkedMultiSite", "join_linkedMultiSite")
             ->leftJoin("client.contact", "join_contact")

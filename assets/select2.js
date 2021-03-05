@@ -12,6 +12,8 @@ const ROUTES = {
     location: `ajax_select_locations`,
     type: `ajax_select_type`,
     quality: `ajax_select_quality`,
+    availableBox: `ajax_select_available_boxes`,
+    depositTicket: `ajax_select_deposit_tickets`,
 }
 
 export default class Select2 {

@@ -30,24 +30,22 @@ class TrackingMovement {
     private ?Box $box = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Location::class)
+     * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="trackingMovements")
      */
     private ?Location $location = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Quality::class)
-     * @ORM\JoinColumn(nullable=false)
      */
     private ?Quality $quality = null;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private ?int $state = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Client::class)
-     * @ORM\JoinColumn(nullable=false)
      */
     private ?Client $client = null;
 

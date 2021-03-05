@@ -59,12 +59,18 @@ class Location {
     private Collection $boxes;
 
     /**
+     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="location")
+     */
+    private Collection $trackingMovements;
+
+    /**
      * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="location")
      */
     private Collection $depositTickets;
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
+        $this->trackingMovements = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -150,6 +156,33 @@ class Location {
             // set the owning side to null (unless already changed)
             if ($box->getLocation() === $this) {
                 $box->setLocation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|TrackingMovement[]
+     */
+    public function getTrackingMovements(): Collection {
+        return $this->trackingMovements;
+    }
+
+    public function addTrackingMovement(TrackingMovement $trackingMovement): self {
+        if (!$this->trackingMovements->contains($trackingMovement)) {
+            $this->trackingMovements[] = $trackingMovement;
+            $trackingMovement->setLocation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTrackingMovement(TrackingMovement $trackingMovement): self {
+        if ($this->trackingMovements->removeElement($trackingMovement)) {
+            // set the owning side to null (unless already changed)
+            if ($trackingMovement->getLocation() === $this) {
+                $trackingMovement->setLocation(null);
             }
         }
 
