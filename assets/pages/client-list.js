@@ -59,7 +59,14 @@ $(document).ready(() => {
                 });
 
                 Modal.load(ajax, {table})
-            }
+            },
+            delete: data => {
+                const ajax = AJAX.route(`POST`, `client_delete_template`, {
+                    client: data.id
+                });
+
+                Modal.load(ajax, {table})
+            },
         }
     });
 });

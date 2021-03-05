@@ -45,7 +45,7 @@ class TrackingMovement {
     private ?int $state = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Client::class)
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="trackingMovements")
      */
     private ?Client $client = null;
 

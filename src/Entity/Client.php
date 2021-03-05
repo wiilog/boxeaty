@@ -92,6 +92,11 @@ class Client {
     private Collection $boxes;
 
     /**
+     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="client")
+     */
+    private Collection $trackingMovements;
+
+    /**
      * @ORM\ManyToMany(targetEntity=Client::class)
      * @ORM\JoinTable(name="deposit_tickets_clients")
      */
@@ -290,6 +295,33 @@ class Client {
             // set the owning side to null (unless already changed)
             if ($box->getOwner() === $this) {
                 $box->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|TrackingMovement[]
+     */
+    public function getTrackingMovements(): Collection {
+        return $this->trackingMovements;
+    }
+
+    public function addTrackingMovement(TrackingMovement $trackingMovement): self {
+        if (!$this->trackingMovements->contains($trackingMovement)) {
+            $this->trackingMovements[] = $trackingMovement;
+            $trackingMovement->setLocation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTrackingMovement(TrackingMovement $trackingMovement): self {
+        if ($this->trackingMovements->removeElement($trackingMovement)) {
+            // set the owning side to null (unless already changed)
+            if ($trackingMovement->getLocation() === $this) {
+                $trackingMovement->setLocation(null);
             }
         }
 
