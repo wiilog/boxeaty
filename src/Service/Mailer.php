@@ -21,7 +21,7 @@ class Mailer {
     private ?Address $address = null;
     private ?MailerInterface $mailer = null;
 
-    private function getMailer(): MailerInterface {
+    private function getMailer(): ?MailerInterface {
         if($this->mailer) {
             return $this->mailer;
         }
@@ -31,6 +31,10 @@ class Mailer {
         $user = $config[GlobalSetting::MAILER_USER];
         $pass = $config[GlobalSetting::MAILER_PASSWORD];
         $port = $config[GlobalSetting::MAILER_PORT];
+
+        if(!$host || !$port || !$user || !$pass) {
+            return null;
+        }
 
         $transport = Transport::fromDsn("smtp://$user:$pass@$host:$port");
 
@@ -65,6 +69,10 @@ class Mailer {
         }
 
         $mailer = $this->getMailer();
+        if(!$mailer) {
+            return;
+        }
+
         $email = (new Email())
             ->from($this->address)
             ->to(...$emails)
