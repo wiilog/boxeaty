@@ -43,6 +43,7 @@ $(document).ready(() => {
 
     const newOrderModal = Modal.static(`#modal-new-order`, {
         ajax: AJAX.route(`POST`, `order_new`),
+        table,
         submitter: function() {
             const $depositTicketContainer = $('.deposit-ticket-container');
             const $depositTicket = $depositTicketContainer.find('.deposit-ticket');
@@ -56,10 +57,11 @@ $(document).ready(() => {
                 $('select[name=box]').prop('disabled', true);
             } else {
                 newOrderModal.handleSubmit();
-                newOrderModal.close();
-                confirmationOrderModal.open();
-                table.ajax.reload();
             }
+        },
+        success: () => {
+            newOrderModal.close();
+            confirmationOrderModal.open();
         }
     });
 

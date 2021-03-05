@@ -84,6 +84,11 @@ class OrderController extends AbstractController {
         $boxes = $boxRepository->findBy(["id" => explode(",", $content->box)]);
         $depositTickets = $depositTicketRepository->findBy(["id" => explode(",", $content->depositTicket)]);
 
+        if (empty($boxes) && empty($depositTickets)) {
+            $form->addError('box', 'Au moins une Box ou un ticket consigne sont requis');
+            $form->addError('depositTicket', 'Au moins une Box ou un ticket consigne sont requis');
+        }
+
         if ($form->isValid()) {
             $order = new Order();
             $order->setDate(new DateTime());
