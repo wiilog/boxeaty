@@ -46,6 +46,11 @@ export default class Select2 {
             },
             ...config,
         });
+
+        if($element.is(`[multiple]`)) {console.log(
+            $element.siblings(`.select2-container`));
+            $element.siblings(`.select2-container`).addClass(`multiple`);
+        }
     }
 }
 

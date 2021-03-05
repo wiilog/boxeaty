@@ -7,6 +7,7 @@ use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
 use App\Entity\TrackingMovement;
+use App\Entity\User;
 use App\Helper\Stream;
 use App\Helper\StringHelper;
 use App\Service\Mailer;
@@ -142,6 +143,8 @@ class ApiController extends AbstractController {
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk ?? $request->request->get("id"));
 
         foreach ($kiosk->getBoxes() as $box) {
+            $user = $this->getUser();
+
             $movement = (new TrackingMovement())
                 ->setDate(new DateTime())
                 ->setBox($box)
@@ -150,7 +153,7 @@ class ApiController extends AbstractController {
                 ->setState(Box::UNAVAILABLE)
                 ->setLocation($deliverer)
                 ->setComment($content->comment ?? null)
-                ->setUser(null);
+                ->setUser($user instanceof User ? $user : null);
 
             $box->fromTrackingMovement($movement);
 
