@@ -21,6 +21,7 @@ $(document).ready(() => {
     const table = initDatatable(`#table-boxes`, {
         ajax: AJAX.route(`POST`, `boxes_api`),
         columns: [
+            {data: `id`, class: `d-none`},
             {data: `number`, title: `Numéro Box`},
             {data: `location`, title: `Emplacement`},
             {data: `state`, title: `Etat`},
@@ -29,7 +30,7 @@ $(document).ready(() => {
             {data: `type`, title: `Type`},
             DATATABLE_ACTIONS
         ],
-        order: [[`number`, `asc`]],
+        order: [[`id`, `desc`]],
         listeners: {
             action: data => {
                 window.location.href = Routing.generate(`box_show`, {
