@@ -16,7 +16,7 @@
                         <label>
                             Type de données
                             <select type="text" name="type" class="data" data-s2 data-placeholder="Type de données à importer" required>
-                                <option value="{{ constant('App\\Entity\\Import::TYPE_BOX') }}" selected>Box</option>
+                                <option value="{{ constant('App\\Entity\\Import::TYPE_BOX') }}">Box</option>
                             </select>
                         </label>
                     </div>
@@ -32,9 +32,10 @@
 
                         <div class="mt-3">
                             Attention : Le délimiteur est le point virgule et l'encodage UTF-8.<br>
-                            Des fichiers de modèles d'import sont disponibles. Veuillez sélectionner un type de données à importer.
+                        </div>
 
-                            <a class="primary" href="/templates/box.csv" target="_blank">Télécharger le modèle</a>
+                        <div class="row mt-3">
+                            <p class="class-12 template-link"></p>
                         </div>
                     </div>
                 </div>

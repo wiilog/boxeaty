@@ -205,7 +205,7 @@ export function clearForm($elem) {
         $(check).prop(`checked`, true);
     }
 
-    $elem.find(`.is-invalid .is-valid`).removeClass(`is-invalid is-valid`);
+    $elem.find(`.is-invalid, .is-valid`).removeClass(`is-invalid is-valid`);
     $elem.find(`.invalid-feedback`).remove();
     $elem.find(`[contenteditable="true"]`).html(``);
 }

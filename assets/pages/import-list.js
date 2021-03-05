@@ -42,6 +42,10 @@ $(document).ready(() => {
             }),
         }
     });
+
+    $('#modal-new-import').find('[name=type]').on('change', function () {
+        importTemplateChanged($(this));
+    });
 });
 
 function onSecondStepSuccess(modal) {
@@ -91,4 +95,29 @@ function onSecondStepSuccess(modal) {
 
         modifying = false;
     });
+}
+
+function importTemplateChanged($dataTypeImport = null) {
+    const $linkToTemplate = $('.template-link');
+
+    $linkToTemplate.empty();
+
+    const templateDirectory = '/templates';
+    const configDownloadLink = {
+        box: {label: 'Box', url: `${templateDirectory}/Box.csv`},
+    };
+
+    const valTypeImport = $dataTypeImport ? $dataTypeImport.val() : '';
+    if (configDownloadLink[valTypeImport]) {
+        const {url, label} = configDownloadLink[valTypeImport];
+        $linkToTemplate
+            .append(`<div class="col-12">Un fichier de modèle d\'import est disponible pour les ${label}.</div>`)
+            .append(`<div class="col-12"><a class="primary" href="${url}">Télécharger</a></div>`);
+    }
+    else if (valTypeImport === '') {
+        $linkToTemplate.append('<div class="col-12">Des fichiers de modèles d\'import sont disponibles. Veuillez sélectionner un type de données à importer.</div>');
+    }
+    else {
+        $linkToTemplate.append('<div class="col-12">Aucun modèle d\'import n\'est disponible pour ce type de données.</div>');
+    }
 }
