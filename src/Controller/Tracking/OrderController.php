@@ -75,7 +75,6 @@ class OrderController extends AbstractController {
 
             $boxPrices = Stream::from($order->getBoxes()->toArray())
                 ->reduce(function(float $carry, Box $box) {
-                    dump($box->getType() ? $box->getType()->getPrice() : 0);
                     return $carry + ($box->getType() ? $box->getType()->getPrice() : 0);
                 }, 0);
 
