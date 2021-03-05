@@ -36,6 +36,13 @@ class ExportService {
         "Actif",
     ];
 
+    public const LOCATION_HEADER = [
+        "Type",
+        "Nom",
+        "Actif",
+        "Client",
+    ];
+
     public const MOVEMENT_HEADER = [
         "Date",
         "Emplacement",
@@ -65,13 +72,6 @@ class ExportService {
         "Date et heure d'utilisation de la consigne",
         "Emplacement de la consigne",
         "Etat",
-    ];
-
-    public const LOCATION_HEADER = [
-        "Type",
-        "Nom",
-        "Actif",
-        "Client",
     ];
 
     public const BOX_HEADER = [
