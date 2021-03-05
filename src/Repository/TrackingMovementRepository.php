@@ -43,10 +43,10 @@ class TrackingMovementRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "movement");
 
         if ($search) {
-            $qb->join("movement.box", "search_box")
-                ->join("movement.client", "search_client")
-                ->join("movement.quality", "search_quality")
-                ->join("movement.user", "search_user")
+            $qb->leftJoin("movement.box", "search_box")
+                ->leftJoin("movement.client", "search_client")
+                ->leftJoin("movement.quality", "search_quality")
+                ->leftJoin("movement.user", "search_user")
                 ->andWhere($qb->expr()->orX(
                     "search_box.number LIKE :search",
                     "search_client.name LIKE :search",
@@ -68,12 +68,12 @@ class TrackingMovementRepository extends EntityRepository {
                     break;
                 case "client":
                     $qb->leftJoin("movement.client", "filter_client")
-                        ->andWhere("filter_client.name LIKE :value")
+                        ->andWhere("filter_client.id LIKE :value")
                         ->setParameter("value", "%$value%");
                     break;
                 case "user":
                     $qb->leftJoin("movement.user", "filter_user")
-                        ->andWhere("filter_user.username LIKE :value")
+                        ->andWhere("filter_user.id LIKE :value")
                         ->setParameter("value", "%$value%");
                     break;
                 default:
