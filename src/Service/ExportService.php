@@ -95,6 +95,10 @@ class ExportService {
             ->getValue(GlobalSetting::CSV_EXPORTS_ENCODING);
     }
 
+    public function getEncoding(): ?string {
+        return $this->encoding;
+    }
+
     public function export(callable $generator, string $name, ?array $headers = null): StreamedResponse {
         $response = new StreamedResponse(function() use ($generator, $headers) {
             $output = fopen("php://output", "wb");

@@ -26,7 +26,7 @@
     <div class="col-12">
         <label>
             Client
-            <select name="client" class="data" data-s2="client" data-placeholder="Sélectionnez un ou plusieurs clients" required>
+            <select name="client" class="data" data-s2="client" data-placeholder="Sélectionnez un client" required>
                 {% if location.client %}
                     <option value="{{ location.client.id }}" selected>{{ location.client.name }}</option>
                 {% endif %}

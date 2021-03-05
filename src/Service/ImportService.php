@@ -152,6 +152,10 @@ class ImportService {
         $this->data = fgetcsv($handle, 0, ";");
         $this->hasError = false;
 
+        if($this->data && $this->exportService->getEncoding() === ExportService::ENCODING_UTF8) {
+            $this->data = array_map("utf8_encode", $this->data);
+        }
+
         return $this->data !== false;
     }
 
