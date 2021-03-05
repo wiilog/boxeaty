@@ -38,9 +38,10 @@ class ExportService {
 
     public const LOCATION_HEADER = [
         "Type",
-        "Nom",
+        "Nom de l'emplacement",
+        "Nom du client",
         "Actif",
-        "Client",
+        "Description",
     ];
 
     public const MOVEMENT_HEADER = [
