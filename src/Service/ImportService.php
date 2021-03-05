@@ -12,6 +12,7 @@ use App\Entity\TrackingMovement;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class ImportService {
@@ -25,12 +26,15 @@ class ImportService {
     /** @Required */
     public ExportService $exportService;
 
+    /** @Required */
+    public Security $security;
+
     private $data = null;
     private array $trace = [];
     private ?bool $hasError = null;
     private ?Import $import = null;
 
-    public function execute(Import $import, UserInterface $user) {
+    public function execute(Import $import) {
         $this->import = $import;
         $import->setCreations(0)
             ->setUpdates(0)
@@ -98,7 +102,7 @@ class ImportService {
                     ->setLocation($location)
                     ->setClient($owner)
                     ->setComment($this->value(Import::COMMENT))
-                    ->setUser($user);
+                    ->setUser($this->security ? $this->security->getUser() : null);
 
                 $box->setType($type)
                     ->setUses(0)
