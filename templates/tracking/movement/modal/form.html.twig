@@ -48,7 +48,7 @@
     <div class="col-12">
         <label>
             Emplacement
-            <select name="location" class="data" data-s2="anyLocation" data-placeholder="Sélectionnez un emplacement">
+            <select name="location" class="data" data-s2="anyLocation" data-placeholder="Sélectionnez un emplacement" required>
                 {% if movement.location %}
                     <option value="{{ movement.location.id }}" selected>{{ movement.location.name }}</option>
                 {% endif %}
