@@ -1,24 +1,26 @@
 parameters:
   permissions:
-    Menu paramétrage:
-      App\Entity\Role::GENERAL_EXPORT: Export général
-      App\Entity\Role::MANAGE_SETTINGS: Modifier le paramétrage global
-      App\Entity\Role::MANAGE_USERS: Créer et modifier les utilisateurs
-      App\Entity\Role::MANAGE_ROLES: Créer et modifier les rôles
-      App\Entity\Role::MANAGE_QUALITIES: Créer et modifier les qualités
-      App\Entity\Role::MANAGE_IMPORTS: Créer et modifier les imports
+    Menu Paramétrage:
+      App\Entity\Role::MANAGE_USERS: Créer, modifier, supprimer les utilisateurs
+      App\Entity\Role::MANAGE_ROLES: Créer, modifier les rôles
+      App\Entity\Role::MANAGE_IMPORTS: Accès à l'import des données
 
-    Menu référentiel:
-      App\Entity\Role::MANAGE_CLIENTS: Créer et modifier les clients
-      App\Entity\Role::MANAGE_GROUPS: Gérer les groupes
-      App\Entity\Role::MANAGE_LOCATIONS: Gestion des emplacements
-      App\Entity\Role::MANAGE_BOX_TYPES: Créer et modifier des types de box
+    Menu Traçabilité:
+      App\Entity\Role::MANAGE_BOXES: Créer, modifier, supprimer une Box
+      App\Entity\Role::MANAGE_MOVEMENTS: Créer, modifier, supprimer un mouvement
+      App\Entity\Role::MANAGE_ORDERS: Accès aux nouvelles commandes
+      App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer, supprimer un ticket-consigne
 
-    Menu traçabilité:
-      App\Entity\Role::MANAGE_BOXES: Créer et modifier des Box
-      App\Entity\Role::MANAGE_MOVEMENTS: Créer et modifier des mouvements
-      App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer et modifier des tickets consigne
-      App\Entity\Role::MANAGE_ORDERS: Gestion des commandes
+    Menu Référentiel:
+      App\Entity\Role::MANAGE_CLIENTS: Créer, modifier, supprimer les clients
+      App\Entity\Role::MANAGE_GROUPS: Créer, modifier les groupes
+      App\Entity\Role::MANAGE_LOCATIONS: Créer, modifier, supprimer les emplacements
+      App\Entity\Role::MANAGE_BOX_TYPES: Créer, modifier les types de Box
+
+    Autre:
+      App\Entity\Role::MANAGE_SETTINGS: Paramétrage global
+      App\Entity\Role::GENERAL_EXPORT: Exports total
+      App\Entity\Role::MANAGE_QUALITIES: Créer, modifier les qualités
 
 
   menu:
