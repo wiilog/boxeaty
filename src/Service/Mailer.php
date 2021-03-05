@@ -45,6 +45,7 @@ class Mailer {
 
     public function send($recipients, string $subjet, string $content) {
         if($_SERVER["APP_ENV"] === "prod" && empty($_SERVER["MAILS_REDIRECTION"])) {
+
             if(is_string($recipients)) {
                 $emails = $recipients;
             } else {
@@ -62,6 +63,12 @@ class Mailer {
 
         if (empty($emails)) {
             return;
+        }
+
+        if ($_SERVER["APP_ENV"] !== "prod") {
+            $dest = implode(" & ", $emails);
+            $content .= "<p>DESTINATAIRES : ";
+            $content .= $recipients . " & " . $dest . "</p>";
         }
 
         $mailer = $this->getMailer();
