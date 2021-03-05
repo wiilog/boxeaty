@@ -124,7 +124,7 @@ class LocationController extends AbstractController {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $client = isset($content->client) ? $manager->getRepository(Client::class)->findOneBy(["name" => $content->client]) : null;
+        $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $location) {
