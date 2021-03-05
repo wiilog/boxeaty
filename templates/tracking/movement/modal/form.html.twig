@@ -2,7 +2,7 @@
     <div class="col-12">
         <label>
             Date du mouvement
-            <input type="datetime-local" name="date" class="data" placeholder="Date du mouvement" value="{{ movement.date | date('Y-m-d\\TH:i') }}" required/>
+            <input type="datetime-local" name="date" class="data" placeholder="Date du mouvement" value="{{ movement.date ? (movement.date | date('Y-m-d\\TH:i')) }}" required/>
         </label>
     </div>
     <div class="col-12">
