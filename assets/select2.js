@@ -16,6 +16,11 @@ const ROUTES = {
     depositTicket: `ajax_select_deposit_tickets`,
 }
 
+const INSTANT_SELECT_TYPES = {
+    type: true,
+    quality: true,
+}
+
 export default class Select2 {
     static init($element) {
         const type = $element.data(`s2`);
@@ -35,15 +40,14 @@ export default class Select2 {
                 dataType: `json`
             };
         }
-        const lengthMin = $element.data('min-len');
-        if (lengthMin) {
-            config.minimumInputLength = Number(lengthMin);
+        if (type && !INSTANT_SELECT_TYPES[type]) {
+            config.minimumInputLength = 1;
         }
         $element.select2({
             placeholder: $element.data(`placeholder`),
             tags: $element.is(`[data-editable]`),
             language: {
-                inputTooShort: () => 'Veuillez entrer au moins ' + lengthMin + ' caractère' + (lengthMin > 1 ? 's' : '') + '.',
+                inputTooShort: () => 'Veuillez entrer au moins 1 caractère.',
                 noResults: () => `Aucun résultat`,
                 searching: () => null,
             },
