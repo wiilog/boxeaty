@@ -90,6 +90,8 @@ class ImportService {
 
             if (!$this->hasError()) {
                 $movement = (new TrackingMovement())
+                    ->setBox($box)
+                    ->setDate(new DateTime('now'))
                     ->setState($state)
                     ->setQuality($quality)
                     ->setLocation($location)
