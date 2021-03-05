@@ -27,7 +27,7 @@ function getBoxTrackingMovements(start = 0) {
                         <div class="timeline-line">
                             <span class="timeline-line-marker"><strong>${date}</strong></span>
                             <span class="timeline-line-title ml-3">${state}</span>
-                            ${comment}
+                            <div class="timeline-line-comment alert alert-${color}">${comment || 'Aucun commentaire'}</div>
                         </div>
                     `;
                 });
