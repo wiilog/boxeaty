@@ -13,6 +13,7 @@ use App\Helper\FormatHelper;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -149,14 +150,32 @@ class LocationController extends AbstractController {
     }
 
     /**
-     * @Route("/supprimer", name="location_delete", options={"expose": true})
+     * @Route("/supprimer/template/{location}", name="location_delete_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = (object)$request->request->all();
-        $location = $manager->getRepository(Location::class)->find($content->id);
+    public function deleteTemplate(Location $location): Response {
+        return $this->json([
+            "submit" => $this->generateUrl("location_delete", ["location" => $location->getId()]),
+            "template" => $this->renderView("referential/location/modal/delete.html.twig", [
+                "location" => $location,
+            ])
+        ]);
+    }
 
-        if ($location) {
+    /**
+     * @Route("/supprimer/{location}", name="location_delete", options={"expose": true})
+     * @HasPermission(Role::MANAGE_LOCATIONS)
+     */
+    public function delete(EntityManagerInterface $manager, Location $location): Response {
+        if($location && !$location->getBoxes()->isEmpty()) {
+            $location->setActive(false);
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+                "msg" => "Emplacement <strong>{$location->getName()}</strong> désactivé avec succès"
+            ]);
+        } else if ($location) {
             $manager->remove($location);
             $manager->flush();
 
