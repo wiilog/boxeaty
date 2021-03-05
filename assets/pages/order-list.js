@@ -126,13 +126,12 @@ function scan(scanModal, $select, type, msg) {
                         return $(this).val();
                     }).toArray();
 
-                    if($select.find(`option[value='${result}']`).length === 0) {
-                        let option = new Option(result, result, true, true);
+                    if($select.find(`option[value='${idk.id}']`).length === 0) {
+                        let option = new Option(idk.text, idk.id, true, true);
                         $select.append(option);
                     }
 
-                    selectedOptions.push(result);
-                    $select.val(selectedOptions).trigger("change");
+                    selectedOptions.push(idk.id);
                     Flash.add('success', msg.success);
                 } else {
                     Flash.add('warning', msg.warning)
