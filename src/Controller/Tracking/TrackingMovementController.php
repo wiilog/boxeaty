@@ -64,6 +64,7 @@ class TrackingMovementController extends AbstractController {
                 "quality" => $movement->getQuality() ? $movement->getQuality()->getName() : "",
                 "state" => Box::NAMES[$movement->getState()] ?? "",
                 "client" => $movement->getClient() ? $movement->getClient()->getName() : "",
+                "user" => $movement->getUser() ? $movement->getUser()->getUsername() : "",
                 "actions" => $actions,
             ];
         }

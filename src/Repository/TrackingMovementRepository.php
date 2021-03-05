@@ -24,11 +24,11 @@ class TrackingMovementRepository extends EntityRepository {
             ->addSelect("quality.name AS quality_name")
             ->addSelect("movement.state AS state")
             ->addSelect("client.name AS client_name")
-            ->addSelect("movement.comment AS comment")
+            ->addSelect("user.username AS user_username")
             ->leftJoin("movement.box", "box")
             ->leftJoin("movement.quality", "quality")
             ->leftJoin("movement.client", "client")
-            ->leftJoin("movement.location", "location")
+            ->leftJoin("movement.user", "user")
             ->getQuery()
             ->toIterable();
     }

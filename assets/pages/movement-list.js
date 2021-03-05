@@ -32,6 +32,7 @@ $(document).ready(() => {
             {data: `quality`, title: `Qualité`},
             {data: `state`, title: `Etat`},
             {data: `client`, title: `Client`},
+            {data: `user`, title: `Utilisateur`},
             DATATABLE_ACTIONS,
         ],
         order: [[`date`, `desc`]],
