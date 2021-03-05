@@ -25,8 +25,7 @@ class RoleRepository extends EntityRepository {
             ->andWhere("role.code NOT LIKE :no_access")
             ->setParameter('no_access', Role::ROLE_NO_ACCESS);
         if ($search) {
-            $qb->where("role.name LIKE :search")
-                ->orWhere("role.code LIKE :search")
+            $qb->andWhere("role.name LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 
