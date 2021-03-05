@@ -3,6 +3,7 @@
 namespace App\Controller\Tracking;
 
 use App\Annotation\HasPermission;
+use App\Entity\Box;
 use App\Entity\DepositTicket;
 use App\Entity\Location;
 use App\Entity\Role;
@@ -74,7 +75,8 @@ class DepositTicketController extends AbstractController {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
+        $kiosk = $manager->getRepository(Location::class)->find($content->location);
+        $box = $manager->getRepository(Box::class)->find($content->box);
         $existing = $manager->getRepository(DepositTicket::class)->findOneBy(["number" => $content->number]);
         if ($existing) {
             $form->addError("number", "Ce ticket consigne existe déjà");
@@ -83,6 +85,7 @@ class DepositTicketController extends AbstractController {
         if ($form->isValid()) {
             $depositTicket = new DepositTicket();
             $depositTicket
+                ->setBox($box)
                 ->setCreationDate(new DateTime())
                 ->setLocation($kiosk)
                 ->setValidityDate(new DateTime("+{$kiosk->getClient()->getDepositTicketValidity()} month"))
@@ -122,7 +125,8 @@ class DepositTicketController extends AbstractController {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
+        $box = $manager->getRepository(Box::class)->find($content->box);
+        $kiosk = $manager->getRepository(Location::class)->find($content->location);
         $existing = $manager->getRepository(DepositTicket::class)->findOneBy(["number" => $content->number]);
         if ($existing !== null && $existing !== $depositTicket) {
             $form->addError("name", "Un autre ticket consigne avec ce numéro existe déjà");
@@ -130,6 +134,7 @@ class DepositTicketController extends AbstractController {
 
         if ($form->isValid()) {
             $depositTicket
+                ->setBox($box)
                 ->setLocation($kiosk)
                 ->setNumber($content->number)
                 ->setState($content->state);

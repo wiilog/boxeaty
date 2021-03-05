@@ -18,7 +18,7 @@ export default class Modal {
     config;
     files;
 
-    static static(element, config) {
+    static static(element, config = {}) {
         const modal = new Modal();
         modal.id = Math.floor(Math.random() * 1000000);
         modal.element = typeof element === `string` ? $(element) : element;

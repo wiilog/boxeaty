@@ -5,6 +5,7 @@ import Modal from "../modal";
 import AJAX from "../ajax";
 import QrScanner from "qr-scanner";
 import Flash from "../flash";
+import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
 
 const boxPrices = {};
 const depositTicketPrices = {};
@@ -14,11 +15,32 @@ $(document).ready(() => {
 
     const orderId = $('[name=order-id]').val();
     $('#modal-delete-order').find('[name=id]').val(orderId);
-    const confirmationOrderModal = Modal.static(`#modal-confirmation-order`, {
-        submitter: () => {
-            confirmationOrderModal.handleSubmit();
-            window.location.reload();
-        },
+
+    const deleteOrderModal = Modal.static(`#modal-delete-order`, {
+        ajax: AJAX.route(`POST`, `order_delete`),
+        success: () => window.location.reload(),
+    });
+
+    $(`.new-box`).click(() => newBoxModal.open());
+
+    const table = initDatatable(`#table-orders`, {
+        ajax: AJAX.route(`POST`, `orders_api`),
+        columns: [
+            {data: `boxes`, title: `Numéro(s) Box(s)`},
+            {data: `depositTickets`, title: `Ticket(s) dépose`},
+            {data: `location`, title: `Emplacement de passage en caisse`},
+            {data: `totalBoxAmount`, title: `Montant total des Box`},
+            {data: `totalDepositTicketAmount`, title: `Montant total des consignes`},
+            {data: `totalCost`, title: `Balance de passage en caisse`},
+            {data: `user`, title: `Utilisateur`},
+            {data: `client`, title: `Client`},
+            {data: `date`, title: `Date et heure de création`},
+            DATATABLE_ACTIONS
+        ],
+        order: [[`date`, `desc`]],
+        listeners: {
+            delete: data => deleteOrderModal.open(data),
+        }
     });
 
     const newOrderModal = Modal.static(`#modal-new-order`, {
@@ -36,17 +58,16 @@ $(document).ready(() => {
                 $('select[name=box]').prop('disabled', true);
             } else {
                 newOrderModal.handleSubmit();
+                newOrderModal.close();
                 confirmationOrderModal.open();
+                table.ajax.reload();
             }
         }
     });
 
-    const deleteOrderModal = Modal.static(`#modal-delete-order`, {
-        ajax: AJAX.route(`POST`, `order_delete`),
-        success: () => window.location.reload(),
-    });
-
     const scanModal = Modal.static(`#modal-scan`);
+
+    const confirmationOrderModal = Modal.static(`#modal-confirmation-order`);
 
     $(`.new-order`).click(() => {
         newOrderModal.open();
