@@ -19,14 +19,20 @@ function getBoxTrackingMovements(start = 0) {
         .json((result) => {
             if(result.success) {
                 const data = (result.data || []);
-                const historyLines = data.map(({state, color, comment, date}) => `
-                    <div class="timeline-line">
-                        <span class="timeline-line-marker"><strong>${date}</strong></span>
-                        <span class="timeline-line-title ml-3">${state}</span>
-                        <div class="timeline-line-comment alert alert-${color}">${comment || 'Aucun commentaire'}</div>
-                    </div>
-                `);
+                const historyLines = data.map(({state, color, comment, date}) => {
+                    let $comment = $(`<div class="timeline-line-comment alert alert-${color}">${comment || 'Aucun commentaire'}</div>`);
+                    $comment.find(`[data-f-id="pbf"]`).remove();
+
+                    return `
+                        <div class="timeline-line">
+                            <span class="timeline-line-marker"><strong>${date}</strong></span>
+                            <span class="timeline-line-title ml-3">${state}</span>
+                            ${comment}
+                        </div>
+                    `;
+                });
                 $historyWrapper.append(...historyLines);
+                $historyWrapper.find(`[data-f-id="pbf"]`).remove()
 
                 $showMoreWrapper.remove();
                 if(!result.isTail && data.length > 0) {
