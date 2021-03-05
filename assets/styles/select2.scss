@@ -10,6 +10,16 @@
     width: 100% !important;
 }
 
+.select2-container:not(.select2-container--open) {
+    height: 60px;
+    overflow-x: auto;
+}
+
+.select2-container--focus {
+    overflow-x: auto;
+    height: 60px;
+}
+
 .filters .select2-container {
     width: 200px !important;
 }
