@@ -135,7 +135,7 @@ class ImportController extends AbstractController {
                     "file_fields" => Stream::from($fields)
                         ->map(fn($field, $id) => [
                             "name" => $field,
-                            "value" => trim($values[$id] ?? ""),
+                            "value" => utf8_encode(trim($values[$id] ?? "")),
                             "closest" => $preAssignments[$field] ?? null,
                         ])
                         ->toArray()
