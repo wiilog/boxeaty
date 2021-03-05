@@ -19,7 +19,7 @@ parameters:
 
     Autre:
       App\Entity\Role::MANAGE_SETTINGS: Paramétrage global
-      App\Entity\Role::GENERAL_EXPORT: Exports total
+      App\Entity\Role::GENERAL_EXPORT: Export général
       App\Entity\Role::MANAGE_QUALITIES: Créer, modifier les qualités
 
 
