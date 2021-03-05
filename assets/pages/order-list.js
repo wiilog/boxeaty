@@ -134,6 +134,7 @@ function scan(scanModal, $select, type, msg) {
                     }
 
                     selectedOptions.push(idk.id);
+                    $select.val(selectedOptions).trigger("change");
                     Flash.add('success', msg.success);
                 } else {
                     Flash.add('warning', msg.warning)

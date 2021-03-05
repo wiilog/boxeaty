@@ -128,9 +128,14 @@ class OrderController extends AbstractController {
 
             $totalPrice = $boxPrices - $depositTicketPrices;
 
+            if(count($boxes) >= 1) {
+                $order->setClient($boxes[0]->getOwner());
+                $order->setLocation($boxes[0]->getLocation());
+            } else if(!$this->getUser()->getClients()->isEmpty()) {
+                $order->setClient($this->getUser()->getClients()[0]);
+            }
+
             $order->setUser($this->getUser());
-            $order->setClient($boxes[0]->getOwner());
-            $order->setLocation($boxes[0]->getLocation());
             $order->setTotalBoxAmount($boxPrices);
             $order->setTotalDepositTicketAmount($depositTicketPrices);
             $order->setTotalCost($totalPrice);
