@@ -42,13 +42,13 @@ $(document).ready(() => {
     const table = initDatatable(`#table-clients`, {
         ajax: AJAX.route(`POST`, `clients_api`),
         columns: [
-            {data: `name`, title: `Nom du client`},
+            {data: `name`, title: `Nom Client`},
             {data: `active`, title: `Actif`},
             {data: `address`, title: `Adresse`},
             {data: `contact`, title: `Contact attribué`},
             {data: `group`, title: `Groupe`},
-            {data: `multiSite`, title: `Multi-site`},
             {data: `linkedMultiSite`, title: `Multi-site lié`},
+            {data: `multiSite`, title: `Multi-site`},
             DATATABLE_ACTIONS,
         ],
         order: [[`name`, `asc`]],

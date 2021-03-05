@@ -49,8 +49,8 @@ class ClientController extends AbstractController {
                 "address" => $client->getAddress(),
                 "contact" => FormatHelper::user($client->getContact()),
                 "group" => FormatHelper::named($client->getGroup()),
-                "multiSite" => $client->isMultiSite() ? "Oui" : "Non",
                 "linkedMultiSite" => FormatHelper::named($client->getLinkedMultiSite()),
+                "multiSite" => $client->isMultiSite() ? "Oui" : "Non",
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => false
@@ -182,14 +182,15 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
-        $users = $manager->getRepository(Client::class)->iterateAll();
+        $clients = $manager->getRepository(Client::class)->iterateAll();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function($output) use ($exportService, $users) {
-            foreach ($users as $user) {
-                $exportService->putLine($output, $user);
+        return $exportService->export(function($output) use ($exportService, $clients) {
+            foreach ($clients as $client) {
+                $client["active"] = Client::NAMES[$client["active"]];
+                $exportService->putLine($output, $client);
             }
         }, "export-clients-$today.csv", ExportService::CLIENT_HEADER);
     }

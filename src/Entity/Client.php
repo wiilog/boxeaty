@@ -14,6 +14,14 @@ class Client {
 
     use Active;
 
+    const INACTIVE = 0;
+    const ACTIVE = 1;
+
+    public const NAMES = [
+        self::ACTIVE => 'actif',
+        self::INACTIVE => 'inactif'
+    ];
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
