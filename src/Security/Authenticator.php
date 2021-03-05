@@ -29,7 +29,7 @@ class Authenticator extends AbstractFormLoginAuthenticator {
     public const HOME_ROUTE = "home";
     public const ORDERS_LIST_ROUTE = "orders_list";
 
-    public const PASSWORD_ERROR = "Le mot de passe doit contenir au moins un chiffre, une lettre majuscule et une lettre minuscule";
+    public const PASSWORD_ERROR = "Le mot de passe doit contenir au moins un chiffre, une majuscule et une minuscule. Il doit faire au moins 8 caractères.";
 
     /** @Required */
     public EntityManagerInterface $entityManager;
