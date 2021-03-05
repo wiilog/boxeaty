@@ -124,4 +124,26 @@ class TrackingMovementRepository extends EntityRepository {
             ->getQuery()
             ->getResult();
     }
+
+    public function findNewerMovement(TrackingMovement $trackingMovement): ?TrackingMovement {
+        $box = $trackingMovement->getBox();
+        if ($box
+            && $trackingMovement->getId()
+            && $trackingMovement->getDate()) {
+            return $this->createQueryBuilder("tracking_movement")
+                ->where("tracking_movement.box = :box")
+                ->andWhere("tracking_movement.id != :movement")
+                ->andWhere("tracking_movement.date > :date")
+                ->addOrderBy("tracking_movement.date", "DESC")
+                ->addOrderBy("tracking_movement.id", "DESC")
+                ->setParameter("box", $box)
+                ->setParameter("movement", $trackingMovement->getId())
+                ->setParameter("date", $trackingMovement->getDate())
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
+        }
+
+        return null;
+    }
 }
