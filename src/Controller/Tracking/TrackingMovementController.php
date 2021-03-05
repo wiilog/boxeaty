@@ -105,9 +105,7 @@ class TrackingMovementController extends AbstractController {
                 ->setUser($this->getUser())
                 ->setComment($content->comment ?? null);
 
-            $box->setQuality($quality)
-                ->setState($content->state ?? null)
-                ->setOwner($client);
+            $box->fromTrackingMovement($movement);
 
             $manager->persist($movement);
             $manager->flush();

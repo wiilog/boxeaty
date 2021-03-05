@@ -41,18 +41,24 @@ export default class Select2 {
                 dataType: `json`
             };
         }
-        if (type && !INSTANT_SELECT_TYPES[type]) {
-            config.minimumInputLength = 1;
-        }
+        // if (type && !INSTANT_SELECT_TYPES[type]) {
+        //     config.minimumInputLength = 1;
+        // }
         $element.select2({
             placeholder: $element.data(`placeholder`),
-            tags: $element.is(`[data-editable]`),
+            allowClear: true,
             language: {
                 inputTooShort: () => 'Veuillez entrer au moins 1 caractère.',
                 noResults: () => `Aucun résultat`,
                 searching: () => null,
             },
             ...config,
+        });
+
+        //fixes select2 search focus bug
+        $element.on(`select2:open`, function() {
+            setTimeout(() => $('.select2-search__field').focus(), 150);
+            setTimeout(() => $('.select2-search__field').focus(), 300);
         });
 
         if($element.is(`[multiple]`)) {console.log(

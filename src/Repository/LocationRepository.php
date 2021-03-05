@@ -106,11 +106,4 @@ class LocationRepository extends EntityRepository {
             ->getSingleScalarResult();
     }
 
-    public function findDeliverer(): Location {
-        return $this->createQueryBuilder("location")
-            ->where("location.code = '" . Location::DELIVERER . "'")
-            ->getQuery()
-            ->getSingleResult();
-    }
-
 }
