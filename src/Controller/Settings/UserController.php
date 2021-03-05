@@ -29,7 +29,7 @@ class UserController extends AbstractController {
      * @HasPermission(Role::MANAGE_USERS)
      */
     public function list(EntityManagerInterface $manager): Response {
-        $roles = $manager->getRepository(Role::class)->findBy(['active' => true]);
+        $roles = $manager->getRepository(Role::class)->findBy(["active" => true]);
 
         return $this->render("settings/user/index.html.twig", [
             "new_user" => new User(),
@@ -121,7 +121,7 @@ class UserController extends AbstractController {
      * @HasPermission(Role::MANAGE_USERS)
      */
     public function editTemplate(EntityManagerInterface $manager, User $user): Response {
-        $roles = $manager->getRepository(Role::class)->findBy(['active' => true]);
+        $roles = $manager->getRepository(Role::class)->findBy(["active" => true]);
 
         return $this->json([
             "submit" => $this->generateUrl("user_edit", ["user" => $user->getId()]),

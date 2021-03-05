@@ -84,8 +84,17 @@ class LocationController extends AbstractController {
         }
 
         if ($form->isValid()) {
+            $deporte = new Location();
+            $deporte->setKiosk($content->type)
+                ->setName($content->name . "_deporte")
+                ->setActive($content->active)
+                ->setClient($client)
+                ->setDescription($content->description ?? null)
+                ->setDeposits(0);
+
             $location = new Location();
-            $location->setKiosk($content->type)
+            $location->setDeporte($deporte)
+                ->setKiosk($content->type)
                 ->setName($content->name)
                 ->setActive($content->active)
                 ->setClient($client)
@@ -93,6 +102,7 @@ class LocationController extends AbstractController {
                 ->setDeposits(0);
 
             $manager->persist($location);
+            $manager->persist($deporte);
             $manager->flush();
 
             return $this->json([
