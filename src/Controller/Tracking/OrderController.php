@@ -110,7 +110,9 @@ class OrderController extends AbstractController {
 
             foreach ($depositTickets as $depositTicket) {
                 $order->addDepositTicket($depositTicket);
-                $depositTicket->setState(DepositTicket::SPENT);
+                $depositTicket
+                    ->setState(DepositTicket::SPENT)
+                    ->setUseDate(new DateTime());
             }
 
             $depositTicketPrices = Stream::from($order->getDepositTickets())

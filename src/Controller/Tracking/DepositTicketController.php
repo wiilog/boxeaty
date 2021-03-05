@@ -92,6 +92,10 @@ class DepositTicketController extends AbstractController {
                 ->setNumber($content->number)
                 ->setState($content->state);
 
+            if ($content->state == DepositTicket::SPENT) {
+                $depositTicket->setUseDate(new DateTime());
+            }
+
             $manager->persist($depositTicket);
             $manager->flush();
 
@@ -133,11 +137,17 @@ class DepositTicketController extends AbstractController {
         }
 
         if ($form->isValid()) {
+            $oldState = $depositTicket->getState();
             $depositTicket
                 ->setBox($box)
                 ->setLocation($kiosk)
                 ->setNumber($content->number)
                 ->setState($content->state);
+
+            if ($oldState == DepositTicket::VALID
+                && $content->state == DepositTicket::SPENT) {
+                $depositTicket->setUseDate(new DateTime());
+            }
 
             $manager->flush();
 
