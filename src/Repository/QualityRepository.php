@@ -26,8 +26,13 @@ class QualityRepository extends EntityRepository
     }
 
     public function getForSelect(?string $search) {
-        return $this->createQueryBuilder("quality")
-            ->select("quality.id AS id, quality.name AS text")
+        $qb = $this->createQueryBuilder("quality");
+
+        if(!$search) {
+            $qb->addOrderBy("quality.name", "ASC");
+
+        }
+        return $qb->select("quality.id AS id, quality.name AS text")
             ->where("quality.name LIKE :search")
             ->andWhere("quality.active = 1")
             ->setMaxResults(15)
