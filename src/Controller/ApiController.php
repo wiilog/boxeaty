@@ -42,14 +42,15 @@ class ApiController extends AbstractController {
 
         $phrase = $manager->getRepository(GlobalSetting::class)->getValue(GlobalSetting::TABLET_PHRASE);
 
-        if(isset($content->id)) {
+        $client = null;
+        if (isset($content->id)) {
             $kiosk = $manager->getRepository(Location::class)->find($content->id);
-            $client = $kiosk->getClient();
-            if (!$client->isMultiSite() && $client->getLinkedMultiSite()) {
-                $client = $client->getLinkedMultiSite();
+            if ($kiosk) {
+                $client = $kiosk->getClient();
+                if ($client && !$client->isMultiSite() && $client->getLinkedMultiSite()) {
+                    $client = $client->getLinkedMultiSite();
+                }
             }
-        } else {
-            $client = null;
         }
 
         return $this->json([
