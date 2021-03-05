@@ -26,6 +26,7 @@ class GlobalSettingController extends AbstractController {
             "empty_kiosk_code" => $settings[GlobalSetting::EMPTY_KIOSK_CODE],
             "box_capacities" => explode(",", $settings[GlobalSetting::BOX_CAPACITIES]->getValue()) ?: [],
             "box_shapes" => explode(",", $settings[GlobalSetting::BOX_SHAPES]->getValue()) ?: [],
+            "tablet_phrase" =>  $settings[GlobalSetting::TABLET_PHRASE],
             "mailer" => [
                 "host" => $settings[GlobalSetting::MAILER_HOST],
                 "port" => $settings[GlobalSetting::MAILER_PORT],
@@ -42,18 +43,11 @@ class GlobalSettingController extends AbstractController {
      * @HasPermission(Role::MANAGE_SETTINGS)
      */
     public function update(Request $request, EntityManagerInterface $manager): Response {
-        $content = (object) $request->request->all();
+        $content = $request->request->all();
 
         $settings = $manager->getRepository(GlobalSetting::class)->getAll();
-        foreach ($content as $name => $value) {
-            if (isset($settings[$name])) {
-                $setting = $settings[$name];
-            } else {
-                $setting = (new GlobalSetting())->setName($name);
-                $manager->persist($setting);
-            }
-
-            $setting->setValue($value === "" ? null : $value);
+        foreach ($settings as $setting) {
+            $setting->setValue($content[$setting->getName()] ?? null ?: null);
         }
 
         $manager->flush();

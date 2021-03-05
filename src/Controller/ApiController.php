@@ -34,6 +34,29 @@ class ApiController extends AbstractController {
     }
 
     /**
+     * @Route("/config", name="api_config")
+     */
+    public function config(Request $request, EntityManagerInterface $manager): Response {
+        $content = json_decode($request->getContent());
+
+        $phrase = $manager->getRepository(GlobalSetting::class)->getValue(GlobalSetting::TABLET_PHRASE);
+
+        if(isset($content->id)) {
+            $kiosk = $manager->getRepository(Location::class)->find($content->id);
+            $client = $kiosk->getClient();
+            if (!$client->isMultiSite() && $client->getLinkedMultiSite()) {
+                $client = $client->getLinkedMultiSite();
+            }
+        } else {
+            $client = null;
+        }
+
+        return $this->json([
+            "phrase" => $phrase ?: ($client ? "{$client->getName()} s'engage avec BoxEaty<br>dans la réduction des déchets" : ""),
+        ]);
+    }
+
+    /**
      * @Route("/kiosks", name="api_kiosks")
      */
     public function kiosks(EntityManagerInterface $manager): Response {
