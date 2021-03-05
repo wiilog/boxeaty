@@ -30,7 +30,7 @@ class TrackingMovement {
     private ?Box $box = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Location::class)
+     * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="trackingMovements")
      */
     private ?Location $location = null;
 

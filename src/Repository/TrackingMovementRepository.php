@@ -25,6 +25,7 @@ class TrackingMovementRepository extends EntityRepository {
             ->addSelect("movement.state AS state")
             ->addSelect("client.name AS client_name")
             ->addSelect("user.username AS user_username")
+            ->leftJoin("movement.location", "location")
             ->leftJoin("movement.box", "box")
             ->leftJoin("movement.quality", "quality")
             ->leftJoin("movement.client", "client")

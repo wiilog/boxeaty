@@ -11,11 +11,6 @@ $(document).ready(() => {
         table: `#table-locations`,
     });
 
-    const deleteLocationModal = Modal.static(`#modal-delete-location`, {
-        ajax: AJAX.route(`POST`, `location_delete`),
-        table: `#table-locations`,
-    });
-
     const emptyLocationModal = Modal.static(`#modal-empty-location`, {
         ajax: AJAX.route(`POST`, `api_empty_kiosk`),
         table: `#table-locations`,
