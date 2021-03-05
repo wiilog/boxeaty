@@ -17,6 +17,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import "select2";
 @import "datatable";
 @import "settings";
+@import "timeline";
 
 html {
     height: 100%;
@@ -245,85 +246,6 @@ main:not(.login) {
     p {
         text-align: center;
     }
-}
-
-.box-show {
-    width: 100%;
-    margin-top: -30px;
-    padding-right: 0;
-
-    .box-group {
-        padding-right: 0 !important;
-    }
-
-    h3 {
-        font-size: 28px;
-    }
-
-    .box-details {
-        @include box();
-    }
-
-    .details {
-        height: 60vh;
-    }
-
-    .owner {
-        height: 15vh;
-        margin-bottom: 1vh;
-    }
-
-    .history {
-        height: 44vh;
-    }
-}
-
-.point {
-    display: inline-block;
-    padding: 10px 40px;
-    position: relative;
-    background-color: inherit;
-    width: 28%;
-}
-
-.point::after {
-    content: '';
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    right: -17px;
-    background-color: #1E1F44;
-    border: 3px solid white;
-    border-radius: 50%;
-    z-index: 1;
-    top: -3px;
-}
-
-.detail {
-    padding: 10px 30px;
-    position: relative;
-    background-color: inherit;
-    width: 28%;
-}
-
-.detail::before {
-    content: '';
-    position: absolute;
-    width: 1px;
-    background-color: #CECECE;
-    top: 0;
-    bottom: 0;
-    left: -7px;
-    height: 100px;
-}
-
-.comment {
-    margin-left: 250px;
-    border-radius: 5px;
-    background-color: #F4E7E9;
-    height: 50px;
-    width: 36vw;
-    padding: 15px;
 }
 
 // Card for order page
