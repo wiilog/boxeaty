@@ -19,6 +19,7 @@ const ROUTES = {
 const INSTANT_SELECT_TYPES = {
     type: true,
     quality: true,
+    group: true,
 }
 
 export default class Select2 {
