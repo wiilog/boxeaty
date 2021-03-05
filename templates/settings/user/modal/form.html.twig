@@ -34,7 +34,7 @@
         <label>
             Mot de passe
             <input type="password" name="password" class="data" autocomplete="new-password"
-                   placeholder="Mot de passe {{ user.id ? '(laisser vide pour ne pas modifer)' }}"
+                   placeholder="Mot de passe {{ user.id ? '(vide pour ne pas modifer)' }}"
                     {{ not user.id ? 'required' }}/>
         </label>
     </div>
@@ -42,7 +42,7 @@
         <label>
             Confirmer le mot de passe
             <input type="password" data-repeat="password" class="data"
-                   placeholder="Mot de passe {{ user.id ? '(laisser vide pour ne pas modifer)' }}"
+                   placeholder="Mot de passe {{ user.id ? '(vide pour ne pas modifer)' }}"
                     {{ not user.id ? 'required' }}/>
         </label>
     </div>
