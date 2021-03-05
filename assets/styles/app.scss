@@ -416,6 +416,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background: transparent;
 }
 
+.toggle input[type=radio]+label {
+    border-color: #f8f8f8;
+    color: black;
+    background-color: #F8F8F8;
+}
 ///* adjust increase/decrease button */
 //input[type="date"]::-webkit-inner-spin-button {
 //    z-index: 1;
