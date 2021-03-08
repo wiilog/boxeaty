@@ -70,14 +70,29 @@ class DepositTicketController extends AbstractController {
     /**
      * @Route("/nouveau", name="deposit_ticket_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
+     * @param Request $request
+     * @param EntityManagerInterface $manager
+     * @return Response
      */
-    public function new(Request $request, EntityManagerInterface $manager): Response {
+    public function new(Request $request,
+                        EntityManagerInterface $manager): Response {
+
         $form = Form::create();
 
+        $depositTicketRepository = $manager->getRepository(DepositTicket::class);
         $content = (object)$request->request->all();
         $kiosk = $manager->getRepository(Location::class)->find($content->location);
         $box = $manager->getRepository(Box::class)->find($content->box);
-        $existing = $manager->getRepository(DepositTicket::class)->findOneBy(["number" => $content->number]);
+        $existing = $depositTicketRepository->findOneBy(["number" => $content->number]);
+        $alreadyValidTicketOnBoxCount = $depositTicketRepository->count([
+            "box" => $box,
+            "state" => (DepositTicket::VALID)
+        ]);
+
+        if ($alreadyValidTicketOnBoxCount > 0 ) {
+            $form->addError("state","Un ticket valide existe déja pour cette boite");
+        }
+
         if ($existing) {
             $form->addError("number", "Ce ticket consigne existe déjà");
         }
