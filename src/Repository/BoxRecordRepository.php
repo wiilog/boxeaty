@@ -3,33 +3,34 @@
 namespace App\Repository;
 
 use App\Entity\Box;
-use App\Entity\TrackingMovement;
+use App\Entity\BoxRecord;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
- * @method TrackingMovement|null find($id, $lockMode = null, $lockVersion = null)
- * @method TrackingMovement|null findOneBy(array $criteria, array $orderBy = null)
- * @method TrackingMovement[]    findAll()
- * @method TrackingMovement[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method BoxRecord|null find($id, $lockMode = null, $lockVersion = null)
+ * @method BoxRecord|null findOneBy(array $criteria, array $orderBy = null)
+ * @method BoxRecord[]    findAll()
+ * @method BoxRecord[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TrackingMovementRepository extends EntityRepository {
+class BoxRecordRepository extends EntityRepository {
 
-    public function iterateAll() {
-        return $this->createQueryBuilder("movement")
-            ->select("movement.date AS date")
+    public function iterateAllTrackingMovements() {
+        return $this->createQueryBuilder("record")
+            ->select("record.date AS date")
             ->addSelect("location.name AS location_name")
             ->addSelect("box.number AS box_number")
             ->addSelect("quality.name AS quality_name")
-            ->addSelect("movement.state AS state")
+            ->addSelect("record.state AS state")
             ->addSelect("client.name AS client_name")
             ->addSelect("user.username AS user_username")
-            ->leftJoin("movement.location", "location")
-            ->leftJoin("movement.box", "box")
-            ->leftJoin("movement.quality", "quality")
-            ->leftJoin("movement.client", "client")
-            ->leftJoin("movement.user", "user")
+            ->where('record.trackingMovement = 1')
+            ->leftJoin("record.location", "location")
+            ->leftJoin("record.box", "box")
+            ->leftJoin("record.quality", "quality")
+            ->leftJoin("record.client", "client")
+            ->leftJoin("record.user", "user")
             ->getQuery()
             ->toIterable();
     }
@@ -37,16 +38,18 @@ class TrackingMovementRepository extends EntityRepository {
     public function findForDatatable(array $params, ?User $user) {
         $search = $params["search"]["value"] ?? null;
 
-        $qb = $this->createQueryBuilder("movement");
-        QueryHelper::withCurrentGroup($qb, "movement.client.group", $user);
+        $qb = $this->createQueryBuilder("record")
+            ->where('record.trackingMovement = 1');
 
-        $total = QueryHelper::count($qb, "movement");
+        QueryHelper::withCurrentGroup($qb, "record.client.group", $user);
+
+        $total = QueryHelper::count($qb, "record");
 
         if ($search) {
-            $qb->leftJoin("movement.box", "search_box")
-                ->leftJoin("movement.client", "search_client")
-                ->leftJoin("movement.quality", "search_quality")
-                ->leftJoin("movement.user", "search_user")
+            $qb->leftJoin("record.box", "search_box")
+                ->leftJoin("record.client", "search_client")
+                ->leftJoin("record.quality", "search_quality")
+                ->leftJoin("record.user", "search_user")
                 ->andWhere($qb->expr()->orX(
                     "search_box.number LIKE :search",
                     "search_client.name LIKE :search",
@@ -59,25 +62,25 @@ class TrackingMovementRepository extends EntityRepository {
         foreach ($params["filters"] as $name => $value) {
             switch ($name) {
                 case "from":
-                    $qb->andWhere("DATE(movement.date) >= :from")
+                    $qb->andWhere("DATE(record.date) >= :from")
                         ->setParameter("from", $value);
                     break;
                 case "to":
-                    $qb->andWhere("DATE(movement.date) <= :to")
+                    $qb->andWhere("DATE(record.date) <= :to")
                         ->setParameter("to", $value);
                     break;
                 case "client":
-                    $qb->leftJoin("movement.client", "filter_client")
+                    $qb->leftJoin("record.client", "filter_client")
                         ->andWhere("filter_client.id LIKE :value")
                         ->setParameter("value", "%$value%");
                     break;
                 case "user":
-                    $qb->leftJoin("movement.user", "filter_user")
+                    $qb->leftJoin("record.user", "filter_user")
                         ->andWhere("filter_user.id LIKE :value")
                         ->setParameter("value", "%$value%");
                     break;
                 default:
-                    $qb->andWhere("movement.$name = :filter_$name")
+                    $qb->andWhere("record.$name = :filter_$name")
                         ->setParameter("filter_$name", $value);
                     break;
             }
@@ -85,10 +88,10 @@ class TrackingMovementRepository extends EntityRepository {
 
         foreach ($params["order"] ?? [] as $order) {
             $column = $params["columns"][$order["column"]]["data"];
-            $qb->addOrderBy("movement.$column", $order["dir"]);
+            $qb->addOrderBy("record.$column", $order["dir"]);
         }
 
-        $filtered = QueryHelper::count($qb, "movement");
+        $filtered = QueryHelper::count($qb, "record");
 
         $qb->setFirstResult($params["start"])
             ->setMaxResults($params["length"]);
@@ -100,11 +103,12 @@ class TrackingMovementRepository extends EntityRepository {
         ];
     }
 
-    public function findPreviousMovement($box): ?TrackingMovement {
-        return $this->createQueryBuilder("movement")
-            ->where("movement.box = :box")
-            ->andWhere("movement.location IS NULL")
-            ->orderBy("movement.id", "DESC")
+    public function findPreviousTrackingMovement(Box $box): ?BoxRecord {
+        return $this->createQueryBuilder("record")
+            ->where("record.box = :box")
+            ->andWhere("record.location IS NULL")
+            ->andWhere("record.trackingMovement = 1")
+            ->orderBy("record.id", "DESC")
             ->setMaxResults(1)
             ->setParameter("box", $box)
             ->getQuery()
@@ -112,12 +116,12 @@ class TrackingMovementRepository extends EntityRepository {
     }
 
     public function getBoxMovements(Box $box, int $start, int $length): array {
-        return $this->createQueryBuilder("tracking_movement")
-            ->select("tracking_movement.comment AS comment")
-            ->addSelect("tracking_movement.date AS date")
-            ->addSelect("tracking_movement.state AS state")
-            ->where("tracking_movement.box = :box")
-            ->addOrderBy("tracking_movement.date", "DESC")
+        return $this->createQueryBuilder("record")
+            ->select("record.comment AS comment")
+            ->addSelect("record.date AS date")
+            ->addSelect("record.state AS state")
+            ->where("record.box = :box")
+            ->addOrderBy("record.date", "DESC")
             ->setParameter("box", $box)
             ->setMaxResults($length)
             ->setFirstResult($start)
@@ -125,17 +129,18 @@ class TrackingMovementRepository extends EntityRepository {
             ->getResult();
     }
 
-    public function findNewerMovement(TrackingMovement $trackingMovement): ?TrackingMovement {
+    public function findNewerTrackingMovement(BoxRecord $trackingMovement): ?BoxRecord {
         $box = $trackingMovement->getBox();
         if ($box
             && $trackingMovement->getId()
             && $trackingMovement->getDate()) {
-            return $this->createQueryBuilder("tracking_movement")
-                ->where("tracking_movement.box = :box")
-                ->andWhere("tracking_movement.id != :movement")
-                ->andWhere("tracking_movement.date > :date")
-                ->addOrderBy("tracking_movement.date", "DESC")
-                ->addOrderBy("tracking_movement.id", "DESC")
+            return $this->createQueryBuilder("record")
+                ->where("record.box = :box")
+                ->andWhere("record.id != :movement")
+                ->andWhere("record.date > :date")
+                ->andWhere("record.trackingMovement = 1")
+                ->addOrderBy("record.date", "DESC")
+                ->addOrderBy("record.id", "DESC")
                 ->setParameter("box", $box)
                 ->setParameter("movement", $trackingMovement->getId())
                 ->setParameter("date", $trackingMovement->getDate())

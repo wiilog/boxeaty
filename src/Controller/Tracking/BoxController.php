@@ -9,7 +9,7 @@ use App\Entity\Client;
 use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
-use App\Entity\TrackingMovement;
+use App\Entity\BoxRecord;
 use App\Helper\Form;
 use App\Helper\Stream;
 use App\Service\ExportService;
@@ -91,7 +91,8 @@ class BoxController extends AbstractController {
         if ($form->isValid()) {
             $box = new Box();
 
-            $movement = (new TrackingMovement())
+            $movement = (new BoxRecord())
+                ->setTrackingMovement(true)
                 ->setDate(new DateTime())
                 ->setBox($box)
                 ->setLocation($location)
@@ -105,7 +106,7 @@ class BoxController extends AbstractController {
                 ->setType($type)
                 ->setUses(0)
                 ->setCanGenerateDepositTicket(false)
-                ->fromTrackingMovement($movement);
+                ->fromRecord($movement);
 
             $manager->persist($box);
             $manager->flush();
@@ -180,7 +181,8 @@ class BoxController extends AbstractController {
                 $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
                 $type = isset($content->type) ? $manager->getRepository(BoxType::class)->find($content->type) : null;
 
-                $movement = (new TrackingMovement())
+                $movement = (new BoxRecord())
+                    ->setTrackingMovement(true)
                     ->setDate(new DateTime())
                     ->setBox($box)
                     ->setLocation($location)
@@ -191,7 +193,7 @@ class BoxController extends AbstractController {
 
                 $box->setNumber($content->number)
                     ->setType($type)
-                    ->fromTrackingMovement($movement);
+                    ->fromRecord($movement);
 
                 $manager->persist($movement);
                 $manager->flush();
@@ -267,12 +269,12 @@ class BoxController extends AbstractController {
                                          Request $request,
                                          EntityManagerInterface $manager): \Symfony\Component\HttpFoundation\JsonResponse
     {
-        $trackingMovementRepository = $manager->getRepository(TrackingMovement::class);
+        $trackingMovementRepository = $manager->getRepository(BoxRecord::class);
         $start = $request->query->getInt('start', 0);
         $length = 10;
 
         $boxMovements = $trackingMovementRepository->getBoxMovements($box, $start, $length);
-        $countBoxMovements = $box->getTrackingMovements()->count();
+        $countBoxMovements = $box->getBoxRecords()->count();
 
         return $this->json([
             'success' => true,

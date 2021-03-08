@@ -6,7 +6,7 @@ use App\Entity\Box;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
-use App\Entity\TrackingMovement;
+use App\Entity\BoxRecord;
 use App\Entity\User;
 use App\Helper\Stream;
 use App\Helper\StringHelper;
@@ -145,7 +145,8 @@ class ApiController extends AbstractController {
         foreach ($kiosk->getBoxes() as $box) {
             $user = $this->getUser();
 
-            $movement = (new TrackingMovement())
+            $movement = (new BoxRecord())
+                ->setTrackingMovement(true)
                 ->setDate(new DateTime())
                 ->setBox($box)
                 ->setClient($box->getOwner())
@@ -155,7 +156,7 @@ class ApiController extends AbstractController {
                 ->setComment($content->comment ?? null)
                 ->setUser($user instanceof User ? $user : null);
 
-            $box->fromTrackingMovement($movement);
+            $box->fromRecord($movement);
 
             $manager->persist($movement);
         }
@@ -211,7 +212,8 @@ class ApiController extends AbstractController {
         if ($box
             && $box->getType()
             && $box->getOwner()) {
-            $movement = (new TrackingMovement())
+            $movement = (new BoxRecord())
+                ->setTrackingMovement(true)
                 ->setDate(new DateTime())
                 ->setBox($box)
                 ->setLocation($kiosk)
@@ -225,7 +227,7 @@ class ApiController extends AbstractController {
 
             $box->setCanGenerateDepositTicket(true)
                 ->setUses($box->getUses() + 1)
-                ->fromTrackingMovement($movement);
+                ->fromRecord($movement);
 
             $manager->persist($movement);
             $manager->flush();

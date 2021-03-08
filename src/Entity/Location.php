@@ -62,9 +62,9 @@ class Location {
     private Collection $boxes;
 
     /**
-     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="location")
+     * @ORM\OneToMany(targetEntity=BoxRecord::class, mappedBy="location")
      */
-    private Collection $trackingMovements;
+    private Collection $boxRecords;
 
     /**
      * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="location")
@@ -73,7 +73,7 @@ class Location {
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
-        $this->trackingMovements = new ArrayCollection();
+        $this->boxRecords = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -175,26 +175,26 @@ class Location {
     }
 
     /**
-     * @return Collection|TrackingMovement[]
+     * @return Collection|BoxRecord[]
      */
-    public function getTrackingMovements(): Collection {
-        return $this->trackingMovements;
+    public function getBoxRecords(): Collection {
+        return $this->boxRecords;
     }
 
-    public function addTrackingMovement(TrackingMovement $trackingMovement): self {
-        if (!$this->trackingMovements->contains($trackingMovement)) {
-            $this->trackingMovements[] = $trackingMovement;
-            $trackingMovement->setLocation($this);
+    public function addBoxRecord(BoxRecord $boxRecord): self {
+        if (!$this->boxRecords->contains($boxRecord)) {
+            $this->boxRecords[] = $boxRecord;
+            $boxRecord->setLocation($this);
         }
 
         return $this;
     }
 
-    public function removeTrackingMovement(TrackingMovement $trackingMovement): self {
-        if ($this->trackingMovements->removeElement($trackingMovement)) {
+    public function removeBoxRecord(BoxRecord $boxRecord): self {
+        if ($this->boxRecords->removeElement($boxRecord)) {
             // set the owning side to null (unless already changed)
-            if ($trackingMovement->getLocation() === $this) {
-                $trackingMovement->setLocation(null);
+            if ($boxRecord->getLocation() === $this) {
+                $boxRecord->setLocation(null);
             }
         }
 

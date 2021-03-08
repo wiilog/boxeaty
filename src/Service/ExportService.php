@@ -142,7 +142,7 @@ class ExportService {
 
     public function createWorksheet(Spreadsheet $spreadsheet, string $name, $class, array $header, callable $transformer = null): Worksheet {
         $sheet = new Worksheet(null, $name);
-        $export = Stream::from(is_string($class) ? $this->manager->getRepository($class)->iterateAll() : $class)
+        $export = Stream::from(is_string($class) ? $this->manager->getRepository($class)->iterateAllTrackingMovements() : $class)
             ->map(function($row) use ($transformer) {
                 if($transformer) {
                     $row = $transformer($row);

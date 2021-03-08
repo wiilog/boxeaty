@@ -7,7 +7,7 @@ use App\Entity\Box;
 use App\Entity\DepositTicket;
 use App\Entity\Order;
 use App\Entity\Role;
-use App\Entity\TrackingMovement;
+use App\Entity\BoxRecord;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Helper\Stream;
@@ -95,7 +95,8 @@ class OrderController extends AbstractController {
 
             foreach ($boxes as $box) {
                 $order->addBox($box);
-                $movement = (new TrackingMovement())
+                $movement = (new BoxRecord())
+                    ->setTrackingMovement(true)
                     ->setBox($box)
                     ->setDate(new DateTime())
                     ->setState(Box::CONSUMER)
@@ -105,7 +106,7 @@ class OrderController extends AbstractController {
                     ->setUser($this->getUser());
 
                 $manager->persist($movement);
-                $box->fromTrackingMovement($movement);
+                $box->fromRecord($movement);
             }
 
             $boxPrices = Stream::from($order->getBoxes())
@@ -161,9 +162,10 @@ class OrderController extends AbstractController {
 
         if ($order) {
             foreach ($order->getBoxes() as $box) {
-                $previousMovement = $manager->getRepository(TrackingMovement::class)->findPreviousMovement($box);
+                $previousMovement = $manager->getRepository(BoxRecord::class)->findPreviousTrackingMovement($box);
 
-                $movement = (new TrackingMovement())
+                $movement = (new BoxRecord())
+                    ->setTrackingMovement(true)
                     ->setBox($box)
                     ->setDate(new DateTime())
                     ->setState(Box::AVAILABLE)
@@ -173,7 +175,7 @@ class OrderController extends AbstractController {
                     ->setUser($this->getUser());
 
                 $manager->persist($movement);
-                $box->fromTrackingMovement($movement);
+                $box->fromRecord($movement);
             }
 
             foreach ($order->getDepositTickets() as $depositTicket) {

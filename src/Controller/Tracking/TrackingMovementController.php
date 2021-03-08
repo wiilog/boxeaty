@@ -5,12 +5,10 @@ namespace App\Controller\Tracking;
 use App\Annotation\HasPermission;
 use App\Entity\Box;
 use App\Entity\Client;
-use App\Entity\Group;
 use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
-use App\Entity\TrackingMovement;
-use App\Entity\User;
+use App\Entity\BoxRecord;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -34,7 +32,7 @@ class TrackingMovementController extends AbstractController {
         $qualities = $manager->getRepository(Quality::class)->findAll();
 
         return $this->render("tracking/movement/index.html.twig", [
-            "new_movement" => new TrackingMovement(),
+            "new_movement" => new BoxRecord(),
             "qualities" => $qualities,
             "states" => Box::NAMES,
         ]);
@@ -45,7 +43,7 @@ class TrackingMovementController extends AbstractController {
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
-        $movements = $manager->getRepository(TrackingMovement::class)
+        $movements = $manager->getRepository(BoxRecord::class)
             ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $actions = $this->renderView("datatable_actions.html.twig", [
@@ -54,7 +52,7 @@ class TrackingMovementController extends AbstractController {
         ]);
 
         $data = [];
-        /** @var TrackingMovement $movement */
+        /** @var BoxRecord $movement */
         foreach ($movements["data"] as $movement) {
             $data[] = [
                 "id" => $movement->getId(),
@@ -85,7 +83,7 @@ class TrackingMovementController extends AbstractController {
         $form = Form::create();
 
         $content = (object) $request->request->all();
-        $trackingMovementRepository = $manager->getRepository(TrackingMovement::class);
+        $trackingMovementRepository = $manager->getRepository(BoxRecord::class);
 
         /** @var Box $box */
         $box = $manager->getRepository(Box::class)->find($content->box);
@@ -98,8 +96,9 @@ class TrackingMovementController extends AbstractController {
             $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
             $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
 
-            $movement = new TrackingMovement();
-            $movement->setDate(new DateTime($content->date))
+            $movement = (new BoxRecord())
+                ->setTrackingMovement(true)
+                ->setDate(new DateTime($content->date))
                 ->setBox($box)
                 ->setQuality($quality)
                 ->setState($content->state ?? null)
@@ -111,9 +110,9 @@ class TrackingMovementController extends AbstractController {
             $manager->persist($movement);
             $manager->flush();
 
-            $newerMovement = $trackingMovementRepository->findNewerMovement($movement);
+            $newerMovement = $trackingMovementRepository->findNewerTrackingMovement($movement);
             if (!$newerMovement) {
-                $box->fromTrackingMovement($movement);
+                $box->fromRecord($movement);
             }
 
             $manager->flush();
@@ -131,7 +130,7 @@ class TrackingMovementController extends AbstractController {
      * @Route("/modifier/template/{movement}", name="tracking_movement_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
-    public function editTemplate(EntityManagerInterface $manager, TrackingMovement $movement): Response {
+    public function editTemplate(EntityManagerInterface $manager, BoxRecord $movement): Response {
         $qualities = $manager->getRepository(Quality::class)->findAll();
 
         return $this->json([
@@ -148,7 +147,7 @@ class TrackingMovementController extends AbstractController {
      * @Route("/modifier/{movement}", name="tracking_movement_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
-    public function edit(Request $request, EntityManagerInterface $manager, TrackingMovement $movement): Response {
+    public function edit(Request $request, EntityManagerInterface $manager, BoxRecord $movement): Response {
         $form = Form::create();
 
         $content = (object) $request->request->all();
@@ -157,7 +156,7 @@ class TrackingMovementController extends AbstractController {
             $form->addError("box", "Cette Box n'existe pas ou a changé de numéro");
         }
 
-        $trackingMovementRepository = $manager->getRepository(TrackingMovement::class);
+        $trackingMovementRepository = $manager->getRepository(BoxRecord::class);
         $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
         $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
@@ -171,9 +170,9 @@ class TrackingMovementController extends AbstractController {
                 ->setComment($content->comment ?? null);
             $manager->flush();
 
-            $newerMovement = $trackingMovementRepository->findNewerMovement($movement);
+            $newerMovement = $trackingMovementRepository->findNewerTrackingMovement($movement);
             if (!$newerMovement) {
-                $box->fromTrackingMovement($movement);
+                $box->fromRecord($movement);
             }
 
             $manager->flush();
@@ -193,7 +192,7 @@ class TrackingMovementController extends AbstractController {
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
         $content = (object) $request->request->all();
-        $movement = $manager->getRepository(TrackingMovement::class)->find($content->id);
+        $movement = $manager->getRepository(BoxRecord::class)->find($content->id);
 
         if ($movement) {
             $manager->remove($movement);
@@ -216,7 +215,7 @@ class TrackingMovementController extends AbstractController {
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
     public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
-        $movements = $manager->getRepository(TrackingMovement::class)->iterateAll();
+        $movements = $manager->getRepository(BoxRecord::class)->iterateAllTrackingMovements();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");

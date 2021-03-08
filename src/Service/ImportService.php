@@ -8,12 +8,11 @@ use App\Entity\Client;
 use App\Entity\Import;
 use App\Entity\Location;
 use App\Entity\Quality;
-use App\Entity\TrackingMovement;
+use App\Entity\BoxRecord;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 class ImportService {
 
@@ -94,7 +93,8 @@ class ImportService {
             }
 
             if (!$this->hasError()) {
-                $movement = (new TrackingMovement())
+                $movement = (new BoxRecord())
+                    ->setTrackingMovement(true)
                     ->setBox($box)
                     ->setDate(new DateTime('now'))
                     ->setState($state)
@@ -107,7 +107,7 @@ class ImportService {
                 $box->setType($type)
                     ->setUses(0)
                     ->setCanGenerateDepositTicket(false)
-                    ->fromTrackingMovement($movement);
+                    ->fromRecord($movement);
 
                 $this->manager->persist($movement);
 
