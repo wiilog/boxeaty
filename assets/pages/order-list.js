@@ -3,15 +3,13 @@ import '../app';
 import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
-import QrScanner from "qr-scanner";
-import Flash from "../flash";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
+import Scan from "../scan";
 
 const boxPrices = {};
 const depositTicketPrices = {};
 
 $(document).ready(() => {
-    QrScanner.WORKER_PATH = '/build/vendor/qr-scanner-worker.min.js';
 
     const orderId = $('[name=order-id]').val();
     $('#modal-delete-order').find('[name=id]').val(orderId);
@@ -80,7 +78,7 @@ $(document).ready(() => {
 
     $(`.scan-box`).click(function() {
         const $modal = $(this).closest('.modal');
-        scan(scanModal, $modal.find('select[name=box]'), `boxes`, {
+        Scan.proceed(scanModal, $modal.find('select[name=box]'), `boxes`, {
             success: 'La Box a bien été ajoutée',
             warning: 'La Box n\'existe pas'
         });
@@ -88,7 +86,7 @@ $(document).ready(() => {
 
     $(`.deposit-ticket-scan`).click(function() {
         const $modal = $(this).closest('.modal');
-        scan(scanModal, $modal.find('select[name=depositTicket]'), `deposit_tickets`, {
+        Scan.proceed(scanModal, $modal.find('select[name=depositTicket]'), `deposit_tickets`, {
             success: 'Le ticket-consigne a bien été ajouté',
             warning: `Le ticket-consigne n'existe pas, a déjà été utilisé ou n'est plus valide`
         });
@@ -102,56 +100,6 @@ $(document).ready(() => {
         calculateTotalCost($('select[name=depositTicket]'));
     });
 });
-
-function scan(scanModal, $select, type, msg) {
-    if(type === `boxes`) {
-        scanModal.elem().find(`.scan-container-title`).text(`Scan de la Box`);
-    } else {
-        scanModal.elem().find(`.scan-container-title`).text(`Scan du ticket-consigne`);
-    }
-
-    scanModal.open()
-    const qrScanner = new QrScanner($('.scan-element')[0], result => {
-        if(result) {
-            const url = Routing.generate(type === `boxes` ? `ajax_select_available_boxes` : `ajax_select_deposit_tickets`);
-            AJAX.url(`GET`, url + `?term=${result}`).json(results => {
-                const idk = results.results.find(r => r.text === result);
-
-                if(idk) {
-                    if(type === `boxes`) {
-                        boxPrices[idk.text] = idk.price;
-                    } else {
-                        depositTicketPrices[idk.text] = idk.price;
-                    }
-
-                    let selectedOptions = $select.find(`option:selected`).map(function() {
-                        return $(this).val();
-                    }).toArray();
-
-                    if($select.find(`option[value='${idk.id}']`).length === 0) {
-                        let option = new Option(idk.text, idk.id, true, true);
-                        $select.append(option);
-                    }
-
-                    selectedOptions.push(idk.id);
-                    $select.val(selectedOptions).trigger("change");
-                    Flash.add('success', msg.success);
-                } else {
-                    Flash.add('warning', msg.warning)
-                }
-
-                scanModal.close();
-            });
-
-            qrScanner.destroy();
-        }
-    });
-
-    $('#modal-scan').on('hidden.bs.modal', function() {
-        qrScanner.destroy();
-    });
-    qrScanner.start();
-}
 
 function calculateTotalCost($select) {
     const $modal = $select.closest('.modal');
