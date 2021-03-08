@@ -12,10 +12,12 @@ use App\Entity\Role;
 use App\Entity\BoxRecord;
 use App\Helper\Form;
 use App\Helper\Stream;
+use App\Service\BoxRecordService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -73,6 +75,7 @@ class BoxController extends AbstractController {
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
      */
     public function new(Request $request,
+                        BoxRecordService $boxRecordService,
                         EntityManagerInterface $manager): Response {
         $form = Form::create();
 
@@ -82,6 +85,7 @@ class BoxController extends AbstractController {
         $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
         $type = isset($content->type) ? $manager->getRepository(BoxType::class)->find($content->type) : null;
         $existing = $manager->getRepository(Box::class)->findOneBy(["number" => $content->number]);
+
         if ($existing) {
             $form->addError("number", "Ce numéro de Box existe déjà");
         } else if (strlen($content->number) > 50) {
@@ -89,26 +93,28 @@ class BoxController extends AbstractController {
         }
 
         if ($form->isValid()) {
-            $box = new Box();
-
-            $movement = (new BoxRecord())
-                ->setTrackingMovement(true)
-                ->setDate(new DateTime())
-                ->setBox($box)
-                ->setLocation($location)
-                ->setClient($owner)
-                ->setQuality($quality)
-                ->setState($content->state ?? null)
-                ->setComment($content->comment ?? null)
-                ->setUser($this->getUser());
-
-            $box->setNumber($content->number)
+            $box = (new Box())
+                ->setNumber($content->number)
                 ->setType($type)
                 ->setUses(0)
                 ->setCanGenerateDepositTicket(false)
-                ->fromRecord($movement);
-
+                ->setLocation($location)
+                ->setQuality($quality)
+                ->setOwner($owner)
+                ->setState($content->state ?? null)
+                ->setComment($content->comment ?? null);
             $manager->persist($box);
+
+            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, [], $this->getUser());
+
+            if ($tracking) {
+                $manager->persist($tracking);
+            }
+
+            if ($record) {
+                $manager->persist($record);
+            }
+
             $manager->flush();
 
             return $this->json([
@@ -151,6 +157,7 @@ class BoxController extends AbstractController {
      * @HasPermission(Role::MANAGE_BOXES)
      */
     public function edit(Request $request,
+                         BoxRecordService $boxRecordService,
                          EntityManagerInterface $manager,
                          Box $box): Response {
         $form = Form::create();
@@ -163,41 +170,42 @@ class BoxController extends AbstractController {
         }
 
         if ($form->isValid()) {
-            $oldOwnerId = $box->getOwner() ? $box->getOwner()->getId() : null;
-            $oldQualityId = $box->getQuality() ? $box->getQuality()->getId() : null;
-            $oldLocationId = $box->getLocation() ? $box->getLocation()->getId() : null;
-            $oldTypeId = $box->getType() ? $box->getType()->getId() : null;
+            $oldLocation = $box->getLocation();
+            $oldState = $box->getState();
+            $oldComment = $box->getComment();
 
-            if ($content->number != $box->getNumber()
-                || $content->owner != $oldOwnerId
-                || $content->quality != $oldQualityId
-                || $content->state != $box->getState()
-                || $content->location != $oldLocationId
-                || $content->type != $oldTypeId
-                || $content->comment !== $box->getComment()) {
+            $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
+            $owner = isset($content->owner) ? $manager->getRepository(Client::class)->find($content->owner) : null;
+            $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
+            $type = isset($content->type) ? $manager->getRepository(BoxType::class)->find($content->type) : null;
 
-                $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
-                $owner = isset($content->owner) ? $manager->getRepository(Client::class)->find($content->owner) : null;
-                $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
-                $type = isset($content->type) ? $manager->getRepository(BoxType::class)->find($content->type) : null;
+            $box->setNumber($content->number)
+                ->setType($type)
+                ->setLocation($location)
+                ->setQuality($quality)
+                ->setOwner($owner)
+                ->setState($content->state ?? null)
+                ->setComment($content->comment ?? null);
 
-                $movement = (new BoxRecord())
-                    ->setTrackingMovement(true)
-                    ->setDate(new DateTime())
-                    ->setBox($box)
-                    ->setLocation($location)
-                    ->setClient($owner)
-                    ->setQuality($quality)
-                    ->setState($content->state ?? null)
-                    ->setComment($content->comment ?? null);
+            [$tracking, $record] = $boxRecordService->generateBoxRecords(
+                $box,
+                [
+                    'location' => $oldLocation,
+                    'state' => $oldState,
+                    'comment' => $oldComment,
+                ],
+                $this->getUser()
+            );
 
-                $box->setNumber($content->number)
-                    ->setType($type)
-                    ->fromRecord($movement);
-
-                $manager->persist($movement);
-                $manager->flush();
+            if ($tracking) {
+                $manager->persist($tracking);
             }
+
+            if ($record) {
+                $manager->persist($record);
+            }
+
+            $manager->flush();
 
             return $this->json([
                 "success" => true,
@@ -263,18 +271,23 @@ class BoxController extends AbstractController {
      * @param Box $box
      * @param Request $request
      * @param EntityManagerInterface $manager
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @return JsonResponse
      */
     public function getTrackingMovements(Box $box,
                                          Request $request,
-                                         EntityManagerInterface $manager): \Symfony\Component\HttpFoundation\JsonResponse
+                                         EntityManagerInterface $manager): JsonResponse
     {
         $trackingMovementRepository = $manager->getRepository(BoxRecord::class);
         $start = $request->query->getInt('start', 0);
         $length = 10;
 
-        $boxMovements = $trackingMovementRepository->getBoxMovements($box, $start, $length);
-        $countBoxMovements = $box->getBoxRecords()->count();
+        $boxMovements = $trackingMovementRepository->getBoxRecords($box, $start, $length);
+        $countBoxMovements = $trackingMovementRepository->count([
+            'box' => $box,
+            'trackingMovement' => false
+        ]);
+
+        dump($countBoxMovements);
 
         return $this->json([
             'success' => true,

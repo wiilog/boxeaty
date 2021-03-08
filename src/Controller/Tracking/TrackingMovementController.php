@@ -9,6 +9,7 @@ use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\BoxRecord;
+use App\Service\BoxRecordService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -79,7 +80,9 @@ class TrackingMovementController extends AbstractController {
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      * @throws Exception
      */
-    public function new(Request $request, EntityManagerInterface $manager): Response {
+    public function new(Request $request,
+                        BoxRecordService $boxRecordService,
+                        EntityManagerInterface $manager): Response {
         $form = Form::create();
 
         $content = (object) $request->request->all();
@@ -92,6 +95,9 @@ class TrackingMovementController extends AbstractController {
         }
 
         if ($form->isValid()) {
+            $oldState = $box->getState();
+            $oldComment = $box->getComment();
+
             $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
             $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
             $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
@@ -113,9 +119,18 @@ class TrackingMovementController extends AbstractController {
             $newerMovement = $trackingMovementRepository->findNewerTrackingMovement($movement);
             if (!$newerMovement) {
                 $box->fromRecord($movement);
+                /** @noinspection PhpUnusedLocalVariableInspection */
+                [$ignored, $record] = $boxRecordService->generateBoxRecords(
+                    $box,
+                    ['state' => $oldState, 'comment' => $oldComment],
+                    $this->getUser()
+                );
+                if ($record) {
+                    $manager->persist($record);
+                }
+                $manager->flush();
             }
 
-            $manager->flush();
 
             return $this->json([
                 "success" => true,
@@ -147,7 +162,10 @@ class TrackingMovementController extends AbstractController {
      * @Route("/modifier/{movement}", name="tracking_movement_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
-    public function edit(Request $request, EntityManagerInterface $manager, BoxRecord $movement): Response {
+    public function edit(Request $request,
+                         BoxRecordService $boxRecordService,
+                         EntityManagerInterface $manager,
+                         BoxRecord $movement): Response {
         $form = Form::create();
 
         $content = (object) $request->request->all();
@@ -162,18 +180,16 @@ class TrackingMovementController extends AbstractController {
         $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
 
         if ($form->isValid()) {
-            $movement->setDate(new DateTime($content->date))
+            $oldState = $box->getState();
+            $oldComment = $box->getComment();
+
+            $movement
+                ->setDate(new DateTime($content->date))
                 ->setQuality($quality)
                 ->setState($content->state ?? null)
                 ->setClient($client)
                 ->setLocation($location)
                 ->setComment($content->comment ?? null);
-            $manager->flush();
-
-            $newerMovement = $trackingMovementRepository->findNewerTrackingMovement($movement);
-            if (!$newerMovement) {
-                $box->fromRecord($movement);
-            }
 
             $manager->flush();
 

@@ -11,6 +11,7 @@ use App\Entity\BoxRecord;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Helper\Stream;
+use App\Service\BoxRecordService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -74,7 +75,9 @@ class OrderController extends AbstractController {
      * @Route("/nouveau", name="order_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_ORDERS)
      */
-    public function new(Request $request, EntityManagerInterface $manager): Response {
+    public function new(Request $request,
+                        BoxRecordService $boxRecordService,
+                        EntityManagerInterface $manager): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
@@ -95,18 +98,31 @@ class OrderController extends AbstractController {
 
             foreach ($boxes as $box) {
                 $order->addBox($box);
-                $movement = (new BoxRecord())
-                    ->setTrackingMovement(true)
-                    ->setBox($box)
-                    ->setDate(new DateTime())
-                    ->setState(Box::CONSUMER)
-                    ->setLocation(null)
-                    ->setQuality($box->getQuality())
-                    ->setClient($box->getOwner())
-                    ->setUser($this->getUser());
 
-                $manager->persist($movement);
-                $box->fromRecord($movement);
+                $oldLocation = $box->getLocation();
+                $oldState = $box->getState();
+                $oldComment = $box->getComment();
+
+                $box->setState(Box::CONSUMER)
+                    ->setLocation(null);
+
+                [$tracking, $record] = $boxRecordService->generateBoxRecords(
+                    $box,
+                    [
+                        'location' => $oldLocation,
+                        'state' => $oldState,
+                        'comment' => $oldComment
+                    ],
+                    $this->getUser()
+                );
+
+                if ($tracking) {
+                    $manager->persist($tracking);
+                }
+
+                if ($record) {
+                    $manager->persist($record);
+                }
             }
 
             $boxPrices = Stream::from($order->getBoxes())
@@ -156,26 +172,40 @@ class OrderController extends AbstractController {
      * @Route("/supprimer", name="order_delete", options={"expose": true})
      * @HasPermission(Role::MANAGE_ORDERS)
      */
-    public function delete(Request $request, EntityManagerInterface $manager): Response {
+    public function delete(Request $request,
+                           BoxRecordService $boxRecordService,
+                           EntityManagerInterface $manager): Response {
         $content = (object)$request->request->all();
         $order = $manager->getRepository(Order::class)->find($content->id);
 
         if ($order) {
             foreach ($order->getBoxes() as $box) {
+                $oldLocation = $box->getLocation();
+                $oldState = $box->getState();
+                $oldComment = $box->getComment();
+
                 $previousMovement = $manager->getRepository(BoxRecord::class)->findPreviousTrackingMovement($box);
 
-                $movement = (new BoxRecord())
-                    ->setTrackingMovement(true)
-                    ->setBox($box)
-                    ->setDate(new DateTime())
-                    ->setState(Box::AVAILABLE)
-                    ->setLocation($previousMovement ? $previousMovement->getLocation() : null)
-                    ->setQuality($box->getQuality())
-                    ->setClient($box->getOwner())
-                    ->setUser($this->getUser());
+                $box->setState(Box::AVAILABLE)
+                    ->setLocation($previousMovement ? $previousMovement->getLocation() : null);
 
-                $manager->persist($movement);
-                $box->fromRecord($movement);
+                [$tracking, $record] = $boxRecordService->generateBoxRecords(
+                    $box,
+                    [
+                        'location' => $oldLocation,
+                        'state' => $oldState,
+                        'comment' => $oldComment
+                    ],
+                    $this->getUser()
+                );
+
+                if ($tracking) {
+                    $manager->persist($tracking);
+                }
+
+                if ($record) {
+                    $manager->persist($record);
+                }
             }
 
             foreach ($order->getDepositTickets() as $depositTicket) {

@@ -165,4 +165,16 @@ class BoxRecord {
         return $this;
     }
 
+    public function copyBox(): self {
+        if ($this->box) {
+            $this
+                ->setLocation($this->box->getLocation())
+                ->setClient($this->box->getOwner())
+                ->setQuality($this->box->getQuality())
+                ->setState($this->box->getState())
+                ->setComment($this->box->getComment());
+        }
+        return $this;
+    }
+
 }

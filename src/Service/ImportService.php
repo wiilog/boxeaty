@@ -9,6 +9,7 @@ use App\Entity\Import;
 use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\BoxRecord;
+use App\Entity\User;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -27,6 +28,9 @@ class ImportService {
 
     /** @Required */
     public Security $security;
+
+    /** @Required */
+    public BoxRecordService $boxRecordService;
 
     private $data = null;
     private array $trace = [];
@@ -93,23 +97,26 @@ class ImportService {
             }
 
             if (!$this->hasError()) {
-                $movement = (new BoxRecord())
-                    ->setTrackingMovement(true)
-                    ->setBox($box)
-                    ->setDate(new DateTime('now'))
-                    ->setState($state)
-                    ->setQuality($quality)
-                    ->setLocation($location)
-                    ->setClient($owner)
-                    ->setComment($this->value(Import::COMMENT))
-                    ->setUser($this->security ? $this->security->getUser() : null);
-
+                /** @var User $loggedUser */
+                $loggedUser = $this->security ? $this->security->getUser() : null;
                 $box->setType($type)
                     ->setUses(0)
                     ->setCanGenerateDepositTicket(false)
-                    ->fromRecord($movement);
+                    ->setState($state)
+                    ->setLocation($location)
+                    ->setQuality($quality)
+                    ->setOwner($owner)
+                    ->setComment($this->value(Import::COMMENT));
 
-                $this->manager->persist($movement);
+                [$tracking, $record] = $this->boxRecordService->generateBoxRecords($box, [], $loggedUser);
+
+                if ($tracking) {
+                    $this->manager->persist($tracking);
+                }
+
+                if ($record) {
+                    $this->manager->persist($record);
+                }
 
                 if (!$box->getId()) {
                     $this->manager->persist($box);

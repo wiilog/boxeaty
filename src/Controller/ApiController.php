@@ -6,10 +6,10 @@ use App\Entity\Box;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
-use App\Entity\BoxRecord;
 use App\Entity\User;
 use App\Helper\Stream;
 use App\Helper\StringHelper;
+use App\Service\BoxRecordService;
 use App\Service\Mailer;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -137,28 +137,40 @@ class ApiController extends AbstractController {
     /**
      * @Route("/kiosks/empty", name="api_empty_kiosk", options={"expose": true})
      */
-    public function emptyKiosk(Request $request, EntityManagerInterface $manager): Response {
+    public function emptyKiosk(Request $request,
+                               BoxRecordService $boxRecordService,
+                               EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk ?? $request->request->get("id"));
 
         foreach ($kiosk->getBoxes() as $box) {
             $user = $this->getUser();
+            $oldLocation = $box->getLocation();
+            $oldState = $box->getState();
+            $oldComment = $box->getComment();
 
-            $movement = (new BoxRecord())
-                ->setTrackingMovement(true)
-                ->setDate(new DateTime())
-                ->setBox($box)
-                ->setClient($box->getOwner())
-                ->setQuality($box->getQuality())
-                ->setState(Box::UNAVAILABLE)
+            $box->setState(Box::UNAVAILABLE)
                 ->setLocation($kiosk->getDeporte())
-                ->setComment($content->comment ?? null)
-                ->setUser($user instanceof User ? $user : null);
+                ->setComment($content->comment ?? null);
 
-            $box->fromRecord($movement);
+            [$tracking, $record] = $boxRecordService->generateBoxRecords(
+                $box,
+                [
+                    'location' => $oldLocation,
+                    'state' => $oldState,
+                    'comment' => $oldComment
+                ],
+                $user instanceof User ? $user : null
+            );
 
-            $manager->persist($movement);
+            if ($tracking) {
+                $manager->persist($tracking);
+            }
+
+            if ($record) {
+                $manager->persist($record);
+            }
         }
 
         $manager->flush();
@@ -200,7 +212,9 @@ class ApiController extends AbstractController {
     /**
      * @Route("/box/drop", name="api_drop_box")
      */
-    public function dropBox(Request $request, EntityManagerInterface $manager): Response {
+    public function dropBox(Request $request,
+                            BoxRecordService $boxRecordService,
+                            EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
@@ -212,24 +226,37 @@ class ApiController extends AbstractController {
         if ($box
             && $box->getType()
             && $box->getOwner()) {
-            $movement = (new BoxRecord())
-                ->setTrackingMovement(true)
-                ->setDate(new DateTime())
-                ->setBox($box)
-                ->setLocation($kiosk)
-                ->setClient($box->getOwner())
-                ->setQuality($box->getQuality())
-                ->setState(Box::UNAVAILABLE)
-                ->setComment($content->comment ?? null)
-                ->setUser(null);
+            $oldLocation = $box->getLocation();
+            $oldState = $box->getState();
+            $oldComment = $box->getComment();
 
             $kiosk->setDeposits($kiosk->getDeposits() + 1);;
 
-            $box->setCanGenerateDepositTicket(true)
+            $box
+                ->setCanGenerateDepositTicket(true)
                 ->setUses($box->getUses() + 1)
-                ->fromRecord($movement);
+                ->setState(Box::UNAVAILABLE)
+                ->setLocation($kiosk)
+                ->setComment($content->comment ?? null);
 
-            $manager->persist($movement);
+            [$tracking, $record] = $boxRecordService->generateBoxRecords(
+                $box,
+                [
+                    'location' => $oldLocation,
+                    'state' => $oldState,
+                    'comment' => $oldComment
+                ],
+                null
+            );
+
+            if ($tracking) {
+                $manager->persist($tracking);
+            }
+
+            if ($record) {
+                $manager->persist($record);
+            }
+
             $manager->flush();
 
             return $this->json([

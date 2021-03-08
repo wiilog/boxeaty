@@ -106,7 +106,7 @@ class BoxRecordRepository extends EntityRepository {
     public function findPreviousTrackingMovement(Box $box): ?BoxRecord {
         return $this->createQueryBuilder("record")
             ->where("record.box = :box")
-            ->andWhere("record.location IS NULL")
+            ->andWhere("record.location IS NOT NULL")
             ->andWhere("record.trackingMovement = 1")
             ->orderBy("record.id", "DESC")
             ->setMaxResults(1)
@@ -115,13 +115,15 @@ class BoxRecordRepository extends EntityRepository {
             ->getOneOrNullResult();
     }
 
-    public function getBoxMovements(Box $box, int $start, int $length): array {
+    public function getBoxRecords(Box $box, int $start, int $length): array {
         return $this->createQueryBuilder("record")
             ->select("record.comment AS comment")
             ->addSelect("record.date AS date")
             ->addSelect("record.state AS state")
             ->where("record.box = :box")
-            ->addOrderBy("record.date", "DESC")
+            ->andWhere("record.trackingMovement = 0")
+            ->orderBy("record.date", "DESC")
+            ->addOrderBy("record.id", "DESC")
             ->setParameter("box", $box)
             ->setMaxResults($length)
             ->setFirstResult($start)
