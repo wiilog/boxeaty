@@ -23,7 +23,7 @@
     <div class="col-md-6 col-12">
         <label>
             Téléphone
-            <input type="tel" name="phoneNumber" class="data" placeholder="Numéro de téléphone" value="{{ client.phoneNumber }}" required/>
+            <input type="number" name="phoneNumber" class="data" placeholder="Numéro de téléphone" value="{{ client.phoneNumber }}" min="10" required/>
         </label>
     </div>
     <div class="col-12">
