@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="col-12 toggle">
+    <div class="col-12 toggle location-type">
         <span class="label">Type</span>
 
         <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-kiosk" name="type" class="data" value="1" {{ location.kiosk ? 'checked' }}/>
@@ -7,6 +7,13 @@
 
         <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-location" name="type" class="data" value="0" {{ not location.kiosk ? 'checked' }}/>
         <label for="{{ location.id ? 'edit' : 'new' }}-location-type-location">Emplacement</label>
+    </div>
+    <div class="col-12 kiosk-capacity {{ not location.kiosk ? 'd-none' }}">
+        <label>
+            Capacité
+            <input type="number" name="capacity" class="data" placeholder="Saisissez la capacité de la borne"
+                   value="{{ location.capacity }}" {{ location.kiosk ? 'required' }} min="1"/>
+        </label>
     </div>
     <div class="col-12">
         <label>

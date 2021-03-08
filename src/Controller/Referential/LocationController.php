@@ -51,8 +51,9 @@ class LocationController extends AbstractController {
                 "client_name" => $location->getClient() ? $location->getClient()->getName() : '',
                 "active" => $location->isActive() ? "Oui" : "Non",
                 "client" => FormatHelper::named($location->getClient()),
-                "boxes" => $location->getBoxes()->count(),
                 "description" => $location->getDescription(),
+                "boxes" => $location->getBoxes()->count(),
+                "capacity" => $location->getCapacity() ?? "",
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
@@ -77,10 +78,15 @@ class LocationController extends AbstractController {
 
         $content = (object)$request->request->all();
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
+        $capacity = isset($content->client) ? (int)$content->capacity : null;
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Un emplacement avec ce nom existe déjà");
+        }
+
+        if ($capacity < Location::MIN_KIOSK_CAPACITY) {
+            $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
 
         if ($form->isValid()) {
@@ -100,6 +106,10 @@ class LocationController extends AbstractController {
                 ->setClient($client)
                 ->setDescription($content->description ?? null)
                 ->setDeposits(0);
+
+            if((int)$content->type === 1) {
+                $location->setCapacity($capacity);
+            }
 
             $manager->persist($location);
             $manager->persist($deporte);
@@ -123,7 +133,8 @@ class LocationController extends AbstractController {
             "submit" => $this->generateUrl("location_edit", ["location" => $location->getId()]),
             "template" => $this->renderView("referential/location/modal/edit.html.twig", [
                 "location" => $location,
-            ])
+            ]),
+            "success" => true
         ]);
     }
 
@@ -136,10 +147,15 @@ class LocationController extends AbstractController {
 
         $content = (object)$request->request->all();
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
+        $capacity = isset($content->client) ? (int)$content->capacity : null;
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $location) {
             $form->addError("label", "Un autre emplacement avec ce nom existe déjà");
+        }
+
+        if ($capacity < Location::MIN_KIOSK_CAPACITY) {
+            $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
 
         if ($form->isValid()) {
@@ -148,6 +164,10 @@ class LocationController extends AbstractController {
                 ->setClient($client)
                 ->setActive($content->active)
                 ->setDescription($content->description ?? null);
+
+            if((int)$content->type === 1) {
+                $location->setCapacity($capacity);
+            }
 
             $manager->flush();
 

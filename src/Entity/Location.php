@@ -14,6 +14,8 @@ class Location {
 
     use Active;
 
+    public const MIN_KIOSK_CAPACITY = 1;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -70,6 +72,11 @@ class Location {
      * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="location")
      */
     private Collection $depositTickets;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $capacity;
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
@@ -224,6 +231,18 @@ class Location {
                 $depositTicket->setLocation(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCapacity(): ?int
+    {
+        return $this->capacity;
+    }
+
+    public function setCapacity(int $capacity): self
+    {
+        $this->capacity = $capacity;
 
         return $this;
     }

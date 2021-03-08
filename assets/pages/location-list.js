@@ -25,6 +25,7 @@ $(document).ready(() => {
             {data: `active`, title: `Actif`},
             {data: `description`, title: `Description`},
             {data: `boxes`, title: `Nombre de Box`, orderable: false},
+            {data: `capacity`, title: `Capacité`},
             DATATABLE_ACTIONS,
         ],
         order: [[`name`, `asc`]],
@@ -34,7 +35,28 @@ $(document).ready(() => {
                     location: data.id
                 });
 
-                Modal.load(ajax, {table})
+                Modal.load(ajax, {
+                    table,
+                    afterOpen: () => {
+                        $('.location-type').find('input').on('change', function () {
+                            const $kioskCapacity = $('.kiosk-capacity');
+
+                            if (parseInt($(this).val()) === 1) {
+                                $kioskCapacity.removeClass('d-none');
+                                $kioskCapacity.find('input').prop('required', true);
+                            } else {
+                                $kioskCapacity.addClass('d-none');
+                                $kioskCapacity.find('input').val('');
+                                $kioskCapacity.find('input').prop('required', false);
+                            }
+
+                            $(`#modal-new-location, #modal-edit-location`).on('hidden.bs.modal', function () {
+                                $kioskCapacity.addClass('d-none');
+                                $kioskCapacity.find('input').prop('required', false);
+                            });
+                        });
+                    }
+                })
             },
             delete: data => {
                 const ajax = AJAX.route(`POST`, `location_delete_template`, {
@@ -48,4 +70,22 @@ $(document).ready(() => {
     });
 
     $(`.new-location`).click(() => newLocationModal.open());
+
+    $('.location-type').find('input').on('change', function () {
+        const $kioskCapacity = $('.kiosk-capacity');
+
+        if (parseInt($(this).val()) === 1) {
+            $kioskCapacity.removeClass('d-none');
+            $kioskCapacity.find('input').prop('required', true);
+        } else {
+            $kioskCapacity.addClass('d-none');
+            $kioskCapacity.find('input').val('');
+            $kioskCapacity.find('input').prop('required', false);
+        }
+
+        $(`#modal-new-location, #modal-edit-location`).on('hidden.bs.modal', function () {
+            $kioskCapacity.addClass('d-none');
+            $kioskCapacity.find('input').prop('required', false);
+        });
+    });
 });
