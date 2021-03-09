@@ -76,7 +76,9 @@ class ExportService {
         "Date de validité",
         "Numéro de consigne",
         "Date et heure d'utilisation de la consigne",
+        "Montant de la consigne",
         "Emplacement de la consigne",
+        "Utilisateur en caisse",
         "Etat",
     ];
 

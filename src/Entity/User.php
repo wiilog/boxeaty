@@ -79,10 +79,16 @@ class User implements UserInterface {
      */
     private $resetTokenExpiration;
 
+    /**
+     * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="orderUser")
+     */
+    private Collection $orderDepositTickets;
+
     public function __construct() {
         $this->clients = new ArrayCollection();
         $this->trackingMovements = new ArrayCollection();
         $this->groups = new ArrayCollection();
+        $this->orderDepositTickets = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -280,6 +286,30 @@ class User implements UserInterface {
     public function setResetTokenExpiration(?\DateTimeInterface $resetTokenExpiration): self
     {
         $this->resetTokenExpiration = $resetTokenExpiration;
+
+        return $this;
+    }
+
+    public function getOrderDepositTickets(): Collection {
+        return $this->orderDepositTickets;
+    }
+
+    public function addOrderDepositTicket(DepositTicket $depositTicket): self {
+        if (!$this->orderDepositTickets->contains($depositTicket)) {
+            $this->orderDepositTickets[] = $depositTicket;
+            $depositTicket->setOrderUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderDepositTicket(DepositTicket $depositTicket): self {
+        if ($this->orderDepositTickets->removeElement($depositTicket)) {
+            // set the owning side to null (unless already changed)
+            if ($depositTicket->getOrderUser() === $this) {
+                $depositTicket->setOrderUser(null);
+            }
+        }
 
         return $this;
     }

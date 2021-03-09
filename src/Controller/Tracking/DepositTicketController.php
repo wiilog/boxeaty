@@ -43,7 +43,12 @@ class DepositTicketController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $data = [];
+
+        /** @var DepositTicket $depositTicket */
         foreach ($depositTickets["data"] as $depositTicket) {
+            $box = $depositTicket->getBox();
+            $boxType = $box ? $box->getType() : null;
+            $totalAmount = $boxType ? $boxType->getPrice() : null;
             $data[] = [
                 "id" => $depositTicket->getId(),
                 "creationDate" => FormatHelper::datetime($depositTicket->getCreationDate()),
@@ -53,6 +58,8 @@ class DepositTicketController extends AbstractController {
                 "useDate" => FormatHelper::datetime($depositTicket->getUseDate()) ?: "Inutilisé",
                 "client" => $depositTicket->getLocation() ? FormatHelper::named($depositTicket->getLocation()->getClient()) : "",
                 "state" => DepositTicket::NAMES[$depositTicket->getState()] ?? "",
+                "orderUser" => FormatHelper::user($depositTicket->getOrderUser()),
+                "depositAmount" => FormatHelper::price($totalAmount),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,

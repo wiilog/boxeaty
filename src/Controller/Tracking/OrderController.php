@@ -8,6 +8,7 @@ use App\Entity\DepositTicket;
 use App\Entity\Order;
 use App\Entity\Role;
 use App\Entity\TrackingMovement;
+use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Helper\Stream;
@@ -93,6 +94,9 @@ class OrderController extends AbstractController {
             $order = new Order();
             $order->setDate(new DateTime());
 
+            /** @var User $orderUser */
+            $orderUser = $this->getUser();
+
             foreach ($boxes as $box) {
                 $order->addBox($box);
                 $movement = (new TrackingMovement())
@@ -102,7 +106,7 @@ class OrderController extends AbstractController {
                     ->setLocation(null)
                     ->setQuality($box->getQuality())
                     ->setClient($box->getOwner())
-                    ->setUser($this->getUser());
+                    ->setUser($orderUser);
 
                 $manager->persist($movement);
                 $box->fromTrackingMovement($movement);
@@ -117,6 +121,7 @@ class OrderController extends AbstractController {
                 $order->addDepositTicket($depositTicket);
                 $depositTicket
                     ->setState(DepositTicket::SPENT)
+                    ->setOrderUser($orderUser)
                     ->setUseDate(new DateTime());
             }
 
@@ -135,7 +140,7 @@ class OrderController extends AbstractController {
                 $order->setClient($this->getUser()->getClients()[0]);
             }
 
-            $order->setUser($this->getUser());
+            $order->setUser($orderUser);
             $order->setTotalBoxAmount($boxPrices);
             $order->setTotalDepositTicketAmount($depositTicketPrices);
             $order->setTotalCost($totalPrice);
