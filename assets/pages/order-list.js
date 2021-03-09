@@ -5,6 +5,7 @@ import Modal from "../modal";
 import AJAX from "../ajax";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
 import Scan from "../scan";
+import Flash from "../flash";
 
 const boxPrices = {};
 const depositTicketPrices = {};
@@ -22,7 +23,7 @@ $(document).ready(() => {
     const table = initDatatable(`#table-orders`, {
         ajax: AJAX.route(`POST`, `orders_api`),
         columns: [
-            {data: `boxes`, title: `Numéro(s) Box(s)`},
+            {data: `boxes`, title: `Numéro(s) Box`},
             {data: `depositTickets`, title: `Ticket(s) consigne`},
             {data: `location`, title: `Emplacement`},
             {data: `totalBoxAmount`, title: `Montant total des Box`},
@@ -78,18 +79,48 @@ $(document).ready(() => {
 
     $(`.scan-box`).click(function() {
         const $modal = $(this).closest('.modal');
-        Scan.proceed(scanModal, $modal.find('select[name=box]'), `boxes`, {
-            success: 'La Box a bien été ajoutée',
-            warning: 'La Box n\'existe pas'
+
+        Scan.proceed(scanModal, {
+            title: `Scan de la Box`,
+            onScan: (result) => (
+                getAvailableElementFromBarcode(
+                    result,
+                    {
+                        $select: $modal.find('select[name=box]'),
+                        routeName: `ajax_select_available_boxes`,
+                        successMessage: 'La Box a bien été ajoutée',
+                        warningMessage: 'La Box n\'existe pas',
+                        updatePrices: (element) => {
+                            boxPrices[element.text] = element.price;
+                        }
+                    }
+                )
+            )
         });
     });
 
     $(`.deposit-ticket-scan`).click(function() {
         const $modal = $(this).closest('.modal');
-        Scan.proceed(scanModal, $modal.find('select[name=depositTicket]'), `deposit_tickets`, {
-            success: 'Le ticket-consigne a bien été ajouté',
-            warning: `Le ticket-consigne n'existe pas, a déjà été utilisé ou n'est plus valide`
-        });
+        Scan.proceed(
+            scanModal,
+            {
+                title: `Scan du ticket-consigne`,
+                onScan: (result) => (
+                    getAvailableElementFromBarcode(
+                        result,
+                        {
+                            $select: $modal.find('select[name=depositTicket]'),
+                            routeName: `ajax_select_deposit_tickets`,
+                            successMessage: 'Le ticket-consigne a bien été ajouté',
+                            warningMessage: `Le ticket-consigne n'existe pas, a déjà été utilisé ou n'est plus valide`,
+                            updatePrices: (element) => {
+                                depositTicketPrices[element.text] = element.price;
+                            }
+                        }
+                    )
+                )
+            }
+        );
     });
 
     $('select[name=box]').on('change', function() {
@@ -142,5 +173,38 @@ function calculateTotalCost($select) {
     } else {
         $costLabel.text('Aucun coût');
         $hint.addClass('d-none');
+    }
+}
+
+function getAvailableElementFromBarcode(result, {routeName, $select, updatePrices, successMessage, warningMessage}) {
+    if (result) {
+        const urlWithParams = Routing.generate(routeName, {term: result});
+        return AJAX.url(`GET`, urlWithParams).json((results) => {
+            const element = results.results.find(r => r.text === result);
+
+            if (element) {
+                updatePrices(element);
+
+                let selectedOptions = $select.find(`option:selected`)
+                    .map(function () {
+                        return $(this).val();
+                    })
+                    .toArray();
+
+                if ($select.find(`option[value='${element.id}']`).length === 0) {
+                    let option = new Option(element.text, element.id, true, true);
+                    $select.append(option);
+                }
+
+                selectedOptions.push(element.id);
+                $select.val(selectedOptions).trigger("change");
+                Flash.add('success', successMessage);
+            } else {
+                Flash.add('warning', warningMessage)
+            }
+        });
+    }
+    else {
+        return new Promise((resolve) => { resolve(); })
     }
 }
