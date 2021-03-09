@@ -207,7 +207,7 @@ class UserController extends AbstractController {
                 "success" => false,
                 "msg" => "Vous ne pouvez pas supprimer votre propre compte utilisateur"
             ]);
-        } else if($user && !$user->getTrackingMovements()->isEmpty()) {
+        } else if($user && !$user->getBoxRecords()->isEmpty()) {
             $user->setActive(false);
             $manager->flush();
 

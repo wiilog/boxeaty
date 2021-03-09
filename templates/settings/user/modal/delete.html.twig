@@ -5,7 +5,7 @@
 
             <div class="delete-image"></div>
             <h1>
-                {% if user.trackingMovements | length > 0 %}
+                {% if user.boxRecords | length > 0 %}
                     Cet utilisateur possède un ou plusieurs mouvements. <br>
                     Vous ne pouvez pas le supprimer.<br>
                     Voulez-vous le désactiver ?
@@ -18,7 +18,7 @@
 
             <div class="footer">
                 <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="submit" class="primary">{{ (user.trackingMovements | length > 0) ? 'Désactiver' : 'Supprimer' }}</button>
+                <button type="submit" class="primary">{{ (user.boxRecords | length > 0) ? 'Désactiver' : 'Supprimer' }}</button>
             </div>
         </div>
     </div>

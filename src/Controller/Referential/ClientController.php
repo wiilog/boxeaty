@@ -199,7 +199,7 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function delete(EntityManagerInterface $manager, Client $client): Response {
-        if($client && (!$client->getTrackingMovements()->isEmpty() || !$client->getBoxes()->isEmpty())) {
+        if($client && (!$client->getBoxRecords()->isEmpty() || !$client->getBoxes()->isEmpty())) {
             $client->setActive(false);
             $manager->flush();
 
