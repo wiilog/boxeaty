@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Box;
 use App\Entity\Quality;
-use App\Entity\TrackingMovement;
+use App\Entity\BoxRecord;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
@@ -72,7 +72,7 @@ class QualityRepository extends EntityRepository
     public function getDeletable(array $qualities): array {
         $uses = $this->createQueryBuilder("quality")
             ->select("quality.id AS id, (COUNT(movement) + COUNT(box)) AS uses")
-            ->leftJoin(TrackingMovement::class, "movement", Join::WITH, "movement.quality = quality.id")
+            ->leftJoin(BoxRecord::class, "movement", Join::WITH, "movement.quality = quality.id")
             ->leftJoin(Box::class, "box", Join::WITH, "box.quality = quality.id")
             ->where("quality.id IN (:qualities)")
             ->groupBy("quality")

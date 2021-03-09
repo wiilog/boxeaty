@@ -175,7 +175,7 @@ class LocationController extends AbstractController {
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
     public function delete(EntityManagerInterface $manager, Location $location): Response {
-        if($location && (!$location->getTrackingMovements()->isEmpty() || !$location->getBoxes()->isEmpty())) {
+        if($location && (!$location->getBoxRecords()->isEmpty() || !$location->getBoxes()->isEmpty())) {
             $location->setActive(false);
             $manager->flush();
 

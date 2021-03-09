@@ -208,7 +208,7 @@ class UserController extends AbstractController {
             ]);
         } else if($user
             && (
-                !$user->getTrackingMovements()->isEmpty()
+                !$user->getBoxRecords()->isEmpty()
                 || !$user->getOrderDepositTickets()->isEmpty()
             )) {
             $user->setActive(false);
