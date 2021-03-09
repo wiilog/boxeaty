@@ -247,7 +247,7 @@ class TrackingMovementController extends AbstractController {
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
     public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
-        $movements = $manager->getRepository(BoxRecord::class)->iterateAllTrackingMovements();
+        $movements = $manager->getRepository(BoxRecord::class)->iterateAll();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");

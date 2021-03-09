@@ -16,7 +16,7 @@ use Doctrine\ORM\EntityRepository;
  */
 class BoxRecordRepository extends EntityRepository {
 
-    public function iterateAllTrackingMovements() {
+    public function iterateAll() {
         return $this->createQueryBuilder("record")
             ->select("record.date AS date")
             ->addSelect("location.name AS location_name")
