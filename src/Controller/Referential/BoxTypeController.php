@@ -77,7 +77,7 @@ class BoxTypeController extends AbstractController {
         $content = (object)$request->request->all();
         $existing = $manager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
-            $form->addError("name", "Ce type de box existe déjà");
+            $form->addError("name", "Ce type de Box existe déjà");
         }
 
         if ($content->price < 0) {
@@ -97,7 +97,7 @@ class BoxTypeController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Type de box créé avec succès",
+                "msg" => "Type de Box créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -133,7 +133,7 @@ class BoxTypeController extends AbstractController {
         $content = (object)$request->request->all();
         $existing = $manager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $boxType) {
-            $form->addError("name", "Un autre type de box avec ce nom existe déjà");
+            $form->addError("name", "Un autre type de Box avec ce nom existe déjà");
         }
 
         if ($form->isValid()) {
@@ -147,7 +147,7 @@ class BoxTypeController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Type de box modifié avec succès",
+                "msg" => "Type de Box modifié avec succès",
             ]);
         } else {
             return $form->errors();

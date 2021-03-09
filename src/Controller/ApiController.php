@@ -287,7 +287,7 @@ class ApiController extends AbstractController {
         if (!$box->getCanGenerateDepositTicket()) {
             return $this->json([
                 "success" => false,
-                "msg" => "Cette box n'a pas été déposée",
+                "msg" => "Cette Box n'a pas été déposée",
             ]);
         }
 
