@@ -10,18 +10,12 @@
         <label>
             Etat
             <select name="state" class="data" data-s2 data-placeholder="Sélectionnez un état" required>
-                <option value="{{ constant('App\\Entity\\DepositTicket::VALID') }}"
-                        {{ deposit_ticket.state == constant('App\\Entity\\DepositTicket::VALID') ? 'selected' }}>
-                    Valable
-                </option>
-                <option value="{{ constant('App\\Entity\\DepositTicket::SPENT') }}"
-                        {{ deposit_ticket.state == constant('App\\Entity\\DepositTicket::SPENT') ? 'selected' }}>
-                    Utilisé
-                </option>
-                <option value="{{ constant('App\\Entity\\DepositTicket::EXPIRED') }}"
-                        {{ deposit_ticket.state == constant('App\\Entity\\DepositTicket::EXPIRED') ? 'selected' }}>
-                    Périmé
-                </option>
+                {% for state, label in constant('App\\Entity\\DepositTicket::NAMES') %}
+                    <option value="{{ state }}"
+                            {{ deposit_ticket.state == state ? 'selected' }}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
             </select>
         </label>
     </div>

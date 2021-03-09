@@ -85,6 +85,9 @@ class TrackingMovementController extends AbstractController {
         $form = Form::create();
 
         $content = (object) $request->request->all();
+        $trackingMovementRepository = $manager->getRepository(TrackingMovement::class);
+
+        /** @var Box $box */
         $box = $manager->getRepository(Box::class)->find($content->box);
         if (!$box) {
             $form->addError("box", "Cette Box n'existe pas ou a changé de numéro");
@@ -105,11 +108,14 @@ class TrackingMovementController extends AbstractController {
                 ->setUser($this->getUser())
                 ->setComment($content->comment ?? null);
 
-            $box->setQuality($quality)
-                ->setState($content->state ?? null)
-                ->setOwner($client);
-
             $manager->persist($movement);
+            $manager->flush();
+
+            $newerMovement = $trackingMovementRepository->findNewerMovement($movement);
+            if (!$newerMovement) {
+                $box->fromTrackingMovement($movement);
+            }
+
             $manager->flush();
 
             return $this->json([
@@ -151,6 +157,7 @@ class TrackingMovementController extends AbstractController {
             $form->addError("box", "Cette Box n'existe pas ou a changé de numéro");
         }
 
+        $trackingMovementRepository = $manager->getRepository(TrackingMovement::class);
         $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
         $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
@@ -162,6 +169,12 @@ class TrackingMovementController extends AbstractController {
                 ->setClient($client)
                 ->setLocation($location)
                 ->setComment($content->comment ?? null);
+            $manager->flush();
+
+            $newerMovement = $trackingMovementRepository->findNewerMovement($movement);
+            if (!$newerMovement) {
+                $box->fromTrackingMovement($movement);
+            }
 
             $manager->flush();
 

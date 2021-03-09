@@ -84,7 +84,7 @@ class ClientController extends AbstractController {
 
         $existing = $clientRepository->findOneBy(["name" => $content->name]);
         if ($existing) {
-            $form->addError("email", "Ce client existe déjà");
+            $form->addError("name", "Ce client existe déjà");
         } elseif ((int) $content->phoneNumber !== 10) {
             $form->addError("phoneNumber", "Le numéro de téléphone doit faire 10 caractères");
         }
@@ -152,7 +152,7 @@ class ClientController extends AbstractController {
 
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $client) {
-            $form->addError("email", "Un autre client avec ce nom existe déjà");
+            $form->addError("name", "Un autre client avec ce nom existe déjà");
         }
 
         if($form->isValid()) {

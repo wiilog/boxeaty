@@ -15,12 +15,14 @@ use Doctrine\ORM\EntityRepository;
  */
 class LocationRepository extends EntityRepository {
 
-    public function iterateAll() {
+    public function iterateAll()
+    {
         return $this->createQueryBuilder("location")
             ->select("IF(location.kiosk = 0, 'Emplacement', 'Borne') AS type")
             ->addSelect("location.name AS name")
             ->addSelect("client.name AS client_name")
             ->addSelect("location.active AS active")
+            ->addSelect("location.description AS description")
             ->leftJoin("location.client", "client")
             ->getQuery()
             ->toIterable();
@@ -41,7 +43,12 @@ class LocationRepository extends EntityRepository {
 
         foreach ($params["order"] ?? [] as $order) {
             $column = $params["columns"][$order["column"]]["data"];
-            $qb->addOrderBy("location.$column", $order["dir"]);
+            if ($column === "client_name") {
+                $qb->leftJoin("location.client", "location_client")
+                    ->addOrderBy("location_client.name", $order["dir"]);
+            } else {
+                $qb->addOrderBy("location.$column", $order["dir"]);
+            }
         }
 
         $filtered = QueryHelper::count($qb, "location");
@@ -97,13 +104,6 @@ class LocationRepository extends EntityRepository {
             ->where("kiosk.kiosk = 1")
             ->getQuery()
             ->getSingleScalarResult();
-    }
-
-    public function findDeliverer(): Location {
-        return $this->createQueryBuilder("location")
-            ->where("location.code = '" . Location::DELIVERER . "'")
-            ->getQuery()
-            ->getSingleResult();
     }
 
 }

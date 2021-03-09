@@ -84,6 +84,11 @@ class OrderController extends AbstractController {
         $boxes = $boxRepository->findBy(["id" => explode(",", $content->box)]);
         $depositTickets = $depositTicketRepository->findBy(["id" => explode(",", $content->depositTicket)]);
 
+        if (empty($boxes) && empty($depositTickets)) {
+            $form->addError('box', 'Au moins une Box ou un ticket-consigne sont requis');
+            $form->addError('depositTicket', 'Au moins une Box ou un ticket-consigne sont requis');
+        }
+
         if ($form->isValid()) {
             $order = new Order();
             $order->setDate(new DateTime());
@@ -110,7 +115,9 @@ class OrderController extends AbstractController {
 
             foreach ($depositTickets as $depositTicket) {
                 $order->addDepositTicket($depositTicket);
-                $depositTicket->setState(DepositTicket::SPENT);
+                $depositTicket
+                    ->setState(DepositTicket::SPENT)
+                    ->setUseDate(new DateTime());
             }
 
             $depositTicketPrices = Stream::from($order->getDepositTickets())
@@ -121,9 +128,14 @@ class OrderController extends AbstractController {
 
             $totalPrice = $boxPrices - $depositTicketPrices;
 
+            if(count($boxes) >= 1) {
+                $order->setClient($boxes[0]->getOwner());
+                $order->setLocation($boxes[0]->getLocation());
+            } else if(!$this->getUser()->getClients()->isEmpty()) {
+                $order->setClient($this->getUser()->getClients()[0]);
+            }
+
             $order->setUser($this->getUser());
-            $order->setClient($boxes[0]->getOwner());
-            $order->setLocation($boxes[0]->getLocation());
             $order->setTotalBoxAmount($boxPrices);
             $order->setTotalDepositTicketAmount($depositTicketPrices);
             $order->setTotalCost($totalPrice);

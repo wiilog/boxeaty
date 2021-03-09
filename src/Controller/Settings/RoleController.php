@@ -6,6 +6,8 @@ use App\Annotation\HasPermission;
 use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\StringHelper;
+use App\Service\ExportService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -186,6 +188,23 @@ class RoleController extends AbstractController {
                 "msg" => "Le rôle n'existe pas"
             ]);
         }
+    }
+
+    /**
+     * @Route("/export", name="roles_export", options={"expose": true})
+     * @HasPermission(Role::MANAGE_ROLES)
+     */
+    public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
+        $roles = $manager->getRepository(Role::class)->iterateAll();
+
+        $today = new DateTime();
+        $today = $today->format("d-m-Y-H-i-s");
+
+        return $exportService->export(function($output) use ($exportService, $roles) {
+            foreach ($roles as $role) {
+                $exportService->putLine($output, $role);
+            }
+        }, "export-role-$today.csv", ExportService::ROLE_HEADER);
     }
 
 }

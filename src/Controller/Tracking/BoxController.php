@@ -72,7 +72,8 @@ class BoxController extends AbstractController {
      * @Route("/nouveau", name="box_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
      */
-    public function new(Request $request, EntityManagerInterface $manager): Response {
+    public function new(Request $request,
+                        EntityManagerInterface $manager): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
@@ -122,7 +123,8 @@ class BoxController extends AbstractController {
      * @Route("/voir/{box}", name="box_show", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function show(EntityManagerInterface $manager, Box $box): Response {
+    public function show(EntityManagerInterface $manager,
+                         Box $box): Response {
         $box = $manager->getRepository(Box::class)->find($box);
 
         return $this->render('tracking/box/show.html.twig', [
@@ -147,36 +149,53 @@ class BoxController extends AbstractController {
      * @Route("/modifier/{box}", name="box_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function edit(Request $request, EntityManagerInterface $manager, Box $box): Response {
+    public function edit(Request $request,
+                         EntityManagerInterface $manager,
+                         Box $box): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
-        $owner = isset($content->owner) ? $manager->getRepository(Client::class)->find($content->owner) : null;
-        $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
-        $type = isset($content->type) ? $manager->getRepository(BoxType::class)->find($content->type) : null;
         $existing = $manager->getRepository(Box::class)->findOneBy(["number" => $content->number]);
+
         if ($existing !== null && $existing !== $box) {
             $form->addError("name", "Une autre Box avec ce numéro existe déjà");
         }
 
         if ($form->isValid()) {
-            $movement = (new TrackingMovement())
-                ->setDate(new DateTime())
-                ->setBox($box)
-                ->setLocation($location)
-                ->setClient($owner)
-                ->setQuality($quality)
-                ->setState($content->state ?? null)
-                ->setComment($content->comment ?? null)
-                ->setUser($this->getUser());
+            $oldOwnerId = $box->getOwner() ? $box->getOwner()->getId() : null;
+            $oldQualityId = $box->getQuality() ? $box->getQuality()->getId() : null;
+            $oldLocationId = $box->getLocation() ? $box->getLocation()->getId() : null;
+            $oldTypeId = $box->getType() ? $box->getType()->getId() : null;
 
-            $box->setNumber($content->number)
-                ->setType($type)
-                ->fromTrackingMovement($movement);
+            if ($content->number != $box->getNumber()
+                || $content->owner != $oldOwnerId
+                || $content->quality != $oldQualityId
+                || $content->state != $box->getState()
+                || $content->location != $oldLocationId
+                || $content->type != $oldTypeId
+                || $content->comment !== $box->getComment()) {
 
-            $manager->persist($movement);
-            $manager->flush();
+                $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
+                $owner = isset($content->owner) ? $manager->getRepository(Client::class)->find($content->owner) : null;
+                $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
+                $type = isset($content->type) ? $manager->getRepository(BoxType::class)->find($content->type) : null;
+
+                $movement = (new TrackingMovement())
+                    ->setDate(new DateTime())
+                    ->setBox($box)
+                    ->setLocation($location)
+                    ->setClient($owner)
+                    ->setQuality($quality)
+                    ->setState($content->state ?? null)
+                    ->setComment($content->comment ?? null);
+
+                $box->setNumber($content->number)
+                    ->setType($type)
+                    ->fromTrackingMovement($movement);
+
+                $manager->persist($movement);
+                $manager->flush();
+            }
 
             return $this->json([
                 "success" => true,
@@ -190,8 +209,12 @@ class BoxController extends AbstractController {
     /**
      * @Route("/supprimer", name="box_delete", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
+     * @param Request $request
+     * @param EntityManagerInterface $manager
+     * @return Response
      */
-    public function delete(Request $request, EntityManagerInterface $manager): Response {
+    public function delete(Request $request,
+                           EntityManagerInterface $manager): Response {
         $content = (object)$request->request->all();
         $box = $manager->getRepository(Box::class)->find($content->id);
 
@@ -214,8 +237,12 @@ class BoxController extends AbstractController {
     /**
      * @Route("/export", name="boxes_export", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
+     * @param EntityManagerInterface $manager
+     * @param ExportService $exportService
+     * @return Response
      */
-    public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
+    public function export(EntityManagerInterface $manager,
+                           ExportService $exportService): Response {
         $boxes = $manager->getRepository(Box::class)->iterateAll();
 
         $today = new DateTime();
@@ -231,10 +258,15 @@ class BoxController extends AbstractController {
 
     /**
      * @Route("/{box}/mouvements", name="get_box_mouvements", options={"expose": true}, methods={"GET"})
+     * @param Box $box
+     * @param Request $request
+     * @param EntityManagerInterface $manager
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
     public function getTrackingMovements(Box $box,
                                          Request $request,
-                                         EntityManagerInterface $manager) {
+                                         EntityManagerInterface $manager): \Symfony\Component\HttpFoundation\JsonResponse
+    {
         $trackingMovementRepository = $manager->getRepository(TrackingMovement::class);
         $start = $request->query->getInt('start', 0);
         $length = 10;

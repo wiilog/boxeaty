@@ -21,17 +21,15 @@ $(document).ready(() => {
         success: () => window.location.reload(),
     });
 
-    $(`.new-box`).click(() => newBoxModal.open());
-
     const table = initDatatable(`#table-orders`, {
         ajax: AJAX.route(`POST`, `orders_api`),
         columns: [
             {data: `boxes`, title: `Numéro(s) Box(s)`},
-            {data: `depositTickets`, title: `Ticket(s) dépose`},
-            {data: `location`, title: `Emplacement de passage en caisse`},
+            {data: `depositTickets`, title: `Ticket(s) consigne`},
+            {data: `location`, title: `Emplacement`},
             {data: `totalBoxAmount`, title: `Montant total des Box`},
             {data: `totalDepositTicketAmount`, title: `Montant total des consignes`},
-            {data: `totalCost`, title: `Balance de passage en caisse`},
+            {data: `totalCost`, title: `Balance`},
             {data: `user`, title: `Utilisateur`},
             {data: `client`, title: `Client`},
             {data: `date`, title: `Date et heure de création`},
@@ -45,6 +43,7 @@ $(document).ready(() => {
 
     const newOrderModal = Modal.static(`#modal-new-order`, {
         ajax: AJAX.route(`POST`, `order_new`),
+        table,
         submitter: function() {
             const $depositTicketContainer = $('.deposit-ticket-container');
             const $depositTicket = $depositTicketContainer.find('.deposit-ticket');
@@ -58,10 +57,11 @@ $(document).ready(() => {
                 $('select[name=box]').prop('disabled', true);
             } else {
                 newOrderModal.handleSubmit();
-                newOrderModal.close();
-                confirmationOrderModal.open();
-                table.ajax.reload();
             }
+        },
+        success: () => {
+            newOrderModal.close();
+            confirmationOrderModal.open();
         }
     });
 
@@ -105,9 +105,9 @@ $(document).ready(() => {
 
 function scan(scanModal, $select, type, msg) {
     if(type === `boxes`) {
-        scanModal.elem().find(`.scan-container-title`).text(`Scan de la box`);
+        scanModal.elem().find(`.scan-container-title`).text(`Scan de la Box`);
     } else {
-        scanModal.elem().find(`.scan-container-title`).text(`Scan du ticket consigne`);
+        scanModal.elem().find(`.scan-container-title`).text(`Scan du ticket-consigne`);
     }
 
     scanModal.open()
@@ -128,12 +128,12 @@ function scan(scanModal, $select, type, msg) {
                         return $(this).val();
                     }).toArray();
 
-                    if($select.find(`option[value='${result}']`).length === 0) {
-                        let option = new Option(result, result, true, true);
+                    if($select.find(`option[value='${idk.id}']`).length === 0) {
+                        let option = new Option(idk.text, idk.id, true, true);
                         $select.append(option);
                     }
 
-                    selectedOptions.push(result);
+                    selectedOptions.push(idk.id);
                     $select.val(selectedOptions).trigger("change");
                     Flash.add('success', msg.success);
                 } else {

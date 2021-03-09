@@ -23,7 +23,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ApiController extends AbstractController {
 
-    private const BOX_CAPACITY = 6;
+    private const BOX_CAPACITY = 50;
 
     /**
      * @Route("/ping", name="api_ping")
@@ -42,14 +42,15 @@ class ApiController extends AbstractController {
 
         $phrase = $manager->getRepository(GlobalSetting::class)->getValue(GlobalSetting::TABLET_PHRASE);
 
-        if(isset($content->id)) {
+        $client = null;
+        if (isset($content->id)) {
             $kiosk = $manager->getRepository(Location::class)->find($content->id);
-            $client = $kiosk->getClient();
-            if (!$client->isMultiSite() && $client->getLinkedMultiSite()) {
-                $client = $client->getLinkedMultiSite();
+            if ($kiosk) {
+                $client = $kiosk->getClient();
+                if ($client && !$client->isMultiSite() && $client->getLinkedMultiSite()) {
+                    $client = $client->getLinkedMultiSite();
+                }
             }
-        } else {
-            $client = null;
         }
 
         return $this->json([
@@ -139,7 +140,6 @@ class ApiController extends AbstractController {
     public function emptyKiosk(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
-        $deliverer = $manager->getRepository(Location::class)->findDeliverer();
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk ?? $request->request->get("id"));
 
         foreach ($kiosk->getBoxes() as $box) {
@@ -151,7 +151,7 @@ class ApiController extends AbstractController {
                 ->setClient($box->getOwner())
                 ->setQuality($box->getQuality())
                 ->setState(Box::UNAVAILABLE)
-                ->setLocation($deliverer)
+                ->setLocation($kiosk->getDeporte())
                 ->setComment($content->comment ?? null)
                 ->setUser($user instanceof User ? $user : null);
 
@@ -303,7 +303,7 @@ class ApiController extends AbstractController {
 
         $mailer->send(
             $content->email,
-            "BoxEaty - Ticket consigne",
+            "BoxEaty - Ticket-consigne",
             $this->renderView("emails/deposit_ticket.html.twig", [
                 "ticket" => $depositTicket,
             ])

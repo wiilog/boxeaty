@@ -66,7 +66,7 @@ class ImportService {
             $stateValue = $this->value(Import::STATE);
             $state = array_search($stateValue, Box::NAMES);
             if ($stateValue && $state === false) {
-                $this->addError("Etat de box inconnu \"$state\"");
+                $this->addError("Etat de Box inconnu \"$state\"");
             }
 
             $ownerValue = $this->value(Import::OWNER, true);
@@ -151,6 +151,10 @@ class ImportService {
 
         $this->data = fgetcsv($handle, 0, ";");
         $this->hasError = false;
+
+        if($this->data && $this->exportService->getEncoding() === ExportService::ENCODING_UTF8) {
+            $this->data = array_map("utf8_encode", $this->data);
+        }
 
         return $this->data !== false;
     }

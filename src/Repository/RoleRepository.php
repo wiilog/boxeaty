@@ -16,6 +16,14 @@ use Doctrine\ORM\Query\Expr\Join;
  */
 class RoleRepository extends EntityRepository {
 
+    public function iterateAll() {
+        return $this->createQueryBuilder("role")
+            ->select("role.name AS name")
+            ->addSelect("role.active AS active")
+            ->getQuery()
+            ->toIterable();
+    }
+
     public function findForDatatable(array $params): array {
         $search = $params["search"]["value"] ?? null;
 
@@ -25,8 +33,7 @@ class RoleRepository extends EntityRepository {
             ->andWhere("role.code NOT LIKE :no_access")
             ->setParameter('no_access', Role::ROLE_NO_ACCESS);
         if ($search) {
-            $qb->where("role.name LIKE :search")
-                ->orWhere("role.code LIKE :search")
+            $qb->andWhere("role.name LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 

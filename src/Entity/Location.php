@@ -12,8 +12,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Location {
 
-    public const DELIVERER = "Livreur";
-
     use Active;
 
     /**
@@ -22,6 +20,11 @@ class Location {
      * @ORM\Column(type="integer")
      */
     private ?int $id = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Location::class)
+     */
+    private ?Location $deporte = null;
 
     /**
      * @ORM\Column(type="boolean")
@@ -75,6 +78,15 @@ class Location {
 
     public function getId(): ?int {
         return $this->id;
+    }
+
+    public function getDeporte(): ?Location {
+        return $this->deporte;
+    }
+
+    public function setDeporte(?Location $deporte): self {
+        $this->deporte = $deporte;
+        return $this;
     }
 
     public function isKiosk(): ?bool {

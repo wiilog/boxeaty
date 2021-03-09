@@ -42,10 +42,14 @@ class ClientRepository extends EntityRepository {
 
         if ($search) {
             $qb->leftJoin("client.users", "search_user")
+                ->leftJoin("client.group", "search_group")
+                ->leftJoin("client.linkedMultiSite", "search_multi_site")
                 ->andWhere($qb->expr()->orX(
                     "client.name LIKE :search",
                     "client.address LIKE :search",
-                    "search_user.username LIKE :search"
+                    "search_user.username LIKE :search",
+                    "search_group.name LIKE :search",
+                    "search_multi_site.name LIKE :search",
                 ))
                 ->setParameter("search", "%$search%");
         }
