@@ -51,7 +51,7 @@ class QueryHelper {
             if($multiple) {
                 foreach ($user->getGroups() as $i => $group) {
                     $query
-                        ->andWhere("$alias.$field IS NULL OR :__group_$i MEMBER OF $alias.$field")
+                        ->andWhere("$alias.$field IS EMPTY OR :__group_$i MEMBER OF $alias.$field")
                         ->setParameter("__group_$i", $group);
                 }
             } else {
