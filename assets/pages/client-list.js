@@ -70,7 +70,7 @@ $(document).ready(() => {
         }
     });
 
-    $('#modal-new-client').find('[name=phoneNumber]').on('keypress', function (e) {
+    $('#modal-new-client').find('[name=phoneNumber]').on('value', function (e) {
         if($(this).val().length < 10) {
             return true;
         } else {
