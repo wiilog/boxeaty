@@ -2,12 +2,9 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Location;
-use App\Entity\Role;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\Console\Output\ConsoleOutput;
 
 class LocationFixtures extends Fixture implements FixtureGroupInterface {
 

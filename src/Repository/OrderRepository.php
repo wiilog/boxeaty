@@ -5,9 +5,7 @@ namespace App\Repository;
 use App\Entity\Order;
 use App\Entity\User;
 use App\Helper\QueryHelper;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Order|null find($id, $lockMode = null, $lockVersion = null)

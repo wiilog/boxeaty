@@ -3,17 +3,14 @@
 namespace App\Controller\Referential;
 
 use App\Annotation\HasPermission;
-use App\Entity\Box;
 use App\Entity\Client;
 use App\Entity\Location;
 use App\Entity\Role;
-use App\Entity\TrackingMovement;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
