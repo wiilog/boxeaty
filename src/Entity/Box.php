@@ -34,7 +34,7 @@ class Box {
         self::OUT => "secondary",
     ];
 
-    public const DEFAULT_COLOR = 'light';
+    public const DEFAULT_COLOR = 'dark';
 
     /**
      * @ORM\Id

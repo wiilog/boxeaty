@@ -193,6 +193,21 @@ class TrackingMovementController extends AbstractController {
 
             $manager->flush();
 
+            $newerMovement = $trackingMovementRepository->findNewerTrackingMovement($movement);
+            if (!$newerMovement) {
+                $box->fromRecord($movement);
+                /** @noinspection PhpUnusedLocalVariableInspection */
+                [$ignored, $record] = $boxRecordService->generateBoxRecords(
+                    $box,
+                    ['state' => $oldState, 'comment' => $oldComment],
+                    $this->getUser()
+                );
+                if ($record) {
+                    $manager->persist($record);
+                }
+                $manager->flush();
+            }
+
             return $this->json([
                 "success" => true,
                 "msg" => "Mouvement de traçabilité modifié avec succès",

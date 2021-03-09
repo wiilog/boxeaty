@@ -294,7 +294,7 @@ class BoxController extends AbstractController {
             'isTail' => ($start + $length) >= $countBoxMovements,
             'data' => Stream::from($boxMovements)
                 ->map(fn(array $movement) => [
-                    'comment' => str_replace("Powered by Froala Editor", "",$movement['comment']),
+                    'comment' => str_replace("Powered by Froala Editor", "", $movement['comment']),
                     'color' => (isset($movement['state']) && isset(Box::LINKED_COLORS[$movement['state']]))
                         ? Box::LINKED_COLORS[$movement['state']]
                         : Box::DEFAULT_COLOR,
