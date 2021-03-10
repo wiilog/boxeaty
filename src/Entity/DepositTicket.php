@@ -76,6 +76,11 @@ class DepositTicket {
      */
     private Collection $orders;
 
+    /**
+     * @ORM\Column(nullable=true)
+     */
+    private ?string $consumerEmail;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
@@ -177,6 +182,18 @@ class DepositTicket {
         if ($this->orders->removeElement($order)) {
             $order->removeDepositTicket($this);
         }
+
+        return $this;
+    }
+
+    public function getConsumerEmail(): ?string
+    {
+        return $this->consumerEmail;
+    }
+
+    public function setConsumerEmail(?string $consumerEmail): self
+    {
+        $this->consumerEmail = $consumerEmail;
 
         return $this;
     }
