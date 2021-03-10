@@ -8,7 +8,6 @@ use App\Entity\Group;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
-use App\Helper\Stream;
 use App\Security\Authenticator;
 use App\Service\ExportService;
 use DateTime;
@@ -207,7 +206,11 @@ class UserController extends AbstractController {
                 "success" => false,
                 "msg" => "Vous ne pouvez pas supprimer votre propre compte utilisateur"
             ]);
-        } else if($user && !$user->getTrackingMovements()->isEmpty()) {
+        } else if($user
+            && (
+                !$user->getBoxRecords()->isEmpty()
+                || !$user->getOrderDepositTickets()->isEmpty()
+            )) {
             $user->setActive(false);
             $manager->flush();
 

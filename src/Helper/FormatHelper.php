@@ -58,4 +58,10 @@ class FormatHelper {
         return $comment ? strip_tags($comment) : $else;
     }
 
+    public static function price(?float $priceFloat, $else = ""): string {
+        return $priceFloat
+            ? (number_format($priceFloat, 2, ',', ' ') . ' €')
+            : $else;
+    }
+
 }

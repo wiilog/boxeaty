@@ -11,7 +11,7 @@ use App\Entity\Group;
 use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
-use App\Entity\TrackingMovement;
+use App\Entity\BoxRecord;
 use App\Entity\User;
 use App\Service\ExportService;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -41,7 +41,7 @@ class DefaultController extends AbstractController {
             $row["state"] = isset($row["state"]) ? Box::NAMES[$row["state"]] : '';
             return $row;
         });
-        $exportService->createWorksheet($spreadsheet, "Mouvements", TrackingMovement::class, ExportService::MOVEMENT_HEADER, function(array $row) {
+        $exportService->createWorksheet($spreadsheet, "Mouvements", BoxRecord::class, ExportService::MOVEMENT_HEADER, function(array $row) {
             $row["state"] = isset($row["state"]) ? Box::NAMES[$row["state"]] : '';
             return $row;
         });

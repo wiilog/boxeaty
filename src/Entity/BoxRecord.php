@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\TrackingMovementRepository;
+use App\Repository\BoxRecordRepository;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=TrackingMovementRepository::class)
+ * @ORM\Entity(repositoryClass=BoxRecordRepository::class)
  */
-class TrackingMovement {
+class BoxRecord {
 
     /**
      * @ORM\Id
@@ -24,13 +24,13 @@ class TrackingMovement {
     private ?DateTime $date = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Box::class, inversedBy="trackingMovements")
+     * @ORM\ManyToOne(targetEntity=Box::class, inversedBy="boxRecords")
      * @ORM\JoinColumn(nullable=false)
      */
     private ?Box $box = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="trackingMovements")
+     * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="boxRecords")
      */
     private ?Location $location = null;
 
@@ -45,12 +45,12 @@ class TrackingMovement {
     private ?int $state = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="trackingMovements")
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="boxRecords")
      */
     private ?Client $client = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="trackingMovements")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="boxRecords")
      */
     private ?User $user = null;
 
@@ -58,6 +58,11 @@ class TrackingMovement {
      * @ORM\Column(type="text", nullable=true)
      */
     private ?string $comment = null;
+
+    /**
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private ?bool $trackingMovement;
 
     public function getId(): ?int {
         return $this->id;
@@ -80,11 +85,11 @@ class TrackingMovement {
     public function setBox(?Box $box): self {
         $previous = $this->getBox();
         if ($previous) {
-            $previous->removeTrackingMovement($this);
+            $previous->removeBoxRecord($this);
         }
 
         $this->box = $box;
-        $box->addTrackingMovement($this);
+        $box->addBoxRecord($this);
 
         return $this;
     }
@@ -148,6 +153,27 @@ class TrackingMovement {
     public function setComment(?string $comment): self {
         $this->comment = $comment;
 
+        return $this;
+    }
+
+    public function isTrackingMovement(): ?bool {
+        return $this->trackingMovement;
+    }
+
+    public function setTrackingMovement(bool $trackingMovement): self {
+        $this->trackingMovement = $trackingMovement;
+        return $this;
+    }
+
+    public function copyBox(): self {
+        if ($this->box) {
+            $this
+                ->setLocation($this->box->getLocation())
+                ->setClient($this->box->getOwner())
+                ->setQuality($this->box->getQuality())
+                ->setState($this->box->getState())
+                ->setComment($this->box->getComment());
+        }
         return $this;
     }
 

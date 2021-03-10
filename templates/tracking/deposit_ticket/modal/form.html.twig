@@ -39,4 +39,12 @@
             </select>
         </label>
     </div>
+    {% if create is defined %}
+        <div class="col-12">
+                <label>
+                    Email du consommateur
+                    <input type="email" name="emailConsumer" class="data" placeholder="Renseignez l'email">
+                </label>
+        </div>
+    {% endif %}
 </div>

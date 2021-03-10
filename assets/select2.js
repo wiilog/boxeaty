@@ -41,9 +41,9 @@ export default class Select2 {
                 dataType: `json`
             };
         }
-        // if (type && !INSTANT_SELECT_TYPES[type]) {
-        //     config.minimumInputLength = 1;
-        // }
+        if (type && !INSTANT_SELECT_TYPES[type]) {
+            config.minimumInputLength = 1;
+        }
         $element.select2({
             placeholder: $element.data(`placeholder`),
             allowClear: true,
@@ -61,8 +61,7 @@ export default class Select2 {
             setTimeout(() => $('.select2-search__field').focus(), 300);
         });
 
-        if($element.is(`[multiple]`)) {console.log(
-            $element.siblings(`.select2-container`));
+        if($element.is(`[multiple]`)) {
             $element.siblings(`.select2-container`).addClass(`multiple`);
         }
     }

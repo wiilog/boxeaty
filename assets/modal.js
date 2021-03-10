@@ -171,8 +171,9 @@ export default class Modal {
                 }
             });
         } else {
-           return new Promise(() => {
+           return new Promise((resolve) => {
                this.element.modal(`hide`);
+               resolve();
            });
         }
     }

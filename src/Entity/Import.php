@@ -54,7 +54,7 @@ class Import {
             "name" => "Propriétaire",
         ],
         self::TYPE => [
-            "name" => "Type de box",
+            "name" => "Type de Box",
         ],
         self::COMMENT => [
             "name" => "Commentaire",

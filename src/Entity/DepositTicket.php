@@ -61,6 +61,12 @@ class DepositTicket {
     private ?DateTime $useDate = null;
 
     /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="orderDepositTickets")
+     * @ORM\JoinColumn(nullable=true)
+     */
+    private ?User $orderUser = null;
+
+    /**
      * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="depositTickets")
      */
     private ?Location $location = null;
@@ -68,7 +74,12 @@ class DepositTicket {
     /**
      * @ORM\ManyToMany(targetEntity=Order::class, mappedBy="depositTickets")
      */
-    private $orders;
+    private Collection $orders;
+
+    /**
+     * @ORM\Column(nullable=true)
+     */
+    private ?string $consumerEmail;
 
     public function __construct()
     {
@@ -173,6 +184,34 @@ class DepositTicket {
         }
 
         return $this;
+    }
+
+    public function getConsumerEmail(): ?string
+    {
+        return $this->consumerEmail;
+    }
+
+    public function setConsumerEmail(?string $consumerEmail): self
+    {
+        $this->consumerEmail = $consumerEmail;
+
+        return $this;
+    }
+
+    public function setOrderUser(?User $orderUser): self {
+        if ($this->getOrderUser()
+            && $this->getOrderUser() !== $orderUser) {
+            $this->getOrderUser()->removeOrderDepositTicket($this);
+        }
+        $this->orderUser = $orderUser;
+        if ($this->orderUser) {
+            $this->orderUser->addOrderDepositTicket($this);
+        }
+        return $this;
+    }
+
+    public function getOrderUser(): ?User {
+        return $this->orderUser;
     }
 
 }
