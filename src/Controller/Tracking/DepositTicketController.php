@@ -113,7 +113,7 @@ class DepositTicketController extends AbstractController {
 
             $manager->persist($depositTicket);
             $manager->flush();
-            $mailer->send($depositTicket->getConsumerEmail(),'Creation d\'un ticket de consigne',$this->renderView("emails/deposit_ticket.html.twig",[
+            $mailer->send($depositTicket->getConsumerEmail(),'Création d\'un ticket-consigne', $this->renderView("emails/deposit_ticket.html.twig",[
                 "ticket" =>$depositTicket,
             ]));
             return $this->json([
