@@ -203,7 +203,7 @@ main:not(.login) {
 
     .fr-toolbar {
         border: none;
-        background-color: #F8F8F8;
+        background-color: $grey;
     }
 
     .fr-wrapper {
@@ -417,12 +417,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     height: auto;
     color: transparent;
     background: transparent;
-}
-
-.toggle input[type=radio]+label {
-    border-color: #f8f8f8;
-    color: black;
-    background-color: #F8F8F8;
 }
 ///* adjust increase/decrease button */
 //input[type="date"]::-webkit-inner-spin-button {

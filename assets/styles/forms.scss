@@ -80,12 +80,28 @@ input[type=number]::-webkit-inner-spin-button {
 
     input[type="radio"] + label {
         @include button(secondary);
+        border-color: $grey;
+        color: black;
+        background-color: $grey;
         width: 200px;
         margin-top: 0;
     }
 
     input[type="radio"]:checked + label {
         @include button(primary);
+        background: $blue !important;
+        border-color: $blue;
+        color: white !important;
+        cursor: default;
+    }
+
+    input[type=radio] + label:hover {
+        border-color: $blue;
+        color: $blue;
+    }
+
+    input[type=radio]:checked + label:hover {
+        border-color: $blue;
     }
 }
 
@@ -160,7 +176,7 @@ button, a {
 
     .input-group-text {
         border: none !important;
-        background-color: #F8F8F8 !important;
+        background-color: $grey !important;
         width: 45px;
         font-size: 18px;
         display: flex;

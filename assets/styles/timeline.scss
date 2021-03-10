@@ -1,3 +1,5 @@
+@import "variables";
+
 .timeline-line {
     .timeline-line-comment {
         border-radius: 5px;
@@ -45,7 +47,7 @@
         width: 40px;
         height: 40px;
         right: -17px;
-        background-color: #1E1F44;
+        background-color: $blue;
         border: 3px solid white;
         border-radius: 50%;
         z-index: 1;
