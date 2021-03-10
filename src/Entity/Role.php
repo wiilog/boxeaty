@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Role {
 
     public const ROLE_NO_ACCESS = "AUCUN_ACCES";
-    public const ROLE_ADMIN = "ADMINISTRATEUR";
+    public const ROLE_ADMIN = "SUPER_ADMINISTRATEUR";
 
     public const GENERAL_EXPORT = "GENERAL_EXPORT";
     public const MANAGE_SETTINGS = "MANAGE_SETTINGS";

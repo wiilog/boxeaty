@@ -38,9 +38,10 @@ class ExportService {
 
     public const LOCATION_HEADER = [
         "Type",
-        "Nom",
+        "Nom de l'emplacement",
+        "Nom du client",
         "Actif",
-        "Client",
+        "Description",
     ];
 
     public const MOVEMENT_HEADER = [
@@ -54,9 +55,14 @@ class ExportService {
     ];
 
     public const BOX_TYPE_HEADER = [
-        "Type de box",
+        "Type de Box",
         "Prix",
         "Actif"
+    ];
+
+    public const ROLE_HEADER = [
+        "Nom",
+        "Actif",
     ];
 
     public const QUALITY_HEADER = [
@@ -70,7 +76,9 @@ class ExportService {
         "Date de validité",
         "Numéro de consigne",
         "Date et heure d'utilisation de la consigne",
+        "Montant de la consigne",
         "Emplacement de la consigne",
+        "Utilisateur en caisse",
         "Etat",
     ];
 
@@ -93,6 +101,10 @@ class ExportService {
         $this->manager = $manager;
         $this->encoding = $manager->getRepository(GlobalSetting::class)
             ->getValue(GlobalSetting::CSV_EXPORTS_ENCODING);
+    }
+
+    public function getEncoding(): ?string {
+        return $this->encoding;
     }
 
     public function export(callable $generator, string $name, ?array $headers = null): StreamedResponse {

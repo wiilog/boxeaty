@@ -22,6 +22,14 @@ class FormatHelper {
         return self::entity($users, "username");
     }
 
+    public static function boxes($entities): ?string {
+        return self::entity($entities, "number");
+    }
+
+    public static function depositTickets($entities): ?string {
+        return self::entity($entities, "number");
+    }
+
     public static function named($entity): ?string {
         return $entity ? $entity->getName() : "";
     }
@@ -48,6 +56,12 @@ class FormatHelper {
 
     public static function html(?string $comment, $else = ""): ?string {
         return $comment ? strip_tags($comment) : $else;
+    }
+
+    public static function price(?float $priceFloat, $else = ""): string {
+        return $priceFloat
+            ? (number_format($priceFloat, 2, ',', ' ') . ' €')
+            : $else;
     }
 
 }

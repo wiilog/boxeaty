@@ -92,6 +92,11 @@ class Client {
     private Collection $boxes;
 
     /**
+     * @ORM\OneToMany(targetEntity=BoxRecord::class, mappedBy="client")
+     */
+    private Collection $boxRecords;
+
+    /**
      * @ORM\ManyToMany(targetEntity=Client::class)
      * @ORM\JoinTable(name="deposit_tickets_clients")
      */
@@ -290,6 +295,33 @@ class Client {
             // set the owning side to null (unless already changed)
             if ($box->getOwner() === $this) {
                 $box->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|BoxRecord[]
+     */
+    public function getBoxRecords(): Collection {
+        return $this->boxRecords;
+    }
+
+    public function addBoxRecord(BoxRecord $boxRecord): self {
+        if (!$this->boxRecords->contains($boxRecord)) {
+            $this->boxRecords[] = $boxRecord;
+            $boxRecord->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBoxRecord(BoxRecord $boxRecord): self {
+        if ($this->boxRecords->removeElement($boxRecord)) {
+            // set the owning side to null (unless already changed)
+            if ($boxRecord->getClient() === $this) {
+                $boxRecord->setClient(null);
             }
         }
 

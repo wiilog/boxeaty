@@ -112,6 +112,18 @@
             </select>
         </label>
     </div>
+
+    <div class="box global-settings">
+        <h1>
+            Configuration des bornes
+            <button class="secondary float-end" type="submit">Enregistrer</button>
+        </h1>
+
+        <label class="w-35">
+            Message page d'accueil des bornes
+            <textarea name="{{ constant('App\\Entity\\GlobalSetting::TABLET_PHRASE') }}" class="data">{{ tablet_phrase.value }}</textarea>
+        </label>
+    </div>
 {% endblock %}
 
 {% block javascripts %}

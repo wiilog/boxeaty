@@ -18,7 +18,7 @@ export default class Modal {
     config;
     files;
 
-    static static(element, config) {
+    static static(element, config = {}) {
         const modal = new Modal();
         modal.id = Math.floor(Math.random() * 1000000);
         modal.element = typeof element === `string` ? $(element) : element;
@@ -38,7 +38,10 @@ export default class Modal {
                 Flash.add(Flash.WARNING, `Opération en cours d'exécution`);
             }
 
-            $button.load(() => config.submitter ? config.submitter() : modal.handleSubmit());
+            $button.load(() => {
+                console.log(config.submitter);
+                return config.submitter ? config.submitter() : modal.handleSubmit()
+            });
         });
 
         return modal;
@@ -169,8 +172,9 @@ export default class Modal {
                 }
             });
         } else {
-           return new Promise(() => {
+           return new Promise((resolve) => {
                this.element.modal(`hide`);
+               resolve();
            });
         }
     }

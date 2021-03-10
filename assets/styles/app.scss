@@ -21,13 +21,16 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 
 html {
     height: 100%;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 body {
     font-family: 'Retroyal', sans-serif;
     background-color: $grey;
     max-width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    position: relative;
 }
 
 body.home {

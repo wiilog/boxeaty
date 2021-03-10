@@ -53,7 +53,7 @@ class ClientController extends AbstractController {
                 "multiSite" => $client->isMultiSite() ? "Oui" : "Non",
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
-                    "deletable" => false
+                    "deletable" => true
                 ]),
             ];
         }
@@ -84,7 +84,9 @@ class ClientController extends AbstractController {
 
         $existing = $clientRepository->findOneBy(["name" => $content->name]);
         if ($existing) {
-            $form->addError("email", "Ce client existe déjà");
+            $form->addError("name", "Ce client existe déjà");
+        } elseif (!empty($content->phoneNumber) && strlen($content->phoneNumber) !== 10) {
+            $form->addError("phoneNumber", "Le numéro de téléphone doit contenir 10 caractères");
         }
 
         if($form->isValid()) {
@@ -150,7 +152,9 @@ class ClientController extends AbstractController {
 
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $client) {
-            $form->addError("email", "Un autre client avec ce nom existe déjà");
+            $form->addError("name", "Un autre client avec ce nom existe déjà");
+        } elseif (!empty($content->phoneNumber) && strlen($content->phoneNumber) !== 10) {
+            $form->addError("phoneNumber", "Le numéro de téléphone doit contenir 10 caractères");
         }
 
         if($form->isValid()) {
@@ -174,6 +178,48 @@ class ClientController extends AbstractController {
             ]);
         } else {
             return $form->errors();
+        }
+    }
+
+    /**
+     * @Route("/supprimer/template/{client}", name="client_delete_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENTS)
+     */
+    public function deleteTemplate(Client $client): Response {
+        return $this->json([
+            "submit" => $this->generateUrl("client_delete", ["client" => $client->getId()]),
+            "template" => $this->renderView("referential/client/modal/delete.html.twig", [
+                "client" => $client,
+            ])
+        ]);
+    }
+
+    /**
+     * @Route("/supprimer/{client}", name="client_delete", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENTS)
+     */
+    public function delete(EntityManagerInterface $manager, Client $client): Response {
+        if($client && (!$client->getBoxRecords()->isEmpty() || !$client->getBoxes()->isEmpty())) {
+            $client->setActive(false);
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+                "msg" => "Client <strong>{$client->getName()}</strong> désactivé avec succès"
+            ]);
+        } else if ($client) {
+            $manager->remove($client);
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+                "msg" => "Client <strong>{$client->getName()}</strong> supprimé avec succès"
+            ]);
+        } else {
+            return $this->json([
+                "success" => false,
+                "msg" => "Le client n'existe pas"
+            ]);
         }
     }
 

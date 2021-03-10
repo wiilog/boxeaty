@@ -28,28 +28,25 @@
                     <label class="form-check-label" for="{{ key }}">{{ label }}</label>
                 </div>
             {% endfor %}
+            {% if menu == 'Autre' %}
+                <div class="form-check form-switch">
+                    <input class="form-check-input data" type="checkbox" name="allowEditOwnGroupOnly"
+                           id="allow-edit-own-group-only" {{ role.allowEditOwnGroupOnly ? 'checked' }}>
+                    <label class="form-check-label" for="allow-edit-own-group-only">Autoriser uniquement pour son groupe</label>
+                </div>
+
+                <div class="form-check form-switch">
+                    <input class="form-check-input data" type="checkbox" name="redirectUserNewCommand"
+                           id="redirect-user-new-command" {{ role.redirectUserNewCommand ? 'checked' }}>
+                    <label class="form-check-label" for="redirect-user-new-command">Rediriger l'utilisateur sur l'écran "Passage en caisse"</label>
+                </div>
+
+                <div class="form-check form-switch">
+                    <input class="form-check-input data" type="checkbox" name="receiveMailsNewAccounts"
+                           id="receive-mails-new-accounts" {{ role.receiveMailsNewAccounts ? 'checked' }}>
+                    <label class="form-check-label" for="receive-mails-new-accounts">Réception mail création compte</label>
+                </div>
+            {% endif %}
         </div>
     {% endfor %}
-
-    <div class="col-12 mt-3">
-        <h3>Autres paramètres</h3>
-
-        <div class="form-check form-switch">
-            <input class="form-check-input data" type="checkbox" name="allowEditOwnGroupOnly"
-                   id="allow-edit-own-group-only" {{ role.allowEditOwnGroupOnly ? 'checked' }}>
-            <label class="form-check-label" for="allow-edit-own-group-only">Autoriser la modification des données de son groupe uniquement</label>
-        </div>
-
-        <div class="form-check form-switch">
-            <input class="form-check-input data" type="checkbox" name="redirectUserNewCommand"
-                   id="redirect-user-new-command" {{ role.redirectUserNewCommand ? 'checked' }}>
-            <label class="form-check-label" for="redirect-user-new-command">Rediriger l'utilisateur sur l'écran "Nouvelle commande"</label>
-        </div>
-
-        <div class="form-check form-switch">
-            <input class="form-check-input data" type="checkbox" name="receiveMailsNewAccounts"
-                   id="receive-mails-new-accounts" {{ role.receiveMailsNewAccounts ? 'checked' }}>
-            <label class="form-check-label" for="receive-mails-new-accounts">Réception d'emails pour la création de comptes</label>
-        </div>
-    </div>
 </div>

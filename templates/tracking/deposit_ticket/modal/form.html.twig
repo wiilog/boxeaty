@@ -10,25 +10,32 @@
         <label>
             Etat
             <select name="state" class="data" data-s2 data-placeholder="Sélectionnez un état" required>
-                <option value="{{ constant('App\\Entity\\DepositTicket::VALID') }}"
-                        {{ deposit_ticket.state == constant('App\\Entity\\DepositTicket::VALID') ? 'selected' }}>
-                    Valable
-                </option>
-                <option value="{{ constant('App\\Entity\\DepositTicket::SPENT') }}"
-                        {{ deposit_ticket.state == constant('App\\Entity\\DepositTicket::SPENT') ? 'selected' }}>
-                    Utilisé
-                </option>
-                <option value="{{ constant('App\\Entity\\DepositTicket::EXPIRED') }}"
-                        {{ deposit_ticket.state == constant('App\\Entity\\DepositTicket::EXPIRED') ? 'selected' }}>
-                    Périmé
-                </option>
+                {% for state, label in constant('App\\Entity\\DepositTicket::NAMES') %}
+                    <option value="{{ state }}"
+                            {{ deposit_ticket.state == state ? 'selected' }}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
             </select>
         </label>
     </div>
-    <div class="col-12">
+    <div class="col-12 col-md-6">
         <label>
             Borne
-            <select name="kiosk" class="data" data-s2="kiosk" data-placeholder="Sélectionnez une borne" required>
+            <select name="location" class="data" data-s2="kiosk" data-placeholder="Sélectionnez une borne" required>
+                {% if deposit_ticket.location %}
+                    <option value="{{ deposit_ticket.location.id }}">{{ deposit_ticket.location.name }}</option>
+                {% endif %}
+            </select>
+        </label>
+    </div>
+    <div class="col-12 col-md-6">
+        <label>
+            Box
+            <select name="box" class="data" data-s2="box" data-placeholder="Sélectionnez une Box" required>
+                {% if deposit_ticket.box %}
+                    <option value="{{ deposit_ticket.box.id }}">{{ deposit_ticket.box.number }}</option>
+                {% endif %}
             </select>
         </label>
     </div>

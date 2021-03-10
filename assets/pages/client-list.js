@@ -59,7 +59,23 @@ $(document).ready(() => {
                 });
 
                 Modal.load(ajax, {table})
-            }
+            },
+            delete: data => {
+                const ajax = AJAX.route(`POST`, `client_delete_template`, {
+                    client: data.id
+                });
+
+                Modal.load(ajax, {table})
+            },
         }
     });
+
+    $('#modal-new-client').find('[name=phoneNumber]').on('value', function (e) {
+        if($(this).val().length < 10) {
+            return true;
+        } else {
+            e.preventDefault();
+            return false;
+        }
+    })
 });

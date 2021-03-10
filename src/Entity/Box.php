@@ -34,7 +34,7 @@ class Box {
         self::OUT => "secondary",
     ];
 
-    public const DEFAULT_COLOR = 'light';
+    public const DEFAULT_COLOR = 'dark';
 
     /**
      * @ORM\Id
@@ -79,9 +79,9 @@ class Box {
     private ?string $comment = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="box", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=BoxRecord::class, mappedBy="box", cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private Collection $trackingMovements;
+    private Collection $boxRecords;
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
@@ -99,7 +99,7 @@ class Box {
     private $orders;
 
     public function __construct() {
-        $this->trackingMovements = new ArrayCollection();
+        $this->boxRecords = new ArrayCollection();
         $this->orders = new ArrayCollection();
     }
 
@@ -118,18 +118,29 @@ class Box {
     }
 
     /**
-     * @return Collection|TrackingMovement[]
+     * @return Collection|BoxRecord[]
      */
-    public function getTrackingMovements(): Collection {
-        return $this->trackingMovements;
+    public function getBoxRecords(): Collection {
+        return $this->boxRecords;
     }
 
-    public function addTrackingMovement(TrackingMovement $trackingMovement): self {
-        if (!$this->trackingMovements->contains($trackingMovement)) {
-            $this->trackingMovements[] = $trackingMovement;
+    public function addBoxRecord(BoxRecord $boxRecord): self {
+        if (!$this->boxRecords->contains($boxRecord)) {
+            $this->boxRecords[] = $boxRecord;
 
-            if ($trackingMovement->getBox() !== $this) {
-                $trackingMovement->setBox($this);
+            if ($boxRecord->getBox() !== $this) {
+                $boxRecord->setBox($this);
+            }
+        }
+
+        return $this;
+    }
+
+    public function removeBoxRecord(BoxRecord $boxRecord): self {
+        if ($this->boxRecords->removeElement($boxRecord)) {
+            // set the owning side to null (unless already changed)
+            if ($boxRecord->getBox() === $this) {
+                $boxRecord->setBox(null);
             }
         }
 
@@ -214,17 +225,6 @@ class Box {
         return $this;
     }
 
-    public function removeTrackingMovement(TrackingMovement $trackingMovement): self {
-        if ($this->trackingMovements->removeElement($trackingMovement)) {
-            // set the owning side to null (unless already changed)
-            if ($trackingMovement->getBox() === $this) {
-                $trackingMovement->setBox(null);
-            }
-        }
-
-        return $this;
-    }
-
     /**
      * @return Collection|Order[]
      */
@@ -252,12 +252,12 @@ class Box {
         return $this;
     }
 
-    public function fromTrackingMovement(TrackingMovement $movement): self {
-        return $this->setState($movement->getState())
-            ->setLocation($movement->getLocation())
-            ->setQuality($movement->getQuality())
-            ->setOwner($movement->getClient())
-            ->setComment($movement->getComment());
+    public function fromRecord(BoxRecord $record): self {
+        return $this->setState($record->getState())
+            ->setLocation($record->getLocation())
+            ->setQuality($record->getQuality())
+            ->setOwner($record->getClient())
+            ->setComment($record->getComment());
     }
 
 }

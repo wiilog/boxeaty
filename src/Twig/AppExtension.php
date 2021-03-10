@@ -3,9 +3,11 @@
 namespace App\Twig;
 
 use App\Entity\User;
+use App\Helper\FormatHelper;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Security;
 use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class AppExtension extends AbstractExtension {
@@ -30,6 +32,12 @@ class AppExtension extends AbstractExtension {
             new TwigFunction("has_permission", [$this, "hasPermission"]),
             new TwigFunction("permissions", [$this, "getPermissions"]),
             new TwigFunction("base64", [$this, "base64"]),
+        ];
+    }
+
+    public function getFilters(): array {
+        return [
+            new TwigFilter("format_helper", [$this, "formatHelper"]),
         ];
     }
 
@@ -84,6 +92,10 @@ class AppExtension extends AbstractExtension {
         }
 
         return "data:image/$type;base64,$content";
+    }
+
+    public function formatHelper($input, string $formatter, $else = ''): string {
+        return FormatHelper::{$formatter}($input, $else);
     }
 
 }
