@@ -8,7 +8,6 @@ use App\Entity\Group;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
-use App\Helper\Stream;
 use App\Security\Authenticator;
 use App\Service\ExportService;
 use DateTime;
@@ -29,7 +28,7 @@ class UserController extends AbstractController {
      * @HasPermission(Role::MANAGE_USERS)
      */
     public function list(EntityManagerInterface $manager): Response {
-        $roles = $manager->getRepository(Role::class)->findAll();
+        $roles = $manager->getRepository(Role::class)->findBy(["active" => true]);
 
         return $this->render("settings/user/index.html.twig", [
             "new_user" => new User(),
@@ -121,7 +120,7 @@ class UserController extends AbstractController {
      * @HasPermission(Role::MANAGE_USERS)
      */
     public function editTemplate(EntityManagerInterface $manager, User $user): Response {
-        $roles = $manager->getRepository(Role::class)->findAll();
+        $roles = $manager->getRepository(Role::class)->findBy(["active" => true]);
 
         return $this->json([
             "submit" => $this->generateUrl("user_edit", ["user" => $user->getId()]),
@@ -207,7 +206,11 @@ class UserController extends AbstractController {
                 "success" => false,
                 "msg" => "Vous ne pouvez pas supprimer votre propre compte utilisateur"
             ]);
-        } else if($user && !$user->getTrackingMovements()->isEmpty()) {
+        } else if($user
+            && (
+                !$user->getBoxRecords()->isEmpty()
+                || !$user->getOrderDepositTickets()->isEmpty()
+            )) {
             $user->setActive(false);
             $manager->flush();
 

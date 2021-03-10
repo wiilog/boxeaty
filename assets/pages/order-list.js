@@ -3,15 +3,14 @@ import '../app';
 import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
-import QrScanner from "qr-scanner";
-import Flash from "../flash";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
+import Scan from "../scan";
+import Flash from "../flash";
 
 const boxPrices = {};
 const depositTicketPrices = {};
 
 $(document).ready(() => {
-    QrScanner.WORKER_PATH = '/build/vendor/qr-scanner-worker.min.js';
 
     const orderId = $('[name=order-id]').val();
     $('#modal-delete-order').find('[name=id]').val(orderId);
@@ -21,17 +20,15 @@ $(document).ready(() => {
         success: () => window.location.reload(),
     });
 
-    $(`.new-box`).click(() => newBoxModal.open());
-
     const table = initDatatable(`#table-orders`, {
         ajax: AJAX.route(`POST`, `orders_api`),
         columns: [
-            {data: `boxes`, title: `Numéro(s) Box(s)`},
-            {data: `depositTickets`, title: `Ticket(s) dépose`},
-            {data: `location`, title: `Emplacement de passage en caisse`},
+            {data: `boxes`, title: `Numéro(s) Box`},
+            {data: `depositTickets`, title: `Ticket(s) consigne`},
+            {data: `location`, title: `Emplacement`},
             {data: `totalBoxAmount`, title: `Montant total des Box`},
             {data: `totalDepositTicketAmount`, title: `Montant total des consignes`},
-            {data: `totalCost`, title: `Balance de passage en caisse`},
+            {data: `totalCost`, title: `Balance`},
             {data: `user`, title: `Utilisateur`},
             {data: `client`, title: `Client`},
             {data: `date`, title: `Date et heure de création`},
@@ -45,6 +42,7 @@ $(document).ready(() => {
 
     const newOrderModal = Modal.static(`#modal-new-order`, {
         ajax: AJAX.route(`POST`, `order_new`),
+        table,
         submitter: function() {
             const $depositTicketContainer = $('.deposit-ticket-container');
             const $depositTicket = $depositTicketContainer.find('.deposit-ticket');
@@ -58,10 +56,11 @@ $(document).ready(() => {
                 $('select[name=box]').prop('disabled', true);
             } else {
                 newOrderModal.handleSubmit();
-                newOrderModal.close();
-                confirmationOrderModal.open();
-                table.ajax.reload();
             }
+        },
+        success: () => {
+            newOrderModal.close();
+            confirmationOrderModal.open();
         }
     });
 
@@ -80,18 +79,48 @@ $(document).ready(() => {
 
     $(`.scan-box`).click(function() {
         const $modal = $(this).closest('.modal');
-        scan(scanModal, $modal.find('select[name=box]'), `boxes`, {
-            success: 'La Box a bien été ajoutée',
-            warning: 'La Box n\'existe pas'
+
+        Scan.proceed(scanModal, {
+            title: `Scan de la Box`,
+            onScan: (result) => (
+                getAvailableElementFromBarcode(
+                    result,
+                    {
+                        $select: $modal.find('select[name=box]'),
+                        routeName: `ajax_select_available_boxes`,
+                        successMessage: 'La Box a bien été ajoutée',
+                        warningMessage: 'La Box n\'existe pas',
+                        updatePrices: (element) => {
+                            boxPrices[element.text] = element.price;
+                        }
+                    }
+                )
+            )
         });
     });
 
     $(`.deposit-ticket-scan`).click(function() {
         const $modal = $(this).closest('.modal');
-        scan(scanModal, $modal.find('select[name=depositTicket]'), `deposit_tickets`, {
-            success: 'Le ticket-consigne a bien été ajouté',
-            warning: `Le ticket-consigne n'existe pas, a déjà été utilisé ou n'est plus valide`
-        });
+        Scan.proceed(
+            scanModal,
+            {
+                title: `Scan du ticket-consigne`,
+                onScan: (result) => (
+                    getAvailableElementFromBarcode(
+                        result,
+                        {
+                            $select: $modal.find('select[name=depositTicket]'),
+                            routeName: `ajax_select_deposit_tickets`,
+                            successMessage: 'Le ticket-consigne a bien été ajouté',
+                            warningMessage: `Le ticket-consigne n'existe pas, a déjà été utilisé ou n'est plus valide`,
+                            updatePrices: (element) => {
+                                depositTicketPrices[element.text] = element.price;
+                            }
+                        }
+                    )
+                )
+            }
+        );
     });
 
     $('select[name=box]').on('change', function() {
@@ -102,56 +131,6 @@ $(document).ready(() => {
         calculateTotalCost($('select[name=depositTicket]'));
     });
 });
-
-function scan(scanModal, $select, type, msg) {
-    if(type === `boxes`) {
-        scanModal.elem().find(`.scan-container-title`).text(`Scan de la box`);
-    } else {
-        scanModal.elem().find(`.scan-container-title`).text(`Scan du ticket consigne`);
-    }
-
-    scanModal.open()
-    const qrScanner = new QrScanner($('.scan-element')[0], result => {
-        if(result) {
-            const url = Routing.generate(type === `boxes` ? `ajax_select_available_boxes` : `ajax_select_deposit_tickets`);
-            AJAX.url(`GET`, url + `?term=${result}`).json(results => {
-                const idk = results.results.find(r => r.text === result);
-
-                if(idk) {
-                    if(type === `boxes`) {
-                        boxPrices[idk.text] = idk.price;
-                    } else {
-                        depositTicketPrices[idk.text] = idk.price;
-                    }
-
-                    let selectedOptions = $select.find(`option:selected`).map(function() {
-                        return $(this).val();
-                    }).toArray();
-
-                    if($select.find(`option[value='${result}']`).length === 0) {
-                        let option = new Option(result, result, true, true);
-                        $select.append(option);
-                    }
-
-                    selectedOptions.push(result);
-                    $select.val(selectedOptions).trigger("change");
-                    Flash.add('success', msg.success);
-                } else {
-                    Flash.add('warning', msg.warning)
-                }
-
-                scanModal.close();
-            });
-
-            qrScanner.destroy();
-        }
-    });
-
-    $('#modal-scan').on('hidden.bs.modal', function() {
-        qrScanner.destroy();
-    });
-    qrScanner.start();
-}
 
 function calculateTotalCost($select) {
     const $modal = $select.closest('.modal');
@@ -194,5 +173,38 @@ function calculateTotalCost($select) {
     } else {
         $costLabel.text('Aucun coût');
         $hint.addClass('d-none');
+    }
+}
+
+function getAvailableElementFromBarcode(result, {routeName, $select, updatePrices, successMessage, warningMessage}) {
+    if (result) {
+        const urlWithParams = Routing.generate(routeName, {term: result});
+        return AJAX.url(`GET`, urlWithParams).json((results) => {
+            const element = results.results.find(r => r.text === result);
+
+            if (element) {
+                updatePrices(element);
+
+                let selectedOptions = $select.find(`option:selected`)
+                    .map(function () {
+                        return $(this).val();
+                    })
+                    .toArray();
+
+                if ($select.find(`option[value='${element.id}']`).length === 0) {
+                    let option = new Option(element.text, element.id, true, true);
+                    $select.append(option);
+                }
+
+                selectedOptions.push(element.id);
+                $select.val(selectedOptions).trigger("change");
+                Flash.add('success', successMessage);
+            } else {
+                Flash.add('warning', warningMessage)
+            }
+        });
+    }
+    else {
+        return new Promise((resolve) => { resolve(); })
     }
 }

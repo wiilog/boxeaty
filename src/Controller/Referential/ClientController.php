@@ -84,7 +84,9 @@ class ClientController extends AbstractController {
 
         $existing = $clientRepository->findOneBy(["name" => $content->name]);
         if ($existing) {
-            $form->addError("email", "Ce client existe déjà");
+            $form->addError("name", "Ce client existe déjà");
+        } elseif (!empty($content->phoneNumber) && strlen($content->phoneNumber) !== 10) {
+            $form->addError("phoneNumber", "Le numéro de téléphone doit contenir 10 caractères");
         }
 
         if($form->isValid()) {
@@ -150,7 +152,9 @@ class ClientController extends AbstractController {
 
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $client) {
-            $form->addError("email", "Un autre client avec ce nom existe déjà");
+            $form->addError("name", "Un autre client avec ce nom existe déjà");
+        } elseif (!empty($content->phoneNumber) && strlen($content->phoneNumber) !== 10) {
+            $form->addError("phoneNumber", "Le numéro de téléphone doit contenir 10 caractères");
         }
 
         if($form->isValid()) {
@@ -195,7 +199,7 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function delete(EntityManagerInterface $manager, Client $client): Response {
-        if($client && (!$client->getTrackingMovements()->isEmpty() || !$client->getBoxes()->isEmpty())) {
+        if($client && (!$client->getBoxRecords()->isEmpty() || !$client->getBoxes()->isEmpty())) {
             $client->setActive(false);
             $manager->flush();
 

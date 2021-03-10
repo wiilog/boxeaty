@@ -16,7 +16,7 @@ $(document).ready(() => {
     const table = initDatatable(`#table-box-types`, {
         ajax: AJAX.route(`POST`, `box_types_api`),
         columns: [
-            {data: `name`, title: `Type de box`},
+            {data: `name`, title: `Type de Box`},
             {data: `active`, title: `Actif`},
             {data: `price`, title: `Prix`},
             {data: `capacity`, title: `Contenance`},

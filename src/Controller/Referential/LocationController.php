@@ -3,17 +3,14 @@
 namespace App\Controller\Referential;
 
 use App\Annotation\HasPermission;
-use App\Entity\Box;
 use App\Entity\Client;
 use App\Entity\Location;
 use App\Entity\Role;
-use App\Entity\TrackingMovement;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -48,6 +45,7 @@ class LocationController extends AbstractController {
                 "id" => $location->getId(),
                 "type" => $location->isKiosk() ? "Borne" : "Emplacement",
                 "name" => $location->getName(),
+                "client_name" => $location->getClient() ? $location->getClient()->getName() : '',
                 "active" => $location->isActive() ? "Oui" : "Non",
                 "client" => FormatHelper::named($location->getClient()),
                 "boxes" => $location->getBoxes()->count(),
@@ -83,8 +81,17 @@ class LocationController extends AbstractController {
         }
 
         if ($form->isValid()) {
+            $deporte = new Location();
+            $deporte->setKiosk($content->type)
+                ->setName($content->name . "_deporte")
+                ->setActive($content->active)
+                ->setClient($client)
+                ->setDescription($content->description ?? null)
+                ->setDeposits(0);
+
             $location = new Location();
-            $location->setKiosk($content->type)
+            $location->setDeporte($deporte)
+                ->setKiosk($content->type)
                 ->setName($content->name)
                 ->setActive($content->active)
                 ->setClient($client)
@@ -92,6 +99,7 @@ class LocationController extends AbstractController {
                 ->setDeposits(0);
 
             $manager->persist($location);
+            $manager->persist($deporte);
             $manager->flush();
 
             return $this->json([
@@ -167,7 +175,7 @@ class LocationController extends AbstractController {
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
     public function delete(EntityManagerInterface $manager, Location $location): Response {
-        if($location && (!$location->getTrackingMovements()->isEmpty() || !$location->getBoxes()->isEmpty())) {
+        if($location && (!$location->getBoxRecords()->isEmpty() || !$location->getBoxes()->isEmpty())) {
             $location->setActive(false);
             $manager->flush();
 

@@ -19,6 +19,7 @@ const ROUTES = {
 const INSTANT_SELECT_TYPES = {
     type: true,
     quality: true,
+    group: true,
 }
 
 export default class Select2 {
@@ -45,7 +46,7 @@ export default class Select2 {
         }
         $element.select2({
             placeholder: $element.data(`placeholder`),
-            tags: $element.is(`[data-editable]`),
+            allowClear: true,
             language: {
                 inputTooShort: () => 'Veuillez entrer au moins 1 caractère.',
                 noResults: () => `Aucun résultat`,
@@ -54,8 +55,13 @@ export default class Select2 {
             ...config,
         });
 
-        if($element.is(`[multiple]`)) {console.log(
-            $element.siblings(`.select2-container`));
+        //fixes select2 search focus bug
+        $element.on(`select2:open`, function() {
+            setTimeout(() => $('.select2-search__field').focus(), 150);
+            setTimeout(() => $('.select2-search__field').focus(), 300);
+        });
+
+        if($element.is(`[multiple]`)) {
             $element.siblings(`.select2-container`).addClass(`multiple`);
         }
     }

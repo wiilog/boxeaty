@@ -16,7 +16,7 @@
             <p class="fs-5">Emplacement : <strong>{{ box.location ? box.location.name }}</strong></p>
             <p class="fs-5">Qualité : <strong>{{ box.quality ? box.quality.name }}</strong></p>
             <p class="fs-5">Etat : <strong>{{ box.state ? constant('App\\Entity\\Box::NAMES')[box.state] }}</strong></p>
-            <p class="fs-5">Prix : <strong>{{ box.type and box.type.price ? ((box.type.price | replace({'.': ','})) ~ ' euros') }}</strong></p>
+            <p class="fs-5">Prix : <strong>{{ box.type ? box.type.price|format_helper('price') }}</strong></p>
         </div>
         <div class="col-8 box-group">
             <div class="owner box-details">

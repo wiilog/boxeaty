@@ -6,10 +6,10 @@ use App\Entity\Box;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
-use App\Entity\TrackingMovement;
 use App\Entity\User;
 use App\Helper\Stream;
 use App\Helper\StringHelper;
+use App\Service\BoxRecordService;
 use App\Service\Mailer;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,7 +23,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ApiController extends AbstractController {
 
-    private const BOX_CAPACITY = 6;
+    private const BOX_CAPACITY = 50;
 
     /**
      * @Route("/ping", name="api_ping")
@@ -42,14 +42,15 @@ class ApiController extends AbstractController {
 
         $phrase = $manager->getRepository(GlobalSetting::class)->getValue(GlobalSetting::TABLET_PHRASE);
 
-        if(isset($content->id)) {
+        $client = null;
+        if (isset($content->id)) {
             $kiosk = $manager->getRepository(Location::class)->find($content->id);
-            $client = $kiosk->getClient();
-            if (!$client->isMultiSite() && $client->getLinkedMultiSite()) {
-                $client = $client->getLinkedMultiSite();
+            if ($kiosk) {
+                $client = $kiosk->getClient();
+                if ($client && !$client->isMultiSite() && $client->getLinkedMultiSite()) {
+                    $client = $client->getLinkedMultiSite();
+                }
             }
-        } else {
-            $client = null;
         }
 
         return $this->json([
@@ -136,28 +137,40 @@ class ApiController extends AbstractController {
     /**
      * @Route("/kiosks/empty", name="api_empty_kiosk", options={"expose": true})
      */
-    public function emptyKiosk(Request $request, EntityManagerInterface $manager): Response {
+    public function emptyKiosk(Request $request,
+                               BoxRecordService $boxRecordService,
+                               EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
-        $deliverer = $manager->getRepository(Location::class)->findDeliverer();
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk ?? $request->request->get("id"));
 
         foreach ($kiosk->getBoxes() as $box) {
             $user = $this->getUser();
+            $oldLocation = $box->getLocation();
+            $oldState = $box->getState();
+            $oldComment = $box->getComment();
 
-            $movement = (new TrackingMovement())
-                ->setDate(new DateTime())
-                ->setBox($box)
-                ->setClient($box->getOwner())
-                ->setQuality($box->getQuality())
-                ->setState(Box::UNAVAILABLE)
-                ->setLocation($deliverer)
-                ->setComment($content->comment ?? null)
-                ->setUser($user instanceof User ? $user : null);
+            $box->setState(Box::UNAVAILABLE)
+                ->setLocation($kiosk->getDeporte())
+                ->setComment($content->comment ?? null);
 
-            $box->fromTrackingMovement($movement);
+            [$tracking, $record] = $boxRecordService->generateBoxRecords(
+                $box,
+                [
+                    'location' => $oldLocation,
+                    'state' => $oldState,
+                    'comment' => $oldComment
+                ],
+                $user instanceof User ? $user : null
+            );
 
-            $manager->persist($movement);
+            if ($tracking) {
+                $manager->persist($tracking);
+            }
+
+            if ($record) {
+                $manager->persist($record);
+            }
         }
 
         $manager->flush();
@@ -199,7 +212,9 @@ class ApiController extends AbstractController {
     /**
      * @Route("/box/drop", name="api_drop_box")
      */
-    public function dropBox(Request $request, EntityManagerInterface $manager): Response {
+    public function dropBox(Request $request,
+                            BoxRecordService $boxRecordService,
+                            EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
@@ -211,23 +226,37 @@ class ApiController extends AbstractController {
         if ($box
             && $box->getType()
             && $box->getOwner()) {
-            $movement = (new TrackingMovement())
-                ->setDate(new DateTime())
-                ->setBox($box)
-                ->setLocation($kiosk)
-                ->setClient($box->getOwner())
-                ->setQuality($box->getQuality())
-                ->setState(Box::UNAVAILABLE)
-                ->setComment($content->comment ?? null)
-                ->setUser(null);
+            $oldLocation = $box->getLocation();
+            $oldState = $box->getState();
+            $oldComment = $box->getComment();
 
             $kiosk->setDeposits($kiosk->getDeposits() + 1);;
 
-            $box->setCanGenerateDepositTicket(true)
+            $box
+                ->setCanGenerateDepositTicket(true)
                 ->setUses($box->getUses() + 1)
-                ->fromTrackingMovement($movement);
+                ->setState(Box::UNAVAILABLE)
+                ->setLocation($kiosk)
+                ->setComment($content->comment ?? null);
 
-            $manager->persist($movement);
+            [$tracking, $record] = $boxRecordService->generateBoxRecords(
+                $box,
+                [
+                    'location' => $oldLocation,
+                    'state' => $oldState,
+                    'comment' => $oldComment
+                ],
+                null
+            );
+
+            if ($tracking) {
+                $manager->persist($tracking);
+            }
+
+            if ($record) {
+                $manager->persist($record);
+            }
+
             $manager->flush();
 
             return $this->json([
@@ -287,7 +316,7 @@ class ApiController extends AbstractController {
         if (!$box->getCanGenerateDepositTicket()) {
             return $this->json([
                 "success" => false,
-                "msg" => "Cette box n'a pas été déposée",
+                "msg" => "Cette Box n'a pas été déposée",
             ]);
         }
 
@@ -303,7 +332,7 @@ class ApiController extends AbstractController {
 
         $mailer->send(
             $content->email,
-            "BoxEaty - Ticket consigne",
+            "BoxEaty - Ticket-consigne",
             $this->renderView("emails/deposit_ticket.html.twig", [
                 "ticket" => $depositTicket,
             ])

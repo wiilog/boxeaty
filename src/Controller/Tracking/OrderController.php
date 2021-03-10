@@ -7,10 +7,13 @@ use App\Entity\Box;
 use App\Entity\DepositTicket;
 use App\Entity\Order;
 use App\Entity\Role;
+use App\Entity\BoxRecord;
 use App\Entity\TrackingMovement;
+use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Helper\Stream;
+use App\Service\BoxRecordService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -74,7 +77,9 @@ class OrderController extends AbstractController {
      * @Route("/nouveau", name="order_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_ORDERS)
      */
-    public function new(Request $request, EntityManagerInterface $manager): Response {
+    public function new(Request $request,
+                        BoxRecordService $boxRecordService,
+                        EntityManagerInterface $manager): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
@@ -84,23 +89,45 @@ class OrderController extends AbstractController {
         $boxes = $boxRepository->findBy(["id" => explode(",", $content->box)]);
         $depositTickets = $depositTicketRepository->findBy(["id" => explode(",", $content->depositTicket)]);
 
+        if (empty($boxes) && empty($depositTickets)) {
+            $form->addError('box', 'Au moins une Box ou un ticket-consigne sont requis');
+            $form->addError('depositTicket', 'Au moins une Box ou un ticket-consigne sont requis');
+        }
+
         if ($form->isValid()) {
             $order = new Order();
             $order->setDate(new DateTime());
 
+            /** @var User $orderUser */
+            $orderUser = $this->getUser();
+
             foreach ($boxes as $box) {
                 $order->addBox($box);
-                $movement = (new TrackingMovement())
-                    ->setBox($box)
-                    ->setDate(new DateTime())
-                    ->setState(Box::CONSUMER)
-                    ->setLocation(null)
-                    ->setQuality($box->getQuality())
-                    ->setClient($box->getOwner())
-                    ->setUser($this->getUser());
 
-                $manager->persist($movement);
-                $box->fromTrackingMovement($movement);
+                $oldLocation = $box->getLocation();
+                $oldState = $box->getState();
+                $oldComment = $box->getComment();
+
+                $box->setState(Box::CONSUMER)
+                    ->setLocation(null);
+
+                [$tracking, $record] = $boxRecordService->generateBoxRecords(
+                    $box,
+                    [
+                        'location' => $oldLocation,
+                        'state' => $oldState,
+                        'comment' => $oldComment
+                    ],
+                    $this->getUser()
+                );
+
+                if ($tracking) {
+                    $manager->persist($tracking);
+                }
+
+                if ($record) {
+                    $manager->persist($record);
+                }
             }
 
             $boxPrices = Stream::from($order->getBoxes())
@@ -110,7 +137,10 @@ class OrderController extends AbstractController {
 
             foreach ($depositTickets as $depositTicket) {
                 $order->addDepositTicket($depositTicket);
-                $depositTicket->setState(DepositTicket::SPENT);
+                $depositTicket
+                    ->setState(DepositTicket::SPENT)
+                    ->setOrderUser($orderUser)
+                    ->setUseDate(new DateTime());
             }
 
             $depositTicketPrices = Stream::from($order->getDepositTickets())
@@ -121,9 +151,14 @@ class OrderController extends AbstractController {
 
             $totalPrice = $boxPrices - $depositTicketPrices;
 
-            $order->setUser($this->getUser());
-            $order->setClient($boxes[0]->getOwner());
-            $order->setLocation($boxes[0]->getLocation());
+            if(count($boxes) >= 1) {
+                $order->setClient($boxes[0]->getOwner());
+                $order->setLocation($boxes[0]->getLocation());
+            } else if(!$this->getUser()->getClients()->isEmpty()) {
+                $order->setClient($this->getUser()->getClients()[0]);
+            }
+
+            $order->setUser($orderUser);
             $order->setTotalBoxAmount($boxPrices);
             $order->setTotalDepositTicketAmount($depositTicketPrices);
             $order->setTotalCost($totalPrice);
@@ -143,25 +178,40 @@ class OrderController extends AbstractController {
      * @Route("/supprimer", name="order_delete", options={"expose": true})
      * @HasPermission(Role::MANAGE_ORDERS)
      */
-    public function delete(Request $request, EntityManagerInterface $manager): Response {
+    public function delete(Request $request,
+                           BoxRecordService $boxRecordService,
+                           EntityManagerInterface $manager): Response {
         $content = (object)$request->request->all();
         $order = $manager->getRepository(Order::class)->find($content->id);
 
         if ($order) {
             foreach ($order->getBoxes() as $box) {
-                $previousMovement = $manager->getRepository(TrackingMovement::class)->findPreviousMovement($box);
+                $oldLocation = $box->getLocation();
+                $oldState = $box->getState();
+                $oldComment = $box->getComment();
 
-                $movement = (new TrackingMovement())
-                    ->setBox($box)
-                    ->setDate(new DateTime())
-                    ->setState(Box::AVAILABLE)
-                    ->setLocation($previousMovement ? $previousMovement->getLocation() : null)
-                    ->setQuality($box->getQuality())
-                    ->setClient($box->getOwner())
-                    ->setUser($this->getUser());
+                $previousMovement = $manager->getRepository(BoxRecord::class)->findPreviousTrackingMovement($box);
 
-                $manager->persist($movement);
-                $box->fromTrackingMovement($movement);
+                $box->setState(Box::AVAILABLE)
+                    ->setLocation($previousMovement ? $previousMovement->getLocation() : null);
+
+                [$tracking, $record] = $boxRecordService->generateBoxRecords(
+                    $box,
+                    [
+                        'location' => $oldLocation,
+                        'state' => $oldState,
+                        'comment' => $oldComment
+                    ],
+                    $this->getUser()
+                );
+
+                if ($tracking) {
+                    $manager->persist($tracking);
+                }
+
+                if ($record) {
+                    $manager->persist($record);
+                }
             }
 
             foreach ($order->getDepositTickets() as $depositTicket) {
