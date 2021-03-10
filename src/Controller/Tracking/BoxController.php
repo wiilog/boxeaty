@@ -219,9 +219,6 @@ class BoxController extends AbstractController {
     /**
      * @Route("/supprimer", name="box_delete", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
-     * @param Request $request
-     * @param EntityManagerInterface $manager
-     * @return Response
      */
     public function delete(Request $request,
                            EntityManagerInterface $manager): Response {
@@ -247,9 +244,6 @@ class BoxController extends AbstractController {
     /**
      * @Route("/export", name="boxes_export", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
-     * @param EntityManagerInterface $manager
-     * @param ExportService $exportService
-     * @return Response
      */
     public function export(EntityManagerInterface $manager,
                            ExportService $exportService): Response {
@@ -268,10 +262,6 @@ class BoxController extends AbstractController {
 
     /**
      * @Route("/{box}/mouvements", name="get_box_mouvements", options={"expose": true}, methods={"GET"})
-     * @param Box $box
-     * @param Request $request
-     * @param EntityManagerInterface $manager
-     * @return JsonResponse
      */
     public function getTrackingMovements(Box $box,
                                          Request $request,
@@ -279,15 +269,14 @@ class BoxController extends AbstractController {
     {
         $trackingMovementRepository = $manager->getRepository(BoxRecord::class);
         $start = $request->query->getInt('start', 0);
+        $search = $request->query->has('search') ? $request->query->get('search') : null;
         $length = 10;
 
-        $boxMovements = $trackingMovementRepository->getBoxRecords($box, $start, $length);
+        $boxMovements = $trackingMovementRepository->getBoxRecords($box, $start, $length, $search);
         $countBoxMovements = $trackingMovementRepository->count([
             'box' => $box,
             'trackingMovement' => false
         ]);
-
-        dump($countBoxMovements);
 
         return $this->json([
             'success' => true,

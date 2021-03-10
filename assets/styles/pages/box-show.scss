@@ -34,4 +34,17 @@
         height: 15vh;
         margin-bottom: 1vh;
     }
+
+    .scroll-top {
+        .scroll-top-button {
+            right: 80px;
+            position: absolute;
+            bottom: 110px;
+
+            svg {
+                color: $blue;
+                cursor: pointer;
+            }
+        }
+    }
 }
