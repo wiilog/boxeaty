@@ -28,7 +28,7 @@ $(document).ready(() => {
         columns: [
             {data: `date`, title: `Date`},
             {data: `location`, title: `Emplacement`},
-            {data: `box`, title: `Numéro box`},
+            {data: `box`, title: `Numéro Box`},
             {data: `quality`, title: `Qualité`},
             {data: `state`, title: `Etat`},
             {data: `client`, title: `Client`},

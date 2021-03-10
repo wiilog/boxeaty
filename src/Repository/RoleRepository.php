@@ -3,10 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Role;
-use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query\Expr\Join;
 
 /**
  * @method Role|null find($id, $lockMode = null, $lockVersion = null)

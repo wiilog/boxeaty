@@ -20,3 +20,4 @@ doctrine:
             string_functions:
                 DATE: DoctrineExtensions\Query\Mysql\Date
                 IF: DoctrineExtensions\Query\Mysql\IfElse
+                REPLACE: DoctrineExtensions\Query\Mysql\Replace

@@ -57,7 +57,7 @@ parameters:
         - name: Emplacement
           route: locations_list
           permission: App\Entity\Role::MANAGE_LOCATIONS
-        - name: Type de box
+        - name: Type de Box
           route: box_types_list
           permission: App\Entity\Role::MANAGE_BOX_TYPES
     - name: Paramétrage

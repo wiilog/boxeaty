@@ -43,7 +43,12 @@ class DepositTicketController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $data = [];
+
+        /** @var DepositTicket $depositTicket */
         foreach ($depositTickets["data"] as $depositTicket) {
+            $box = $depositTicket->getBox();
+            $boxType = $box ? $box->getType() : null;
+            $totalAmount = $boxType ? $boxType->getPrice() : null;
             $data[] = [
                 "id" => $depositTicket->getId(),
                 "creationDate" => FormatHelper::datetime($depositTicket->getCreationDate()),
@@ -53,6 +58,8 @@ class DepositTicketController extends AbstractController {
                 "useDate" => FormatHelper::datetime($depositTicket->getUseDate()) ?: "Inutilisé",
                 "client" => $depositTicket->getLocation() ? FormatHelper::named($depositTicket->getLocation()->getClient()) : "",
                 "state" => DepositTicket::NAMES[$depositTicket->getState()] ?? "",
+                "orderUser" => FormatHelper::user($depositTicket->getOrderUser()),
+                "depositAmount" => FormatHelper::price($totalAmount),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
@@ -94,7 +101,7 @@ class DepositTicketController extends AbstractController {
         }
 
         if ($existing) {
-            $form->addError("number", "Ce ticket consigne existe déjà");
+            $form->addError("number", "Ce ticket-consigne existe déjà");
         }
 
         if ($form->isValid()) {
@@ -116,7 +123,7 @@ class DepositTicketController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Ticket consigne <b>{$depositTicket->getNumber()}</b> créé avec succès",
+                "msg" => "Ticket-consigne <b>{$depositTicket->getNumber()}</b> créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -148,7 +155,7 @@ class DepositTicketController extends AbstractController {
         $kiosk = $manager->getRepository(Location::class)->find($content->location);
         $existing = $manager->getRepository(DepositTicket::class)->findOneBy(["number" => $content->number]);
         if ($existing !== null && $existing !== $depositTicket) {
-            $form->addError("name", "Un autre ticket consigne avec ce numéro existe déjà");
+            $form->addError("name", "Un autre ticket-consigne avec ce numéro existe déjà");
         }
 
         if ($form->isValid()) {
@@ -168,7 +175,7 @@ class DepositTicketController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Ticket consigne modifié avec succès",
+                "msg" => "Ticket-consigne modifié avec succès",
             ]);
         } else {
             return $form->errors();
@@ -189,12 +196,12 @@ class DepositTicketController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Ticket consigne <strong>{$depositTicket->getNumber()}</strong> supprimé avec succès"
+                "msg" => "Ticket-consigne <strong>{$depositTicket->getNumber()}</strong> supprimé avec succès"
             ]);
         } else {
             return $this->json([
                 "success" => false,
-                "msg" => "Le ticket consigne n'existe pas"
+                "msg" => "Le ticket-consigne n'existe pas"
             ]);
         }
     }

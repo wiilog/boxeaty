@@ -55,9 +55,9 @@ class User implements UserInterface {
     private ?Role $role = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=TrackingMovement::class, mappedBy="user")
+     * @ORM\OneToMany(targetEntity=BoxRecord::class, mappedBy="user")
      */
-    private Collection $trackingMovements;
+    private Collection $boxRecords;
 
     /**
      * @ORM\ManyToMany(targetEntity=Client::class, inversedBy="users")
@@ -79,10 +79,16 @@ class User implements UserInterface {
      */
     private $resetTokenExpiration;
 
+    /**
+     * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="orderUser")
+     */
+    private Collection $orderDepositTickets;
+
     public function __construct() {
         $this->clients = new ArrayCollection();
-        $this->trackingMovements = new ArrayCollection();
+        $this->boxRecords = new ArrayCollection();
         $this->groups = new ArrayCollection();
+        $this->orderDepositTickets = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -150,26 +156,26 @@ class User implements UserInterface {
     }
 
     /**
-     * @return Collection|TrackingMovement[]
+     * @return Collection|BoxRecord[]
      */
-    public function getTrackingMovements(): Collection {
-        return $this->trackingMovements;
+    public function getBoxRecords(): Collection {
+        return $this->boxRecords;
     }
 
-    public function addTrackingMovement(TrackingMovement $trackingMovement): self {
-        if (!$this->trackingMovements->contains($trackingMovement)) {
-            $this->trackingMovements[] = $trackingMovement;
-            $trackingMovement->setUser($this);
+    public function addBoxRecord(BoxRecord $boxRecord): self {
+        if (!$this->boxRecords->contains($boxRecord)) {
+            $this->boxRecords[] = $boxRecord;
+            $boxRecord->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeTrackingMovement(TrackingMovement $trackingMovement): self {
-        if ($this->trackingMovements->removeElement($trackingMovement)) {
+    public function removeBoxRecord(BoxRecord $boxRecord): self {
+        if ($this->boxRecords->removeElement($boxRecord)) {
             // set the owning side to null (unless already changed)
-            if ($trackingMovement->getUser() === $this) {
-                $trackingMovement->setUser(null);
+            if ($boxRecord->getUser() === $this) {
+                $boxRecord->setUser(null);
             }
         }
 
@@ -280,6 +286,30 @@ class User implements UserInterface {
     public function setResetTokenExpiration(?\DateTimeInterface $resetTokenExpiration): self
     {
         $this->resetTokenExpiration = $resetTokenExpiration;
+
+        return $this;
+    }
+
+    public function getOrderDepositTickets(): Collection {
+        return $this->orderDepositTickets;
+    }
+
+    public function addOrderDepositTicket(DepositTicket $depositTicket): self {
+        if (!$this->orderDepositTickets->contains($depositTicket)) {
+            $this->orderDepositTickets[] = $depositTicket;
+            $depositTicket->setOrderUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderDepositTicket(DepositTicket $depositTicket): self {
+        if ($this->orderDepositTickets->removeElement($depositTicket)) {
+            // set the owning side to null (unless already changed)
+            if ($depositTicket->getOrderUser() === $this) {
+                $depositTicket->setOrderUser(null);
+            }
+        }
 
         return $this;
     }

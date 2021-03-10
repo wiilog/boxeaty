@@ -125,3 +125,7 @@
 .btn-close:focus {
     box-shadow: none;
 }
+
+body.modal-open {
+    overflow: hidden;
+}

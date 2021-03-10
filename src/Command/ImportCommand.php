@@ -2,20 +2,12 @@
 
 namespace App\Command;
 
-use App\Entity\Box;
-use App\Entity\BoxType;
-use App\Entity\Client;
 use App\Entity\Import;
-use App\Entity\Location;
-use App\Entity\Quality;
-use App\Service\ExportService;
 use App\Service\ImportService;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class ImportCommand extends Command {
 
