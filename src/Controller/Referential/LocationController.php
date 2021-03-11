@@ -3,6 +3,7 @@
 namespace App\Controller\Referential;
 
 use App\Annotation\HasPermission;
+use App\Entity\Box;
 use App\Entity\Client;
 use App\Entity\Location;
 use App\Entity\Role;
@@ -36,6 +37,7 @@ class LocationController extends AbstractController {
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
+        $boxRepository = $manager->getRepository(Box::class);
         $locations = $manager->getRepository(Location::class)
             ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
@@ -49,7 +51,7 @@ class LocationController extends AbstractController {
                 "active" => $location->isActive() ? "Oui" : "Non",
                 "client" => FormatHelper::named($location->getClient()),
                 "description" => $location->getDescription(),
-                "boxes" => $location->getBoxes()->count(),
+                "boxes" => $boxRepository->count(['location' => $location]),
                 "capacity" => $location->getCapacity() ?? "",
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
@@ -75,20 +77,21 @@ class LocationController extends AbstractController {
 
         $content = (object)$request->request->all();
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
-        $capacity = isset($content->client) ? (int)$content->capacity : null;
+        $capacity = isset($content->capacity) ? (int)$content->capacity : null;
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Un emplacement avec ce nom existe déjà");
         }
 
-        if ($capacity < Location::MIN_KIOSK_CAPACITY) {
+        if ($content->type && (!$capacity || $capacity < Location::MIN_KIOSK_CAPACITY)) {
             $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
 
         if ($form->isValid()) {
             $deporte = new Location();
-            $deporte->setKiosk($content->type)
+            $deporte
+                ->setKiosk($content->type)
                 ->setName($content->name . "_deporte")
                 ->setActive($content->active)
                 ->setClient($client)
@@ -96,7 +99,8 @@ class LocationController extends AbstractController {
                 ->setDeposits(0);
 
             $location = new Location();
-            $location->setDeporte($deporte)
+            $location
+                ->setDeporte($deporte)
                 ->setKiosk($content->type)
                 ->setName($content->name)
                 ->setActive($content->active)
@@ -106,6 +110,9 @@ class LocationController extends AbstractController {
 
             if((int)$content->type === 1) {
                 $location->setCapacity($capacity);
+            }
+            else {
+                $location->setCapacity(null);
             }
 
             $manager->persist($location);
@@ -144,19 +151,20 @@ class LocationController extends AbstractController {
 
         $content = (object)$request->request->all();
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
-        $capacity = isset($content->client) ? (int)$content->capacity : null;
+        $capacity = isset($content->capacity) ? (int)$content->capacity : null;
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $location) {
             $form->addError("label", "Un autre emplacement avec ce nom existe déjà");
         }
 
-        if ($capacity < Location::MIN_KIOSK_CAPACITY) {
+        if ($content->type && (!$capacity || $capacity < Location::MIN_KIOSK_CAPACITY)) {
             $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
 
         if ($form->isValid()) {
-            $location->setKiosk($content->type)
+            $location
+                ->setKiosk($content->type)
                 ->setName($content->name)
                 ->setClient($client)
                 ->setActive($content->active)
@@ -164,6 +172,9 @@ class LocationController extends AbstractController {
 
             if((int)$content->type === 1) {
                 $location->setCapacity($capacity);
+            }
+            else {
+                $location->setCapacity(null);
             }
 
             $manager->flush();

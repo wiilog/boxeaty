@@ -32,6 +32,11 @@ export default class Modal {
         modal.setupFileUploader();
 
         modal.element.on('hidden.bs.modal', () => modal.clear());
+        modal.element.on('shown.bs.modal', () => {
+            if(config.afterOpen) {
+                config.afterOpen(modal);
+            }
+        });
         modal.element.find(`button[type="submit"]`).click(function() {
             const $button = $(this);
             if($button.hasClass(LOADING_CLASS)) {

@@ -76,7 +76,7 @@ class Location {
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $capacity;
+    private ?int $capacity = null;
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
@@ -240,7 +240,7 @@ class Location {
         return $this->capacity;
     }
 
-    public function setCapacity(int $capacity): self
+    public function setCapacity(?int $capacity): self
     {
         $this->capacity = $capacity;
 
