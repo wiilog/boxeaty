@@ -48,7 +48,7 @@
     position: relative;
 
     tbody {
-        tr.odd, tr.even {
+        .clickable-row {
             cursor: pointer !important;
         }
     }

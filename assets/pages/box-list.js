@@ -31,6 +31,9 @@ $(document).ready(() => {
             DATATABLE_ACTIONS
         ],
         order: [[`id`, `desc`]],
+        initComplete: () => {
+            $('#table-boxes tr').addClass('clickable-row');
+        },
         listeners: {
             action: data => {
                 window.location.href = Routing.generate(`box_show`, {
