@@ -57,8 +57,7 @@ export default class Select2 {
 
         //fixes select2 search focus bug
         $element.on(`select2:open`, function() {
-            setTimeout(() => $('.select2-search__field').focus(), 150);
-            setTimeout(() => $('.select2-search__field').focus(), 300);
+            setTimeout(() => $('[name="capacity"]').data('select2').$dropdown.find('.select2-search__field').focus(), 150);
         });
 
         if($element.is(`[multiple]`)) {
