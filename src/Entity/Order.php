@@ -157,10 +157,6 @@ class Order {
         return $this->totalBoxAmount;
     }
 
-    public function getTotalBoxAmountFormated(): ?string {
-        return $this->totalBoxAmount . " €";
-    }
-
     public function setTotalBoxAmount(?string $totalBoxAmount): self {
         $this->totalBoxAmount = $totalBoxAmount;
         return $this;
@@ -168,10 +164,6 @@ class Order {
 
     public function getTotalDepositTicketAmount(): ?string {
         return $this->totalDepositTicketAmount;
-    }
-
-    public function getTotalDepositTicketAmountFormated(): ?string {
-        return $this->totalDepositTicketAmount. " €";
     }
 
     public function setTotalDepositTicketAmount(?string $totalDepositTicketAmount): self {
@@ -187,9 +179,5 @@ class Order {
         $this->totalCost = $totalCost;
 
         return $this;
-    }
-
-    public function getTotalCostFormated(): ?string {
-        return $this->getTotalCost(). " €";
     }
 }
