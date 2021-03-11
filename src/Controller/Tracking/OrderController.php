@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/tracabilite/passage-caisse")
+ * @Route("/tracabilite/scan-box")
  */
 class OrderController extends AbstractController {
 
@@ -224,7 +224,7 @@ class OrderController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Passage en caisse supprimé avec succès"
+                "msg" => "Scan Box supprimé avec succès"
             ]);
         } else {
 

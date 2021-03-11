@@ -8,7 +8,7 @@ parameters:
     Menu Traçabilité:
       App\Entity\Role::MANAGE_BOXES: Créer, modifier, supprimer une Box
       App\Entity\Role::MANAGE_MOVEMENTS: Créer, modifier, supprimer un mouvement
-      App\Entity\Role::MANAGE_ORDERS: Accès aux passages en caisse
+      App\Entity\Role::MANAGE_ORDERS: Accès aux scans Box
       App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer, supprimer un ticket-consigne
 
     Menu Référentiel:
@@ -41,7 +41,7 @@ parameters:
         - name: Mouvements
           permission: App\Entity\Role::MANAGE_MOVEMENTS
           route: tracking_movements_list
-        - name: Passage en caisse
+        - name: Scan Box
           permission: App\Entity\Role::MANAGE_ORDERS
           route: orders_list
     - name: Référentiel
