@@ -31,8 +31,8 @@ $(document).ready(() => {
             DATATABLE_ACTIONS
         ],
         order: [[`id`, `desc`]],
-        initComplete: () => {
-            $('#table-boxes tr').addClass('clickable-row');
+        createdRow: (row) => {
+            $(row).addClass('cursor-pointer');
         },
         listeners: {
             action: data => {
