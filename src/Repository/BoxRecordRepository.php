@@ -127,14 +127,19 @@ class BoxRecordRepository extends EntityRepository {
             ->setParameter("box", $box);
 
         if($search) {
-            $qb->andWhere("record.comment LIKE :search")
+            $qb
+                ->andWhere("record.comment LIKE :search")
                 ->setParameter("search", '%' . $search . '%');
         }
 
-        return $qb->setMaxResults($length)
-            ->setFirstResult($start)
-            ->getQuery()
-            ->getResult();
+        return [
+            'totalCount' => QueryHelper::count($qb, 'record'),
+            'data' => $qb
+                ->setMaxResults($length)
+                ->setFirstResult($start)
+                ->getQuery()
+                ->getResult()
+        ];
     }
 
     public function findNewerTrackingMovement(BoxRecord $trackingMovement): ?BoxRecord {

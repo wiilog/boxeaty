@@ -9,7 +9,7 @@ $(document).ready(() => {
     getBoxTrackingMovements();
 
     $('.comment-search').on('change', function () {
-        getBoxTrackingMovements($(this).val());
+        getBoxTrackingMovements(0);
     });
 
     $('.history-wrapper').on('scroll', function () {
@@ -30,16 +30,20 @@ $(document).ready(() => {
     });
 });
 
-function getBoxTrackingMovements(search = null, start = 0) {
+function getBoxTrackingMovements(start = 0) {
     const $historyWrapper = $('.history-wrapper');
     const $showMoreWrapper = $historyWrapper.find('.show-more-wrapper');
     const $showMoreButton = $showMoreWrapper.find('button');
     $showMoreButton.pushLoader();
 
+    const search = $('.comment-search').val();
+
     AJAX.route('GET', 'get_box_mouvements', {box: $('#box-id').val(), search, start})
         .json((result) => {
             if(result.success) {
-                $('.history-wrapper').empty();
+                if (start === 0) {
+                    $('.history-wrapper').empty();
+                }
                 const data = (result.data || []);
                 const historyLines = data.map(({state, color, comment, date}) => {
                     let $comment = $(`<div class="timeline-line-comment alert alert-${color}">${comment || 'Aucun commentaire'}</div>`);
@@ -69,16 +73,17 @@ function getBoxTrackingMovements(search = null, start = 0) {
                     }));
                 }
 
+                const customWrapperClass = 'd-flex justify-content-center align-items-center';
                 if(data.length === 0) {
-                    $historyWrapper.addClass("d-flex justify-content-center align-items-center")
+                    $historyWrapper.addClass(customWrapperClass);
                     $historyWrapper.append(`
                         <div class="d-flex flex-column align-items-center">
-                            <i class="far fa-frown fa-3x"></i>
-                            <p class="mt-2">Aucun commentaire ne correspond à votre recherche</p>
+                            <i class="fas fa-list-ul fa-3x"></i>
+                            <p class="mt-2">Aucun commentaire ${search ? 'ne correspond à votre recherche' : ' pour cette box'}</p>
                         </div>
-                    `)
+                    `);
                 } else {
-                    $historyWrapper.removeClass("d-flex justify-content-center align-items-center")
+                    $historyWrapper.removeClass(customWrapperClass);
                 }
             } else {
                 Flash.add('danger', `L'historique de la Box n'a pas pu être récupéré`);

@@ -267,21 +267,17 @@ class BoxController extends AbstractController {
                                          Request $request,
                                          EntityManagerInterface $manager): JsonResponse
     {
-        $trackingMovementRepository = $manager->getRepository(BoxRecord::class);
+        $boxRecordRepository = $manager->getRepository(BoxRecord::class);
         $start = $request->query->getInt('start', 0);
         $search = $request->query->has('search') ? $request->query->get('search') : null;
         $length = 10;
 
-        $boxMovements = $trackingMovementRepository->getBoxRecords($box, $start, $length, $search);
-        $countBoxMovements = $trackingMovementRepository->count([
-            'box' => $box,
-            'trackingMovement' => false
-        ]);
+        $boxMovementsResult = $boxRecordRepository->getBoxRecords($box, $start, $length, $search);
 
         return $this->json([
             'success' => true,
-            'isTail' => ($start + $length) >= $countBoxMovements,
-            'data' => Stream::from($boxMovements)
+            'isTail' => ($start + $length) >= $boxMovementsResult['totalCount'],
+            'data' => Stream::from($boxMovementsResult['data'])
                 ->map(fn(array $movement) => [
                     'comment' => str_replace("Powered by Froala Editor", "", $movement['comment']),
                     'color' => (isset($movement['state']) && isset(Box::LINKED_COLORS[$movement['state']]))

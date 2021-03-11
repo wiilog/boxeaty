@@ -62,7 +62,6 @@ class DepositTicketController extends AbstractController {
                 "orderUser" => FormatHelper::user($depositTicket->getOrderUser()),
                 "depositAmount" => FormatHelper::price($totalAmount),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
-                    "editable" => true,
                     "deletable" => true,
                 ]),
             ];
@@ -129,58 +128,6 @@ class DepositTicketController extends AbstractController {
             return $this->json([
                 "success" => true,
                 "msg" => "Ticket-consigne <b>{$depositTicket->getNumber()}</b> créé avec succès",
-            ]);
-        } else {
-            return $form->errors();
-        }
-    }
-
-    /**
-     * @Route("/modifier/template/{depositTicket}", name="deposit_ticket_edit_template", options={"expose": true})
-     * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
-     */
-    public function editTemplate(DepositTicket $depositTicket): Response {
-        return $this->json([
-            "submit" => $this->generateUrl("deposit_ticket_edit", ["depositTicket" => $depositTicket->getId()]),
-            "template" => $this->renderView("tracking/deposit_ticket/modal/edit.html.twig", [
-                "deposit_ticket" => $depositTicket,
-            ])
-        ]);
-    }
-
-    /**
-     * @Route("/modifier/{depositTicket}", name="deposit_ticket_edit", options={"expose": true})
-     * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
-     */
-    public function edit(Request $request, EntityManagerInterface $manager, DepositTicket $depositTicket): Response {
-        $form = Form::create();
-
-        $content = (object)$request->request->all();
-        $box = $manager->getRepository(Box::class)->find($content->box);
-        $kiosk = $manager->getRepository(Location::class)->find($content->location);
-        $existing = $manager->getRepository(DepositTicket::class)->findOneBy(["number" => $content->number]);
-        if ($existing !== null && $existing !== $depositTicket) {
-            $form->addError("name", "Un autre ticket-consigne avec ce numéro existe déjà");
-        }
-
-        if ($form->isValid()) {
-            $oldState = $depositTicket->getState();
-            $depositTicket
-                ->setBox($box)
-                ->setLocation($kiosk)
-                ->setNumber($content->number)
-                ->setState($content->state);
-
-            if ($oldState == DepositTicket::VALID
-                && $content->state == DepositTicket::SPENT) {
-                $depositTicket->setUseDate(new DateTime());
-            }
-
-            $manager->flush();
-
-            return $this->json([
-                "success" => true,
-                "msg" => "Ticket-consigne modifié avec succès",
             ]);
         } else {
             return $form->errors();
