@@ -47,12 +47,6 @@
 .dataTables_wrapper {
     position: relative;
 
-    tbody {
-        tr.odd, tr.even {
-            cursor: pointer !important;
-        }
-    }
-
     thead {
         background: $grey;
 

@@ -31,6 +31,9 @@ $(document).ready(() => {
             DATATABLE_ACTIONS
         ],
         order: [[`id`, `desc`]],
+        createdRow: (row) => {
+            $(row).addClass('cursor-pointer');
+        },
         listeners: {
             action: data => {
                 window.location.href = Routing.generate(`box_show`, {

@@ -215,6 +215,13 @@ class LocationController extends AbstractController {
                 "msg" => "Emplacement <strong>{$location->getName()}</strong> désactivé avec succès"
             ]);
         } else if ($location) {
+            $originalLocation = $manager->getRepository(Location::class)->findOneBy([
+                'deporte' => $location
+            ]);
+
+            if($originalLocation) {
+                $originalLocation->setDeporte(null);
+            }
             $manager->remove($location);
             $manager->flush();
 
