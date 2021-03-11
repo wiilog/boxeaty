@@ -11,6 +11,7 @@ use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Helper\StringHelper;
 use App\Service\ExportService;
+use App\Service\Mailer;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -77,10 +78,14 @@ class DepositTicketController extends AbstractController {
     /**
      * @Route("/nouveau", name="deposit_ticket_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
+     * @param Request $request
+     * @param EntityManagerInterface $manager
+     * @param Mailer $mailer
+     * @return Response
      */
     public function new(Request $request,
-                        EntityManagerInterface $manager): Response {
-
+                        EntityManagerInterface $manager,
+                        Mailer $mailer): Response {
         $form = Form::create();
 
         $depositTicketRepository = $manager->getRepository(DepositTicket::class);
@@ -109,7 +114,8 @@ class DepositTicketController extends AbstractController {
                 ->setLocation($kiosk)
                 ->setValidityDate(new DateTime("+{$kiosk->getClient()->getDepositTicketValidity()} month"))
                 ->setNumber($content->number)
-                ->setState($content->state);
+                ->setState($content->state)
+                ->setConsumerEmail($content->emailConsumer);
 
             if ($content->state == DepositTicket::SPENT) {
                 $depositTicket->setUseDate(new DateTime());
@@ -117,7 +123,9 @@ class DepositTicketController extends AbstractController {
 
             $manager->persist($depositTicket);
             $manager->flush();
-
+            $mailer->send($depositTicket->getConsumerEmail(),'Création d\'un ticket-consigne', $this->renderView("emails/deposit_ticket.html.twig",[
+                "ticket" =>$depositTicket,
+            ]));
             return $this->json([
                 "success" => true,
                 "msg" => "Ticket-consigne <b>{$depositTicket->getNumber()}</b> créé avec succès",

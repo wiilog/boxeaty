@@ -23,8 +23,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ApiController extends AbstractController {
 
-    private const BOX_CAPACITY = 50;
-
     /**
      * @Route("/ping", name="api_ping")
      */
@@ -66,7 +64,7 @@ class ApiController extends AbstractController {
             ->map(fn(Location $kiosk) => [
                 "id" => $kiosk->getId(),
                 "name" => $kiosk->getName(),
-                "capacity" => self::BOX_CAPACITY,
+                "capacity" => $kiosk->getCapacity(),
                 "client" => null,
                 "boxes" => Stream::from($kiosk->getBoxes())
                     ->map(fn(Box $box) => [
@@ -116,7 +114,7 @@ class ApiController extends AbstractController {
                 "kiosk" => [
                     "id" => $kiosk->getId(),
                     "name" => $kiosk->getName(),
-                    "capacity" => self::BOX_CAPACITY,
+                    "capacity" => $kiosk->getCapacity(),
                     "client" => null,
                     "boxes" => Stream::from($kiosk->getBoxes())
                         ->map(fn(Box $box) => [

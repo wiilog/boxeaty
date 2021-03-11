@@ -2,10 +2,12 @@
 
 namespace App\Repository;
 
+use App\Entity\Box;
 use App\Entity\Location;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 
 /**
  * @method Location|null find($id, $lockMode = null, $lockVersion = null)
@@ -23,7 +25,11 @@ class LocationRepository extends EntityRepository {
             ->addSelect("client.name AS client_name")
             ->addSelect("location.active AS active")
             ->addSelect("location.description AS description")
+            ->addSelect("COUNT(box) AS boxes")
+            ->addSelect("location.capacity AS capacity")
             ->leftJoin("location.client", "client")
+            ->leftJoin(Box::class, "box", Join::WITH, "box.location = location.id")
+            ->groupBy("location")
             ->getQuery()
             ->toIterable();
     }

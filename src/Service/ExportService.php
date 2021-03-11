@@ -42,6 +42,8 @@ class ExportService {
         "Nom du client",
         "Actif",
         "Description",
+        "Nombre de Box",
+        "Capacité",
     ];
 
     public const MOVEMENT_HEADER = [
