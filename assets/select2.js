@@ -44,6 +44,11 @@ export default class Select2 {
         if (type && !INSTANT_SELECT_TYPES[type]) {
             config.minimumInputLength = 1;
         }
+
+        if ($element.is('[data-s2-tags]')) {
+            config.tags = true;
+        }
+
         $element.select2({
             placeholder: $element.data(`placeholder`),
             allowClear: true,
@@ -55,18 +60,17 @@ export default class Select2 {
             ...config,
         });
 
-        //fixes select2 search focus bug
-        $element.on(`select2:open`, function() {
-            setTimeout(() => $('[name="capacity"]').data('select2').$dropdown.find('.select2-search__field').focus(), 150);
-        });
-
         if($element.is(`[multiple]`)) {
             $element.siblings(`.select2-container`).addClass(`multiple`);
         }
     }
 }
 
-$(document).ready(() => $(`[data-s2]`).each((id, elem) => Select2.init($(elem))))
-    .arrive(`[data-s2]`, function() {
-        Select2.init($(this));
-    });
+$(document).ready(() => $(`[data-s2]`).each((id, elem) => Select2.init($(elem))));
+$(document).arrive(`[data-s2]`, function() {
+    Select2.init($(this));
+});
+$(document).arrive('.select2-search--dropdown .select2-search__field', function() {
+    //fixes select2 search focus bug
+    setTimeout(() => { $(this).focus(); }, 200);
+});
