@@ -23,9 +23,20 @@
                 <h3>Propriétaire</h3>
                 <p class="fs-5">{{ box.owner ? box.owner.name }}</p>
             </div>
-            <div class="history box-details">
-                <h3>Historique de la Box</h3>
+            <div class="history box-details justify-content-between">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Historique de la Box</h3>
+                    <label class="d-flex align-items-center mt-0">
+                    Rechercher:
+                        <input type="text" class="comment-search data" placeholder="entrée pour valider">
+                    </label>
+                </div>
                 <div class="history-wrapper"></div>
+                <div class="scroll-top d-flex justify-content-end d-none">
+                    <span class="scroll-top-button">
+                        <i class="fas fa-arrow-circle-up fa-2x"></i>
+                    </span>
+                </div>
             </div>
         </div>
     </div>

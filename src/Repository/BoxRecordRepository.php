@@ -115,8 +115,8 @@ class BoxRecordRepository extends EntityRepository {
             ->getOneOrNullResult();
     }
 
-    public function getBoxRecords(Box $box, int $start, int $length): array {
-        return $this->createQueryBuilder("record")
+    public function getBoxRecords(Box $box, int $start, int $length, string $search = null): array {
+        $qb = $this->createQueryBuilder("record")
             ->select("record.comment AS comment")
             ->addSelect("record.date AS date")
             ->addSelect("record.state AS state")
@@ -124,11 +124,22 @@ class BoxRecordRepository extends EntityRepository {
             ->andWhere("record.trackingMovement = 0")
             ->orderBy("record.date", "DESC")
             ->addOrderBy("record.id", "DESC")
-            ->setParameter("box", $box)
-            ->setMaxResults($length)
-            ->setFirstResult($start)
-            ->getQuery()
-            ->getResult();
+            ->setParameter("box", $box);
+
+        if($search) {
+            $qb
+                ->andWhere("record.comment LIKE :search")
+                ->setParameter("search", '%' . $search . '%');
+        }
+
+        return [
+            'totalCount' => QueryHelper::count($qb, 'record'),
+            'data' => $qb
+                ->setMaxResults($length)
+                ->setFirstResult($start)
+                ->getQuery()
+                ->getResult()
+        ];
     }
 
     public function findNewerTrackingMovement(BoxRecord $trackingMovement): ?BoxRecord {
