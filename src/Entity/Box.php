@@ -79,7 +79,7 @@ class Box {
     private ?string $comment = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=BoxRecord::class, mappedBy="box", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=BoxRecord::class, mappedBy="box", cascade={"remove"}, orphanRemoval=true)
      */
     private Collection $boxRecords;
 
