@@ -4,6 +4,7 @@ namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
 use App\Entity\Role;
+use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\StringHelper;
 use App\Service\ExportService;
@@ -33,18 +34,26 @@ class RoleController extends AbstractController {
      * @Route("/api", name="roles_api", options={"expose": true})
      * @HasPermission(Role::MANAGE_ROLES)
      */
-    public function api(Request $request, EntityManagerInterface $manager): Response {
+    public function api(Request $request,
+                        EntityManagerInterface $manager): Response {
         $roleRepository = $manager->getRepository(Role::class);
         $roles = $roleRepository->findForDatatable(json_decode($request->getContent(), true));
 
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         $data = [];
+        /** @var Role $role */
         foreach ($roles["data"] as $role) {
             $data[] = [
                 "id" => $role->getId(),
                 "name" => $role->getName(),
                 "active" => $role->isActive() ? "Oui" : "Non",
                 "actions" => $this->renderView("datatable_actions.html.twig", [
-                    "editable" => true,
+                    "editable" => (
+                        ($role->getCode() !== Role::ROLE_ADMIN && $role->getId() !== $currentUser->getRole()->getId())
+                        || $currentUser->getRole()->getCode() === Role::ROLE_ADMIN
+                    ),
                     "deletable" => true,
                 ]),
             ];
@@ -61,7 +70,8 @@ class RoleController extends AbstractController {
      * @Route("/nouveau", name="role_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_ROLES)
      */
-    public function new(Request $request, EntityManagerInterface $manager): Response {
+    public function new(Request $request,
+                        EntityManagerInterface $manager): Response {
         $form = Form::create();
 
         $content = (object) $request->request->all();
@@ -122,6 +132,18 @@ class RoleController extends AbstractController {
         }
 
         if ($form->isValid()) {
+
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+
+            if ($role->getCode() === Role::ROLE_ADMIN &&
+                $currentUser->getRole()->getCode() !== Role::ROLE_ADMIN) {
+                return $this->json([
+                    "success" => false,
+                    "msg" => "Vous n'avez pas les permissions nécessaires",
+                ]);
+            }
+
             //don't edit slug for the base roles
             if(!in_array($role->getCode(), [Role::ROLE_NO_ACCESS, Role::ROLE_ADMIN])) {
                 $role->setCode(strtoupper(StringHelper::slugify($content->name)));
