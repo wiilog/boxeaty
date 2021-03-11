@@ -4,3 +4,5 @@ twig:
         '%kernel.project_dir%/assets': assets
         '%kernel.project_dir%/public': public
         '%kernel.project_dir%/public/images/email': email
+    globals:
+        web_version: '%web_version%'

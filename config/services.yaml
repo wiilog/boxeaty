@@ -3,6 +3,7 @@ imports:
 
 parameters:
     locale: 'fr'
+    web_version: '0.1.4'
 
 services:
     # default configuration for services in *this* file
