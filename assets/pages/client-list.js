@@ -70,12 +70,28 @@ $(document).ready(() => {
         }
     });
 
-    $('#modal-new-client').find('[name=phoneNumber]').on('value', function (e) {
-        if($(this).val().length < 10) {
-            return true;
-        } else {
-            e.preventDefault();
-            return false;
-        }
+    $('#modal-new-client').find('[name=phoneNumber]').on('keypress', function (event) {
+        return mapPhoneNumber($(this), event);
+    });
+
+    $(document).arrive('input[name=phoneNumber]', () => {
+        const $input = $(this);
+        $input.off();
+        $('#modal-edit-client').find('[name=phoneNumber]').on('keypress', function (event) {
+            return mapPhoneNumber($(this), event);
+        });
     })
 });
+
+function mapPhoneNumber($input, event) {
+    if(/[^0-9]/g.test(event.key || '')) {
+        event.preventDefault();
+    } else {
+        if($input.val().length < 10) {
+            return true;
+        } else {
+            event.preventDefault();
+            return false;
+        }
+    }
+}

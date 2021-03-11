@@ -48,15 +48,16 @@ class OrderController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $data = [];
+        /** @var Order $order */
         foreach ($orders["data"] as $order) {
             $data[] = [
                 "id" => $order->getId(),
                 "boxes" => FormatHelper::boxes($order->getBoxes()),
                 "depositTickets" => FormatHelper::depositTickets($order->getDepositTickets()),
                 "location" => $order->getLocation() ? $order->getLocation()->getName() : "",
-                "totalBoxAmount" => $order->getTotalBoxAmount(),
-                "totalDepositTicketAmount" => $order->getTotalDepositTicketAmount(),
-                "totalCost" => $order->getTotalCost(),
+                "totalBoxAmount" => FormatHelper::price($order->getTotalBoxAmount()),
+                "totalDepositTicketAmount" => FormatHelper::price($order->getTotalDepositTicketAmount()),
+                "totalCost" => FormatHelper::price($order->getTotalCost()),
                 "user" => FormatHelper::user($order->getUser()),
                 "client" => FormatHelper::named($order->getClient()),
                 "date" => FormatHelper::datetime($order->getDate()),
@@ -229,7 +230,7 @@ class OrderController extends AbstractController {
 
             return $this->json([
                 "success" => false,
-                "msg" => "Ce passage en caisse n'existe pas"
+                "msg" => "Ce scan Box n'existe pas"
             ]);
         }
     }

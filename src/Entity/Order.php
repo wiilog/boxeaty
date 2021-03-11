@@ -180,5 +180,4 @@ class Order {
 
         return $this;
     }
-
 }

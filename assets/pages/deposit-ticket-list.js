@@ -47,13 +47,6 @@ $(document).ready(() => {
         ],
         order: [[`creationDate`, `desc`]],
         listeners: {
-            edit: data => {
-                const ajax = AJAX.route(`POST`, `deposit_ticket_edit_template`, {
-                    depositTicket: data.id
-                });
-
-                Modal.load(ajax, {table})
-            },
             delete: data => deleteDepositTicketModal.open(data),
         }
     });
