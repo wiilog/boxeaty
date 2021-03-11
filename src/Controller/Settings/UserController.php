@@ -41,8 +41,13 @@ class UserController extends AbstractController {
      * @HasPermission(Role::MANAGE_USERS)
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
+
+
+        /** @var User $loggedUser */
+        $loggedUser = $this->getUser();
+
         $users = $manager->getRepository(User::class)
-            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
+            ->findForDatatable(json_decode($request->getContent(), true), $loggedUser);
 
         $data = [];
         foreach ($users["data"] as $user) {
@@ -54,7 +59,10 @@ class UserController extends AbstractController {
                 "role" => $user->getRole()->getName(),
                 "status" => $user->isActive() ? "Actif" : "Inactif",
                 "actions" => $this->renderView("datatable_actions.html.twig", [
-                    "editable" => true,
+                    "editable" => (
+                        $loggedUser->getRole()->getCode() === Role::ROLE_ADMIN
+                        || $user->getRole()->getCode() !== Role::ROLE_ADMIN
+                    ),
                     "deletable" => true,
                 ]),
             ];
@@ -153,10 +161,22 @@ class UserController extends AbstractController {
             $form->addError("password", Authenticator::PASSWORD_ERROR);
         }
 
-        $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(",", $content->clients)]);
-        $groups = $manager->getRepository(Group::class)->findBy(["id" => explode(",", $content->groups)]);
+        /** @var User $loggedUser */
+        $loggedUser = $this->getUser();
+
+        if ($loggedUser->getRole()->getCode() !== Role::ROLE_ADMIN
+            && $user->getRole()->getCode() === Role::ROLE_ADMIN) {
+
+            return $this->json([
+                "success" => false,
+                "msg" => "Vous n'avez pas les permissions nécessaires"
+            ]);
+        }
 
         if ($form->isValid()) {
+            $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(",", $content->clients)]);
+            $groups = $manager->getRepository(Group::class)->findBy(["id" => explode(",", $content->groups)]);
+
             $user->setUsername($content->username)
                 ->setEmail($content->email)
                 ->setRole($role)
