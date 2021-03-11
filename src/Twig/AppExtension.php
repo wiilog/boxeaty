@@ -2,10 +2,9 @@
 
 namespace App\Twig;
 
-use App\Entity\User;
 use App\Helper\FormatHelper;
+use App\Service\RoleService;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Security\Core\Security;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -16,7 +15,7 @@ class AppExtension extends AbstractExtension {
     public KernelInterface $kernel;
 
     /** @Required */
-    public Security $security;
+    public RoleService $roleService;
 
     private array $config;
     private array $permissions;
@@ -64,18 +63,7 @@ class AppExtension extends AbstractExtension {
     }
 
     public function hasPermission(string ...$permissions): bool {
-        $user = $this->security->getUser();
-        if($user && $user instanceof User && $user->isActive()) {
-            foreach($permissions as $permission) {
-                if(!in_array($permission, $user->getRole()->getPermissions())) {
-                    return false;
-                }
-            }
-
-            return true;
-        } else {
-            return false;
-        }
+        return $this->roleService->hasPermission(...$permissions);
     }
 
     public function getPermissions(): array {

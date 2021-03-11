@@ -182,7 +182,12 @@ class ImportService {
         }
 
         $name = bin2hex(random_bytes(6)) . ".csv";
-        $path = $this->kernel->getProjectDir() . "/public/persistent/traces/$name";
+        $tracesDirectory = $this->kernel->getProjectDir() . "/public/persistent/traces";
+        if(!is_dir($tracesDirectory)) {
+            mkdir($tracesDirectory);
+        }
+
+        $path = $tracesDirectory . '/' . $name;
 
         $file = fopen($path, "w");
         foreach ($this->trace as $line) {
