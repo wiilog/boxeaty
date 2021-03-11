@@ -23,12 +23,12 @@ $(document).ready(() => {
     const table = initDatatable(`#table-orders`, {
         ajax: AJAX.route(`POST`, `orders_api`),
         columns: [
-            {data: `boxes`, title: `Numéro(s) Box`},
+            {data: `boxes`, title: `Identifiant Box`},
             {data: `depositTickets`, title: `Ticket(s) consigne`},
             {data: `location`, title: `Emplacement`},
-            {data: `totalBoxAmount`, title: `Montant total des Box`},
-            {data: `totalDepositTicketAmount`, title: `Montant total des consignes`},
-            {data: `totalCost`, title: `Balance`},
+            {data: `totalBoxAmount`, title: `Scan ticket-consigne`},
+            {data: `totalDepositTicketAmount`, title: `Coût de la Box`},
+            {data: `totalCost`, title: `Consigne à régler`},
             {data: `user`, title: `Utilisateur`},
             {data: `client`, title: `Client`},
             {data: `date`, title: `Date et heure de création`},

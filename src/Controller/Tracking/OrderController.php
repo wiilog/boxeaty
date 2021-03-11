@@ -48,15 +48,16 @@ class OrderController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
 
         $data = [];
+        /** @var Order $order */
         foreach ($orders["data"] as $order) {
             $data[] = [
                 "id" => $order->getId(),
                 "boxes" => FormatHelper::boxes($order->getBoxes()),
                 "depositTickets" => FormatHelper::depositTickets($order->getDepositTickets()),
                 "location" => $order->getLocation() ? $order->getLocation()->getName() : "",
-                "totalBoxAmount" => $order->getTotalBoxAmount(),
-                "totalDepositTicketAmount" => $order->getTotalDepositTicketAmount(),
-                "totalCost" => $order->getTotalCost(),
+                "totalBoxAmount" => $order->getTotalBoxAmountFormated(),
+                "totalDepositTicketAmount" => $order->getTotalDepositTicketAmountFormated(),
+                "totalCost" => $order->getTotalCostFormated(),
                 "user" => FormatHelper::user($order->getUser()),
                 "client" => FormatHelper::named($order->getClient()),
                 "date" => FormatHelper::datetime($order->getDate()),
