@@ -6,6 +6,14 @@ import AJAX from "../ajax";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
 import Select2 from "../select2";
 
+const forbiddenChars = [
+    "e",
+    "E",
+    "+",
+    "-",
+    ","
+];
+
 $(document).ready(() => {
     const newClientModal = Modal.static(`#modal-new-client`, {
         ajax: AJAX.route(`POST`, `client_new`),
@@ -70,12 +78,16 @@ $(document).ready(() => {
         }
     });
 
-    $('#modal-new-client').find('[name=phoneNumber]').on('value', function (e) {
-        if($(this).val().length < 10) {
-            return true;
-        } else {
+    $('#modal-new-client').find('[name=phoneNumber]').on('keypress', function (e) {
+        if(forbiddenChars.includes(e.key)) {
             e.preventDefault();
-            return false;
+        } else {
+            if($(this).val().length < 10) {
+                return true;
+            } else {
+                e.preventDefault();
+                return false;
+            }
         }
     })
 });
