@@ -10,6 +10,11 @@ $(document).ready(() => {
     const newClientModal = Modal.static(`#modal-new-client`, {
         ajax: AJAX.route(`POST`, `client_new`),
         table: `#table-clients`,
+        afterOpen: (modal) => {
+            const $modal = modal.elem();
+            const $select = $modal.find('[name="depositTicketsClients"]');
+            $select.val('0').trigger('change');
+        },
         success: () => {
             const $modal = $(`#modal-new-client`);
 
@@ -22,7 +27,7 @@ $(document).ready(() => {
 
     $(`.new-client`).click(() => newClientModal.open());
 
-    $(`#modal-new-client input[name="name"]`).keyup(function() {
+    $(`#modal-new-client input[name="name"]`).on('input', function() {
         let $option = $(`#modal-new-client`).find(`.client-self-name`);
         $option.text($(this).val());
         Select2.init($option.parent());
@@ -37,7 +42,7 @@ $(document).ready(() => {
         }
 
         $multiSite.attr(`disabled`, $isMultiSite.is(`:checked`));
-    })
+    });
 
     const table = initDatatable(`#table-clients`, {
         ajax: AJAX.route(`POST`, `clients_api`),
