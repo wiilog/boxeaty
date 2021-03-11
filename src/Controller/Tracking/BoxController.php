@@ -287,8 +287,6 @@ class BoxController extends AbstractController {
             'trackingMovement' => false
         ]);
 
-        dump($countBoxMovements);
-
         return $this->json([
             'success' => true,
             'isTail' => ($start + $length) >= $countBoxMovements,
