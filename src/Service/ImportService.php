@@ -111,10 +111,12 @@ class ImportService {
                 [$tracking, $record] = $this->boxRecordService->generateBoxRecords($box, [], $loggedUser);
 
                 if ($tracking) {
+                    $tracking->setBox($box);
                     $this->manager->persist($tracking);
                 }
 
                 if ($record) {
+                    $record->setBox($box);
                     $this->manager->persist($record);
                 }
 

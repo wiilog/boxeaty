@@ -108,10 +108,12 @@ class BoxController extends AbstractController {
             [$tracking, $record] = $boxRecordService->generateBoxRecords($box, [], $this->getUser());
 
             if ($tracking) {
+                $tracking->setBox($box);
                 $manager->persist($tracking);
             }
 
             if ($record) {
+                $record->setBox($box);
                 $manager->persist($record);
             }
 
@@ -198,10 +200,12 @@ class BoxController extends AbstractController {
             );
 
             if ($tracking) {
+                $tracking->setBox($box);
                 $manager->persist($tracking);
             }
 
             if ($record) {
+                $record->setBox($box);
                 $manager->persist($record);
             }
 

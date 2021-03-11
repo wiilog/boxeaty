@@ -123,10 +123,12 @@ class OrderController extends AbstractController {
                 );
 
                 if ($tracking) {
+                    $tracking->setBox($box);
                     $manager->persist($tracking);
                 }
 
                 if ($record) {
+                    $record->setBox($box);
                     $manager->persist($record);
                 }
             }
@@ -207,10 +209,12 @@ class OrderController extends AbstractController {
                 );
 
                 if ($tracking) {
+                    $tracking->setBox($box);
                     $manager->persist($tracking);
                 }
 
                 if ($record) {
+                    $record->setBox($box);
                     $manager->persist($record);
                 }
             }

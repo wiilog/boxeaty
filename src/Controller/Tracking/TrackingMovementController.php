@@ -127,6 +127,7 @@ class TrackingMovementController extends AbstractController {
                     $this->getUser()
                 );
                 if ($record) {
+                    $record->setBox($box);
                     $manager->persist($record);
                 }
                 $manager->flush();
@@ -204,6 +205,7 @@ class TrackingMovementController extends AbstractController {
                     $this->getUser()
                 );
                 if ($record) {
+                    $record->setBox($box);
                     $manager->persist($record);
                 }
                 $manager->flush();
