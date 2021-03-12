@@ -152,7 +152,16 @@ class Box {
     }
 
     public function setLocation(?Location $location): self {
+        if ($this->getLocation()
+            && $location !== $this->getLocation()) {
+            $this->getLocation()->removeBox($this);
+        }
+
         $this->location = $location;
+
+        if ($this->location) {
+            $this->location->addBox($this);
+        }
 
         return $this;
     }
