@@ -54,7 +54,7 @@ export function initDatatable(table, config) {
             processing: true,
             serverSide: true,
             responsive: true,
-            scrollX: false,
+            scrollX: true,
             autoWidth: true,
             fixedColumns: {
                 heightMatch: `auto`

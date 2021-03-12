@@ -285,6 +285,12 @@ export function processForm($parent) {
                 value = $input.val().trim();
             }
 
+            if($input.is(`textarea`)) {
+                let $comment = $(`<span>${$input.val()}</span>`);
+                $comment.find(`[data-f-id="pbf"]`).remove();
+                value = $comment.html();
+            }
+
             if(value !== null) {
                 data.append($input.attr(`name`), value);
             }
