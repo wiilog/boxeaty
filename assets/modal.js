@@ -1,6 +1,7 @@
 import Flash from './flash';
 import AJAX from './ajax';
 import {LOADING_CLASS} from "./app";
+import $ from "jquery";
 
 const uploads = {};
 
@@ -10,6 +11,12 @@ function addUpload(modal, name, file) {
     }
 
     uploads[modal.id][name] = file;
+}
+
+function deleteUpload(modal, name) {
+    if(uploads[modal.id] && uploads[modal.id][name]) {
+        delete uploads[modal.id][name];
+    }
 }
 
 export default class Modal {
@@ -97,7 +104,7 @@ export default class Modal {
     setupFileUploader() {
         const modal = this;
         const $dropframe = this.element.find(`.attachment-drop-frame`);
-        const $input = $dropframe.find(`input[type="file"]`);
+        const $input = $dropframe.find(`input[name=attachment]`);
 
         if($dropframe.exists()) {
             [`dragenter`, `dragover`, `dragleave`, `drop`].forEach(event => {
@@ -105,11 +112,30 @@ export default class Modal {
                     event.preventDefault();
                     return false;
                 });
-            })
+            });
+            
+            this.element.find('.file-empty').on('click', (e) => {
+                $input.trigger('click');
+                e.preventDefault();
+            });
 
-            $input.on(`change`, function() {
-                addUpload(modal, $input.attr(`name`), $(this)[0].files[0]);
-                $dropframe.addClass(`is-valid`);
+            const $fileEmpty = $dropframe.find('.file-empty');
+            const $fileConfirmation = $dropframe.find('.file-confirmation');
+            $input.on('change', function() {
+                const files = $(this)[0].files;
+                if(files && files.length > 0) {
+                    proceedFileSaving($input, $dropframe, files[0], $fileEmpty, $fileConfirmation, modal);
+                } else {
+                    deleteUpload(modal, $input.attr(`name`));
+                    $dropframe.removeClass('is-valid');
+                    $fileEmpty.removeClass('d-none');
+                    $fileConfirmation.addClass('d-none');
+                }
+            });
+
+            $fileConfirmation.find('.file-delete-icon').on('click', function(e) {
+                $input.val('').trigger('change');
+                e.preventDefault();
             });
 
             $dropframe.on(`drop`, function(event) {
@@ -122,16 +148,7 @@ export default class Modal {
                 if(data && data.files.length) {
                     event.preventDefault();
                     event.stopPropagation();
-
-                    const supported = $input.data(`format`);
-                    const format = getExtension(data.files[0]);
-                    if(supported && format !== supported) {
-                        $dropframe.addClass(`is-invalid`);
-                        $dropframe.parents(`label`).append(`<span class="invalid-feedback">Seuls les fichier au format .${supported} sont supportés</span>`);
-                    } else {
-                        addUpload(modal, $input.attr(`name`), data.files[0]);
-                        $dropframe.addClass(`is-valid`);
-                    }
+                    proceedFileSaving($input, $dropframe, data.files[0], $fileEmpty, $fileConfirmation, modal)
                 } else {
                     $dropframe.addClass(`is-invalid`);
                 }
@@ -323,4 +340,20 @@ function showInvalid($field, message) {
 
 function getExtension(file) {
     return file.name.split('.').pop();
+}
+
+function proceedFileSaving($input, $dropframe, file, $fileEmpty, $fileConfirmation, modal) {
+    const supported = $input.data(`format`);
+    const format = getExtension(file);
+    if(supported && format !== supported) {
+        $input.val('').trigger('change');
+        $dropframe.addClass(`is-invalid`);
+        $dropframe.parents(`label`).append(`<span class="invalid-feedback">Seuls les fichier au format .${supported} sont supportés</span>`);
+    } else {
+        addUpload(modal, $input.attr(`name`), file);
+        $dropframe.addClass('is-valid');
+        $fileEmpty.addClass('d-none');
+        $fileConfirmation.removeClass('d-none');
+        $fileConfirmation.find('.file-name').text(file.name);
+    }
 }
