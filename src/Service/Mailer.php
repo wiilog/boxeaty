@@ -49,7 +49,7 @@ class Mailer {
 
     public function send($recipients, string $subjet, string $content) {
         if(is_string($recipients)) {
-            $originalRecipients = $recipients;
+            $originalRecipients = [$recipients];
         } else {
             if (!is_array($recipients) && !($recipients instanceof Collection)) {
                 $recipients = [$recipients];

@@ -1,4 +1,13 @@
 {
+    "assoconnect/mjml-bundle": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "1.0",
+            "ref": "74656f4762a2cc83f03f78c50142b3c9285fb18c"
+        }
+    },
     "bacon/bacon-qr-code": {
         "version": "2.0.3"
     },
@@ -132,6 +141,15 @@
             "./config/routes/fos_js_routing.yaml"
         ]
     },
+    "guzzlehttp/guzzle": {
+        "version": "6.5.5"
+    },
+    "guzzlehttp/promises": {
+        "version": "1.4.1"
+    },
+    "guzzlehttp/psr7": {
+        "version": "1.7.0"
+    },
     "laminas/laminas-code": {
         "version": "4.0.0"
     },
@@ -212,6 +230,9 @@
     },
     "psr/simple-cache": {
         "version": "1.0.1"
+    },
+    "ralouphie/getallheaders": {
+        "version": "3.0.3"
     },
     "sensio/framework-extra-bundle": {
         "version": "5.2",

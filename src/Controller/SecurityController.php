@@ -101,7 +101,7 @@ class SecurityController extends AbstractController {
                     ->setCreationDate(new DateTime());
 
                 $recipients = $userRepository->findNewUserRecipients($user->getGroups()->first());
-                $mailer->send($recipients, "BoxEaty - Nouvel utilisateur", $this->renderView("emails/new_user.html.twig", [
+                $mailer->send($recipients, "BoxEaty - Nouvel utilisateur", $this->renderView("emails/mjml/new_user.html.twig", [
                     "user" => $user,
                 ]));
 
@@ -154,13 +154,13 @@ class SecurityController extends AbstractController {
                 $user->setResetTokenExpiration($time);
                 $manager->flush();
 
-                $mailer->send($user, "BoxEaty - Réinitialisation du mot de passe", $this->renderView("emails/reset_request.html.twig", [
+                $mailer->send($user, "BoxEaty - Réinitialisation du mot de passe", $this->renderView("emails/mjml/forgotten_password.html.twig", [
                     "user" => $user,
                     "token" => $token,
                 ]));
             }
 
-            $this->addFlash("success", "Un email a été envoyé au compte {$forgotten["email"]} si il existe");
+            $this->addFlash("success", "Un email a été envoyé au compte {$forgotten["email"]} s'il existe");
 
             return $this->redirectToRoute("password_forgotten_confirm", $forgotten);
         }

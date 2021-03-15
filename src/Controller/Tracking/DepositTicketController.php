@@ -97,7 +97,7 @@ class DepositTicketController extends AbstractController {
             "state" => DepositTicket::VALID,
         ]);
 
-        if ($alreadyValidTicketOnBoxCount > 0) {
+        if (((int) $content->state === DepositTicket::VALID) && $alreadyValidTicketOnBoxCount > 0) {
             $form->addError("state", "Un ticket-consigne valide existe déjà pour la Box " . "<strong>" . $box->getNumber() . "</strong>");
         }
 
@@ -120,11 +120,22 @@ class DepositTicketController extends AbstractController {
                 $depositTicket->setUseDate(new DateTime());
             }
 
+            $client = $depositTicket->getLocation() ? $depositTicket->getLocation()->getClient() : null;
+            $depositTicketsClients = $client ? $client->getDepositTicketsClients() : [];
+            $usable = (count($depositTicketsClients) === 0
+                ? "tout le réseau BoxEaty"
+                : count($depositTicketsClients) > 0)
+                ? "les restaurants"
+                : "le restaurant";
+
+            $mailer->send($depositTicket->getConsumerEmail(),'Création d\'un ticket-consigne', $this->renderView("emails/mjml/deposit_ticket.html.twig",[
+                "ticket" => $depositTicket,
+                "usable" => $usable,
+            ]));
+
             $manager->persist($depositTicket);
             $manager->flush();
-            $mailer->send($depositTicket->getConsumerEmail(),'Création d\'un ticket-consigne', $this->renderView("emails/deposit_ticket.html.twig",[
-                "ticket" =>$depositTicket,
-            ]));
+
             return $this->json([
                 "success" => true,
                 "msg" => "Ticket-consigne <b>{$depositTicket->getNumber()}</b> créé avec succès",
