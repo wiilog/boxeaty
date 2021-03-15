@@ -7,7 +7,8 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import '~@fortawesome/fontawesome-free/scss/regular';
 @import '~@fortawesome/fontawesome-free/scss/brands';
 @import "~select2/src/scss/core";
-@import '~froala-editor/css/froala_editor.css';
+@import "~quill/dist/quill.core.css";
+@import "~quill/dist/quill.snow.css";
 
 @import "mixins";
 @import "fonts";
@@ -213,25 +214,6 @@ main:not(.login) {
         justify-content: center;
         backdrop-filter: blur(2px);
         background-color: initial;
-    }
-}
-
-//FROALA OVERRIDES
-.fr-box.fr-basic {
-
-    .fr-second-toolbar {
-        display: none;
-    }
-
-    .fr-toolbar {
-        border: none;
-        background-color: $grey;
-    }
-
-    .fr-wrapper {
-        border: none;
-        border-bottom: 1px solid $grey-dark !important;
-        height: 15vh;
     }
 }
 
@@ -454,3 +436,18 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 //input[type="date"]::-webkit-clear-button {
 //    z-index: 1;
 //}
+
+.ql-toolbar {
+    background: $grey;
+    border: none !important;
+    border-radius: 8px;
+}
+
+.ql-container {
+    border: none !important;
+    border-bottom: 1px solid $grey;
+    background-color: rgb(254, 254, 254);
+    border-radius: 8px;
+    margin-top: 3px;
+    height: 100px;
+}

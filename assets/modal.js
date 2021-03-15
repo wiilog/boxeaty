@@ -244,7 +244,7 @@ export function processForm($parent) {
 
     const errors = [];
     const data = new FormData();
-    const $inputs = $parent.find(`select.data, input.data, input[data-repeat], textarea.data`);
+    const $inputs = $parent.find(`select.data, input.data, input[data-repeat], textarea.data, .data[data-wysiwyg]`);
 
     //clear previous errors
     $parent.find(`.is-invalid`).removeClass(`is-invalid`);
@@ -277,22 +277,20 @@ export function processForm($parent) {
             }
         }
 
-        if($input.attr(`name`)) {
-            let value = $input.val() || null;
-            if($input.attr(`type`) === `checkbox`) {
+        if($input.attr(`name`) || $input.attr(`data-wysiwyg`)) {
+            let value;
+            if($input.is(`[data-wysiwyg]`)) {
+                value = $input.find(`.ql-editor`).html();
+            } else if($input.attr(`type`) === `checkbox`) {
                 value = $input.is(`:checked`) ? `1` : `0`;
             } else if(typeof value === 'string') {
                 value = $input.val().trim();
-            }
-
-            if($input.is(`textarea`)) {
-                let $comment = $(`<span>${$input.val()}</span>`);
-                $comment.find(`[data-f-id="pbf"]`).remove();
-                value = $comment.html();
+            } else {
+                value = $input.val() || null;
             }
 
             if(value !== null) {
-                data.append($input.attr(`name`), value);
+                data.append($input.attr(`name`) || $input.attr(`data-wysiwyg`), value);
             }
         }
     }
