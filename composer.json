@@ -1,6 +1,8 @@
 {
     "type": "project",
     "license": "proprietary",
+    "name": "wiilog/boxeaty",
+    "description": "Supervision BoxEaty",
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {

@@ -16,6 +16,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Helper\Form;
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -249,15 +250,16 @@ class TrackingMovementController extends AbstractController {
      * @Route("/export", name="tracking_movement_export", options={"expose": true})
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
-    public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
+    public function export(EntityManagerInterface $manager, ExportService $exportService, LoggerInterface $l): Response {
         $movements = $manager->getRepository(BoxRecord::class)->iterateAll();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function($output) use ($exportService, $movements) {
+        return $exportService->export(function($output) use ($exportService, $movements, $l) {
             foreach ($movements as $movement) {
-                $movement["state"] = Box::NAMES[$movement["state"]];
+                $l->critical(json_encode($movement));
+                $movement["state"] = Box::NAMES[$movement["state"]] ?? "Inconnu";
                 $exportService->putLine($output, $movement);
             }
         }, "export-tracabilite-$today.csv", ExportService::MOVEMENT_HEADER);
