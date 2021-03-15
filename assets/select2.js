@@ -90,3 +90,7 @@ $(document).ready(() => $(`[data-s2]`).each((id, elem) => Select2.init($(elem)))
 $(document).arrive(`[data-s2]`, function() {
     Select2.init($(this));
 });
+$(document).arrive('.select2-search--dropdown .select2-search__field', function() {
+    //fixes select2 search focus bug
+    setTimeout(() => { $(this).focus(); }, 300);
+});
