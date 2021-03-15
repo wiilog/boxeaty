@@ -90,7 +90,7 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/kiosks/{kiosk}", name="api_get_kiosks", requirements={"kiosk"="\d+"})
+     * @Route("/kiosks/{kiosk}", name="api_get_kiosks", requirements={"kiosk"="\d+"}, methods={"GET"})
      */
     public function kiosk(Location $kiosk): Response {
         if ($kiosk && $kiosk->isKiosk()) {
