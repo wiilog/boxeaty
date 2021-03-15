@@ -12,7 +12,7 @@
             </div>
         </div>
 
-        <table id="table-orders"></table>
+        <table id="table-orders" data-initial-data="{{ initial_orders }}"></table>
     </div>
 
     {% include 'tracking/order/modal/new.html.twig' with {order: new_order} %}

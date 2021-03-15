@@ -41,8 +41,8 @@ class GroupRepository extends EntityRepository {
 
         $filtered = QueryHelper::count($qb, "g");
 
-        $qb->setFirstResult($params["start"])
-            ->setMaxResults($params["length"]);
+        $qb->setFirstResult($params["start"] ?? 0)
+            ->setMaxResults($params["length"] ?? 10);
 
         return [
             "data" => $qb->getQuery()->getResult(),

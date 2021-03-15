@@ -26,9 +26,10 @@ class LocationController extends AbstractController {
      * @Route("/liste", name="locations_list")
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function list(): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("referential/location/index.html.twig", [
             "new_location" => new Location(),
+            "initial_locations" => $this->api($request, $manager)->getContent(),
         ]);
     }
 
@@ -39,7 +40,7 @@ class LocationController extends AbstractController {
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $boxRepository = $manager->getRepository(Box::class);
         $locations = $manager->getRepository(Location::class)
-            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
+            ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
         foreach ($locations["data"] as $location) {

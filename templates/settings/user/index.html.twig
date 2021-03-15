@@ -13,7 +13,7 @@
             </div>
         </div>
 
-        <table id="table-users"></table>
+        <table id="table-users" data-initial-data="{{ initial_users }}"></table>
     </div>
 
     {% include 'settings/user/modal/new.html.twig' with {user: new_user} %}

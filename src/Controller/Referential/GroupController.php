@@ -23,9 +23,10 @@ class GroupController extends AbstractController {
      * @Route("/liste", name="groups_list")
      * @HasPermission(Role::MANAGE_GROUPS)
      */
-    public function list(): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("referential/group/index.html.twig", [
             "new_group" => new Group(),
+            "initial_groups" => $this->api($request, $manager)->getContent()
         ]);
     }
 
@@ -35,7 +36,7 @@ class GroupController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $groups = $manager->getRepository(Group::class)
-            ->findForDatatable(json_decode($request->getContent(), true));
+            ->findForDatatable(json_decode($request->getContent(), true) ?? []);
 
         $data = [];
         foreach ($groups["data"] as $group) {

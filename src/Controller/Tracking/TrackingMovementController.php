@@ -31,11 +31,12 @@ class TrackingMovementController extends AbstractController {
      * @Route("/liste", name="tracking_movements_list")
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
-    public function list(EntityManagerInterface $manager): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         $qualities = $manager->getRepository(Quality::class)->findAll();
 
         return $this->render("tracking/movement/index.html.twig", [
             "new_movement" => new BoxRecord(),
+            "initial_movements" => $this->api($request, $manager)->getContent(),
             "qualities" => $qualities,
             "states" => Box::NAMES,
         ]);
@@ -47,7 +48,7 @@ class TrackingMovementController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $movements = $manager->getRepository(BoxRecord::class)
-            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
+            ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $actions = $this->renderView("datatable_actions.html.twig", [
             "editable" => true,

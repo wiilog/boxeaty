@@ -30,12 +30,10 @@ class OrderController extends AbstractController {
      * @Route("/liste", name="orders_list")
      * @HasPermission(Role::MANAGE_ORDERS)
      */
-    public function list(EntityManagerInterface $manager): Response {
-        $orders = $manager->getRepository(Order::class)->findBy([], ['id' => 'DESC']);
-
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("tracking/order/index.html.twig", [
             "new_order" => new Order(),
-            "orders" => $orders,
+            "initial_orders" => $this->api($request, $manager)->getContent(),
         ]);
     }
 
@@ -45,7 +43,7 @@ class OrderController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $orders = $manager->getRepository(Order::class)
-            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
+            ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
         /** @var Order $order */

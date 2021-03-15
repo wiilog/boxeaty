@@ -26,9 +26,10 @@ class ClientController extends AbstractController {
      * @Route("/liste", name="clients_list")
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function list(): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("referential/client/index.html.twig", [
             "new_client" => new Client(),
+            "initial_clients" => $this->api($request, $manager)->getContent(),
         ]);
     }
 
@@ -38,7 +39,7 @@ class ClientController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $clients = $manager->getRepository(Client::class)
-            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
+            ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
         foreach ($clients["data"] as $client) {
