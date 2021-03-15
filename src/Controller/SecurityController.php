@@ -160,7 +160,7 @@ class SecurityController extends AbstractController {
                 ]));
             }
 
-            $this->addFlash("success", "Un email a été envoyé au compte {$forgotten["email"]} si il existe");
+            $this->addFlash("success", "Un email a été envoyé au compte {$forgotten["email"]} s'il existe");
 
             return $this->redirectToRoute("password_forgotten_confirm", $forgotten);
         }
