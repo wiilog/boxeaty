@@ -17,7 +17,7 @@
             </div>
         </div>
 
-        <table id="table-deposit-tickets"></table>
+        <table id="table-deposit-tickets" data-initial-data="{{ initial_deposit_tickets }}"></table>
     </div>
 
     {% include 'tracking/deposit_ticket/modal/new.html.twig' with {deposit_ticket: new_deposit_ticket} %}

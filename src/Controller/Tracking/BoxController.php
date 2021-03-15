@@ -31,10 +31,10 @@ class BoxController extends AbstractController {
      * @Route("/liste", name="boxes_list")
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function list(): Response {
-
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("tracking/box/index.html.twig", [
             "new_box" => new Box(),
+            "initial_boxes" => $this->api($request, $manager)->getContent(),
         ]);
     }
 
@@ -44,7 +44,7 @@ class BoxController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $boxes = $manager->getRepository(Box::class)
-            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
+            ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
         foreach ($boxes["data"] as $box) {
@@ -240,6 +240,7 @@ class BoxController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "La Box n'existe pas"
             ]);
         }

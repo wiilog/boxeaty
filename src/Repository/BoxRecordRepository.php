@@ -59,7 +59,7 @@ class BoxRecordRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["filters"] as $name => $value) {
+        foreach ($params["filters"] ?? [] as $name => $value) {
             switch ($name) {
                 case "from":
                     $qb->andWhere("DATE(record.date) >= :from")
@@ -93,8 +93,8 @@ class BoxRecordRepository extends EntityRepository {
 
         $filtered = QueryHelper::count($qb, "record");
 
-        $qb->setFirstResult($params["start"])
-            ->setMaxResults($params["length"]);
+        $qb->setFirstResult($params["start"] ?? 0)
+            ->setMaxResults($params["length"] ?? 10);
 
         return [
             "data" => $qb->getQuery()->getResult(),

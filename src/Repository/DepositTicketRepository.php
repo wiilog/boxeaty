@@ -69,7 +69,7 @@ class DepositTicketRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["filters"] as $name => $value) {
+        foreach ($params["filters"] ?? [] as $name => $value) {
             switch ($name) {
                 case "from":
                     $qb->andWhere("DATE(deposit_ticket.creationDate) >= :from")
@@ -119,8 +119,8 @@ class DepositTicketRepository extends EntityRepository {
 
         $filtered = QueryHelper::count($qb, "deposit_ticket");
 
-        $qb->setFirstResult($params["start"])
-            ->setMaxResults($params["length"]);
+        $qb->setFirstResult($params["start"] ?? 0)
+            ->setMaxResults($params["length"] ?? 10);
 
         return [
             "data" => $qb->getQuery()->getResult(),

@@ -23,9 +23,10 @@ class QualityController extends AbstractController {
      * @Route("/liste", name="qualities_list")
      * @HasPermission(Role::MANAGE_QUALITIES)
      */
-    public function list(): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("settings/quality/index.html.twig", [
             "new_quality" => new Quality(),
+            "initial_qualities" => $this->api($request, $manager)->getContent(),
         ]);
     }
 
@@ -35,7 +36,7 @@ class QualityController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $qualityRepository = $manager->getRepository(Quality::class);
-        $qualities = $qualityRepository->findForDatatable(json_decode($request->getContent(), true));
+        $qualities = $qualityRepository->findForDatatable(json_decode($request->getContent(), true) ?? []);
         $deletable = $qualityRepository->getDeletable($qualities["data"]);
 
         $data = [];
@@ -153,6 +154,7 @@ class QualityController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "La qualité n'existe pas"
             ]);
         }

@@ -28,6 +28,10 @@ header {
             img {
                 margin-right: 10px;
             }
+
+            @media (max-width: $mobile-breakpoint) {
+                display: none;
+            }
         }
 
         .menu-container {

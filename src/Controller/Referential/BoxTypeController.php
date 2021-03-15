@@ -24,13 +24,14 @@ class BoxTypeController extends AbstractController {
      * @Route("/liste", name="box_types_list")
      * @HasPermission(Role::MANAGE_BOX_TYPES)
      */
-    public function list(EntityManagerInterface $manager): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         $settingsRepository = $manager->getRepository(GlobalSetting::class);
         $capacities = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_CAPACITIES));
         $shapes = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_SHAPES));
 
         return $this->render("referential/box_type/index.html.twig", [
             "new_box_type" => new BoxType(),
+            "initial_box_types" => $this->api($request, $manager)->getContent(),
             "capacities" => $capacities ?: [],
             "shapes" => $shapes ?: [],
         ]);
@@ -42,7 +43,7 @@ class BoxTypeController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $boxTypes = $manager->getRepository(BoxType::class)
-            ->findForDatatable(json_decode($request->getContent(), true));
+            ->findForDatatable(json_decode($request->getContent(), true) ?? []);
 
         $data = [];
         foreach ($boxTypes["data"] as $boxType) {

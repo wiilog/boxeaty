@@ -16,6 +16,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Helper\Form;
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,11 +31,12 @@ class TrackingMovementController extends AbstractController {
      * @Route("/liste", name="tracking_movements_list")
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
-    public function list(EntityManagerInterface $manager): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         $qualities = $manager->getRepository(Quality::class)->findAll();
 
         return $this->render("tracking/movement/index.html.twig", [
             "new_movement" => new BoxRecord(),
+            "initial_movements" => $this->api($request, $manager)->getContent(),
             "qualities" => $qualities,
             "states" => Box::NAMES,
         ]);
@@ -46,7 +48,7 @@ class TrackingMovementController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $movements = $manager->getRepository(BoxRecord::class)
-            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
+            ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $actions = $this->renderView("datatable_actions.html.twig", [
             "editable" => true,
@@ -256,7 +258,7 @@ class TrackingMovementController extends AbstractController {
 
         return $exportService->export(function($output) use ($exportService, $movements) {
             foreach ($movements as $movement) {
-                $movement["state"] = Box::NAMES[$movement["state"]];
+                $movement["state"] = Box::NAMES[$movement["state"]] ?? "Inconnu";
                 $exportService->putLine($output, $movement);
             }
         }, "export-tracabilite-$today.csv", ExportService::MOVEMENT_HEADER);

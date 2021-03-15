@@ -28,10 +28,10 @@ class DepositTicketController extends AbstractController {
      * @Route("/liste", name="deposit_tickets_list")
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
      */
-    public function list(): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("tracking/deposit_ticket/index.html.twig", [
-            "new_deposit_ticket" => (new DepositTicket())
-                ->setNumber(StringHelper::random(5)),
+            "new_deposit_ticket" => (new DepositTicket())->setNumber(StringHelper::random(5)),
+            "initial_deposit_tickets" => $this->api($request, $manager)->getContent(),
         ]);
     }
 
@@ -41,7 +41,7 @@ class DepositTicketController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $depositTickets = $manager->getRepository(DepositTicket::class)
-            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
+            ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
 
@@ -153,6 +153,7 @@ class DepositTicketController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "Le ticket-consigne n'existe pas"
             ]);
         }

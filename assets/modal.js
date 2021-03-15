@@ -1,6 +1,7 @@
 import Flash from './flash';
 import AJAX from './ajax';
 import {LOADING_CLASS} from "./app";
+import $ from "jquery";
 
 const uploads = {};
 
@@ -10,6 +11,12 @@ function addUpload(modal, name, file) {
     }
 
     uploads[modal.id][name] = file;
+}
+
+function deleteUpload(modal, name) {
+    if(uploads[modal.id] && uploads[modal.id][name]) {
+        delete uploads[modal.id][name];
+    }
 }
 
 export default class Modal {
@@ -97,7 +104,7 @@ export default class Modal {
     setupFileUploader() {
         const modal = this;
         const $dropframe = this.element.find(`.attachment-drop-frame`);
-        const $input = $dropframe.find(`input[type="file"]`);
+        const $input = $dropframe.find(`input[name=attachment]`);
 
         if($dropframe.exists()) {
             [`dragenter`, `dragover`, `dragleave`, `drop`].forEach(event => {
@@ -105,11 +112,30 @@ export default class Modal {
                     event.preventDefault();
                     return false;
                 });
-            })
+            });
+            
+            this.element.find('.file-empty').on('click', (e) => {
+                $input.trigger('click');
+                e.preventDefault();
+            });
 
-            $input.on(`change`, function() {
-                addUpload(modal, $input.attr(`name`), $(this)[0].files[0]);
-                $dropframe.addClass(`is-valid`);
+            const $fileEmpty = $dropframe.find('.file-empty');
+            const $fileConfirmation = $dropframe.find('.file-confirmation');
+            $input.on('change', function() {
+                const files = $(this)[0].files;
+                if(files && files.length > 0) {
+                    proceedFileSaving($input, $dropframe, files[0], $fileEmpty, $fileConfirmation, modal);
+                } else {
+                    deleteUpload(modal, $input.attr(`name`));
+                    $dropframe.removeClass('is-valid');
+                    $fileEmpty.removeClass('d-none');
+                    $fileConfirmation.addClass('d-none');
+                }
+            });
+
+            $fileConfirmation.find('.file-delete-icon').on('click', function(e) {
+                $input.val('').trigger('change');
+                e.preventDefault();
             });
 
             $dropframe.on(`drop`, function(event) {
@@ -122,16 +148,7 @@ export default class Modal {
                 if(data && data.files.length) {
                     event.preventDefault();
                     event.stopPropagation();
-
-                    const supported = $input.data(`format`);
-                    const format = getExtension(data.files[0]);
-                    if(supported && format !== supported) {
-                        $dropframe.addClass(`is-invalid`);
-                        $dropframe.parents(`label`).append(`<span class="invalid-feedback">Seuls les fichier au format .${supported} sont supportés</span>`);
-                    } else {
-                        addUpload(modal, $input.attr(`name`), data.files[0]);
-                        $dropframe.addClass(`is-valid`);
-                    }
+                    proceedFileSaving($input, $dropframe, data.files[0], $fileEmpty, $fileConfirmation, modal)
                 } else {
                     $dropframe.addClass(`is-invalid`);
                 }
@@ -207,7 +224,7 @@ export default class Modal {
 
 export function clearForm($elem) {
     $elem.find(`input.data:not([type=checkbox]):not([type=radio]), select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
-    $elem.find(`input[type=checkbox][checked], input[type=radio][checked]`).prop(`checked`, false);
+    $elem.find(`input[type=checkbox]:checked, input[type=radio]:checked`).prop(`checked`, false);
 
     for(const check of $elem.find(`input[type=checkbox][checked], input[type=radio][checked]`)) {
         $(check).prop(`checked`, true);
@@ -227,7 +244,7 @@ export function processForm($parent) {
 
     const errors = [];
     const data = new FormData();
-    const $inputs = $parent.find(`select.data, input.data, input[data-repeat], textarea.data`);
+    const $inputs = $parent.find(`select.data, input.data, input[data-repeat], textarea.data, .data[data-wysiwyg]`);
 
     //clear previous errors
     $parent.find(`.is-invalid`).removeClass(`is-invalid`);
@@ -238,6 +255,38 @@ export function processForm($parent) {
 
         if($input.attr(`type`) === `radio`) {
             $input = $parent.find(`input[type="radio"][name="${input.name}"]:checked`);
+        } else if($input.attr(`type`) === `number`) {
+            let val = parseInt($input.val());
+            let min = parseInt($input.attr('min'));
+            let max = parseInt($input.attr('max'));
+
+            if (!isNaN(val) && (val > max || val < min)) {
+                let message = `La valeur `;
+                if (!isNaN(min) && !isNaN(max)) {
+                    message += min > max
+                        ? `doit être inférieure à ${max}.`
+                        : `doit être comprise entre ${min} et ${max}.`;
+                } else if (!isNaN(max)) {
+                    message += `doit être inférieure à ${max}.`;
+                } else if (!isNaN(min)) {
+                    message += `doit être supérieure à ${min}.`;
+                } else {
+                    message += `est invalide`;
+                }
+
+                errors.push({
+                    elements: [$input],
+                    message,
+                });
+            }
+        } else if($input.attr(`type`) === `tel`) {
+            const regex = /^(?:(?:\\+|00)33[\\s.-]{0,3}(?:\\(0\\)[\\s.-]{0,3})?|0)[1-9](?:(?:[\\s.-]?\\d{2}){4}|\\d{2}(?:[\\s.-]?\\d{3}){2})$/;
+            if($input.val() && !$input.val().match(regex)) {
+                errors.push({
+                    elements: [$input],
+                    message: `Le numéro de téléphone n'est pas valide`,
+                });
+            }
         }
 
         if($input.data(`repeat`)) {
@@ -260,16 +309,20 @@ export function processForm($parent) {
             }
         }
 
-        if($input.attr(`name`)) {
-            let value = $input.val() || null;
-            if($input.attr(`type`) === `checkbox`) {
+        if($input.attr(`name`) || $input.attr(`data-wysiwyg`)) {
+            let value;
+            if($input.is(`[data-wysiwyg]`)) {
+                value = $input.find(`.ql-editor`).html();
+            } else if($input.attr(`type`) === `checkbox`) {
                 value = $input.is(`:checked`) ? `1` : `0`;
             } else if(typeof value === 'string') {
                 value = $input.val().trim();
+            } else {
+                value = $input.val() || null;
             }
 
             if(value !== null) {
-                data.append($input.attr(`name`), value);
+                data.append($input.attr(`name`) || $input.attr(`data-wysiwyg`), value);
             }
         }
     }
@@ -323,4 +376,20 @@ function showInvalid($field, message) {
 
 function getExtension(file) {
     return file.name.split('.').pop();
+}
+
+function proceedFileSaving($input, $dropframe, file, $fileEmpty, $fileConfirmation, modal) {
+    const supported = $input.data(`format`);
+    const format = getExtension(file);
+    if(supported && format !== supported) {
+        $input.val('').trigger('change');
+        $dropframe.addClass(`is-invalid`);
+        $dropframe.parents(`label`).append(`<span class="invalid-feedback">Seuls les fichier au format .${supported} sont supportés</span>`);
+    } else {
+        addUpload(modal, $input.attr(`name`), file);
+        $dropframe.addClass('is-valid');
+        $fileEmpty.addClass('d-none');
+        $fileConfirmation.removeClass('d-none');
+        $fileConfirmation.find('.file-name').text(file.name);
+    }
 }

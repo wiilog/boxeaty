@@ -24,9 +24,15 @@
                         <label>
                             Pièce jointe
                             <div class="attachment-drop-frame">
-                                Faites glisser votre pièce jointe ici<br>
-                                ou <span class="click-here">cliquez ici</span>
-                                <input type="file" name="attachment" class="data" data-format="csv" required>
+                                <div class="file-empty cursor-pointer">
+                                    Faites glisser votre pièce jointe ici<br>
+                                    ou <span class="click-here">cliquez ici</span>
+                                </div>
+                                <div class="file-confirmation d-none">
+                                    Le fichier <strong class="file-name"></strong> a bien été ajouté.
+                                    <i class="fas fa-trash cursor-pointer file-delete-icon"></i>
+                                </div>
+                                <input type="file" name="attachment" class="data d-none" data-format="csv" accept=".csv" required>
                             </div>
                         </label>
 

@@ -48,13 +48,21 @@ export function initDatatable(table, config) {
         });
     };
 
+    const initial = $table.data(`initial-data`);
+    if (initial && typeof initial === `object`) {
+        config = {
+            ...config,
+            ...initial
+        };
+    }
+
     const $datatable = $table
         .on(`error.dt`, (e, settings, techNote, message) => console.error(`An error has been reported by DataTables: `, message, e, table))
         .DataTable({
             processing: true,
             serverSide: true,
             responsive: true,
-            scrollX: false,
+            scrollX: true,
             autoWidth: true,
             fixedColumns: {
                 heightMatch: `auto`
@@ -66,6 +74,7 @@ export function initDatatable(table, config) {
             initComplete: () => {
                 moveSearchInputToHeader($table);
             },
+            deferLoading: !!config.data || config.data === [],
             ...config
         });
 
