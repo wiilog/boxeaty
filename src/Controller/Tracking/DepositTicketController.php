@@ -30,8 +30,7 @@ class DepositTicketController extends AbstractController {
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("tracking/deposit_ticket/index.html.twig", [
-            "new_deposit_ticket" => (new DepositTicket())
-                ->setNumber(StringHelper::random(5)),
+            "new_deposit_ticket" => (new DepositTicket())->setNumber(StringHelper::random(5)),
             "initial_deposit_tickets" => $this->api($request, $manager)->getContent(),
         ]);
     }
