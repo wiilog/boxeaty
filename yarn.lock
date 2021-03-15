@@ -2585,11 +2585,6 @@ friendly-errors-webpack-plugin@^2.0.0-beta.1:
     string-width "^2.0.0"
     strip-ansi "^5"
 
-froala-editor@^3.2.6-1:
-  version "3.2.6-1"
-  resolved "https://registry.yarnpkg.com/froala-editor/-/froala-editor-3.2.6-1.tgz#b03feb2b076bc14b8f969a041e4122aab0eb29b3"
-  integrity sha512-PfUi3KwtYqPE9/fRJBhUAjOffUmVt2Bgd9XL1dcWkEZ9vgLaxQLau721xSy9tsZGc43GYoIlDo1jj9Mmdo3cDw==
-
 fs-minipass@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/fs-minipass/-/fs-minipass-2.1.0.tgz#7f5036fdbf12c63c169190cbe4199c852271f9fb"
