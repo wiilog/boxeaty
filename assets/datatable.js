@@ -48,9 +48,8 @@ export function initDatatable(table, config) {
         });
     };
 
-    const initial = $table.data('initial-data');
-    if (initial
-        && typeof initial === 'object') {
+    const initial = $table.data(`initial-data`);
+    if (initial && typeof initial === `object`) {
         config = {
             ...config,
             ...initial
