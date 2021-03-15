@@ -13,8 +13,7 @@
             </div>
         </div>
 
-        <table id="table-locations"></table>
-        <input id="table-locations-initial" type="hidden" value="{{ initial_locations }}">
+        <table id="table-locations" data-initial-data="{{ initial_locations }}"></table>
     </div>
 
     {% include 'referential/location/modal/new.html.twig' with {location: new_location} %}

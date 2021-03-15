@@ -13,8 +13,7 @@
             </div>
         </div>
 
-        <table id="table-box-types"></table>
-        <input id="table-box-types-initial" type="hidden" value="{{ initial_box_types }}">
+        <table id="table-box-types" data-initial-data="{{ initial_box_types }}"></table>
     </div>
 
     {% include 'referential/box_type/modal/new.html.twig' with {box_type: new_box_type} %}

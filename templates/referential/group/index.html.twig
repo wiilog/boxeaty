@@ -13,8 +13,7 @@
             </div>
         </div>
 
-        <table id="table-groups"></table>
-        <input id="table-groups-initial" type="hidden" value="{{ initial_groups }}">
+        <table id="table-groups" data-initial-data="{{ initial_groups }}"></table>
     </div>
 
     {% include 'referential/group/modal/new.html.twig' with {group: new_group} %}

@@ -48,11 +48,12 @@ export function initDatatable(table, config) {
         });
     };
 
-    const $initial = $(`${table}-initial`);
-    if($initial.exists()) {
+    const initial = $table.data('initial-data');
+    if (initial
+        && typeof initial === 'object') {
         config = {
             ...config,
-            ...JSON.parse($initial.val())
+            ...initial
         };
     }
 

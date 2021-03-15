@@ -13,8 +13,7 @@
             </div>
         </div>
 
-        <table id="table-clients"></table>
-        <input id="table-clients-initial" type="hidden" value="{{ initial_clients }}">
+        <table id="table-clients" data-initial-data="{{ initial_clients }}"></table>
     </div>
 
     {% include 'referential/client/modal/new.html.twig' with {client: new_client} %}
