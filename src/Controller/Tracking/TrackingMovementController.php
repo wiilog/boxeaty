@@ -249,15 +249,14 @@ class TrackingMovementController extends AbstractController {
      * @Route("/export", name="tracking_movement_export", options={"expose": true})
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
-    public function export(EntityManagerInterface $manager, ExportService $exportService, LoggerInterface $l): Response {
+    public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
         $movements = $manager->getRepository(BoxRecord::class)->iterateAll();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function($output) use ($exportService, $movements, $l) {
+        return $exportService->export(function($output) use ($exportService, $movements) {
             foreach ($movements as $movement) {
-                $l->critical(json_encode($movement));
                 $movement["state"] = Box::NAMES[$movement["state"]] ?? "Inconnu";
                 $exportService->putLine($output, $movement);
             }
