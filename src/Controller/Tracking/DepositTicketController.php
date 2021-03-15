@@ -154,6 +154,7 @@ class DepositTicketController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "Le ticket-consigne n'existe pas"
             ]);
         }

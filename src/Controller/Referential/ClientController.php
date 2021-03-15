@@ -219,6 +219,7 @@ class ClientController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "Le client n'existe pas"
             ]);
         }

@@ -240,6 +240,7 @@ class BoxController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "La Box n'existe pas"
             ]);
         }

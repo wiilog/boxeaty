@@ -154,6 +154,7 @@ class QualityController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "La qualité n'existe pas"
             ]);
         }

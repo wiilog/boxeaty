@@ -208,6 +208,7 @@ class RoleController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "Le rôle n'existe pas"
             ]);
         }

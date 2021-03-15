@@ -203,7 +203,7 @@ class ImportController extends AbstractController {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "msg" => "Cet import n'existe plus",
+                "msg" => "Cet import n'existe pas",
             ]);
         }
 

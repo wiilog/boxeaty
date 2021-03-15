@@ -229,9 +229,9 @@ class OrderController extends AbstractController {
                 "msg" => "Scan Box supprimé avec succès"
             ]);
         } else {
-
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "Ce scan Box n'existe pas"
             ]);
         }

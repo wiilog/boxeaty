@@ -233,6 +233,7 @@ class LocationController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "L'emplacement n'existe pas"
             ]);
         }
