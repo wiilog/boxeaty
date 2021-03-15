@@ -4,7 +4,10 @@ namespace App\Twig;
 
 use App\Helper\FormatHelper;
 use App\Service\RoleService;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -16,6 +19,9 @@ class AppExtension extends AbstractExtension {
 
     /** @Required */
     public RoleService $roleService;
+
+    /** @Required */
+    public Environment $twig;
 
     private array $config;
     private array $permissions;
@@ -31,6 +37,7 @@ class AppExtension extends AbstractExtension {
             new TwigFunction("has_permission", [$this, "hasPermission"]),
             new TwigFunction("permissions", [$this, "getPermissions"]),
             new TwigFunction("base64", [$this, "base64"]),
+            new TwigFunction("get_folder", [$this, "getFolder"]),
         ];
     }
 
@@ -43,13 +50,13 @@ class AppExtension extends AbstractExtension {
     public function menuConfiguration(): array {
         $config = [];
 
-        foreach($this->config as $item) {
-            if($this->shouldAddItem($item)) {
-                if(isset($item["items"])) {
+        foreach ($this->config as $item) {
+            if ($this->shouldAddItem($item)) {
+                if (isset($item["items"])) {
                     $item["items"] = array_filter($item["items"], fn($subitem) => $this->shouldAddItem($subitem));
                 }
 
-                if(!isset($item["items"]) || count($item["items"]) !== 0) {
+                if (!isset($item["items"]) || count($item["items"]) !== 0) {
                     $config[] = $item;
                 }
             }
@@ -75,11 +82,32 @@ class AppExtension extends AbstractExtension {
         $type = pathinfo($absolutePath, PATHINFO_EXTENSION);
         $content = base64_encode(file_get_contents($absolutePath));
 
-        if($type == "svg") {
+        if ($type == "svg") {
             $type = "svg+xml";
         }
 
         return "data:image/$type;base64,$content";
+    }
+
+    public function getFolder(string $folder) {
+        foreach ($this->twig->getLoader()->getPaths() as $path) {
+            if (is_dir("$path/$folder")) {
+                $location = "$path/$folder";
+                break;
+            }
+        }
+
+        if (isset($location)) {
+            $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($location, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
+            $files = array_keys(iterator_to_array($files));
+
+            return array_map(
+                fn(string $path) => str_replace($this->kernel->getProjectDir() . "/templates", "", $path),
+                $files
+            );
+        } else {
+            return [];
+        }
     }
 
     public function formatHelper($input, string $formatter, $else = ''): string {

@@ -45,13 +45,10 @@ export default class Select2 {
             config.minimumInputLength = 1;
         }
 
-        if ($element.is('[data-s2-tags]')) {
-            config.tags = true;
-        }
-
         $element.select2({
             placeholder: $element.data(`placeholder`),
             allowClear: true,
+            tags: $element.is(`[data-editable]`),
             language: {
                 inputTooShort: () => 'Veuillez entrer au moins 1 caractère.',
                 noResults: () => `Aucun résultat`,
