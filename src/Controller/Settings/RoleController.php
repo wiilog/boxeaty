@@ -24,9 +24,10 @@ class RoleController extends AbstractController {
      * @Route("/liste", name="roles_list")
      * @HasPermission(Role::MANAGE_ROLES)
      */
-    public function list(): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("settings/role/index.html.twig", [
             "new_role" => new Role(),
+            "initial_roles" => $this->api($request, $manager)->getContent(),
         ]);
     }
 
@@ -37,7 +38,7 @@ class RoleController extends AbstractController {
     public function api(Request $request,
                         EntityManagerInterface $manager): Response {
         $roleRepository = $manager->getRepository(Role::class);
-        $roles = $roleRepository->findForDatatable(json_decode($request->getContent(), true));
+        $roles = $roleRepository->findForDatatable(json_decode($request->getContent(), true) ?? []);
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();

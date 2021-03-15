@@ -48,6 +48,14 @@ export function initDatatable(table, config) {
         });
     };
 
+    const $initial = $(`${table}-initial`);
+    if($initial.exists()) {
+        config = {
+            ...config,
+            ...JSON.parse($initial.val())
+        };
+    }
+
     const $datatable = $table
         .on(`error.dt`, (e, settings, techNote, message) => console.error(`An error has been reported by DataTables: `, message, e, table))
         .DataTable({
@@ -66,6 +74,7 @@ export function initDatatable(table, config) {
             initComplete: () => {
                 moveSearchInputToHeader($table);
             },
+            deferLoading: !!config.data || config.data === [],
             ...config
         });
 

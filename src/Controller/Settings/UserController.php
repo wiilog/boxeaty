@@ -27,11 +27,12 @@ class UserController extends AbstractController {
      * @Route("/liste", name="users_list")
      * @HasPermission(Role::MANAGE_USERS)
      */
-    public function list(EntityManagerInterface $manager): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         $roles = $manager->getRepository(Role::class)->findBy(["active" => true]);
 
         return $this->render("settings/user/index.html.twig", [
             "new_user" => new User(),
+            "initial_users" => $this->api($request, $manager)->getContent(),
             "roles" => $roles,
         ]);
     }
@@ -41,13 +42,11 @@ class UserController extends AbstractController {
      * @HasPermission(Role::MANAGE_USERS)
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
-
-
         /** @var User $loggedUser */
         $loggedUser = $this->getUser();
 
         $users = $manager->getRepository(User::class)
-            ->findForDatatable(json_decode($request->getContent(), true), $loggedUser);
+            ->findForDatatable(json_decode($request->getContent(), true) ?? [], $loggedUser);
 
         $data = [];
         foreach ($users["data"] as $user) {
@@ -236,7 +235,7 @@ class UserController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Utilisateur <strong>{$user->getUsername()}</strong> désactivé avec succès"
+                "msg" => "Utilisateur <strong>{$user->getUsername()}</strong> désactivé avec succès",
             ]);
         } else if ($user) {
             $manager->remove($user);
@@ -244,7 +243,12 @@ class UserController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Utilisateur <strong>{$user->getUsername()}</strong> supprimé avec succès"
+                "msg" => "Utilisateur <strong>{$user->getUsername()}</strong> supprimé avec succès",
+            ]);
+        } else {
+            return $this->json([
+                "success" => false,
+                "msg" => "Une erreur est survenue",
             ]);
         }
     }

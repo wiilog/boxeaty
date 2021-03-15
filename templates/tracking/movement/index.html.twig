@@ -18,6 +18,7 @@
         </div>
 
         <table id="table-movements"></table>
+        <input id="table-movements-initial" type="hidden" value="{{ initial_movements }}">
     </div>
 
     {% include 'tracking/movement/modal/new.html.twig' with {movement: new_movement} %}

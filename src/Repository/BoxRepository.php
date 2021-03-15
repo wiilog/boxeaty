@@ -91,7 +91,7 @@ class BoxRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["filters"] as $name => $value) {
+        foreach ($params["filters"] ?? [] as $name => $value) {
             switch ($name) {
                 case("group"):
                     $qb->leftJoin("box.owner", "filter_client")
@@ -130,8 +130,8 @@ class BoxRepository extends EntityRepository {
 
         $filtered = QueryHelper::count($qb, "box");
 
-        $qb->setFirstResult($params["start"])
-            ->setMaxResults($params["length"]);
+        $qb->setFirstResult($params["start"] ?? 0)
+            ->setMaxResults($params["length"] ?? 10);
 
         return [
             "data" => $qb->getQuery()->getResult(),

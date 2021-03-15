@@ -14,6 +14,7 @@
         </div>
 
         <table id="table-roles"></table>
+        <input id="table-roles-initial" type="hidden" value="{{ initial_roles }}">
     </div>
 
     {% include 'settings/role/modal/new.html.twig' with {role: new_role} %}

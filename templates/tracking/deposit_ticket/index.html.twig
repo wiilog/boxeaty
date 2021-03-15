@@ -18,6 +18,7 @@
         </div>
 
         <table id="table-deposit-tickets"></table>
+        <input id="table-deposit-tickets-initial" type="hidden" value="{{ initial_deposit_tickets }}">
     </div>
 
     {% include 'tracking/deposit_ticket/modal/new.html.twig' with {deposit_ticket: new_deposit_ticket} %}

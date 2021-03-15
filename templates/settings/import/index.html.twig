@@ -17,6 +17,7 @@
         </div>
 
         <table id="table-imports"></table>
+        <input id="table-imports-initial" type="hidden" value="{{ initial_imports }}">
     </div>
 
     {% include 'settings/import/modal/new.html.twig' with {import: new_import} %}

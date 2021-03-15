@@ -13,6 +13,7 @@
         </div>
 
         <table id="table-orders"></table>
+        <input id="table-orders-initial" type="hidden" value="{{ initial_orders }}">
     </div>
 
     {% include 'tracking/order/modal/new.html.twig' with {order: new_order} %}
