@@ -7,6 +7,7 @@ use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\StringHelper;
+use App\Repository\RoleRepository;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,9 +25,11 @@ class RoleController extends AbstractController {
      * @Route("/liste", name="roles_list")
      * @HasPermission(Role::MANAGE_ROLES)
      */
-    public function list(): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("settings/role/index.html.twig", [
             "new_role" => new Role(),
+            "initial_roles" => $this->api($request, $manager)->getContent(),
+            "roles_order" => RoleRepository::DEFAULT_DATATABLE_ORDER,
         ]);
     }
 
@@ -37,25 +40,27 @@ class RoleController extends AbstractController {
     public function api(Request $request,
                         EntityManagerInterface $manager): Response {
         $roleRepository = $manager->getRepository(Role::class);
-        $roles = $roleRepository->findForDatatable(json_decode($request->getContent(), true));
+        $roles = $roleRepository->findForDatatable(json_decode($request->getContent(), true) ?? []);
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
+        $actions = $this->renderView("datatable_actions.html.twig", [
+            "editable" => true,
+            "deletable" => true,
+        ]);
+
         $data = [];
         /** @var Role $role */
         foreach ($roles["data"] as $role) {
+            $editable = $currentUser->getRole()->getCode() === Role::ROLE_ADMIN
+                || ($role->getCode() !== Role::ROLE_ADMIN && $role->getId() !== $currentUser->getRole()->getId());
+
             $data[] = [
                 "id" => $role->getId(),
                 "name" => $role->getName(),
                 "active" => $role->isActive() ? "Oui" : "Non",
-                "actions" => $this->renderView("datatable_actions.html.twig", [
-                    "editable" => (
-                        ($role->getCode() !== Role::ROLE_ADMIN && $role->getId() !== $currentUser->getRole()->getId())
-                        || $currentUser->getRole()->getCode() === Role::ROLE_ADMIN
-                    ),
-                    "deletable" => true,
-                ]),
+                "actions" => $editable ? $actions : "",
             ];
         }
 
@@ -207,6 +212,7 @@ class RoleController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "Le rôle n'existe pas"
             ]);
         }

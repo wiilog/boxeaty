@@ -25,7 +25,9 @@
             Rôle
             <select name="role" class="data" data-s2 data-placeholder="Sélectionnez un rôle" required>
                 {% for role in roles %}
-                    <option value="{{ role.id }}" {{ user.role and role.id == user.role.id ? 'selected' }}>{{ role.name }}</option>
+                    {% if role.code != 'SUPER_ADMINISTRATEUR' or app.user.role.code == 'SUPER_ADMINISTRATEUR' %}
+                        <option value="{{ role.id }}" {{ user.role and role.id == user.role.id ? 'selected' }}>{{ role.name }}</option>
+                    {% endif %}
                 {% endfor %}
             </select>
         </label>
@@ -58,7 +60,8 @@
     </div>
     <div class="col-md-6 col-12">
         <label>
-            Client(s) <i data-toggle="tooltip" title="Si vous ne sélectionnez rien, tous les clients du groupe seront rattachés automatiquement"></i>
+            Client(s)
+            <i data-toggle="tooltip" title="Si vous ne sélectionnez rien, tous les clients du groupe seront rattachés automatiquement"></i>
             <select name="clients" class="data multiple" data-s2="client" data-placeholder="Sélectionnez un ou plusieurs clients"
                     {{ user.groups | length > 1 ? 'disabled' }} multiple required>
                 {% for client in user.clients %}

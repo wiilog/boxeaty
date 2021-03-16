@@ -9,14 +9,13 @@ use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\BoxRecord;
+use App\Repository\BoxRecordRepository;
 use App\Service\BoxRecordService;
-use App\Entity\TrackingMovement;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Helper\Form;
 use Exception;
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,11 +30,13 @@ class TrackingMovementController extends AbstractController {
      * @Route("/liste", name="tracking_movements_list")
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
-    public function list(EntityManagerInterface $manager): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         $qualities = $manager->getRepository(Quality::class)->findAll();
 
         return $this->render("tracking/movement/index.html.twig", [
             "new_movement" => new BoxRecord(),
+            "initial_movements" => $this->api($request, $manager)->getContent(),
+            "movements_order" => BoxRecordRepository::DEFAULT_DATATABLE_ORDER,
             "qualities" => $qualities,
             "states" => Box::NAMES,
         ]);
@@ -47,7 +48,7 @@ class TrackingMovementController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $movements = $manager->getRepository(BoxRecord::class)
-            ->findForDatatable(json_decode($request->getContent(), true), $this->getUser());
+            ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $actions = $this->renderView("datatable_actions.html.twig", [
             "editable" => true,
@@ -249,15 +250,14 @@ class TrackingMovementController extends AbstractController {
      * @Route("/export", name="tracking_movement_export", options={"expose": true})
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
-    public function export(EntityManagerInterface $manager, ExportService $exportService, LoggerInterface $l): Response {
+    public function export(EntityManagerInterface $manager, ExportService $exportService): Response {
         $movements = $manager->getRepository(BoxRecord::class)->iterateAll();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function($output) use ($exportService, $movements, $l) {
+        return $exportService->export(function($output) use ($exportService, $movements) {
             foreach ($movements as $movement) {
-                $l->critical(json_encode($movement));
                 $movement["state"] = Box::NAMES[$movement["state"]] ?? "Inconnu";
                 $exportService->putLine($output, $movement);
             }

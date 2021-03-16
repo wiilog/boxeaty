@@ -34,7 +34,6 @@ $(document).ready(() => {
             {data: `date`, title: `Date et heure de création`},
             DATATABLE_ACTIONS
         ],
-        order: [[`date`, `desc`]],
         listeners: {
             delete: data => deleteOrderModal.open(data),
         }

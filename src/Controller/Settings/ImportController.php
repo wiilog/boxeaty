@@ -9,6 +9,7 @@ use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Helper\Stream;
 use App\Helper\StringHelper;
+use App\Repository\ImportRepository;
 use App\Service\ImportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,9 +30,11 @@ class ImportController extends AbstractController {
      * @Route("/liste", name="imports_list")
      * @HasPermission(Role::MANAGE_IMPORTS)
      */
-    public function list(): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("settings/import/index.html.twig", [
             "new_import" => new Import(),
+            "initial_imports" => $this->api($request, $manager)->getContent(),
+            "imports_order" => ImportRepository::DEFAULT_DATATABLE_ORDER,
         ]);
     }
 
@@ -41,7 +44,7 @@ class ImportController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $imports = $manager->getRepository(Import::class)
-            ->findForDatatable(json_decode($request->getContent(), true));
+            ->findForDatatable(json_decode($request->getContent(), true) ?? []);
 
         $data = [];
         foreach ($imports["data"] as $import) {
@@ -202,7 +205,7 @@ class ImportController extends AbstractController {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "msg" => "Cet import n'existe plus",
+                "msg" => "Cet import n'existe pas",
             ]);
         }
 

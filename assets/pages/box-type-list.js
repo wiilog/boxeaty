@@ -23,7 +23,6 @@ $(document).ready(() => {
             {data: `shape`, title: `Forme`},
             DATATABLE_ACTIONS
         ],
-        order: [[`name`, `asc`]],
         listeners: {
             edit: data => {
                 const ajax = AJAX.route(`POST`, `box_type_edit_template`, {

@@ -16,6 +16,10 @@ use Doctrine\ORM\EntityRepository;
  */
 class BoxRecordRepository extends EntityRepository {
 
+    public const DEFAULT_DATATABLE_ORDER = [['date', 'desc']];
+    private const DEFAULT_DATATABLE_START = 0;
+    private const DEFAULT_DATATABLE_LENGTH = 10;
+
     public function iterateAll() {
         return $this->createQueryBuilder("record")
             ->select("record.date AS date")
@@ -59,7 +63,7 @@ class BoxRecordRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["filters"] as $name => $value) {
+        foreach ($params["filters"] ?? [] as $name => $value) {
             switch ($name) {
                 case "from":
                     $qb->andWhere("DATE(record.date) >= :from")
@@ -86,15 +90,22 @@ class BoxRecordRepository extends EntityRepository {
             }
         }
 
-        foreach ($params["order"] ?? [] as $order) {
-            $column = $params["columns"][$order["column"]]["data"];
-            $qb->addOrderBy("record.$column", $order["dir"]);
+        if (!empty($params['order'])) {
+            foreach ($params["order"] ?? [] as $order) {
+                $column = $params["columns"][$order["column"]]["data"];
+                $qb->addOrderBy("record.$column", $order["dir"]);
+            }
+        }
+        else {
+            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+                $qb->addOrderBy("record.$column", $dir);
+            }
         }
 
         $filtered = QueryHelper::count($qb, "record");
 
-        $qb->setFirstResult($params["start"])
-            ->setMaxResults($params["length"]);
+        $qb->setFirstResult($params["start"] ?? self::DEFAULT_DATATABLE_START)
+            ->setMaxResults($params["length"] ?? self::DEFAULT_DATATABLE_LENGTH);
 
         return [
             "data" => $qb->getQuery()->getResult(),

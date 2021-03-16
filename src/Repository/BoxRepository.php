@@ -6,7 +6,6 @@ use App\Entity\Box;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
-use function Doctrine\ORM\QueryBuilder;
 
 /**
  * @method Box|null find($id, $lockMode = null, $lockVersion = null)
@@ -15,6 +14,10 @@ use function Doctrine\ORM\QueryBuilder;
  * @method Box[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class BoxRepository extends EntityRepository {
+
+    public const DEFAULT_DATATABLE_ORDER = [['email', 'asc']];
+    private const DEFAULT_DATATABLE_START = 0;
+    private const DEFAULT_DATATABLE_LENGTH = 10;
 
     public function iterateAll() {
         return $this->createQueryBuilder("box")
@@ -91,7 +94,7 @@ class BoxRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["filters"] as $name => $value) {
+        foreach ($params["filters"] ?? [] as $name => $value) {
             switch ($name) {
                 case("group"):
                     $qb->leftJoin("box.owner", "filter_client")
@@ -109,29 +112,36 @@ class BoxRepository extends EntityRepository {
             }
         }
 
-        foreach ($params["order"] ?? [] as $order) {
-            $column = $params["columns"][$order["column"]]["data"];
-            if ($column === "location") {
-                $qb->leftJoin("box.location", "order_location")
-                    ->addOrderBy("order_location.name", $order["dir"]);
-            } else if ($column === "quality") {
-                $qb->leftJoin("box.quality", "order_quality")
-                    ->addOrderBy("order_quality.name", $order["dir"]);
-            } else if ($column === "owner") {
-                $qb->leftJoin("box.owner", "order_owner")
-                    ->addOrderBy("order_owner.name", $order["dir"]);
-            } else if ($column === "type") {
-                $qb->leftJoin("box.type", "order_type")
-                    ->addOrderBy("order_type.name", $order["dir"]);
-            } else {
-                $qb->addOrderBy("box.$column", $order["dir"]);
+        if (!empty($params['order'])) {
+            foreach ($params["order"] ?? [] as $order) {
+                $column = $params["columns"][$order["column"]]["data"];
+                if ($column === "location") {
+                    $qb->leftJoin("box.location", "order_location")
+                        ->addOrderBy("order_location.name", $order["dir"]);
+                } else if ($column === "quality") {
+                    $qb->leftJoin("box.quality", "order_quality")
+                        ->addOrderBy("order_quality.name", $order["dir"]);
+                } else if ($column === "owner") {
+                    $qb->leftJoin("box.owner", "order_owner")
+                        ->addOrderBy("order_owner.name", $order["dir"]);
+                } else if ($column === "type") {
+                    $qb->leftJoin("box.type", "order_type")
+                        ->addOrderBy("order_type.name", $order["dir"]);
+                } else {
+                    $qb->addOrderBy("box.$column", $order["dir"]);
+                }
+            }
+        }
+        else {
+            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+                $qb->addOrderBy("box.$column", $dir);
             }
         }
 
         $filtered = QueryHelper::count($qb, "box");
 
-        $qb->setFirstResult($params["start"])
-            ->setMaxResults($params["length"]);
+        $qb->setFirstResult($params["start"] ?? self::DEFAULT_DATATABLE_START)
+            ->setMaxResults($params["length"] ?? self::DEFAULT_DATATABLE_LENGTH);
 
         return [
             "data" => $qb->getQuery()->getResult(),

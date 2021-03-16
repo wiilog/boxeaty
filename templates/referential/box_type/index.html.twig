@@ -13,7 +13,10 @@
             </div>
         </div>
 
-        <table id="table-box-types"></table>
+        <table id="table-box-types"
+               data-initial-data="{{ initial_box_types }}"
+               data-default-order="{{ box_types_order|json_encode }}">
+        </table>
     </div>
 
     {% include 'referential/box_type/modal/new.html.twig' with {box_type: new_box_type} %}

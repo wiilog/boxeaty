@@ -4,11 +4,15 @@
 header {
     background-color: $blue;
     border-radius: 0 0 16px 16px;
-    padding: 20px 30px;
+    padding: 20px 30px 50px;
     color: white;
 
     .top {
         @include content-apart();
+
+        @media (max-width: $tablet-breakpoint) {
+            flex-wrap: wrap;
+        }
 
         .logo {
             height: 100px;
@@ -115,9 +119,17 @@ header {
     }
 
     .breadcrumb {
-        margin-top: 50px;
+        margin: 50px;
         font-size: 2.5rem;
-        margin-bottom: 45px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        @media (max-width: $tablet-breakpoint) {
+            order: 3;
+            margin: 0;
+            width: 100%;
+        }
 
         .menu {
             font-weight: bold;
@@ -128,5 +140,14 @@ header {
             font-style: normal;
             margin: 0 7px;
         }
+
+        span {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    .filler {
+        flex: 1 1 auto;
     }
 }

@@ -6,7 +6,6 @@ use App\Entity\Client;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
-use function Doctrine\ORM\QueryBuilder;
 
 /**
  * @method Client|null find($id, $lockMode = null, $lockVersion = null)
@@ -15,6 +14,10 @@ use function Doctrine\ORM\QueryBuilder;
  * @method Client[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class ClientRepository extends EntityRepository {
+
+    public const DEFAULT_DATATABLE_ORDER = [['name', 'asc']];
+    private const DEFAULT_DATATABLE_START = 0;
+    private const DEFAULT_DATATABLE_LENGTH = 10;
 
     public function iterateAll() {
         return $this->createQueryBuilder("client")
@@ -54,23 +57,30 @@ class ClientRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["order"] ?? [] as $order) {
-            $column = $params["columns"][$order["column"]]["data"];
-            if ($column === "contact") {
-                QueryHelper::order($qb, "client.contact.username", $order["dir"]);
-            } else if ($column === "group") {
-                QueryHelper::order($qb, "client.group.name", $order["dir"]);
-            } else if ($column === "multiSite") {
-                QueryHelper::order($qb, "client.multiSite.name", $order["dir"]);
-            } else {
-                $qb->addOrderBy("client.$column", $order["dir"]);
+        if (!empty($params['order'])) {
+            foreach ($params["order"] ?? [] as $order) {
+                $column = $params["columns"][$order["column"]]["data"];
+                if ($column === "contact") {
+                    QueryHelper::order($qb, "client.contact.username", $order["dir"]);
+                } else if ($column === "group") {
+                    QueryHelper::order($qb, "client.group.name", $order["dir"]);
+                } else if ($column === "multiSite") {
+                    QueryHelper::order($qb, "client.multiSite.name", $order["dir"]);
+                } else {
+                    $qb->addOrderBy("client.$column", $order["dir"]);
+                }
+            }
+        }
+        else {
+            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+                $qb->addOrderBy("client.$column", $dir);
             }
         }
 
         $filtered = QueryHelper::count($qb, "client");
 
-        $qb->setFirstResult($params["start"])
-            ->setMaxResults($params["length"]);
+        $qb->setFirstResult($params["start"] ?? self::DEFAULT_DATATABLE_START)
+            ->setMaxResults($params["length"] ?? self::DEFAULT_DATATABLE_LENGTH);
 
         return [
             "data" => $qb->getQuery()->getResult(),

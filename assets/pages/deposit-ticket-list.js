@@ -36,7 +36,6 @@ $(document).ready(() => {
             {data: `state`, title: `Etat`},
             DATATABLE_ACTIONS,
         ],
-        order: [[`creationDate`, `desc`]],
         listeners: {
             delete: data => deleteDepositTicketModal.open(data),
         }

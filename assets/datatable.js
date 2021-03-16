@@ -13,6 +13,11 @@ export function initDatatable(table, config) {
     const $table = $(table);
     $table.addClass(`w-100`);
 
+    const orderConfig = $table.data('default-order');
+    config.order = (orderConfig && Array.isArray(orderConfig))
+        ? orderConfig
+        : [];
+
     for(const [id, column] of Object.entries(config.columns)) {
         if(!column.name) {
             column.name = column.data;
@@ -22,7 +27,7 @@ export function initDatatable(table, config) {
             const newOrder = [];
             for(let [name, order] of config.order) {
                 if(name === column.data) {
-                    name = id;
+                    name = Number(id);
                 }
 
                 newOrder.push([name, order]);
@@ -48,6 +53,14 @@ export function initDatatable(table, config) {
         });
     };
 
+    const initial = $table.data(`initial-data`);
+    if (initial && typeof initial === `object`) {
+        config = {
+            ...config,
+            ...initial
+        };
+    }
+
     const $datatable = $table
         .on(`error.dt`, (e, settings, techNote, message) => console.error(`An error has been reported by DataTables: `, message, e, table))
         .DataTable({
@@ -66,6 +79,7 @@ export function initDatatable(table, config) {
             initComplete: () => {
                 moveSearchInputToHeader($table);
             },
+            deferLoading: !!config.data || config.data === [],
             ...config
         });
 

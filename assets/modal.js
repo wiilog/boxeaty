@@ -38,7 +38,13 @@ export default class Modal {
 
         modal.setupFileUploader();
 
-        modal.element.on('hidden.bs.modal', () => modal.clear());
+        modal.element.on('hidden.bs.modal', () => {
+            modal.clear();
+            modal.element.find('[data-s2-initialized]').each(function () {
+                // we remove already openede elements
+                $(this).select2('close');
+            });
+        });
         modal.element.on('shown.bs.modal', () => {
             if(config.afterOpen) {
                 config.afterOpen(modal);
@@ -255,6 +261,38 @@ export function processForm($parent) {
 
         if($input.attr(`type`) === `radio`) {
             $input = $parent.find(`input[type="radio"][name="${input.name}"]:checked`);
+        } else if($input.attr(`type`) === `number`) {
+            let val = parseInt($input.val());
+            let min = parseInt($input.attr('min'));
+            let max = parseInt($input.attr('max'));
+
+            if (!isNaN(val) && (val > max || val < min)) {
+                let message = `La valeur `;
+                if (!isNaN(min) && !isNaN(max)) {
+                    message += min > max
+                        ? `doit être inférieure à ${max}.`
+                        : `doit être comprise entre ${min} et ${max}.`;
+                } else if (!isNaN(max)) {
+                    message += `doit être inférieure à ${max}.`;
+                } else if (!isNaN(min)) {
+                    message += `doit être supérieure à ${min}.`;
+                } else {
+                    message += `est invalide`;
+                }
+
+                errors.push({
+                    elements: [$input],
+                    message,
+                });
+            }
+        } else if($input.attr(`type`) === `tel`) {
+            const regex = /^(?:(?:\\+|00)33[\\s.-]{0,3}(?:\\(0\\)[\\s.-]{0,3})?|0)[1-9](?:(?:[\\s.-]?\\d{2}){4}|\\d{2}(?:[\\s.-]?\\d{3}){2})$/;
+            if($input.val() && !$input.val().match(regex)) {
+                errors.push({
+                    elements: [$input],
+                    message: `Le numéro de téléphone n'est pas valide`,
+                });
+            }
         }
 
         if($input.data(`repeat`)) {
@@ -332,7 +370,7 @@ export function processForm($parent) {
 }
 
 function showInvalid($field, message) {
-    if($field.is(`[data-s2]`)) {
+    if($field.is(`[data-s2-initialized]`)) {
         $field = $field.parent().find(`.select2-selection`);
     } else if($field.is(`[type="file"]`)) {
         $field = $field.parent();
