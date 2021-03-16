@@ -22,7 +22,7 @@ $(document).ready(() => {
     const table = initDatatable(`#table-locations`, {
         ajax: AJAX.route(`POST`, `locations_api`),
         columns: [
-            {data: `type`, title: `Type`, orderable: false},
+            {data: `kiosk`, title: `Type`},
             {data: `name`, title: `Nom de l'emplacement`},
             {data: `client_name`, title: `Nom du client`},
             {data: `active`, title: `Actif`},

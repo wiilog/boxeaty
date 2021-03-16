@@ -177,9 +177,7 @@ class ApiController extends AbstractController {
             "state" => Box::CONSUMER,
         ]);
 
-        if ($box
-            && $box->getType()
-            && $box->getOwner()) {
+        if ($box && $box->getType() && $box->getOwner()) {
             return $this->json([
                 "success" => true,
                 "box" => [
@@ -190,8 +188,6 @@ class ApiController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
-                "reload" => true,
-                "msg" => "La Box n'existe pas ou n'est pas sale",
             ]);
         }
     }
@@ -259,7 +255,6 @@ class ApiController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
-                "reload" => true,
                 "msg" => "La Box n'existe pas, veuillez contacter un responsable d'établissement.",
             ]);
         }

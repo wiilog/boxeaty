@@ -48,7 +48,7 @@ class LocationController extends AbstractController {
         foreach ($locations["data"] as $location) {
             $data[] = [
                 "id" => $location->getId(),
-                "type" => $location->isKiosk() ? "Borne" : "Emplacement",
+                "kiosk" => $location->isKiosk() ? "Borne" : "Emplacement",
                 "name" => $location->getName(),
                 "client_name" => $location->getClient() ? $location->getClient()->getName() : '',
                 "active" => $location->isActive() ? "Oui" : "Non",

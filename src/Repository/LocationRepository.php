@@ -21,8 +21,7 @@ class LocationRepository extends EntityRepository {
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
-    public function iterateAll()
-    {
+    public function iterateAll() {
         return $this->createQueryBuilder("location")
             ->select("IF(location.kiosk = 0, 'Emplacement', 'Borne') AS type")
             ->addSelect("location.name AS name")
@@ -61,8 +60,7 @@ class LocationRepository extends EntityRepository {
                     $qb->addOrderBy("location.$column", $order["dir"]);
                 }
             }
-        }
-        else {
+        } else {
             foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("location.$column", $dir);
             }
