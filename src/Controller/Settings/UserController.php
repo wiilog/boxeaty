@@ -158,8 +158,16 @@ class UserController extends AbstractController {
             $form->addError("role", "Le rôle sélectionné n'existe plus, merci de rafraichir la page");
         }
 
-        if (isset($content->password) && !Authenticator::isPasswordSecure($content->password)) {
-            $form->addError("password", Authenticator::PASSWORD_ERROR);
+        if(isset($content->password)) {
+            if($user == $this->getUser() && !isset($content->currentPassword)) {
+                $form->addError("currentPassword", "Ce champ est requis pour changer le mot de passe");
+            } else if (isset($content->currentPassword) && !$encoder->isPasswordValid($user, $content->currentPassword)) {
+                $form->addError("currentPassword", "Ce champ ne correspond pas au mot de passe actuel");
+            }
+
+            if (!Authenticator::isPasswordSecure($content->password)) {
+                $form->addError("password", Authenticator::PASSWORD_ERROR);
+            }
         }
 
         /** @var User $loggedUser */

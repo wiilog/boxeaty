@@ -22,6 +22,17 @@ label {
         width: 100%;
     }
 
+    .show-password {
+        cursor: pointer;
+        display: block;
+        position: relative;
+        top: -30px;
+        right: 5px;
+        text-align: right;
+        width: 100% !important;
+        height: 0;
+    }
+
     &:not(:first-child) {
         margin-top: 0.5rem;
     }

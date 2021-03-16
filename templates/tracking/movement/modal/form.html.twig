@@ -8,7 +8,7 @@
     <div class="col-12">
         <label>
             Box
-            <select name="box" class="data" data-s2="box" data-placeholder="Sélectionnez une box" required {{ movement.id ? 'disabled' }}>
+            <select name="box" class="data" data-s2="box" data-placeholder="Sélectionnez une Box" required {{ movement.id ? 'disabled' }}>
                 {% if movement.box %}
                     <option value="{{ movement.box.id }}" selected>{{ movement.box.number }}</option>
                 {% endif %}
