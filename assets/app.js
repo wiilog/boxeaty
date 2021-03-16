@@ -5,10 +5,11 @@ import 'arrive';
 import 'datatables.net';
 import 'datatables.net-dt/js/dataTables.dataTables';
 import '@fortawesome/fontawesome-free/js/all.js';
-import '../node_modules/froala-editor/js/languages/fr.js'
 
 import $ from 'jquery';
-import FroalaEditor from 'froala-editor';
+import Quill from 'quill/dist/quill.js';
+import Toolbar from 'quill/modules/toolbar';
+import Snow from 'quill/themes/snow';
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 
 import './select2';
@@ -55,13 +56,34 @@ $document.ready(() => {
     $document.arrive(`.fr-wrapper div:not([class])`, bannerRemover);
 });
 
+
+Quill.register({
+    'modules/toolbar.js': Toolbar,
+    'themes/snow.js': Snow,
+});
+
 function initializeWYSIWYG() {
-    new FroalaEditor(`[data-wysiwyg]`, {
-        language: 'fr',
-        placeholderText: 'Votre commentaire'
+    $('[data-wysiwyg]:not([id])').each(function() {
+        this.id = randomString(64);
+
+        new Quill(this, {
+            modules: {
+                toolbar: [
+                    [{header: [1, 2, 3, false]}],
+                    ['bold', 'italic', 'underline', 'image'],
+                    [{'list': 'ordered'}, {'list': 'bullet'}]
+                ]
+            },
+            formats: [
+                'header',
+                'bold', 'italic', 'underline', 'strike', 'blockquote',
+                'list', 'bullet', 'indent', 'link', 'image'
+            ],
+            theme: 'snow',
+        });
     });
 }
-
+global.initializeWYSIWYG = initializeWYSIWYG;
 export const SPINNER_WRAPPER_CLASS = `spinner-border-container`;
 export const LOADING_CLASS = `loading`;
 
@@ -120,3 +142,14 @@ jQuery.fn.popLoader = function() {
 
     return this;
 };
+
+export function randomString(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const charactersLength = characters.length;
+    for(let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
+}

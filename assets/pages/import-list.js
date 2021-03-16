@@ -35,7 +35,6 @@ $(document).ready(() => {
             {data: `user`, title: `Utilisateur`},
             DATATABLE_ACTIONS,
         ],
-        order: [[`creationDate`, `desc`]],
         listeners: {
             cancel: data => AJAX.route(`POST`, `import_cancel`).run({
                 import: data.id,

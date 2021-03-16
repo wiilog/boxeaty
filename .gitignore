@@ -26,3 +26,7 @@ yarn-error.log
 /public/exports/
 /public/persistent/imports
 /public/persistent/traces
+
+###> assoconnect/mjml-bundle ###
+/templates/emails/mjml/*.html.twig
+###< assoconnect/mjml-bundle ###

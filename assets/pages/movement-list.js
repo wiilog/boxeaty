@@ -35,7 +35,6 @@ $(document).ready(() => {
             {data: `user`, title: `Utilisateur`},
             DATATABLE_ACTIONS,
         ],
-        order: [[`date`, `desc`]],
         listeners: {
             edit: data => {
                 const ajax = AJAX.route(`POST`, `tracking_movement_edit_template`, {

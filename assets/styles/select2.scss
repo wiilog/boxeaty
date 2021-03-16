@@ -3,16 +3,11 @@
 
 .select2 {
     min-width: 200px;
-    height: 38px;
+    min-height: 38px;
 }
 
 .select2-container {
     width: 100% !important;
-}
-
-.select2-container.multiple {
-    height: 60px;
-    overflow-x: auto;
 }
 
 .filters .select2-container:not(.select2-container--open) {
@@ -28,12 +23,11 @@
     border-radius: 0 !important;
     border-bottom: 1px solid $grey-dark !important;
     outline: none;
-    height: 38px !important;
+    min-height: 38px !important;
     line-height: 38px;
 
     &.select2-selection--multiple {
         display: flex;
-        max-height: 38px;
     }
 
     &.is-invalid {
@@ -119,12 +113,18 @@
     }
 }
 
+.select2-selection--multiple {
+    flex-wrap: wrap !important;
+
+    .select2-selection__rendered {
+        flex: 1 1 auto;
+        flex-wrap: wrap;
+    }
+}
+
 .select2-selection__rendered {
     display: inline-flex !important;
     align-items: center;
-    height: 38px !important;
-}
-
-.select2-container--open .select2-dropdown--below {
-    margin-top: -22px !important;
+    min-height: 38px !important;
+    margin-bottom: 0 !important;
 }

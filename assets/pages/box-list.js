@@ -30,7 +30,6 @@ $(document).ready(() => {
             {data: `type`, title: `Type`},
             DATATABLE_ACTIONS
         ],
-        order: [[`id`, `desc`]],
         createdRow: (row) => {
             $(row).addClass('cursor-pointer');
         },

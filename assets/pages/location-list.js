@@ -31,7 +31,6 @@ $(document).ready(() => {
             {data: `capacity`, title: `Capacité`},
             DATATABLE_ACTIONS,
         ],
-        order: [[`name`, `asc`]],
         listeners: {
             edit: data => {
                 const ajax = AJAX.route(`POST`, `location_edit_template`, {

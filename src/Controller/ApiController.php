@@ -61,18 +61,7 @@ class ApiController extends AbstractController {
      */
     public function kiosks(EntityManagerInterface $manager): Response {
         $kiosks = Stream::from($manager->getRepository(Location::class)->findBy(["kiosk" => true]))
-            ->map(fn(Location $kiosk) => [
-                "id" => $kiosk->getId(),
-                "name" => $kiosk->getName(),
-                "capacity" => $kiosk->getCapacity(),
-                "client" => null,
-                "boxes" => Stream::from($kiosk->getBoxes())
-                    ->map(fn(Box $box) => [
-                        "id" => $box->getId(),
-                        "number" => $box->getNumber(),
-                    ])
-                    ->toArray(),
-            ])
+            ->map(fn(Location $kiosk) => $kiosk->serialize())
             ->toArray();
 
         return $this->json([
@@ -101,14 +90,10 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/kiosks/reload", name="api_kiosks_reload")
+     * @Route("/kiosks/{kiosk}", name="api_get_kiosks", requirements={"kiosk"="\d+"}, methods={"GET"})
      */
-    public function kiosk(Request $request, EntityManagerInterface $manager): Response {
-        $content = json_decode($request->getContent());
-
-        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
-
-        if ($kiosk) {
+    public function kiosk(Location $kiosk): Response {
+        if ($kiosk && $kiosk->isKiosk()) {
             return $this->json([
                 "success" => true,
                 "kiosk" => [
@@ -177,6 +162,7 @@ class ApiController extends AbstractController {
 
         return $this->json([
             "success" => true,
+            'kiosk' => $kiosk->serialize()
         ]);
     }
 
@@ -204,6 +190,7 @@ class ApiController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "La Box n'existe pas ou n'est pas sale",
             ]);
         }
@@ -267,10 +254,12 @@ class ApiController extends AbstractController {
                     "id" => $box->getId(),
                     "number" => $box->getNumber(),
                 ],
+                'kiosk' => $kiosk->serialize()
             ]);
         } else {
             return $this->json([
                 "success" => false,
+                "reload" => true,
                 "msg" => "La Box n'existe pas, veuillez contacter un responsable d'établissement.",
             ]);
         }
@@ -335,7 +324,7 @@ class ApiController extends AbstractController {
         $mailer->send(
             $content->email,
             "BoxEaty - Ticket-consigne",
-            $this->renderView("emails/deposit_ticket.html.twig", [
+            $this->renderView("emails/mjml/deposit_ticket.html.twig", [
                 "ticket" => $depositTicket,
             ])
         );

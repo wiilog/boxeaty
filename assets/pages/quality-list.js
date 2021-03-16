@@ -24,7 +24,6 @@ $(document).ready(() => {
             {data: `name`, title: `Nom`},
             DATATABLE_ACTIONS,
         ],
-        order: [[`name`, `asc`]],
         listeners: {
             edit: data => {
                 const ajax = AJAX.route(`POST`, `quality_edit_template`, {

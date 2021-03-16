@@ -15,6 +15,10 @@ use Doctrine\ORM\EntityRepository;
  */
 class OrderRepository extends EntityRepository {
 
+    public const DEFAULT_DATATABLE_ORDER = [['date', 'desc']];
+    private const DEFAULT_DATATABLE_START = 0;
+    private const DEFAULT_DATATABLE_LENGTH = 10;
+
     public function findForDatatable(array $params, ?User $user): array {
         $search = $params["search"]["value"] ?? null;
 
@@ -35,26 +39,33 @@ class OrderRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["order"] ?? [] as $order) {
-            $column = $params["columns"][$order["column"]]["data"];
-            if ($column === "location") {
-                $qb->leftJoin("ord.location", "order_location")
-                    ->addOrderBy("order_location.name", $order["dir"]);
-            } else if ($column === "user") {
-                $qb->leftJoin("ord.user", "order_user")
-                    ->addOrderBy("order_user.name", $order["dir"]);
-            } else if ($column === "client") {
-                $qb->leftJoin("ord.client", "order_client")
-                    ->addOrderBy("order_client.name", $order["dir"]);
-            } else {
-                $qb->addOrderBy("ord.$column", $order["dir"]);
+        if (!empty($params['order'])) {
+            foreach ($params["order"] ?? [] as $order) {
+                $column = $params["columns"][$order["column"]]["data"];
+                if ($column === "location") {
+                    $qb->leftJoin("ord.location", "order_location")
+                        ->addOrderBy("order_location.name", $order["dir"]);
+                } else if ($column === "user") {
+                    $qb->leftJoin("ord.user", "order_user")
+                        ->addOrderBy("order_user.name", $order["dir"]);
+                } else if ($column === "client") {
+                    $qb->leftJoin("ord.client", "order_client")
+                        ->addOrderBy("order_client.name", $order["dir"]);
+                } else {
+                    $qb->addOrderBy("ord.$column", $order["dir"]);
+                }
+            }
+        }
+        else {
+            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+                $qb->addOrderBy("ord.$column", $dir);
             }
         }
 
         $filtered = QueryHelper::count($qb, "ord");
 
-        $qb->setFirstResult($params["start"])
-            ->setMaxResults($params["length"]);
+        $qb->setFirstResult($params["start"] ?? self::DEFAULT_DATATABLE_START)
+            ->setMaxResults($params["length"] ?? self::DEFAULT_DATATABLE_LENGTH);
 
         return [
             "data" => $qb->getQuery()->getResult(),

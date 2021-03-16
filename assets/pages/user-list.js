@@ -23,7 +23,6 @@ $(document).ready(() => {
             {data: `status`, title: `Statut`},
             DATATABLE_ACTIONS,
         ],
-        order: [[`email`, `asc`]],
         listeners: {
             edit: data => {
                 const ajax = AJAX.route(`POST`, `user_edit_template`, {

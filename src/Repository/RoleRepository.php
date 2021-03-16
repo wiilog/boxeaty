@@ -14,6 +14,10 @@ use Doctrine\ORM\EntityRepository;
  */
 class RoleRepository extends EntityRepository {
 
+    public const DEFAULT_DATATABLE_ORDER = [['name', 'asc']];
+    private const DEFAULT_DATATABLE_START = 0;
+    private const DEFAULT_DATATABLE_LENGTH = 10;
+
     public function iterateAll() {
         return $this->createQueryBuilder("role")
             ->select("role.name AS name")
@@ -35,15 +39,22 @@ class RoleRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["order"] ?? [] as $order) {
-            $column = $params["columns"][$order["column"]]["data"];
-            $qb->addOrderBy("role.$column", $order["dir"]);
+        if (!empty($params['order'])) {
+            foreach ($params["order"] ?? [] as $order) {
+                $column = $params["columns"][$order["column"]]["data"];
+                $qb->addOrderBy("role.$column", $order["dir"]);
+            }
+        }
+        else {
+            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+                $qb->addOrderBy("role.$column", $dir);
+            }
         }
 
         $filtered = QueryHelper::count($qb, "role");
 
-        $qb->setFirstResult($params["start"])
-            ->setMaxResults($params["length"]);
+        $qb->setFirstResult($params["start"] ?? self::DEFAULT_DATATABLE_START)
+            ->setMaxResults($params["length"] ?? self::DEFAULT_DATATABLE_LENGTH);
 
         return [
             "data" => $qb->getQuery()->getResult(),
