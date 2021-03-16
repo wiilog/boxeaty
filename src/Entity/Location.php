@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Helper\Stream;
 use App\Repository\LocationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -245,6 +246,21 @@ class Location {
         $this->capacity = $capacity;
 
         return $this;
+    }
+
+    public function serialize(): array {
+        return [
+            "id" => $this->getId(),
+            "name" => $this->getName(),
+            "capacity" => $this->getCapacity(),
+            "client" => null,
+            "boxes" => Stream::from($this->getBoxes())
+                ->map(fn(Box $box) => [
+                    "id" => $box->getId(),
+                    "number" => $box->getNumber(),
+                ])
+                ->toArray()
+        ];
     }
 
 }
