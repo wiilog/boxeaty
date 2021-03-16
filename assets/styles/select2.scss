@@ -26,10 +26,6 @@
     min-height: 38px !important;
     line-height: 38px;
 
-    &.select2-selection--multiple {
-        display: flex;
-    }
-
     &.is-invalid {
         background: $invalid-lighter;
         border-bottom-color: $invalid !important;
@@ -46,7 +42,6 @@
 
 .select2-search {
     border: none !important;
-    width: 100%;
 
     textarea, input {
         min-width: initial;
