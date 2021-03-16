@@ -45,20 +45,22 @@ class RoleController extends AbstractController {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
+        $actions = $this->renderView("datatable_actions.html.twig", [
+            "editable" => true,
+            "deletable" => true,
+        ]);
+
         $data = [];
         /** @var Role $role */
         foreach ($roles["data"] as $role) {
+            $editable = $currentUser->getRole()->getCode() === Role::ROLE_ADMIN
+                || ($role->getCode() !== Role::ROLE_ADMIN && $role->getId() !== $currentUser->getRole()->getId());
+
             $data[] = [
                 "id" => $role->getId(),
                 "name" => $role->getName(),
                 "active" => $role->isActive() ? "Oui" : "Non",
-                "actions" => $this->renderView("datatable_actions.html.twig", [
-                    "editable" => (
-                        ($role->getCode() !== Role::ROLE_ADMIN && $role->getId() !== $currentUser->getRole()->getId())
-                        || $currentUser->getRole()->getCode() === Role::ROLE_ADMIN
-                    ),
-                    "deletable" => true,
-                ]),
+                "actions" => $editable ? $actions : "",
             ];
         }
 
