@@ -15,7 +15,7 @@ use Doctrine\ORM\EntityRepository;
  */
 class BoxRepository extends EntityRepository {
 
-    public const DEFAULT_DATATABLE_ORDER = [['email', 'asc']];
+    public const DEFAULT_DATATABLE_ORDER = [['id', 'asc']];
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 

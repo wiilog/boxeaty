@@ -14,7 +14,7 @@ use Doctrine\ORM\EntityRepository;
  */
 class UserRepository extends EntityRepository {
 
-    public const DEFAULT_DATATABLE_ORDER = [['id', 'desc']];
+    public const DEFAULT_DATATABLE_ORDER = [['email', 'desc']];
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
