@@ -96,9 +96,28 @@ class ImportService {
                 $this->addError("Aucun emplacement correspondant à \"$locationValue\"");
             }
 
+            /** @var Client $owner */
+            if ($import->getUser()->getRole()->isAllowEditOwnGroupOnly()) {
+                $groups = $import->getUser()->getGroups();
+
+                if ($groups->contains($location->getClient()->getGroup())) {
+                    $this->addError(
+                        "Vous ne pouvez pas importer des Box dans " .
+                        "l'emplacement \"$locationValue\" car il appartient au " .
+                        "groupe \"{$location->getClient()->getGroup()->getName()}\""
+                    );
+                }
+
+                if (!$groups->contains($owner->getGroup())) {
+                    $this->addError(
+                        "Vous ne pouvez pas importer des Box du " .
+                        "client \"$ownerValue\" car il est dans le " .
+                        "groupe \"{$owner->getGroup()->getName()}\""
+                    );
+                }
+            }
+
             if (!$this->hasError()) {
-                /** @var User $loggedUser */
-                $loggedUser = $this->security ? $this->security->getUser() : null;
                 $box->setType($type)
                     ->setUses(0)
                     ->setCanGenerateDepositTicket(false)
@@ -108,7 +127,7 @@ class ImportService {
                     ->setOwner($owner)
                     ->setComment($this->value(Import::COMMENT));
 
-                [$tracking, $record] = $this->boxRecordService->generateBoxRecords($box, [], $loggedUser);
+                [$tracking, $record] = $this->boxRecordService->generateBoxRecords($box, [], $import->getUser());
 
                 if ($tracking) {
                     $tracking->setBox($box);
@@ -128,7 +147,7 @@ class ImportService {
                 }
             }
 
-            if($creations % 500 == 0) {
+            if ($creations % 500 == 0) {
                 $this->manager->flush();
             }
         }
@@ -161,7 +180,7 @@ class ImportService {
         $this->data = fgetcsv($handle, 0, ";");
         $this->hasError = false;
 
-        if($this->data && $this->exportService->getEncoding() === ExportService::ENCODING_UTF8) {
+        if ($this->data && $this->exportService->getEncoding() === ExportService::ENCODING_UTF8) {
             $this->data = array_map("utf8_encode", $this->data);
         }
 
@@ -185,7 +204,7 @@ class ImportService {
 
         $name = bin2hex(random_bytes(6)) . ".csv";
         $tracesDirectory = $this->kernel->getProjectDir() . "/public/persistent/traces";
-        if(!is_dir($tracesDirectory)) {
+        if (!is_dir($tracesDirectory)) {
             mkdir($tracesDirectory);
         }
 
