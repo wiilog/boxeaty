@@ -9,6 +9,7 @@ use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
+use App\Repository\ClientRepository;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,6 +31,7 @@ class ClientController extends AbstractController {
         return $this->render("referential/client/index.html.twig", [
             "new_client" => new Client(),
             "initial_clients" => $this->api($request, $manager)->getContent(),
+            "clients_order" => ClientRepository::DEFAULT_DATATABLE_ORDER
         ]);
     }
 

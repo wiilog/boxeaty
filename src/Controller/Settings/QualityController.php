@@ -6,6 +6,7 @@ use App\Annotation\HasPermission;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Helper\Form;
+use App\Repository\QualityRepository;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,6 +28,7 @@ class QualityController extends AbstractController {
         return $this->render("settings/quality/index.html.twig", [
             "new_quality" => new Quality(),
             "initial_qualities" => $this->api($request, $manager)->getContent(),
+            "qualities_order" => QualityRepository::DEFAULT_DATATABLE_ORDER,
         ]);
     }
 

@@ -8,6 +8,7 @@ use App\Entity\Group;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
+use App\Repository\UserRepository;
 use App\Security\Authenticator;
 use App\Service\ExportService;
 use DateTime;
@@ -33,6 +34,7 @@ class UserController extends AbstractController {
         return $this->render("settings/user/index.html.twig", [
             "new_user" => new User(),
             "initial_users" => $this->api($request, $manager)->getContent(),
+            "users_order" => UserRepository::DEFAULT_DATATABLE_ORDER,
             "roles" => $roles,
         ]);
     }

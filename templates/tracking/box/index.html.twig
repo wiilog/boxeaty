@@ -17,7 +17,10 @@
             </div>
         </div>
 
-        <table id="table-boxes" data-initial-data="{{ initial_boxes }}"></table>
+        <table id="table-boxes"
+               data-initial-data="{{ initial_boxes }}"
+               data-default-order="{{ boxes_order|json_encode }}">
+        </table>
     </div>
 
     {% include 'tracking/box/modal/new.html.twig' with {box: new_box} %}

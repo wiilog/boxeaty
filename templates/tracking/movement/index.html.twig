@@ -17,7 +17,10 @@
             </div>
         </div>
 
-        <table id="table-movements" data-initial-data="{{ initial_movements }}"></table>
+        <table id="table-movements"
+               data-initial-data="{{ initial_movements }}"
+               data-default-order="{{ movements_order|json_encode }}">
+        </table>
     </div>
 
     {% include 'tracking/movement/modal/new.html.twig' with {movement: new_movement} %}

@@ -56,7 +56,6 @@ $(document).ready(() => {
             {data: `multiSite`, title: `Multi-site`},
             DATATABLE_ACTIONS,
         ],
-        order: [[`name`, `asc`]],
         listeners: {
             edit: data => {
                 const ajax = AJAX.route(`POST`, `client_edit_template`, {

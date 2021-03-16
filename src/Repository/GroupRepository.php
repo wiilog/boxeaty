@@ -15,6 +15,10 @@ use Doctrine\ORM\EntityRepository;
  */
 class GroupRepository extends EntityRepository {
 
+    public const DEFAULT_DATATABLE_ORDER = [['name', 'asc']];
+    private const DEFAULT_DATATABLE_START = 0;
+    private const DEFAULT_DATATABLE_LENGTH = 10;
+
     public function iterateAll() {
         return $this->createQueryBuilder("g")
             ->select("g.name AS name")
@@ -34,15 +38,22 @@ class GroupRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["order"] ?? [] as $order) {
-            $column = $params["columns"][$order["column"]]["data"];
-            $qb->addOrderBy("g.$column", $order["dir"]);
+        if (!empty($params['order'])) {
+            foreach ($params["order"] ?? [] as $order) {
+                $column = $params["columns"][$order["column"]]["data"];
+                $qb->addOrderBy("g.$column", $order["dir"]);
+            }
+        }
+        else {
+            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+                $qb->addOrderBy("g.$column", $dir);
+            }
         }
 
         $filtered = QueryHelper::count($qb, "g");
 
-        $qb->setFirstResult($params["start"] ?? 0)
-            ->setMaxResults($params["length"] ?? 10);
+        $qb->setFirstResult($params["start"] ?? self::DEFAULT_DATATABLE_START)
+            ->setMaxResults($params["length"] ?? self::DEFAULT_DATATABLE_LENGTH);
 
         return [
             "data" => $qb->getQuery()->getResult(),

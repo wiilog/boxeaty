@@ -13,6 +13,11 @@ export function initDatatable(table, config) {
     const $table = $(table);
     $table.addClass(`w-100`);
 
+    const orderConfig = $table.data('default-order');
+    config.order = (orderConfig && Array.isArray(orderConfig))
+        ? orderConfig
+        : [];
+
     for(const [id, column] of Object.entries(config.columns)) {
         if(!column.name) {
             column.name = column.data;
@@ -22,7 +27,7 @@ export function initDatatable(table, config) {
             const newOrder = [];
             for(let [name, order] of config.order) {
                 if(name === column.data) {
-                    name = id;
+                    name = Number(id);
                 }
 
                 newOrder.push([name, order]);

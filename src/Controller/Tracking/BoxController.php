@@ -12,6 +12,7 @@ use App\Entity\Role;
 use App\Entity\BoxRecord;
 use App\Helper\Form;
 use App\Helper\Stream;
+use App\Repository\BoxRepository;
 use App\Service\BoxRecordService;
 use App\Service\ExportService;
 use DateTime;
@@ -35,6 +36,7 @@ class BoxController extends AbstractController {
         return $this->render("tracking/box/index.html.twig", [
             "new_box" => new Box(),
             "initial_boxes" => $this->api($request, $manager)->getContent(),
+            "boxes_order" => BoxRepository::DEFAULT_DATATABLE_ORDER
         ]);
     }
 

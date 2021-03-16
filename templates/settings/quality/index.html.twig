@@ -13,7 +13,9 @@
             </div>
         </div>
 
-        <table id="table-qualities" data-initial-data="{{ initial_qualities }}"></table>
+        <table id="table-qualities"
+               data-initial-data="{{ initial_qualities }}"
+               data-default-order="{{ qualities_order|json_encode }}"></table>
     </div>
 
     {% include 'settings/quality/modal/new.html.twig' with {quality: new_quality} %}

@@ -13,7 +13,10 @@
             </div>
         </div>
 
-        <table id="table-locations" data-initial-data="{{ initial_locations }}"></table>
+        <table id="table-locations"
+               data-initial-data="{{ initial_locations }}"
+               data-default-order="{{ locations_order|json_encode }}">
+        </table>
     </div>
 
     {% include 'referential/location/modal/new.html.twig' with {location: new_location} %}

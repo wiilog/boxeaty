@@ -7,6 +7,7 @@ use App\Entity\BoxType;
 use App\Entity\GlobalSetting;
 use App\Entity\Role;
 use App\Helper\Form;
+use App\Repository\BoxTypeRepository;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,6 +33,7 @@ class BoxTypeController extends AbstractController {
         return $this->render("referential/box_type/index.html.twig", [
             "new_box_type" => new BoxType(),
             "initial_box_types" => $this->api($request, $manager)->getContent(),
+            "box_types_order" => BoxTypeRepository::DEFAULT_DATATABLE_ORDER,
             "capacities" => $capacities ?: [],
             "shapes" => $shapes ?: [],
         ]);

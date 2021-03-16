@@ -9,6 +9,7 @@ use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Helper\Stream;
 use App\Helper\StringHelper;
+use App\Repository\ImportRepository;
 use App\Service\ImportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,6 +34,7 @@ class ImportController extends AbstractController {
         return $this->render("settings/import/index.html.twig", [
             "new_import" => new Import(),
             "initial_imports" => $this->api($request, $manager)->getContent(),
+            "imports_order" => ImportRepository::DEFAULT_DATATABLE_ORDER,
         ]);
     }
 

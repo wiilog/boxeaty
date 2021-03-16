@@ -13,6 +13,7 @@ use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Helper\Stream;
+use App\Repository\OrderRepository;
 use App\Service\BoxRecordService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -34,6 +35,7 @@ class OrderController extends AbstractController {
         return $this->render("tracking/order/index.html.twig", [
             "new_order" => new Order(),
             "initial_orders" => $this->api($request, $manager)->getContent(),
+            "orders_order" => OrderRepository::DEFAULT_DATATABLE_ORDER,
         ]);
     }
 

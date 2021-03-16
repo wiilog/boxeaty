@@ -9,6 +9,7 @@ use App\Entity\Location;
 use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
+use App\Repository\LocationRepository;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,6 +31,7 @@ class LocationController extends AbstractController {
         return $this->render("referential/location/index.html.twig", [
             "new_location" => new Location(),
             "initial_locations" => $this->api($request, $manager)->getContent(),
+            "locations_order" => LocationRepository::DEFAULT_DATATABLE_ORDER,
         ]);
     }
 

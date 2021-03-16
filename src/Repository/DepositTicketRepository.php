@@ -6,7 +6,6 @@ use App\Entity\DepositTicket;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
-use function Doctrine\ORM\QueryBuilder;
 
 /**
  * @method DepositTicket|null find($id, $lockMode = null, $lockVersion = null)
@@ -15,6 +14,10 @@ use function Doctrine\ORM\QueryBuilder;
  * @method DepositTicket[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class DepositTicketRepository extends EntityRepository {
+
+    public const DEFAULT_DATATABLE_ORDER = [['creationDate', 'desc']];
+    private const DEFAULT_DATATABLE_START = 0;
+    private const DEFAULT_DATATABLE_LENGTH = 10;
 
     public function iterateAll() {
         return $this->createQueryBuilder("deposit_ticket")
@@ -94,33 +97,40 @@ class DepositTicketRepository extends EntityRepository {
             }
         }
 
-        foreach ($params["order"] ?? [] as $order) {
-            $column = $params["columns"][$order["column"]]["data"];
-            if ($column === "kiosk") {
-                $qb->leftJoin("deposit_ticket.location", "order_location")
-                    ->addOrderBy("order_location.name", $order["dir"]);
-            } else if ($column === "client") {
-                $qb->leftJoin("deposit_ticket.location", "order_client_location")
-                    ->leftJoin("order_client_location.client", "order_client")
-                    ->addOrderBy("order_client.name", $order["dir"]);
-            } else if ($column === 'orderUser') {
-                $qb
-                    ->leftJoin('deposit_ticket.orderUser', 'order_orderUser')
-                    ->addOrderBy('order_orderUser.username', $order["dir"]);
-            } else if ($column === 'depositAmount') {
-                $qb
-                    ->leftJoin('deposit_ticket.box', 'order_box')
-                    ->leftJoin('order_box.type', 'order_box_type')
-                    ->addOrderBy('order_box_type.price', $order["dir"]);
-            } else if (property_exists(DepositTicket::class, $column)) {
-                $qb->addOrderBy("deposit_ticket.$column", $order["dir"]);
+        if (!empty($params['order'])) {
+            foreach ($params["order"] ?? [] as $order) {
+                $column = $params["columns"][$order["column"]]["data"];
+                if ($column === "kiosk") {
+                    $qb->leftJoin("deposit_ticket.location", "order_location")
+                        ->addOrderBy("order_location.name", $order["dir"]);
+                } else if ($column === "client") {
+                    $qb->leftJoin("deposit_ticket.location", "order_client_location")
+                        ->leftJoin("order_client_location.client", "order_client")
+                        ->addOrderBy("order_client.name", $order["dir"]);
+                } else if ($column === 'orderUser') {
+                    $qb
+                        ->leftJoin('deposit_ticket.orderUser', 'order_orderUser')
+                        ->addOrderBy('order_orderUser.username', $order["dir"]);
+                } else if ($column === 'depositAmount') {
+                    $qb
+                        ->leftJoin('deposit_ticket.box', 'order_box')
+                        ->leftJoin('order_box.type', 'order_box_type')
+                        ->addOrderBy('order_box_type.price', $order["dir"]);
+                } else if (property_exists(DepositTicket::class, $column)) {
+                    $qb->addOrderBy("deposit_ticket.$column", $order["dir"]);
+                }
+            }
+        }
+        else {
+            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+                $qb->addOrderBy("deposit_ticket.$column", $dir);
             }
         }
 
         $filtered = QueryHelper::count($qb, "deposit_ticket");
 
-        $qb->setFirstResult($params["start"] ?? 0)
-            ->setMaxResults($params["length"] ?? 10);
+        $qb->setFirstResult($params["start"] ?? self::DEFAULT_DATATABLE_START)
+            ->setMaxResults($params["length"] ?? self::DEFAULT_DATATABLE_LENGTH);
 
         return [
             "data" => $qb->getQuery()->getResult(),

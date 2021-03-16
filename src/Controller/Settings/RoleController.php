@@ -7,6 +7,7 @@ use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\StringHelper;
+use App\Repository\RoleRepository;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,6 +29,7 @@ class RoleController extends AbstractController {
         return $this->render("settings/role/index.html.twig", [
             "new_role" => new Role(),
             "initial_roles" => $this->api($request, $manager)->getContent(),
+            "roles_order" => RoleRepository::DEFAULT_DATATABLE_ORDER,
         ]);
     }
 

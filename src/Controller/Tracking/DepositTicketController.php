@@ -10,6 +10,7 @@ use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Helper\StringHelper;
+use App\Repository\DepositTicketRepository;
 use App\Service\ExportService;
 use App\Service\Mailer;
 use DateTime;
@@ -32,6 +33,7 @@ class DepositTicketController extends AbstractController {
         return $this->render("tracking/deposit_ticket/index.html.twig", [
             "new_deposit_ticket" => (new DepositTicket())->setNumber(StringHelper::random(5)),
             "initial_deposit_tickets" => $this->api($request, $manager)->getContent(),
+            "deposit_tickets_order" => DepositTicketRepository::DEFAULT_DATATABLE_ORDER
         ]);
     }
 

@@ -9,14 +9,13 @@ use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\BoxRecord;
+use App\Repository\BoxRecordRepository;
 use App\Service\BoxRecordService;
-use App\Entity\TrackingMovement;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Helper\Form;
 use Exception;
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,6 +36,7 @@ class TrackingMovementController extends AbstractController {
         return $this->render("tracking/movement/index.html.twig", [
             "new_movement" => new BoxRecord(),
             "initial_movements" => $this->api($request, $manager)->getContent(),
+            "movements_order" => BoxRecordRepository::DEFAULT_DATATABLE_ORDER,
             "qualities" => $qualities,
             "states" => Box::NAMES,
         ]);

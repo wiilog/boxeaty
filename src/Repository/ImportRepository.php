@@ -14,6 +14,10 @@ use Doctrine\ORM\EntityRepository;
  */
 class ImportRepository extends EntityRepository {
 
+    public const DEFAULT_DATATABLE_ORDER = [['creationDate', 'desc']];
+    private const DEFAULT_DATATABLE_START = 0;
+    private const DEFAULT_DATATABLE_LENGTH = 10;
+
     public function findForDatatable(array $params): array {
         $search = $params["search"]["value"] ?? null;
 
@@ -44,19 +48,26 @@ class ImportRepository extends EntityRepository {
             }
         }
 
-        foreach ($params["order"] ?? [] as $order) {
-            $column = $params["columns"][$order["column"]]["data"];
-            if ($column === "user") {
-                QueryHelper::order($qb, "import.user.username", $order["dir"]);
-            } else {
-                $qb->addOrderBy("import.$column", $order["dir"]);
+        if (!empty($params['order'])) {
+            foreach ($params["order"] ?? [] as $order) {
+                $column = $params["columns"][$order["column"]]["data"];
+                if ($column === "user") {
+                    QueryHelper::order($qb, "import.user.username", $order["dir"]);
+                } else {
+                    $qb->addOrderBy("import.$column", $order["dir"]);
+                }
+            }
+        }
+        else {
+            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+                $qb->addOrderBy("import.$column", $dir);
             }
         }
 
         $filtered = QueryHelper::count($qb, "import");
 
-        $qb->setFirstResult($params["start"] ?? 0)
-            ->setMaxResults($params["length"] ?? 10);
+        $qb->setFirstResult($params["start"] ?? self::DEFAULT_DATATABLE_START)
+            ->setMaxResults($params["length"] ?? self::DEFAULT_DATATABLE_LENGTH);
 
         return [
             "data" => $qb->getQuery()->getResult(),
