@@ -81,7 +81,14 @@ export default class Select2 {
                 if (!$select2.is($clonedElement)) {
                     $select2.select2('close');
                 }
-            })
+            });
+
+            const $select = $(this);
+            const $select2Parent = $select.parent();
+            const $searchField = $select2Parent.find('.select2-search--dropdown .select2-search__field');
+            if ($searchField.exists()) {
+                setTimeout(() => $searchField[0].focus(), 300);
+            }
         });
     }
 }
@@ -89,10 +96,4 @@ export default class Select2 {
 $(document).ready(() => $(`[data-s2]`).each((id, elem) => Select2.init($(elem))));
 $(document).arrive(`[data-s2]`, function() {
     Select2.init($(this));
-});
-
-//fixes select2 search focus bug
-$(document).arrive('.select2-search--dropdown .select2-search__field', function() {
-    setTimeout(() => this.focus(), 200);
-    setTimeout(() => this.focus(), 300);
 });
