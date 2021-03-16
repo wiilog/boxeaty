@@ -1,0 +1,20 @@
+<div class="box global-settings">
+    <h1>
+        Configuration des exports CSV
+        <button class="secondary float-end" type="submit">Enregistrer</button>
+    </h1>
+
+    <label class="w-35">
+        Encodage des exports CSV
+        <select name="{{ constant('App\\Entity\\GlobalSetting::CSV_EXPORTS_ENCODING') }}" class="data" data-s2 data-no-empty-option>
+            <option value="{{ constant('App\\Service\\ExportService::ENCODING_UTF8') }}"
+                    {{ csv_encoding.value == constant('App\\Service\\ExportService::ENCODING_UTF8') ? 'selected' }}>
+                UTF8
+            </option>
+            <option value="{{ constant('App\\Service\\ExportService::ENCODING_WINDOWS') }}"
+                    {{ csv_encoding.value == constant('App\\Service\\ExportService::ENCODING_WINDOWS') ? 'selected' }}>
+                1252 Europe de l'ouest Windows
+            </option>
+        </select>
+    </label>
+</div>
