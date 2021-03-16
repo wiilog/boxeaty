@@ -11,7 +11,6 @@ Encore
     .setOutputPath("public/build/")
     .setPublicPath("/build")
 
-    .addStyleEntry("email", "./assets/styles/fonts.scss")
     .addEntry("app", "./assets/app.js")
     .addEntry("box_list", "./assets/pages/box-list.js")
     .addEntry("box_show", "./assets/pages/box-show.js")

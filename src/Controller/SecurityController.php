@@ -101,9 +101,13 @@ class SecurityController extends AbstractController {
                     ->setCreationDate(new DateTime());
 
                 $recipients = $userRepository->findNewUserRecipients($user->getGroups()->first());
-                $mailer->send($recipients, "BoxEaty - Nouvel utilisateur", $this->renderView("emails/mjml/new_user.html.twig", [
-                    "user" => $user,
-                ]));
+                $mailer->send(
+                    $recipients,
+                    "BoxEaty - Nouvel utilisateur",
+                    $this->renderView("emails/mjml/new_user.html.twig", [
+                        "user" => $user,
+                    ])
+                );
 
                 $em->persist($user);
                 $em->flush();

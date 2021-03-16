@@ -122,21 +122,26 @@ class DepositTicketController extends AbstractController {
                 $depositTicket->setUseDate(new DateTime());
             }
 
-            $client = $depositTicket->getLocation() ? $depositTicket->getLocation()->getClient() : null;
-            $depositTicketsClients = $client ? $client->getDepositTicketsClients() : [];
-            $usable = (count($depositTicketsClients) === 0
-                ? "tout le réseau BoxEaty"
-                : count($depositTicketsClients) > 0)
-                ? "les restaurants"
-                : "le restaurant";
-
-            $mailer->send($depositTicket->getConsumerEmail(),'Création d\'un ticket-consigne', $this->renderView("emails/mjml/deposit_ticket.html.twig",[
-                "ticket" => $depositTicket,
-                "usable" => $usable,
-            ]));
-
             $manager->persist($depositTicket);
             $manager->flush();
+
+            $client = $depositTicket->getLocation() ? $depositTicket->getLocation()->getClient() : null;
+            $depositTicketsClientsCount = $client ? $client->getDepositTicketsClients()->count() : 0;
+
+            $usable = ($depositTicketsClientsCount === 0
+                ? "tout le réseau BoxEaty"
+                : ($depositTicketsClientsCount === 1
+                    ? "le restaurant"
+                    : "les restaurants"));
+
+            $mailer->send(
+                $depositTicket->getConsumerEmail(),
+                'Création d\'un ticket-consigne',
+                $this->renderView("emails/mjml/deposit_ticket.html.twig",[
+                    "ticket" => $depositTicket,
+                    "usable" => $usable,
+                ])
+            );
 
             return $this->json([
                 "success" => true,
