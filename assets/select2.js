@@ -56,7 +56,7 @@ export default class Select2 {
 
         $clonedElement.select2({
             placeholder: $clonedElement.data(`placeholder`),
-            tags: $clonedElement.is('[data-s2-tags]'),
+            tags: $clonedElement.is('[data-editable]'),
             allowClear: $clonedElement.is(`[multiple]`),
             dropdownParent: $selectParent,
             language: {
