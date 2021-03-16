@@ -41,17 +41,24 @@ export default class Select2 {
                 dataType: `json`
             };
         }
+
         if (type && !INSTANT_SELECT_TYPES[type]) {
             config.minimumInputLength = 1;
         }
 
-        if ($element.is('[data-s2-tags]')) {
-            config.tags = true;
-        }
+        const $clonedElement = $element.clone();
+        $clonedElement.removeAttr('data-s2');
+        $clonedElement.attr('data-s2-init', '');
+        const $selectParent = $('<div/>', {
+            html: $clonedElement
+        });
+        $element.replaceWith($selectParent);
 
-        $element.select2({
-            placeholder: $element.data(`placeholder`),
-            allowClear: true,
+        $clonedElement.select2({
+            placeholder: $clonedElement.data(`placeholder`),
+            tags: $clonedElement.is('[data-s2-tags]'),
+            allowClear: $clonedElement.is(`[multiple]`),
+            dropdownParent: $selectParent,
             language: {
                 inputTooShort: () => 'Veuillez entrer au moins 1 caractère.',
                 noResults: () => `Aucun résultat`,
@@ -63,6 +70,19 @@ export default class Select2 {
         if($element.is(`[multiple]`)) {
             $element.siblings(`.select2-container`).addClass(`multiple`);
         }
+
+        $clonedElement.on('select2:open', function (e) {
+            const evt = "scroll.select2";
+            $(e.target).parents().off(evt);
+            $(window).off(evt);
+            // we hide all other select2 dropdown
+            $('[data-s2-init]').each(function () {
+                const $select2 = $(this);
+                if (!$select2.is($clonedElement)) {
+                    $select2.select2('close');
+                }
+            })
+        });
     }
 }
 
@@ -72,5 +92,5 @@ $(document).arrive(`[data-s2]`, function() {
 });
 $(document).arrive('.select2-search--dropdown .select2-search__field', function() {
     //fixes select2 search focus bug
-    setTimeout(() => { $(this).focus(); }, 200);
+    setTimeout(() => { $(this).focus(); }, 300);
 });
