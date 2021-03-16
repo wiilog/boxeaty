@@ -32,20 +32,43 @@
             </select>
         </label>
     </div>
-    <div class="col-md-6 col-12">
+    {% if user.id %}
+    <div class="col-12 change-password">
+        <button class="primary change-password w-100 mt-2">Changer le mot de passe</button>
+    </div>
+    {% endif %}
+
+    {% if user.id and user.id == app.user.id %}
+        <div class="col-12 change-password" style="display:none">
+            <label>
+                Mot de passe actuel
+                <input type="password" name="currentPassword" class="data" placeholder="Mot de passe actuel"/>
+                <span class="show-password">
+                    <span><i class="far fa-eye"></i></span>
+                </span>
+            </label>
+        </div>
+    {% endif %}
+    <div class="col-md-6 col-12 change-password" style="display:none">
         <label>
             Mot de passe
             <input type="password" name="password" class="data" autocomplete="new-password"
                    placeholder="Mot de passe {{ user.id ? '(vide pour ne pas modifer)' }}"
                     {{ not user.id ? 'required' }}/>
+            <span class="show-password">
+                <span><i class="far fa-eye"></i></span>
+            </span>
         </label>
     </div>
-    <div class="col-md-6 col-12">
+    <div class="col-md-6 col-12 change-password" style="display:none">
         <label>
             Confirmer le mot de passe
             <input type="password" data-repeat="password" class="data"
                    placeholder="Mot de passe {{ user.id ? '(vide pour ne pas modifer)' }}"
                     {{ not user.id ? 'required' }}/>
+            <span class="show-password">
+                <span><i class="far fa-eye"></i></span>
+            </span>
         </label>
     </div>
     <div class="col-md-6 col-12">

@@ -12,6 +12,9 @@ $(document).ready(() => {
     });
 
     $(`.new-user`).click(() => newUserModal.open());
+    $(document).on(`click`, `button.change-password`, function() {
+        $(this).parents(`.modal`).find(`div.change-password`).slideToggle();
+    })
 
     const table = initDatatable(`#table-users`, {
         ajax: AJAX.route(`POST`, `users_api`),
