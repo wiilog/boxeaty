@@ -40,7 +40,7 @@ export default class Modal {
 
         modal.element.on('hidden.bs.modal', () => {
             modal.clear();
-            modal.element.find('[data-s2-init]').each(function () {
+            modal.element.find('[data-s2-initialized]').each(function () {
                 // we remove already openede elements
                 $(this).select2('close');
             });
@@ -370,7 +370,7 @@ export function processForm($parent) {
 }
 
 function showInvalid($field, message) {
-    if($field.is(`[data-s2-init]`)) {
+    if($field.is(`[data-s2-initialized]`)) {
         $field = $field.parent().find(`.select2-selection`);
     } else if($field.is(`[type="file"]`)) {
         $field = $field.parent();
