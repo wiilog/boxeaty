@@ -121,13 +121,7 @@ function initializeDropdown($button) {
         }
 
         createPopper($button[0], $dropdown[0], {
-            placement: `bottom-start`,
-            modifiers: [{
-                name: `offset`,
-                options: {
-                    offset: [-50, 0],
-                },
-            }],
+            placement: `left`,
         });
     })
 }
