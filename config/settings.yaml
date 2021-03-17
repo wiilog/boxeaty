@@ -1,4 +1,6 @@
 parameters:
+  web_version: '0.2.0'
+
   permissions:
     Menu Paramétrage:
       App\Entity\Role::MANAGE_USERS: Créer, modifier, supprimer les utilisateurs
