@@ -15,6 +15,8 @@ import {createPopper} from '@popperjs/core';
 
 import './select2';
 import './jquery';
+import AJAX from "./ajax";
+import Modal from "./modal";
 
 global.$ = $;
 global.Routing = Routing;
@@ -129,3 +131,17 @@ function initializeDropdown($button) {
         });
     })
 }
+
+$(document).ready(() => {
+    const $currentUser = $(`#current-user`);
+console.log($currentUser);
+    if($currentUser.exists()) {
+        $(`.current-user`).click(() => {
+            const ajax = AJAX.route(`POST`, `user_edit_template`, {
+                user: $currentUser.val()
+            });
+
+            Modal.load(ajax)
+        });
+    }
+})

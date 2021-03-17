@@ -30,6 +30,10 @@ export default class Select2 {
             $element.prepend(`<option selected>`);
         }
 
+        $element.removeAttr(`data-s2`);
+        $element.attr(`data-s2-initialized`, ``);
+        $element.wrap(`<div/>`);
+
         const config = {};
         if(type) {
             if(!ROUTES[type]) {
@@ -38,6 +42,21 @@ export default class Select2 {
 
             config.ajax = {
                 url: Routing.generate(ROUTES[type]),
+                data: params => {
+                    if($element.is(`[data-include]`)) {
+                        const values = $element.closest(`.modal`)
+                            .find($element.data(`include`))
+                            .filter((id, elem) => elem.name && elem.value)
+                            .keymap(elem => [elem.name, elem.value]);
+
+                        params = {
+                            ...params,
+                            ...values,
+                        };
+                    }
+
+                    return params;
+                },
                 dataType: `json`
             };
         }
@@ -46,19 +65,11 @@ export default class Select2 {
             config.minimumInputLength = 1;
         }
 
-        const $clonedElement = $element.clone();
-        $clonedElement.removeAttr('data-s2');
-        $clonedElement.attr('data-s2-initialized', '');
-        const $selectParent = $('<div/>', {
-            html: $clonedElement
-        });
-        $element.replaceWith($selectParent);
-
-        $clonedElement.select2({
-            placeholder: $clonedElement.data(`placeholder`),
-            tags: $clonedElement.is('[data-editable]'),
-            allowClear: $clonedElement.is(`[multiple]`),
-            dropdownParent: $selectParent,
+        $element.select2({
+            placeholder: $element.data(`placeholder`),
+            tags: $element.is('[data-editable]'),
+            allowClear: !$element.is(`[multiple]`),
+            dropdownParent: $element.parent(),
             language: {
                 inputTooShort: () => 'Veuillez entrer au moins 1 caractère.',
                 noResults: () => `Aucun résultat`,
@@ -67,29 +78,35 @@ export default class Select2 {
             ...config,
         });
 
-        if($element.is(`[multiple]`)) {
-            $element.siblings(`.select2-container`).addClass(`multiple`);
-        }
-
-        $clonedElement.on('select2:open', function (e) {
+        $element.on('select2:open', function (e) {
             const evt = "scroll.select2";
             $(e.target).parents().off(evt);
             $(window).off(evt);
             // we hide all other select2 dropdown
             $('[data-s2-initialized]').each(function () {
                 const $select2 = $(this);
-                if (!$select2.is($clonedElement)) {
+                if (!$select2.is($element)) {
                     $select2.select2('close');
                 }
             });
 
-            const $select = $(this);
-            const $select2Parent = $select.parent();
+            const $select2Parent = $element.parent();
             const $searchField = $select2Parent.find('.select2-search--dropdown .select2-search__field');
             if ($searchField.exists()) {
                 setTimeout(() => $searchField[0].focus(), 300);
             }
         });
+    }
+
+    static wrap($element) {
+        const $clone = $element.clone();
+        $clone.removeAttr(`data-s2`);
+        $clone.attr(`data-s2-initialized`, ``);
+        const $selectParent = $('<div/>', {
+            html: $clone
+        });
+        $element.replaceWith($selectParent);
+        return $clone;
     }
 }
 

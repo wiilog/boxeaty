@@ -5,7 +5,7 @@
     <title>{% block title %}BoxEaty{% endblock %}</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{{ asset('favicon.ico') }}" />
+    <link rel="icon" href="{{ asset('favicon.ico') }}"/>
 
     {% block stylesheets %}
         {{ encore_entry_link_tags('app') }}
@@ -14,6 +14,11 @@
 <body class="{% block bodyclass %}{% endblock %}">
 {% include 'utils/alerts.html.twig' %}
 {% block body %}{% endblock %}
+
+{% if app.user %}
+    <input type="hidden" id="current-user" value="{{ app.user.id }}">
+{% endif %}
+
 {% block javascripts %}
     {{ encore_entry_script_tags('app') }}
 {% endblock %}

@@ -74,7 +74,7 @@
     <div class="col-md-6 col-12">
         <label>
             Groupe(s)
-            <select name="groups" class="data multiple" data-s2="group" data-placeholder="Sélectionnez un ou plusieurs groupes" multiple required>
+            <select name="groups" class="data" data-s2="group" data-placeholder="Sélectionnez un ou plusieurs groupes" multiple required>
                 {% for group in user.groups %}
                     <option value="{{ group.id }}" selected>{{ group.name }}</option>
                 {% endfor %}
@@ -85,8 +85,10 @@
         <label>
             Client(s)
             <i data-toggle="tooltip" title="Si vous ne sélectionnez rien, tous les clients du groupe seront rattachés automatiquement"></i>
-            <select name="clients" class="data multiple" data-s2="client" data-placeholder="Sélectionnez un ou plusieurs clients"
-                    {{ user.groups | length > 1 ? 'disabled' }} multiple required>
+            <select name="clients" class="data"
+                    data-s2="client" data-include="select[name=groups]"
+                    data-placeholder="Sélectionnez un ou plusieurs clients"
+                    multiple required {{ user.groups | length > 1 ? 'disabled' }}>
                 {% for client in user.clients %}
                     <option value="{{ client.id }}" selected>{{ client.name }}</option>
                 {% endfor %}

@@ -12,6 +12,15 @@ jQuery.fn.exists = function() {
     return this.length !== 0;
 }
 
+jQuery.fn.keymap = function() {
+    const values = {};
+    for(const input of this) {
+        values[input.name] = input.value;
+    }
+
+    return values;
+}
+
 jQuery.fn.load = function(callback, size = `small`) {
     const $element = $(this[0]); //the element on which the function was called
 

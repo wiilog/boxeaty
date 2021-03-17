@@ -64,7 +64,7 @@ export default class Modal {
         return modal;
     }
 
-    static load(ajax, config) {
+    static load(ajax, config = {}) {
         if(typeof ajax === 'string') {
             withResponse({
                 template: ajax,
