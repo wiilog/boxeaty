@@ -134,7 +134,7 @@ function initializeDropdown($button) {
 
 $(document).ready(() => {
     const $currentUser = $(`#current-user`);
-console.log($currentUser);
+
     if($currentUser.exists()) {
         $(`.current-user`).click(() => {
             const ajax = AJAX.route(`POST`, `user_edit_template`, {
