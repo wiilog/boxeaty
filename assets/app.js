@@ -111,8 +111,12 @@ function initializeDropdown($button) {
     const $dropdown = $button.siblings(`.dropdown-menu`);
 
     $button.click(function() {
-        $(`.dropdown-menu`).hide();
-        $dropdown.show();
+        if($dropdown.is(`:visible`)) {
+            $dropdown.hide();
+        } else {
+            $(`.dropdown-menu`).hide();
+            $dropdown.show();
+        }
 
         createPopper($button[0], $dropdown[0], {
             placement: 'left',
