@@ -42,12 +42,22 @@ export default class Select2 {
 
             config.ajax = {
                 url: Routing.generate(ROUTES[type]),
-                data: params => {
-                    if($element.is(`[data-include]`)) {
-                        const values = $element.closest(`.modal`)
-                            .find($element.data(`include`))
-                            .filter((id, elem) => elem.name && elem.value)
-                            .keymap(elem => [elem.name, elem.value]);
+                data: (params) => {
+                    if($element.is(`[data-include-params]`)) {
+                        const $includeParamsSelector = $element.data(`include-params`);
+                        let $fields;
+                        if (!$element.is(`[data-include-params-closest]`)) {
+                            $fields = $($includeParamsSelector);
+                        }
+                        else {
+                            $fields = $element
+                                .closest($element.data(`[data-include-params-closest]`))
+                                .find($includeParamsSelector);
+                        }
+
+                        const values = $fields
+                            .filter((_, elem) => elem.name && elem.value)
+                            .keymap((elem) => [elem.name, elem.value]);
 
                         params = {
                             ...params,
@@ -96,17 +106,6 @@ export default class Select2 {
                 setTimeout(() => $searchField[0].focus(), 300);
             }
         });
-    }
-
-    static wrap($element) {
-        const $clone = $element.clone();
-        $clone.removeAttr(`data-s2`);
-        $clone.attr(`data-s2-initialized`, ``);
-        const $selectParent = $('<div/>', {
-            html: $clone
-        });
-        $element.replaceWith($selectParent);
-        return $clone;
     }
 }
 

@@ -288,7 +288,7 @@ export function processForm($parent) {
                 });
             }
         } else if($input.attr(`type`) === `tel`) {
-            const regex = /^(?:(?:\\+|00)33[\\s.-]{0,3}(?:\\(0\\)[\\s.-]{0,3})?|0)[1-9](?:(?:[\\s.-]?\\d{2}){4}|\\d{2}(?:[\\s.-]?\\d{3}){2})$/;
+            const regex = /^(?:(?:\+|00)33[\s.-]{0,3}(?:\(0\)[\s.-]{0,3})?|0)[1-9](?:(?:[\s.-]?\d{2}){4}|\d{2}(?:[\s.-]?\d{3}){2})$/;
             if($input.val() && !$input.val().match(regex)) {
                 errors.push({
                     elements: [$input],
