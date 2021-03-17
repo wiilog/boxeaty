@@ -172,6 +172,18 @@ main:not(.login) {
     }
 }
 
+* {
+    overflow-x: visible;
+}
+
+.scrollable-x {
+    overflow-x: auto;
+}
+
+@media (max-width: $tablet-breakpoint) {
+
+}
+
 .box {
     @include box();
 

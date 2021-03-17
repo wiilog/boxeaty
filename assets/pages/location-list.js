@@ -53,14 +53,13 @@ $(document).ready(() => {
     $(`.new-location`).click(() => newLocationModal.open());
 
     fireTypeChangeEvent($('#modal-new-location').find('input[name="type"]'));
-    $(document)
-        .arrive('#modal-edit-location .location-type', function() {
-            fireTypeChangeEvent($(this).find('input[name="type"]'));
-        });
+    $(document).arrive('#modal-edit-location .location-type', function() {
+        fireTypeChangeEvent($(this).find('input[name="type"]'));
+    });
 });
 
 function fireTypeChangeEvent($type) {
-    $type.on('change', function () {
+    $type.on('change', function() {
         const $type = $(this);
         toggleCapacityInput($type);
     })
@@ -71,7 +70,7 @@ function toggleCapacityInput($typeRadio) {
     const $modal = $typeRadio.closest('.modal');
     const $kioskCapacity = $modal.find('.kiosk-capacity');
 
-    if (parseInt($checkedRadio.val()) === 1) {
+    if(parseInt($checkedRadio.val()) === 1) {
         $kioskCapacity.removeClass('d-none');
         $kioskCapacity.find('input').prop('required', true);
     } else {

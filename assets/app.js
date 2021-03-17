@@ -11,8 +11,10 @@ import Quill from 'quill/dist/quill.js';
 import Toolbar from 'quill/modules/toolbar';
 import Snow from 'quill/themes/snow';
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+import {createPopper} from '@popperjs/core';
 
 import './select2';
+import './jquery';
 
 global.$ = $;
 global.Routing = Routing;
@@ -37,25 +39,16 @@ $(`.menu-container`).on(`click`, `.category`, (e) => {
 
 //remove the menu when clicking outside
 $(document).click(e => {
+    const selector = `[data-toggle="dropdown"], .dropdown-menu, .display-menu, #menu-dropdown`;
     const $target = $(e.target);
-    if(!$target.hasClass(`display-menu`) && !$target.closest(`#menu-dropdown`).exists() && $(`#menu-dropdown`).is(`:visible`)) {
-        $(`#menu-dropdown, .category-dropdown`).hide();
+
+    if(!$target.closest(selector).exists() && !$target.is(selector)) {
+        $(`#menu-dropdown, .category-dropdown, .dropdown-menu`).hide();
     }
 });
 
 $(document).ready(initializeWYSIWYG)
     .arrive(`[data-wysiwyg]`, initializeWYSIWYG);
-
-function bannerRemover() {
-    $(this).remove();
-}
-
-const $document = $(document);
-$document.ready(() => {
-    $document.find(`.fr-wrapper div:not([class])`).each(bannerRemover);
-    $document.arrive(`.fr-wrapper div:not([class])`, bannerRemover);
-});
-
 
 Quill.register({
     'modules/toolbar.js': Toolbar,
@@ -83,65 +76,6 @@ function initializeWYSIWYG() {
         });
     });
 }
-global.initializeWYSIWYG = initializeWYSIWYG;
-export const SPINNER_WRAPPER_CLASS = `spinner-border-container`;
-export const LOADING_CLASS = `loading`;
-
-/**
- * Tests jQuery found an element
- *
- * @returns boolean
- */
-jQuery.fn.exists = function() {
-    return this.length !== 0;
-}
-
-jQuery.fn.load = function(callback, size = `small`) {
-    const $element = $(this[0]); //the element on which the function was called
-
-    $element.pushLoader(size);
-
-    const result = callback();
-    if(result !== undefined && result.finally) {
-        result.finally(() => $element.popLoader())
-    } else {
-        $element.popLoader();
-    }
-};
-
-/**
- * Add a loader to the element
- *
- * @returns {jQuery}
- */
-jQuery.fn.pushLoader = function(size = `small`) {
-    const $element = $(this[0]); //the element on which the function was called
-
-    if(!$element.find(`.${SPINNER_WRAPPER_CLASS}`).exists()) {
-        size = size === `small` ? `spinner-border-sm` : ``;
-
-        $element.append(`<div class="spinner-border-container"><div class="spinner-border ${size}" role="status"></div></div>`);
-        $element.addClass(LOADING_CLASS);
-    }
-
-    return this;
-};
-
-/**
- * Remove the loader from the element
- * @returns {jQuery}
- */
-jQuery.fn.popLoader = function() {
-    const $element = $(this[0]); //the element on which the function was called
-    $element.removeClass(LOADING_CLASS);
-
-    const $loaderWrapper = $element.find(`.${SPINNER_WRAPPER_CLASS}`)
-    if($loaderWrapper.exists()) {
-        $loaderWrapper.remove();
-    }
-
-    return this;
-};
 
 export function randomString(length) {
     let result = '';
@@ -154,6 +88,7 @@ export function randomString(length) {
     return result;
 }
 
+//password toggle eye icon
 $(document).on(`click`, `.show-password span`, function() {
     const $input = $(this).parents(`label`).find(`input`);
 
@@ -163,3 +98,24 @@ $(document).on(`click`, `.show-password span`, function() {
         $input.attr(`type`, `password`);
     }
 })
+
+$(document).ready(() => $(`[data-toggle="dropdown"]`).each(function() {
+    initializeDropdown($(this))
+}));
+
+$(document).arrive(`[data-toggle="dropdown"]`, function() {
+    initializeDropdown($(this));
+});
+
+function initializeDropdown($button) {
+    const $dropdown = $button.siblings(`.dropdown-menu`);
+
+    $button.click(function() {
+        $(`.dropdown-menu`).hide();
+        $dropdown.show();
+
+        createPopper($button[0], $dropdown[0], {
+            placement: 'left',
+        });
+    })
+}

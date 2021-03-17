@@ -1,6 +1,6 @@
 import Flash from './flash';
 import AJAX from './ajax';
-import {LOADING_CLASS} from "./app";
+import {LOADING_CLASS} from "./jquery";
 import $ from "jquery";
 
 const uploads = {};
