@@ -75,7 +75,7 @@ export function initDatatable(table, config) {
             language: {
                 url: `/i18n/datatableLanguage.json`,
             },
-            dom: `<"row mb-2"<"col-auto d-none"f>>t<"footer"<"left" li>p>r`,
+            dom: `<"row mb-2"<"col-auto d-none"f>><"scrollable-x"t><"footer"<"left" li>p>r`,
             initComplete: () => {
                 moveSearchInputToHeader($table);
             },

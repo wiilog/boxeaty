@@ -45,11 +45,13 @@ export default class Modal {
                 $(this).select2('close');
             });
         });
+
         modal.element.on('shown.bs.modal', () => {
             if(config.afterOpen) {
                 config.afterOpen(modal);
             }
         });
+
         modal.element.find(`button[type="submit"]`).click(function() {
             const $button = $(this);
             if($button.hasClass(LOADING_CLASS)) {
@@ -64,7 +66,7 @@ export default class Modal {
         return modal;
     }
 
-    static load(ajax, config) {
+    static load(ajax, config = {}) {
         if(typeof ajax === 'string') {
             withResponse({
                 template: ajax,
@@ -286,7 +288,7 @@ export function processForm($parent) {
                 });
             }
         } else if($input.attr(`type`) === `tel`) {
-            const regex = /^(?:(?:\\+|00)33[\\s.-]{0,3}(?:\\(0\\)[\\s.-]{0,3})?|0)[1-9](?:(?:[\\s.-]?\\d{2}){4}|\\d{2}(?:[\\s.-]?\\d{3}){2})$/;
+            const regex = /^(?:(?:\+|00)33[\s.-]{0,3}(?:\(0\)[\s.-]{0,3})?|0)[1-9](?:(?:[\s.-]?\d{2}){4}|\d{2}(?:[\s.-]?\d{3}){2})$/;
             if($input.val() && !$input.val().match(regex)) {
                 errors.push({
                     elements: [$input],

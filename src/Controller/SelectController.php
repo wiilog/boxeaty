@@ -66,7 +66,11 @@ class SelectController extends AbstractController {
      * @Route("/select/client", name="ajax_select_clients", options={"expose": true})
      */
     public function clients(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Client::class)->getForSelect($request->query->get("term"), $this->getUser());
+        $results = $manager->getRepository(Client::class)->getForSelect(
+            $request->query->get("term"),
+            $request->query->get("groups"),
+            $this->getUser()
+        );
 
         return $this->json([
             "results" => $results,

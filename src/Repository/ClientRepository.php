@@ -89,10 +89,21 @@ class ClientRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search) {
-        return $this->createQueryBuilder("client")
-            ->select("client.id AS id, client.name AS text")
-            ->where("client.name LIKE :search")
+    public function getForSelect(?string $search, ?string $group, ?User $user) {
+        $qb = $this->createQueryBuilder("client");
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $qb->andWhere("client.group IN (:groups)")
+                ->setParameter("groups", $user->getGroups());
+        }
+
+        if($group) {
+            $qb->andWhere("client.group = :group")
+                ->setParameter("group", $group);
+        }
+
+        return $qb->select("client.id AS id, client.name AS text")
+            ->andWhere("client.name LIKE :search")
             ->andWhere("client.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")

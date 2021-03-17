@@ -8,8 +8,6 @@ use App\Entity\Client;
 use App\Entity\Import;
 use App\Entity\Location;
 use App\Entity\Quality;
-use App\Entity\BoxRecord;
-use App\Entity\User;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;

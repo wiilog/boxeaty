@@ -45,12 +45,15 @@ $(document).ready(() => {
     });
 
     $(document).on(`change`, `select[name="groups"]`, function() {
-        const $clients = $(`select[name="clients"]`);
-        const groups = $(this).val();
-
-        $clients.attr(`disabled`, groups.length > 1);
-        if(groups.length > 1) {
-            $clients.val(null).trigger(`change`);
-        }
+        onGroupsChange($(this));
     });
 });
+
+function onGroupsChange($groups) {
+    const $modal = $groups.closest('.modal');
+    const $clients = $modal.find(`select[name="clients"]`);
+    const groups = $groups.val();
+
+    $clients.prop(`disabled`, groups.length > 1);
+    $clients.val(null).trigger(`change`);
+}
