@@ -48,10 +48,10 @@ export default class AJAX {
                     return;
                 }
 
-                if(json.success === false && json.msg) {
-                    Flash.add("danger", json.msg);
-                } else if(json.success === true && json.msg) {
-                    Flash.add("success", json.msg);
+                if(json.success === false && json.message) {
+                    Flash.add("danger", json.message);
+                } else if(json.success === true && json.message) {
+                    Flash.add("success", json.message);
                 }
 
                 if(callback) {
@@ -85,10 +85,10 @@ export default class AJAX {
                     return;
                 }
 
-                if(json.success === false && json.msg) {
-                    Flash.add("danger", json.msg);
-                } else if(json.success === true && json.msg) {
-                    Flash.add("success", json.msg);
+                if(json.success === false && json.message) {
+                    Flash.add("danger", json.message);
+                } else if(json.success === true && json.message) {
+                    Flash.add("success", json.message);
                 }
 
                 if(json.reload === true) {

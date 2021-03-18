@@ -117,7 +117,7 @@ class UserController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Utilisateur créé avec succès",
+                "message" => "Utilisateur créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -178,7 +178,7 @@ class UserController extends AbstractController {
 
             return $this->json([
                 "success" => false,
-                "msg" => "Vous n'avez pas les permissions nécessaires"
+                "message" => "Vous n'avez pas les permissions nécessaires"
             ]);
         }
 
@@ -202,7 +202,7 @@ class UserController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Utilisateur modifié avec succès",
+                "message" => "Utilisateur modifié avec succès",
                 "menu" => $this->getUser() === $user ? $this->renderView("menu.html.twig", [
                     "current_route" => "users_list"
                 ]) : null,
@@ -233,7 +233,7 @@ class UserController extends AbstractController {
         if ($user === $this->getUser()) {
             return $this->json([
                 "success" => false,
-                "msg" => "Vous ne pouvez pas supprimer votre propre compte utilisateur"
+                "message" => "Vous ne pouvez pas supprimer votre propre compte utilisateur"
             ]);
         } else if($user
             && (
@@ -245,7 +245,7 @@ class UserController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Utilisateur <strong>{$user->getUsername()}</strong> désactivé avec succès",
+                "message" => "Utilisateur <strong>{$user->getUsername()}</strong> désactivé avec succès",
             ]);
         } else if ($user) {
             $manager->remove($user);
@@ -253,12 +253,12 @@ class UserController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Utilisateur <strong>{$user->getUsername()}</strong> supprimé avec succès",
+                "message" => "Utilisateur <strong>{$user->getUsername()}</strong> supprimé avec succès",
             ]);
         } else {
             return $this->json([
                 "success" => false,
-                "msg" => "Une erreur est survenue",
+                "message" => "Une erreur est survenue",
             ]);
         }
     }

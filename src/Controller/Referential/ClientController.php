@@ -116,7 +116,7 @@ class ClientController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Client créé avec succès",
+                "message" => "Client créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -177,7 +177,7 @@ class ClientController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Client modifié avec succès",
+                "message" => "Client modifié avec succès",
             ]);
         } else {
             return $form->errors();
@@ -208,7 +208,7 @@ class ClientController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Client <strong>{$client->getName()}</strong> désactivé avec succès"
+                "message" => "Client <strong>{$client->getName()}</strong> désactivé avec succès"
             ]);
         } else if ($client) {
             $manager->remove($client);
@@ -216,13 +216,13 @@ class ClientController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Client <strong>{$client->getName()}</strong> supprimé avec succès"
+                "message" => "Client <strong>{$client->getName()}</strong> supprimé avec succès"
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "msg" => "Le client n'existe pas"
+                "message" => "Le client n'existe pas"
             ]);
         }
     }

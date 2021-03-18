@@ -99,7 +99,7 @@ class BoxTypeController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Type de Box créé avec succès",
+                "message" => "Type de Box créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -149,7 +149,7 @@ class BoxTypeController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Type de Box modifié avec succès",
+                "message" => "Type de Box modifié avec succès",
             ]);
         } else {
             return $form->errors();

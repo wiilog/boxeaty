@@ -124,7 +124,7 @@ class LocationController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Emplacement créé avec succès",
+                "message" => "Emplacement créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -184,7 +184,7 @@ class LocationController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Emplacement modifié avec succès",
+                "message" => "Emplacement modifié avec succès",
             ]);
         } else {
             return $form->errors();
@@ -215,7 +215,7 @@ class LocationController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Emplacement <strong>{$location->getName()}</strong> désactivé avec succès"
+                "message" => "Emplacement <strong>{$location->getName()}</strong> désactivé avec succès"
             ]);
         } else if ($location) {
             $originalLocation = $manager->getRepository(Location::class)->findOneBy([
@@ -230,13 +230,13 @@ class LocationController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Emplacement <strong>{$location->getName()}</strong> supprimé avec succès"
+                "message" => "Emplacement <strong>{$location->getName()}</strong> supprimé avec succès"
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "msg" => "L'emplacement n'existe pas"
+                "message" => "L'emplacement n'existe pas"
             ]);
         }
     }

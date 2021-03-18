@@ -84,7 +84,7 @@ class QualityController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Qualité créée avec succès",
+                "message" => "Qualité créée avec succès",
             ]);
         } else {
             return $form->errors();
@@ -125,7 +125,7 @@ class QualityController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Qualité modifiée avec succès",
+                "message" => "Qualité modifiée avec succès",
             ]);
         } else {
             return $form->errors();
@@ -143,7 +143,7 @@ class QualityController extends AbstractController {
         if (!$quality->getBoxes()->isEmpty()) {
             return $this->json([
                 "success" => false,
-                "msg" => "Cette qualité est utilisée par une ou plusieurs Box vous ne poucez pas la supprimer",
+                "message" => "Cette qualité est utilisée par une ou plusieurs Box vous ne poucez pas la supprimer",
             ]);
         } else if ($quality) {
             $manager->remove($quality);
@@ -151,13 +151,13 @@ class QualityController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Quality <strong>{$quality->getName()}</strong> supprimée avec succès"
+                "message" => "Quality <strong>{$quality->getName()}</strong> supprimée avec succès"
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "msg" => "La qualité n'existe pas"
+                "message" => "La qualité n'existe pas"
             ]);
         }
     }

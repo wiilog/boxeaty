@@ -228,13 +228,13 @@ class OrderController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Scan Box supprimé avec succès"
+                "message" => "Scan Box supprimé avec succès"
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "msg" => "Ce scan Box n'existe pas"
+                "message" => "Ce scan Box n'existe pas"
             ]);
         }
     }

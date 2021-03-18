@@ -82,7 +82,7 @@ class GroupController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Groupe créé avec succès",
+                "message" => "Groupe créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -123,7 +123,7 @@ class GroupController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Groupe modifié avec succès",
+                "message" => "Groupe modifié avec succès",
             ]);
         } else {
             return $form->errors();

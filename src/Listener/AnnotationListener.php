@@ -48,7 +48,7 @@ class AnnotationListener {
                 if ($annotation->mode == HasPermission::IN_JSON) {
                     return new JsonResponse([
                         "success" => false,
-                        "msg" => "Vous n'avez pas les permissions nécessaires",
+                        "message" => "Vous n'avez pas les permissions nécessaires",
                     ]);
                 } else if ($annotation->mode == HasPermission::IN_RENDER) {
                     return new Response($this->templating->render("security/access_denied.html.twig"));

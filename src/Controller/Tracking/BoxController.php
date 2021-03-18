@@ -123,7 +123,7 @@ class BoxController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Box créée avec succès",
+                "message" => "Box créée avec succès",
             ]);
         } else {
             return $form->errors();
@@ -215,7 +215,7 @@ class BoxController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Box modifiée avec succès",
+                "message" => "Box modifiée avec succès",
             ]);
         } else {
             return $form->errors();
@@ -237,13 +237,13 @@ class BoxController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Box <strong>{$box->getNumber()}</strong> supprimée avec succès"
+                "message" => "Box <strong>{$box->getNumber()}</strong> supprimée avec succès"
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "msg" => "La Box n'existe pas"
+                "message" => "La Box n'existe pas"
             ]);
         }
     }

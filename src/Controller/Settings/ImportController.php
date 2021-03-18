@@ -90,7 +90,7 @@ class ImportController extends AbstractController {
             if (count($csv) < 2) {
                 return $this->json([
                     "success" => true,
-                    "msg" => "Le fichier doit contenir au moins une ligne d'en-tête et une ligne d'exemple",
+                    "message" => "Le fichier doit contenir au moins une ligne d'en-tête et une ligne d'exemple",
                 ]);
             }
 
@@ -156,7 +156,7 @@ class ImportController extends AbstractController {
         if (!$import) {
             return $this->json([
                 "success" => true,
-                "msg" => "Erreur lors de la création de l'import",
+                "message" => "Erreur lors de la création de l'import",
             ]);
         }
 
@@ -171,7 +171,7 @@ class ImportController extends AbstractController {
                 if(isset($config["required"]) && $config["required"] && !in_array($name, $associations)) {
                     return $this->json([
                         "success" => false,
-                        "msg" => "Le champ {$config['name']} est requis mais n'est associé à aucune colonne du fichier",
+                        "message" => "Le champ {$config['name']} est requis mais n'est associé à aucune colonne du fichier",
                     ]);
                 }
             }
@@ -187,7 +187,7 @@ class ImportController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Import créé avec succès",
+                "message" => "Import créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -205,7 +205,7 @@ class ImportController extends AbstractController {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "msg" => "Cet import n'existe pas",
+                "message" => "Cet import n'existe pas",
             ]);
         }
 
@@ -213,7 +213,7 @@ class ImportController extends AbstractController {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "msg" => "Seul les imports planifiés peuvent être annulés",
+                "message" => "Seul les imports planifiés peuvent être annulés",
             ]);
         }
 
@@ -223,7 +223,7 @@ class ImportController extends AbstractController {
         return $this->json([
             "success" => true,
             "reload" => true,
-            "msg" => "Import annulé avec succès",
+            "message" => "Import annulé avec succès",
         ]);
     }
 

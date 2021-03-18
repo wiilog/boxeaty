@@ -112,7 +112,7 @@ class ApiController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
-                "msg" => "Borne inexistante",
+                "message" => "Borne inexistante",
             ]);
         }
     }
@@ -255,7 +255,7 @@ class ApiController extends AbstractController {
         } else {
             return $this->json([
                 "success" => false,
-                "msg" => "La Box n'existe pas, veuillez contacter un responsable d'établissement.",
+                "message" => "La Box n'existe pas, veuillez contacter un responsable d'établissement.",
             ]);
         }
     }
@@ -302,7 +302,7 @@ class ApiController extends AbstractController {
         if (!$box->getCanGenerateDepositTicket()) {
             return $this->json([
                 "success" => false,
-                "msg" => "Cette Box n'a pas été déposée",
+                "message" => "Cette Box n'a pas été déposée",
             ]);
         }
 

@@ -54,7 +54,7 @@ class GlobalSettingController extends AbstractController {
 
         return $this->json([
             "success" => true,
-            "msg" => "Les paramétrages globaux ont été enregistrés avec succès",
+            "message" => "Les paramétrages globaux ont été enregistrés avec succès",
         ]);
     }
 

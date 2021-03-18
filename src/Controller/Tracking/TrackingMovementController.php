@@ -138,7 +138,7 @@ class TrackingMovementController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Mouvement de traçabilité créé avec succès",
+                "message" => "Mouvement de traçabilité créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -215,7 +215,7 @@ class TrackingMovementController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Mouvement de traçabilité modifié avec succès",
+                "message" => "Mouvement de traçabilité modifié avec succès",
             ]);
         } else {
             return $form->errors();
@@ -236,12 +236,12 @@ class TrackingMovementController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Mouvement de traçabilité supprimé avec succès"
+                "message" => "Mouvement de traçabilité supprimé avec succès"
             ]);
         } else {
             return $this->json([
                 "success" => false,
-                "msg" => "Le mouvement de traçabilité a déjà été supprimé",
+                "message" => "Le mouvement de traçabilité a déjà été supprimé",
             ]);
         }
     }

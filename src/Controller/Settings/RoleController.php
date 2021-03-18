@@ -100,7 +100,7 @@ class RoleController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Rôle créé avec succès",
+                "message" => "Rôle créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -145,7 +145,7 @@ class RoleController extends AbstractController {
                 $currentUser->getRole()->getCode() !== Role::ROLE_ADMIN) {
                 return $this->json([
                     "success" => false,
-                    "msg" => "Vous n'avez pas les permissions nécessaires",
+                    "message" => "Vous n'avez pas les permissions nécessaires",
                 ]);
             }
 
@@ -165,7 +165,7 @@ class RoleController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Rôle modifié avec succès",
+                "message" => "Rôle modifié avec succès",
                 "menu" => $this->getUser()->getRole() === $role ? $this->renderView("menu.html.twig", [
                     "current_route" => "roles_list"
                 ]) : null,
@@ -199,7 +199,7 @@ class RoleController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Rôle <strong>{$role->getName()}</strong> désactivé avec succès"
+                "message" => "Rôle <strong>{$role->getName()}</strong> désactivé avec succès"
             ]);
         } else if ($role) {
             $manager->remove($role);
@@ -207,13 +207,13 @@ class RoleController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Rôle <strong>{$role->getName()}</strong> supprimé avec succès"
+                "message" => "Rôle <strong>{$role->getName()}</strong> supprimé avec succès"
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "msg" => "Le rôle n'existe pas"
+                "message" => "Le rôle n'existe pas"
             ]);
         }
     }

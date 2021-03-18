@@ -145,7 +145,7 @@ class DepositTicketController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Ticket-consigne <b>{$depositTicket->getNumber()}</b> créé avec succès",
+                "message" => "Ticket-consigne <b>{$depositTicket->getNumber()}</b> créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -166,13 +166,13 @@ class DepositTicketController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "msg" => "Ticket-consigne <strong>{$depositTicket->getNumber()}</strong> supprimé avec succès"
+                "message" => "Ticket-consigne <strong>{$depositTicket->getNumber()}</strong> supprimé avec succès"
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "msg" => "Le ticket-consigne n'existe pas"
+                "message" => "Le ticket-consigne n'existe pas"
             ]);
         }
     }
