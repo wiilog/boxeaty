@@ -33,6 +33,13 @@
     cursor: pointer;
     transition: all 200ms;
 
+    &.big {
+        height: 55px;
+        line-height: 55px;
+        padding: 0 35px;
+        font-size: 1.2rem;
+    }
+
     @if $type == primary {
         background: $orange;
         border-color: $orange;

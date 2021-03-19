@@ -32,6 +32,16 @@ class Role {
     public const MANAGE_DEPOSIT_TICKETS = "MANAGE_DEPOSIT_TICKETS";
     public const MANAGE_ORDERS = "MANAGE_ORDERS";
 
+    public const ADDITIONAL_PERMISSIONS = [
+        self::ALLOW_EDIT_OWN_GROUP_ONLY,
+        self::REDIRECT_USER_NEW_COMMAND,
+        self::RECEIVE_MAILS_NEW_ACCOUNTS,
+    ];
+
+    public const ALLOW_EDIT_OWN_GROUP_ONLY = "ALLOW_EDIT_OWN_GROUP_ONLY";
+    public const REDIRECT_USER_NEW_COMMAND = "REDIRECT_USER_NEW_COMMAND";
+    public const RECEIVE_MAILS_NEW_ACCOUNTS = "RECEIVE_MAILS_NEW_ACCOUNTS";
+
     use Active;
 
     /**
@@ -123,7 +133,7 @@ class Role {
         return $this;
     }
 
-    public function getRedirectUserNewCommand(): ?bool {
+    public function isRedirectUserNewCommand(): ?bool {
         return $this->redirectUserNewCommand;
     }
 
@@ -132,7 +142,7 @@ class Role {
         return $this;
     }
 
-    public function getReceiveMailsNewAccounts(): ?bool {
+    public function isReceiveMailsNewAccounts(): ?bool {
         return $this->receiveMailsNewAccounts;
     }
 
