@@ -67,15 +67,16 @@ function fireTypeChangeEvent($type) {
 
 function toggleCapacityInput($typeRadio) {
     const $checkedRadio = $typeRadio.filter(`:checked`);
-    const $modal = $typeRadio.closest('.modal');
-    const $kioskCapacity = $modal.find('.kiosk-capacity');
+    const $modal = $typeRadio.closest(`.modal`);
+    const $kioskFields = $modal.find(`.kiosk-fields`);
 
     if(parseInt($checkedRadio.val()) === 1) {
-        $kioskCapacity.removeClass('d-none');
-        $kioskCapacity.find('input').prop('required', true);
+        $kioskFields.removeClass(`d-none`);
+        $kioskFields.find(`input`).prop(`required`, true);
     } else {
-        $kioskCapacity.addClass('d-none');
-        $kioskCapacity.find('input').val('');
-        $kioskCapacity.find('input').prop('required', false);
+        $kioskFields.addClass(`d-none`);
+        $kioskFields.find(`input`)
+            .val(``)
+            .prop(`required`, false);
     }
 }

@@ -26,7 +26,6 @@ class GlobalSettingController extends AbstractController {
             "empty_kiosk_code" => $settings[GlobalSetting::EMPTY_KIOSK_CODE],
             "box_capacities" => explode(",", $settings[GlobalSetting::BOX_CAPACITIES]->getValue()) ?: [],
             "box_shapes" => explode(",", $settings[GlobalSetting::BOX_SHAPES]->getValue()) ?: [],
-            "tablet_phrase" =>  $settings[GlobalSetting::TABLET_PHRASE],
             "mailer" => [
                 "host" => $settings[GlobalSetting::MAILER_HOST],
                 "port" => $settings[GlobalSetting::MAILER_PORT],

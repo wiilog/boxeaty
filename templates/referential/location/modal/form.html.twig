@@ -8,13 +8,6 @@
         <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-location" name="type" class="data" value="0" {{ not location.kiosk ? 'checked' }}/>
         <label for="{{ location.id ? 'edit' : 'new' }}-location-type-location">Emplacement</label>
     </div>
-    <div class="col-12 kiosk-capacity {{ not location.kiosk ? 'd-none' }}">
-        <label>
-            Capacité
-            <input type="number" name="capacity" class="data" placeholder="Saisissez la capacité de la borne"
-                   value="{{ location.capacity }}" {{ location.kiosk ? 'required' }} min="1"/>
-        </label>
-    </div>
     <div class="col-12">
         <label>
             Nom
@@ -38,6 +31,20 @@
                     <option value="{{ location.client.id }}" selected>{{ location.client.name }}</option>
                 {% endif %}
             </select>
+        </label>
+    </div>
+    <div class="col-12 kiosk-capacity {{ not location.kiosk ? 'd-none' }}">
+        <label>
+            Capacité
+            <input type="number" name="capacity" class="data" placeholder="Saisissez la capacité de la borne"
+                   value="{{ location.capacity }}" {{ location.kiosk ? 'required' }} min="1"/>
+        </label>
+    </div>
+    <div class="col-12 kiosk-capacity {{ not location.kiosk ? 'd-none' }}">
+        <label>
+            Message de la borne
+            <input type="text" name="message" class="data" placeholder="Saisissez le message de la borne"
+                   value="{{ location.message }}" {{ location.kiosk ? 'required' }}/>
         </label>
     </div>
     <div class="col-12">
