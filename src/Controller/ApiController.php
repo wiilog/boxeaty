@@ -42,15 +42,18 @@ class ApiController extends AbstractController {
         if (isset($content->id)) {
             $kiosk = $manager->getRepository(Location::class)->find($content->id);
 
-            if($kiosk->getMessage()) {
-                $message = $kiosk->getMessage();
-            } else if ($kiosk) {
-                $client = $kiosk->getClient();
-                if ($client && !$client->isMultiSite() && $client->getLinkedMultiSite()) {
-                    $client = $client->getLinkedMultiSite();
+            if ($kiosk) {
+                if ($kiosk->getMessage()) {
+                    $message = $kiosk->getMessage();
                 }
+                else {
+                    $client = $kiosk->getClient();
+                    if ($client && !$client->isMultiSite() && $client->getLinkedMultiSite()) {
+                        $client = $client->getLinkedMultiSite();
+                    }
 
-                $message = "{$client->getName()} s'engage avec BoxEaty<br>dans la réduction des déchets";
+                    $message = "{$client->getName()} s'engage avec BoxEaty<br>dans la réduction des déchets";
+                }
             }
         }
 
