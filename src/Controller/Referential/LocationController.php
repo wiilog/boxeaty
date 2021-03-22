@@ -80,7 +80,7 @@ class LocationController extends AbstractController {
 
         $content = (object)$request->request->all();
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
-        $capacity = (int)$content->capacity ?? 0;
+        $capacity = (int)$content->capacity ?? null;
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
