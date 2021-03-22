@@ -133,3 +133,8 @@ body.modal-open {
 .modal {
     overflow-y: auto !important;
 }
+
+.modal.no-header .body {
+    margin-top: -20px;
+    padding-top: 0;
+}

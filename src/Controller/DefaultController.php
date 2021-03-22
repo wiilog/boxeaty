@@ -18,6 +18,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class DefaultController extends AbstractController {
@@ -25,7 +26,8 @@ class DefaultController extends AbstractController {
     /**
      * @Route("/accueil", name="home")
      */
-    public function home(): Response {
+    public function home(SessionInterface $session): Response {
+        dump($session->all());
         return $this->render("home.html.twig");
     }
 

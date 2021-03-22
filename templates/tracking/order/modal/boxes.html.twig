@@ -1,0 +1,41 @@
+<div id="modal-order-boxes" class="modal fade no-header" data-backdrop="static">
+    <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="body">
+                <div class="row">
+                    <div class="col-12 col-md-4 scanned-boxes">
+                        <h2 class="mb-3">Box scannées</h2>
+                        {% for box in boxes %}
+                            <input type="text" name="items" class="data data-array mt-1" value="{{ box }}" readonly>
+                            <span class="floating-icon">
+                                <i class="fas fa-times"></i>
+                            </span>
+                        {% endfor %}
+                    </div>
+                    <div class="col-12 col-md-8">
+                        <h2 class="mb-3">Etape 1 : Scan de la/les Box</h2>
+                        <div class="scan-container">
+                            <img src="{{ asset('images/barcode-mask.svg') }}" alt="Masque QR code">
+                            <video data-scan data-items=".scanned-boxes"></video>
+                        </div>
+
+                        <select class="add-box-select" data-s2="availableBox" data-no-empty-option
+                                data-placeholder="Sélectionner une Box à ajouter manuellement" required
+                                data-manual data-items=".scanned-boxes"
+                                data-include-param-closest=".modal"
+                                data-include-params="input[name=items]">
+                        </select>
+                    </div>
+                </div>
+
+                <input type="hidden" name="session" class="data" value="{{ session }}">
+            </div>
+
+            <div class="footer">
+                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="primary">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>

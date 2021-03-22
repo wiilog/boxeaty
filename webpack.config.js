@@ -27,6 +27,7 @@ Encore
     .addEntry("quality_list", "./assets/pages/quality-list.js")
     .addEntry("import_list", "./assets/pages/import-list.js")
     .addEntry("order_list", "./assets/pages/order-list.js")
+    .addEntry("order", "./assets/pages/order.js")
     .autoProvidejQuery()
 
     .addPlugin(new CopyPlugin({

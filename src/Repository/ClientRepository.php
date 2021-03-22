@@ -111,9 +111,15 @@ class ClientRepository extends EntityRepository {
             ->getArrayResult();
     }
 
-    public function getMultiSiteForSelect(?string $search) {
-        return $this->createQueryBuilder("client")
-            ->select("client.id AS id, client.name AS text")
+    public function getMultiSiteForSelect(?string $search, ?User $user) {
+        $qb = $this->createQueryBuilder("client");
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $qb->andWhere("client.group IN (:groups)")
+                ->setParameter("groups", $user->getGroups());
+        }
+
+        return $qb->select("client.id AS id, client.name AS text")
             ->where("client.name LIKE :search")
             ->andWhere("client.active = 1")
             ->andWhere("client.isMultiSite = 1")

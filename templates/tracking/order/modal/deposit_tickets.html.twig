@@ -1,0 +1,46 @@
+<div id="modal-order-deposit-tickets" class="modal fade no-header" data-backdrop="static">
+    <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="body">
+                <div class="row">
+                    <div class="col-12 col-md-4 scanned-tickets">
+                        <h2 class="mb-3">Ticket-consigne scannés</h2>
+                        {% for ticket in tickets %}
+                            <input type="text" name="items" class="data data-array mt-1" value="{{ ticket }}" readonly>
+                            <span class="floating-icon">
+                                <i class="fas fa-times"></i>
+                            </span>
+                        {% endfor %}
+                    </div>
+                    <div class="col-12 col-md-8">
+                        <h2 class="mb-3">
+                            Etape 2 : Scan du/des ticket(s)-consigne(s)
+                            <i data-toggle="tooltip" title="Si vous n'avez pas de ticket-consigne veuillez passer à l'étape suivante"></i>
+                            <i data-toggle="tooltip" title="Si vous n'avez pas de ticket-consigne veuillez passer à l'étape suivante"></i>
+                        </h2>
+                        <div class="scan-container">
+                            <img src="{{ asset('images/barcode-mask.svg') }}" alt="Masque QR code">
+                            <video data-scan data-items=".scanned-tickets"></video>
+                        </div>
+
+                        <select data-s2="depositTicket" data-no-empty-option
+                                data-placeholder="Sélectionner un ticket-consigne à ajouter manuellement" required
+                                data-manual data-items=".scanned-tickets"
+                                data-include-param-closest=".modal"
+                                data-include-params="input[name=items]">
+                        </select>
+                    </div>
+                </div>
+
+                <input type="hidden" name="session" class="data" value="{{ session }}">
+            </div>
+
+            <div class="footer">
+                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="primary" name="previous" value="1">Etape précédente</button>
+                <button type="submit" class="primary">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>

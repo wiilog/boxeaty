@@ -61,7 +61,7 @@ body.home {
             margin: 0 15px;
         }
 
-        &>div, &>a {
+        &>div {
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -73,6 +73,7 @@ body.home {
             background-color: $grey-light;
             text-decoration: none;
             color: $blue;
+            text-align: center;
             transition: all 300ms;
 
             &[disabled] {
@@ -94,6 +95,29 @@ body.home {
                 font-size: 1.4rem;
                 font-weight: bold;
             }
+        }
+    }
+
+    @media (max-width: $mobile-breakpoint) {
+        .instructions {
+            margin-top: 30px;
+            flex-direction: column;
+
+            &>div {
+                width: 100%;
+
+                &:hover:not([disabled]), &:focus:not([disabled]) {
+                    width: 100%;
+                }
+            }
+
+            .caret {
+                display: none;
+            }
+        }
+
+        a.primary.big {
+            margin: 30px 0;
         }
     }
 }
@@ -391,7 +415,7 @@ main:not(.login) {
     border: 2px solid $orange;
     border-radius: 7px;
     height: 80px;
-    padding: 20px 0px;
+    padding: 20px 0;
     color: $orange;
     display: flex;
     justify-content: center;
@@ -411,7 +435,7 @@ main:not(.login) {
         opacity: 0.5;
     }
 
-    .scan-element {
+    video {
         border-radius: 10px;
         width: 100%;
     }

@@ -8,7 +8,6 @@ use App\Entity\DepositTicket;
 use App\Entity\Order;
 use App\Entity\Role;
 use App\Entity\BoxRecord;
-use App\Entity\TrackingMovement;
 use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
@@ -20,6 +19,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -154,10 +154,10 @@ class OrderController extends AbstractController {
 
             $totalPrice = $boxPrices - $depositTicketPrices;
 
-            if(count($boxes) >= 1) {
+            if (count($boxes) >= 1) {
                 $order->setClient($boxes[0]->getOwner());
                 $order->setLocation($boxes[0]->getLocation());
-            } else if(!$this->getUser()->getClients()->isEmpty()) {
+            } else if (!$this->getUser()->getClients()->isEmpty()) {
                 $order->setClient($this->getUser()->getClients()[0]);
             }
 
@@ -237,6 +237,105 @@ class OrderController extends AbstractController {
                 "message" => "Ce scan Box n'existe pas"
             ]);
         }
+    }
+
+    /**
+     * @Route("/template/box", name="order_boxes_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_ORDERS)
+     */
+    public function boxesTemplate(Request $request, SessionInterface $session): Response {
+        $id = $request->query->get("session");
+
+        return $this->json([
+            "submit" => $this->generateUrl("order_boxes_submit"),
+            "template" => $this->renderView("tracking/order/modal/boxes.html.twig", [
+                "session" => $id,
+                "boxes" => $session->get("order.$id.boxes", []),
+            ])
+        ]);
+    }
+
+    /**
+     * @Route("/submit/box", name="order_boxes_submit", options={"expose": true})
+     * @HasPermission(Role::MANAGE_ORDERS)
+     */
+    public function boxes(Request $request, SessionInterface $session): Response {
+        $id = $request->request->get("session");
+        $boxes = $request->request->get("items");
+
+        $session->set("order.$id.boxes", explode(",", $boxes));
+
+        return $this->json([
+            "success" => true,
+            "modal" => [
+                "submit" => $this->generateUrl("order_deposit_tickets_submit"),
+                "template" => $this->renderView("tracking/order/modal/deposit_tickets.html.twig", [
+                    "session" => $id,
+                    "tickets" => $session->get("order.$id.tickets", []),
+                ])
+            ],
+        ]);
+    }
+
+    /**
+     * @Route("/template/deposit-ticket", name="order_deposit_tickets_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_ORDERS)
+     */
+    public function depositTicketsTemplate(Request $request, SessionInterface $session): Response {
+        $id = $request->query->get("session");
+
+        return $this->json([
+            "submit" => $this->generateUrl("order_deposit_tickets_submit"),
+            "template" => $this->renderView("tracking/order/modal/deposit_tickets.html.twig", [
+                "session" => $id,
+                "tickets" => $session->get("order.$id.tickets", []),
+            ])
+        ]);
+    }
+
+    /**
+     * @Route("/submit/deposit-ticket", name="order_deposit_tickets_submit", options={"expose": true})
+     * @HasPermission(Role::MANAGE_ORDERS)
+     */
+    public function depositTickets(Request $request, SessionInterface $session): Response {
+        $id = $request->request->get("session");
+        $tickets = $request->request->get("items");
+
+        $session->set("order.$id.tickets", explode(",", $tickets));
+
+        if($request->request->get("previous", 0)) {
+            $modal = [
+                "submit" => $this->generateUrl("order_boxes_submit"),
+                "template" => $this->renderView("tracking/order/modal/boxes.html.twig", [
+                    "session" => $id,
+                    "boxes" => $session->get("order.$id.boxes", []),
+                ])
+            ];
+        } else {
+            $modal = [
+                "submit" => $this->generateUrl("order_payment_submit"),
+                "template" => $this->renderView("tracking/order/modal/payment.html.twig", [
+                    "session" => $id,
+                    "boxes" => $session->get("order.$id.boxes", []),
+                    "tickets" => $session->get("order.$id.tickets", []),
+                ])
+            ];
+        }
+
+        return $this->json([
+            "success" => true,
+            "modal" => $modal,
+        ]);
+    }
+
+    /**
+     * @Route("/submit/payment", name="order_payment_submit", options={"expose": true})
+     * @HasPermission(Role::MANAGE_ORDERS)
+     */
+    public function payment(Request $request, SessionInterface $session): Response {
+        return $this->json([
+            "success" => true,
+        ]);
     }
 
 }
