@@ -17,13 +17,16 @@ class SettingFixtures extends Fixture implements FixtureGroupInterface {
         GlobalSetting::EMPTY_KIOSK_CODE => "4578",
         GlobalSetting::BOX_CAPACITIES => null,
         GlobalSetting::BOX_SHAPES => null,
-        GlobalSetting::TABLET_PHRASE => null,
         GlobalSetting::MAILER_HOST => null,
         GlobalSetting::MAILER_PORT => null,
         GlobalSetting::MAILER_USER => null,
         GlobalSetting::MAILER_PASSWORD => null,
         GlobalSetting::MAILER_SENDER_EMAIL => null,
         GlobalSetting::MAILER_SENDER_NAME => null,
+    ];
+
+    private const DELETED_SETTINGS = [
+        "TABLET_PHRASE",
     ];
 
     public function load(ObjectManager $manager) {
@@ -40,6 +43,12 @@ class SettingFixtures extends Fixture implements FixtureGroupInterface {
                 $output->writeln("Created setting \"{$setting->getName()}\"");
                 $manager->persist($setting);
             }
+        }
+
+        $deleted = $settingRepository->findBy(["name" => self::DELETED_SETTINGS]);
+        foreach($deleted as $setting) {
+            $output->writeln("Deleted setting \"{$setting->getName()}\"");
+            $manager->remove($setting);
         }
 
         $manager->flush();
