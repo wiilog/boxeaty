@@ -38,21 +38,24 @@ class ApiController extends AbstractController {
     public function config(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
-        $phrase = $manager->getRepository(GlobalSetting::class)->getValue(GlobalSetting::TABLET_PHRASE);
-
         $client = null;
         if (isset($content->id)) {
             $kiosk = $manager->getRepository(Location::class)->find($content->id);
-            if ($kiosk) {
+
+            if($kiosk->getMessage()) {
+                $message = $kiosk->getMessage();
+            } else if ($kiosk) {
                 $client = $kiosk->getClient();
                 if ($client && !$client->isMultiSite() && $client->getLinkedMultiSite()) {
                     $client = $client->getLinkedMultiSite();
                 }
+
+                $message = "{$client->getName()} s'engage avec BoxEaty<br>dans la réduction des déchets";
             }
         }
 
         return $this->json([
-            "phrase" => $phrase ?: ($client ? "{$client->getName()} s'engage avec BoxEaty<br>dans la réduction des déchets" : ""),
+            "phrase" => $message ?? "",
         ]);
     }
 

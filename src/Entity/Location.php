@@ -55,6 +55,16 @@ class Location {
     private ?Client $client = null;
 
     /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private ?int $capacity = null;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private ?string $message = null;
+
+    /**
      * @ORM\Column(type="integer")
      */
     private ?int $deposits = null;
@@ -73,11 +83,6 @@ class Location {
      * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="location")
      */
     private Collection $depositTickets;
-
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private ?int $capacity = null;
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
@@ -142,6 +147,26 @@ class Location {
 
     public function setClient(?Client $client): self {
         $this->client = $client;
+
+        return $this;
+    }
+
+    public function getCapacity(): ?int {
+        return $this->capacity;
+    }
+
+    public function setCapacity(?int $capacity): self {
+        $this->capacity = $capacity;
+
+        return $this;
+    }
+
+    public function getMessage(): ?string {
+        return $this->message;
+    }
+
+    public function setMessage(string $message): self {
+        $this->message = $message;
 
         return $this;
     }
@@ -232,18 +257,6 @@ class Location {
                 $depositTicket->setLocation(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getCapacity(): ?int
-    {
-        return $this->capacity;
-    }
-
-    public function setCapacity(?int $capacity): self
-    {
-        $this->capacity = $capacity;
 
         return $this;
     }

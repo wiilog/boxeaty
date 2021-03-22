@@ -80,7 +80,7 @@ class LocationController extends AbstractController {
 
         $content = (object)$request->request->all();
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
-        $capacity = isset($content->capacity) ? (int)$content->capacity : null;
+        $capacity = (int)$content->capacity ?? 0;
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
@@ -111,11 +111,15 @@ class LocationController extends AbstractController {
                 ->setDescription($content->description ?? null)
                 ->setDeposits(0);
 
-            if((int)$content->type === 1) {
-                $location->setCapacity($capacity);
-            }
-            else {
-                $location->setCapacity(null);
+            if ((int)$content->type === 1) {
+                $location->setCapacity($capacity)
+                    ->setMessage($content->message ?? null);
+
+                $deporte->setCapacity($capacity)
+                    ->setMessage($content->message ?? null);
+            } else {
+                $location->setCapacity(null)
+                    ->setMessage(null);
             }
 
             $manager->persist($location);
@@ -154,7 +158,7 @@ class LocationController extends AbstractController {
 
         $content = (object)$request->request->all();
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
-        $capacity = isset($content->capacity) ? (int)$content->capacity : null;
+        $capacity = (int)$content->capacity ?? null;
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $location) {
@@ -173,11 +177,12 @@ class LocationController extends AbstractController {
                 ->setActive($content->active)
                 ->setDescription($content->description ?? null);
 
-            if((int)$content->type === 1) {
-                $location->setCapacity($capacity);
-            }
-            else {
-                $location->setCapacity(null);
+            if ((int)$content->type === 1) {
+                $location->setCapacity($capacity)
+                    ->setMessage($content->message ?? null);
+            } else {
+                $location->setCapacity(null)
+                    ->setMessage($content->message ?? null);
             }
 
             $manager->flush();
@@ -209,7 +214,7 @@ class LocationController extends AbstractController {
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
     public function delete(EntityManagerInterface $manager, Location $location): Response {
-        if($location && (!$location->getBoxRecords()->isEmpty() || !$location->getBoxes()->isEmpty())) {
+        if ($location && (!$location->getBoxRecords()->isEmpty() || !$location->getBoxes()->isEmpty())) {
             $location->setActive(false);
             $manager->flush();
 
@@ -219,10 +224,10 @@ class LocationController extends AbstractController {
             ]);
         } else if ($location) {
             $originalLocation = $manager->getRepository(Location::class)->findOneBy([
-                'deporte' => $location
+                "deporte" => $location
             ]);
 
-            if($originalLocation) {
+            if ($originalLocation) {
                 $originalLocation->setDeporte(null);
             }
             $manager->remove($location);

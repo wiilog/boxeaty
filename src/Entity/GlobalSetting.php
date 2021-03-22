@@ -15,7 +15,6 @@ class GlobalSetting {
     public const EMPTY_KIOSK_CODE = "EMPTY_KIOSK_CODE";
     public const BOX_CAPACITIES = "BOX_CAPACITIES";
     public const BOX_SHAPES = "BOX_SHAPES";
-    public const TABLET_PHRASE = "TABLET_PHRASE";
 
     public const MAILER_HOST = "MAILER_HOST";
     public const MAILER_PORT = "MAILER_PORT";
