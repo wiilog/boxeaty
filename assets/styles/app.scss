@@ -531,3 +531,33 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     margin-top: 3px;
     height: 100px;
 }
+
+.noscript {
+    z-index: 100000;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: white;
+
+    img {
+        position: relative;
+        top: -10vh;
+        width: 300px;
+        max-width: 60%;
+    }
+
+    h1 {
+        margin-bottom: 2rem;
+    }
+
+    p {
+        width: 60%;
+        font-size: 1.6rem;
+        text-align: center;
+    }
+}
