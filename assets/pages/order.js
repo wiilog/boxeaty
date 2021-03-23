@@ -1,12 +1,10 @@
-import '../app';
+import {$document} from "../app";
 
 import Modal from "../modal";
 import AJAX from "../ajax";
 import $ from "jquery";
 import Scan from "../scan";
 import {randomString} from "../app";
-
-const $document = $(document);
 
 $document.ready(() => {
     $(`#scan-box`).click(() => openBoxesModal());

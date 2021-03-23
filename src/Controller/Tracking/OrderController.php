@@ -14,6 +14,7 @@ use App\Helper\FormatHelper;
 use App\Helper\Stream;
 use App\Repository\OrderRepository;
 use App\Service\BoxRecordService;
+use App\Service\OrderService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,6 +27,9 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/tracabilite/scan-box")
  */
 class OrderController extends AbstractController {
+
+    /** @Required */
+    public OrderService $service;
 
     /**
      * @Route("/liste", name="orders_list")
@@ -243,37 +247,20 @@ class OrderController extends AbstractController {
      * @Route("/template/box", name="order_boxes_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_ORDERS)
      */
-    public function boxesTemplate(Request $request, SessionInterface $session): Response {
-        $id = $request->query->get("session");
-
-        return $this->json([
-            "submit" => $this->generateUrl("order_boxes_submit"),
-            "template" => $this->renderView("tracking/order/modal/boxes.html.twig", [
-                "session" => $id,
-                "boxes" => $session->get("order.$id.boxes", []),
-            ])
-        ]);
+    public function boxesTemplate(): Response {
+        return $this->json($this->service->renderBoxes());
     }
 
     /**
      * @Route("/submit/box", name="order_boxes_submit", options={"expose": true})
      * @HasPermission(Role::MANAGE_ORDERS)
      */
-    public function boxes(Request $request, SessionInterface $session): Response {
-        $id = $request->request->get("session");
-        $boxes = $request->request->get("items");
-
-        $session->set("order.$id.boxes", explode(",", $boxes));
+    public function boxes(): Response {
+        $this->service->update(DepositTicket::class);
 
         return $this->json([
             "success" => true,
-            "modal" => [
-                "submit" => $this->generateUrl("order_deposit_tickets_submit"),
-                "template" => $this->renderView("tracking/order/modal/deposit_tickets.html.twig", [
-                    "session" => $id,
-                    "tickets" => $session->get("order.$id.tickets", []),
-                ])
-            ],
+            "modal" => $this->service->renderDepositTickets(),
         ]);
     }
 
@@ -281,45 +268,21 @@ class OrderController extends AbstractController {
      * @Route("/template/deposit-ticket", name="order_deposit_tickets_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_ORDERS)
      */
-    public function depositTicketsTemplate(Request $request, SessionInterface $session): Response {
-        $id = $request->query->get("session");
-
-        return $this->json([
-            "submit" => $this->generateUrl("order_deposit_tickets_submit"),
-            "template" => $this->renderView("tracking/order/modal/deposit_tickets.html.twig", [
-                "session" => $id,
-                "tickets" => $session->get("order.$id.tickets", []),
-            ])
-        ]);
+    public function depositTicketsTemplate(): Response {
+        return $this->json($this->service->renderDepositTickets());
     }
 
     /**
      * @Route("/submit/deposit-ticket", name="order_deposit_tickets_submit", options={"expose": true})
      * @HasPermission(Role::MANAGE_ORDERS)
      */
-    public function depositTickets(Request $request, SessionInterface $session): Response {
-        $id = $request->request->get("session");
-        $tickets = $request->request->get("items");
-
-        $session->set("order.$id.tickets", explode(",", $tickets));
+    public function depositTickets(Request $request): Response {
+        $this->service->update(DepositTicket::class);
 
         if($request->request->get("previous", 0)) {
-            $modal = [
-                "submit" => $this->generateUrl("order_boxes_submit"),
-                "template" => $this->renderView("tracking/order/modal/boxes.html.twig", [
-                    "session" => $id,
-                    "boxes" => $session->get("order.$id.boxes", []),
-                ])
-            ];
+            $modal = $this->service->renderBoxes();
         } else {
-            $modal = [
-                "submit" => $this->generateUrl("order_payment_submit"),
-                "template" => $this->renderView("tracking/order/modal/payment.html.twig", [
-                    "session" => $id,
-                    "boxes" => $session->get("order.$id.boxes", []),
-                    "tickets" => $session->get("order.$id.tickets", []),
-                ])
-            ];
+            $modal = $this->service->renderPayment();
         }
 
         return $this->json([
@@ -333,8 +296,22 @@ class OrderController extends AbstractController {
      * @HasPermission(Role::MANAGE_ORDERS)
      */
     public function payment(Request $request, SessionInterface $session): Response {
+        $boxes = $this->service->get(Box::class);
+        $tickets = $this->service->get(DepositTicket::class);
+
+        //TODO: create order entity
+
+        $this->service->clear(true);
+
+        if($request->request->get("previous", 0)) {
+            $modal = $this->service->renderDepositTickets();
+        } else {
+            $modal = $this->service->renderConfirmation();
+        }
+
         return $this->json([
             "success" => true,
+            "modal" => $modal,
         ]);
     }
 

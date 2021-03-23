@@ -74,19 +74,23 @@ export default class Modal {
                 template: ajax,
             });
         } else {
-            ajax.json(response => Modal.html({
-                ...config,
-                ...response,
-            }))
+            ajax.json(response => {
+                delete response.success;
+
+                Modal.html({
+                    ...config,
+                    ...response,
+                });
+            });
         }
     }
 
-    static html(config) {
+    static html(config = {}) {
         const $modal = $(config.template);
         $modal.appendTo(`body`);
         $modal.modal(`show`);
 
-        $modal.on('hidden.bs.modal', function(e) {
+        $modal.on('hidden.bs.modal', function() {
             $(this).remove();
         })
 
@@ -203,6 +207,9 @@ export default class Modal {
                 }
 
                 if(result.modal) {
+                    delete result.success;
+                    delete result.menu;
+
                     Modal.html({
                         ...this.config,
                         ...result.modal,

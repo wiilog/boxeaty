@@ -1,15 +1,37 @@
-import '../app';
+import {$document} from '../app';
 import '../pages/order';
 
-import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
-import Scan from "../scan";
-import Flash from "../flash";
 
-const boxPrices = {};
-const depositTicketPrices = {};
+$document.ready(() => {
+    const deleteOrderModal = Modal.static(`#modal-delete-order`, {
+        ajax: AJAX.route(`POST`, `order_delete`),
+    });
+
+    const table = initDatatable(`#table-orders`, {
+        ajax: AJAX.route(`POST`, `orders_api`),
+        columns: [
+            {data: `boxes`, title: `Identifiant Box`},
+            {data: `depositTickets`, title: `Ticket(s) consigne`},
+            {data: `location`, title: `Emplacement`},
+            {data: `totalBoxAmount`, title: `Scan ticket-consigne`},
+            {data: `totalDepositTicketAmount`, title: `Coût de la Box`},
+            {data: `totalCost`, title: `Consigne à régler`},
+            {data: `user`, title: `Utilisateur`},
+            {data: `client`, title: `Client`},
+            {data: `date`, title: `Date et heure de création`},
+            DATATABLE_ACTIONS
+        ],
+        listeners: {
+            delete: data => deleteOrderModal.open(data),
+        }
+    });
+})
+
+// const boxPrices = {};
+// const depositTicketPrices = {};
 //
 // $(document).ready(() => {
 //     const orderId = $('[name=order-id]').val();

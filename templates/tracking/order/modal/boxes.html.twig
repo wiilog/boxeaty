@@ -1,4 +1,4 @@
-<div id="modal-order-boxes" class="modal fade no-header" data-backdrop="static">
+<div id="modal-order-boxes" class="modal fade no-header">
     <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
         <div class="modal-content">
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -7,7 +7,8 @@
                     <div class="col-12 col-md-4 scanned-boxes">
                         <h2 class="mb-3">Box scannées</h2>
                         {% for box in boxes %}
-                            <input type="text" name="items" class="data data-array mt-1" value="{{ box }}" readonly>
+                            <input type="text" name="items" class="data data-array mt-1" readonly
+                                   value="{{ box.number }}" data-price="{{ box.type.price }}">
                             <span class="floating-icon">
                                 <i class="fas fa-times"></i>
                             </span>
@@ -34,7 +35,9 @@
 
             <div class="footer">
                 <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="submit" class="primary">Enregistrer</button>
+                <div class="spacer"></div>
+                <div class="spacer"></div>
+                <button type="submit" class="primary">Etape suivante</button>
             </div>
         </div>
     </div>

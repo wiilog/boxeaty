@@ -7,8 +7,8 @@
     <div class="box first-box">
         <div class="content-menu">
             <div id="table-search-container"></div>
-            <div class="right new-order-container">
-                <button class="primary new-order"><i class="icon fas fa-plus"></i></button>
+            <div class="new-order">
+                <button id="scan-box" class="primary"><i class="icon fas fa-plus"></i></button>
             </div>
         </div>
 
@@ -18,9 +18,7 @@
         </table>
     </div>
 
-    {% include 'tracking/order/modal/new.html.twig' with {order: new_order} %}
     {% include 'tracking/order/modal/delete.html.twig' %}
-    {% include 'tracking/order/modal/scan.html.twig' %}
     {% include 'tracking/order/modal/confirmation.html.twig' %}
 {% endblock %}
 

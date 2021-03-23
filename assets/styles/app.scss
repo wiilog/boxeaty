@@ -61,7 +61,7 @@ body.home {
             margin: 0 15px;
         }
 
-        &>div {
+        & > div {
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -103,21 +103,23 @@ body.home {
             margin-top: 30px;
             flex-direction: column;
 
-            &>div {
+            & > div {
                 width: 100%;
 
                 &:hover:not([disabled]), &:focus:not([disabled]) {
                     width: 100%;
                 }
             }
-
-            .caret {
-                display: none;
-            }
         }
 
         a.primary.big {
             margin: 30px 0;
+        }
+    }
+
+    @media (max-width: $tablet-breakpoint) {
+        .instructions .caret {
+            display: none;
         }
     }
 }
@@ -336,12 +338,12 @@ main:not(.login) {
 }
 
 // Card for order page
-.new-order-container {
+.new-order {
     position: absolute;
     right: 50px;
     top: 160px;
 
-    .new-order {
+    button {
         height: 70px !important;
         width: 70px !important;
         border-radius: 50% !important;

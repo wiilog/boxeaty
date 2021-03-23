@@ -14,6 +14,7 @@ use App\Entity\Role;
 use App\Entity\BoxRecord;
 use App\Entity\User;
 use App\Service\ExportService;
+use DateTime;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,8 +27,7 @@ class DefaultController extends AbstractController {
     /**
      * @Route("/accueil", name="home")
      */
-    public function home(SessionInterface $session): Response {
-        dump($session->all());
+    public function home(): Response {
         return $this->render("home.html.twig");
     }
 

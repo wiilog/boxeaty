@@ -165,7 +165,7 @@ class Location {
         return $this->message;
     }
 
-    public function setMessage(string $message): self {
+    public function setMessage(?string $message): self {
         $this->message = $message;
 
         return $this;

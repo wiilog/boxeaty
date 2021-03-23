@@ -21,8 +21,13 @@ import Modal from "./modal";
 global.$ = $;
 global.Routing = Routing;
 
+export const $document = $(document);
+
 const routes = require(`../public/generated/routes.json`);
 Routing.setRoutingData(routes);
+
+// make all modals static
+$.fn.modal.Constructor.Default.backdrop = `static`;
 
 //tooltips
 $(document)

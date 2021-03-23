@@ -97,6 +97,10 @@
         display: flex;
         margin-top: 1rem;
 
+        .spacer {
+            flex: 1;
+        }
+
         button, a {
             flex: 1;
 
@@ -106,6 +110,19 @@
 
             &:not(:last-child) {
                 margin-right: 10px;
+            }
+        }
+
+
+        @media (max-width: $mobile-breakpoint) {
+            flex-direction: column;
+
+            .spacer {
+                display: none;
+            }
+
+            button, a {
+                margin: 2px 0 0 !important;
             }
         }
     }
