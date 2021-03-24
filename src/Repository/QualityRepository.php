@@ -2,12 +2,9 @@
 
 namespace App\Repository;
 
-use App\Entity\Box;
 use App\Entity\Quality;
-use App\Entity\BoxRecord;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query\Expr\Join;
 
 /**
  * @method Quality|null find($id, $lockMode = null, $lockVersion = null)
@@ -61,8 +58,7 @@ class QualityRepository extends EntityRepository
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("quality.$column", $order["dir"]);
             }
-        }
-        else {
+        } else {
             foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("quality.$column", $dir);
             }
@@ -78,25 +74,6 @@ class QualityRepository extends EntityRepository
             "total" => $total,
             "filtered" => $filtered,
         ];
-    }
-
-    public function getDeletable(array $qualities): array {
-        $uses = $this->createQueryBuilder("quality")
-            ->select("quality.id AS id, (COUNT(movement) + COUNT(box)) AS uses")
-            ->leftJoin(BoxRecord::class, "movement", Join::WITH, "movement.quality = quality.id")
-            ->leftJoin(Box::class, "box", Join::WITH, "box.quality = quality.id")
-            ->where("quality.id IN (:qualities)")
-            ->groupBy("quality")
-            ->setParameter("qualities", $qualities)
-            ->getQuery()
-            ->getResult();
-
-        $deletable = [];
-        foreach($uses as $use) {
-            $deletable[$use["id"]] = $use["uses"] === 0;
-        }
-
-        return $deletable;
     }
 
 }

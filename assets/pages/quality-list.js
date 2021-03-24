@@ -11,11 +11,6 @@ $(document).ready(() => {
         table: `#table-qualities`,
     });
 
-    const deleteQualityModal = Modal.static(`#modal-delete-quality`, {
-        ajax: AJAX.route(`POST`, `quality_delete`),
-        table: `#table-qualities`,
-    });
-
     $(`.new-quality`).click(() => newQualityModal.open());
 
     const table = initDatatable(`#table-qualities`, {
@@ -32,7 +27,13 @@ $(document).ready(() => {
 
                 Modal.load(ajax, {table})
             },
-            delete: data => deleteQualityModal.open(data),
+            delete: data => {
+                const ajax = AJAX.route(`POST`, `quality_delete_template`, {
+                    quality: data.id
+                });
+
+                Modal.load(ajax, {table})
+            },
         }
     });
 });
