@@ -7,7 +7,7 @@ use DateTimeInterface;
 
 class FormatHelper {
 
-    public static function entity($entities, string $field, string $separator = ", ") {
+    public static function entity($entities, string $field, string $separator = ", ", string $else = "-") {
         return Stream::from($entities)
             ->filter(function($entity) use ($field) {
                 return $entity !== null && is_array($entity) ? $entity[$field] : $entity->{"get$field"}();
@@ -15,7 +15,7 @@ class FormatHelper {
             ->map(function($entity) use ($field) {
                 return is_array($entity) ? $entity[$field] : $entity->{"get$field"}();
             })
-            ->join($separator);
+            ->join($separator) ?: $else;
     }
 
     public static function users($users): ?string {
@@ -30,27 +30,27 @@ class FormatHelper {
         return self::entity($entities, "number");
     }
 
-    public static function named($entity): ?string {
-        return $entity ? $entity->getName() : "";
+    public static function named($entity, string $else = "-"): ?string {
+        return $entity ? $entity->getName() : $else;
     }
 
     public static function user(?User $user): ?string {
-        return $user ? $user->getUsername() : "";
+        return $user ? $user->getUsername() : "-";
     }
 
-    public static function bool(?bool $bool, $else = ""): ?string {
+    public static function bool(?bool $bool, $else = "-"): ?string {
         return isset($bool) ? ($bool ? "Oui" : "Non") : $else;
     }
 
-    public static function date(?DateTimeInterface $date, $else = ""): ?string {
+    public static function date(?DateTimeInterface $date, $else = "-"): ?string {
         return $date ? $date->format("d/m/Y") : $else;
     }
 
-    public static function datetime(?DateTimeInterface $date, $else = ""): ?string {
+    public static function datetime(?DateTimeInterface $date, $else = "-"): ?string {
         return $date ? $date->format("d/m/Y H:i") : $else;
     }
 
-    public static function time(?DateTimeInterface $date, $else = ""): ?string {
+    public static function time(?DateTimeInterface $date, $else = "-"): ?string {
         return $date ? $date->format("H:i") : $else;
     }
 
@@ -58,8 +58,8 @@ class FormatHelper {
         return $comment ? strip_tags($comment) : $else;
     }
 
-    public static function price(?float $priceFloat, $else = ""): string {
-        return $priceFloat
+    public static function price(?float $priceFloat, $else = "-"): string {
+        return $priceFloat !== null
             ? (number_format($priceFloat, 2, ',', ' ') . ' €')
             : $else;
     }

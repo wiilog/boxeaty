@@ -77,3 +77,27 @@ jQuery.fn.popLoader = function() {
 
     return this;
 };
+
+jQuery.fn.mobileSlideToggle = function() {
+    if(window.screen.width <= 768) {
+        $(this).slideToggle();
+    } else {
+        $(this).toggle();
+    }
+}
+
+jQuery.fn.mobileSlideUp = function() {
+    if(window.screen.width <= 768) {
+        $(this).slideUp();
+    } else {
+        $(this).hide();
+    }
+}
+
+jQuery.fn.mobileSlideDown = function() {
+    if(window.screen.width <= 768) {
+        $(this).slideDown();
+    } else {
+        $(this).show();
+    }
+}

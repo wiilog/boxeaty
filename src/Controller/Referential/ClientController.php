@@ -49,7 +49,7 @@ class ClientController extends AbstractController {
                 "id" => $client->getId(),
                 "name" => $client->getName(),
                 "active" => $client->isActive() ? "Oui" : "Non",
-                "address" => $client->getAddress(),
+                "address" => $client->getAddress() ?: "-",
                 "contact" => FormatHelper::user($client->getContact()),
                 "group" => FormatHelper::named($client->getGroup()),
                 "linkedMultiSite" => FormatHelper::named($client->getLinkedMultiSite()),

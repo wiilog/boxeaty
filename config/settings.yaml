@@ -11,7 +11,7 @@ parameters:
       App\Entity\Role::MANAGE_BOXES: Créer, modifier, supprimer une Box
       App\Entity\Role::MANAGE_MOVEMENTS: Créer, modifier, supprimer un mouvement
       App\Entity\Role::MANAGE_ORDERS: Accès aux scans Box
-      App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer, supprimer un ticket-consigne
+      App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer, supprimer un ticket‑consigne
 
     Menu Référentiel:
       App\Entity\Role::MANAGE_CLIENTS: Créer, modifier, supprimer les clients
@@ -37,7 +37,7 @@ parameters:
         - name: Box
           permission: App\Entity\Role::MANAGE_BOXES
           route: boxes_list
-        - name: Suivi ticket-consigne
+        - name: Suivi ticket‑consigne
           permission: App\Entity\Role::MANAGE_DEPOSIT_TICKETS
           route: deposit_tickets_list
         - name: Mouvements

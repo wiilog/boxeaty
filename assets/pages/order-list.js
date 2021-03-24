@@ -10,13 +10,13 @@ $document.ready(() => {
         ajax: AJAX.route(`POST`, `order_delete`),
     });
 
-    const table = initDatatable(`#table-orders`, {
+    initDatatable(`#table-orders`, {
         ajax: AJAX.route(`POST`, `orders_api`),
         columns: [
             {data: `boxes`, title: `Identifiant Box`},
             {data: `depositTickets`, title: `Ticket(s) consigne`},
             {data: `location`, title: `Emplacement`},
-            {data: `totalBoxAmount`, title: `Scan ticket-consigne`},
+            {data: `totalBoxAmount`, title: `Scan ticket‑consigne`},
             {data: `totalDepositTicketAmount`, title: `Coût de la Box`},
             {data: `totalCost`, title: `Consigne à régler`},
             {data: `user`, title: `Utilisateur`},
@@ -48,7 +48,7 @@ $document.ready(() => {
 //             {data: `boxes`, title: `Identifiant Box`},
 //             {data: `depositTickets`, title: `Ticket(s) consigne`},
 //             {data: `location`, title: `Emplacement`},
-//             {data: `totalBoxAmount`, title: `Scan ticket-consigne`},
+//             {data: `totalBoxAmount`, title: `Scan ticket‑consigne`},
 //             {data: `totalDepositTicketAmount`, title: `Coût de la Box`},
 //             {data: `totalCost`, title: `Consigne à régler`},
 //             {data: `user`, title: `Utilisateur`},
@@ -125,15 +125,15 @@ $document.ready(() => {
 //         Scan.proceed(
 //             scanModal,
 //             {
-//                 title: `Scan du ticket-consigne`,
+//                 title: `Scan du ticket‑consigne`,
 //                 onScan: (result) => (
 //                     getAvailableElementFromBarcode(
 //                         result,
 //                         {
 //                             $select: $modal.find('select[name=depositTicket]'),
 //                             routeName: `ajax_select_deposit_tickets`,
-//                             successMessage: 'Le ticket-consigne a bien été ajouté',
-//                             warningMessage: `Le ticket-consigne n'existe pas, a déjà été utilisé ou n'est plus valide`,
+//                             successMessage: 'Le ticket‑consigne a bien été ajouté',
+//                             warningMessage: `Le ticket‑consigne n'existe pas, a déjà été utilisé ou n'est plus valide`,
 //                             updatePrices: (element) => {
 //                                 depositTicketPrices[element.text] = element.price;
 //                             }
