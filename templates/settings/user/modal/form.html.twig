@@ -43,7 +43,7 @@
             <label>
                 Mot de passe actuel
                 <input type="password" name="currentPassword" class="data" placeholder="Mot de passe actuel"/>
-                <span class="show-password">
+                <span class="floating-icon show-password">
                     <span><i class="far fa-eye"></i></span>
                 </span>
             </label>
@@ -55,7 +55,7 @@
             <input type="password" name="password" class="data" autocomplete="new-password"
                    placeholder="Mot de passe {{ user.id ? '(vide pour ne pas modifer)' }}"
                     {{ not user.id ? 'required' }}/>
-            <span class="show-password">
+            <span class="floating-icon show-password">
                 <span><i class="far fa-eye"></i></span>
             </span>
         </label>
@@ -66,7 +66,7 @@
             <input type="password" data-repeat="password" class="data"
                    placeholder="Mot de passe {{ user.id ? '(vide pour ne pas modifer)' }}"
                     {{ not user.id ? 'required' }}/>
-            <span class="show-password">
+            <span class="floating-icon show-password">
                 <span><i class="far fa-eye"></i></span>
             </span>
         </label>

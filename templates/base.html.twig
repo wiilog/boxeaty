@@ -19,6 +19,17 @@
     <input type="hidden" id="current-user" value="{{ app.user.id }}">
 {% endif %}
 
+<noscript>
+    <div class="noscript">
+        <img src="{{ asset('images/logo.svg') }}" alt="Logo BoxEaty">
+        <h1>Javascript désactivé</h1>
+        <p>
+            L'application BoxEaty ne peut pas fonctionner si le JavaScript n'est pas activé. Vous pouvez le réactiver
+            dans les paramètres de votre navigateur.
+        </p>
+    </div>
+</noscript>
+
 {% block javascripts %}
     {{ encore_entry_script_tags('app') }}
 {% endblock %}

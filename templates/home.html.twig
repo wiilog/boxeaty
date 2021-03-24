@@ -1,16 +1,47 @@
 {% extends 'template.html.twig' %}
 
+{% set display_new_command = has_permission(constant('App\\Entity\\Role::REDIRECT_USER_NEW_COMMAND')) %}
+
 {% block menu %}Accueil{% endblock %}
 
 {% block bodyclass %}home{% endblock %}
 {% block content %}
     <div class="box home first-box">
-        <h1 class="mb-4">Bienvenue !</h1>
-
         {% if has_permission(constant('App\\Entity\\Role::GENERAL_EXPORT')) %}
+            <h1 class="mb-4">Bienvenue !</h1>
+
             <a class="outline" href="{{ path('export') }}">
                 <i class="icon fas fa-download"></i> Export général au format CSV
             </a>
+        {% elseif display_new_command %}
+            <div class="instructions">
+                <div id="scan-box">
+                    <img src="{{ asset('images/box.svg') }}" width=200 height=100 alt="Box">
+                    <span>Scan de la box</span>
+                </div>
+                <i class="fas fa-angle-double-right caret"></i>
+                <div id="scan-deposit-ticket">
+                    <img src="{{ asset('images/ticket.svg') }}" width=200 height=100 alt="Ticket-consigne">
+                    <span>Scan du ticket&#8209;consigne</span>
+                </div>
+                <i class="fas fa-angle-double-right caret"></i>
+                <div disabled>
+                    <img src="{{ asset('images/success.svg') }}" width=200 height=100 alt="Règlement">
+                    <span>Règlement</span>
+                </div>
+            </div>
+
+            <a href="{{ path('orders_list') }}" class="primary big mt-5">Voir toutes les commandes</a>
+        {% else %}
+            <h1 class="mb-4">Bienvenue !</h1>
         {% endif %}
     </div>
+
+    {% if display_new_command %}
+        {% include 'tracking/order/modal/confirmation.html.twig' %}
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags(display_new_command ? 'order' : 'app') }}
 {% endblock %}

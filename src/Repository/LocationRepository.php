@@ -78,9 +78,16 @@ class LocationRepository extends EntityRepository {
         ];
     }
 
-    public function getLocationsForSelect(?string $search) {
-        return $this->createQueryBuilder("location")
-            ->select("location.id AS id, location.name AS text")
+    public function getLocationsForSelect(?string $search, ?User $user) {
+        $qb = $this->createQueryBuilder("location");
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $qb->join("location.client", "client")
+                ->andWhere("client.group IN (:groups)")
+                ->setParameter("groups", $user->getGroups());
+        }
+
+        return $qb->select("location.id AS id, location.name AS text")
             ->where("location.kiosk = 0")
             ->andWhere("location.name LIKE :search")
             ->andWhere("location.active = 1")
@@ -90,9 +97,16 @@ class LocationRepository extends EntityRepository {
             ->getArrayResult();
     }
 
-    public function getKiosksForSelect(?string $search) {
-        return $this->createQueryBuilder("kiosk")
-            ->select("kiosk.id AS id, kiosk.name AS text")
+    public function getKiosksForSelect(?string $search, ?User $user) {
+        $qb = $this->createQueryBuilder("kiosk");
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $qb->join("kiosk.client", "client")
+                ->andWhere("client.group IN (:groups)")
+                ->setParameter("groups", $user->getGroups());
+        }
+
+        return $qb->select("kiosk.id AS id, kiosk.name AS text")
             ->where("kiosk.kiosk = 1")
             ->andWhere("kiosk.name LIKE :search")
             ->andWhere("kiosk.active = 1")
@@ -102,11 +116,18 @@ class LocationRepository extends EntityRepository {
             ->getArrayResult();
     }
 
-    public function getAnyForSelect(?string $search) {
-        return $this->createQueryBuilder("kiosk")
-            ->select("kiosk.id AS id, kiosk.name AS text")
-            ->where("kiosk.name LIKE :search")
-            ->andWhere("kiosk.active = 1")
+    public function getAnyForSelect(?string $search, ?User $user) {
+        $qb = $this->createQueryBuilder("location");
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $qb->join("location.client", "client")
+                ->andWhere("client.group IN (:groups)")
+                ->setParameter("groups", $user->getGroups());
+        }
+
+        return $qb->select("location.id AS id, location.name AS text")
+            ->where("location.name LIKE :search")
+            ->andWhere("location.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()

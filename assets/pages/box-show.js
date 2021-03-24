@@ -75,7 +75,7 @@ function getBoxTrackingMovements(start = 0) {
                     $historyWrapper.addClass(customWrapperClass);
                     $historyWrapper.append(`
                         <div class="d-flex flex-column align-items-center">
-                            <i class="fas fa-list-ul fa-3x"></i>
+                            <i class="far fa-frown fa-3x"></i>
                             <p class="mt-2">Aucun commentaire ${search ? 'ne correspond à votre recherche' : ' pour cette box'}</p>
                         </div>
                     `);

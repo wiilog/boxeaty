@@ -1,6 +1,11 @@
 {% set current_route = current_route ?? app.request.attributes.get('_route') %}
 
 <div id="menu-dropdown" style="display:none">
+    <h1>
+        Menu
+        <button type="button" class="close-menu" aria-label="Close"></button>
+    </h1>
+
     {% for item in menu_configuration() %}
         {% if item.type == "link" %}
             <a href="{{ path(item.route) }}" {{ item.route == current_route ? 'class="active"' }}>

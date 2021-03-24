@@ -8,24 +8,28 @@ use App\Entity\DepositTicket;
 use App\Entity\Order;
 use App\Entity\Role;
 use App\Entity\BoxRecord;
-use App\Entity\TrackingMovement;
 use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Helper\Stream;
 use App\Repository\OrderRepository;
 use App\Service\BoxRecordService;
+use App\Service\OrderService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/tracabilite/scan-box")
  */
 class OrderController extends AbstractController {
+
+    /** @Required */
+    public OrderService $service;
 
     /**
      * @Route("/liste", name="orders_list")
@@ -154,10 +158,10 @@ class OrderController extends AbstractController {
 
             $totalPrice = $boxPrices - $depositTicketPrices;
 
-            if(count($boxes) >= 1) {
+            if (count($boxes) >= 1) {
                 $order->setClient($boxes[0]->getOwner());
                 $order->setLocation($boxes[0]->getLocation());
-            } else if(!$this->getUser()->getClients()->isEmpty()) {
+            } else if (!$this->getUser()->getClients()->isEmpty()) {
                 $order->setClient($this->getUser()->getClients()[0]);
             }
 
@@ -237,6 +241,78 @@ class OrderController extends AbstractController {
                 "message" => "Ce scan Box n'existe pas"
             ]);
         }
+    }
+
+    /**
+     * @Route("/template/box", name="order_boxes_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_ORDERS)
+     */
+    public function boxesTemplate(): Response {
+        return $this->json($this->service->renderBoxes());
+    }
+
+    /**
+     * @Route("/submit/box", name="order_boxes_submit", options={"expose": true})
+     * @HasPermission(Role::MANAGE_ORDERS)
+     */
+    public function boxes(): Response {
+        $this->service->update(DepositTicket::class);
+
+        return $this->json([
+            "success" => true,
+            "modal" => $this->service->renderDepositTickets(),
+        ]);
+    }
+
+    /**
+     * @Route("/template/deposit-ticket", name="order_deposit_tickets_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_ORDERS)
+     */
+    public function depositTicketsTemplate(): Response {
+        return $this->json($this->service->renderDepositTickets());
+    }
+
+    /**
+     * @Route("/submit/deposit-ticket", name="order_deposit_tickets_submit", options={"expose": true})
+     * @HasPermission(Role::MANAGE_ORDERS)
+     */
+    public function depositTickets(Request $request): Response {
+        $this->service->update(DepositTicket::class);
+
+        if($request->request->get("previous", 0)) {
+            $modal = $this->service->renderBoxes();
+        } else {
+            $modal = $this->service->renderPayment();
+        }
+
+        return $this->json([
+            "success" => true,
+            "modal" => $modal,
+        ]);
+    }
+
+    /**
+     * @Route("/submit/payment", name="order_payment_submit", options={"expose": true})
+     * @HasPermission(Role::MANAGE_ORDERS)
+     */
+    public function payment(Request $request, SessionInterface $session): Response {
+        $boxes = $this->service->get(Box::class);
+        $tickets = $this->service->get(DepositTicket::class);
+
+        //TODO: create order entity
+
+        $this->service->clear(true);
+
+        if($request->request->get("previous", 0)) {
+            $modal = $this->service->renderDepositTickets();
+        } else {
+            $modal = $this->service->renderConfirmation();
+        }
+
+        return $this->json([
+            "success" => true,
+            "modal" => $modal,
+        ]);
     }
 
 }

@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\DepositTicket;
 use App\Entity\User;
 use App\Helper\QueryHelper;
+use DateTime;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -139,9 +140,22 @@ class DepositTicketRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search) {
-        return $this->createQueryBuilder("deposit_ticket")
-            ->select("deposit_ticket.id AS id, deposit_ticket.number AS text, type.price AS price")
+    public function getForSelect(?string $search, ?array $exclude, ?User $user = null) {
+        $qb = $this->createQueryBuilder("deposit_ticket");
+
+        if($exclude) {
+            $qb->andWhere("deposit_ticket.number NOT IN (:excluded)")
+                ->setParameter("excluded", $exclude);
+        }
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $qb->join("deposit_ticket.box", "same_group_box")
+                ->join("same_group_box.owner", "owner")
+                ->andWhere("owner.group IN (:groups)")
+                ->setParameter("groups", $user->getGroups());
+        }
+
+        return $qb->select("deposit_ticket.id AS id, deposit_ticket.number AS text, type.price AS price")
             ->join("deposit_ticket.box", "box")
             ->join("box.type", "type")
             ->andWhere("deposit_ticket.number LIKE :search")
@@ -149,7 +163,7 @@ class DepositTicketRepository extends EntityRepository {
             ->andWhere("deposit_ticket.state = :valid")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
-            ->setParameter("now", new \DateTime())
+            ->setParameter("now", new DateTime())
             ->setParameter("valid", DepositTicket::VALID)
             ->getQuery()
             ->getResult();

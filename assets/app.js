@@ -21,8 +21,13 @@ import Modal from "./modal";
 global.$ = $;
 global.Routing = Routing;
 
+export const $document = $(document);
+
 const routes = require(`../public/generated/routes.json`);
 Routing.setRoutingData(routes);
+
+// make all modals static
+$.fn.modal.Constructor.Default.backdrop = `static`;
 
 //tooltips
 $(document)
@@ -34,10 +39,19 @@ $(document)
 //activate dropdowns
 $(`.datatable-action`).click(() => $(`.datatable-action-dropdown`).toggle());
 $(`.display-menu`).click(() => $(`#menu-dropdown`).toggle());
-$(`.menu-container`).on(`click`, `.category`, (e) => {
-    $(`.category-dropdown`).hide();
-    $(e.currentTarget).children(`.category-dropdown`).toggle();
-});
+$(`.menu-container`)
+    .on(`click`, `.category`, function() {
+        const $dropdown = $(this).children(`.category-dropdown`);
+        const wasVisible = $dropdown.is(`:visible`);
+
+        $(`.category-dropdown`).hide();
+        if(!wasVisible) {
+            $dropdown.show();
+        }
+    })
+    .on(`click`, `.close-menu`, () => {
+        $(`#menu-dropdown`).hide()
+    });
 
 //remove the menu when clicking outside
 $(document).click(e => {

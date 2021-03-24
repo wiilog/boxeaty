@@ -12,11 +12,20 @@ jQuery.fn.exists = function() {
     return this.length !== 0;
 }
 
-jQuery.fn.keymap = function(callable) {
+jQuery.fn.keymap = function(callable, grouped = false) {
     const values = {};
     for(const input of this) {
         const [key, value] = callable(input);
-        values[key] = value;
+
+        if(grouped) {
+            if(values[key] === undefined) {
+                values[key] = [];
+            }
+
+            values[key].push(value);
+        } else {
+            values[key] = value;
+        }
     }
 
     return values;

@@ -22,17 +22,6 @@ label {
         width: 100%;
     }
 
-    .show-password {
-        cursor: pointer;
-        display: block;
-        position: relative;
-        top: -30px;
-        right: 5px;
-        text-align: right;
-        width: 100% !important;
-        height: 0;
-    }
-
     &:not(:first-child) {
         margin-top: 0.5rem;
     }
@@ -43,6 +32,21 @@ label {
         font-weight: normal;
         color: $invalid;
     }
+}
+
+input[disabled], input[readonly] {
+    background-color: $grey;
+}
+
+input + .floating-icon {
+    cursor: pointer;
+    display: block;
+    position: relative;
+    top: -30px;
+    right: 10px;
+    text-align: right;
+    width: 100% !important;
+    height: 0;
 }
 
 input:not([type="checkbox"]):not([type="radio"]), select {

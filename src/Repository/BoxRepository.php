@@ -52,8 +52,13 @@ class BoxRepository extends EntityRepository {
             ->getArrayResult();
     }
 
-    public function getAvailableForSelect(?string $search, ?User $user) {
+    public function getAvailableForSelect(?string $search, ?array $exclude, ?User $user) {
         $qb = $this->createQueryBuilder("box");
+
+        if($exclude) {
+            $qb->andWhere("box.number NOT IN (:excluded)")
+                ->setParameter("excluded", $exclude);
+        }
 
         if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
             $qb->join("box.owner", "owner")

@@ -40,8 +40,9 @@ export default class Modal {
 
         modal.element.on('hidden.bs.modal', () => {
             modal.clear();
-            modal.element.find('[data-s2-initialized]').each(function () {
-                // we remove already openede elements
+
+            modal.element.find('[data-s2-initialized]').each(function() {
+                //close all select2 elements
                 $(this).select2('close');
             });
         });
@@ -58,8 +59,8 @@ export default class Modal {
                 Flash.add(Flash.WARNING, `Opération en cours d'exécution`);
             }
 
-            $button.load(() => {
-                return config.submitter ? config.submitter() : modal.handleSubmit()
+            $button.load(function() {
+                return config.submitter ? config.submitter() : modal.handleSubmit($button)
             });
         });
 
@@ -68,45 +69,55 @@ export default class Modal {
 
     static load(ajax, config = {}) {
         if(typeof ajax === 'string') {
-            withResponse({
+            Modal.html({
+                ...config,
                 template: ajax,
             });
         } else {
-            ajax.json(response => withResponse(response))
-        }
+            ajax.json(response => {
+                delete response.success;
 
-        function withResponse(response) {
-            const $modal = $(response.template);
-            $modal.appendTo(`body`);
-            $modal.modal(`show`);
-
-            $modal.on('hidden.bs.modal', function(e) {
-                $(this).remove();
-            })
-
-            const modal = new Modal();
-            modal.id = Math.floor(Math.random() * 1000000);
-            modal.element = $modal;
-            modal.config = {
-                ajax: AJAX.url(`POST`, config.submit ?? response.submit),
-                ...config
-            };
-
-            modal.setupFileUploader();
-
-            if(config.afterOpen) {
-                config.afterOpen(modal);
-            }
-
-            $modal.find(`button[type="submit"]`).click(function() {
-                const $button = $(this);
-                if($button.hasClass(LOADING_CLASS)) {
-                    Flash.add(Flash.WARNING, `Opération en cours d'exécution`);
-                }
-
-                $button.load(() => modal.handleSubmit());
+                Modal.html({
+                    ...config,
+                    ...response,
+                });
             });
         }
+    }
+
+    static html(config = {}) {
+        const $modal = $(config.template);
+        $modal.appendTo(`body`);
+        $modal.modal(`show`);
+
+        $modal.on('hidden.bs.modal', function() {
+            $(this).remove();
+        })
+
+        const modal = new Modal();
+        modal.id = Math.floor(Math.random() * 1000000);
+        modal.element = $modal;
+        modal.config = {
+            ...config,
+            ajax: AJAX.url(`POST`, config.submit),
+        };
+
+        modal.setupFileUploader();
+
+        if(config.afterOpen) {
+            config.afterOpen(modal);
+        }
+
+        $modal.find(`button[type="submit"]`).click(function() {
+            const $button = $(this);
+            if($button.hasClass(LOADING_CLASS)) {
+                Flash.add(Flash.WARNING, `Opération en cours d'exécution`);
+            }
+
+            $button.load(() => modal.handleSubmit($button));
+        });
+
+        return modal;
     }
 
     setupFileUploader() {
@@ -121,7 +132,7 @@ export default class Modal {
                     return false;
                 });
             });
-            
+
             this.element.find('.file-empty').on('click', (e) => {
                 $input.trigger('click');
                 e.preventDefault();
@@ -132,7 +143,7 @@ export default class Modal {
             $input.on('change', function() {
                 const files = $(this)[0].files;
                 if(files && files.length > 0) {
-                    proceedFileSaving($input, $dropframe, files[0], $fileEmpty, $fileConfirmation, modal);
+                    proceedFileSaving($input, files[0], $fileEmpty, $fileConfirmation, modal);
                 } else {
                     deleteUpload(modal, $input.attr(`name`));
                     $dropframe.removeClass('is-valid');
@@ -156,7 +167,7 @@ export default class Modal {
                 if(data && data.files.length) {
                     event.preventDefault();
                     event.stopPropagation();
-                    proceedFileSaving($input, $dropframe, data.files[0], $fileEmpty, $fileConfirmation, modal)
+                    proceedFileSaving($input, data.files[0], $fileEmpty, $fileConfirmation, modal)
                 } else {
                     $dropframe.addClass(`is-invalid`);
                 }
@@ -166,15 +177,16 @@ export default class Modal {
         }
     }
 
-    handleSubmit() {
-        const data = processForm(this);
+    handleSubmit($button) {
+        const data = processForm(this, $button);
         if(data === false) {
             return;
         }
+
         if(this.config.ajax) {
             return this.config.ajax.json(data, result => {
-                if (!result.success && result.errors !== undefined) {
-                    for (const error of result.errors.fields) {
+                if(!result.success && result.errors !== undefined) {
+                    for(const error of result.errors.fields) {
                         showInvalid(this.element.find(`[name="${error.field}"]`), error.message);
                     }
 
@@ -182,29 +194,44 @@ export default class Modal {
                 }
 
                 //refresh the datatable
-                if (this.config && this.config.table) {
-                    if (this.config.table.ajax) {
+                if(this.config && this.config.table) {
+                    if(this.config.table.ajax) {
                         this.config.table.ajax.reload();
                     } else {
                         $(this.config.table).DataTable().ajax.reload();
                     }
                 }
 
-                if (result.menu) {
+                if(result.menu) {
                     $(`#menu-dropdown`).replaceWith(result.menu);
                 }
 
-                this.element.modal(`hide`);
+                if(result.modal) {
+                    delete result.success;
+                    delete result.menu;
 
-                if (result.success && this.config.success) {
+                    Modal.html({
+                        ...this.config,
+                        ...result.modal,
+                    });
+                }
+
+                if(!this.config.keepOpen) {
+                    this.close();
+                }
+
+                if(result.success && this.config.success) {
                     this.config.success(result);
                 }
             });
         } else {
-           return new Promise((resolve) => {
-               this.element.modal(`hide`);
-               resolve();
-           });
+            return new Promise((resolve) => {
+                if(!this.config.keepOpen) {
+                    this.close();
+                }
+
+                resolve();
+            });
         }
     }
 
@@ -243,7 +270,7 @@ export function clearForm($elem) {
     $elem.find(`[contenteditable="true"]`).html(``);
 }
 
-export function processForm($parent) {
+export function processForm($parent, $button = null) {
     let modal = null;
     if($parent instanceof Modal) {
         modal = $parent;
@@ -268,15 +295,15 @@ export function processForm($parent) {
             let min = parseInt($input.attr('min'));
             let max = parseInt($input.attr('max'));
 
-            if (!isNaN(val) && (val > max || val < min)) {
+            if(!isNaN(val) && (val > max || val < min)) {
                 let message = `La valeur `;
-                if (!isNaN(min) && !isNaN(max)) {
+                if(!isNaN(min) && !isNaN(max)) {
                     message += min > max
                         ? `doit être inférieure à ${max}.`
                         : `doit être comprise entre ${min} et ${max}.`;
-                } else if (!isNaN(max)) {
+                } else if(!isNaN(max)) {
                     message += `doit être inférieure à ${max}.`;
-                } else if (!isNaN(min)) {
+                } else if(!isNaN(min)) {
                     message += `doit être supérieure à ${min}.`;
                 } else {
                     message += `est invalide`;
@@ -358,6 +385,10 @@ export function processForm($parent) {
             .filter(val => val !== null));
     }
 
+    if($button && $button.attr(`name`)) {
+        data.append($button.attr(`name`), $button.val());
+    }
+
     if(modal && uploads[modal.id]) {
         for(const [name, file] of Object.entries(uploads[modal.id])) {
             data.append(name, file)
@@ -386,9 +417,11 @@ function getExtension(file) {
     return file.name.split('.').pop();
 }
 
-function proceedFileSaving($input, $dropframe, file, $fileEmpty, $fileConfirmation, modal) {
+function proceedFileSaving($input, file, $fileEmpty, $fileConfirmation, modal) {
+    const $dropframe = $input.closest(`.attachment-drop-frame`)
     const supported = $input.data(`format`);
     const format = getExtension(file);
+
     if(supported && format !== supported) {
         $input.val('').trigger('change');
         $dropframe.addClass(`is-invalid`);

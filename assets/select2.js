@@ -45,11 +45,11 @@ export default class Select2 {
                 data: (params) => {
                     if($element.is(`[data-include-params]`)) {
                         const $includeParamsSelector = $element.data(`include-params`);
+
                         let $fields;
                         if (!$element.is(`[data-include-params-closest]`)) {
                             $fields = $($includeParamsSelector);
-                        }
-                        else {
+                        } else {
                             $fields = $element
                                 .closest($element.data(`[data-include-params-closest]`))
                                 .find($includeParamsSelector);
@@ -57,7 +57,7 @@ export default class Select2 {
 
                         const values = $fields
                             .filter((_, elem) => elem.name && elem.value)
-                            .keymap((elem) => [elem.name, elem.value]);
+                            .keymap((elem) => [elem.name, elem.value], true);
 
                         params = {
                             ...params,
