@@ -72,10 +72,22 @@ class UserRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search): array {
-        return $this->createQueryBuilder("user")
-            ->select("user.id AS id, user.username AS text")
-            ->where("user.username LIKE :search")
+    public function getForSelect(?string $search, ?User $user): array {
+        $qb = $this->createQueryBuilder("user");
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $or = $qb->expr()->orX();
+
+            foreach($user->getGroups() as $group) {
+                $or->add(":group_{$group->getId()} MEMBER OF user.groups");
+                $qb->setParameter("group_{$group->getId()}", $group);
+            }
+
+            $qb->andWhere($or);
+        }
+
+        return $qb->select("user.id AS id, user.username AS text")
+            ->andWhere("user.username LIKE :search")
             ->andWhere("user.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")

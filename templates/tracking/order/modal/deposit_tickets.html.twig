@@ -5,7 +5,7 @@
             <div class="body">
                 <div class="row">
                     <div class="col-12 col-md-4 scanned-tickets">
-                        <h2 class="mb-3">Ticket-consigne scannés</h2>
+                        <h2 class="mb-3">Ticket‑consigne scannés</h2>
                         {% for ticket in tickets %}
                             <input type="text" name="items" class="data data-array mt-1" readonly
                                    value="{{ ticket.number }}" data-price="{{ ticket.box.type.price }}">
@@ -17,8 +17,8 @@
                     <div class="col-12 col-md-8">
                         <h2 class="mb-3">
                             Etape 2 : Scan du/des ticket(s)-consigne(s)
-                            <i data-toggle="tooltip" title="Si vous n'avez pas de ticket-consigne veuillez passer à l'étape suivante"></i>
-                            <i data-toggle="tooltip" title="Si vous n'avez pas de ticket-consigne veuillez passer à l'étape suivante"></i>
+                            <i data-toggle="tooltip" title="Si vous n'avez pas de ticket‑consigne veuillez passer à l'étape suivante"></i>
+                            <i data-toggle="tooltip" title="Si vous n'avez pas de ticket‑consigne veuillez passer à l'étape suivante"></i>
                         </h2>
                         <div class="scan-container">
                             <img src="{{ asset('images/barcode-mask.svg') }}" alt="Masque QR code">
@@ -26,7 +26,7 @@
                         </div>
 
                         <select data-s2="depositTicket" data-no-empty-option
-                                data-placeholder="Sélectionner un ticket-consigne à ajouter manuellement" required
+                                data-placeholder="Sélectionner un ticket‑consigne à ajouter manuellement" required
                                 data-manual data-items=".scanned-tickets"
                                 data-include-param-closest=".modal"
                                 data-include-params="input[name=items]">

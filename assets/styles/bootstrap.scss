@@ -162,6 +162,11 @@ body.modal-open {
                 border: none;
                 padding: 1.4rem;
             }
+
+            .modal-content > h1 {
+                width: calc(100% - 50px);
+                font-size: 2.6rem;
+            }
         }
     }
 }

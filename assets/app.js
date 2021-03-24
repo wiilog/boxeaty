@@ -38,19 +38,23 @@ $(document)
 
 //activate dropdowns
 $(`.datatable-action`).click(() => $(`.datatable-action-dropdown`).toggle());
-$(`.display-menu`).click(() => $(`#menu-dropdown`).toggle());
+$(`.display-menu`).click(() => $(`#menu-dropdown`).mobileSlideToggle());
 $(`.menu-container`)
-    .on(`click`, `.category`, function() {
+    .on(`click`, `.category`, function(e) {
+        if($(e.target).closest(`.category-dropdown`).exists()) {
+            return
+        }
+
         const $dropdown = $(this).children(`.category-dropdown`);
         const wasVisible = $dropdown.is(`:visible`);
 
-        $(`.category-dropdown`).hide();
+        $(`.category-dropdown`).mobileSlideUp();
         if(!wasVisible) {
-            $dropdown.show();
+            $dropdown.mobileSlideDown();
         }
     })
     .on(`click`, `.close-menu`, () => {
-        $(`#menu-dropdown`).hide()
+        $(`#menu-dropdown`).mobileSlideUp()
     });
 
 //remove the menu when clicking outside

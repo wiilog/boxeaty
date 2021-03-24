@@ -11,6 +11,7 @@ use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\BoxRecord;
 use App\Helper\Form;
+use App\Helper\FormatHelper;
 use App\Helper\Stream;
 use App\Repository\BoxRepository;
 use App\Service\BoxRecordService;
@@ -53,11 +54,11 @@ class BoxController extends AbstractController {
             $data[] = [
                 "id" => $box->getId(),
                 "number" => $box->getNumber(),
-                "location" => $box->getLocation() ? $box->getLocation()->getName() : "",
-                "state" => Box::NAMES[$box->getState()] ?? "",
-                "quality" => $box->getQuality() ? $box->getQuality()->getName() : "",
-                "owner" => $box->getOwner() ? $box->getOwner()->getName() : "",
-                "type" => $box->getType() ? $box->getType()->getName() : "",
+                "location" => FormatHelper::named($box->getLocation()),
+                "state" => Box::NAMES[$box->getState()] ?? "-",
+                "quality" => FormatHelper::named($box->getQuality()),
+                "owner" => FormatHelper::named($box->getOwner()),
+                "type" => FormatHelper::named($box->getType()),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,

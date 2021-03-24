@@ -58,7 +58,7 @@ class OrderController extends AbstractController {
                 "id" => $order->getId(),
                 "boxes" => FormatHelper::boxes($order->getBoxes()),
                 "depositTickets" => FormatHelper::depositTickets($order->getDepositTickets()),
-                "location" => $order->getLocation() ? $order->getLocation()->getName() : "",
+                "location" => FormatHelper::named($order->getLocation()),
                 "totalBoxAmount" => FormatHelper::price($order->getTotalBoxAmount()),
                 "totalDepositTicketAmount" => FormatHelper::price($order->getTotalDepositTicketAmount()),
                 "totalCost" => FormatHelper::price($order->getTotalCost()),
@@ -95,8 +95,8 @@ class OrderController extends AbstractController {
         $depositTickets = $depositTicketRepository->findBy(["id" => explode(",", $content->depositTicket)]);
 
         if (empty($boxes) && empty($depositTickets)) {
-            $form->addError('box', 'Au moins une Box ou un ticket-consigne sont requis');
-            $form->addError('depositTicket', 'Au moins une Box ou un ticket-consigne sont requis');
+            $form->addError('box', 'Au moins une Box ou un ticket‑consigne sont requis');
+            $form->addError('depositTicket', 'Au moins une Box ou un ticket‑consigne sont requis');
         }
 
         if ($form->isValid()) {
@@ -295,7 +295,7 @@ class OrderController extends AbstractController {
      * @Route("/submit/payment", name="order_payment_submit", options={"expose": true})
      * @HasPermission(Role::MANAGE_ORDERS)
      */
-    public function payment(Request $request, SessionInterface $session): Response {
+    public function payment(Request $request): Response {
         $boxes = $this->service->get(Box::class);
         $tickets = $this->service->get(DepositTicket::class);
 

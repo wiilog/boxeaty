@@ -8,6 +8,7 @@ use App\Entity\Group;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
+use App\Helper\FormatHelper;
 use App\Repository\UserRepository;
 use App\Security\Authenticator;
 use App\Service\ExportService;
@@ -56,14 +57,12 @@ class UserController extends AbstractController {
                 "id" => $user->getId(),
                 "username" => $user->getUsername(),
                 "email" => $user->getEmail(),
-                "lastLogin" => $user->getLastLogin() ? $user->getLastLogin()->format("d/m/Y H:i") : "/",
+                "lastLogin" => FormatHelper::datetime($user->getLastLogin()),
                 "role" => $user->getRole()->getName(),
                 "status" => $user->isActive() ? "Actif" : "Inactif",
                 "actions" => $this->renderView("datatable_actions.html.twig", [
-                    "editable" => (
-                        $loggedUser->getRole()->getCode() === Role::ROLE_ADMIN
-                        || $user->getRole()->getCode() !== Role::ROLE_ADMIN
-                    ),
+                    "editable" => $loggedUser->getRole()->getCode() === Role::ROLE_ADMIN
+                        || $user->getRole()->getCode() !== Role::ROLE_ADMIN,
                     "deletable" => true,
                 ]),
             ];

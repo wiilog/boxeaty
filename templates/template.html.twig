@@ -9,23 +9,27 @@
                 </a>
                 <p class="m-0 text-end" style="position:relative;top:-15px">{{ web_version }}</p>
             </div>
-            <div class="breadcrumb">
-                <span class="menu">{% apply upper %}{% block menu %}{% endblock %}{% endapply %}</span>
 
-                {% set _page = block('page') ?? null %}
+            {% set _menu = block('menu') ?? null %}
+            {% set _page = block('page') ?? null %}
+            <div class="breadcrumb" {# data-toggle="tooltip" title="{{ _menu }} | {{ _page | striptags }}" #}>
+                <span class="menu text-uppercase">
+                    {{ _menu }}
+                </span>
+
                 {% if _page is not empty %}
                     <i class="separator">|</i>
-                    <span>{% block page %}{% endblock %}</span>
+                    <span>{{ _page }}</span>
                 {% endif %}
             </div>
             <div class="filler"></div>
             <div class="header-right">
                 <div class="current-user">
-                    <img src="{{ asset('images/user.svg') }}"/>
+                    <img src="{{ asset('images/user.svg') }}" alt="Icone utilisateur"/>
                     {{ app.user.username }}
                 </div>
                 <div class="menu-container">
-                    <img class="display-menu" src="{{ asset('images/menu.svg') }}"/>
+                    <img class="display-menu" src="{{ asset('images/menu.svg') }}" alt="Menu"/>
                     {% include 'menu.html.twig' %}
                 </div>
             </div>
