@@ -33,19 +33,25 @@ body {
     overflow-x: hidden;
     overflow-y: auto;
     position: relative;
+    display: flex;
+    flex-direction: column;
     padding-bottom: 25px;
 }
 
-body.home {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+body.full-height main {
+    flex: 1 1 auto;
+}
 
+body.home {
     main {
-        flex: 1 1 auto;
+        flex: 1;
 
         .box {
-            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
         }
     }
 
@@ -100,7 +106,6 @@ body.home {
 
     @media (max-width: $mobile-breakpoint) {
         .instructions {
-            margin-top: 30px;
             flex-direction: column;
 
             & > div {
@@ -171,7 +176,7 @@ main:not(.login) {
         width: 100%;
     }
 
-    .filters  {
+    .filters {
         @include box();
         @include content-apart();
 
@@ -197,8 +202,29 @@ main:not(.login) {
             align-items: center;
             flex-wrap: wrap;
 
-            &>* {
+            .dates-filter {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            & > * {
                 margin-right: 25px;
+            }
+
+            @media (max-width: $mobile-breakpoint) {
+                .dates-filter {
+                    flex-direction: column;
+                }
+
+                & > * {
+                    width: 100%;
+                    margin: 2px 0;
+
+                    .select2-container {
+                        width: 100% !important;
+                    }
+                }
             }
         }
 
@@ -212,18 +238,20 @@ main:not(.login) {
                 flex-direction: row;
                 align-items: center;
                 margin-right: 10px;
+
+                input {
+                    margin-left: 5px;
+                }
             }
         }
     }
 
     .content-menu {
         @include content-apart();
-
         margin-bottom: 15px;
 
         @media (max-width: $mobile-breakpoint) {
             flex-direction: column;
-
 
             #table-search-container, input, .right, button, a {
                 display: block;
@@ -246,27 +274,12 @@ main:not(.login) {
     }
 }
 
-.scrollable-x {
-    overflow-x: auto;
-}
-
-@media (max-width: $tablet-breakpoint) {
-
-}
-
 .box {
     @include box();
 
     &.box-small {
         min-width: 350px;
         width: 40%;
-    }
-
-    &.home {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
     }
 }
 
@@ -339,21 +352,21 @@ main:not(.login) {
 
 // Card for order page
 .new-order {
-    position: absolute;
-    right: 50px;
-    top: 160px;
+    position: relative;
+    top: -$new-order-height + 10px;
 
     button {
-        height: 70px !important;
-        width: 70px !important;
-        border-radius: 50% !important;
         display: flex;
         justify-content: center;
         align-items: center;
+        float: right;
+        height: $new-order-height !important;
+        width: $new-order-height !important;
+        border-radius: 50% !important;
 
         svg {
             margin-right: 0 !important;
-            font-size: 20px;
+            font-size: 1.8rem;
         }
     }
 }
@@ -475,6 +488,7 @@ main:not(.login) {
     width: 36vw;
     padding: 15px;
 }
+
 input[type="date"] {
     position: relative;
 }
@@ -537,7 +551,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .noscript {
     z-index: 100000;
     position: absolute;
-    top: 0; left: 0;
+    top: 0;
+    left: 0;
     width: 100vw;
     height: 100vh;
     display: flex;

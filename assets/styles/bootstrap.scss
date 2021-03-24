@@ -149,6 +149,21 @@ body.modal-open {
 
 .modal {
     overflow-y: auto !important;
+
+    @media (max-width: $mobile-breakpoint) {
+        .modal-dialog {
+            width: 100vw;
+            max-width: none;
+            height: auto;
+            margin: 0;
+
+            .modal-content {
+                border-radius: 0;
+                border: none;
+                padding: 1.4rem;
+            }
+        }
+    }
 }
 
 .modal.no-header .body {

@@ -1,34 +1,37 @@
 {% extends 'template.html.twig' %}
 
 {% block menu %}Traçabilité{% endblock %}
-{% block page %}<a href="{{ path('boxes_list') }}" class="text-white text-decoration-none">Box</a> | Détails{% endblock %}
+{% block page %}
+    <a href="{{ path('boxes_list') }}" class="text-white text-decoration-none">Box</a> | Détails
+{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     {{ encore_entry_link_tags('box_show') }}
 {% endblock %}
 
+{% block bodyclass %}full-height{% endblock %}
 {% block content %}
     <div class="row box-show">
-        <div class="col-4 details box-details">
+        <div class="col-md-4 col-12 details box-details">
             <h3>Détails de la Box</h3>
-            <p class="fs-5">Code : <strong>{{ box.number }}</strong></p>
-            <p class="fs-5">Emplacement : <strong>{{ box.location ? box.location.name }}</strong></p>
-            <p class="fs-5">Qualité : <strong>{{ box.quality ? box.quality.name }}</strong></p>
-            <p class="fs-5">Etat : <strong>{{ box.state ? constant('App\\Entity\\Box::NAMES')[box.state] }}</strong></p>
-            <p class="fs-5">Prix : <strong>{{ box.type ? box.type.price|format_helper('price') }}</strong></p>
+            <p>Code : <strong>{{ box.number }}</strong></p>
+            <p>Emplacement : <strong>{{ box.location ? box.location.name }}</strong></p>
+            <p>Qualité : <strong>{{ box.quality ? box.quality.name }}</strong></p>
+            <p>Etat : <strong>{{ box.state ? constant('App\\Entity\\Box::NAMES')[box.state] }}</strong></p>
+            <p>Prix : <strong>{{ box.type ? box.type.price|format_helper('price') }}</strong></p>
         </div>
-        <div class="col-8 box-group">
+        <div class="col-md-8 col-12 right-column">
             <div class="owner box-details">
                 <h3>Propriétaire</h3>
-                <p class="fs-5">{{ box.owner ? box.owner.name }}</p>
+                <p class="fs-5 mb-0">{{ box.owner ? box.owner.name }}</p>
             </div>
-            <div class="history box-details justify-content-between">
-                <div class="d-flex justify-content-between align-items-center">
+            <div class="history box-details">
+                <div class="d-flex flex-md-row flex-column justify-content-between">
                     <h3 class="mb-0">Historique de la Box</h3>
-                    <label class="d-flex align-items-center mt-0">
-                    Rechercher:
-                        <input type="text" class="comment-search data" placeholder="entrée pour valider">
+                    <label class="d-flex align-items-center text-nowrap mt-0">
+                        Rechercher :
+                        <input type="text" class="comment-search data" placeholder="Entrée pour valider">
                     </label>
                 </div>
                 <div class="history-wrapper"></div>
