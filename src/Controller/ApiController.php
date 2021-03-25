@@ -325,7 +325,7 @@ class ApiController extends AbstractController {
         $mailer->send(
             $content->email,
             "BoxEaty - Ticket‑consigne",
-            $this->renderView("emails/mjml/deposit_ticket.html.twig", [
+            $this->renderView("emails/deposit_ticket.html.twig", [
                 "ticket" => $depositTicket,
             ])
         );
