@@ -14,12 +14,12 @@
             {% set _page = block('page') ?? null %}
             <div class="breadcrumb" {# data-toggle="tooltip" title="{{ _menu }} | {{ _page | striptags }}" #}>
                 <span class="menu text-uppercase">
-                    {{ _menu }}
+                    {{ _menu | raw }}
                 </span>
 
                 {% if _page is not empty %}
                     <i class="separator">|</i>
-                    <span>{{ _page }}</span>
+                    <span>{{ _page | raw }}</span>
                 {% endif %}
             </div>
             <div class="filler"></div>
