@@ -9,7 +9,7 @@ export const DATATABLE_ACTIONS = {
     width: `10px`,
 };
 
-const LANGUAGE = {
+export const DATATABLE_LANGUAGE = {
     processing: `<span class="content">Traitement en cours</span>`,
     search: `Rechercher&nbsp;:`,
     lengthMenu: `Nombre de lignes par page: _MENU_`,
@@ -95,7 +95,7 @@ export function initDatatable(table, config) {
             fixedColumns: {
                 heightMatch: `auto`
             },
-            language: LANGUAGE,
+            language: DATATABLE_LANGUAGE,
             dom: `<"row mb-2"<"col-auto d-none"f>>t<"footer"<"left" li>p>r`,
             initComplete: () => {
                 moveSearchInputToHeader($table);
