@@ -11,7 +11,7 @@ $(document).ready(() => {
         table: `#table-imports`,
         success: result => {
             if(result.next) {
-                Modal.load(result.modal, {
+                Modal.html(result.modal, {
                     table: `#table-imports`,
                     submit: Routing.generate(`import_fields_association`),
                     afterOpen: onSecondStepSuccess,
@@ -22,7 +22,7 @@ $(document).ready(() => {
 
     $(`.new-import`).click(() => newImportModal.open());
 
-    const table = initDatatable(`#table-imports`, {
+    initDatatable(`#table-imports`, {
         ajax: AJAX.route(`POST`, `imports_api`),
         columns: [
             {data: `name`, title: `Nom de l'import`},
