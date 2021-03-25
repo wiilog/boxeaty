@@ -129,7 +129,7 @@ class ImportController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "modal" => $this->renderView("settings/import/modal/fields_association.html.twig", [
+                "next" => $this->renderView("settings/import/modal/fields_association.html.twig", [
                     "fields" => Import::FIELDS,
                     "pre_assignments" => $preAssignments,
                     "file_fields" => Stream::from($fields)

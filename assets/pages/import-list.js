@@ -10,7 +10,7 @@ $(document).ready(() => {
         ajax: AJAX.route(`POST`, `import_new`),
         table: `#table-imports`,
         success: result => {
-            if(result.modal) {
+            if(result.next) {
                 Modal.load(result.modal, {
                     table: `#table-imports`,
                     submit: Routing.generate(`import_fields_association`),
