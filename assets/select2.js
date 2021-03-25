@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $, {GROUP_WHEN_NEEDED} from 'jquery';
 import 'select2';
 import 'select2/src/js/select2/i18n/fr';
 
@@ -90,20 +90,15 @@ export default class Select2 {
 
     static includeParams($element, params) {
         if($element.is(`[data-include-params]`)) {
-            const $includeParamsSelector = $element.data(`include-params`);
-
-            let $fields;
-            if(!$element.is(`[data-include-params-closest]`)) {
-                $fields = $($includeParamsSelector);
-            } else {
-                $fields = $element
-                    .closest($element.data(`[data-include-params-closest]`))
-                    .find($includeParamsSelector);
-            }
+            const selector = $element.data(`include-params`);
+            const closest = $element.data(`[data-include-params-parent]`) || `.modal`;
+            const $fields = $element
+                    .closest(closest)
+                    .find(selector);
 
             const values = $fields
                 .filter((_, elem) => elem.name && elem.value)
-                .keymap((elem) => [elem.name, elem.value], true);
+                .keymap((elem) => [elem.name, elem.value], GROUP_WHEN_NEEDED);
 
             params = {
                 ...params,

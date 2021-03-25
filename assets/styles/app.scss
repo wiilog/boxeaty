@@ -239,6 +239,10 @@ main:not(.login) {
                 align-items: center;
                 margin-right: 10px;
 
+                @media (max-width: $mobile-breakpoint) {
+                    margin-right: 0;
+                }
+
                 input {
                     margin-left: 5px;
                 }
@@ -491,47 +495,20 @@ main:not(.login) {
 
 input[type="date"] {
     position: relative;
-}
-
-/* create a new arrow, because we are going to mess up the native one
-see "List of symbols" below if you want another, you could also try to add a font-awesome icon.. */
-input[type="date"]:after {
-    content: "\1F5D3";
-    color: #555;
-    padding: 0 5px;
-}
-
-/* change color of symbol on hover */
-input[type="date"]:hover:after {
-    color: #bf1400;
+    background-image: url('../images/calendar.svg');
+    background-repeat: no-repeat;
+    background-position: center right 8px;
+    background-size: 16px;
 }
 
 /* make the native arrow invisible and stretch it over the whole field so you can click anywhere in the input field to trigger the native datepicker*/
 input[type="date"]::-webkit-calendar-picker-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: auto;
-    height: auto;
-    color: transparent;
     background: transparent;
 }
 
 .cursor-pointer {
     cursor: pointer !important;
 }
-
-///* adjust increase/decrease button */
-//input[type="date"]::-webkit-inner-spin-button {
-//    z-index: 1;
-//}
-//
-///* adjust clear button */
-//input[type="date"]::-webkit-clear-button {
-//    z-index: 1;
-//}
 
 .ql-toolbar {
     background: $grey;
