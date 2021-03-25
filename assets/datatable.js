@@ -77,6 +77,7 @@ export function initDatatable(table, config) {
     };
 
     const initial = $table.data(`initial-data`);
+    const hasInitialData = initial && typeof initial === `object`;
     if(initial && typeof initial === `object`) {
         config = {
             ...config,
@@ -88,7 +89,7 @@ export function initDatatable(table, config) {
         .on(`error.dt`, (e, settings, techNote, message) => console.error(`An error has been reported by DataTables: `, message, e, table))
         .DataTable({
             processing: true,
-            serverSide: true,
+            serverSide: !hasInitialData,
             responsive: true,
             scrollX: true,
             autoWidth: true,
