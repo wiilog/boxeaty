@@ -10,14 +10,14 @@ $document.ready(() => {
         ajax: AJAX.route(`POST`, `order_delete`),
     });
 
-    const table = initDatatable(`#table-orders`, {
+    initDatatable(`#table-orders`, {
         ajax: AJAX.route(`POST`, `orders_api`),
         columns: [
             {data: `boxes`, title: `Identifiant Box`},
             {data: `depositTickets`, title: `Ticket(s) consigne`},
             {data: `location`, title: `Emplacement`},
-            {data: `totalBoxAmount`, title: `Scan ticket-consigne`},
-            {data: `totalDepositTicketAmount`, title: `Coût de la Box`},
+            {data: `totalBoxAmount`, title: `Coût des Box`},
+            {data: `totalDepositTicketAmount`, title: `Valeur des tickets-consignes`},
             {data: `totalCost`, title: `Consigne à régler`},
             {data: `user`, title: `Utilisateur`},
             {data: `client`, title: `Client`},

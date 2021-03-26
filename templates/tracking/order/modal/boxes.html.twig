@@ -4,26 +4,34 @@
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
             <div class="body">
                 <div class="row">
-                    <div class="col-12 col-md-4 scanned-boxes">
+                    <div class="col-12 col-md-4 left-pane">
                         <h2 class="mb-3">Box scannées</h2>
-                        {% for box in boxes %}
-                            <input type="text" name="items" class="data data-array mt-1" readonly
-                                   value="{{ box.number }}" data-price="{{ box.type.price }}">
-                            <span class="floating-icon">
-                                <i class="fas fa-times"></i>
-                            </span>
-                        {% endfor %}
+                        <div class="scanned-boxes">
+                            {% for box in boxes %}
+                                <div class="item">
+                                    <input type="text" name="items" class="data data-array mt-1" readonly
+                                           value="{{ box.number }}" data-price="{{ box.type.price }}">
+                                    <span class="floating-icon">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <label>
+                            Prix des Box
+                            <input type="number" name="price" class="euros" value="{{ price }}" readonly>
+                        </label>
                     </div>
                     <div class="col-12 col-md-8">
                         <h2 class="mb-3">Etape 1 : Scan de la/les Box</h2>
                         <div class="scan-container">
                             <img src="{{ asset('images/barcode-mask.svg') }}" alt="Masque QR code">
-                            <video data-scan data-items=".scanned-boxes"></video>
+                            <video data-scan="box" data-items=".scanned-boxes"></video>
                         </div>
 
-                        <select class="add-box-select" data-s2="availableBox" data-no-empty-option
+                        <select class="add-box-select" data-s2="orderBox" data-no-empty-option
                                 data-placeholder="Sélectionner une Box à ajouter manuellement" required
-                                data-manual data-items=".scanned-boxes"
+                                data-manual="box" data-items=".scanned-boxes"
                                 data-include-param-closest=".modal"
                                 data-include-params="input[name=items]">
                         </select>
@@ -34,7 +42,7 @@
             </div>
 
             <div class="footer">
-                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <a href="{{ path('home') }}" class="secondary">Annuler</a>
                 <div class="spacer"></div>
                 <div class="spacer"></div>
                 <button type="submit" class="primary">Etape suivante</button>

@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Box;
 use App\Entity\DepositTicket;
+use App\Helper\Stream;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -49,6 +50,7 @@ class OrderService {
             "template" => $this->twig->render("tracking/order/modal/boxes.html.twig", [
                 "session" => $this->getToken(),
                 "boxes" => $this->get(Box::class),
+                "price" => $this->getBoxesPrice(),
             ])
         ];
     }
@@ -59,17 +61,19 @@ class OrderService {
             "template" => $this->twig->render("tracking/order/modal/deposit_tickets.html.twig", [
                 "session" => $this->getToken(),
                 "tickets" => $this->get(DepositTicket::class),
+                "price" => $this->getTicketsPrice(),
             ])
         ];
     }
 
     public function renderPayment(): array {
         return [
-            "submit" => $this->router->generate("order_payment_submit"),
+            "submit" => $this->router->generate("order_confirm"),
             "template" => $this->twig->render("tracking/order/modal/payment.html.twig", [
                 "session" => $this->getToken(),
                 "boxes" => $this->get(Box::class),
                 "tickets" => $this->get(DepositTicket::class),
+                "total_price" => $this->getBoxesPrice() - $this->getTicketsPrice(),
             ])
         ];
     }
@@ -80,15 +84,31 @@ class OrderService {
         ];
     }
 
+    public function getBoxesPrice(): string {
+        return Stream::from($this->get(Box::class))
+            ->reduce(fn(int $total, Box $box) => $total + $box->getType()->getPrice());
+    }
+
+    public function getTicketsPrice(): string {
+        return Stream::from($this->get(DepositTicket::class))
+            ->reduce(function(int $total, DepositTicket $ticket) {
+                return $total + $ticket->getBox()->getType()->getPrice();
+            });
+    }
+
     /**
      * @return array|Box[]|DepositTicket[]
      */
     public function get(string $class): array {
         $id = $this->getToken();
 
-        return $this->manager
-            ->getRepository($class)
-            ->findBy(["number" => $this->session->get("order.$id.$class", [])]);
+        if(!isset($this->$class)) {
+            $this->$class = $this->manager
+                ->getRepository($class)
+                ->findBy(["number" => $this->session->get("order.$id.$class", [])]);
+        }
+
+        return $this->$class;
     }
 
     public function update(string $class) {
@@ -101,7 +121,7 @@ class OrderService {
 
     public function clear($current = false) {
         //remove current order
-        if($current) {
+        if ($current) {
             $id = $this->getToken();
 
             $this->session->remove("order.$id");
@@ -112,10 +132,10 @@ class OrderService {
 
         //clear previous unfinished orders
         $expiry = new DateTime("-1 day");
-        foreach($this->session->all() as $key => $value) {
-            if(preg_match("/^order\.[A-Z0-9]{8,32}$/i", $key)) {
+        foreach ($this->session->all() as $key => $value) {
+            if (preg_match("/^order\.[A-Z0-9]{8,32}$/i", $key)) {
                 [$id, $date] = $value;
-                if($date < $expiry) {
+                if ($date < $expiry) {
                     $this->session->remove("order.$id");
                     $this->session->remove("order.$id.boxes");
                     $this->session->remove("order.$id.tickets");

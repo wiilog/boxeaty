@@ -5,6 +5,7 @@ namespace App\Controller\Referential;
 use App\Annotation\HasPermission;
 use App\Entity\Client;
 use App\Entity\Group;
+use App\Entity\Location;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
@@ -77,12 +78,12 @@ class ClientController extends AbstractController {
 
         $clientRepository = $manager->getRepository(Client::class);
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $depositTicketsClientsIds = explode(",", $content->depositTicketsClients);
 
         $contact = $manager->getRepository(User::class)->find($content->contact);
         $group = $manager->getRepository(Group::class)->find($content->group);
-        $multiSite = isset($content->linkedMultiSite)? $clientRepository->find($content->linkedMultiSite) : null;
+        $multiSite = isset($content->linkedMultiSite) ? $clientRepository->find($content->linkedMultiSite) : null;
         $depositTicketsClients = $clientRepository->findBy(["id" => $depositTicketsClientsIds]);
 
         $existing = $clientRepository->findOneBy(["name" => $content->name]);
@@ -92,9 +93,8 @@ class ClientController extends AbstractController {
             $form->addError("phoneNumber", "Le numéro de téléphone doit contenir 10 caractères");
         }
 
-        if($form->isValid()) {
-            $client = new Client();
-            $client
+        if ($form->isValid()) {
+            $client = (new Client())
                 ->setName($content->name)
                 ->setAddress($content->address)
                 ->setPhoneNumber($content->phoneNumber)
@@ -106,12 +106,24 @@ class ClientController extends AbstractController {
                 ->setDepositTicketClients($depositTicketsClients)
                 ->setDepositTicketValidity($content->depositTicketValidity);
 
+            $out = (new Location())
+                ->setClient($client)
+                ->setActive(true)
+                ->setName("{$client->getName()}_sortie")
+                ->setDescription("Emplacement de sortie du client {$client->getName()}")
+                ->setDeposits(0)
+                ->setKiosk(false)
+                ->setDeporte(null);
+
+            $client->setOutLocation($out);
+
             //0 is used to select the client we're creating
-            if(in_array(0, $depositTicketsClientsIds)) {
+            if (in_array(0, $depositTicketsClientsIds)) {
                 $depositTicketsClients[] = $client;
             }
 
             $manager->persist($client);
+            $manager->persist($out);
             $manager->flush();
 
             return $this->json([
@@ -145,13 +157,13 @@ class ClientController extends AbstractController {
 
         $clientRepository = $manager->getRepository(Client::class);
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $depositTicketsClientsIds = explode(",", $content->depositTicketsClients);
 
         $contact = $manager->getRepository(User::class)->find($content->contact);
         $group = $manager->getRepository(Group::class)->find($content->group);
-        $multiSite = isset($content->linkedMultiSite)? $clientRepository->find($content->linkedMultiSite) : null;
-        $depositTicketsClients =  $clientRepository->findBy(["id" => $depositTicketsClientsIds]);
+        $multiSite = isset($content->linkedMultiSite) ? $clientRepository->find($content->linkedMultiSite) : null;
+        $depositTicketsClients = $clientRepository->findBy(["id" => $depositTicketsClientsIds]);
 
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $client) {
@@ -160,7 +172,7 @@ class ClientController extends AbstractController {
             $form->addError("phoneNumber", "Le numéro de téléphone doit contenir 10 caractères");
         }
 
-        if($form->isValid()) {
+        if ($form->isValid()) {
             $client
                 ->setName($content->name)
                 ->setAddress($content->address)
@@ -202,7 +214,7 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function delete(EntityManagerInterface $manager, Client $client): Response {
-        if($client && (!$client->getBoxRecords()->isEmpty() || !$client->getBoxes()->isEmpty())) {
+        if ($client && (!$client->getBoxRecords()->isEmpty() || !$client->getBoxes()->isEmpty())) {
             $client->setActive(false);
             $manager->flush();
 

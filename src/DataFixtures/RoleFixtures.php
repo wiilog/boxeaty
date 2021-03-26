@@ -54,7 +54,7 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
                     ->setPermissions(self::PERMISSIONS[$code])
                     ->setAllowEditOwnGroupOnly(false)
                     ->setReceiveMailsNewAccounts($config["emailsNewAccounts"])
-                    ->setRedirectUserNewCommand(false)
+                    ->setShowNewOrderOnHome(false)
                     ->setActive(true);
 
                 $output->writeln("Created role \"{$role->getName()}\"");

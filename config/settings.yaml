@@ -43,7 +43,7 @@ parameters:
         - name: Mouvements
           permission: App\Entity\Role::MANAGE_MOVEMENTS
           route: tracking_movements_list
-        - name: Scan Box
+        - name: Commandes
           permission: App\Entity\Role::MANAGE_ORDERS
           route: orders_list
     - name: Référentiel

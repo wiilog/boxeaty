@@ -1,15 +1,46 @@
-<div id="modal-order-boxes" class="modal fade no-header">
-    <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
+<div id="modal-order-payment" class="modal fade">
+    <div class="modal-dialog modal-fullscreen-lg-down modal-lg">
         <div class="modal-content">
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Etape 3 : Règlement</h1>
+
             <div class="body">
+                <div class="row">
+                    <div class="col-md-6 col-12">
+                        <label>
+                            Nombre de Box
+                            <input type="text" value="{{ boxes | length }}" readonly>
+                        </label>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <label>
+                            Nombre de ticket-consigne
+                            <input type="text" value="{{ tickets | length }}" readonly>
+                        </label>
+                    </div>
+                    <div class="col-12 payment-price">
+                        <div>Total <strong>{{ total_price }} €</strong></div>
+                    </div>
+                </div>
+
+                {% if total_price > 0 %}
+                    <div class="alert alert-warning mb-0">
+                        <i class="fas fa-exclamation-circle" style="margin-right:5px"></i> Demander le règlement de la somme affichée
+                    </div>
+                {% elseif total_price < 0 %}
+                    <div class="alert alert-warning mb-0">
+                        <i class="fas fa-exclamation-circle" style="margin-right:5px"></i> Veuillez verser la somme affichée
+                    </div>
+                {% endif %}
+
                 <input type="hidden" name="session" class="data" value="{{ session }}">
             </div>
 
             <div class="footer">
-                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <a href="{{ path('home') }}" class="secondary">Annuler</a>
+                <div class="spacer"></div>
                 <button type="submit" class="primary" name="previous" value="1">Etape précédente</button>
-                <button type="submit" class="primary">Enregistrer</button>
+                <button type="submit" class="primary">Terminer</button>
             </div>
         </div>
     </div>

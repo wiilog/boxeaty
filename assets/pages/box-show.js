@@ -3,6 +3,7 @@ import '../app';
 import $ from "jquery";
 import AJAX from "../ajax";
 import Flash from "../flash";
+
 import "../styles/pages/box-show.scss";
 
 $(document).ready(() => {

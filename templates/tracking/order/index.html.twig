@@ -1,7 +1,12 @@
 {% extends 'template.html.twig' %}
 
 {% block menu %}Traçabilité{% endblock %}
-{% block page %}Scan Box{% endblock %}
+{% block page %}Commandes{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('order') }}
+{% endblock %}
 
 {% block content %}
     <div class="box first-box">
@@ -19,7 +24,6 @@
     </div>
 
     {% include 'tracking/order/modal/delete.html.twig' %}
-    {% include 'tracking/order/modal/confirmation.html.twig' %}
 {% endblock %}
 
 {% block javascripts %}

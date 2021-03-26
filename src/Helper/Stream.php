@@ -155,7 +155,7 @@ class Stream implements Countable, IteratorAggregate, ArrayAccess {
         return $this;
     }
 
-    public function reduce(callable $callback, $initial) {
+    public function reduce(callable $callback, $initial = 0) {
         $this->checkValidity();
 
         $carry = $initial;

@@ -140,7 +140,7 @@ class DepositTicketRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search, ?array $exclude, ?User $user = null) {
+    public function getForOrderSelect(?string $search, ?array $exclude, ?User $user = null) {
         $qb = $this->createQueryBuilder("deposit_ticket");
 
         if($exclude) {

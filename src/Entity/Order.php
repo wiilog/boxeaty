@@ -52,19 +52,14 @@ class Order {
     private Collection $depositTickets;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="decimal", precision=5, scale=2)
      */
-    private ?string $totalBoxAmount;
+    private ?string $boxPrice;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="decimal", precision=5, scale=2)
      */
-    private ?string $totalDepositTicketAmount;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    private ?string $totalCost;
+    private ?string $depositTicketPrice;
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
@@ -132,6 +127,19 @@ class Order {
         return $this;
     }
 
+    public function setBoxes(?array $boxes): self {
+        foreach($this->getBoxes()->toArray() as $box) {
+            $this->removeBox($box);
+        }
+
+        $this->boxes = new ArrayCollection();
+        foreach($boxes as $box) {
+            $this->addBox($box);
+        }
+
+        return $this;
+    }
+
     /**
      * @return Collection|DepositTicket[]
      */
@@ -153,31 +161,35 @@ class Order {
         return $this;
     }
 
-    public function getTotalBoxAmount(): ?string {
-        return $this->totalBoxAmount;
-    }
+    public function setDepositTickets(?array $depositTickets): self {
+        foreach($this->getDepositTickets()->toArray() as $depositTicket) {
+            $this->removeDepositTicket($depositTicket);
+        }
 
-    public function setTotalBoxAmount(?string $totalBoxAmount): self {
-        $this->totalBoxAmount = $totalBoxAmount;
-        return $this;
-    }
-
-    public function getTotalDepositTicketAmount(): ?string {
-        return $this->totalDepositTicketAmount;
-    }
-
-    public function setTotalDepositTicketAmount(?string $totalDepositTicketAmount): self {
-        $this->totalDepositTicketAmount = $totalDepositTicketAmount;
-        return $this;
-    }
-
-    public function getTotalCost(): ?float {
-        return $this->totalCost;
-    }
-
-    public function setTotalCost(float $totalCost): self {
-        $this->totalCost = $totalCost;
+        $this->depositTickets = new ArrayCollection();
+        foreach($depositTickets as $depositTicket) {
+            $this->addDepositTicket($depositTicket);
+        }
 
         return $this;
     }
+
+    public function getBoxPrice(): ?string {
+        return $this->boxPrice;
+    }
+
+    public function setBoxPrice(?string $boxPrice): self {
+        $this->boxPrice = $boxPrice;
+        return $this;
+    }
+
+    public function getDepositTicketPrice(): ?string {
+        return $this->depositTicketPrice;
+    }
+
+    public function setDepositTicketPrice(?string $depositTicketPrice): self {
+        $this->depositTicketPrice = $depositTicketPrice;
+        return $this;
+    }
+
 }

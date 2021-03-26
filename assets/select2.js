@@ -12,8 +12,8 @@ const ROUTES = {
     location: `ajax_select_locations`,
     type: `ajax_select_type`,
     quality: `ajax_select_quality`,
-    availableBox: `ajax_select_available_boxes`,
-    depositTicket: `ajax_select_deposit_tickets`,
+    orderBox: `ajax_select_order_boxes`,
+    orderDepositTicket: `ajax_select_order_deposit_tickets`,
 }
 
 const INSTANT_SELECT_TYPES = {

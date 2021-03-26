@@ -72,6 +72,11 @@ class Client {
     private ?int $depositTicketValidity = null;
 
     /**
+     * @ORM\OneToOne(targetEntity=Location::class)
+     */
+    private ?Location $outLocation = null;
+
+    /**
      * @ORM\ManyToMany(targetEntity=User::class, mappedBy="clients")
      */
     private Collection $users;
@@ -355,6 +360,18 @@ class Client {
     public function setDepositTicketClients($depositTicketsClients): self
     {
         $this->depositTicketsClients = new ArrayCollection($depositTicketsClients);
+        return $this;
+    }
+
+    public function getOutLocation(): ?Location
+    {
+        return $this->outLocation;
+    }
+
+    public function setOutLocation(?Location $outLocation): self
+    {
+        $this->outLocation = $outLocation;
+
         return $this;
     }
 

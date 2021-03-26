@@ -1,5 +1,11 @@
 import Flash from "./flash";
 
+export const GET = `POST`;
+export const POST = `POST`;
+export const PUT = `POST`;
+export const PATCH = `POST`;
+export const DELETE = `POST`;
+
 export default class AJAX {
     method;
     route;

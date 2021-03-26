@@ -35,11 +35,6 @@ class Location {
     private ?bool $kiosk = null;
 
     /**
-     * @ORM\Column(type="string", length=255, unique=true, nullable=true)
-     */
-    private ?string $code = null;
-
-    /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
     private ?string $name = null;
@@ -108,16 +103,6 @@ class Location {
 
     public function setKiosk(?bool $kiosk): self {
         $this->kiosk = $kiosk;
-        return $this;
-    }
-
-    public function getCode(): ?string {
-        return $this->code;
-    }
-
-    public function setCode(string $code): self {
-        $this->code = $code;
-
         return $this;
     }
 

@@ -1,19 +1,22 @@
 {% extends 'template.html.twig' %}
 
-{% set display_new_command = has_permission(constant('App\\Entity\\Role::REDIRECT_USER_NEW_COMMAND')) %}
+{% set display_new_command = has_permission(constant('App\\Entity\\Role::SHOW_NEW_ORDER_ON_HOME')) %}
+{% set display_export = has_permission(constant('App\\Entity\\Role::GENERAL_EXPORT')) %}
 
-{% block menu %}Accueil{% endblock %}
+{% block menu %}{{ display_new_command and not display_export ? 'Traçabilité' : 'Accueil' }}{% endblock %}
+{% block page %}{{ display_new_command and not display_export ? 'Nouvelle commande' }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% if display_new_command %}
+        {{ encore_entry_link_tags('order') }}
+    {% endif %}
+{% endblock %}
 
 {% block bodyclass %}home{% endblock %}
 {% block content %}
     <div class="box home first-box">
-        {% if has_permission(constant('App\\Entity\\Role::GENERAL_EXPORT')) %}
-            <h1 class="mb-4">Bienvenue !</h1>
-
-            <a class="outline" href="{{ path('export') }}">
-                <i class="icon fas fa-download"></i> Export général au format CSV
-            </a>
-        {% elseif display_new_command %}
+        {% if display_new_command %}
             <div class="instructions">
                 <div id="scan-box">
                     <img src="{{ asset('images/box.svg') }}" width=200 height=100 alt="Box">
@@ -32,14 +35,22 @@
             </div>
 
             <a href="{{ path('orders_list') }}" class="primary big mt-5">Voir toutes les commandes</a>
+
+            {% if display_export %}
+                <a class="outline mt-3" href="{{ path('export') }}">
+                    <i class="icon fas fa-download"></i> Export général au format CSV
+                </a>
+            {% endif %}
+        {% elseif display_export %}
+            <h1 class="mb-4">Bienvenue !</h1>
+
+            <a class="outline" href="{{ path('export') }}">
+                <i class="icon fas fa-download"></i> Export général au format CSV
+            </a>
         {% else %}
             <h1 class="mb-4">Bienvenue !</h1>
         {% endif %}
     </div>
-
-    {% if display_new_command %}
-        {% include 'tracking/order/modal/confirmation.html.twig' %}
-    {% endif %}
 {% endblock %}
 
 {% block javascripts %}

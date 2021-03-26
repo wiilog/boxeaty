@@ -52,7 +52,7 @@ class BoxRepository extends EntityRepository {
             ->getArrayResult();
     }
 
-    public function getAvailableForSelect(?string $search, ?array $exclude, ?User $user) {
+    public function getForOrderSelect(?string $search, ?array $exclude, ?User $user) {
         $qb = $this->createQueryBuilder("box");
 
         if($exclude) {
@@ -69,7 +69,7 @@ class BoxRepository extends EntityRepository {
         return $qb->select("box.id AS id, box.number AS text, type.price AS price")
             ->join("box.type", "type")
             ->andWhere("box.number LIKE :search")
-            ->andWhere("box.state = '" . Box::AVAILABLE . "'")
+            ->andWhere("box.state = '" . Box::CLIENT . "'")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
