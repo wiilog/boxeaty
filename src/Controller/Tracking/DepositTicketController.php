@@ -116,7 +116,7 @@ class DepositTicketController extends AbstractController {
                 ->setValidityDate(new DateTime("+{$kiosk->getClient()->getDepositTicketValidity()} month"))
                 ->setNumber($content->number)
                 ->setState($content->state)
-                ->setConsumerEmail($content->emailConsumer);
+                ->setConsumerEmail($content->emailConsumer ?? null);
 
             if ($content->state == DepositTicket::SPENT) {
                 $depositTicket->setUseDate(new DateTime());

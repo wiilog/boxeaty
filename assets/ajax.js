@@ -30,7 +30,6 @@ export default class AJAX {
         return ajax;
     }
 
-    //TODO: remove code duplication between .json and .run
     json(body, callback) {
         if(typeof body === 'function') {
             callback = body;
@@ -47,18 +46,8 @@ export default class AJAX {
 
         return fetch(url, config)
             .then(response => response.json())
-            .then(json => {
-                if(json.status === 500) {
-                    console.error(json);
-                    Flash.add(Flash.DANGER, `Une erreur est survenue lors du traitement de votre requête par le serveur`);
-                    return;
-                }
-
-                if(json.success === false && json.message) {
-                    Flash.add("danger", json.message);
-                } else if(json.success === true && json.message) {
-                    Flash.add("success", json.message);
-                }
+            .then((json) => {
+                treatFetchCallback(json);
 
                 if(callback) {
                     callback(json);
@@ -69,43 +58,28 @@ export default class AJAX {
                 Flash.add("danger", `Une erreur est survenue lors du traitement de votre requête par le serveur`);
             });
     }
+}
 
-    //TODO: remove code duplication between .json and .run
-    run(body) {
-        if(!(body instanceof FormData) && (typeof body === `object` || Array.isArray(body))) {
-            body = JSON.stringify(body);
-        }
-
-        const url = this.route ? Routing.generate(this.route, this.params) : this.url;
-        const config = {
-            method: this.method,
-            body
-        };
-
-        return fetch(url, config)
-            .then(response => response.json())
-            .then(json => {
-                if(json.status === 500) {
-                    console.error(json);
-                    Flash.add(Flash.DANGER, `Une erreur est survenue lors du traitement de votre requête par le serveur`);
-                    return;
-                }
-
-                if(json.success === false && json.message) {
-                    Flash.add("danger", json.message);
-                } else if(json.success === true && json.message) {
-                    Flash.add("success", json.message);
-                }
-
-                if(json.reload === true) {
-                    $.fn.dataTable
-                        .tables({visible: true, api: true})
-                        .ajax.reload();
-                }
-            })
-            .catch(error => {
-                console.error(error);
-                Flash.add("danger", `Une erreur est survenue lors du traitement de votre requête par le serveur`);
-            });
+function treatFetchCallback(json) {
+    if(json.status === 500) {
+        addFlashError(json);
+        return;
     }
+
+    if(json.success === false && json.message) {
+        Flash.add("danger", json.message);
+    } else if(json.success === true && json.message) {
+        Flash.add("success", json.message);
+    }
+
+    if(json.reload === true) {
+        $.fn.dataTable
+            .tables({visible: true, api: true})
+            .ajax.reload();
+    }
+}
+
+function addFlashError(json) {
+    console.error(json);
+    Flash.add(Flash.DANGER, `Une erreur est survenue lors du traitement de votre requête par le serveur`);
 }

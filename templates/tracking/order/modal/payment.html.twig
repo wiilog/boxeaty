@@ -1,3 +1,6 @@
+{% set boxesLength = boxes | length %}
+{% set ticketsLength = tickets | length %}
+{% set orderIsEmpty = boxesLength == 0 and ticketsLength == 0 %}
 <div id="modal-order-payment" class="modal fade">
     <div class="modal-dialog modal-fullscreen-lg-down modal-lg">
         <div class="modal-content">
@@ -9,21 +12,25 @@
                     <div class="col-md-6 col-12">
                         <label>
                             Nombre de Box
-                            <input type="text" value="{{ boxes | length }}" readonly>
+                            <input type="text" value="{{ boxes | length }}" readonly class="{{ orderIsEmpty ? 'is-invalid' }}">
                         </label>
                     </div>
                     <div class="col-md-6 col-12">
                         <label>
                             Nombre de ticket-consigne
-                            <input type="text" value="{{ tickets | length }}" readonly>
+                            <input type="text" value="{{ tickets | length }}" readonly class="{{ orderIsEmpty ? 'is-invalid' }}">
                         </label>
                     </div>
                     <div class="col-12 payment-price">
-                        <div>Total <strong>{{ total_price }} €</strong></div>
+                        <div>Total <strong>{{ total_price | format_helper('price') }}</strong></div>
                     </div>
                 </div>
 
-                {% if total_price > 0 %}
+                {% if orderIsEmpty %}
+                    <div class="alert alert-danger mb-0">
+                        <i class="fas fa-exclamation-circle" style="margin-right:5px"></i> La commande ne peut pas être vide
+                    </div>
+                {% elseif total_price > 0 %}
                     <div class="alert alert-warning mb-0">
                         <i class="fas fa-exclamation-circle" style="margin-right:5px"></i> Demander le règlement de la somme affichée
                     </div>
@@ -40,7 +47,7 @@
                 <a href="{{ path('home') }}" class="secondary">Annuler</a>
                 <div class="spacer"></div>
                 <button type="submit" class="primary" name="previous" value="1">Etape précédente</button>
-                <button type="submit" class="primary">Terminer</button>
+                <button class="primary" {{ orderIsEmpty ? 'disabled' : 'type="submit"' }}>Terminer</button>
             </div>
         </div>
     </div>

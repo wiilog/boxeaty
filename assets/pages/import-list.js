@@ -37,7 +37,7 @@ $(document).ready(() => {
             DATATABLE_ACTIONS,
         ],
         listeners: {
-            cancel: data => AJAX.route(`POST`, `import_cancel`).run({
+            cancel: data => AJAX.route(`POST`, `import_cancel`).json({
                 import: data.id,
             }),
         }

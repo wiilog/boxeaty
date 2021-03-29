@@ -21,7 +21,12 @@
                         </div>
                         <label>
                             Prix des Box
-                            <input type="number" name="price" class="euros" value="{{ price }}" readonly>
+                            <input type="text"
+                                   name="price"
+                                   class="euros"
+                                   value="{{ price | format_helper('price', false) }}"
+                                   data-raw-value="{{ price }}"
+                                   readonly>
                         </label>
                     </div>
                     <div class="col-12 col-md-8">

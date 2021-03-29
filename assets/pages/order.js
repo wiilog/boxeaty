@@ -27,8 +27,11 @@ $document.ready(() => {
         const $field = $(this);
         const $item = $field.closest(`.item`);
         const $totalPrice = $field.closest(`.modal`).find(`input[name="price"]`);
+        const $inputDeleted = $item.find(`input`);
+        const priceDeleted = Number($inputDeleted.data(`price`)) || 0;
 
-        $totalPrice.val(Number($totalPrice.val()) - Number($item.find(`input`).data(`price`)));
+        updatePriceInput($totalPrice, -priceDeleted);
+
         $item.remove();
     })
 });
@@ -62,7 +65,8 @@ function addInput(element, code) {
             const $totalPrice = $modal.find(`input[name="price"]`);
             const modification = type === `box` ? response.price : -response.price;
 
-            $totalPrice.val(Number($totalPrice.val()) + Math.abs(modification));
+            updatePriceInput($totalPrice, Math.abs(modification));
+
             $container.append(`
                 <div class="item">
                     <input type="text" name="items" class="data data-array mt-1" value="${code}" data-price="${modification}" readonly>
@@ -95,4 +99,11 @@ function openDepositTicketModal() {
     Modal.load(AJAX.route(`GET`, `order_deposit_tickets_template`, {
         session: randomString(16),
     }));
+}
+
+function updatePriceInput($input, delta) {
+    const priceValue = Number($input.data('raw-value')) || 0;
+    const newPriceValue = priceValue + delta;
+    $input.data('raw-value', newPriceValue);
+    $input.val(newPriceValue.toFixed(2).replace('.', ','));
 }

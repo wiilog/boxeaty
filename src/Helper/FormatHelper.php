@@ -58,9 +58,9 @@ class FormatHelper {
         return $comment ? strip_tags($comment) : $else;
     }
 
-    public static function price(?float $priceFloat, $else = "-"): string {
+    public static function price(?float $priceFloat, bool $showSymbol = true, $else = "-"): string {
         return $priceFloat !== null
-            ? (number_format($priceFloat, 2, ',', ' ') . ' €')
+            ? (number_format($priceFloat, 2, ',', ' ') . ($showSymbol ? ' €' : ''))
             : $else;
     }
 

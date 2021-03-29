@@ -1,4 +1,5 @@
 import $ from "jquery";
+import Flash from "./flash";
 
 export const SPINNER_WRAPPER_CLASS = `spinner-border-container`;
 export const LOADING_CLASS = `loading`;
@@ -52,13 +53,18 @@ jQuery.fn.keymap = function(callable, grouping = NO_GROUPING) {
 jQuery.fn.load = function(callback, size = `small`) {
     const $element = $(this[0]); //the element on which the function was called
 
-    $element.pushLoader(size);
+    if($element.hasClass(LOADING_CLASS)) {
+        Flash.add(Flash.WARNING, `Opération en cours d'exécution`, true);
+    }
+    else {
+        $element.pushLoader(size);
 
-    const result = callback();
-    if(result !== undefined && result.finally) {
-        result.finally(() => $element.popLoader())
-    } else {
-        $element.popLoader();
+        const result = callback();
+        if (result !== undefined && result.finally) {
+            result.finally(() => $element.popLoader())
+        } else {
+            $element.popLoader();
+        }
     }
 };
 

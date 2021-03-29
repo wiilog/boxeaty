@@ -110,8 +110,8 @@ class AppExtension extends AbstractExtension {
         }
     }
 
-    public function formatHelper($input, string $formatter, $else = ''): string {
-        return FormatHelper::{$formatter}($input, $else);
+    public function formatHelper($input, string $formatter, ...$options): string {
+        return FormatHelper::{$formatter}($input, ...$options);
     }
 
 }

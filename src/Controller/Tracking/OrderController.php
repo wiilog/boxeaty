@@ -200,6 +200,13 @@ class OrderController extends AbstractController {
         $boxes = $this->service->get(Box::class);
         $tickets = $this->service->get(DepositTicket::class);
 
+        if (empty($boxes) && empty($tickets)) {
+            return $this->json([
+                "success" => true,
+                "message" => 'La commande ne peut pas être vide',
+            ]);
+        }
+
         $client = isset($boxes[0]) ? $boxes[0]->getOwner() : null;
 
         $order = (new Order())
@@ -252,6 +259,7 @@ class OrderController extends AbstractController {
         return $this->json([
             "success" => true,
             "modal" => $this->service->renderConfirmation(),
+            "reload" => true,
         ]);
     }
 

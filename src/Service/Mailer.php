@@ -48,6 +48,10 @@ class Mailer {
     }
 
     public function send($recipients, string $subjet, string $content) {
+        if (empty($recipients)) {
+            return;
+        }
+
         if(is_string($recipients)) {
             $originalRecipients = [$recipients];
         } else {
@@ -56,6 +60,7 @@ class Mailer {
             }
 
             $originalRecipients = Stream::from($recipients)
+                ->filter(fn($recipient) => $recipient)
                 ->map(fn(User $user) => $user->getEmail())
                 ->toArray();
         }

@@ -76,7 +76,7 @@ input[type="search"]::-webkit-search-results-decoration {
     display: none;
 }
 
-input[type=number].euros {
+input.euros {
     background-image: url(../images/euro.svg);
     background-size: 10px;
     background-position: center right 10px;

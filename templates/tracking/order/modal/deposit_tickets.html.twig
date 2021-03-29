@@ -21,12 +21,17 @@
                         </div>
                         <label>
                             Valeur des tickets-consignes
-                            <input type="number" name="price" class="euros" value="{{ price }}" readonly>
+                            <input type="text"
+                                   name="price"
+                                   class="euros"
+                                   data-raw-value="{{ price }}"
+                                   value="{{ price | format_helper('price', false) }}"
+                                   readonly/>
                         </label>
                     </div>
                     <div class="col-12 col-md-8">
                         <h2 class="deposit-ticket-header mb-3">
-                            Etape 2 : Scan du/des ticket(s)-consigne(s)
+                            Etape 2 : Scan ticket-consigne
 
                             <span class="deposit-ticket-tooltip"
                                  data-toggle="tooltip"

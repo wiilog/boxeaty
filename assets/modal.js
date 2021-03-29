@@ -55,9 +55,6 @@ export default class Modal {
 
         modal.element.find(`button[type="submit"]`).click(function() {
             const $button = $(this);
-            if($button.hasClass(LOADING_CLASS)) {
-                Flash.add(Flash.WARNING, `Opération en cours d'exécution`);
-            }
 
             $button.load(function() {
                 return config.submitter ? config.submitter() : modal.handleSubmit($button)
@@ -110,10 +107,6 @@ export default class Modal {
 
         $modal.find(`button[type="submit"]`).click(function() {
             const $button = $(this);
-            if($button.hasClass(LOADING_CLASS)) {
-                Flash.add(Flash.WARNING, `Opération en cours d'exécution`);
-            }
-
             $button.load(() => modal.handleSubmit($button));
         });
 

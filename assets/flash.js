@@ -4,7 +4,7 @@ export default class Flash {
     static WARNING = `warning`;
     static DANGER = `danger`;
 
-    static add(type, message) {
+    static add(type, message, unique = false) {
         const $alert = $(`
             <div class="alert alert-${type} alert-dismissible fade show" role="alert">
                 ${message}
@@ -12,8 +12,13 @@ export default class Flash {
             </div>
         `);
 
+        const $container = $('.alert-container');
+        if(unique) {
+            $container.empty();
+        }
+
         $alert.appendTo(`.alert-container`)
-        $('.alert-container').css('z-index', 10000);
+        $container.css('z-index', 10000);
 
         setTimeout(() => $alert.fadeOut(500, function () {
             $(this).remove();

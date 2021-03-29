@@ -34,21 +34,15 @@
                 </div>
             </div>
 
-            <a href="{{ path('orders_list') }}" class="primary big mt-5">Voir toutes les commandes</a>
-
-            {% if display_export %}
-                <a class="outline mt-3" href="{{ path('export') }}">
-                    <i class="icon fas fa-download"></i> Export général au format CSV
-                </a>
-            {% endif %}
-        {% elseif display_export %}
+            <a href="{{ path('orders_list') }}" class="primary big mt-5 {{ display_export ? 'mb-3' }}">Voir toutes les commandes</a>
+        {% else %}
             <h1 class="mb-4">Bienvenue !</h1>
+        {% endif %}
 
+        {% if display_export %}
             <a class="outline" href="{{ path('export') }}">
                 <i class="icon fas fa-download"></i> Export général au format CSV
             </a>
-        {% else %}
-            <h1 class="mb-4">Bienvenue !</h1>
         {% endif %}
     </div>
 {% endblock %}
