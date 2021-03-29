@@ -76,13 +76,27 @@ class OrderController extends AbstractController {
     }
 
     /**
-     * @Route("/info/{type}", name="order_info", options={"expose": true})
+     * @Route("/info/{type}/{number}", name="order_info", options={"expose": true})
      * @HasPermission(Role::MANAGE_ORDERS)
      */
-    public function info(EntityManagerInterface $manager, Request $request, string $type): Response {
+    public function info(EntityManagerInterface $manager, string $type, string $number): Response {
         if ($type === "box") {
             $box = $manager->getRepository(Box::class)
-                ->findOneBy(["number" => $request->query->get("number")]);
+                ->findOneBy(["number" => $number]);
+
+            if (!$box) {
+                return $this->json([
+                    "success" => false,
+                    "message" => "La Box $number n'existe pas",
+                ]);
+            }
+
+            if ($box->getState() !== Box::CLIENT) {
+                return $this->json([
+                    "success" => false,
+                    "message" => "La Box $number n'est pas en statut client et ne peut pas être remise à un consommateur",
+                ]);
+            }
 
             return $this->json([
                 "success" => true,
@@ -91,7 +105,27 @@ class OrderController extends AbstractController {
             ]);
         } else if ($type === "ticket") {
             $ticket = $manager->getRepository(DepositTicket::class)
-                ->findOneBy(["number" => $request->query->get("number")]);
+                ->findOneBy(["number" => $number]);
+
+            if (!$ticket) {
+                return $this->json([
+                    "success" => false,
+                    "message" => "La ticket-consigne $number n'existe pas",
+                ]);
+            }
+
+            $now = new DateTime();
+            if ($ticket->getValidityDate() < $now && $ticket->getState() === DepositTicket::VALID) {
+                $ticket->setState(DepositTicket::EXPIRED);
+                $manager->flush();
+            }
+
+            if ($ticket->getState() !== DepositTicket::VALID) {
+                return $this->json([
+                    "success" => false,
+                    "message" => "Le ticket-consigne $number a expiré ou a déjà été utilisé",
+                ]);
+            }
 
             return $this->json([
                 "success" => true,
@@ -203,6 +237,11 @@ class OrderController extends AbstractController {
                 $record->setBox($box);
                 $manager->persist($record);
             }
+        }
+
+        foreach ($tickets as $ticket) {
+            $ticket->setState(DepositTicket::SPENT)
+                ->setUseDate(new DateTime());
         }
 
         $manager->persist($order);
