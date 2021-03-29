@@ -29,12 +29,12 @@
     <div class="col-12">
         <label>
             Contact principal
+            <select class="data" name="contact" data-s2="user" data-placeholder="Sélectionnez un utilisateur..." required>
+                {% if client.contact %}
+                    <option value="{{ client.contact.id }}" selected>{{ client.contact.username }}</option>
+                {% endif %}
+            </select>
         </label>
-        <select class="data" name="contact" data-s2="user" data-placeholder="Sélectionnez un utilisateur..." required>
-            {% if client.contact %}
-                <option value="{{ client.contact.id }}" selected>{{ client.contact.username }}</option>
-            {% endif %}
-        </select>
     </div>
     <div class="col-12">
         <label>Propriétés</label>
@@ -47,47 +47,47 @@
     <div class="col-md-6 col-12">
         <label>
             Groupe
+            <select class="data" name="group" data-s2="group" data-placeholder="Sélectionnez un groupe..." required>
+                {% if client.group %}
+                    <option value="{{ client.group.id }}" selected>{{ client.group.name }}</option>
+                {% endif %}
+            </select>
         </label>
-        <select class="data" name="group" data-s2="group" data-placeholder="Sélectionnez un groupe..." required>
-            {% if client.group %}
-                <option value="{{ client.group.id }}" selected>{{ client.group.name }}</option>
-            {% endif %}
-        </select>
     </div>
     <div class="col-md-6 col-12">
         <label>
             Client multi-site lié
+            <select class="data" name="linkedMultiSite" data-s2="multiSite" data-placeholder="Sélectionnez un client..." {{ client.isMultiSite ? 'disabled' }}>
+                {% if client.linkedMultiSite %}
+                    <option value="{{ client.linkedMultiSite.id }}" selected>{{ client.linkedMultiSite.name }}</option>
+                {% endif %}
+            </select>
         </label>
-        <select class="data" name="linkedMultiSite" data-s2="multiSite" data-placeholder="Sélectionnez un client..." {{ client.isMultiSite ? 'disabled' }}>
-            {% if client.linkedMultiSite %}
-                <option value="{{ client.linkedMultiSite.id }}" selected>{{ client.linkedMultiSite.name }}</option>
-            {% endif %}
-        </select>
     </div>
     <div class="col-md-6 col-12">
         <label>
-            Ticket-consigne valable dans la borne
-        </label>
-        <select class="data" name="depositTicketsClients" data-s2="client" data-placeholder="Sélectionnez des clients..." multiple required>
-            {% if not client.id %}
-                <option class="client-self-name" value="0" selected>Client actuel</option>
-            {% endif %}
+            Ticket‑consigne valable dans la borne
+            <select class="data" name="depositTicketsClients" data-s2="client" data-placeholder="Sélectionnez des clients..." multiple required>
+                {% if not client.id %}
+                    <option class="client-self-name" value="0" selected>Client actuel</option>
+                {% endif %}
 
-            {% for client in client.depositTicketsClients %}
-                <option value="{{ client.id }}" selected>{{ client.name }}</option>
-            {% endfor %}
-        </select>
+                {% for client in client.depositTicketsClients %}
+                    <option value="{{ client.id }}" selected>{{ client.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
     </div>
     <div class="col-md-6 col-12">
         <label>
-            Validité ticket-consigne
+            Validité ticket‑consigne
+            <select class="data" name="depositTicketValidity" data-s2 data-placeholder="Sélectionnez une durée de validité...">
+                {% for i in 1..24 %}
+                    <option value="{{ i }}" {{ i == client.depositTicketValidity or not client.depositTicketValidity and i == 3 ? 'selected' }}>
+                        {{ i }} mois
+                    </option>
+                {% endfor %}
+            </select>
         </label>
-        <select class="data" name="depositTicketValidity" data-s2 data-placeholder="Sélectionnez une durée de validité...">
-            {% for i in 1..24 %}
-                <option value="{{ i }}" {{ i == client.depositTicketValidity or not client.depositTicketValidity and i == 3 ? 'selected' }}>
-                    {{ i }} mois
-                </option>
-            {% endfor %}
-        </select>
     </div>
 </div>

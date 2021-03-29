@@ -10,16 +10,17 @@
 
 {% block content %}
     <div class="box first-box">
+        <div class="new-order">
+            <button id="scan-box" class="primary"><i class="icon fas fa-plus"></i></button>
+        </div>
+
         <div class="content-menu">
             <div id="table-search-container"></div>
-            <div class="new-order">
-                <button id="scan-box" class="primary"><i class="icon fas fa-plus"></i></button>
-            </div>
         </div>
 
         <table id="table-orders"
                data-initial-data="{{ initial_orders }}"
-               data-default-order="{{ orders_order|json_encode }}">
+               data-default-order="{{ orders_order | json_encode }}">
         </table>
     </div>
 

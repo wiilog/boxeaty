@@ -4,6 +4,16 @@
 {% block page %}Global{% endblock %}
 
 {% block content %}
+    <label style="position:absolute;top:-500px">
+        Utilisateur
+        <input type="text" name="username">
+    </label>
+
+    <label style="position:absolute;top:-500px">
+        Mot de passe
+        <input type="text" name="password">
+    </label>
+
     {% for template in get_folder('settings/global_settings/sections') %}
         {% include template %}
     {% endfor %}

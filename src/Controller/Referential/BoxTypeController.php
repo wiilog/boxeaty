@@ -7,6 +7,7 @@ use App\Entity\BoxType;
 use App\Entity\GlobalSetting;
 use App\Entity\Role;
 use App\Helper\Form;
+use App\Helper\FormatHelper;
 use App\Repository\BoxTypeRepository;
 use App\Service\ExportService;
 use DateTime;
@@ -52,9 +53,9 @@ class BoxTypeController extends AbstractController {
             $data[] = [
                 "id" => $boxType->getId(),
                 "name" => $boxType->getName(),
-                "price" => $boxType->getPrice(),
-                "capacity" => $boxType->getCapacity(),
-                "shape" => $boxType->getShape(),
+                "price" => FormatHelper::price($boxType->getPrice()),
+                "capacity" => $boxType->getCapacity() ?: "-",
+                "shape" => $boxType->getShape() ?: "-",
                 "active" => $boxType->isActive() ? "Oui" : "Non",
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,

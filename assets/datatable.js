@@ -9,6 +9,29 @@ export const DATATABLE_ACTIONS = {
     width: `10px`,
 };
 
+export const DATATABLE_LANGUAGE = {
+    processing: `<span class="content">Traitement en cours</span>`,
+    search: `Rechercher&nbsp;:`,
+    lengthMenu: `Nombre de lignes par page: _MENU_`,
+    info: `_START_ &agrave; _END_ sur _TOTAL_`,
+    infoEmpty: `Aucun &eacute;l&eacute;ment &agrave; afficher`,
+    infoFiltered: `(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)`,
+    infoPostFix: ``,
+    loadingRecords: `Chargement en cours`,
+    zeroRecords: `Aucun &eacute;l&eacute;ment &agrave; afficher`,
+    emptyTable: `Aucune donn&eacute;e disponible dans le tableau`,
+    paginate: {
+        first: `Premier`,
+        previous: `Pr&eacute;c&eacute;dent`,
+        next: `Suivant`,
+        last: `Dernier`
+    },
+    aria: {
+        sortAscending: `: activer pour trier la colonne par ordre croissant`,
+        sortDescending: `: activer pour trier la colonne par ordre d&eacute;croissant`
+    }
+};
+
 export function initDatatable(table, config) {
     const $table = $(table);
     $table.addClass(`w-100`);
@@ -54,7 +77,8 @@ export function initDatatable(table, config) {
     };
 
     const initial = $table.data(`initial-data`);
-    if (initial && typeof initial === `object`) {
+    const hasInitialData = initial && typeof initial === `object`;
+    if(initial && typeof initial === `object`) {
         config = {
             ...config,
             ...initial
@@ -65,17 +89,15 @@ export function initDatatable(table, config) {
         .on(`error.dt`, (e, settings, techNote, message) => console.error(`An error has been reported by DataTables: `, message, e, table))
         .DataTable({
             processing: true,
-            serverSide: true,
+            serverSide: !hasInitialData,
             responsive: true,
             scrollX: true,
             autoWidth: true,
             fixedColumns: {
                 heightMatch: `auto`
             },
-            language: {
-                url: `/i18n/datatableLanguage.json`,
-            },
-            dom: `<"row mb-2"<"col-auto d-none"f>><"scrollable-x"t><"footer"<"left" li>p>r`,
+            language: DATATABLE_LANGUAGE,
+            dom: `<"row mb-2"<"col-auto d-none"f>>t<"footer"<"left" li>p>r`,
             initComplete: () => {
                 moveSearchInputToHeader($table);
             },

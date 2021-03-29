@@ -123,3 +123,8 @@
     min-height: 38px !important;
     margin-bottom: 0 !important;
 }
+
+.select2-selection__clear > span {
+    display: block;
+    margin-top: 3px !important;
+}

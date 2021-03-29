@@ -31,8 +31,12 @@ class Quality {
      */
     private $boxes;
 
-    public function __construct()
-    {
+    /**
+     * @ORM\OneToMany(targetEntity=BoxRecord::class, mappedBy="quality")
+     */
+    private $records;
+
+    public function __construct() {
         $this->boxes = new ArrayCollection();
     }
 
@@ -53,13 +57,11 @@ class Quality {
     /**
      * @return Collection|Box[]
      */
-    public function getBoxes(): Collection
-    {
+    public function getBoxes(): Collection {
         return $this->boxes;
     }
 
-    public function addBox(Box $box): self
-    {
+    public function addBox(Box $box): self {
         if (!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
             $box->setQuality($this);
@@ -68,12 +70,38 @@ class Quality {
         return $this;
     }
 
-    public function removeBox(Box $box): self
-    {
+    public function removeBox(Box $box): self {
         if ($this->boxes->removeElement($box)) {
             // set the owning side to null (unless already changed)
             if ($box->getQuality() === $this) {
                 $box->setQuality(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|BoxRecord[]
+     */
+    public function getRecords(): Collection {
+        return $this->records;
+    }
+
+    public function addRecord(BoxRecord $record): self {
+        if (!$this->records->contains($record)) {
+            $this->records[] = $record;
+            $record->setQuality($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRecord(BoxRecord $record): self {
+        if ($this->records->removeElement($record)) {
+            // set the owning side to null (unless already changed)
+            if ($record->getQuality() === $this) {
+                $record->setQuality(null);
             }
         }
 

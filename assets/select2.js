@@ -1,5 +1,6 @@
-import $ from 'jquery';
+import $, {GROUP_WHEN_NEEDED} from 'jquery';
 import 'select2';
+import 'select2/src/js/select2/i18n/fr';
 
 const ROUTES = {
     box: `ajax_select_boxes`,
@@ -42,36 +43,12 @@ export default class Select2 {
 
             config.ajax = {
                 url: Routing.generate(ROUTES[type]),
-                data: (params) => {
-                    if($element.is(`[data-include-params]`)) {
-                        const $includeParamsSelector = $element.data(`include-params`);
-
-                        let $fields;
-                        if (!$element.is(`[data-include-params-closest]`)) {
-                            $fields = $($includeParamsSelector);
-                        } else {
-                            $fields = $element
-                                .closest($element.data(`[data-include-params-closest]`))
-                                .find($includeParamsSelector);
-                        }
-
-                        const values = $fields
-                            .filter((_, elem) => elem.name && elem.value)
-                            .keymap((elem) => [elem.name, elem.value], true);
-
-                        params = {
-                            ...params,
-                            ...values,
-                        };
-                    }
-
-                    return params;
-                },
+                data: params => Select2.includeParams($element, params),
                 dataType: `json`
             };
         }
 
-        if (type && !INSTANT_SELECT_TYPES[type]) {
+        if(type && !INSTANT_SELECT_TYPES[type]) {
             config.minimumInputLength = 1;
         }
 
@@ -81,31 +58,55 @@ export default class Select2 {
             allowClear: !$element.is(`[multiple]`),
             dropdownParent: $element.parent(),
             language: {
-                inputTooShort: () => 'Veuillez entrer au moins 1 caractère.',
+                errorLoading: () => `Une erreur est survenue`,
+                inputTooShort: args => `Saisissez au moins ${args.minimum - args.input.length} caractère`,
                 noResults: () => `Aucun résultat`,
                 searching: () => null,
+                removeItem: () => `Supprimer l'élément`,
+                removeAllItems: () => `Supprimer tous les éléments`,
             },
             ...config,
         });
 
-        $element.on('select2:open', function (e) {
+        $element.on('select2:open', function(e) {
             const evt = "scroll.select2";
             $(e.target).parents().off(evt);
             $(window).off(evt);
             // we hide all other select2 dropdown
-            $('[data-s2-initialized]').each(function () {
+            $('[data-s2-initialized]').each(function() {
                 const $select2 = $(this);
-                if (!$select2.is($element)) {
+                if(!$select2.is($element)) {
                     $select2.select2('close');
                 }
             });
 
             const $select2Parent = $element.parent();
             const $searchField = $select2Parent.find('.select2-search--dropdown .select2-search__field');
-            if ($searchField.exists()) {
+            if($searchField.exists()) {
                 setTimeout(() => $searchField[0].focus(), 300);
             }
         });
+    }
+
+    static includeParams($element, params) {
+        if($element.is(`[data-include-params]`)) {
+            const selector = $element.data(`include-params`);
+            const closest = $element.data(`[data-include-params-parent]`) || `.modal`;
+            const $fields = $element
+                    .closest(closest)
+                    .find(selector);
+
+            const values = $fields
+                .filter((_, elem) => elem.name && elem.value)
+                .keymap((elem) => [elem.name, elem.value], GROUP_WHEN_NEEDED);
+
+            params = {
+                ...params,
+                ...values,
+            };
+        }
+
+        return params;
     }
 }
 

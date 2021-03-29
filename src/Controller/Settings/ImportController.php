@@ -54,9 +54,9 @@ class ImportController extends AbstractController {
                 "status" => Import::NAMES[$import->getStatus()],
                 "creationDate" => FormatHelper::datetime($import->getCreationDate()),
                 "executionDate" => FormatHelper::datetime($import->getExecutionDate()),
-                "creations" => $import->getCreations(),
-                "updates" => $import->getUpdates(),
-                "errors" => $import->getErrors(),
+                "creations" => $import->getCreations() ?? "-",
+                "updates" => $import->getUpdates() ?? "-",
+                "errors" => $import->getErrors() ?? "-",
                 "user" => $import->getUser()->getUsername(),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "cancellable" => $import->getStatus() === Import::UPCOMING,
@@ -129,7 +129,7 @@ class ImportController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "modal" => $this->renderView("settings/import/modal/fields_association.html.twig", [
+                "next" => $this->renderView("settings/import/modal/fields_association.html.twig", [
                     "fields" => Import::FIELDS,
                     "pre_assignments" => $preAssignments,
                     "file_fields" => Stream::from($fields)

@@ -35,7 +35,7 @@ class BoxRecord {
     private ?Location $location = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Quality::class)
+     * @ORM\ManyToOne(targetEntity=Quality::class, inversedBy="records")
      */
     private ?Quality $quality = null;
 

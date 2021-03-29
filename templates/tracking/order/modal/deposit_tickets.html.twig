@@ -5,7 +5,7 @@
             <div class="body">
                 <div class="row">
                     <div class="col-12 col-md-4 left-pane">
-                        <h2 class="mb-3">Tickets-consignes scannées</h2>
+                        <h2 class="mb-3">Tickets-consignes scannés</h2>
                         <div class="scanned-tickets">
                             {% for ticket in tickets %}
                                 <div class="item">
@@ -25,18 +25,20 @@
                     <div class="col-12 col-md-8">
                         <h2 class="mb-3">
                             Etape 2 : Scan du/des ticket(s)-consigne(s)
-                            <i data-toggle="tooltip" title="Si vous n'avez pas de ticket-consigne veuillez passer à l'étape suivante"></i>
-                            <i data-toggle="tooltip" title="Si vous n'avez pas de ticket-consigne veuillez passer à l'étape suivante"></i>
+                            <i data-toggle="tooltip" title="Si vous n'avez pas de ticket‑consigne veuillez passer à l'étape suivante"></i>
+                            <i data-toggle="tooltip" title="Si vous n'avez pas de ticket‑consigne veuillez passer à l'étape suivante"></i>
                         </h2>
                         <div class="scan-container">
                             <img src="{{ asset('images/barcode-mask.svg') }}" alt="Masque QR code">
                             <video data-scan="ticket" data-items=".scanned-tickets"></video>
                         </div>
 
-                        <select data-s2="orderDepositTicket" data-no-empty-option
-                                data-placeholder="Sélectionner un ticket-consigne à ajouter manuellement" required
-                                data-manual="ticket" data-items=".scanned-tickets"
-                                data-include-param-closest=".modal"
+                        <select data-s2="orderDepositTicket"
+                                data-no-empty-option
+                                data-placeholder="Sélectionner un ticket-consigne à ajouter manuellement"
+                                required
+                                data-manual="ticket"
+                                data-items=".scanned-tickets"
                                 data-include-params="input[name=items]">
                         </select>
                     </div>

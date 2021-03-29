@@ -38,11 +38,24 @@ $(document)
 
 //activate dropdowns
 $(`.datatable-action`).click(() => $(`.datatable-action-dropdown`).toggle());
-$(`.display-menu`).click(() => $(`#menu-dropdown`).toggle());
-$(`.menu-container`).on(`click`, `.category`, (e) => {
-    $(`.category-dropdown`).hide();
-    $(e.currentTarget).children(`.category-dropdown`).toggle();
-});
+$(`.display-menu`).click(() => $(`#menu-dropdown`).mobileSlideToggle());
+$(`.menu-container`)
+    .on(`click`, `.category`, function(e) {
+        if($(e.target).closest(`.category-dropdown`).exists()) {
+            return
+        }
+
+        const $dropdown = $(this).children(`.category-dropdown`);
+        const wasVisible = $dropdown.is(`:visible`);
+
+        $(`.category-dropdown`).mobileSlideUp();
+        if(!wasVisible) {
+            $dropdown.mobileSlideDown();
+        }
+    })
+    .on(`click`, `.close-menu`, () => {
+        $(`#menu-dropdown`).mobileSlideUp()
+    });
 
 //remove the menu when clicking outside
 $(document).click(e => {

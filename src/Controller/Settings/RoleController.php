@@ -6,6 +6,7 @@ use App\Annotation\HasPermission;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
+use App\Helper\FormatHelper;
 use App\Helper\StringHelper;
 use App\Repository\RoleRepository;
 use App\Service\ExportService;
@@ -59,7 +60,7 @@ class RoleController extends AbstractController {
             $data[] = [
                 "id" => $role->getId(),
                 "name" => $role->getName(),
-                "active" => $role->isActive() ? "Oui" : "Non",
+                "active" => FormatHelper::bool($role->isActive()),
                 "actions" => $editable ? $actions : "",
             ];
         }

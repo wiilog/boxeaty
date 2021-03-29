@@ -54,13 +54,13 @@ class DepositTicketController extends AbstractController {
             $totalAmount = $boxType ? $boxType->getPrice() : null;
             $data[] = [
                 "id" => $depositTicket->getId(),
+                "number" => $depositTicket->getNumber(),
                 "creationDate" => FormatHelper::datetime($depositTicket->getCreationDate()),
                 "kiosk" => FormatHelper::named($depositTicket->getLocation()),
                 "validityDate" => FormatHelper::datetime($depositTicket->getValidityDate()),
-                "number" => $depositTicket->getNumber() ?? "",
                 "useDate" => FormatHelper::datetime($depositTicket->getUseDate()) ?: "Inutilisé",
-                "client" => $depositTicket->getLocation() ? FormatHelper::named($depositTicket->getLocation()->getClient()) : "",
-                "state" => DepositTicket::NAMES[$depositTicket->getState()] ?? "",
+                "client" => FormatHelper::named($depositTicket->getLocation()->getClient()),
+                "state" => DepositTicket::NAMES[$depositTicket->getState()] ?? "-",
                 "orderUser" => FormatHelper::user($depositTicket->getOrderUser()),
                 "depositAmount" => FormatHelper::price($totalAmount),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
@@ -100,11 +100,11 @@ class DepositTicketController extends AbstractController {
         ]);
 
         if (((int) $content->state === DepositTicket::VALID) && $alreadyValidTicketOnBoxCount > 0) {
-            $form->addError("state", "Un ticket-consigne valide existe déjà pour la Box " . "<strong>" . $box->getNumber() . "</strong>");
+            $form->addError("state", "Un ticket‑consigne valide existe déjà pour la Box " . "<strong>" . $box->getNumber() . "</strong>");
         }
 
         if ($existing) {
-            $form->addError("number", "Ce ticket-consigne existe déjà");
+            $form->addError("number", "Ce ticket‑consigne existe déjà");
         }
 
         if ($form->isValid()) {
@@ -136,8 +136,8 @@ class DepositTicketController extends AbstractController {
 
             $mailer->send(
                 $depositTicket->getConsumerEmail(),
-                'Création d\'un ticket-consigne',
-                $this->renderView("emails/mjml/deposit_ticket.html.twig",[
+                "Création d'un ticket‑consigne",
+                $this->renderView("emails/deposit_ticket.html.twig",[
                     "ticket" => $depositTicket,
                     "usable" => $usable,
                 ])
@@ -145,7 +145,7 @@ class DepositTicketController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "message" => "Ticket-consigne <b>{$depositTicket->getNumber()}</b> créé avec succès",
+                "message" => "Ticket‑consigne <b>{$depositTicket->getNumber()}</b> créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -166,13 +166,13 @@ class DepositTicketController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "message" => "Ticket-consigne <strong>{$depositTicket->getNumber()}</strong> supprimé avec succès"
+                "message" => "Ticket‑consigne <strong>{$depositTicket->getNumber()}</strong> supprimé avec succès"
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "message" => "Le ticket-consigne n'existe pas"
+                "message" => "Le ticket‑consigne n'existe pas"
             ]);
         }
     }

@@ -131,7 +131,7 @@
         position: absolute;
         top: 2rem;
         right: 1.5rem;
-        background: url(../images/close-modal.svg);
+        background: url(../images/close-modal.svg) no-repeat;
         background-size: 20px;
         width: 20px;
         height: 20px;
@@ -149,6 +149,26 @@ body.modal-open {
 
 .modal {
     overflow-y: auto !important;
+
+    @media (max-width: $mobile-breakpoint) {
+        .modal-dialog {
+            width: 100vw;
+            max-width: none;
+            height: auto;
+            margin: 0;
+
+            .modal-content {
+                border-radius: 0;
+                border: none;
+                padding: 1.4rem;
+            }
+
+            .modal-content > h1 {
+                width: calc(100% - 50px);
+                font-size: 2.6rem;
+            }
+        }
+    }
 }
 
 .modal.no-header .body {

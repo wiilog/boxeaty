@@ -39,7 +39,6 @@ class QualityController extends AbstractController {
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $qualityRepository = $manager->getRepository(Quality::class);
         $qualities = $qualityRepository->findForDatatable(json_decode($request->getContent(), true) ?? []);
-        $deletable = $qualityRepository->getDeletable($qualities["data"]);
 
         $data = [];
         foreach ($qualities["data"] as $quality) {
@@ -49,7 +48,6 @@ class QualityController extends AbstractController {
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
-                    "disableDelete" => !$deletable[$quality->getId()] ? "Cette qualité ne peut pas être supprimé car elle est utilisée par des Box" : null,
                 ]),
             ];
         }
@@ -133,17 +131,30 @@ class QualityController extends AbstractController {
     }
 
     /**
-     * @Route("/supprimer", name="quality_delete", options={"expose": true})
+     * @Route("/supprimer/template/{quality}", name="quality_delete_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_QUALITIES)
      */
-    public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = (object)$request->request->all();
-        $quality = $manager->getRepository(Quality::class)->find($content->id);
+    public function deleteTemplate(Quality $quality): Response {
+        return $this->json([
+            "submit" => $this->generateUrl("quality_delete", ["quality" => $quality->getId()]),
+            "template" => $this->renderView("settings/quality/modal/delete.html.twig", [
+                "quality" => $quality,
+            ])
+        ]);
+    }
 
-        if (!$quality->getBoxes()->isEmpty()) {
+    /**
+     * @Route("/supprimer/{quality}", name="quality_delete", options={"expose": true})
+     * @HasPermission(Role::MANAGE_QUALITIES)
+     */
+    public function delete(EntityManagerInterface $manager, Quality $quality): Response {
+        if (!$quality->getBoxes()->isEmpty() || !$quality->getRecords()->isEmpty()) {
+            $quality->setActive(false);
+            $manager->flush();
+
             return $this->json([
-                "success" => false,
-                "message" => "Cette qualité est utilisée par une ou plusieurs Box vous ne poucez pas la supprimer",
+                "success" => true,
+                "message" => "Qualité <strong>{$quality->getName()}</strong> désactivée avec succès"
             ]);
         } else if ($quality) {
             $manager->remove($quality);
@@ -151,7 +162,7 @@ class QualityController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "message" => "Quality <strong>{$quality->getName()}</strong> supprimée avec succès"
+                "message" => "Qualité <strong>{$quality->getName()}</strong> supprimée avec succès"
             ]);
         } else {
             return $this->json([

@@ -108,17 +108,6 @@ class SelectController extends AbstractController {
     }
 
     /**
-     * @Route("/select/emplacement", name="ajax_select_locations", options={"expose": true})
-     */
-    public function locations(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Location::class)->getLocationsForSelect($request->query->get("term"), $this->getUser());
-
-        return $this->json([
-            "results" => $results,
-        ]);
-    }
-
-    /**
      * @Route("/select/type", name="ajax_select_type", options={"expose": true})
      */
     public function types(Request $request, EntityManagerInterface $manager): Response {
@@ -141,10 +130,21 @@ class SelectController extends AbstractController {
     }
 
     /**
+     * @Route("/select/emplacement", name="ajax_select_locations", options={"expose": true})
+     */
+    public function locations(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Location::class)->getLocationsForSelect($request->query->get("term"), $this->getUser());
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
      * @Route("/select/kiosk", name="ajax_select_kiosks", options={"expose": true})
      */
     public function kiosk(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Location::class)->getKiosksForSelect($request->query->get("term"));
+        $results = $manager->getRepository(Location::class)->getKiosksForSelect($request->query->get("term"), $this->getUser());
 
         return $this->json([
             "results" => $results,
@@ -155,7 +155,7 @@ class SelectController extends AbstractController {
      * @Route("/select/any-location", name="ajax_select_any_location", options={"expose": true})
      */
     public function anyLocation(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Location::class)->getAnyForSelect($request->query->get("term"));
+        $results = $manager->getRepository(Location::class)->getAnyForSelect($request->query->get("term"), $this->getUser());
 
         return $this->json([
             "results" => $results,

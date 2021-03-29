@@ -51,7 +51,7 @@
     {% endif %}
     <div class="col-md-6 col-12 change-password" style="display:none">
         <label>
-            Mot de passe
+            Nouveau mot de passe
             <input type="password" name="password" class="data" autocomplete="new-password"
                    placeholder="Mot de passe {{ user.id ? '(vide pour ne pas modifer)' }}"
                     {{ not user.id ? 'required' }}/>
@@ -62,7 +62,7 @@
     </div>
     <div class="col-md-6 col-12 change-password" style="display:none">
         <label>
-            Confirmer le mot de passe
+            Confirmer le nouveau mot de passe
             <input type="password" data-repeat="password" class="data"
                    placeholder="Mot de passe {{ user.id ? '(vide pour ne pas modifer)' }}"
                     {{ not user.id ? 'required' }}/>
@@ -93,7 +93,6 @@
             <select name="clients"
                     class="data"
                     data-s2="client"
-                    data-include-param-closest=".modal"
                     data-include-params="select[name=groups]"
                     data-placeholder="Sélectionnez un ou plusieurs clients"
                     multiple

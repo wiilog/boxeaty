@@ -12,19 +12,37 @@ jQuery.fn.exists = function() {
     return this.length !== 0;
 }
 
-jQuery.fn.keymap = function(callable, grouped = false) {
+export const NO_GROUPING = 0;
+export const GROUP_EVERYTHING = 0;
+export const GROUP_WHEN_NEEDED = 0;
+
+jQuery.fn.keymap = function(callable, grouping = NO_GROUPING) {
     const values = {};
     for(const input of this) {
         const [key, value] = callable(input);
 
-        if(grouped) {
-            if(values[key] === undefined) {
+        if(grouping === NO_GROUPING) {
+            values[key] = value;
+        } else if(grouping === GROUP_EVERYTHING) {
+            if(!values[key]) {
                 values[key] = [];
             }
 
             values[key].push(value);
-        } else {
-            values[key] = value;
+        } else if(grouping === GROUP_WHEN_NEEDED) {
+            if(values[key] === undefined) {
+                values[key] = {__single_value: value};
+            } else if(values[key].__single_value !== undefined) {
+                values[key] = [values[key].__single_value, value];
+            } else {
+                values[key].push(value);
+            }
+        }
+    }
+
+    if(grouping === GROUP_WHEN_NEEDED) {
+        for(const[key, value] of Object.entries(values)) {
+            values[key] = value.__single_value !== undefined ? value.__single_value : value;
         }
     }
 
@@ -77,3 +95,27 @@ jQuery.fn.popLoader = function() {
 
     return this;
 };
+
+jQuery.fn.mobileSlideToggle = function() {
+    if(window.screen.width <= 768) {
+        $(this).slideToggle();
+    } else {
+        $(this).toggle();
+    }
+}
+
+jQuery.fn.mobileSlideUp = function() {
+    if(window.screen.width <= 768) {
+        $(this).slideUp();
+    } else {
+        $(this).hide();
+    }
+}
+
+jQuery.fn.mobileSlideDown = function() {
+    if(window.screen.width <= 768) {
+        $(this).slideDown();
+    } else {
+        $(this).show();
+    }
+}

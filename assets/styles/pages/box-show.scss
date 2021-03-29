@@ -1,13 +1,10 @@
 @import "../mixins";
 
 .box-show {
+    flex: 1;
     width: 100%;
     margin-top: -30px;
     padding-right: 0;
-
-    .box-group {
-        padding-right: 0 !important;
-    }
 
     h3 {
         font-size: 28px;
@@ -16,23 +13,38 @@
     .box-details {
         @include box();
 
-        &.history {
-            height: 44vh;
+        &.details {
+            height: 100%;
+            @media (max-width: $mobile-breakpoint) {
+                height: initial;
+            }
         }
 
-        .history-wrapper {
-            overflow-y: auto;
-            height: 90%;
+        p {
+            font-size: 1.25rem;
+            margin-top: 5px;
         }
     }
 
-    .details {
-        height: 60vh;
-    }
+    .right-column {
+        display: flex;
+        flex-direction: column;
+        padding-right: 0 !important;
 
-    .owner {
-        height: 15vh;
-        margin-bottom: 1vh;
+        @media (max-width: $mobile-breakpoint) {
+            padding: 0 !important;
+            margin-top: 15px;
+        }
+
+        .history {
+            flex: 1 1 auto;
+            margin-top: 15px;
+
+            .history-wrapper {
+                overflow-y: auto;
+                height: 90%;
+            }
+        }
     }
 
     .scroll-top {

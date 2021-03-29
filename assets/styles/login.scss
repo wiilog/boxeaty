@@ -12,6 +12,7 @@ main.login {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 100%;
 
     .logo {
         height: 150px;
@@ -28,7 +29,17 @@ main.login {
     }
 
     form {
-        width: 450px;
+        width: 400px;
         max-width: 80%;
+    }
+
+    @media (max-width: $mobile-breakpoint) {
+        img.logo {
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin-bottom: 0;
+        }
     }
 }

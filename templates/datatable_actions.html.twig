@@ -7,9 +7,7 @@
             <button data-listener="edit"><i class="icon fas fa-pen"></i> Modifier</button>
         {% endif %}
         {% if deletable ?? false %}
-            <button data-listener="delete" {% if disableDelete is defined %}title="{{ disableDelete }}" disabled{% endif %}>
-                <i class="icon fas fa-trash-alt"></i> Supprimer
-            </button>
+            <button data-listener="delete"><i class="icon fas fa-trash-alt"></i> Supprimer</button>
         {% endif %}
         {% if cancellable ?? false %}
             <button data-listener="cancel"><i class="icon fas fa-ban"></i> Annuler</button>

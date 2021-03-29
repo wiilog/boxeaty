@@ -3,15 +3,16 @@ import '../app';
 import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
-import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
+import {DATATABLE_ACTIONS, DATATABLE_LANGUAGE, initDatatable} from "../datatable";
 
 $(document).ready(() => {
     const newImportModal = Modal.static(`#modal-new-import`, {
         ajax: AJAX.route(`POST`, `import_new`),
         table: `#table-imports`,
         success: result => {
-            if(result.modal) {
-                Modal.load(result.modal, {
+            if(result.next) {
+                Modal.html({
+                    template: result.next,
                     table: `#table-imports`,
                     submit: Routing.generate(`import_fields_association`),
                     afterOpen: onSecondStepSuccess,
@@ -22,7 +23,7 @@ $(document).ready(() => {
 
     $(`.new-import`).click(() => newImportModal.open());
 
-    const table = initDatatable(`#table-imports`, {
+    initDatatable(`#table-imports`, {
         ajax: AJAX.route(`POST`, `imports_api`),
         columns: [
             {data: `name`, title: `Nom de l'import`},
@@ -61,9 +62,7 @@ function onSecondStepSuccess(modal) {
         fixedColumns: {
             heightMatch: `auto`
         },
-        language: {
-            url: `/i18n/datatableLanguage.json`,
-        },
+        language: DATATABLE_LANGUAGE,
     });
 
     let modifying = false;

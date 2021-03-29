@@ -9,6 +9,7 @@ use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\BoxRecord;
+use App\Helper\FormatHelper;
 use App\Repository\BoxRecordRepository;
 use App\Service\BoxRecordService;
 use App\Service\ExportService;
@@ -60,13 +61,13 @@ class TrackingMovementController extends AbstractController {
         foreach ($movements["data"] as $movement) {
             $data[] = [
                 "id" => $movement->getId(),
-                "date" => $movement->getDate()->format("d/m/Y H:i"),
-                "location" => $movement->getLocation() ? $movement->getLocation()->getName() : '',
+                "date" => FormatHelper::datetime($movement->getDate()),
+                "location" => FormatHelper::named($movement->getLocation()),
                 "box" => $movement->getBox()->getNumber(),
-                "quality" => $movement->getQuality() ? $movement->getQuality()->getName() : "",
-                "state" => Box::NAMES[$movement->getState()] ?? "",
-                "client" => $movement->getClient() ? $movement->getClient()->getName() : "",
-                "user" => $movement->getUser() ? $movement->getUser()->getUsername() : "",
+                "quality" => FormatHelper::named($movement->getQuality()),
+                "state" => Box::NAMES[$movement->getState()] ?? "-",
+                "client" => FormatHelper::named($movement->getClient()),
+                "user" => FormatHelper::user($movement->getUser()),
                 "actions" => $actions,
             ];
         }
