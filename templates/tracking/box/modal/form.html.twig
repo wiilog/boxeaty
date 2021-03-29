@@ -30,26 +30,11 @@
         <label>
             État
             <select name="state" class="data" data-s2 data-placeholder="Sélectionnez un état">
-                <option value="{{ constant('App\\Entity\\Box::AVAILABLE') }}"
-                        {{ box.state == constant('App\\Entity\\Box::AVAILABLE') ? 'selected' }}>
-                    Disponible
+                {% for state, label in constant('App\\Entity\\Box::NAMES') %}
+                <option value="{{ state }}" {{ box.state == state ? 'selected' }}>
+                    {{ label }}
                 </option>
-                <option value="{{ constant('App\\Entity\\Box::UNAVAILABLE') }}"
-                        {{ box.state == constant('App\\Entity\\Box::UNAVAILABLE') ? 'selected' }}>
-                    Indisponible
-                </option>
-                <option value="{{ constant('App\\Entity\\Box::CONSUMER') }}"
-                        {{ box.state == constant('App\\Entity\\Box::CONSUMER') ? 'selected' }}>
-                    Consommateur
-                </option>
-                <option value="{{ constant('App\\Entity\\Box::CLIENT') }}"
-                        {{ box.state == constant('App\\Entity\\Box::CLIENT') ? 'selected' }}>
-                    Client
-                </option>
-                <option value="{{ constant('App\\Entity\\Box::OUT') }}"
-                        {{ box.state == constant('App\\Entity\\Box::OUT') ? 'selected' }}>
-                    Sorti
-                </option>
+                {% endfor %}
             </select>
         </label>
     </div>

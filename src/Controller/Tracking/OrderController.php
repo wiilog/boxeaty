@@ -273,7 +273,7 @@ class OrderController extends AbstractController {
 
                 $previousMovement = $manager->getRepository(BoxRecord::class)->findPreviousTrackingMovement($box);
 
-                $box->setState(Box::AVAILABLE)
+                $box->setState(Box::CLIENT)
                     ->setLocation($previousMovement ? $previousMovement->getLocation() : null);
 
                 [$tracking, $record] = $boxRecordService->generateBoxRecords(
