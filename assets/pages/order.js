@@ -62,7 +62,7 @@ function addInput(element, code) {
             const $totalPrice = $modal.find(`input[name="price"]`);
             const modification = type === `box` ? response.price : -response.price;
 
-            $totalPrice.val(Number($totalPrice.val()) + modification);
+            $totalPrice.val(Number($totalPrice.val()) + Math.abs(modification));
             $container.append(`
                 <div class="item">
                     <input type="text" name="items" class="data data-array mt-1" value="${code}" data-price="${modification}" readonly>
