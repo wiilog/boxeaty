@@ -20,7 +20,7 @@
         "@fortawesome/free-solid-svg-icons": "^5.15.2",
         "@popperjs/core": "^2.9.1",
         "arrive": "^2.4.1",
-        "bootstrap": "5.0.0-beta3",
+        "bootstrap": "5.0.0-beta2",
         "copy-webpack-plugin": "^7.0.0",
         "datatables.net": "^1.10.22",
         "datatables.net-buttons": "^1.6.4",

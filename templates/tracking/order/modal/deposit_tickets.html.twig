@@ -32,15 +32,17 @@
                             <img src="{{ asset('images/barcode-mask.svg') }}" alt="Masque QR code">
                             <video data-scan="ticket" data-items=".scanned-tickets"></video>
                         </div>
-
-                        <select data-s2="orderDepositTicket"
-                                data-no-empty-option
-                                data-placeholder="Sélectionner un ticket-consigne à ajouter manuellement"
-                                required
-                                data-manual="ticket"
-                                data-items=".scanned-tickets"
-                                data-include-params="input[name=items]">
-                        </select>
+                        <label>
+                            Numéro Ticket-consigne
+                            <select data-s2="orderDepositTicket"
+                                    data-no-empty-option
+                                    data-placeholder="Sélectionner un ticket-consigne à ajouter manuellement"
+                                    required
+                                    data-manual="ticket"
+                                    data-items=".scanned-tickets"
+                                    data-include-params="input[name=items]">
+                            </select>
+                        </label>
                     </div>
                 </div>
 

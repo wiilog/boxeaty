@@ -23,21 +23,24 @@
                         </label>
                     </div>
                     <div class="col-12 col-md-8">
-                        <h2 class="mb-3">Etape 1 : Scan de la/les Box</h2>
+                        <h2 class="mb-3">Etape 1 : Scan Box</h2>
                         <div class="scan-container">
                             <img src="{{ asset('images/barcode-mask.svg') }}" alt="Masque QR code">
                             <video data-scan="box" data-items=".scanned-boxes"></video>
                         </div>
 
-                        <select class="add-box-select"
-                                data-s2="orderBox"
-                                data-no-empty-option
-                                data-placeholder="Sélectionner une Box à ajouter manuellement"
-                                required
-                                data-manual="box"
-                                data-items=".scanned-boxes"
-                                data-include-params="input[name=items]">
-                        </select>
+                        <label>
+                            Numéro Box
+                            <select class="add-box-select"
+                                    data-s2="orderBox"
+                                    data-no-empty-option
+                                    data-placeholder="Sélectionner une Box à ajouter manuellement"
+                                    required
+                                    data-manual="box"
+                                    data-items=".scanned-boxes"
+                                    data-include-params="input[name=items]">
+                            </select>
+                        </label>
                     </div>
                 </div>
 
