@@ -1,6 +1,6 @@
 import './styles/app.scss';
 
-import 'bootstrap';
+import {Modal as BootstrapModal} from 'bootstrap';
 import 'arrive';
 import 'datatables.net';
 import 'datatables.net-dt/js/dataTables.dataTables';
@@ -18,22 +18,20 @@ import './jquery';
 import AJAX from "./ajax";
 import Modal from "./modal";
 
-global.$ = $;
-global.Routing = Routing;
-
 export const $document = $(document);
 
 const routes = require(`../public/generated/routes.json`);
 Routing.setRoutingData(routes);
+global.Routing = Routing;
 
 // make all modals static
-$.fn.modal.Constructor.Default.backdrop = `static`;
+BootstrapModal.Default.backdrop = `static`;
 
 //tooltips
 $(document)
     .ready(() => $('[data-toggle="tooltip"]').tooltip())
     .arrive(`[data-toggle="tooltip"]`, function() {
-        $(this).tooltip();
+        $(this).tooltip()
     });
 
 //activate dropdowns
