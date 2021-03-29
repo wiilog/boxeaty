@@ -28,4 +28,4 @@ $document.ready(() => {
             delete: data => deleteOrderModal.open(data),
         }
     });
-})
+});
