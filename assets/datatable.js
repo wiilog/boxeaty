@@ -77,11 +77,11 @@ export function initDatatable(table, config) {
     };
 
     const initial = $table.data(`initial-data`);
-    const hasInitialData = initial && typeof initial === `object`;
     if(initial && typeof initial === `object`) {
         config = {
             ...config,
-            ...initial
+            data: initial.data,
+            deferLoading: [initial.recordsFiltered, initial.recordsTotal],
         };
     }
 
@@ -89,7 +89,7 @@ export function initDatatable(table, config) {
         .on(`error.dt`, (e, settings, techNote, message) => console.error(`An error has been reported by DataTables: `, message, e, table))
         .DataTable({
             processing: true,
-            serverSide: !hasInitialData,
+            serverSide: true,
             responsive: true,
             scrollX: true,
             autoWidth: true,
@@ -101,10 +101,8 @@ export function initDatatable(table, config) {
             initComplete: () => {
                 moveSearchInputToHeader($table);
             },
-            deferLoading: !!config.data || config.data === [],
             ...config
         });
-
 
     $(`${table} tbody`)
         .on(`click`, `tr`, function(event) {
