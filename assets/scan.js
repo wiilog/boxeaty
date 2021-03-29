@@ -1,5 +1,4 @@
 import QrScanner from "qr-scanner";
-import Flash from "./flash";
 
 QrScanner.WORKER_PATH = '/build/vendor/qr-scanner-worker.min.js';
 
@@ -16,7 +15,14 @@ export default class Scan {
         });
 
         scanner.start().then(null, () => {
-            Flash.add(`danger`, `Votre système ne dispose d'aucune caméra ou vous n'avez pas autorisé son accès`)
+            const $scanContainer = $element.closest(`.modal`).find('.scan-container');
+            $scanContainer.empty();
+            $scanContainer.append(`
+                <div class="no-camera-found">
+                    <i class="fas fa-video-slash fa-3x"></i>
+                    <p>Votre système ne dispose d'aucune caméra ou vous n'avez pas autorisé son accès.</p>
+                </div>
+            `);
         });
 
         $element.closest(`.modal`).on('hidden.bs.modal', function() {

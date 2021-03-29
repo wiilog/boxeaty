@@ -23,17 +23,21 @@
                         </label>
                     </div>
                     <div class="col-12 col-md-8">
-                        <h2 class="mb-3">
+                        <h2 class="deposit-ticket-header mb-3">
                             Etape 2 : Scan du/des ticket(s)-consigne(s)
-                            <i data-toggle="tooltip" title="Si vous n'avez pas de ticket‑consigne veuillez passer à l'étape suivante"></i>
-                            <i data-toggle="tooltip" title="Si vous n'avez pas de ticket‑consigne veuillez passer à l'étape suivante"></i>
+
+                            <span class="deposit-ticket-tooltip"
+                                 data-toggle="tooltip"
+                                 title="Si vous n'avez pas de ticket-consigne veuillez passer à l'étape suivante">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </span>
                         </h2>
                         <div class="scan-container">
                             <img src="{{ asset('images/barcode-mask.svg') }}" alt="Masque QR code">
                             <video data-scan="ticket" data-items=".scanned-tickets"></video>
                         </div>
                         <label>
-                            Numéro Ticket-consigne
+                            Numéro ticket-consigne
                             <select data-s2="orderDepositTicket"
                                     data-no-empty-option
                                     data-placeholder="Sélectionner un ticket-consigne à ajouter manuellement"

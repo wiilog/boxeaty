@@ -1,3 +1,5 @@
+@import "../variables";
+
 .new-order {
     position: absolute;
     right: 50px;
@@ -29,6 +31,8 @@
 
 .scan-container {
     position: relative;
+    min-height: 300px;
+    margin-bottom: 15px;
 
     img {
         position: absolute;
@@ -39,9 +43,25 @@
         opacity: 0.5;
     }
 
-    video {
+    video, .no-camera-found {
         border-radius: 10px;
         width: 100%;
+    }
+
+    .no-camera-found {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 300px;
+        padding: 30px;
+        background: $grey;
+
+        p {
+            margin-top: 15px;
+            margin-bottom: 0;
+            text-align: center;
+        }
     }
 }
 
@@ -64,5 +84,21 @@
             margin-left: 12px;
             font-size: 2.5rem;
         }
+    }
+}
+
+.deposit-ticket-header {
+    display: flex;
+    align-items: center;
+
+    [data-toggle="tooltip"] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-left: 15px;
+        float: right;
+        width: 35px;
+        height: 35px;
     }
 }
