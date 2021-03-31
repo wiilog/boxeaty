@@ -7,6 +7,7 @@ import Scan from "../scan";
 import {randomString} from "../app";
 
 import "../styles/pages/order.scss";
+import Flash from "../flash";
 
 $document.ready(() => {
     $(`#scan-box`).click(() => openBoxesModal());
@@ -36,10 +37,14 @@ $document.ready(() => {
     })
 });
 
+let lastScan;
+
 function addInput(element, code) {
-    if(!code) {
+    if(!code || code === lastScan) {
         return;
     }
+
+    lastScan = code;
 
     const $element = $(element);
     const $modal = $element.closest(`.modal`);
@@ -62,6 +67,10 @@ function addInput(element, code) {
         };
 
         AJAX.route(GET, `order_info`, params).json(response => {
+            if(!response.success) {
+                return;
+            }
+
             const $totalPrice = $modal.find(`input[name="price"]`);
             const modification = type === `box` ? response.price : -response.price;
 

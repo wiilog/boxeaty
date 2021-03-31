@@ -23,6 +23,7 @@
 .left-pane {
     display: flex;
     flex-direction: column;
+    border-right: 1px solid #EEE;
 
     .scanned-boxes, .scanned-tickets {
         position: relative;

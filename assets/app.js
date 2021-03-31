@@ -13,6 +13,7 @@ import Snow from 'quill/themes/snow';
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 import {createPopper} from '@popperjs/core';
 
+import './pages/security';
 import './select2';
 import './jquery';
 import AJAX from "./ajax";
@@ -28,8 +29,7 @@ global.Routing = Routing;
 BootstrapModal.Default.backdrop = `static`;
 
 //tooltips
-$(document)
-    .ready(() => $('[data-toggle="tooltip"]').tooltip())
+$document.ready(() => $('[data-toggle="tooltip"]').tooltip())
     .arrive(`[data-toggle="tooltip"]`, function() {
         $(this).tooltip()
     });
@@ -56,7 +56,7 @@ $(`.menu-container`)
     });
 
 //remove the menu when clicking outside
-$(document).click(e => {
+$document.click(e => {
     const selector = `[data-toggle="dropdown"], .dropdown-menu, .display-menu, #menu-dropdown`;
     const $target = $(e.target);
 
@@ -65,34 +65,32 @@ $(document).click(e => {
     }
 });
 
-$(document).ready(initializeWYSIWYG)
-    .arrive(`[data-wysiwyg]`, initializeWYSIWYG);
-
 Quill.register({
     'modules/toolbar.js': Toolbar,
     'themes/snow.js': Snow,
 });
 
-function initializeWYSIWYG() {
-    $('[data-wysiwyg]:not([id])').each(function() {
-        this.id = randomString(64);
+const QUILL_CONFIG = {
+    modules: {
+        toolbar: [
+            [{header: [1, 2, 3, false]}],
+            ['bold', 'italic', 'underline', 'image'],
+            [{'list': 'ordered'}, {'list': 'bullet'}]
+        ]
+    },
+    formats: [
+        'header',
+        'bold', 'italic', 'underline', 'strike', 'blockquote',
+        'list', 'bullet', 'indent', 'link', 'image'
+    ],
+    theme: 'snow',
+};
 
-        new Quill(this, {
-            modules: {
-                toolbar: [
-                    [{header: [1, 2, 3, false]}],
-                    ['bold', 'italic', 'underline', 'image'],
-                    [{'list': 'ordered'}, {'list': 'bullet'}]
-                ]
-            },
-            formats: [
-                'header',
-                'bold', 'italic', 'underline', 'strike', 'blockquote',
-                'list', 'bullet', 'indent', 'link', 'image'
-            ],
-            theme: 'snow',
-        });
-    });
+$document.ready(() => $(`[data-wysiwyg]`).each(initializeWYSIWYG))
+    .arrive(`[data-wysiwyg]`, initializeWYSIWYG);
+
+function initializeWYSIWYG() {
+    new Quill(this, QUILL_CONFIG);
 }
 
 export function randomString(length) {
@@ -106,26 +104,11 @@ export function randomString(length) {
     return result;
 }
 
-//password toggle eye icon
-$(document).on(`click`, `.show-password span`, function() {
-    const $input = $(this).parents(`label`).find(`input`);
+$document.ready(() => $(`[data-toggle="dropdown"]`).each(initializeDropdown))
+    .arrive(`[data-toggle="dropdown"]`, initializeDropdown);
 
-    if($input.attr(`type`) === `password`) {
-        $input.attr(`type`, `text`);
-    } else {
-        $input.attr(`type`, `password`);
-    }
-})
-
-$(document).ready(() => $(`[data-toggle="dropdown"]`).each(function() {
-    initializeDropdown($(this))
-}));
-
-$(document).arrive(`[data-toggle="dropdown"]`, function() {
-    initializeDropdown($(this));
-});
-
-function initializeDropdown($button) {
+function initializeDropdown() {
+    const $button = $(this);
     const $dropdown = $button.siblings(`.dropdown-menu`);
 
     $button.click(function() {
@@ -142,7 +125,8 @@ function initializeDropdown($button) {
     })
 }
 
-$(document).ready(() => {
+//click on own username to edit
+$document.ready(() => {
     const $currentUser = $(`#current-user`);
 
     if($currentUser.exists()) {

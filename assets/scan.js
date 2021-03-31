@@ -8,11 +8,11 @@ export default class Scan {
 
         const scanner = new QrScanner(element, result => {
             if(!config.loop) {
-                scanner.stop();
+                scanner.destroy();
             }
 
-            config.onScan(result).finally(() => scanner.destroy());
-        });
+            config.onScan(result);
+        }, undefined, undefined, `user`);
 
         scanner.start().then(null, () => {
             const $scanContainer = $element.closest(`.modal`).find('.scan-container');

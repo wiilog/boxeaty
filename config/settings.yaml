@@ -8,10 +8,10 @@ parameters:
       App\Entity\Role::MANAGE_IMPORTS: Accès à l'import des données
 
     Menu Traçabilité:
-      App\Entity\Role::MANAGE_BOXES: Créer, modifier, supprimer une Box
-      App\Entity\Role::MANAGE_MOVEMENTS: Créer, modifier, supprimer un mouvement
-      App\Entity\Role::MANAGE_ORDERS: Accès aux scans Box
-      App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer, supprimer un ticket‑consigne
+      App\Entity\Role::MANAGE_BOXES: Créer, modifier, supprimer les Box
+      App\Entity\Role::MANAGE_MOVEMENTS: Créer, modifier, supprimer les mouvement
+      App\Entity\Role::MANAGE_ORDERS: Créer, modifier, supprimer les commandes
+      App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer, supprimer les tickets‑consignes
 
     Menu Référentiel:
       App\Entity\Role::MANAGE_CLIENTS: Créer, modifier, supprimer les clients
