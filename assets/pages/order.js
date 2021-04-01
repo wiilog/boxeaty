@@ -4,7 +4,7 @@ import Modal from "../modal";
 import AJAX, {GET} from "../ajax";
 import $ from "jquery";
 import Scan from "../scan";
-import {randomString} from "../app";
+import {SECONDS, String, Time} from "../util";
 
 import "../styles/pages/order.scss";
 import Flash from "../flash";
@@ -37,14 +37,14 @@ $document.ready(() => {
     })
 });
 
-let lastScan;
+let lastScan = 0;
 
 function addInput(element, code) {
-    if(!code || code === lastScan) {
+    if(!code || lastScan + 3 > Time.now(SECONDS)) {
         return;
     }
 
-    lastScan = code;
+    lastScan = Time.now(SECONDS);
 
     const $element = $(element);
     const $modal = $element.closest(`.modal`);
@@ -87,9 +87,9 @@ function addInput(element, code) {
         });
     } else {
         if(type === `box`) {
-            Flash.add(`danger`, `Cette Box a déjà été scannée`);
+            Flash.add(`danger`, `Cette Box a déjà été scannée`, true);
         } else {
-            Flash.add(`danger`, `Ce ticket-consigne a déjà été scanné`);
+            Flash.add(`danger`, `Ce ticket-consigne a déjà été scanné`, true);
         }
     }
 
@@ -100,13 +100,13 @@ function addInput(element, code) {
 
 function openBoxesModal() {
     Modal.load(AJAX.route(`GET`, `order_boxes_template`, {
-        session: randomString(16),
+        session: String.random(16),
     }));
 }
 
 function openDepositTicketModal() {
     Modal.load(AJAX.route(`GET`, `order_deposit_tickets_template`, {
-        session: randomString(16),
+        session: String.random(16),
     }));
 }
 

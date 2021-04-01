@@ -87,6 +87,7 @@ class OrderController extends AbstractController {
             if (!$box) {
                 return $this->json([
                     "success" => false,
+                    "unique" => true,
                     "message" => "La Box $number n'existe pas",
                 ]);
             }
@@ -94,6 +95,7 @@ class OrderController extends AbstractController {
             if ($box->getState() !== Box::CLIENT) {
                 return $this->json([
                     "success" => false,
+                    "unique" => true,
                     "message" => "La Box $number n'est pas en statut client et ne peut pas être remise à un consommateur",
                 ]);
             }
@@ -110,7 +112,8 @@ class OrderController extends AbstractController {
             if (!$ticket) {
                 return $this->json([
                     "success" => false,
-                    "message" => "La ticket-consigne $number n'existe pas",
+                    "unique" => true,
+                    "message" => "Le ticket-consigne $number n'existe pas",
                 ]);
             }
 
@@ -123,6 +126,7 @@ class OrderController extends AbstractController {
             if ($ticket->getState() !== DepositTicket::VALID) {
                 return $this->json([
                     "success" => false,
+                    "unique" => true,
                     "message" => "Le ticket-consigne $number a expiré ou a déjà été utilisé",
                 ]);
             }
