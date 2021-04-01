@@ -69,8 +69,8 @@ class SecurityController extends AbstractController {
             $existing = $userRepository->findBy(["email" => $email]);
 
             $user->setEmail($request->request->get("email"))
-            ->setUsername($request->request->get("username"))
-            ->addGroup($em->getRepository(Group::class)->find($request->request->get("group")));
+                ->setUsername($request->request->get("username"))
+                ->addGroup($em->getRepository(Group::class)->find($request->request->get("group")));
 
             if ($existing) {
                 $this->addFlash("danger", "Un utilisateur existe déjà avec cet email");
@@ -85,9 +85,7 @@ class SecurityController extends AbstractController {
             if ($password !== $request->request->get("password-repeat")) {
                 $this->addFlash("danger", "Les mots de passe sont différents");
                 $valid = false;
-            }
-
-            if (!Authenticator::isPasswordSecure($password)) {
+            } else if (!Authenticator::isPasswordSecure($password)) {
                 $this->addFlash("danger", Authenticator::PASSWORD_ERROR);
                 $valid = false;
             }
@@ -230,6 +228,5 @@ class SecurityController extends AbstractController {
             "form" => $form->createView()
         ]);
     }
-
 
 }
