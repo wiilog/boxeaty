@@ -49,7 +49,7 @@
             </label>
         </div>
     {% endif %}
-    <div class="col-md-6 col-12 change-password" style="display:none">
+    <div class="col-md-6 col-12 change-password" {{ user.id ? 'style="display:none"' }}>
         <label>
             Nouveau mot de passe
             <input type="password" name="password" class="data" autocomplete="new-password"
@@ -60,7 +60,7 @@
             </span>
         </label>
     </div>
-    <div class="col-md-6 col-12 change-password" style="display:none">
+    <div class="col-md-6 col-12 change-password" {{ user.id ? 'style="display:none"' }}>
         <label>
             Confirmer le nouveau mot de passe
             <input type="password" data-repeat="password" class="data"

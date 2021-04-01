@@ -51,7 +51,7 @@ class Client {
     private ?Group $group = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="contactOf")
      * @ORM\JoinColumn(nullable=false)
      */
     private ?User $contact = null;

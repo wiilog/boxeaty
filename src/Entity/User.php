@@ -65,6 +65,11 @@ class User implements UserInterface {
     private Collection $clients;
 
     /**
+     * @ORM\OneToMany(targetEntity=Client::class, mappedBy="contact")
+     */
+    private Collection $contactOf;
+
+    /**
      * @ORM\ManyToMany(targetEntity=Group::class, inversedBy="users")
      */
     private Collection $groups;
@@ -72,12 +77,12 @@ class User implements UserInterface {
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $resetToken;
+    private ?string $resetToken = null;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $resetTokenExpiration;
+    private ?DateTime $resetTokenExpiration = null;
 
     /**
      * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="orderUser")
@@ -218,6 +223,45 @@ class User implements UserInterface {
         return $this;
     }
 
+    /**
+     * @return Collection|Client[]
+     */
+    public function getContactOf(): Collection {
+        return $this->contactOf;
+    }
+
+    public function addContactOf(Client $contactOf): self {
+        if (!$this->contactOf->contains($contactOf)) {
+            $this->contactOf[] = $contactOf;
+            $contactOf->setContact($this);
+        }
+
+        return $this;
+    }
+
+    public function removeContactOf(Client $contactOf): self {
+        if ($this->contactOf->removeElement($contactOf)) {
+            if ($contactOf->getContact() === $this) {
+                $contactOf->setContact(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setContactOf(?array $contactOfs): self {
+        foreach($this->getContactOf()->toArray() as $contactOf) {
+            $this->removeContactOf($contactOf);
+        }
+
+        $this->contactOf = new ArrayCollection();
+        foreach($contactOfs as $contactOf) {
+            $this->addContactOf($contactOf);
+        }
+
+        return $this;
+    }
+    
     /**
      * @return Collection|Group[]
      */

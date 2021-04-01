@@ -238,6 +238,7 @@ class UserController extends AbstractController {
             && (
                 !$user->getBoxRecords()->isEmpty()
                 || !$user->getOrderDepositTickets()->isEmpty()
+                || !$user->getContactOf()->isEmpty()
             )) {
             $user->setActive(false);
             $manager->flush();
