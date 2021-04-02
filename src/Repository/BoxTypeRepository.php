@@ -39,6 +39,8 @@ class BoxTypeRepository extends EntityRepository {
             $qb->where($qb->expr()->orX(
                 "box_type.name LIKE :search",
                 "box_type.price LIKE :search",
+                "box_type.capacity LIKE :search",
+                "box_type.shape LIKE :search",
             ))->setParameter("search", "%$search%");
         }
 

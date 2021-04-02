@@ -50,9 +50,11 @@ class LocationRepository extends EntityRepository {
                 ->andWhere($qb->expr()->orX(
                     "location.name LIKE :search",
                     "location.description LIKE :search",
+                    "location.capacity = :exact_search",
                     "client.name LIKE :search",
                 ))
-                ->setParameter("search", "%$search%");
+                ->setParameter("search", "%$search%")
+                ->setParameter("exact_search", $search);
         }
 
         if (!empty($params['order'])) {
