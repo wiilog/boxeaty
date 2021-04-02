@@ -31,7 +31,7 @@ class DepositTicket {
     private ?int $id = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Box::class)
+     * @ORM\ManyToOne(targetEntity=Box::class, inversedBy="depositTickets")
      */
     private ?Box $box = null;
 

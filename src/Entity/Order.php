@@ -116,13 +116,16 @@ class Order {
     public function addBox(Box $box): self {
         if (!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
+            $box->addOrder($this);
         }
 
         return $this;
     }
 
     public function removeBox(Box $box): self {
-        $this->boxes->removeElement($box);
+        if ($this->boxes->removeElement($box)) {
+            $box->removeOrder($this);
+        }
 
         return $this;
     }
@@ -139,6 +142,7 @@ class Order {
 
         return $this;
     }
+
 
     /**
      * @return Collection|DepositTicket[]

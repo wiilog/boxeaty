@@ -11,11 +11,6 @@ $(document).ready(() => {
         table: `#table-boxes`,
     });
 
-    const deleteBoxModal = Modal.static(`#modal-delete-box`, {
-        ajax: AJAX.route(`POST`, `box_delete`),
-        table: `#table-boxes`,
-    });
-
     $(`.new-box`).click(() => newBoxModal.open());
 
     const table = initDatatable(`#table-boxes`, {
@@ -30,9 +25,6 @@ $(document).ready(() => {
             {data: `type`, title: `Type`},
             DATATABLE_ACTIONS
         ],
-        createdRow: (row) => {
-            $(row).addClass('cursor-pointer');
-        },
         listeners: {
             action: data => {
                 window.location.href = Routing.generate(`box_show`, {
@@ -46,7 +38,13 @@ $(document).ready(() => {
 
                 Modal.load(ajax, {table})
             },
-            delete: data => deleteBoxModal.open(data),
+            delete: data => {
+                const ajax = AJAX.route(`POST`, `box_delete_template`, {
+                    box: data.id
+                });
+
+                Modal.load(ajax, {table})
+            },
         }
     });
 });

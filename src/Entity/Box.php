@@ -94,6 +94,11 @@ class Box {
     private ?int $uses = null;
 
     /**
+     * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="box")
+     */
+    private Collection $depositTickets;
+
+    /**
      * @ORM\ManyToMany(targetEntity=Order::class, mappedBy="boxes")
      */
     private Collection $orders;
@@ -235,15 +240,52 @@ class Box {
     }
 
     /**
+     * @return Collection|DepositTicket[]
+     */
+    public function getDepositTickets(): Collection {
+        return $this->depositTickets;
+    }
+
+    public function addDepositTicket(DepositTicket $depositTicket): self {
+        if (!$this->depositTickets->contains($depositTicket)) {
+            $this->depositTickets[] = $depositTicket;
+            $depositTicket->setBox($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDepositTicket(DepositTicket $depositTicket): self {
+        if ($this->depositTickets->removeElement($depositTicket)) {
+            if ($depositTicket->getBox() === $this) {
+                $depositTicket->setBox(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setDepositTickets(?array $depositTickets): self {
+        foreach ($this->getDepositTickets()->toArray() as $depositTicket) {
+            $this->removeDepositTicket($depositTicket);
+        }
+
+        $this->depositTickets = new ArrayCollection();
+        foreach ($depositTickets as $depositTicket) {
+            $this->addDepositTicket($depositTicket);
+        }
+
+        return $this;
+    }
+
+    /**
      * @return Collection|Order[]
      */
-    public function getOrders(): Collection
-    {
+    public function getOrders(): Collection {
         return $this->orders;
     }
 
-    public function addOrder(Order $order): self
-    {
+    public function addOrder(Order $order): self {
         if (!$this->orders->contains($order)) {
             $this->orders[] = $order;
             $order->addBox($this);
@@ -252,8 +294,7 @@ class Box {
         return $this;
     }
 
-    public function removeOrder(Order $order): self
-    {
+    public function removeOrder(Order $order): self {
         if ($this->orders->removeElement($order)) {
             $order->removeBox($this);
         }

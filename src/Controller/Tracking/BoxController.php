@@ -224,14 +224,23 @@ class BoxController extends AbstractController {
     }
 
     /**
-     * @Route("/supprimer", name="box_delete", options={"expose": true})
+     * @Route("/supprimer/template/{box}", name="box_delete_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function delete(Request $request,
-                           EntityManagerInterface $manager): Response {
-        $content = (object)$request->request->all();
-        $box = $manager->getRepository(Box::class)->find($content->id);
+    public function deleteTemplate(Box $box): Response {
+        return $this->json([
+            "submit" => $this->generateUrl("box_delete", ["box" => $box->getId()]),
+            "template" => $this->renderView("tracking/box/modal/delete.html.twig", [
+                "box" => $box,
+            ])
+        ]);
+    }
 
+    /**
+     * @Route("/supprimer/{box}", name="box_delete", options={"expose": true})
+     * @HasPermission(Role::MANAGE_BOXES)
+     */
+    public function delete(EntityManagerInterface $manager, Box $box): Response {
         if ($box) {
             $manager->remove($box);
             $manager->flush();
