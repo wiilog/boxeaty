@@ -59,7 +59,9 @@ class ExportService {
     public const BOX_TYPE_HEADER = [
         "Type de Box",
         "Prix",
-        "Actif"
+        "Actif",
+        "Contenance",
+        "Forme",
     ];
 
     public const ROLE_HEADER = [

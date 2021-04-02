@@ -23,6 +23,8 @@ class BoxTypeRepository extends EntityRepository {
             ->select("box_type.name AS name")
             ->addSelect("box_type.price AS price")
             ->addSelect("box_type.active AS active")
+            ->addSelect("box_type.capacity AS capacity")
+            ->addSelect("box_type.shape AS shape")
             ->getQuery()
             ->toIterable();
     }
