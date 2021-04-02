@@ -1,6 +1,4 @@
-import Flash from './flash';
 import AJAX from './ajax';
-import {LOADING_CLASS} from "./jquery";
 import $ from "jquery";
 
 const uploads = {};
@@ -180,7 +178,11 @@ export default class Modal {
             return this.config.ajax.json(data, result => {
                 if(!result.success && result.errors !== undefined) {
                     for(const error of result.errors.fields) {
-                        showInvalid(this.element.find(`[name="${error.field}"]`), error.message);
+                        if(error.global) {
+                            showGlobalInvalid(this.element, error.message);
+                        } else {
+                            showInvalid(this.element.find(`[name="${error.field}"]`), error.message);
+                        }
                     }
 
                     return;
@@ -404,6 +406,18 @@ function showInvalid($field, message) {
 
     $field.addClass(`is-invalid`);
     $field.parents(`label`).append(`<span class="invalid-feedback">${message}</span>`);
+}
+
+function showGlobalInvalid($modal, message) {
+    let $container = $modal.find(`.global-error`);
+    if(!$container.exists()) {
+        $container = $(`<div class="alert alert-danger mt-2 mb-0 global-error"></div>`);
+        $container.appendTo($modal.find(`.body`));
+    } else {
+        $container.empty();
+    }
+
+    $container.html(message);
 }
 
 function getExtension(file) {

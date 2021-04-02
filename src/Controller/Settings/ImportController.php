@@ -156,7 +156,7 @@ class ImportController extends AbstractController {
         if (!$import) {
             return $this->json([
                 "success" => true,
-                "message" => "Erreur lors de la création de l'import",
+                "message" => "Une erreur est survenue lors de la création de l'import",
             ]);
         }
 
@@ -164,21 +164,19 @@ class ImportController extends AbstractController {
 
         $content = (object)$request->request->all();
 
-        if ($form->isValid()) {
-            $associations = explode(",", $content->associations);
+        $associations = explode(",", $content->associations);
 
-            foreach(Import::FIELDS as $name => $config) {
-                if(isset($config["required"]) && $config["required"] && !in_array($name, $associations)) {
-                    return $this->json([
-                        "success" => false,
-                        "message" => "Le champ {$config['name']} est requis mais n'est associé à aucune colonne du fichier",
-                    ]);
-                }
+        foreach (Import::FIELDS as $name => $config) {
+            if (isset($config["required"]) && $config["required"] && !in_array($name, $associations)) {
+                $form->addError("Le champ <b>{$config['name']}</b> est requis mais n'est associé à aucune colonne du fichier");
             }
+        }
+
+        if ($form->isValid()) {
             $import->setFieldsAssociation(array_flip($associations))
                 ->setUser($this->getUser());
 
-            if($import->getStatus() === Import::INSTANT) {
+            if ($import->getStatus() === Import::INSTANT) {
                 $importService->execute($import);
             }
 

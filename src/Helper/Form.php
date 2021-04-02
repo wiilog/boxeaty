@@ -12,11 +12,18 @@ class Form {
         return new Form();
     }
 
-    public function addError(string $field, string $message) {
-        $this->errors[] = [
-            "field" => $field,
-            "message" => $message,
-        ];
+    public function addError(string $field, ?string $message = null) {
+        if(!$message) {
+            $this->errors[] = [
+                "global" => true,
+                "message" => $field,
+            ];
+        } else {
+            $this->errors[] = [
+                "field" => $field,
+                "message" => $message,
+            ];
+        }
     }
 
     public function isValid() {
