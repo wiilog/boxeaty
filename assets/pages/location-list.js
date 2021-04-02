@@ -1,11 +1,11 @@
-import '../app';
+import {$document} from '../app';
 
 import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
 
-$(document).ready(() => {
+$document.ready(() => {
     const newLocationModal = Modal.static(`#modal-new-location`, {
         ajax: AJAX.route(`POST`, `location_new`),
         table: `#table-locations`,
@@ -18,6 +18,8 @@ $(document).ready(() => {
         ajax: AJAX.route(`POST`, `api_empty_kiosk`),
         table: `#table-locations`,
     });
+
+    $(`.new-location`).click(() => newLocationModal.open());
 
     const table = initDatatable(`#table-locations`, {
         ajax: AJAX.route(`POST`, `locations_api`),
@@ -49,19 +51,16 @@ $(document).ready(() => {
             empty: data => emptyLocationModal.open(data),
         }
     });
+});
 
-    $(`.new-location`).click(() => newLocationModal.open());
-
-    fireTypeChangeEvent($('#modal-new-location').find('input[name="type"]'));
-    $(document).arrive('#modal-edit-location .location-type', function() {
+$document.ready(() => fireTypeChangeEvent($('#modal-new-location').find('input[name="type"]')))
+    .arrive(`#modal-edit-location .location-type`, function() {
         fireTypeChangeEvent($(this).find('input[name="type"]'));
     });
-});
 
 function fireTypeChangeEvent($type) {
     $type.on('change', function() {
-        const $type = $(this);
-        toggleCapacityInput($type);
+        toggleCapacityInput($(this));
     })
 }
 
@@ -72,11 +71,16 @@ function toggleCapacityInput($typeRadio) {
 
     if(parseInt($checkedRadio.val()) === 1) {
         $kioskFields.removeClass(`d-none`);
-        $kioskFields.find(`input`).prop(`required`, true);
+        $kioskFields.find(`input`).val(``);
+        $kioskFields.find(`input[data-required]`).each(function() {
+            $(this).prop(`required`, true);
+        })
     } else {
         $kioskFields.addClass(`d-none`);
-        $kioskFields.find(`input`)
-            .val(``)
-            .prop(`required`, false);
+        $kioskFields.find(`input[required]`).each(function() {
+            const $input = $(this);
+            $input.data(`required`, $input.is(`[required]`));
+            $input.prop(`required`, false);
+        })
     }
 }
