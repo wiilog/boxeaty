@@ -108,6 +108,13 @@
     }
 }
 
+.select2-selection--clearable.select2-selection--single {
+    display: flex !important;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .select2-selection--multiple {
     flex-wrap: wrap !important;
 
