@@ -45,7 +45,13 @@ export default class AJAX {
         };
 
         return fetch(url, config)
-            .then(response => response.json())
+            .then(response => {
+                if(response.url.endsWith(`/login`)) {
+                    window.location.href = Routing.generate(`login`);
+                } else {
+                    return response.json();
+                }
+            })
             .then((json) => {
                 treatFetchCallback(json);
 

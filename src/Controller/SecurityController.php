@@ -33,7 +33,7 @@ class SecurityController extends AbstractController {
     }
 
     /**
-     * @Route("/login", name="login")
+     * @Route("/login", name="login", options={"expose": true})
      */
     public function login(AuthenticationUtils $authenticationUtils): Response {
         if ($this->getUser()) {

@@ -47,17 +47,20 @@ class OrderRepository extends EntityRepository {
                         ->addOrderBy("order_location.name", $order["dir"]);
                 } else if ($column === "user") {
                     $qb->leftJoin("ord.user", "order_user")
-                        ->addOrderBy("order_user.name", $order["dir"]);
+                        ->addOrderBy("order_user.username", $order["dir"]);
                 } else if ($column === "client") {
                     $qb->leftJoin("ord.client", "order_client")
                         ->addOrderBy("order_client.name", $order["dir"]);
+                } else if ($column === "totalCost") {
+                    $qb->addOrderBy("ord.boxPrice - ord.depositTicketPrice", $order["dir"]);
                 } else {
                     $qb->addOrderBy("ord.$column", $order["dir"]);
                 }
             }
-        }
-        else {
+        } else {
+
             foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+
                 $qb->addOrderBy("ord.$column", $dir);
             }
         }
