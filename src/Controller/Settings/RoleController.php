@@ -76,8 +76,7 @@ class RoleController extends AbstractController {
      * @Route("/nouveau", name="role_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_ROLES)
      */
-    public function new(Request $request,
-                        EntityManagerInterface $manager): Response {
+    public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
         $content = (object) $request->request->all();
@@ -95,6 +94,13 @@ class RoleController extends AbstractController {
                 ->setAllowEditOwnGroupOnly($content->allowEditOwnGroupOnly)
                 ->setShowNewOrderOnHome($content->showNewOrderOnHome)
                 ->setReceiveMailsNewAccounts($content->receiveMailsNewAccounts);
+
+            if(count($role->getPermissions()) === 0) {
+                return $this->json([
+                    "success" => false,
+                    "message" => "Vous devez sélectionner au moins une permission",
+                ]);
+            }
 
             $manager->persist($role);
             $manager->flush();
@@ -161,6 +167,13 @@ class RoleController extends AbstractController {
                 ->setAllowEditOwnGroupOnly($content->allowEditOwnGroupOnly)
                 ->setShowNewOrderOnHome($content->showNewOrderOnHome)
                 ->setReceiveMailsNewAccounts($content->receiveMailsNewAccounts);
+
+            if(count($role->getPermissions()) === 0) {
+                return $this->json([
+                    "success" => false,
+                    "message" => "Vous devez sélectionner au moins une permission",
+                ]);
+            }
 
             $manager->flush();
 
