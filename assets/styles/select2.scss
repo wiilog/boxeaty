@@ -124,14 +124,13 @@
     }
 }
 
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 29px;
+}
+
 .select2-selection__rendered {
     display: inline-flex !important;
     align-items: center;
     min-height: 38px !important;
     margin-bottom: 0 !important;
-}
-
-.select2-selection__clear > span {
-    display: block;
-    margin-top: 3px !important;
 }
