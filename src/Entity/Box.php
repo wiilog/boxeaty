@@ -96,7 +96,7 @@ class Box {
     /**
      * @ORM\ManyToMany(targetEntity=Order::class, mappedBy="boxes")
      */
-    private $orders;
+    private Collection $orders;
 
     public function __construct() {
         $this->boxRecords = new ArrayCollection();

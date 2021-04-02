@@ -29,7 +29,7 @@ class BoxRecordRepository extends EntityRepository {
             ->addSelect("record.state AS state")
             ->addSelect("client.name AS client_name")
             ->addSelect("user.username AS user_username")
-            ->where('record.trackingMovement = 1')
+            ->where("record.trackingMovement = 1")
             ->leftJoin("record.location", "location")
             ->leftJoin("record.box", "box")
             ->leftJoin("record.quality", "quality")

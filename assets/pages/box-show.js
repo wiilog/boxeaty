@@ -48,13 +48,18 @@ function getBoxTrackingMovements(start = 0) {
                 const data = (result.data || []);
                 const historyLines = data.map(({state, color, comment, date}) => {
                     const $rawComment = $($.parseHTML(comment));
-                    const $strippedComment = $rawComment.text();
-                    const $cleanedComment = $strippedComment.replace(/\s/g, '');
+                    const trimmedComment = $rawComment.text().trim();
+
+                    let $comment = `<div class="timeline-line-comment"></div>`;
+                    if(trimmedComment.trim()) {
+                        $comment = `<div class="timeline-line-comment alert alert-${color}">${comment}</div>`;
+                    }
+
                     return `
                         <div class="timeline-line">
                             <span class="timeline-line-marker"><strong>${date}</strong></span>
                             <span class="timeline-line-title ml-3">${state}</span>
-                            <div class="timeline-line-comment alert ${(($cleanedComment.length > 0) ? 'alert-' + color : '')}">${comment}</div>
+                            ${$comment}
                         </div>
                     `;
                 });
