@@ -3,15 +3,22 @@
         <div class="modal-content">
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
             <div class="delete-image"></div>
-            <h1>
-                {% if client.boxes | length > 0 or client.boxRecords | length > 0 %}
-                    Ce client est lié à un(e) ou plusieurs Box, mouvements.<br>
+            {% if client.boxes | length > 0 or client.boxRecords | length > 0 %}
+                <h1>Ce client est lié à un ou plusieurs mouvements ou Box</h1>
+                <p class="text-center">
                     Vous ne pouvez pas le supprimer.<br>
                     Voulez-vous le désactiver ?
-                {% else %}
-                    Voulez-vous vraiment supprimer ce client ?
-                {% endif %}
-            </h1>
+                </p>
+            {% elseif client.clients | length > 0 %}
+                <h1>Ce client est un client multi-site et est lié à d'autres clients</h1>
+                <p class="text-center">
+                    Vous ne pouvez pas le supprimer.<br>
+                    Voulez-vous le désactiver ?
+                </p>
+            {% else %}
+                <h1>Voulez-vous vraiment supprimer ce client ?</h1>
+            {% endif %}
+
             <input type="hidden" name="id" class="data">
 
             <div class="footer">
