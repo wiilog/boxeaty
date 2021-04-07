@@ -93,6 +93,8 @@ class BoxController extends AbstractController {
             $form->addError("number", "Ce numéro de Box existe déjà");
         } else if (strlen($content->number) > 50) {
             $form->addError("number", "Le numéro de Box ne peut excéder 50 caractères");
+        } else if(!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
+            $form->addError("number", "Le numéro de Box ne peut contenir que des lettres, chiffres, tirets et underscores");
         }
 
         if ($form->isValid()) {
@@ -135,10 +137,7 @@ class BoxController extends AbstractController {
      * @Route("/voir/{box}", name="box_show", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function show(EntityManagerInterface $manager,
-                         Box $box): Response {
-        $box = $manager->getRepository(Box::class)->find($box);
-
+    public function show(Box $box): Response {
         return $this->render('tracking/box/show.html.twig', [
             "box" => $box,
         ]);
@@ -172,6 +171,10 @@ class BoxController extends AbstractController {
 
         if ($existing !== null && $existing !== $box) {
             $form->addError("name", "Une autre Box avec ce numéro existe déjà");
+        } else if (strlen($content->number) > 50) {
+            $form->addError("number", "Le numéro de Box ne peut excéder 50 caractères");
+        } else if(!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
+            $form->addError("number", "Le numéro de Box ne peut contenir que des lettres, chiffres, tirets et underscores");
         }
 
         if ($form->isValid()) {
