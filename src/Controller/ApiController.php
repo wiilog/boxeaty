@@ -304,37 +304,20 @@ class ApiController extends AbstractController {
     public function mailDepositTicket(Request $request, EntityManagerInterface $manager, Mailer $mailer): Response {
         $content = json_decode($request->getContent());
 
-        $box = $manager->getRepository(Box::class)->find($content->box);
-        $validity = $manager->getRepository(Location::class)->find($content->kiosk)
-            ->getClient()
-            ->getDepositTicketValidity();
-
-        if (!$box->getCanGenerateDepositTicket()) {
-            return $this->json([
-                "success" => false,
-                "message" => "Cette Box n'a pas été déposée",
-            ]);
+        $ticket = $this->createDepositTicket($content);
+        if($ticket instanceof Response) {
+            return $ticket;
         }
-
-        $depositTicket = (new DepositTicket())
-            ->setBox($box)
-            ->setNumber(StringHelper::random(5))
-            ->setState(DepositTicket::VALID)
-            ->setLocation($box->getLocation())
-            ->setCreationDate(new DateTime())
-            ->setValidityDate(new DateTime("+$validity month"));
-
-        $box->setCanGenerateDepositTicket(false);
 
         $mailer->send(
             $content->email,
             "BoxEaty - Ticket‑consigne",
             $this->renderView("emails/deposit_ticket.html.twig", [
-                "ticket" => $depositTicket,
+                "ticket" => $ticket,
             ])
         );
 
-        $manager->persist($depositTicket);
+        $manager->persist($ticket);
         $manager->flush();
 
         return $this->json([
@@ -343,9 +326,24 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/deposit-ticket/print/{ticket}", name="api_deposit_ticket_print")
+     * @Route("/deposit-ticket/print", name="api_deposit_ticket_print")
      */
-    public function depositTicketPrint(Image $snappy, DepositTicket $ticket): Response {
+    public function depositTicketPrint(Request $request): Response {
+        $ticket = $this->createDepositTicket(json_decode($request->getContent()));
+        if($ticket instanceof Response) {
+            return $ticket;
+        }
+
+        return $this->json([
+            "success" => true,
+            "ticket" => $ticket->getId(),
+        ]);
+    }
+
+    /**
+     * @Route("/deposit-ticket/image/{ticket}", name="api_deposit_ticket_image")
+     */
+    public function depositTicketImage(Image $snappy, DepositTicket $ticket): Response {
         $client = $ticket->getLocation() ? $ticket->getLocation()->getClient() : null;
         $clients = $client ? $client->getDepositTicketsClients() : [];
 
@@ -371,6 +369,36 @@ class ApiController extends AbstractController {
         ]);
 
         return new SnappyResponse($image, "deposit-ticket.png", "image/png", "inline");
+    }
+
+    private function createDepositTicket($content) {
+        $manager = $this->getDoctrine()->getManager();
+        $box = $manager->getRepository(Box::class)->find($content->box);
+        $validity = $manager->getRepository(Location::class)->find($content->kiosk)
+            ->getClient()
+            ->getDepositTicketValidity();
+
+        if (!$box->getCanGenerateDepositTicket()) {
+            return $this->json([
+                "success" => false,
+                "message" => "Cette Box n'a pas été déposée",
+            ]);
+        }
+
+        $depositTicket = (new DepositTicket())
+            ->setBox($box)
+            ->setNumber(StringHelper::random(5))
+            ->setState(DepositTicket::VALID)
+            ->setLocation($box->getLocation())
+            ->setCreationDate(new DateTime())
+            ->setValidityDate(new DateTime("+$validity month"));
+
+        $box->setCanGenerateDepositTicket(false);
+
+        $manager->persist($depositTicket);
+        $manager->flush();
+
+        return $depositTicket;
     }
 
 }
