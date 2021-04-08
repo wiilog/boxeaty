@@ -111,6 +111,12 @@ class Stream implements Countable, IteratorAggregate, ArrayAccess {
         return isset($key) ? $this->elements[$key] : $default;
     }
 
+    public function firstKey() {
+        $this->checkValidity();
+
+        return array_key_first($this->elements);
+    }
+
     public function firstOr(callable $callback) {
         $this->checkValidity();
 
@@ -199,6 +205,13 @@ class Stream implements Countable, IteratorAggregate, ArrayAccess {
         $this->checkValidity();
 
         $this->elements = array_unique($this->elements);
+        return $this;
+    }
+
+    public function flip(): self {
+        $this->checkValidity();
+
+        $this->elements = array_flip($this->elements);
         return $this;
     }
 

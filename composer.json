@@ -20,6 +20,7 @@
         "doctrine/orm": "^2.8",
         "endroid/qr-code-bundle": "^4.0",
         "friendsofsymfony/jsrouting-bundle": "^2.7",
+        "knplabs/knp-snappy-bundle": "^1.8",
         "nelmio/cors-bundle": "^2.1",
         "phpdocumentor/reflection-docblock": "^5.2",
         "phpoffice/phpspreadsheet": "^1.16",

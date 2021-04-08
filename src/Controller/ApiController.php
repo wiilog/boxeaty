@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Box;
+use App\Entity\Client;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
@@ -13,6 +14,9 @@ use App\Service\BoxRecordService;
 use App\Service\Mailer;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Bundle\SnappyBundle\Snappy\Response\JpegResponse;
+use Knp\Bundle\SnappyBundle\Snappy\Response\SnappyResponse;
+use Knp\Snappy\Image;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -336,6 +340,37 @@ class ApiController extends AbstractController {
         return $this->json([
             "success" => true,
         ]);
+    }
+
+    /**
+     * @Route("/deposit-ticket/print/{ticket}", name="api_deposit_ticket_print")
+     */
+    public function depositTicketPrint(Image $snappy, DepositTicket $ticket): Response {
+        $client = $ticket->getLocation() ? $ticket->getLocation()->getClient() : null;
+        $clients = $client ? $client->getDepositTicketsClients() : [];
+
+        if(count($clients) === 0) {
+            $usable = "tout le réseau BoxEaty";
+        } else if(count($clients) === 1) {
+            $usable = "le restaurant {$clients[0]->getName()}";
+        } else {
+            $usable = "les restaurants " . Stream::from($clients)
+                ->map(fn(Client $client) => $client->getName())
+                ->join(", ");
+        }
+
+        $html = $this->renderView("print/deposit_ticket.html.twig", [
+            "ticket" => $ticket,
+            "usable" => $usable,
+        ]);
+
+        $image = $snappy->getOutputFromHtml($html, [
+            "format" => "png",
+            "disable-smart-width" => true,
+            "width" => "300",
+        ]);
+
+        return new SnappyResponse($image, "deposit-ticket.png", "image/png", "inline");
     }
 
 }

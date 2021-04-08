@@ -1,0 +1,23 @@
+{% extends 'print/base.html.twig' %}
+
+{% block body %}
+    <div class="column">
+        <img src="{{ base64('images/print/logo.png') }}" class="logo" alt="Logo BoxEaty">
+        <h1>Ticket-consigne</h1>
+        <span>À conserver</span>
+
+        <span class="mt-3">Le {{ 'now' | date('d/m/Y à H:i:s') }}</span>
+
+        <strong>Bon pour une nouvelle Box</strong>
+        <span class="valid-until">Valable jusqu'au {{ ticket.validityDate | date('d/m/Y') }}</span>
+
+        <small class="mt-3">Échangeable dans {{ usable }}</small>
+
+        <figure class="qr">
+            <img src="{{ qr_code_data_uri(ticket.number) }}" alt="QR code">
+            <figcaption>{{ ticket.number }}</figcaption>
+        </figure>
+
+        <img src="{{ base64('images/print/eat-consigned.png') }}" class="eat-consigned" alt="Mangez consigné">
+    </div>
+{% endblock %}

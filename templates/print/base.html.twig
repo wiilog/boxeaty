@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Impression</title>
+
+    <style>
+        @font-face {
+            font-family: 'Autumn Collection';
+            font-style: normal;
+            font-weight: 400;
+            src: url({{ base64('../assets/fonts/autumn-collection/autumn-collection-regular.otf') }}) format('opentype');
+        }
+
+        @font-face {
+            font-family: 'Retroyal';
+            font-style: normal;
+            font-weight: 400;
+            src: url({{ base64('../assets/fonts/retroyal/retroyal-bold.otf') }}) format('opentype');
+        }
+
+        @font-face {
+            font-family: 'Retroyal';
+            font-style: normal;
+            font-weight: 700;
+            src: url({{ base64('../assets/fonts/retroyal/retroyal-medium.otf') }}) format('opentype');
+        }
+    </style>
+
+    <style>
+        body {
+            margin: 0;
+        }
+
+        .column {
+            width: 100%;
+            display: table;
+        }
+
+        .column > * {
+            margin: auto;
+            display: table-row;
+            vertical-align: middle;
+            width: 100%;
+        }
+
+        .mt-3 {
+            display: inline-block;
+            margin-top: 15px;
+        }
+
+        .logo {
+            width: 70%;
+        }
+
+        h1 {
+            font-family: 'Autumn Collection', serif;
+            text-align: center;
+        }
+
+        span, small, strong, figcaption {
+            font-family: Retroyal, serif;
+            text-align: center;
+        }
+
+        small {
+            font-size: 1rem;
+        }
+
+        strong {
+            font-size: 1.5rem;
+        }
+
+        figure.qr {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        figure.qr img {
+            width: 50%;
+        }
+
+        figure.qr figcaption {
+            font-weight: bold;
+            font-size: 2.5rem;
+            margin-top: -10px;
+        }
+
+        .eat-consigned {
+            width: 60%;
+        }
+    </style>
+</head>
+<body>
+{% block body %}{% endblock %}
+</body>
+</html>

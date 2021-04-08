@@ -3,6 +3,7 @@
 namespace App\Twig;
 
 use App\Helper\FormatHelper;
+use App\Helper\Stream;
 use App\Service\RoleService;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -13,6 +14,17 @@ use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class AppExtension extends AbstractExtension {
+
+    private const DATA_BY_EXTENSION = [
+        "image" => ["jpg", "jpeg", "png", "svg", "gif"],
+        "font" => ["otf", "ttf", "woff"],
+    ];
+
+    private const TYPES_BY_EXTENSION = [
+        "svg" => "svg+xml",
+        "ttf" => "truetype",
+        "otf" => "opentype",
+    ];
 
     /** @Required */
     public KernelInterface $kernel;
@@ -79,14 +91,15 @@ class AppExtension extends AbstractExtension {
 
     public function base64(string $path) {
         $absolutePath = $this->kernel->getProjectDir() . "/public/$path";
-        $type = pathinfo($absolutePath, PATHINFO_EXTENSION);
+        $extension = pathinfo($absolutePath, PATHINFO_EXTENSION);
         $content = base64_encode(file_get_contents($absolutePath));
 
-        if ($type == "svg") {
-            $type = "svg+xml";
-        }
+        $type = self::TYPES_BY_EXTENSION[$extension] ?? $extension;
+        $data = Stream::from(self::DATA_BY_EXTENSION)
+            ->filter(fn(array $extensions) => in_array($extension, $extensions))
+            ->firstKey();
 
-        return "data:image/$type;base64,$content";
+        return "data:$data/$type;base64,$content";
     }
 
     public function getFolder(string $folder) {
