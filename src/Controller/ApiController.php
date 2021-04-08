@@ -14,7 +14,6 @@ use App\Service\BoxRecordService;
 use App\Service\Mailer;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Knp\Bundle\SnappyBundle\Snappy\Response\JpegResponse;
 use Knp\Bundle\SnappyBundle\Snappy\Response\SnappyResponse;
 use Knp\Snappy\Image;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -49,8 +48,7 @@ class ApiController extends AbstractController {
             if ($kiosk) {
                 if ($kiosk->getMessage()) {
                     $message = $kiosk->getMessage();
-                }
-                else {
+                } else {
                     $client = $kiosk->getClient();
                     if ($client && !$client->isMultiSite() && $client->getLinkedMultiSite()) {
                         $client = $client->getLinkedMultiSite();
@@ -305,7 +303,7 @@ class ApiController extends AbstractController {
         $content = json_decode($request->getContent());
 
         $ticket = $this->createDepositTicket($content);
-        if($ticket instanceof Response) {
+        if ($ticket instanceof Response) {
             return $ticket;
         }
 
@@ -330,7 +328,7 @@ class ApiController extends AbstractController {
      */
     public function depositTicketPrint(Request $request): Response {
         $ticket = $this->createDepositTicket(json_decode($request->getContent()));
-        if($ticket instanceof Response) {
+        if ($ticket instanceof Response) {
             return $ticket;
         }
 
@@ -347,14 +345,15 @@ class ApiController extends AbstractController {
         $client = $ticket->getLocation() ? $ticket->getLocation()->getClient() : null;
         $clients = $client ? $client->getDepositTicketsClients() : [];
 
-        if(count($clients) === 0) {
+        if (count($clients) === 0) {
             $usable = "tout le réseau BoxEaty";
-        } else if(count($clients) === 1) {
-            $usable = "le restaurant {$clients[0]->getName()}";
+        } else if (count($clients) === 1) {
+            $usable = "le restaurant <span class='no-wrap'>{$clients[0]->getName()}</span>";
         } else {
             $usable = "les restaurants " . Stream::from($clients)
-                ->map(fn(Client $client) => $client->getName())
-                ->join(", ");
+                    ->map(fn(Client $client) => $client->getName())
+                    ->map(fn(string $client) => "<span class='no-wrap'>$client</span>")
+                    ->join(", ");
         }
 
         $html = $this->renderView("print/deposit_ticket.html.twig", [
@@ -364,8 +363,10 @@ class ApiController extends AbstractController {
 
         $image = $snappy->getOutputFromHtml($html, [
             "format" => "png",
+            "disable-javascript" => true,
             "disable-smart-width" => true,
-            "width" => "300",
+            "width" => 600,
+            "zoom" => 2,
         ]);
 
         return new SnappyResponse($image, "deposit-ticket.png", "image/png", "inline");

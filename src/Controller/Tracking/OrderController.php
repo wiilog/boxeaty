@@ -113,7 +113,7 @@ class OrderController extends AbstractController {
                 return $this->json([
                     "success" => false,
                     "unique" => true,
-                    "message" => "Le ticket-consigne $number n'existe pas",
+                    "message" => "Le ticket‑consigne $number n'existe pas",
                 ]);
             }
 
@@ -127,7 +127,7 @@ class OrderController extends AbstractController {
                 return $this->json([
                     "success" => false,
                     "unique" => true,
-                    "message" => "Le ticket-consigne $number a expiré ou a déjà été utilisé",
+                    "message" => "Le ticket‑consigne $number a expiré ou a déjà été utilisé",
                 ]);
             }
 

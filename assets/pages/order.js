@@ -89,7 +89,7 @@ function addInput(element, code) {
         if(type === `box`) {
             Flash.add(`danger`, `Cette Box a déjà été scannée`, true);
         } else {
-            Flash.add(`danger`, `Ce ticket-consigne a déjà été scanné`, true);
+            Flash.add(`danger`, `Ce ticket‑consigne a déjà été scanné`, true);
         }
     }
 

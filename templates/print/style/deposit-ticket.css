@@ -1,0 +1,42 @@
+.logo {
+    width: 70%;
+}
+
+h1 {
+    font-family: 'Autumn Collection', serif;
+    text-align: center;
+    font-size: 2.4rem;
+}
+
+span, small, strong, figcaption {
+    font-family: Retroyal, serif;
+    text-align: center;
+}
+
+small {
+    font-size: 1rem;
+}
+
+strong {
+    font-size: 1.5rem;
+}
+
+figure.qr {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+}
+
+figure.qr img {
+    width: 50%;
+}
+
+figure.qr figcaption {
+    font-weight: bold;
+    font-size: 2.5rem;
+    margin-top: -10px;
+}
+
+.eat-consigned {
+    width: 60%;
+}
