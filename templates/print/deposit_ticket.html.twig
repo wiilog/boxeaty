@@ -15,7 +15,7 @@
         <strong>Bon pour une nouvelle Box</strong>
         <span class="valid-until">Valable jusqu'au {{ ticket.validityDate | date('d/m/Y') }}</span>
 
-        <small class="mt-3">Échangeable dans {{ usable | raw }}</small>
+        <small class="mt-3">Échangeable dans {{ usable | raw }}*</small>
 
         <figure class="qr">
             <img src="{{ qr_code_data_uri(ticket.number) }}" alt="QR code">
@@ -23,5 +23,6 @@
         </figure>
 
         <img src="{{ base64('images/print/eat-consigned.png') }}" class="eat-consigned" alt="Mangez consigné">
+        <small class="mt-2">*Remboursement possible en caisse</small>
     </div>
 {% endblock %}
