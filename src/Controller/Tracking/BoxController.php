@@ -18,6 +18,7 @@ use App\Service\BoxRecordService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use DoctrineExtensions\Query\Mysql\Date;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -54,6 +55,7 @@ class BoxController extends AbstractController {
             $data[] = [
                 "id" => $box->getId(),
                 "number" => $box->getNumber(),
+                "creationDate" => FormatHelper::datetime($box->getCreationDate()),
                 "location" => FormatHelper::named($box->getLocation()),
                 "state" => Box::NAMES[$box->getState()] ?? "-",
                 "quality" => FormatHelper::named($box->getQuality()),

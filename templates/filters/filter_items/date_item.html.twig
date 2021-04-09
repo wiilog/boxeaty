@@ -1,8 +1,13 @@
-<div class="dates-filter">
+{% set unique_date = unique_date is defined and unique_date %}
+{% set name = name is defined and name ? name : 'from' %}
+
+<div class="{{ not unique_date ? 'dates-filter' }}">
     <label class="dates">
-        Du <input type="date" name="from" class="data">
+        {{ not unique_date ? 'Du' }} <input type="date" name="{{ name }}" class="data">
     </label>
-    <label class="dates">
-        au <input type="date" name="to" class="data">
-    </label>
+    {% if not unique_date %}
+        <label class="dates">
+            au <input type="date" name="to" class="data">
+        </label>
+    {% endif %}
 </div>

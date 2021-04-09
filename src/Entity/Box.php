@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\BoxRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -103,9 +104,15 @@ class Box {
      */
     private Collection $orders;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $creationDate;
+
     public function __construct() {
         $this->boxRecords = new ArrayCollection();
         $this->orders = new ArrayCollection();
+        $this->creationDate = new DateTime('now');
     }
 
     public function getId(): ?int {
@@ -308,6 +315,18 @@ class Box {
             ->setQuality($record->getQuality())
             ->setOwner($record->getClient())
             ->setComment($record->getComment());
+    }
+
+    public function getCreationDate(): ?\DateTimeInterface
+    {
+        return $this->creationDate;
+    }
+
+    public function setCreationDate(\DateTimeInterface $creationDate): self
+    {
+        $this->creationDate = $creationDate;
+
+        return $this;
     }
 
 }

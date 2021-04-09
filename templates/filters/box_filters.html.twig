@@ -1,6 +1,10 @@
 {% extends 'filters/template.html.twig' %}
 
 {% block filters %}
+    {% include('filters/filter_items/date_item.html.twig') with {
+        unique_date: true,
+        name: 'creationDate'
+    } %}
     {% include('filters/filter_items/client_item.html.twig') with {
         name: 'client',
         placeholder: 'Propriété'

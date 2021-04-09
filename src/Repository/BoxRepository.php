@@ -15,7 +15,7 @@ use Doctrine\ORM\EntityRepository;
  */
 class BoxRepository extends EntityRepository {
 
-    public const DEFAULT_DATATABLE_ORDER = [['id', 'asc']];
+    public const DEFAULT_DATATABLE_ORDER = [['id', 'DESC']];
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
@@ -94,7 +94,9 @@ class BoxRepository extends EntityRepository {
                     "search_location.name LIKE :search",
                     "search_owner.name LIKE :search",
                     "search_quality.name LIKE :search",
-                    "search_type.name LIKE :search"
+                    "search_type.name LIKE :search",
+                    "DATE_FORMAT(box.creationDate, '%d/%m/%Y') LIKE :search",
+                    "DATE_FORMAT(box.creationDate, '%H:%i') LIKE :search"
                 ))
                 ->setParameter("search", "%$search%");
         }
@@ -109,6 +111,10 @@ class BoxRepository extends EntityRepository {
                 case("client"):
                     $qb->andWhere("box.owner = :filter_owner")
                         ->setParameter("filter_owner", $value);
+                    break;
+                case("creationDate"):
+                    $qb->andWhere("DATE(box.creationDate) = :value")
+                        ->setParameter("value", $value);
                     break;
                 default:
                     $qb->andWhere("box.$name = :filter_$name")
