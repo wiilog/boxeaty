@@ -307,11 +307,26 @@ class ApiController extends AbstractController {
             return $ticket;
         }
 
+        $client = $ticket->getLocation() ? $ticket->getLocation()->getClient() : null;
+        $clients = $client ? $client->getDepositTicketsClients() : [];
+
+        if (count($clients) === 0) {
+            $usable = "tout le réseau BoxEaty";
+        } else if (count($clients) === 1) {
+            $usable = "le restaurant <span class='no-wrap'>{$clients[0]->getName()}</span>";
+        } else {
+            $usable = "les restaurants " . Stream::from($clients)
+                    ->map(fn(Client $client) => $client->getName())
+                    ->map(fn(string $client) => "<span class='no-wrap'>$client</span>")
+                    ->join(", ");
+        }
+
         $mailer->send(
             $content->email,
             "BoxEaty - Ticket‑consigne",
             $this->renderView("emails/deposit_ticket.html.twig", [
                 "ticket" => $ticket,
+                "usable" => $usable,
             ])
         );
 
