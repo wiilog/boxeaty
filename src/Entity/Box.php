@@ -105,9 +105,9 @@ class Box {
     private Collection $orders;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(type="datetime", nullable=false)
      */
-    private $creationDate;
+    private DateTime $creationDate;
 
     public function __construct() {
         $this->boxRecords = new ArrayCollection();
