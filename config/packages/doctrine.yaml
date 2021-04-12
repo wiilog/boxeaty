@@ -21,3 +21,4 @@ doctrine:
                 DATE: DoctrineExtensions\Query\Mysql\Date
                 IF: DoctrineExtensions\Query\Mysql\IfElse
                 REPLACE: DoctrineExtensions\Query\Mysql\Replace
+                DATE_FORMAT: DoctrineExtensions\Query\Mysql\DateFormat

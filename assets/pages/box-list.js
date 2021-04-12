@@ -18,6 +18,7 @@ $(document).ready(() => {
         columns: [
             {data: `id`, class: `d-none`},
             {data: `number`, title: `Numéro Box`},
+            {data: `creationDate`, title: `Date de création`},
             {data: `location`, title: `Emplacement`},
             {data: `state`, title: `Etat`},
             {data: `quality`, title: `Qualité`},
