@@ -40,7 +40,7 @@
                     </mj-text>
 
                     <mj-text align="center" font-size="20px" color="#1E1F44">
-                        <b>{{ ticket.location.client.depositTicketsClients | map(l => l.name) | join(', ') }}</b>
+                        <strong>{{ ticket.location.client ? ticket.location.client.depositTicketsClients | map(l => l.name) | join(', ') }}</strong>
                     </mj-text>
                     <mj-text align="center" font-size="20px" color="#1E1F44">
                         *Remboursement possible en caisse

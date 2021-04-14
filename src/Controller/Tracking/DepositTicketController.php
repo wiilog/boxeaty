@@ -98,6 +98,9 @@ class DepositTicketController extends AbstractController {
             "box" => $box,
             "state" => DepositTicket::VALID,
         ]);
+        $depositTicketValidity = $kiosk->getClient()
+            ? (new DateTime("+" . $kiosk->getClient()->getDepositTicketValidity()."month"))
+            : new DateTime("+1month");
 
         if (((int) $content->state === DepositTicket::VALID) && $alreadyValidTicketOnBoxCount > 0) {
             $form->addError("state", "Un ticket‑consigne valide existe déjà pour la Box " . "<strong>" . $box->getNumber() . "</strong>");
@@ -113,7 +116,7 @@ class DepositTicketController extends AbstractController {
                 ->setBox($box)
                 ->setCreationDate(new DateTime())
                 ->setLocation($kiosk)
-                ->setValidityDate(new DateTime("+{$kiosk->getClient()->getDepositTicketValidity()} month"))
+                ->setValidityDate($depositTicketValidity)
                 ->setNumber($content->number)
                 ->setState($content->state)
                 ->setConsumerEmail($content->emailConsumer ?? null);
