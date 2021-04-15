@@ -4,6 +4,7 @@ namespace App\Controller\Tracking;
 
 use App\Annotation\HasPermission;
 use App\Entity\Box;
+use App\Entity\Client;
 use App\Entity\DepositTicket;
 use App\Entity\Location;
 use App\Entity\Role;
@@ -98,9 +99,12 @@ class DepositTicketController extends AbstractController {
             "box" => $box,
             "state" => DepositTicket::VALID,
         ]);
-        $depositTicketValidity = $kiosk->getClient()
-            ? (new DateTime("+" . $kiosk->getClient()->getDepositTicketValidity()."month"))
-            : new DateTime("+1month");
+
+        $kioskClient = $kiosk->getClient();
+        $depositTicketValidity = $kioskClient
+            ? $kioskClient->getDepositTicketValidity()
+            : Client::DEFAULT_TICKET_VALIDITY;
+        $depositTicketValidityDate = new DateTime("+{$depositTicketValidity}month");
 
         if (((int) $content->state === DepositTicket::VALID) && $alreadyValidTicketOnBoxCount > 0) {
             $form->addError("state", "Un ticket‑consigne valide existe déjà pour la Box " . "<strong>" . $box->getNumber() . "</strong>");
@@ -116,7 +120,7 @@ class DepositTicketController extends AbstractController {
                 ->setBox($box)
                 ->setCreationDate(new DateTime())
                 ->setLocation($kiosk)
-                ->setValidityDate($depositTicketValidity)
+                ->setValidityDate($depositTicketValidityDate)
                 ->setNumber($content->number)
                 ->setState($content->state)
                 ->setConsumerEmail($content->emailConsumer ?? null);

@@ -14,8 +14,10 @@ class Client {
 
     use Active;
 
-    const INACTIVE = 0;
-    const ACTIVE = 1;
+    public const INACTIVE = 0;
+    public const ACTIVE = 1;
+
+    public const DEFAULT_TICKET_VALIDITY = 1;
 
     public const NAMES = [
         self::ACTIVE => 'actif',
@@ -190,7 +192,7 @@ class Client {
     }
 
     public function getDepositTicketValidity(): ?int {
-        return $this->depositTicketValidity;
+        return $this->depositTicketValidity ?? self::DEFAULT_TICKET_VALIDITY;
     }
 
     public function setDepositTicketValidity(?int $depositTicketValidity): self {
