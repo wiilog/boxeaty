@@ -81,7 +81,7 @@
     <div class="col-md-6 col-12">
         <label>
             Validité ticket‑consigne
-            <select class="data" name="depositTicketValidity" data-s2 data-placeholder="Sélectionnez une durée de validité...">
+            <select class="data" name="depositTicketValidity" data-s2 data-placeholder="Sélectionnez une durée de validité..." required>
                 {% for i in 1..24 %}
                     <option value="{{ i }}" {{ i == client.depositTicketValidity or not client.depositTicketValidity and i == 3 ? 'selected' }}>
                         {{ i }} mois
