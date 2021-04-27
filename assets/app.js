@@ -121,10 +121,15 @@ $document.ready(() => {
     if($currentUser.exists()) {
         $(`.current-user`).click(() => {
             const ajax = AJAX.route(`POST`, `user_edit_template`, {
-                user: $currentUser.val()
+                user: $currentUser.val(),
+            });
+            $(document).on(`click`, `button.change-password`, function() {
+                $(this).parents(`.modal`).find(`div.change-password`).slideToggle();
             });
 
-            Modal.load(ajax)
+            Modal.load(ajax);
         });
     }
+
+
 })
