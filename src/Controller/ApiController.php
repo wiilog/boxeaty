@@ -9,7 +9,7 @@ use App\Entity\GlobalSetting;
 use App\Entity\Location;
 use App\Entity\User;
 use WiiCommon\Helper\Stream;
-use App\Helper\StringHelper;
+use WiiCommon\Helper\StringHelper;
 use App\Service\BoxRecordService;
 use App\Service\Mailer;
 use DateTime;

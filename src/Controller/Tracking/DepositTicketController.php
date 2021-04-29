@@ -10,7 +10,7 @@ use App\Entity\Location;
 use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
-use App\Helper\StringHelper;
+use WiiCommon\Helper\StringHelper;
 use App\Repository\DepositTicketRepository;
 use App\Service\ExportService;
 use App\Service\Mailer;

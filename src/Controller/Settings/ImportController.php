@@ -8,7 +8,7 @@ use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use WiiCommon\Helper\Stream;
-use App\Helper\StringHelper;
+use WiiCommon\Helper\StringHelper;
 use App\Repository\ImportRepository;
 use App\Service\ImportService;
 use DateTime;
