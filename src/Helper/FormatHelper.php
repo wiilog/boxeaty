@@ -2,6 +2,7 @@
 
 namespace App\Helper;
 
+use WiiCommon\Helper\Stream;
 use App\Entity\User;
 use DateTimeInterface;
 

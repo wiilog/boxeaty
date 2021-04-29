@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Entity\Box;
 use App\Entity\DepositTicket;
-use App\Helper\Stream;
+use WiiCommon\Helper\Stream;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;

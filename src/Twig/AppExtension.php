@@ -3,7 +3,7 @@
 namespace App\Twig;
 
 use App\Helper\FormatHelper;
-use App\Helper\Stream;
+use WiiCommon\Helper\Stream;
 use App\Service\RoleService;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;

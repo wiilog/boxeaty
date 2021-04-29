@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Helper\Stream;
+use WiiCommon\Helper\Stream;
 use App\Repository\LocationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

@@ -8,7 +8,7 @@ use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
 use App\Entity\User;
-use App\Helper\Stream;
+use WiiCommon\Helper\Stream;
 use App\Helper\StringHelper;
 use App\Service\BoxRecordService;
 use App\Service\Mailer;

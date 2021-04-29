@@ -7,7 +7,7 @@ use App\Entity\Import;
 use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
-use App\Helper\Stream;
+use WiiCommon\Helper\Stream;
 use App\Helper\StringHelper;
 use App\Repository\ImportRepository;
 use App\Service\ImportService;

@@ -12,7 +12,7 @@ use App\Entity\Role;
 use App\Entity\BoxRecord;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
-use App\Helper\Stream;
+use WiiCommon\Helper\Stream;
 use App\Repository\BoxRepository;
 use App\Service\BoxRecordService;
 use App\Service\ExportService;
