@@ -7,7 +7,7 @@ use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
-use App\Helper\StringHelper;
+use WiiCommon\Helper\StringHelper;
 use App\Repository\RoleRepository;
 use App\Service\ExportService;
 use DateTime;

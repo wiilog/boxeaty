@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Entity\GlobalSetting;
 use App\Entity\User;
-use App\Helper\Stream;
+use WiiCommon\Helper\Stream;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\MailerInterface;

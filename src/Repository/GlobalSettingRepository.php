@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\GlobalSetting;
-use App\Helper\Stream;
+use WiiCommon\Helper\Stream;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 

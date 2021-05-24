@@ -3,7 +3,7 @@
 namespace App\Service;
 
 use App\Entity\GlobalSetting;
-use App\Helper\Stream;
+use WiiCommon\Helper\Stream;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
