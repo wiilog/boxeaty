@@ -2,6 +2,7 @@
 
 namespace App\Listener;
 
+use App\Annotation\Authenticated;
 use App\Annotation\HasPermission;
 use App\Service\RoleService;
 use Doctrine\Common\Annotations\AnnotationReader;
@@ -11,6 +12,7 @@ use RuntimeException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Twig\Environment;
 
 class AnnotationListener {
@@ -36,9 +38,25 @@ class AnnotationListener {
             throw new RuntimeException("Failed to read annotation");
         }
 
+        $annotation = $reader->getMethodAnnotation($method, Authenticated::class);
+        if ($annotation instanceof Authenticated) {
+            $this->handleAuthenticated($event);
+        }
+
         $annotation = $reader->getMethodAnnotation($method, HasPermission::class);
         if ($annotation instanceof HasPermission) {
             $this->handleHasPermission($event, $annotation);
+        }
+    }
+
+    private function handleAuthenticated(ControllerArgumentsEvent $event) {
+        $request = $event->getRequest();
+
+        $authorization = $request->headers->get("authorization", "");
+        preg_match("/Bearer (.*)/i", $authorization, $matches);
+
+        if(count($matches) != 2 || $_SERVER["API_AUTHENTICATION_KEY"] != $matches[1]) {
+            throw new UnauthorizedHttpException("no challenge");
         }
     }
 
@@ -53,7 +71,7 @@ class AnnotationListener {
                 } else if ($annotation->mode == HasPermission::IN_RENDER) {
                     return new Response($this->templating->render("security/access_denied.html.twig"));
                 } else {
-                    throw new \RuntimeException("Unknown mode $annotation->mode");
+                    throw new RuntimeException("Unknown mode $annotation->mode");
                 }
             });
         }

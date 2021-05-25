@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Annotation\Authenticated;
 use App\Entity\Box;
 use App\Entity\Client;
 use App\Entity\DepositTicket;
@@ -37,11 +38,11 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/config", name="api_config")
+     * @Authenticated()
      */
     public function config(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
-        $client = null;
         if (isset($content->id)) {
             $kiosk = $manager->getRepository(Location::class)->find($content->id);
 
@@ -66,6 +67,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/kiosks", name="api_kiosks")
+     * @Authenticated()
      */
     public function kiosks(EntityManagerInterface $manager): Response {
         $kiosks = Stream::from($manager->getRepository(Location::class)->findBy(["kiosk" => true]))
@@ -80,6 +82,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/check-code", name="api_check_code")
+     * @Authenticated()
      */
     public function checkCode(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
@@ -99,6 +102,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/kiosks/{kiosk}", name="api_get_kiosks", requirements={"kiosk"="\d+"}, methods={"GET"})
+     * @Authenticated()
      */
     public function kiosk(Location $kiosk): Response {
         if ($kiosk && $kiosk->isKiosk()) {
@@ -127,6 +131,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/kiosks/empty", name="api_empty_kiosk", options={"expose": true})
+     * @Authenticated()
      */
     public function emptyKiosk(Request $request,
                                BoxRecordService $boxRecordService,
@@ -176,6 +181,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/box/retrieve", name="api_retrieve_box")
+     * @Authenticated()
      */
     public function retrieveBox(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
@@ -202,6 +208,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/box/drop", name="api_drop_box")
+     * @Authenticated()
      */
     public function dropBox(Request $request,
                             BoxRecordService $boxRecordService,
@@ -270,6 +277,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/deposit-ticket/statistics", name="api_deposit_ticket_statistics")
+     * @Authenticated()
      */
     public function depositTicketStatistics(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
@@ -298,6 +306,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/deposit-ticket/mail", name="api_deposit_ticket_mail")
+     * @Authenticated()
      */
     public function mailDepositTicket(Request $request, EntityManagerInterface $manager, Mailer $mailer): Response {
         $content = json_decode($request->getContent());
@@ -340,6 +349,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/deposit-ticket/print", name="api_deposit_ticket_print")
+     * @Authenticated()
      */
     public function depositTicketPrint(Request $request): Response {
         $ticket = $this->createDepositTicket(json_decode($request->getContent()));
@@ -355,6 +365,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/deposit-ticket/image/{ticket}", name="api_deposit_ticket_image")
+     * @Authenticated()
      */
     public function depositTicketImage(Image $snappy, DepositTicket $ticket): Response {
         $client = $ticket->getLocation() ? $ticket->getLocation()->getClient() : null;
