@@ -33,7 +33,7 @@ class DefaultController extends AbstractController {
 
     /**
      * @Route("/export", name="export")
-     * @HasPermission(Role::GENERAL_EXPORT)
+     * @HasPermission(Role::MANAGE_EXPORTS)
      */
     public function export(ExportService $exportService): Response {
         $spreadsheet = new Spreadsheet();

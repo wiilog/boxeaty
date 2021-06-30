@@ -1,7 +1,7 @@
 {% extends 'template.html.twig' %}
 
 {% set display_new_command = has_permission(constant('App\\Entity\\Role::SHOW_NEW_ORDER_ON_HOME')) %}
-{% set display_export = has_permission(constant('App\\Entity\\Role::GENERAL_EXPORT')) %}
+{% set display_export = has_permission(constant('App\\Entity\\Role::MANAGE_EXPORTS')) %}
 
 {% block menu %}{{ display_new_command and not display_export ? 'Traçabilité' : 'Accueil' }}{% endblock %}
 {% block page %}{{ display_new_command and not display_export ? 'Nouvelle commande' }}{% endblock %}

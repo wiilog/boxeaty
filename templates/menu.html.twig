@@ -15,11 +15,15 @@
         {% elseif item.type == "category" %}
             <div class="category">
                 <i class="chevron fas fa-chevron-left"></i>
-                <i class="icon {% if item.icon is defined %}fas fa-{{ item.icon }}{% endif %}"></i> {{ item.name }}
+                {% if item.icon.type is defined %}
+                    <i class="icon {% if item.icon.name is defined %}bxi bxi-{{ item.icon.name }}{% endif %}"></i> {{ item.name }}
+                {% else %}
+                    <i class="icon {% if item.icon is defined %}fas fa-{{ item.icon }}{% endif %}"></i> {{ item.name }}
+                {% endif %}
 
                 <div class="category-dropdown" style="display:none">
                     {% for subitem in item.items %}
-                        <a href="{{ path(subitem.route) }}">{{ subitem.name }}</a>
+                        <a href="{{ subitem.route is defined ? path(subitem.route) }}">{{ subitem.name }}</a>
                     {% endfor %}
                 </div>
             </div>
