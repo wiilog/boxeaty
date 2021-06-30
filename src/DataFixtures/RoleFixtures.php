@@ -40,9 +40,15 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
             Role::MANAGE_COUNTER_ORDERS,
             Role::MANAGE_DEPOSITORIES,
             Role::MANAGE_COUNTER_ORDERS,
+            Role::VIEW_ALL_ORDERS,
+            Role::CREATE_CLIENT_ORDERS,
             Role::MANAGE_CLIENT_ORDERS,
-            Role::MANAGE_INDICATORS,
+            Role::VIEW_INDICATORS,
             Role::MANAGE_PLANNING,
+            Role::TREAT_PREPARATIONS,
+            Role::TREAT_DELIVERIES,
+            Role::TREAT_RECEPTIONS,
+            Role::TREAT_COLLECTS,
         ],
     ];
 
@@ -60,6 +66,7 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
                     ->setAllowEditOwnGroupOnly(false)
                     ->setReceiveMailsNewAccounts($config["emailsNewAccounts"])
                     ->setShowNewOrderOnHome(false)
+                    ->setShowIndicatorsOnHome(false)
                     ->setActive(true);
 
                 $output->writeln("Created role \"{$role->getName()}\"");

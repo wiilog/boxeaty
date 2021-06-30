@@ -10,19 +10,32 @@ parameters:
     Menu Traçabilité:
       App\Entity\Role::MANAGE_BOXES: Créer, modifier, supprimer les Box
       App\Entity\Role::MANAGE_MOVEMENTS: Créer, modifier, supprimer les mouvement
-      App\Entity\Role::MANAGE_COUNTER_ORDERS: Créer, modifier, supprimer les commandes comptoir
       App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer, supprimer les tickets‑consignes
+
+    Menu Opérations:
+      App\Entity\Role::VIEW_ALL_ORDERS: Voir toutes les commandes
+      App\Entity\Role::CREATE_CLIENT_ORDERS: Gérer les commandes client
+      App\Entity\Role::MANAGE_CLIENT_ORDERS: Gérer les commandes client
+      App\Entity\Role::MANAGE_COUNTER_ORDERS: Créer, modifier, supprimer les commandes comptoir
+      App\Entity\Role::VIEW_INDICATORS: Voir les indicateurs
 
     Menu Référentiel:
       App\Entity\Role::MANAGE_CLIENTS: Créer, modifier, supprimer les clients
       App\Entity\Role::MANAGE_GROUPS: Créer, modifier les groupes
       App\Entity\Role::MANAGE_LOCATIONS: Créer, modifier, supprimer les emplacements
       App\Entity\Role::MANAGE_BOX_TYPES: Créer, modifier les types de Box
+      App\Entity\Role::MANAGE_DEPOSITORIES: Créer, modifier les dépôts
 
     Autre:
       App\Entity\Role::MANAGE_SETTINGS: Paramétrage global
-      App\Entity\Role::MANAGE_EXPORTS: Export général
+      App\Entity\Role::MANAGE_EXPORTS: Exports de données
       App\Entity\Role::MANAGE_QUALITIES: Créer, modifier les qualités
+
+    Application mobile:
+      App\Entity\Role::TREAT_PREPARATIONS: Traiter des préparations
+      App\Entity\Role::TREAT_DELIVERIES: Traiter des livraisons
+      App\Entity\Role::TREAT_RECEPTIONS: Traiter des réceptions
+      App\Entity\Role::TREAT_COLLECTS: Traiter toutes les collectes
 
 
   menu:
@@ -44,7 +57,7 @@ parameters:
           permission: App\Entity\Role::MANAGE_MOVEMENTS
           route: tracking_movements_list
         - name: Indicateurs
-          permission: App\Entity\Role::MANAGE_INDICATORS
+          permission: App\Entity\Role::VIEW_INDICATORS
           #route: indicators
     - name: Opérations
       icon:
@@ -56,7 +69,7 @@ parameters:
           permission: App\Entity\Role::MANAGE_COUNTER_ORDERS
           route: counter_orders_list
         - name: Commande client
-          permission: App\Entity\Role::MANAGE_CLIENT_ORDERS
+          permission: [App\Entity\Role::CREATE_CLIENT_ORDERS, App\Entity\Role::MANAGE_CLIENT_ORDERS]
           #route: client_orders_list
         - name: Planification
           permission: App\Entity\Role::MANAGE_PLANNING

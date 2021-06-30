@@ -20,6 +20,7 @@ class RoleService {
                 if(in_array($permission, Role::ADDITIONAL_PERMISSIONS)) {
                     if($permission === Role::ALLOW_EDIT_OWN_GROUP_ONLY && !$role->isAllowEditOwnGroupOnly()
                         || $permission === Role::SHOW_NEW_ORDER_ON_HOME && !$role->getShowNewOrderOnHome()
+                        || $permission === Role::SHOW_INDICATORS_ON_HOME && !$role->getShowIndicatorsOnHome()
                         || $permission === Role::RECEIVE_MAILS_NEW_ACCOUNTS && !$role->isReceiveMailsNewAccounts()) {
                         return false;
                     }
