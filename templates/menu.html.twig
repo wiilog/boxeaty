@@ -23,7 +23,7 @@
 
                 <div class="category-dropdown" style="display:none">
                     {% for subitem in item.items %}
-                        <a href="{{ subitem.route is defined ? path(subitem.route) }}">{{ subitem.name }}</a>
+                        <a href="{{ subitem.route is defined ? path(subitem.route) : '#' }}">{{ subitem.name }}</a>
                     {% endfor %}
                 </div>
             </div>

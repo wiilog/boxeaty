@@ -30,7 +30,7 @@ class SelectController extends AbstractController {
     }
 
     /**
-     * @Route("/select/commande/box", name="ajax_select_order_boxes", options={"expose": true})
+     * @Route("/select/commande-comptoir/box", name="ajax_select_counter_order_boxes", options={"expose": true})
      */
     public function orderBoxes(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(Box::class)->getForOrderSelect(
@@ -45,7 +45,7 @@ class SelectController extends AbstractController {
     }
 
     /**
-     * @Route("/select/commande/ticket-consigne", name="ajax_select_order_deposit_tickets", options={"expose": true})
+     * @Route("/select/commande-comptoir/ticket-consigne", name="ajax_select_counter_order_deposit_tickets", options={"expose": true})
      */
     public function orderDepositTickets(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(DepositTicket::class)->getForOrderSelect(

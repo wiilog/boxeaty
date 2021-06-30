@@ -1,11 +1,11 @@
 {% extends 'template.html.twig' %}
 
 {% block menu %}Traçabilité{% endblock %}
-{% block page %}Commandes{% endblock %}
+{% block page %}Commandes comptoir{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
-    {{ encore_entry_link_tags('order') }}
+    {{ encore_entry_link_tags('counter_order') }}
 {% endblock %}
 
 {% block content %}
@@ -24,9 +24,9 @@
         </table>
     </div>
 
-    {% include 'tracking/order/modal/delete.html.twig' %}
+    {% include 'tracking/counter_order/modal/delete.html.twig' %}
 {% endblock %}
 
 {% block javascripts %}
-    {{ encore_entry_script_tags('order_list') }}
+    {{ encore_entry_script_tags('counter_order_list') }}
 {% endblock %}

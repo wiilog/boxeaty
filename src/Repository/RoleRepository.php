@@ -29,23 +29,22 @@ class RoleRepository extends EntityRepository {
     public function findForDatatable(array $params): array {
         $search = $params["search"]["value"] ?? null;
 
-        $qb = $this->createQueryBuilder("role");
-        $total = QueryHelper::count($qb, "role");
-        $qb
+        $qb = $this->createQueryBuilder("role")
             ->andWhere("role.code NOT LIKE :no_access")
-            ->setParameter('no_access', Role::ROLE_NO_ACCESS);
+            ->setParameter('no_access', Role::ROLE_NO_ACCESS);;
+        $total = QueryHelper::count($qb, "role");
+
         if ($search) {
             $qb->andWhere("role.name LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 
-        if (!empty($params['order'])) {
+        if (!empty($params["order"])) {
             foreach ($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("role.$column", $order["dir"]);
             }
-        }
-        else {
+        } else {
             foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("role.$column", $dir);
             }

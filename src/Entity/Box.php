@@ -100,7 +100,7 @@ class Box {
     private Collection $depositTickets;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Order::class, mappedBy="boxes")
+     * @ORM\ManyToMany(targetEntity=CounterOrder::class, mappedBy="boxes")
      */
     private Collection $orders;
 
@@ -286,13 +286,13 @@ class Box {
     }
 
     /**
-     * @return Collection|Order[]
+     * @return Collection|CounterOrder[]
      */
     public function getOrders(): Collection {
         return $this->orders;
     }
 
-    public function addOrder(Order $order): self {
+    public function addOrder(CounterOrder $order): self {
         if (!$this->orders->contains($order)) {
             $this->orders[] = $order;
             $order->addBox($this);
@@ -301,7 +301,7 @@ class Box {
         return $this;
     }
 
-    public function removeOrder(Order $order): self {
+    public function removeOrder(CounterOrder $order): self {
         if ($this->orders->removeElement($order)) {
             $order->removeBox($this);
         }
@@ -317,12 +317,12 @@ class Box {
             ->setComment($record->getComment());
     }
 
-    public function getCreationDate(): ?\DateTimeInterface
+    public function getCreationDate(): ?DateTime
     {
         return $this->creationDate;
     }
 
-    public function setCreationDate(\DateTimeInterface $creationDate): self
+    public function setCreationDate(DateTime $creationDate): self
     {
         $this->creationDate = $creationDate;
 

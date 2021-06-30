@@ -5,13 +5,13 @@ namespace App\Controller\Tracking;
 use App\Annotation\HasPermission;
 use App\Entity\Box;
 use App\Entity\DepositTicket;
-use App\Entity\Order;
+use App\Entity\CounterOrder;
 use App\Entity\Role;
 use App\Entity\BoxRecord;
 use App\Helper\FormatHelper;
-use App\Repository\OrderRepository;
+use App\Repository\CounterOrderRepository;
 use App\Service\BoxRecordService;
-use App\Service\OrderService;
+use App\Service\CounterOrderService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,35 +21,35 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/tracabilite/commande")
+ * @Route("/tracabilite/commande-comptoir")
  */
-class OrderController extends AbstractController {
+class CounterOrderController extends AbstractController {
 
     /** @Required */
-    public OrderService $service;
+    public CounterOrderService $service;
 
     /**
-     * @Route("/liste", name="orders_list")
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @Route("/liste", name="counter_orders_list")
+     * @HasPermission(Role::MANAGE_COUNTER_ORDERS)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
-        return $this->render("tracking/order/index.html.twig", [
-            "new_order" => new Order(),
+        return $this->render("tracking/counter_order/index.html.twig", [
+            "new_order" => new CounterOrder(),
             "initial_orders" => $this->api($request, $manager)->getContent(),
-            "orders_order" => OrderRepository::DEFAULT_DATATABLE_ORDER,
+            "orders_order" => CounterOrderRepository::DEFAULT_DATATABLE_ORDER,
         ]);
     }
 
     /**
-     * @Route("/api", name="orders_api", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @Route("/api", name="counter_orders_api", options={"expose": true})
+     * @HasPermission(Role::MANAGE_COUNTER_ORDERS)
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
-        $orders = $manager->getRepository(Order::class)
+        $orders = $manager->getRepository(CounterOrder::class)
             ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
-        /** @var Order $order */
+        /** @var CounterOrder $order */
         foreach ($orders["data"] as $order) {
             $data[] = [
                 "id" => $order->getId(),
@@ -76,8 +76,8 @@ class OrderController extends AbstractController {
     }
 
     /**
-     * @Route("/info/{type}/{number}", name="order_info", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @Route("/info/{type}/{number}", name="counter_order_info", options={"expose": true})
+     * @HasPermission(Role::MANAGE_COUNTER_ORDERS)
      */
     public function info(EntityManagerInterface $manager, string $type, string $number): Response {
         if ($type === "box") {
@@ -142,16 +142,16 @@ class OrderController extends AbstractController {
     }
 
     /**
-     * @Route("/template/box", name="order_boxes_template", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @Route("/template/box", name="counter_order_boxes_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_COUNTER_ORDERS)
      */
     public function boxesTemplate(): Response {
         return $this->json($this->service->renderBoxes());
     }
 
     /**
-     * @Route("/submit/box", name="order_boxes_submit", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @Route("/submit/box", name="counter_order_boxes_submit", options={"expose": true})
+     * @HasPermission(Role::MANAGE_COUNTER_ORDERS)
      */
     public function boxes(): Response {
         $this->service->update(Box::class);
@@ -163,16 +163,16 @@ class OrderController extends AbstractController {
     }
 
     /**
-     * @Route("/template/deposit-ticket", name="order_deposit_tickets_template", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @Route("/template/deposit-ticket", name="counter_order_deposit_tickets_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_COUNTER_ORDERS)
      */
     public function depositTicketsTemplate(): Response {
         return $this->json($this->service->renderDepositTickets());
     }
 
     /**
-     * @Route("/submit/deposit-ticket", name="order_deposit_tickets_submit", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @Route("/submit/deposit-ticket", name="counter_order_deposit_tickets_submit", options={"expose": true})
+     * @HasPermission(Role::MANAGE_COUNTER_ORDERS)
      */
     public function depositTickets(Request $request): Response {
         $this->service->update(DepositTicket::class);
@@ -190,8 +190,8 @@ class OrderController extends AbstractController {
     }
 
     /**
-     * @Route("/submit/confirmation", name="order_confirm", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @Route("/submit/confirmation", name="counter_order_confirm", options={"expose": true})
+     * @HasPermission(Role::MANAGE_COUNTER_ORDERS)
      */
     public function confirm(Request $request, EntityManagerInterface $manager, BoxRecordService $boxRecordService): Response {
         if ($request->request->get("previous", 0)) {
@@ -207,13 +207,13 @@ class OrderController extends AbstractController {
         if (empty($boxes) && empty($tickets)) {
             return $this->json([
                 "success" => true,
-                "message" => "La commande ne peut pas être vide",
+                "message" => "La commande comptoir ne peut pas être vide",
             ]);
         }
 
         $client = isset($boxes[0]) ? $boxes[0]->getOwner() : null;
 
-        $order = (new Order())
+        $order = (new CounterOrder())
             ->setLocation(isset($boxes[0]) ? $boxes[0]->getLocation() : null)
             ->setUser($this->getUser())
             ->setClient($client)
@@ -268,14 +268,14 @@ class OrderController extends AbstractController {
     }
 
     /**
-     * @Route("/supprimer", name="order_delete", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @Route("/supprimer", name="counter_order_delete", options={"expose": true})
+     * @HasPermission(Role::MANAGE_COUNTER_ORDERS)
      */
     public function delete(Request $request,
                            BoxRecordService $boxRecordService,
                            EntityManagerInterface $manager): Response {
         $content = (object)$request->request->all();
-        $order = $manager->getRepository(Order::class)->find($content->id);
+        $order = $manager->getRepository(CounterOrder::class)->find($content->id);
 
         if ($order) {
             foreach ($order->getBoxes() as $box) {
@@ -318,13 +318,13 @@ class OrderController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "message" => "Commande supprimée avec succès"
+                "message" => "Commande comptoir supprimée avec succès"
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "message" => "Cette commande n'existe pas"
+                "message" => "Cette commande comptoir n'existe pas"
             ]);
         }
     }

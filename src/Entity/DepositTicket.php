@@ -72,7 +72,7 @@ class DepositTicket {
     private ?Location $location = null;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Order::class, mappedBy="depositTickets")
+     * @ORM\ManyToMany(targetEntity=CounterOrder::class, mappedBy="depositTickets")
      */
     private Collection $orders;
 
@@ -160,14 +160,14 @@ class DepositTicket {
     }
 
     /**
-     * @return Collection|Order[]
+     * @return Collection|CounterOrder[]
      */
     public function getOrders(): Collection
     {
         return $this->orders;
     }
 
-    public function addOrder(Order $order): self
+    public function addOrder(CounterOrder $order): self
     {
         if (!$this->orders->contains($order)) {
             $this->orders[] = $order;
@@ -177,7 +177,7 @@ class DepositTicket {
         return $this;
     }
 
-    public function removeOrder(Order $order): self
+    public function removeOrder(CounterOrder $order): self
     {
         if ($this->orders->removeElement($order)) {
             $order->removeDepositTicket($this);

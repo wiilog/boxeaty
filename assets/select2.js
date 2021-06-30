@@ -13,8 +13,8 @@ const ROUTES = {
     location: `ajax_select_locations`,
     type: `ajax_select_type`,
     quality: `ajax_select_quality`,
-    orderBox: `ajax_select_order_boxes`,
-    orderDepositTicket: `ajax_select_order_deposit_tickets`,
+    orderBox: `ajax_select_counter_order_boxes`,
+    orderDepositTicket: `ajax_select_counter_order_deposit_tickets`,
 }
 
 const INSTANT_SELECT_TYPES = {
