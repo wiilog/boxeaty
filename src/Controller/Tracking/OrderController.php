@@ -30,7 +30,7 @@ class OrderController extends AbstractController {
 
     /**
      * @Route("/liste", name="orders_list")
-     * @HasPermission(Role::MANAGE_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @HasPermission(Role::MANAGE_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("tracking/order/index.html.twig", [
@@ -42,7 +42,7 @@ class OrderController extends AbstractController {
 
     /**
      * @Route("/api", name="orders_api", options={"expose": true})
-     * @HasPermission(Role::MANAGE_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @HasPermission(Role::MANAGE_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $orders = $manager->getRepository(Order::class)
@@ -77,7 +77,7 @@ class OrderController extends AbstractController {
 
     /**
      * @Route("/info/{type}/{number}", name="order_info", options={"expose": true})
-     * @HasPermission(Role::MANAGE_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @HasPermission(Role::MANAGE_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
      */
     public function info(EntityManagerInterface $manager, string $type, string $number): Response {
         if ($type === "box") {
@@ -143,7 +143,7 @@ class OrderController extends AbstractController {
 
     /**
      * @Route("/template/box", name="order_boxes_template", options={"expose": true})
-     * @HasPermission(Role::MANAGE_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @HasPermission(Role::MANAGE_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
      */
     public function boxesTemplate(): Response {
         return $this->json($this->service->renderBoxes());
@@ -151,7 +151,7 @@ class OrderController extends AbstractController {
 
     /**
      * @Route("/submit/box", name="order_boxes_submit", options={"expose": true})
-     * @HasPermission(Role::MANAGE_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @HasPermission(Role::MANAGE_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
      */
     public function boxes(): Response {
         $this->service->update(Box::class);
@@ -164,7 +164,7 @@ class OrderController extends AbstractController {
 
     /**
      * @Route("/template/deposit-ticket", name="order_deposit_tickets_template", options={"expose": true})
-     * @HasPermission(Role::MANAGE_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @HasPermission(Role::MANAGE_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
      */
     public function depositTicketsTemplate(): Response {
         return $this->json($this->service->renderDepositTickets());
@@ -172,7 +172,7 @@ class OrderController extends AbstractController {
 
     /**
      * @Route("/submit/deposit-ticket", name="order_deposit_tickets_submit", options={"expose": true})
-     * @HasPermission(Role::MANAGE_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @HasPermission(Role::MANAGE_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
      */
     public function depositTickets(Request $request): Response {
         $this->service->update(DepositTicket::class);
@@ -191,7 +191,7 @@ class OrderController extends AbstractController {
 
     /**
      * @Route("/submit/confirmation", name="order_confirm", options={"expose": true})
-     * @HasPermission(Role::MANAGE_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @HasPermission(Role::MANAGE_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
      */
     public function confirm(Request $request, EntityManagerInterface $manager, BoxRecordService $boxRecordService): Response {
         if ($request->request->get("previous", 0)) {
@@ -269,7 +269,7 @@ class OrderController extends AbstractController {
 
     /**
      * @Route("/supprimer", name="order_delete", options={"expose": true})
-     * @HasPermission(Role::MANAGE_ORDERS, Role::SHOW_NEW_ORDER_ON_HOME)
+     * @HasPermission(Role::MANAGE_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
      */
     public function delete(Request $request,
                            BoxRecordService $boxRecordService,

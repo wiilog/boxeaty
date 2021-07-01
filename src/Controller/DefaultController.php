@@ -25,10 +25,11 @@ use Symfony\Component\Routing\Annotation\Route;
 class DefaultController extends AbstractController {
 
     /**
-     * @Route("/accueil", name="home")
+     * @Route("/accueil/{redirection}", name="home", options={"expose": true})
      */
-    public function home(): Response {
-        return $this->render("home.html.twig");
+    public function home($redirection = 0): Response {
+        return $this->render("home.html.twig",[
+        "redirection" => $redirection, ]);
     }
 
     /**

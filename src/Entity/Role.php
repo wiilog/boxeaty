@@ -34,12 +34,12 @@ class Role {
 
     public const ADDITIONAL_PERMISSIONS = [
         self::ALLOW_EDIT_OWN_GROUP_ONLY,
-        self::SHOW_NEW_ORDER_ON_HOME,
+        self::REDIRECT_NEW_COUNTER_ORDER,
         self::RECEIVE_MAILS_NEW_ACCOUNTS,
     ];
 
     public const ALLOW_EDIT_OWN_GROUP_ONLY = "ALLOW_EDIT_OWN_GROUP_ONLY";
-    public const SHOW_NEW_ORDER_ON_HOME = "SHOW_NEW_ORDER_ON_HOME";
+    public const REDIRECT_NEW_COUNTER_ORDER = "REDIRECT_NEW_COUNTER_ORDER";
     public const RECEIVE_MAILS_NEW_ACCOUNTS = "RECEIVE_MAILS_NEW_ACCOUNTS";
 
     use Active;
@@ -74,7 +74,7 @@ class Role {
     /**
      * @ORM\Column(type="boolean")
      */
-    private ?bool $showNewOrderOnHome = null;
+    private ?bool $redirectNewCounterOrder = null;
 
     /**
      * @ORM\Column(type="boolean")
@@ -133,12 +133,12 @@ class Role {
         return $this;
     }
 
-    public function getShowNewOrderOnHome(): ?bool {
-        return $this->showNewOrderOnHome;
+    public function getRedirectNewCounterOrder(): ?bool {
+        return $this->redirectNewCounterOrder;
     }
 
-    public function setShowNewOrderOnHome(?bool $showNewOrderOnHome): self {
-        $this->showNewOrderOnHome = $showNewOrderOnHome;
+    public function setRedirectNewCounterOrder(?bool $redirectNewCounterOrder): self {
+        $this->redirectNewCounterOrder = $redirectNewCounterOrder;
         return $this;
     }
 

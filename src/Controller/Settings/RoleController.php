@@ -92,7 +92,7 @@ class RoleController extends AbstractController {
                 ->setActive($content->active)
                 ->setPermissions(explode(",", $content->permissions))
                 ->setAllowEditOwnGroupOnly($content->allowEditOwnGroupOnly)
-                ->setShowNewOrderOnHome($content->showNewOrderOnHome)
+                ->setRedirectNewCounterOrder($content->redirectNewCounterOrder)
                 ->setReceiveMailsNewAccounts($content->receiveMailsNewAccounts);
 
             if(count($role->getPermissions()) === 0) {
@@ -165,7 +165,7 @@ class RoleController extends AbstractController {
                 ->setActive($content->active)
                 ->setPermissions(explode(",", $content->permissions))
                 ->setAllowEditOwnGroupOnly($content->allowEditOwnGroupOnly)
-                ->setShowNewOrderOnHome($content->showNewOrderOnHome)
+                ->setRedirectNewCounterOrder($content->redirectNewCounterOrder)
                 ->setReceiveMailsNewAccounts($content->receiveMailsNewAccounts);
 
             if(count($role->getPermissions()) === 0) {
