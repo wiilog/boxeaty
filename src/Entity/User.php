@@ -89,11 +89,29 @@ class User implements UserInterface {
      */
     private Collection $orderDepositTickets;
 
+    /**
+     * @ORM\OneToMany(targetEntity=DeliveryRound::class, mappedBy="deliverer")
+     */
+    private Collection $deliveryRounds;
+
+    /**
+     * @ORM\OneToMany(targetEntity=OrderStatusHistory::class, mappedBy="user")
+     */
+    private Collection $orderStatusHistories;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Order::class, mappedBy="requester")
+     */
+    private Collection $orders;
+
     public function __construct() {
         $this->clients = new ArrayCollection();
         $this->boxRecords = new ArrayCollection();
         $this->groups = new ArrayCollection();
         $this->orderDepositTickets = new ArrayCollection();
+        $this->deliveryRounds = new ArrayCollection();
+        $this->orderStatusHistories = new ArrayCollection();
+        $this->order = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -353,6 +371,132 @@ class User implements UserInterface {
             if ($depositTicket->getOrderUser() === $this) {
                 $depositTicket->setOrderUser(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|DeliveryRound[]
+     */
+    public function getDeliveryRounds(): Collection
+    {
+        return $this->deliveryRounds;
+    }
+
+    public function addDeliveryRound(DeliveryRound $deliveryRound): self
+    {
+        if (!$this->deliveryRounds->contains($deliveryRound)) {
+            $this->deliveryRounds[] = $deliveryRound;
+            $deliveryRound->setDeliverer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDeliveryRound(DeliveryRound $deliveryRound): self
+    {
+        if ($this->deliveryRounds->removeElement($deliveryRound)) {
+            // set the owning side to null (unless already changed)
+            if ($deliveryRound->getDeliverer() === $this) {
+                $deliveryRound->setDeliverer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setDeliveryRounds(?array $deliveryRounds): self {
+        foreach($this->getDeliveryRounds()->toArray() as $deliveryRound) {
+            $this->removeDeliveryRound($deliveryRound);
+        }
+
+        $this->deliveryRounds = new ArrayCollection();
+        foreach($deliveryRounds as $deliveryRound) {
+            $this->addDeliveryRound($deliveryRound);
+        }
+
+        return $this;
+    }
+    
+    /**
+     * @return Collection|OrderStatusHistory[]
+     */
+    public function getOrderStatusHistories(): Collection
+    {
+        return $this->orderStatusHistories;
+    }
+
+    public function addOrderStatusHistory(OrderStatusHistory $orderStatusHistory): self
+    {
+        if (!$this->orderStatusHistories->contains($orderStatusHistory)) {
+            $this->orderStatusHistories[] = $orderStatusHistory;
+            $orderStatusHistory->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderStatusHistory(OrderStatusHistory $orderStatusHistory): self
+    {
+        if ($this->orderStatusHistories->removeElement($orderStatusHistory)) {
+            // set the owning side to null (unless already changed)
+            if ($orderStatusHistory->getUser() === $this) {
+                $orderStatusHistory->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setOrderStatusHistories(?array $orderStatusHistories): self {
+        foreach($this->getOrderStatusHistories()->toArray() as $orderStatusHistory) {
+            $this->removeOrderStatusHistory($orderStatusHistory);
+        }
+
+        $this->orderStatusHistories = new ArrayCollection();
+        foreach($orderStatusHistories as $orderStatusHistory) {
+            $this->addOrderStatusHistory($orderStatusHistory);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Order[]
+     */
+    public function getOrders(): ?Order
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): self {
+        if (!$this->orders->contains($order)) {
+            $this->orders[] = $order;
+            $order->setRequester($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): self {
+        if ($this->orders->removeElement($order)) {
+            if ($order->getRequester() === $this) {
+                $order->setRequester(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setOrders(?array $orders): self {
+        foreach($this->getOrders()->toArray() as $order) {
+            $this->removeOrder($order);
+        }
+
+        $this->orders = new ArrayCollection();
+        foreach($orders as $order) {
+            $this->addOrder($order);
         }
 
         return $this;

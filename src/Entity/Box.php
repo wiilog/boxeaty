@@ -109,10 +109,16 @@ class Box {
      */
     private DateTime $creationDate;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Collect::class, mappedBy="boxes")
+     */
+    private Collection $collects;
+
     public function __construct() {
         $this->boxRecords = new ArrayCollection();
         $this->orders = new ArrayCollection();
         $this->creationDate = new DateTime('now');
+        $this->collects = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -325,6 +331,46 @@ class Box {
     public function setCreationDate(\DateTimeInterface $creationDate): self
     {
         $this->creationDate = $creationDate;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Collect[]
+     */
+    public function getCollects(): Collection
+    {
+        return $this->collects;
+    }
+
+    public function addCollect(Collect $collect): self
+    {
+        if (!$this->collects->contains($collect)) {
+            $this->collects[] = $collect;
+            $collect->addBox($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCollect(Collect $collect): self
+    {
+        if ($this->collects->removeElement($collect)) {
+            $collect->removeBox($this);
+        }
+
+        return $this;
+    }
+
+    public function setCollect(?array $collects): self {
+        foreach($this->getCollects()->toArray() as $collect) {
+            $this->removeCollect($collect);
+        }
+
+        $this->collects = new ArrayCollection();
+        foreach($collects as $collect) {
+            $this->addCollect($collect);
+        }
 
         return $this;
     }

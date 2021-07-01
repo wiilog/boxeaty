@@ -109,12 +109,64 @@ class Client {
      */
     private Collection $depositTicketsClients;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private ?string $paymentMode;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private ?int $deliveryMode;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Depository::class, mappedBy="client")
+     */
+    private Collection $depositories;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private ?float $distance;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private ?int $tokens;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $closedParcOrder;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private ?float $servicePrice;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private ?float $deliveryPriceWorkingDay;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private ?float $deliveryPriceOffDay;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=OrderType::class, inversedBy="clients")
+     */
+    private Collection $orderType;
+
     public function __construct() {
         $this->users = new ArrayCollection();
         $this->kiosks = new ArrayCollection();
         $this->clients = new ArrayCollection();
         $this->boxes = new ArrayCollection();
         $this->depositTicketsClients = new ArrayCollection();
+        $this->depositories = new ArrayCollection();
+        $this->orderType = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -373,6 +425,185 @@ class Client {
     public function setOutLocation(?Location $outLocation): self
     {
         $this->outLocation = $outLocation;
+
+        return $this;
+    }
+
+    public function getPaymentMode(): ?string
+    {
+        return $this->paymentMode;
+    }
+
+    public function setPaymentMode(string $paymentMode): self
+    {
+        $this->paymentMode = $paymentMode;
+
+        return $this;
+    }
+
+    public function getDeliveryMode(): ?int
+    {
+        return $this->deliveryMode;
+    }
+
+    public function setDeliveryMode(int $deliveryMode): self
+    {
+        $this->deliveryMode = $deliveryMode;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Depository[]
+     */
+    public function getDepositories(): Collection
+    {
+        return $this->depositories;
+    }
+
+    public function addDepository(Depository $depository): self
+    {
+        if (!$this->depositories->contains($depository)) {
+            $this->depositories[] = $depository;
+            $depository->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDepository(Depository $depository): self
+    {
+        if ($this->depositories->removeElement($depository)) {
+            // set the owning side to null (unless already changed)
+            if ($depository->getClient() === $this) {
+                $depository->setClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setDepositories(?array $depositories): self {
+        foreach($this->getDepositories()->toArray() as $depositorie) {
+            $this->removeDepository($depositorie);
+        }
+
+        $this->depositories = new ArrayCollection();
+        foreach($depositories as $depositorie) {
+            $this->addDepository($depositorie);
+        }
+
+        return $this;
+    }
+
+    public function getDistance(): ?float
+    {
+        return $this->distance;
+    }
+
+    public function setDistance(float $distance): self
+    {
+        $this->distance = $distance;
+
+        return $this;
+    }
+
+    public function getTokens(): ?int
+    {
+        return $this->tokens;
+    }
+
+    public function setTokens(int $tokens): self
+    {
+        $this->tokens = $tokens;
+
+        return $this;
+    }
+
+    public function getClosedParcOrder(): ?bool
+    {
+        return $this->closedParcOrder;
+    }
+
+    public function setClosedParcOrder(bool $closedParcOrder): self
+    {
+        $this->closedParcOrder = $closedParcOrder;
+
+        return $this;
+    }
+
+    public function getServicePrice(): ?float
+    {
+        return $this->servicePrice;
+    }
+
+    public function setServicePrice(float $servicePrice): self
+    {
+        $this->servicePrice = $servicePrice;
+
+        return $this;
+    }
+
+    public function getDeliveryPriceWorkingDay(): ?float
+    {
+        return $this->deliveryPriceWorkingDay;
+    }
+
+    public function setDeliveryPriceWorkingDay(float $deliveryPriceWorkingDay): self
+    {
+        $this->deliveryPriceWorkingDay = $deliveryPriceWorkingDay;
+
+        return $this;
+    }
+
+    public function getDeliveryPriceOffDay(): ?float
+    {
+        return $this->deliveryPriceOffDay;
+    }
+
+    public function setDeliveryPriceOffDay(float $deliveryPriceOffDay): self
+    {
+        $this->deliveryPriceOffDay = $deliveryPriceOffDay;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|OrderType[]
+     */
+    public function getOrderType(): Collection
+    {
+        return $this->orderType;
+    }
+
+    public function addOrderType(OrderType $orderType): self
+    {
+        if (!$this->orderType->contains($orderType)) {
+            $this->orderType[] = $orderType;
+            $orderType->addClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderType(OrderType $orderType): self
+    {
+        if($this->orderType->removeElement($orderType)){
+            $orderType->removeClient($this);
+        }
+
+        return $this;
+    }
+
+    public function setOrderType(?array $orderType): self {
+        foreach($this->getOrderType()->toArray() as $orderTyp) {
+            $this->removeOrderType($orderTyp);
+        }
+
+        $this->orderType = new ArrayCollection();
+        foreach($orderType as $orderTyp) {
+            $this->addOrderType($orderTyp);
+        }
 
         return $this;
     }
