@@ -2,44 +2,43 @@
 
 namespace App\Entity;
 
-use App\Repository\OrderRepository;
+use App\Repository\CounterOrderRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=OrderRepository::class)
- * @ORM\Table(name="`order`")
+ * @ORM\Entity(repositoryClass=CounterOrderRepository::class)
  */
-class Order {
+class CounterOrder {
 
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
+    private ?int $id = null;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private ?DateTime $date;
+    private ?DateTime $date = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Client::class)
      */
-    private ?Client $client;
+    private ?Client $client = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Location::class)
      */
-    private ?Location $location;
+    private ?Location $location = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      */
-    private ?User $user;
+    private ?User $user = null;
 
     /**
      * @ORM\ManyToMany(targetEntity=Box::class, inversedBy="orders")
@@ -54,12 +53,12 @@ class Order {
     /**
      * @ORM\Column(type="decimal", precision=5, scale=2)
      */
-    private ?string $boxPrice;
+    private ?string $boxPrice = null;
 
     /**
      * @ORM\Column(type="decimal", precision=5, scale=2)
      */
-    private ?string $depositTicketPrice;
+    private ?string $depositTicketPrice = null;
 
     /**
      * @ORM\Column(type="integer")

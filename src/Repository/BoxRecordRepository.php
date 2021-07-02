@@ -90,7 +90,7 @@ class BoxRecordRepository extends EntityRepository {
             }
         }
 
-        if (!empty($params['order'])) {
+        if (!empty($params["order"])) {
             foreach ($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("record.$column", $order["dir"]);

@@ -15,22 +15,27 @@ class Role {
     public const ROLE_NO_ACCESS = "AUCUN_ACCES";
     public const ROLE_ADMIN = "SUPER_ADMINISTRATEUR";
 
-    public const GENERAL_EXPORT = "GENERAL_EXPORT";
-    public const MANAGE_SETTINGS = "MANAGE_SETTINGS";
-    public const MANAGE_USERS = "MANAGE_USERS";
-    public const MANAGE_ROLES = "MANAGE_ROLES";
-    public const MANAGE_QUALITIES = "MANAGE_QUALITIES";
-    public const MANAGE_IMPORTS = "MANAGE_IMPORTS";
+    public const MANAGE_BOXES = "MANAGE_BOXES";
+    public const MANAGE_DEPOSIT_TICKETS = "MANAGE_DEPOSIT_TICKETS";
+    public const MANAGE_MOVEMENTS = "MANAGE_MOVEMENTS";
+    public const MANAGE_INDICATORS = "MANAGE_INDICATORS";
+
+    public const MANAGE_COUNTER_ORDERS = "MANAGE_COUNTER_ORDERS";
+    public const MANAGE_CLIENT_ORDERS = "MANAGE_CLIENT_ORDERS";
+    public const MANAGE_PLANNING = "MANAGE_PLANNING";
 
     public const MANAGE_CLIENTS = "MANAGE_CLIENTS";
     public const MANAGE_LOCATIONS = "MANAGE_LOCATIONS";
     public const MANAGE_GROUPS = "MANAGE_GROUPS";
     public const MANAGE_BOX_TYPES = "MANAGE_BOX_TYPES";
+    public const MANAGE_DEPOSITORIES = "MANAGE_DEPOSITORIES";
 
-    public const MANAGE_BOXES = "MANAGE_BOXES";
-    public const MANAGE_MOVEMENTS = "MANAGE_MOVEMENTS";
-    public const MANAGE_DEPOSIT_TICKETS = "MANAGE_DEPOSIT_TICKETS";
-    public const MANAGE_ORDERS = "MANAGE_ORDERS";
+    public const MANAGE_EXPORTS = "MANAGE_EXPORTS";
+    public const MANAGE_SETTINGS = "MANAGE_SETTINGS";
+    public const MANAGE_USERS = "MANAGE_USERS";
+    public const MANAGE_ROLES = "MANAGE_ROLES";
+    public const MANAGE_QUALITIES = "MANAGE_QUALITIES";
+    public const MANAGE_IMPORTS = "MANAGE_IMPORTS";
 
     public const ADDITIONAL_PERMISSIONS = [
         self::ALLOW_EDIT_OWN_GROUP_ONLY,

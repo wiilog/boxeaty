@@ -1,5 +1,5 @@
 const Encore = require("@symfony/webpack-encore");
-const CopyPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It"s useful when you use tools that rely on webpack.config.js file.
@@ -26,19 +26,19 @@ Encore
     .addEntry("role_list", "./assets/pages/role-list.js")
     .addEntry("quality_list", "./assets/pages/quality-list.js")
     .addEntry("import_list", "./assets/pages/import-list.js")
-    .addEntry("order_list", "./assets/pages/order-list.js")
-    .addEntry("order", "./assets/pages/order.js")
+    .addEntry("counter_order_list", "./assets/pages/counter-order-list.js")
+    .addEntry("counter_order", "./assets/pages/counter-order.js")
     .autoProvidejQuery()
 
     .addPlugin(new CopyPlugin({
         patterns : [
             {
-                from: 'node_modules/qr-scanner/qr-scanner-worker.min.js',
-                to: 'vendor/qr-scanner-worker.min.js'
+                from: "node_modules/qr-scanner/qr-scanner-worker.min.js",
+                to: "vendor/qr-scanner-worker.min.js"
             },
             {
-                from: 'node_modules/qr-scanner/qr-scanner-worker.min.js.map',
-                to: 'vendor/qr-scanner-worker.min.js.map'
+                from: "node_modules/qr-scanner/qr-scanner-worker.min.js.map",
+                to: "vendor/qr-scanner-worker.min.js.map"
             }
         ]
     }))

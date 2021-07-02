@@ -1,15 +1,15 @@
 {% extends 'template.html.twig' %}
 
 {% set display_new_command = has_permission(constant('App\\Entity\\Role::SHOW_NEW_ORDER_ON_HOME')) %}
-{% set display_export = has_permission(constant('App\\Entity\\Role::GENERAL_EXPORT')) %}
+{% set display_export = has_permission(constant('App\\Entity\\Role::MANAGE_EXPORTS')) %}
 
 {% block menu %}{{ display_new_command and not display_export ? 'Traçabilité' : 'Accueil' }}{% endblock %}
-{% block page %}{{ display_new_command and not display_export ? 'Nouvelle commande' }}{% endblock %}
+{% block page %}{{ display_new_command and not display_export ? 'Nouvelle commande comptoir' }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     {% if display_new_command %}
-        {{ encore_entry_link_tags('order') }}
+        {{ encore_entry_link_tags('counter_order') }}
     {% endif %}
 {% endblock %}
 
@@ -34,7 +34,7 @@
                 </div>
             </div>
 
-            <a href="{{ path('orders_list') }}" class="primary big mt-5 {{ display_export ? 'mb-3' }}">Voir toutes les commandes</a>
+            <a href="{{ path('counter_orders_list') }}" class="primary big mt-5 {{ display_export ? 'mb-3' }}">Voir toutes les commandes comptoir</a>
         {% else %}
             <h1 class="mb-4">Bienvenue !</h1>
         {% endif %}
@@ -48,5 +48,5 @@
 {% endblock %}
 
 {% block javascripts %}
-    {{ encore_entry_script_tags(display_new_command ? 'order' : 'app') }}
+    {{ encore_entry_script_tags(display_new_command ? 'counter_order' : 'app') }}
 {% endblock %}
