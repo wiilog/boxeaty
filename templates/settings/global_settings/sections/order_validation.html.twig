@@ -1,0 +1,29 @@
+<div class="box global-settings">
+    <h1>
+        Validation de commande
+    </h1>
+        <button class="secondary float-end" type="submit">Enregistrer</button>
+    <form>
+        <label>
+            Validation automatique BoxEaty
+        </label>
+        <div class="row">
+            <div class="d-flex align-items-center">
+                <label class="mr-3" for="autoCheck">Commande J+ :</label>
+                <input class="data"
+                       type="number"
+                       name="{{ constant('App\\Entity\\GlobalSetting::VALIDATION_AUTO_DELAY') }}"
+                       value="{{ validAuto.value }}">
+            </div>
+        </div>
+        <div class="row">
+            <div class="d-flex align-items-center">
+                <label class="mr-3" for="minBoxQte">Quantité Box inférieur à :</label>
+                <input class="data"
+                       type="number"
+                       name="{{ constant('App\\Entity\\GlobalSetting::QUANTITY_BOX_INF') }}"
+                       value="{{ qteBoxInf.value }}">
+            </div>
+        </div>
+    </form>
+</div>
