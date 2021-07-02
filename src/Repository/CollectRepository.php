@@ -3,8 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Collect;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityRepository;
 
 /**
  * @method Collect|null find($id, $lockMode = null, $lockVersion = null)
@@ -12,39 +11,6 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Collect[]    findAll()
  * @method Collect[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class CollectRepository extends ServiceEntityRepository
-{
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, Collect::class);
-    }
+class CollectRepository extends EntityRepository {
 
-    // /**
-    //  * @return Collect[] Returns an array of Collect objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Collect
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }
