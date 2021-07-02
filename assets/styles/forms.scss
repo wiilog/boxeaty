@@ -4,6 +4,29 @@
 //temporary should be replaced with custom style
 input:focus, select { outline: none; }
 
+.inline-form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    label {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin: 0 10px;
+        flex-wrap: wrap;
+
+        input, select {
+            width: auto;
+            margin-left: 10px;
+        }
+
+        .invalid-feedback {
+            width: auto;
+        }
+    }
+}
+
 label {
     display: block;
     font-size: 1.2rem;
