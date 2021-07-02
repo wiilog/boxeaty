@@ -36,17 +36,17 @@ class CounterOrder {
     private ?Location $location = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="counterOrders")
      */
     private ?User $user = null;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Box::class, inversedBy="orders")
+     * @ORM\ManyToMany(targetEntity=Box::class, inversedBy="counterOrders")
      */
     private Collection $boxes;
 
     /**
-     * @ORM\ManyToMany(targetEntity=DepositTicket::class, inversedBy="orders")
+     * @ORM\ManyToMany(targetEntity=DepositTicket::class, inversedBy="counterOrders")
      */
     private Collection $depositTickets;
 
@@ -115,7 +115,7 @@ class CounterOrder {
     public function addBox(Box $box): self {
         if (!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
-            $box->addOrder($this);
+            $box->addCounterOrder($this);
         }
 
         return $this;
@@ -123,7 +123,7 @@ class CounterOrder {
 
     public function removeBox(Box $box): self {
         if ($this->boxes->removeElement($box)) {
-            $box->removeOrder($this);
+            $box->removeCounterOrder($this);
         }
 
         return $this;
@@ -142,7 +142,6 @@ class CounterOrder {
         return $this;
     }
 
-
     /**
      * @return Collection|DepositTicket[]
      */
@@ -153,13 +152,16 @@ class CounterOrder {
     public function addDepositTicket(DepositTicket $depositTicket): self {
         if (!$this->depositTickets->contains($depositTicket)) {
             $this->depositTickets[] = $depositTicket;
+            $depositTicket->addCounterOrder($this);
         }
 
         return $this;
     }
 
     public function removeDepositTicket(DepositTicket $depositTicket): self {
-        $this->depositTickets->removeElement($depositTicket);
+        if($this->depositTickets->removeElement($depositTicket)) {
+            $depositTicket->removeCounterOrder($this);
+        }
 
         return $this;
     }
