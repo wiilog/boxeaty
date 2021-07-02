@@ -74,7 +74,7 @@ class DepositTicket {
     /**
      * @ORM\ManyToMany(targetEntity=CounterOrder::class, mappedBy="depositTickets")
      */
-    private Collection $orders;
+    private Collection $counterOrders;
 
     /**
      * @ORM\Column(nullable=true)
@@ -83,7 +83,7 @@ class DepositTicket {
 
     public function __construct()
     {
-        $this->orders = new ArrayCollection();
+        $this->counterOrders = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -162,24 +162,24 @@ class DepositTicket {
     /**
      * @return Collection|CounterOrder[]
      */
-    public function getOrders(): Collection
+    public function getCounterOrders(): Collection
     {
-        return $this->orders;
+        return $this->counterOrders;
     }
 
-    public function addOrder(CounterOrder $order): self
+    public function addCounterOrder(CounterOrder $order): self
     {
-        if (!$this->orders->contains($order)) {
-            $this->orders[] = $order;
+        if (!$this->counterOrders->contains($order)) {
+            $this->counterOrders[] = $order;
             $order->addDepositTicket($this);
         }
 
         return $this;
     }
 
-    public function removeOrder(CounterOrder $order): self
+    public function removeCounterOrder(CounterOrder $order): self
     {
-        if ($this->orders->removeElement($order)) {
+        if ($this->counterOrders->removeElement($order)) {
             $order->removeDepositTicket($this);
         }
 

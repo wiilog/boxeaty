@@ -3,120 +3,103 @@
 namespace App\Entity;
 
 use App\Repository\OrderStatusHistoryRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=OrderStatusHistoryRepository::class)
  */
-class OrderStatusHistory
-{
+class OrderStatusHistory {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
+    private ?int $id = null;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\ManyToOne(targetEntity=ClientOrder::class, inversedBy="orderStatusHistory")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $changement;
+    private ?ClientOrder $order = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Status::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private ?Status $status = null;
 
     /**
      * @ORM\Column(type="text")
      */
-    private $justification;
+    private ?string $justification = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="orderStatusHistories")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private ?User $user;
+    private ?User $user = null;
 
     /**
-     * @ORM\ManyToOne (targetEntity=Status::class, inversedBy="orderStatusHistory")
+     * @ORM\Column(type="datetime")
      */
-    private ?Status $status;
+    private ?DateTime $changedAt = null;
 
-    /**
-     * @ORM\OneToOne(targetEntity=Order::class, inversedBy="orderStatusHistory", cascade={"persist", "remove"})
-     */
-    private ?Order $orderId;
-
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getChangement(): ?\DateTimeInterface
-    {
-        return $this->changement;
+    public function getOrder(): ?ClientOrder {
+        return $this->order;
     }
 
-    public function setChangement(\DateTimeInterface $changement): self
-    {
-        $this->changement = $changement;
+    public function setOrder(?ClientOrder $order): self {
+        if ($this->order && $this->order !== $order) {
+            $this->order->removeOrderStatusHistory($this);
+        }
+        $this->order = $order;
+        if ($order) {
+            $order->addOrderStatusHistory($this);
+        }
 
         return $this;
     }
 
-    public function getJustification(): ?string
-    {
+    public function getStatus(): ?Status {
+        return $this->status;
+    }
+
+    public function setStatus(Status $status): self {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getJustification(): ?string {
         return $this->justification;
     }
 
-    public function setJustification(string $justification): self
-    {
+    public function setJustification(string $justification): self {
         $this->justification = $justification;
 
         return $this;
     }
 
-    public function getUser(): ?User
-    {
+    public function getUser(): ?User {
         return $this->user;
     }
 
-    public function setUser(?User $user): self
-    {
+    public function setUser(?User $user): self {
         $this->user = $user;
 
         return $this;
     }
 
-    public function getStatus(): ?Status
-    {
-        return $this->status;
+    public function getChangedAt(): ?DateTime {
+        return $this->changedAt;
     }
 
-    public function setStatus(Status $status): self
-    {
-        if($this->status && $this->status !== $status) {
-            $this->status->removeOrderStatusHistory($this);
-        }
-        $this->status = $status;
-        if($status) {
-            $status->addOrderStatusHistory($this);
-        }
-
-        return $this;
-    }
-
-    public function getOrderId(): ?Order
-    {
-        return $this->orderId;
-    }
-
-    public function setOrderId(?Order $orderId): self
-    {
-        if($this->orderId && $this->orderId->getOrderStatusHistory() === $this) {
-            $this->orderId->setOrderStatusHistory(null);
-        }
-        $this->orderId = $orderId;
-        if($orderId) {
-            $orderId->setOrderStatusHistory($this);
-        }
+    public function setChangedAt(DateTime $changedAt): self {
+        $this->changedAt = $changedAt;
 
         return $this;
     }

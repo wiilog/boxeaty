@@ -102,12 +102,17 @@ class Box {
     /**
      * @ORM\ManyToMany(targetEntity=CounterOrder::class, mappedBy="boxes")
      */
-    private Collection $orders;
+    private Collection $counterOrders;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=ClientOrder::class, mappedBy="boxes")
+     */
+    private Collection $clientOrders;
 
     /**
      * @ORM\Column(type="datetime", nullable=false)
      */
-    private DateTime $creationDate;
+    private ?DateTime $creationDate;
 
     /**
      * @ORM\ManyToMany(targetEntity=Collect::class, mappedBy="boxes")
@@ -116,9 +121,17 @@ class Box {
 
     public function __construct() {
         $this->boxRecords = new ArrayCollection();
-        $this->orders = new ArrayCollection();
-        $this->creationDate = new DateTime('now');
+        $this->counterOrders = new ArrayCollection();
+        $this->creationDate = new DateTime("now");
         $this->collects = new ArrayCollection();
+    }
+
+    public function fromRecord(BoxRecord $record): self {
+        return $this->setState($record->getState())
+            ->setLocation($record->getLocation())
+            ->setQuality($record->getQuality())
+            ->setOwner($record->getClient())
+            ->setComment($record->getComment());
     }
 
     public function getId(): ?int {
@@ -294,33 +307,49 @@ class Box {
     /**
      * @return Collection|CounterOrder[]
      */
-    public function getOrders(): Collection {
-        return $this->orders;
+    public function getCounterOrders(): Collection {
+        return $this->counterOrders;
     }
 
-    public function addOrder(CounterOrder $order): self {
-        if (!$this->orders->contains($order)) {
-            $this->orders[] = $order;
+    public function addCounterOrder(CounterOrder $order): self {
+        if (!$this->counterOrders->contains($order)) {
+            $this->counterOrders[] = $order;
             $order->addBox($this);
         }
 
         return $this;
     }
 
-    public function removeOrder(CounterOrder $order): self {
-        if ($this->orders->removeElement($order)) {
+    public function removeCounterOrder(CounterOrder $order): self {
+        if ($this->counterOrders->removeElement($order)) {
             $order->removeBox($this);
         }
 
         return $this;
     }
 
-    public function fromRecord(BoxRecord $record): self {
-        return $this->setState($record->getState())
-            ->setLocation($record->getLocation())
-            ->setQuality($record->getQuality())
-            ->setOwner($record->getClient())
-            ->setComment($record->getComment());
+    /**
+     * @return Collection|ClientOrder[]
+     */
+    public function getClientOrders(): Collection {
+        return $this->clientOrders;
+    }
+
+    public function addClientOrder(ClientOrder $order): self {
+        if (!$this->clientOrders->contains($order)) {
+            $this->clientOrders[] = $order;
+            $order->addBox($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClientOrder(ClientOrder $order): self {
+        if ($this->clientOrders->removeElement($order)) {
+            $order->removeBox($this);
+        }
+
+        return $this;
     }
 
     public function getCreationDate(): ?DateTime

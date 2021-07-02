@@ -10,62 +10,61 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=PreparationRepository::class)
  */
-class Preparation
-{
+class Preparation {
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
-
-    /**
-     * @ORM\OneToOne(targetEntity=Depository::class, mappedBy="preparation")
-     */
-    private ?Depository $depository;
+    private ?int $id = null;
 
     /**
      * @ORM\OneToOne(targetEntity=Delivery::class, mappedBy="preparation")
+     * @ORM\JoinColumn(nullable=false)
      */
     private ?Delivery $delivery;
 
-    public function getId(): ?int
-    {
+    /**
+     * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="preparations")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private ?Depository $depository;
+
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getDepository(): ?Depository
-    {
-        return $this->depository;
-    }
-
-    public function setDepository(?Depository $depository): self {
-        if($this->depository && $this->depository->getPreparation() === $this) {
-            $this->depository->setPreparation(null);
-        }
-        $this->depository = $depository;
-        if($depository) {
-            $depository->setPreparation($this);
-        }
-
-        return $this;
-    }
-
-    public function getDelivery(): ?Delivery
-    {
+    public function getDelivery(): ?Delivery {
         return $this->delivery;
     }
 
     public function setDelivery(?Delivery $delivery): self {
-        if($this->delivery && $this->delivery->getPreparation() === $this) {
+        if ($this->delivery && $this->delivery->getPreparation() === $this) {
             $this->delivery->setPreparation(null);
         }
         $this->delivery = $delivery;
-        if($delivery) {
+        if ($delivery) {
             $delivery->setPreparation($this);
         }
 
         return $this;
     }
-    
+
+    public function getDepository(): ?Depository {
+        return $this->depository;
+    }
+
+    public function setDepository(?Depository $depository): self {
+        if ($this->depository && $this->depository !== $depository) {
+            $this->depository->removePreparation($this);
+        }
+        $this->depository = $depository;
+        if ($depository) {
+            $depository->addPreparation($this);
+        }
+
+        return $this;
+    }
+
 }

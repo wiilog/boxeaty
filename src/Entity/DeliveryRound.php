@@ -3,170 +3,126 @@
 namespace App\Entity;
 
 use App\Repository\DeliveryRoundRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=DeliveryRoundRepository::class)
  */
-class DeliveryRound
-{
+class DeliveryRound {
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
+    private ?int $id = null;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\ManyToOne(targetEntity=Status::class)
+     * @ORM\JoinColumn(nullable=false)
      */
-    private ?int $code;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $deliveryMode;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    private ?float $price;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    private ?float $distance;
+    private ?Status $status = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="deliveryRounds")
      * @ORM\JoinColumn(nullable=false)
      */
-    private ?User $deliverer;
+    private ?User $deliverer = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=Depository::class, mappedBy="deliveryRound")
+     * @ORM\Column(type="string", length=255)
      */
-    private Collection $depository;
+    private ?string $deliveryMode = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Status::class, inversedBy="deliveryRounds")
+     * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="deliveryRounds")
      * @ORM\JoinColumn(nullable=false)
      */
-    private ?Status $status;
+    private ?Depository $depository = null;
 
-    public function __construct()
-    {
-        $this->depositories = new ArrayCollection();
-    }
+    /**
+     * @ORM\Column(type="decimal", precision=8, scale=2)
+     */
+    private ?string $cost = null;
 
-    public function getId(): ?int
-    {
+    /**
+     * @ORM\Column(type="decimal", precision=8, scale=2)
+     */
+    private ?string $distance = null;
+
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getCode(): ?int
-    {
-        return $this->code;
+    public function getStatus(): ?Status {
+        return $this->status;
     }
 
-    public function setCode(int $code): self
-    {
-        $this->code = $code;
-
+    public function setStatus(?Status $status): self {
+        $this->status = $status;
         return $this;
     }
 
-    public function getDeliveryMode(): ?string
-    {
-        return $this->deliveryMode;
-    }
-
-    public function setDeliveryMode(string $deliveryMode): self
-    {
-        $this->deliveryMode = $deliveryMode;
-
-        return $this;
-    }
-
-    public function getPrice(): ?float
-    {
-        return $this->price;
-    }
-
-    public function setPrice(float $price): self
-    {
-        $this->price = $price;
-
-        return $this;
-    }
-
-    public function getDistance(): ?float
-    {
-        return $this->distance;
-    }
-
-    public function setDistance(float $distance): self
-    {
-        $this->distance = $distance;
-
-        return $this;
-    }
-
-    public function getDeliverer(): ?User
-    {
+    public function getDeliverer(): ?User {
         return $this->deliverer;
     }
 
-    public function setDeliverer(?User $deliverer): self
-    {
-        if($this->deliverer && $this->deliverer !== $deliverer) {
+    public function setDeliverer(?User $deliverer): self {
+        if ($this->deliverer && $this->deliverer !== $deliverer) {
             $this->deliverer->removeDeliveryRound($this);
         }
         $this->deliverer = $deliverer;
-        if($deliverer) {
+        if ($deliverer) {
             $deliverer->addDeliveryRound($this);
         }
 
         return $this;
     }
 
-    /**
-     * @return Collection|Depository[]
-     */
-    public function getDepository(): Collection
-    {
-        return $this->depositories;
+    public function getDeliveryMode(): ?string {
+        return $this->deliveryMode;
     }
-    
-    public function setDepository(?Depository $depository): self{
-        if($this->depository && $this->depository->getDeliveryRound() === $this) {
-            $this->depository->setDeliveryRound(null);
+
+    public function setDeliveryMode(string $deliveryMode): self {
+        $this->deliveryMode = $deliveryMode;
+
+        return $this;
+    }
+
+    public function getDepository(): ?Depository {
+        return $this->depository;
+    }
+
+    public function setDepository(?Depository $depository): self {
+        if ($this->depository && $this->depository !== $depository) {
+            $this->depository->removeDeliveryRound($this);
         }
         $this->depository = $depository;
-        if($depository) {
-            $depository->setDeliveryRound($this);
+        if ($depository) {
+            $depository->addDeliveryRound($this);
         }
 
         return $this;
     }
 
-    public function getStatus(): ?Status
-    {
-        return $this->status;
+    public function getCost(): ?string {
+        return $this->cost;
     }
 
-    public function setStatus(?Status $status): self
-    {
-        if($this->status && $this->status !== $status) {
-            $this->status->removeDeliveryRound($this);
-        }
-        $this->status = $status;
-        if($status) {
-            $status->addDeliveryRound($this);
-        }
+    public function setCost(string $cost): self {
+        $this->cost = $cost;
 
         return $this;
     }
+
+    public function getDistance(): ?string {
+        return $this->distance;
+    }
+
+    public function setDistance(string $distance): self {
+        $this->distance = $distance;
+
+        return $this;
+    }
+
 }

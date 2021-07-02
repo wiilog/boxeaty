@@ -10,34 +10,33 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=CollectRepository::class)
  */
-class Collect
-{
+class Collect {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
+    private ?int $id = null;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\OneToOne(targetEntity=ClientOrder::class, inversedBy="collect")
      */
-    private ?int $token;
+    private ?ClientOrder $order = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="collects")
      */
-    private ?Location $location;
+    private ?Location $location = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Status::class, inversedBy="collects")
+     * @ORM\ManyToOne(targetEntity=Status::class)
      */
-    private ?Status $status;
+    private ?Status $status = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=Order::class, inversedBy="collect", cascade={"persist", "remove"})
+     * @ORM\Column(type="integer")
      */
-    private ?Order $orderId;
+    private ?int $tokens = null;
 
     /**
      * @ORM\ManyToMany(targetEntity=Box::class, inversedBy="collects")
@@ -45,86 +44,69 @@ class Collect
     private Collection $boxes;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Attachment::class, inversedBy="collects")
+     * @ORM\ManyToOne(targetEntity=Attachment::class)
      */
-    private ?Attachment $signature;
+    private ?Attachment $signature = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Attachment::class, inversedBy="collects")
+     * @ORM\ManyToOne(targetEntity=Attachment::class)
      */
-    private ?Attachment $photo;
+    private ?Attachment $photo = null;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->boxes = new ArrayCollection();
     }
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getToken(): ?int
-    {
-        return $this->token;
+    public function getTokens(): ?int {
+        return $this->tokens;
     }
 
-    public function setToken(int $token): self
-    {
-        $this->token = $token;
+    public function setTokens(int $tokens): self {
+        $this->tokens = $tokens;
 
         return $this;
     }
 
-    public function getLocation(): ?Location
-    {
+    public function getLocation(): ?Location {
         return $this->location;
     }
 
-    public function setLocation(?Location $location): self
-    {
-        if($this->location && $this->location !== $location){
+    public function setLocation(?Location $location): self {
+        if ($this->location && $this->location !== $location) {
             $this->location->removeCollect($this);
         }
         $this->location = $location;
-        if($location){
+        if ($location) {
             $location->addCollect($this);
         }
 
         return $this;
     }
 
-    public function getStatus(): ?Status
-    {
+    public function getStatus(): ?Status {
         return $this->status;
     }
 
-    public function setStatus(?Status $status): self
-    {
-        if($this->status && $this->status !== $status){
-            $this->status->removeCollect($this);
-        }
+    public function setStatus(?Status $status): self {
         $this->status = $status;
-        if($status){
-            $status->addCollect($this);
-        }
-
         return $this;
     }
 
-    public function getOrderId(): ?Order
-    {
-        return $this->orderId;
+    public function getOrder(): ?ClientOrder {
+        return $this->order;
     }
 
-    public function setOrderId(?Order $orderId): self
-    {
-        if($this->orderId && $this->orderId->getCollect() === $this) {
-            $this->orderId->setCollect(null);
+    public function setOrder(?ClientOrder $order): self {
+        if ($this->order && $this->order->getCollect() === $this) {
+            $this->order->setCollect(null);
         }
-        $this->orderId = $orderId;
-        if($orderId) {
-            $orderId->setCollect($this);
+        $this->order = $order;
+        if ($order) {
+            $order->setCollect($this);
         }
 
         return $this;
@@ -133,13 +115,11 @@ class Collect
     /**
      * @return Collection|Box[]
      */
-    public function getBoxes(): Collection
-    {
+    public function getBoxes(): Collection {
         return $this->boxes;
     }
 
-    public function addBox(Box $box): self
-    {
+    public function addBox(Box $box): self {
         if (!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
             $box->addCollect($this);
@@ -148,8 +128,7 @@ class Collect
         return $this;
     }
 
-    public function removeBox(Box $box): self
-    {
+    public function removeBox(Box $box): self {
         if ($this->boxes->removeElement($box)) {
             $box->removeCollect($this);
         }
@@ -157,52 +136,34 @@ class Collect
         return $this;
     }
 
-    public function setBox(?array $boxes): self {
-        foreach($this->getBoxes()->toArray() as $box) {
+    public function setBoxes(?array $boxes): self {
+        foreach ($this->getBoxes()->toArray() as $box) {
             $this->removeBox($box);
         }
 
         $this->boxes = new ArrayCollection();
-        foreach($boxes as $box) {
+        foreach ($boxes as $box) {
             $this->addBox($box);
         }
 
         return $this;
     }
 
-    public function getSignature(): ?Attachment
-    {
+    public function getSignature(): ?Attachment {
         return $this->signature;
     }
 
-    public function setSignature(?Attachment $signature): self
-    {
-        if($this->signature && $this->signature !== $signature) {
-            $this->signature->removeCollect($this);
-        }
+    public function setSignature(?Attachment $signature): self {
         $this->signature = $signature;
-        if($signature) {
-            $signature->addCollect($this);
-        }
-
         return $this;
     }
 
-    public function getPhoto(): ?Attachment
-    {
+    public function getPhoto(): ?Attachment {
         return $this->photo;
     }
 
-    public function setPhoto(?Attachment $photo): self
-    {
-        if($this->photo && $this->photo !== $photo) {
-            $this->photo->removeCollect($this);
-        }
+    public function setPhoto(?Attachment $photo): self {
         $this->photo = $photo;
-        if($photo) {
-            $photo->addCollect($this);
-        }
-
         return $this;
     }
 }
