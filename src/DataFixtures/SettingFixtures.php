@@ -24,8 +24,8 @@ class SettingFixtures extends Fixture implements FixtureGroupInterface {
         GlobalSetting::MAILER_PASSWORD => null,
         GlobalSetting::MAILER_SENDER_EMAIL => null,
         GlobalSetting::MAILER_SENDER_NAME => null,
-        GlobalSetting::VALIDATION_AUTO_DELAY => null,
-        GlobalSetting::QUANTITY_BOX_INF => null,
+        GlobalSetting::AUTO_VALIDATION_DELAY => null,
+        GlobalSetting::AUTO_VALIDATION_BOX_QUANTITY => null,
     ];
 
     private const DELETED_SETTINGS = [

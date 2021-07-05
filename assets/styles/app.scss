@@ -376,15 +376,6 @@ input[type="date"] {
     background-size: 16px;
 }
 
-input[type="number"] {
-    position: relative;
-    padding-top: 20px !important;
-    max-width: 100px !important;
-    min-width: 50px !important;
-    border: 2px ridge $grey-light;
-}
-
-
 /* make the native arrow invisible and stretch it over the whole field so you can click anywhere in the input field to trigger the native datepicker*/
 input[type="date"]::-webkit-calendar-picker-indicator {
     background: transparent;
