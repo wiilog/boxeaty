@@ -176,15 +176,7 @@ export default class Modal {
 
         if(this.config.ajax) {
             return this.config.ajax.json(data, result => {
-                if(!result.success && result.errors !== undefined) {
-                    for(const error of result.errors.fields) {
-                        if(error.global) {
-                            showGlobalInvalid(this.element, error.message);
-                        } else {
-                            showInvalid(this.element.find(`[name="${error.field}"]`), error.message);
-                        }
-                    }
-
+                if(!handleErrors(this.element, result)) {
                     return;
                 }
 
@@ -395,6 +387,22 @@ export function processForm($parent, $button = null) {
     }
 
     return errors.length === 0 ? data : false;
+}
+
+export function handleErrors(element, result) {
+    if(!result.success && result.errors !== undefined) {
+        for(const error of result.errors.fields) {
+            if(error.global) {
+                showGlobalInvalid(element, error.message);
+            } else {
+                showInvalid(element.find(`[name="${error.field}"]`), error.message);
+            }
+        }
+
+        return false;
+    }
+
+    return true;
 }
 
 function showInvalid($field, message) {

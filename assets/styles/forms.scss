@@ -4,6 +4,29 @@
 //temporary should be replaced with custom style
 input:focus, select { outline: none; }
 
+.inline-form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    label {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin: 0 10px;
+        flex-wrap: wrap;
+
+        input, select {
+            width: auto;
+            margin-left: 10px;
+        }
+
+        .invalid-feedback {
+            width: auto;
+        }
+    }
+}
+
 label {
     display: block;
     font-size: 1.2rem;
@@ -127,6 +150,17 @@ input[type=number]::-webkit-inner-spin-button {
     }
 }
 
+.radio {
+    display: flex;
+    align-items: center;
+
+    input[type="radio"] {
+        display: inline-block;
+        width: 2em;
+        margin-right: 9px;
+    }
+}
+
 button, a {
     text-align: left;
 
@@ -184,7 +218,7 @@ button, a {
 }
 
 .modal {
-    input:not([type="checkbox"]) {
+    input:not([type="checkbox"]):not([type="radio"]) {
         width: 100% !important;
     }
 }

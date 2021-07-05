@@ -1,0 +1,13 @@
+@import "../variables";
+
+.planning {
+    .column {
+        .h1 {
+            font-size: 3rem;
+        }
+
+        &>div {
+            border: 1px solid $grey;
+        }
+    }
+}

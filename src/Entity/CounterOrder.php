@@ -2,64 +2,63 @@
 
 namespace App\Entity;
 
-use App\Repository\OrderRepository;
+use App\Repository\CounterOrderRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=OrderRepository::class)
- * @ORM\Table(name="`order`")
+ * @ORM\Entity(repositoryClass=CounterOrderRepository::class)
  */
-class Order {
+class CounterOrder {
 
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
+    private ?int $id = null;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private ?DateTime $date;
+    private ?DateTime $date = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Client::class)
      */
-    private ?Client $client;
+    private ?Client $client = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Location::class)
      */
-    private ?Location $location;
+    private ?Location $location = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="counterOrders")
      */
-    private ?User $user;
+    private ?User $user = null;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Box::class, inversedBy="orders")
+     * @ORM\ManyToMany(targetEntity=Box::class, inversedBy="counterOrders")
      */
     private Collection $boxes;
 
     /**
-     * @ORM\ManyToMany(targetEntity=DepositTicket::class, inversedBy="orders")
+     * @ORM\ManyToMany(targetEntity=DepositTicket::class, inversedBy="counterOrders")
      */
     private Collection $depositTickets;
 
     /**
      * @ORM\Column(type="decimal", precision=5, scale=2)
      */
-    private ?string $boxPrice;
+    private ?string $boxPrice = null;
 
     /**
      * @ORM\Column(type="decimal", precision=5, scale=2)
      */
-    private ?string $depositTicketPrice;
+    private ?string $depositTicketPrice = null;
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
@@ -116,7 +115,7 @@ class Order {
     public function addBox(Box $box): self {
         if (!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
-            $box->addOrder($this);
+            $box->addCounterOrder($this);
         }
 
         return $this;
@@ -124,25 +123,24 @@ class Order {
 
     public function removeBox(Box $box): self {
         if ($this->boxes->removeElement($box)) {
-            $box->removeOrder($this);
+            $box->removeCounterOrder($this);
         }
 
         return $this;
     }
 
     public function setBoxes(?array $boxes): self {
-        foreach($this->getBoxes()->toArray() as $box) {
+        foreach ($this->getBoxes()->toArray() as $box) {
             $this->removeBox($box);
         }
 
         $this->boxes = new ArrayCollection();
-        foreach($boxes as $box) {
+        foreach ($boxes as $box) {
             $this->addBox($box);
         }
 
         return $this;
     }
-
 
     /**
      * @return Collection|DepositTicket[]
@@ -154,24 +152,27 @@ class Order {
     public function addDepositTicket(DepositTicket $depositTicket): self {
         if (!$this->depositTickets->contains($depositTicket)) {
             $this->depositTickets[] = $depositTicket;
+            $depositTicket->addCounterOrder($this);
         }
 
         return $this;
     }
 
     public function removeDepositTicket(DepositTicket $depositTicket): self {
-        $this->depositTickets->removeElement($depositTicket);
+        if ($this->depositTickets->removeElement($depositTicket)) {
+            $depositTicket->removeCounterOrder($this);
+        }
 
         return $this;
     }
 
     public function setDepositTickets(?array $depositTickets): self {
-        foreach($this->getDepositTickets()->toArray() as $depositTicket) {
+        foreach ($this->getDepositTickets()->toArray() as $depositTicket) {
             $this->removeDepositTicket($depositTicket);
         }
 
         $this->depositTickets = new ArrayCollection();
-        foreach($depositTickets as $depositTicket) {
+        foreach ($depositTickets as $depositTicket) {
             $this->addDepositTicket($depositTicket);
         }
 

@@ -1,3 +1,5 @@
+import './icons.js';
+
 import './styles/app.scss';
 
 import {Modal as BootstrapModal} from 'bootstrap';

@@ -13,8 +13,8 @@ const ROUTES = {
     location: `ajax_select_locations`,
     type: `ajax_select_type`,
     quality: `ajax_select_quality`,
-    orderBox: `ajax_select_order_boxes`,
-    orderDepositTicket: `ajax_select_order_deposit_tickets`,
+    orderBox: `ajax_select_counter_order_boxes`,
+    orderDepositTicket: `ajax_select_counter_order_deposit_tickets`,
 }
 
 const INSTANT_SELECT_TYPES = {
@@ -33,7 +33,7 @@ export default class Select2 {
 
         $element.removeAttr(`data-s2`);
         $element.attr(`data-s2-initialized`, ``);
-        $element.wrap(`<div/>`);
+        $element.wrap(`<div style="position: relative"/>`);
 
         const config = {};
         if(type) {
@@ -51,7 +51,7 @@ export default class Select2 {
         if(type && !INSTANT_SELECT_TYPES[type]) {
             config.minimumInputLength = 1;
         }
-
+console.log($element.parent());
         $element.select2({
             placeholder: $element.data(`placeholder`),
             tags: $element.is('[data-editable]'),
@@ -72,7 +72,8 @@ export default class Select2 {
             const evt = "scroll.select2";
             $(e.target).parents().off(evt);
             $(window).off(evt);
-            // we hide all other select2 dropdown
+
+            // hide all other select2 dropdown
             $('[data-s2-initialized]').each(function() {
                 const $select2 = $(this);
                 if(!$select2.is($element)) {

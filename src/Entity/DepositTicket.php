@@ -72,18 +72,17 @@ class DepositTicket {
     private ?Location $location = null;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Order::class, mappedBy="depositTickets")
+     * @ORM\ManyToMany(targetEntity=CounterOrder::class, mappedBy="depositTickets")
      */
-    private Collection $orders;
+    private Collection $counterOrders;
 
     /**
      * @ORM\Column(nullable=true)
      */
     private ?string $consumerEmail;
 
-    public function __construct()
-    {
-        $this->orders = new ArrayCollection();
+    public function __construct() {
+        $this->counterOrders = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -160,39 +159,34 @@ class DepositTicket {
     }
 
     /**
-     * @return Collection|Order[]
+     * @return Collection|CounterOrder[]
      */
-    public function getOrders(): Collection
-    {
-        return $this->orders;
+    public function getCounterOrders(): Collection {
+        return $this->counterOrders;
     }
 
-    public function addOrder(Order $order): self
-    {
-        if (!$this->orders->contains($order)) {
-            $this->orders[] = $order;
+    public function addCounterOrder(CounterOrder $order): self {
+        if (!$this->counterOrders->contains($order)) {
+            $this->counterOrders[] = $order;
             $order->addDepositTicket($this);
         }
 
         return $this;
     }
 
-    public function removeOrder(Order $order): self
-    {
-        if ($this->orders->removeElement($order)) {
+    public function removeCounterOrder(CounterOrder $order): self {
+        if ($this->counterOrders->removeElement($order)) {
             $order->removeDepositTicket($this);
         }
 
         return $this;
     }
 
-    public function getConsumerEmail(): ?string
-    {
+    public function getConsumerEmail(): ?string {
         return $this->consumerEmail;
     }
 
-    public function setConsumerEmail(?string $consumerEmail): self
-    {
+    public function setConsumerEmail(?string $consumerEmail): self {
         $this->consumerEmail = $consumerEmail;
 
         return $this;

@@ -48,7 +48,7 @@ class ImportRepository extends EntityRepository {
             }
         }
 
-        if (!empty($params['order'])) {
+        if (!empty($params["order"])) {
             foreach ($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 if ($column === "user") {

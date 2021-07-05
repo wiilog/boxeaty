@@ -79,9 +79,15 @@ class Location {
      */
     private Collection $depositTickets;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Collect::class, mappedBy="location")
+     */
+    private Collection $collects;
+
     public function __construct() {
         $this->boxes = new ArrayCollection();
         $this->boxRecords = new ArrayCollection();
+        $this->collects = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -259,6 +265,46 @@ class Location {
                 ])
                 ->toArray()
         ];
+    }
+
+    /**
+     * @return Collection|Collect[]
+     */
+    public function getCollects(): Collection {
+        return $this->collects;
+    }
+
+    public function addCollect(Collect $collect): self {
+        if (!$this->collects->contains($collect)) {
+            $this->collects[] = $collect;
+            $collect->setLocation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCollect(Collect $collect): self {
+        if ($this->collects->removeElement($collect)) {
+            // set the owning side to null (unless already changed)
+            if ($collect->getLocation() === $this) {
+                $collect->setLocation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setCollect(?array $collects): self {
+        foreach ($this->getCollects()->toArray() as $collect) {
+            $this->removeCollect($collect);
+        }
+
+        $this->collects = new ArrayCollection();
+        foreach ($collects as $collect) {
+            $this->addCollect($collect);
+        }
+
+        return $this;
     }
 
 }
