@@ -3,6 +3,11 @@
 {% block menu %}Opérations{% endblock %}
 {% block page %}Planification des livraisons{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('planning') }}
+{% endblock %}
+
 {% block filter_header %}
     {% include 'filters/planning_filters.html.twig' %}
 {% endblock %}
@@ -10,7 +15,7 @@
 {% block bodyclass %}full-height{% endblock %}
 {% block content %}
     <div class="box first-box">
-        <div class="planning">{{ content | raw }}</div>
+        <div id="planning">{{ content | raw }}</div>
     </div>
 {% endblock %}
 

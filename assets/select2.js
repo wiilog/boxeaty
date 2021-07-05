@@ -15,6 +15,8 @@ const ROUTES = {
     quality: `ajax_select_quality`,
     orderBox: `ajax_select_counter_order_boxes`,
     orderDepositTicket: `ajax_select_counter_order_deposit_tickets`,
+    depository: `ajax_select_depositories`,
+    deliverer: `ajax_select_deliverers`,
 }
 
 const INSTANT_SELECT_TYPES = {
@@ -51,7 +53,7 @@ export default class Select2 {
         if(type && !INSTANT_SELECT_TYPES[type]) {
             config.minimumInputLength = 1;
         }
-console.log($element.parent());
+
         $element.select2({
             placeholder: $element.data(`placeholder`),
             tags: $element.is('[data-editable]'),

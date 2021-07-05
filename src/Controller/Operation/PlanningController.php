@@ -28,9 +28,8 @@ class PlanningController extends AbstractController {
      * @HasPermission(Role::MANAGE_PLANNING)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
-        dump($this->content($request, $manager)->getContent());
         return $this->render("operation/planning/index.html.twig", [
-            "content" => $this->content($request, $manager)->getContent(),
+            "content" => $this->content($request, $manager, false)->getContent(),
         ]);
     }
 
@@ -38,11 +37,20 @@ class PlanningController extends AbstractController {
      * @Route("/contenu", name="planning_content", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function content(Request $request, EntityManagerInterface $manager): Response {
+    public function content(Request $request, EntityManagerInterface $manager, bool $json = true): Response {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
 
-        $from = $request->request->get("from") ?? new DateTime();
-        $to = $request->request->get("to") ?? new DateTime("+20 days");
+        if($request->query->has("from")) {
+            $from = DateTime::createFromFormat("Y-m-d", $request->query->get("from"));
+        } else {
+            $from = new DateTime();
+        }
+
+        if($request->query->has("to")) {
+            $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"));
+        } else {
+            $to = (clone $from)->modify("+20 days");
+        }
 
         //group orders by date
         $ordersByDate = [];
@@ -72,9 +80,17 @@ class PlanningController extends AbstractController {
             $planning[] = $column;
         }
 
-        return $this->render("operation/planning/content.html.twig", [
-            "planning" => $planning,
-        ]);
+        if($json) {
+            return $this->json([
+                "planning" => $this->renderView("operation/planning/content.html.twig", [
+                    "planning" => $planning,
+                ])
+            ]);
+        } else {
+            return $this->render("operation/planning/content.html.twig", [
+                "planning" => $planning,
+            ]);
+        }
     }
 
 }

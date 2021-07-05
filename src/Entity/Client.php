@@ -116,7 +116,6 @@ class Client {
 
     /**
      * @ORM\ManyToOne(targetEntity=DeliveryMethod::class)
-     * @ORM\JoinColumn(nullable=false)
      */
     private ?DeliveryMethod $deliveryMethod = null;
 

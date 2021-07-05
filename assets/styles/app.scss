@@ -43,6 +43,7 @@ body.full-height main {
 
     .box {
         flex: 1 1 100%;
+        max-height: calc(100vh - 320px);
     }
 }
 
@@ -436,4 +437,5 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     width: 1em;
     height: 1em;
     vertical-align: -.125em;
+    margin-right: 3px;
 }

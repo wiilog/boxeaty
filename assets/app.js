@@ -15,6 +15,7 @@ import Snow from 'quill/themes/snow';
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 import {createPopper} from '@popperjs/core';
 
+import './util';
 import './pages/security';
 import './select2';
 import './jquery';
@@ -132,6 +133,4 @@ $document.ready(() => {
             Modal.load(ajax);
         });
     }
-
-
 })

@@ -85,6 +85,11 @@ class User implements UserInterface {
     private ?DateTime $resetTokenExpiration = null;
 
     /**
+     * @ORM\Column(type="boolean", options={"default": 0})
+     */
+    private ?bool $deliverer = null;
+
+    /**
      * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="orderUser")
      */
     private Collection $orderDepositTickets;
@@ -355,6 +360,15 @@ class User implements UserInterface {
     public function setResetTokenExpiration(?DateTime $resetTokenExpiration): self {
         $this->resetTokenExpiration = $resetTokenExpiration;
 
+        return $this;
+    }
+
+    public function getDeliverer(): ?bool {
+        return $this->deliverer;
+    }
+
+    public function setDeliverer(?bool $deliverer): self {
+        $this->deliverer = $deliverer;
         return $this;
     }
 
