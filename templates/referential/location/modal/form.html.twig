@@ -47,10 +47,26 @@
                    value="{{ location.message }}"/>
         </label>
     </div>
+    <div>
+        <label class="pb-3">Type d'emplacement</label>
+        <div class="col-12 d-flex justify-content-between">
+            {% for type, index in constant('App\\Entity\\Location::LOCATION_TYPES') %}
+                {% set checked = (location.type == type) %}
+                <div class="d-flex">
+                    <input {{ checked ? 'checked' }} type="radio" class="data mt-2" name="locationType" value="{{ type }}">
+                    <label class="mt-0 mx-2">{{ index }}</label>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
     <div class="col-12">
         <label>
-            Description
-            <textarea type="text" name="description" class="data" placeholder="Votre description">{{ location.description }}</textarea>
+            Dépôt
+            <select name="depository" class="data" data-s2="depository" data-placeholder="Sélectionnez un depot" required>
+                {% if location.depot %}
+                    <option value="{{ location.depot.id }}" selected>{{ location.depot.name }}</option>
+                {% endif %}
+            </select>
         </label>
     </div>
 </div>

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Box;
 use App\Entity\BoxType;
 use App\Entity\Client;
+use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\Group;
 use App\Entity\Location;
@@ -79,6 +80,17 @@ class SelectController extends AbstractController {
             $request->query->get("groups"),
             $this->getUser()
         );
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/depository", name="ajax_select_depositories", options={"expose": true})
+     */
+    public function depositories(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Depository::class)->getDepositoriesForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,
