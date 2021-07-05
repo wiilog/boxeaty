@@ -45,7 +45,7 @@ class BoxTypeRepository extends EntityRepository {
         }
 
 
-        if (!empty($params['order'])) {
+        if (!empty($params["order"])) {
             foreach ($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("box_type.$column", $order["dir"]);

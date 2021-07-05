@@ -40,6 +40,10 @@ body {
 
 body.full-height main {
     flex: 1 1 auto;
+
+    .box {
+        flex: 1 1 100%;
+    }
 }
 
 body.home {
@@ -160,12 +164,12 @@ main:not(.login) {
         margin-left: 0;
         margin-right: 0;
 
-        .box, .filters.first-box {
+        .box, .filters {
             border-radius: 8px;
         }
     }
 
-    .box.first-box, .filters.first-box {
+    .box.first-box, .filters {
         margin-top: -30px;
     }
 
@@ -425,4 +429,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         font-size: 1.6rem;
         text-align: center;
     }
+}
+
+.bxi {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -.125em;
 }

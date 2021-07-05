@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\RouterInterface;
 use Twig\Environment;
 
-class OrderService {
+class CounterOrderService {
 
     /** @Required */
     public SessionInterface $session;
@@ -37,7 +37,7 @@ class OrderService {
             $this->token = $this->request->getCurrentRequest()->get("session");
 
             if (!preg_match("/^[A-Z0-9]{8,32}$/i", $this->token)) {
-                throw new BadRequestHttpException("Invalid order session token");
+                throw new BadRequestHttpException("Invalid counter order session token");
             }
         }
 
@@ -46,8 +46,8 @@ class OrderService {
 
     public function renderBoxes(): array {
         return [
-            "submit" => $this->router->generate("order_boxes_submit"),
-            "template" => $this->twig->render("tracking/order/modal/boxes.html.twig", [
+            "submit" => $this->router->generate("counter_order_boxes_submit"),
+            "template" => $this->twig->render("tracking/counter_order/modal/boxes.html.twig", [
                 "session" => $this->getToken(),
                 "boxes" => $this->get(Box::class),
                 "price" => $this->getBoxesPrice(),
@@ -57,8 +57,8 @@ class OrderService {
 
     public function renderDepositTickets(): array {
         return [
-            "submit" => $this->router->generate("order_deposit_tickets_submit"),
-            "template" => $this->twig->render("tracking/order/modal/deposit_tickets.html.twig", [
+            "submit" => $this->router->generate("counter_order_deposit_tickets_submit"),
+            "template" => $this->twig->render("tracking/counter_order/modal/deposit_tickets.html.twig", [
                 "session" => $this->getToken(),
                 "tickets" => $this->get(DepositTicket::class),
                 "price" => $this->getTicketsPrice(),
@@ -68,8 +68,8 @@ class OrderService {
 
     public function renderPayment(): array {
         return [
-            "submit" => $this->router->generate("order_confirm"),
-            "template" => $this->twig->render("tracking/order/modal/payment.html.twig", [
+            "submit" => $this->router->generate("counter_order_confirm"),
+            "template" => $this->twig->render("tracking/counter_order/modal/payment.html.twig", [
                 "session" => $this->getToken(),
                 "boxes" => $this->get(Box::class),
                 "tickets" => $this->get(DepositTicket::class),
@@ -80,7 +80,7 @@ class OrderService {
 
     public function renderConfirmation(): array {
         return [
-            "template" => $this->twig->render("tracking/order/modal/confirmation.html.twig"),
+            "template" => $this->twig->render("tracking/counter_order/modal/confirmation.html.twig"),
         ];
     }
 
@@ -105,7 +105,7 @@ class OrderService {
         if(!isset($this->$class)) {
             $this->$class = $this->manager
                 ->getRepository($class)
-                ->findBy(["number" => $this->session->get("order.$id.$class", [])]);
+                ->findBy(["number" => $this->session->get("counter_order.$id.$class", [])]);
         }
 
         return $this->$class;
@@ -115,30 +115,30 @@ class OrderService {
         $id = $this->getToken();
         $items = $this->request->getCurrentRequest()->request->get("items");
 
-        $this->session->set("order.$id", [$id, new DateTime()]);
-        $this->session->set("order.$id.$class", array_filter(explode(",", $items)));
+        $this->session->set("counter_order.$id", [$id, new DateTime()]);
+        $this->session->set("counter_order.$id.$class", array_filter(explode(",", $items)));
     }
 
     public function clear($current = false) {
-        //remove current order
+        //remove current counter order
         if ($current) {
             $id = $this->getToken();
 
-            $this->session->remove("order.$id");
+            $this->session->remove("counter_order.$id");
             foreach ([Box::class, DepositTicket::class] as $class) {
-                $this->session->remove("order.$id.$class");
+                $this->session->remove("counter_order.$id.$class");
             }
         }
 
         //clear previous unfinished orders
         $expiry = new DateTime("-1 day");
         foreach ($this->session->all() as $key => $value) {
-            if (preg_match("/^order\.[A-Z0-9]{8,32}$/i", $key)) {
+            if (preg_match("/^counter_order\.[A-Z0-9]{8,32}$/i", $key)) {
                 [$id, $date] = $value;
                 if ($date < $expiry) {
-                    $this->session->remove("order.$id");
-                    $this->session->remove("order.$id.boxes");
-                    $this->session->remove("order.$id.tickets");
+                    $this->session->remove("counter_order.$id");
+                    $this->session->remove("counter_order.$id.boxes");
+                    $this->session->remove("counter_order.$id.tickets");
                 }
             }
         }

@@ -78,7 +78,15 @@ class AppExtension extends AbstractExtension {
     }
 
     private function shouldAddItem(array $item): bool {
-        return !isset($item["permission"]) || $this->hasPermission(constant($item["permission"]));
+        if(isset($item["permission"])) {
+            if (is_array($item["permission"])) {
+                return $this->hasPermission(...array_map("constant", $item["permission"]));
+            } else {
+                return $this->hasPermission(constant($item["permission"]));
+            }
+        } else {
+            return true;
+        }
     }
 
     public function hasPermission(string ...$permissions): bool {

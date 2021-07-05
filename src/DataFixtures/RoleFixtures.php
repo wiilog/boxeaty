@@ -24,12 +24,12 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
     private const PERMISSIONS = [
         Role::ROLE_NO_ACCESS => [],
         Role::ROLE_ADMIN => [
-            Role::GENERAL_EXPORT,
             Role::MANAGE_SETTINGS,
             Role::MANAGE_USERS,
             Role::MANAGE_ROLES,
             Role::MANAGE_QUALITIES,
             Role::MANAGE_IMPORTS,
+            Role::MANAGE_EXPORTS,
             Role::MANAGE_GROUPS,
             Role::MANAGE_CLIENTS,
             Role::MANAGE_LOCATIONS,
@@ -37,7 +37,18 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
             Role::MANAGE_DEPOSIT_TICKETS,
             Role::MANAGE_BOX_TYPES,
             Role::MANAGE_BOXES,
-            Role::MANAGE_ORDERS
+            Role::MANAGE_COUNTER_ORDERS,
+            Role::MANAGE_DEPOSITORIES,
+            Role::MANAGE_COUNTER_ORDERS,
+            Role::VIEW_ALL_ORDERS,
+            Role::CREATE_CLIENT_ORDERS,
+            Role::MANAGE_CLIENT_ORDERS,
+            Role::VIEW_INDICATORS,
+            Role::MANAGE_PLANNING,
+            Role::TREAT_PREPARATIONS,
+            Role::TREAT_DELIVERIES,
+            Role::TREAT_RECEPTIONS,
+            Role::TREAT_COLLECTS,
         ],
     ];
 
@@ -55,6 +66,7 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
                     ->setAllowEditOwnGroupOnly(false)
                     ->setReceiveMailsNewAccounts($config["emailsNewAccounts"])
                     ->setRedirectNewCounterOrder(false)
+                    ->setShowIndicatorsOnHome(false)
                     ->setActive(true);
 
                 $output->writeln("Created role \"{$role->getName()}\"");

@@ -69,7 +69,7 @@ function addInput(element, code) {
             number: code
         };
 
-        AJAX.route(GET, `order_info`, params).json(response => {
+        AJAX.route(GET, `counter_order_info`, params).json(response => {
             if(!response.success) {
                 return;
             }
@@ -102,13 +102,13 @@ function addInput(element, code) {
 }
 
 function openBoxesModal() {
-    Modal.load(AJAX.route(`GET`, `order_boxes_template`, {
+    Modal.load(AJAX.route(`GET`, `counter_order_boxes_template`, {
         session: String.random(16),
     }));
 }
 
 function openDepositTicketModal() {
-    Modal.load(AJAX.route(`GET`, `order_deposit_tickets_template`, {
+    Modal.load(AJAX.route(`GET`, `counter_order_deposit_tickets_template`, {
         session: String.random(16),
     }));
 }

@@ -1,5 +1,5 @@
 import {$document} from '../app';
-import '../pages/order';
+import './counter-order';
 
 import Modal from "../modal";
 import AJAX from "../ajax";
@@ -7,11 +7,11 @@ import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
 
 $document.ready(() => {
     const deleteOrderModal = Modal.static(`#modal-delete-order`, {
-        ajax: AJAX.route(`POST`, `order_delete`),
+        ajax: AJAX.route(`POST`, `counter_order_delete`),
     });
 
     initDatatable(`#table-orders`, {
-        ajax: AJAX.route(`POST`, `orders_api`),
+        ajax: AJAX.route(`POST`, `counter_orders_api`),
         columns: [
             {data: `boxes`, title: `Identifiant Box`},
             {data: `depositTickets`, title: `Ticket(s) consigne`},

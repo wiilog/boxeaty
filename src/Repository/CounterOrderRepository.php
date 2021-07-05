@@ -2,18 +2,18 @@
 
 namespace App\Repository;
 
-use App\Entity\Order;
+use App\Entity\CounterOrder;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
- * @method Order|null find($id, $lockMode = null, $lockVersion = null)
- * @method Order|null findOneBy(array $criteria, array $orderBy = null)
- * @method Order[]    findAll()
- * @method Order[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method CounterOrder|null find($id, $lockMode = null, $lockVersion = null)
+ * @method CounterOrder|null findOneBy(array $criteria, array $orderBy = null)
+ * @method CounterOrder[]    findAll()
+ * @method CounterOrder[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class OrderRepository extends EntityRepository {
+class CounterOrderRepository extends EntityRepository {
 
     public const DEFAULT_DATATABLE_ORDER = [['date', 'desc']];
     private const DEFAULT_DATATABLE_START = 0;
@@ -39,7 +39,7 @@ class OrderRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        if (!empty($params['order'])) {
+        if (!empty($params["order"])) {
             foreach ($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 if ($column === "location") {
