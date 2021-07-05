@@ -130,12 +130,12 @@ class CounterOrder {
     }
 
     public function setBoxes(?array $boxes): self {
-        foreach($this->getBoxes()->toArray() as $box) {
+        foreach ($this->getBoxes()->toArray() as $box) {
             $this->removeBox($box);
         }
 
         $this->boxes = new ArrayCollection();
-        foreach($boxes as $box) {
+        foreach ($boxes as $box) {
             $this->addBox($box);
         }
 
@@ -159,7 +159,7 @@ class CounterOrder {
     }
 
     public function removeDepositTicket(DepositTicket $depositTicket): self {
-        if($this->depositTickets->removeElement($depositTicket)) {
+        if ($this->depositTickets->removeElement($depositTicket)) {
             $depositTicket->removeCounterOrder($this);
         }
 
@@ -167,12 +167,12 @@ class CounterOrder {
     }
 
     public function setDepositTickets(?array $depositTickets): self {
-        foreach($this->getDepositTickets()->toArray() as $depositTicket) {
+        foreach ($this->getDepositTickets()->toArray() as $depositTicket) {
             $this->removeDepositTicket($depositTicket);
         }
 
         $this->depositTickets = new ArrayCollection();
-        foreach($depositTickets as $depositTicket) {
+        foreach ($depositTickets as $depositTicket) {
             $this->addDepositTicket($depositTicket);
         }
 

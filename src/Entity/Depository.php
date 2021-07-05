@@ -119,12 +119,12 @@ class Depository {
     }
 
     public function setPreparations(?array $preparations): self {
-        foreach($this->getPreparations()->toArray() as $preparation) {
+        foreach ($this->getPreparations()->toArray() as $preparation) {
             $this->removePreparation($preparation);
         }
 
         $this->preparations = new ArrayCollection();
-        foreach($preparations as $preparation) {
+        foreach ($preparations as $preparation) {
             $this->addPreparation($preparation);
         }
 
@@ -158,16 +158,16 @@ class Depository {
     }
 
     public function setDeliveryRounds(?array $deliveryRounds): self {
-        foreach($this->getDeliveryRounds()->toArray() as $deliveryRound) {
+        foreach ($this->getDeliveryRounds()->toArray() as $deliveryRound) {
             $this->removeDeliveryRound($deliveryRound);
         }
 
         $this->deliveryRounds = new ArrayCollection();
-        foreach($deliveryRounds as $deliveryRound) {
+        foreach ($deliveryRounds as $deliveryRound) {
             $this->addDeliveryRound($deliveryRound);
         }
 
         return $this;
     }
-    
+
 }

@@ -30,9 +30,10 @@ class DeliveryRound {
     private ?User $deliverer = null;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\ManyToOne(targetEntity=DeliveryMethod::class)
+     * @ORM\JoinColumn(nullable=false)
      */
-    private ?string $deliveryMode = null;
+    private ?DeliveryMethod $deliveryMethod = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="deliveryRounds")
@@ -79,13 +80,12 @@ class DeliveryRound {
         return $this;
     }
 
-    public function getDeliveryMode(): ?string {
-        return $this->deliveryMode;
+    public function getDeliveryMethod(): ?DeliveryMethod {
+        return $this->deliveryMethod;
     }
 
-    public function setDeliveryMode(string $deliveryMode): self {
-        $this->deliveryMode = $deliveryMode;
-
+    public function setDeliveryMethod(?DeliveryMethod $deliveryMethod): self {
+        $this->deliveryMethod = $deliveryMethod;
         return $this;
     }
 

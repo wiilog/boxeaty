@@ -13,4 +13,17 @@ use Doctrine\ORM\EntityRepository;
  */
 class ClientOrderRepository extends EntityRepository {
 
+    /**
+     * @return ClientOrder[]
+     */
+    public function findBetween($from, $to): array {
+        return $this->createQueryBuilder("client_order")
+            ->where("client_order.expectedDelivery BETWEEN :from AND :to")
+            ->orderBy("client_order.expectedDelivery", "ASC")
+            ->setParameter("from", $from)
+            ->setParameter("to", $to)
+            ->getQuery()
+            ->getResult();
+    }
+
 }

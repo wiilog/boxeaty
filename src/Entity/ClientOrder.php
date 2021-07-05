@@ -55,12 +55,13 @@ class ClientOrder {
     /**
      * @ORM\Column(type="datetime")
      */
-    private ?DateTime $estimatedDelivery = null;
+    private ?DateTime $expectedDelivery = null;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\ManyToOne(targetEntity=DeliveryMethod::class)
+     * @ORM\JoinColumn(nullable=false)
      */
-    private ?string $deliveryMode = null;
+    private ?DeliveryMethod $deliveryMethod = null;
 
     /**
      * @ORM\Column(type="boolean")
@@ -227,34 +228,33 @@ class ClientOrder {
     }
 
     public function setOrderStatusHistory(?array $orderStatusHistory): self {
-        foreach($this->getOrderStatusHistory()->toArray() as $item) {
+        foreach ($this->getOrderStatusHistory()->toArray() as $item) {
             $this->removeOrderStatusHistory($item);
         }
 
         $this->orderStatusHistory = new ArrayCollection();
-        foreach($orderStatusHistory as $item) {
+        foreach ($orderStatusHistory as $item) {
             $this->addOrderStatusHistory($item);
         }
 
         return $this;
     }
 
-    public function getEstimatedDelivery(): ?DateTime {
-        return $this->estimatedDelivery;
+    public function getExpectedDelivery(): ?DateTime {
+        return $this->expectedDelivery;
     }
 
-    public function setEstimatedDelivery(DateTime $estimatedDelivery): self {
-        $this->estimatedDelivery = $estimatedDelivery;
+    public function setExpectedDelivery(DateTime $expectedDelivery): self {
+        $this->expectedDelivery = $expectedDelivery;
         return $this;
     }
 
-    public function getDeliveryMode(): ?string {
-        return $this->deliveryMode;
+    public function getDeliveryMethod(): ?DeliveryMethod {
+        return $this->deliveryMethod;
     }
 
-    public function setDeliveryMode(string $deliveryMode): self {
-        $this->deliveryMode = $deliveryMode;
-
+    public function setDeliveryMethod(?DeliveryMethod $deliveryMethod): self {
+        $this->deliveryMethod = $deliveryMethod;
         return $this;
     }
 

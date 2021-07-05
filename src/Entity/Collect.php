@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass=CollectRepository::class)
  */
 class Collect {
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -166,4 +167,5 @@ class Collect {
         $this->photo = $photo;
         return $this;
     }
+
 }

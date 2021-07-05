@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass=OrderStatusHistoryRepository::class)
  */
 class OrderStatusHistory {
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

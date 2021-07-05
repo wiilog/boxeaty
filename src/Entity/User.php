@@ -348,11 +348,11 @@ class User implements UserInterface {
         return $this;
     }
 
-    public function getResetTokenExpiration(): ?\DateTimeInterface {
+    public function getResetTokenExpiration(): ?DateTime {
         return $this->resetTokenExpiration;
     }
 
-    public function setResetTokenExpiration(?\DateTimeInterface $resetTokenExpiration): self {
+    public function setResetTokenExpiration(?DateTime $resetTokenExpiration): self {
         $this->resetTokenExpiration = $resetTokenExpiration;
 
         return $this;
@@ -511,7 +511,7 @@ class User implements UserInterface {
     public function addCounterOrder(CounterOrder $order): self {
         if (!$this->counterOrders->contains($order)) {
             $this->counterOrders[] = $order;
-            $order->setRequester($this);
+            $order->setUser($this);
         }
 
         return $this;
@@ -519,8 +519,8 @@ class User implements UserInterface {
 
     public function removeCounterOrder(CounterOrder $order): self {
         if ($this->counterOrders->removeElement($order)) {
-            if ($order->getRequester() === $this) {
-                $order->setRequester(null);
+            if ($order->getUser() === $this) {
+                $order->setUser(null);
             }
         }
 

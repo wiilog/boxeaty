@@ -74,7 +74,7 @@ parameters:
           #route: client_orders_list
         - name: Planification
           permission: App\Entity\Role::MANAGE_PLANNING
-          #route: planning
+          route: planning
     - name: Référentiel
       icon: address-card
       type: category

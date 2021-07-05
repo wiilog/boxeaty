@@ -81,8 +81,7 @@ class DepositTicket {
      */
     private ?string $consumerEmail;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->counterOrders = new ArrayCollection();
     }
 
@@ -162,13 +161,11 @@ class DepositTicket {
     /**
      * @return Collection|CounterOrder[]
      */
-    public function getCounterOrders(): Collection
-    {
+    public function getCounterOrders(): Collection {
         return $this->counterOrders;
     }
 
-    public function addCounterOrder(CounterOrder $order): self
-    {
+    public function addCounterOrder(CounterOrder $order): self {
         if (!$this->counterOrders->contains($order)) {
             $this->counterOrders[] = $order;
             $order->addDepositTicket($this);
@@ -177,8 +174,7 @@ class DepositTicket {
         return $this;
     }
 
-    public function removeCounterOrder(CounterOrder $order): self
-    {
+    public function removeCounterOrder(CounterOrder $order): self {
         if ($this->counterOrders->removeElement($order)) {
             $order->removeDepositTicket($this);
         }
@@ -186,13 +182,11 @@ class DepositTicket {
         return $this;
     }
 
-    public function getConsumerEmail(): ?string
-    {
+    public function getConsumerEmail(): ?string {
         return $this->consumerEmail;
     }
 
-    public function setConsumerEmail(?string $consumerEmail): self
-    {
+    public function setConsumerEmail(?string $consumerEmail): self {
         $this->consumerEmail = $consumerEmail;
 
         return $this;

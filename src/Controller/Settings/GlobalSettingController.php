@@ -7,6 +7,7 @@ use App\Entity\GlobalSetting;
 use App\Entity\Role;
 use App\Entity\WorkFreeDay;
 use App\Helper\Form;
+use App\Helper\FormatHelper;
 use App\Repository\WorkFreeDayRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,21 +19,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/parametrage/global")
  */
 class GlobalSettingController extends AbstractController {
-
-    public const MONTHS = [
-        1 => "Janvier",
-        2 => "Février",
-        3 => "Mars",
-        4 => "Avril",
-        5 => "Mai",
-        6 => "Juin",
-        7 => "Juillet",
-        8 => "Août",
-        9 => "Septembre",
-        10 => "Octobre",
-        11 => "Novembre",
-        12 => "Décembre",
-    ];
 
     /**
      * @Route("/", name="settings")
@@ -94,8 +80,8 @@ class GlobalSettingController extends AbstractController {
         foreach ($days["data"] as $day) {
             $data[] = [
                 "id" => $day->getId(),
-                "day" => $day->getDay() . " " . self::MONTHS[$day->getMonth()],
-                "actions" => '<button class="silent" data-listener="delete"><i class="icon fas fa-trash-alt"></i></button>',
+                "day" => $day->getDay() . " " . FormatHelper::MONTHS[$day->getMonth()],
+                "actions" => '<button class="silent w-100" data-listener="delete"><i class="icon fas fa-trash-alt"></i></button>',
             ];
         }
 

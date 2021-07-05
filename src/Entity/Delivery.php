@@ -120,4 +120,5 @@ class Delivery {
         $this->photo = $photo;
         return $this;
     }
+
 }
