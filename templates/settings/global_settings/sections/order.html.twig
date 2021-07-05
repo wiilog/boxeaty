@@ -28,7 +28,7 @@
             <label>
                 Mois
                 <select name="month" class="data" data-s2 required>
-                    {% for number, month in constant('App\\Controller\\Settings\\GlobalSettingController::MONTHS') %}
+                    {% for number, month in constant('App\\Helper\\FormatHelper::MONTHS') %}
                         <option value="{{ number }}">{{ month }}</option>
                     {% endfor %}
                 </select>

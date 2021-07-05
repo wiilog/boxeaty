@@ -50,4 +50,5 @@ class WorkFreeDay {
 
         return $this;
     }
+
 }

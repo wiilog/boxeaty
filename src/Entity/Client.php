@@ -115,9 +115,10 @@ class Client {
     private ?string $paymentMode;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\ManyToOne(targetEntity=DeliveryMethod::class)
+     * @ORM\JoinColumn(nullable=false)
      */
-    private ?int $deliveryMode;
+    private ?DeliveryMethod $deliveryMethod = null;
 
     /**
      * @ORM\OneToMany(targetEntity=Depository::class, mappedBy="client")
@@ -430,13 +431,12 @@ class Client {
         return $this;
     }
 
-    public function getDeliveryMode(): ?int {
-        return $this->deliveryMode;
+    public function getDeliveryMethod(): ?DeliveryMethod {
+        return $this->deliveryMethod;
     }
 
-    public function setDeliveryMode(int $deliveryMode): self {
-        $this->deliveryMode = $deliveryMode;
-
+    public function setDeliveryMethod(?DeliveryMethod $deliveryMethod): self {
+        $this->deliveryMethod = $deliveryMethod;
         return $this;
     }
 

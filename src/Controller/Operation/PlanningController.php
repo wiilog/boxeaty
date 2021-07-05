@@ -8,6 +8,8 @@ use App\Entity\Role;
 use App\Annotation\HasPermission;
 use App\Entity\Status;
 use App\Helper\FormatHelper;
+use DateInterval;
+use DatePeriod;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -56,8 +58,9 @@ class PlanningController extends AbstractController {
 
         //generate cards configuration for twig
         $planning = [];
-        foreach ($ordersByDate as $date => $orders) {
-            $date = DateTime::createFromFormat(FormatHelper::DATE_COMPACT, $date);
+        $period = new DatePeriod($from, new DateInterval("P1D"), $to);
+        foreach ($period as $date) {
+            $orders = $ordersByDate[$date->format(FormatHelper::DATE_COMPACT)] ?? [];
 
             $column = [
                 "title" => FormatHelper::weekDay($date) . " " . $date->format("d") . " "  . FormatHelper::month($date),
