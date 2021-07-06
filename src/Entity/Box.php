@@ -18,6 +18,8 @@ class Box {
     public const CONSUMER = 3;
     public const CLIENT = 4;
     public const OUT = 5;
+    public const PACKING = 6;
+    public const UNPACKING = 7;
 
     public const NAMES = [
         self::AVAILABLE => "Disponible",
@@ -25,6 +27,8 @@ class Box {
         self::CONSUMER => "Consommateur",
         self::CLIENT => "Client",
         self::OUT => "Sorti",
+        self::PACKING => "Conditionné",
+        self::UNPACKING => "Déconditionné",
     ];
 
     public const LINKED_COLORS = [
@@ -33,6 +37,8 @@ class Box {
         self::CONSUMER => "primary",
         self::CLIENT => "warning",
         self::OUT => "secondary",
+        self::PACKING => "info",
+        self::UNPACKING => "dark",
     ];
 
     public const DEFAULT_COLOR = 'dark';

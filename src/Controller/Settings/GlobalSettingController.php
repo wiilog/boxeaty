@@ -36,6 +36,8 @@ class GlobalSettingController extends AbstractController {
             "box_capacities" => $this->asArray($settings, GlobalSetting::BOX_CAPACITIES),
             "box_shapes" => $this->asArray($settings, GlobalSetting::BOX_SHAPES),
             "payment_modes" => $this->asArray($settings, GlobalSetting::PAYMENT_MODES),
+            "auto_validation_delay" => $settings[GlobalSetting::AUTO_VALIDATION_DELAY],
+            "auto_validation_box_quantity" => $settings[GlobalSetting::AUTO_VALIDATION_BOX_QUANTITY],
             "mailer" => [
                 "host" => $settings[GlobalSetting::MAILER_HOST],
                 "port" => $settings[GlobalSetting::MAILER_PORT],
