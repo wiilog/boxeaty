@@ -23,6 +23,7 @@ const INSTANT_SELECT_TYPES = {
     type: true,
     quality: true,
     group: true,
+    depository: true,
 }
 
 export default class Select2 {

@@ -34,11 +34,6 @@ class Delivery {
     private ?int $tokens = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=Preparation::class, inversedBy="delivery")
-     */
-    private ?Preparation $preparation = null;
-
-    /**
      * @ORM\ManyToOne(targetEntity=Attachment::class)
      */
     private ?Attachment $signature = null;
@@ -83,22 +78,6 @@ class Delivery {
 
     public function setTokens(int $tokens): self {
         $this->tokens = $tokens;
-
-        return $this;
-    }
-
-    public function getPreparation(): ?Preparation {
-        return $this->preparation;
-    }
-
-    public function setPreparation(?Preparation $preparation): self {
-        if ($this->preparation && $this->preparation->getDelivery() === $this) {
-            $this->preparation->setDelivery(null);
-        }
-        $this->preparation = $preparation;
-        if ($preparation) {
-            $preparation->setDelivery($this);
-        }
 
         return $this;
     }

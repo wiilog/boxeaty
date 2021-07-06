@@ -180,6 +180,15 @@ button, a {
         @include button(silent);
     }
 
+    &.icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 35px;
+        height: 35px;
+        padding: 0;
+    }
+
     .icon {
         display: inline-block;
         margin-right: 5px;

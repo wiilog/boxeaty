@@ -54,7 +54,7 @@ class PlanningController extends AbstractController {
 
         //group orders by date
         $ordersByDate = [];
-        foreach ($clientOrderRepository->findBetween($from, $to) as $order) {
+        foreach ($clientOrderRepository->findBetween($from, $to, $request->query->all()) as $order) {
             $ordersByDate[FormatHelper::date($order->getExpectedDelivery(), "Ymd")][] = $order;
         }
 

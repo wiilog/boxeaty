@@ -1,69 +1,82 @@
+{% macro show(order) %}
+    {# TODO: redirect to the right page #}
+    <a href="{# {{ path('client_orders_list', {order: 1}) }} #}">Voir la commande</a>
+{% endmacro %}
+
+{% import _self as macros %}
+
 {% for column in planning %}
     <div class="column">
         <h3>{{ column.title }}</h3>
         <div>
-            <div class="order to-validate">
-                <span class="title">EatSalad - Pessac</span>
-                <label>Livraison souhaitée <strong>29/04/2021</strong></label>
-                <label>Commande <strong>N°210429001</strong></label>
-
-                <span class="muted">Livraison véhicule lourd</span>
-
-                <span class="status"><i class="bxi bxi-validate"></i> A valider BoxEaty</span>
-                <span class="valid">Validée</span>
-
-                <a href="{# {{ path('client_orders_list', {order: 1}) }} #}">Voir la commande</a>
-            </div>
-
-            <div class="order planned">
-                <span class="title">EatSalad - Pessac</span>
-                <span class="muted">Livraison en véhicule léger</span>
-
-                <span class="status"><i class="bxi bxi-calendar"></i> Planifiée</span>
-                <a href="{# {{ path('client_orders_list', {order: 1}) }} #}">Voir la commande</a>
-            </div>
-
-            <div class="order preparing">
-                <span class="title">EatSalad - Pessac</span>
-                <label class="inline">Validée par <strong>Yann</strong></label>
-                <span class="muted">Livraison à vélo</span>
-
-                <span class="status"><i class="bxi bxi-loading"></i> En préparation</span>
-                <a href="{# {{ path('client_orders_list', {order: 1}) }} #}">Voir la commande</a>
-            </div>
-
-            <div class="order delivering">
-                <span class="title">EatSalad - Pessac</span>
-                <label class="inline">Tournée <strong>N°654823</strong></label>
-                <label class="inline">Livreur <strong>B. Coste</strong></label>
-                <span class="muted">Livraison à vélo</span>
-
-                <span class="status"><i class="bxi bxi-transit"></i> En transit</span>
-                <a href="{# {{ path('client_orders_list', {order: 1}) }} #}">Voir la commande</a>
-            </div>
-
-            <div class="order preparing">
-                <span class="title">EatSalad - Pessac</span>
-                <label class="inline">Tournée <strong>N°238961</strong></label>
-                <label class="inline">Livreur <strong>A. Bounader</strong></label>
-                <span class="muted">Livraison à vélo</span>
-
-                <span class="status"><i class="bxi bxi-preparing"></i> En préparation</span>
-                <a href="{# {{ path('client_orders_list', {order: 1}) }} #}">Voir la commande</a>
-            </div>
-
-            <div class="order late">
-                <span class="title">EatSalad - Pessac</span>
-                <label class="inline">Tournée <strong>N°785236</strong></label>
-                <label class="inline">Livreur <strong>L. Adamski</strong></label>
-                <span class="muted">Livraison à vélo</span>
-
-                <span class="status"><i class="bxi bxi-late"></i> Retard</span>
-                <a href="{# {{ path('client_orders_list', {order: 1}) }} #}">Voir la commande</a>
-            </div>
-
             {% for order in column.orders %}
-                <div class="to-validate"></div>
+                {% if order.status.code == constant('App\\Entity\\Status::ORDER_TO_VALIDATE') %}
+                    <div class="order to-validate">
+                        <span class="title">{{ order.client.name }}</span>
+                        <label>Livraison souhaitée <strong>{{ order.expectedDelivery | date('d/m/Y') }}</strong></label>
+                        <label>Commande <strong>N°{{ order.number }}</strong></label>
+
+                        <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
+
+                        {# TODO: open validation modal #}
+                        <span class="status"><i class="bxi bxi-validate"></i> A valider BoxEaty</span>
+                        <button class="primary validate">Valider</button>
+
+                        {{ macros.show(order) }}
+                    </div>
+                {% elseif order.status.code == constant('App\\Entity\\Status::ORDER_PLANNED') %}
+                    <div class="order planned">
+                        <span class="title">{{ order.client.name }}</span>
+                        <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
+
+                        <span class="status"><i class="bxi bxi-calendar"></i> Planifiée</span>
+                        {{ macros.show(order) }}
+                    </div>
+                {% elseif order.preparation %}
+                    <div class="order preparing">
+                        <span class="title">{{ order.client.name }}</span>
+                        <label class="inline">Validée par <strong>{{ order.validator }}</strong></label>
+                        <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
+
+                        <span class="status"><i class="bxi bxi-loading"></i> En préparation</span>
+                        {{ macros.show(order) }}
+                    </div>
+                    <div class="order preparing">
+                        <span class="title">{{ order.client.name }}</span>
+                        <label class="inline">Tournée <strong>N°238961</strong></label>
+                        <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
+                        <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
+
+                        <span class="status"><i class="bxi bxi-preparing"></i> En préparation</span>
+                        {{ macros.show(order) }}
+                    </div>
+                {% elseif order.delivery %}
+                    {% if order.expectedDelivery > date() %}
+                        <div class="order late">
+                            <span class="title">{{ order.client.name }}</span>
+                            <label class="inline">Tournée <strong>N°785236</strong></label>
+                            <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
+                            <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
+
+                            <div class="side-by-side">
+                                <span class="status"><i class="bxi bxi-late"></i> Retard</span>
+                                <button class="primary icon"><i class="fas fa-envelope"></i></button>
+                            </div>
+                            {{ macros.show(order) }}
+                        </div>
+                    {% else %}
+                        <div class="order delivering">
+                            <span class="title">{{ order.client.name }}</span>
+                            <label class="inline">Tournée <strong>N°654823</strong></label>
+                            <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
+                            <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
+
+                            {# TODO: use the delivery method icon instead #}
+                            <span class="status"><i class="bxi bxi-transit"></i> En transit</span>
+                            {{ macros.show(order) }}
+                        </div>
+                    {% endif %}
+                {% endif %}
             {% endfor %}
         </div>
     </div>

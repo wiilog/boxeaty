@@ -3,12 +3,13 @@
 #planning {
     display: flex;
     flex-direction: row;
-    overflow: auto;
+    overflow-x: auto;
     height: 100%;
-    max-height: 100%;
 
     .column {
-        width: 200px;
+        display: flex;
+        flex-direction: column;
+        min-width: 200px;
         text-align: center;
         padding: 4px;
 
@@ -19,6 +20,7 @@
         &>div {
             display: flex;
             flex-direction: row;
+            align-items: flex-start;
             flex-wrap: wrap;
             flex: 1 1 auto;
             border: 1px solid $grey-dark;
@@ -97,14 +99,20 @@
                     color: $blue;
                 }
 
-                .valid {
+                .side-by-side {
+                    display: flex;
+                    align-items: center;
+                    margin: auto;
+
+                    :not(:first-child) {
+                        margin-left: 4px;
+                    }
+                }
+
+                .validate {
                     margin: 8px auto;
-                    height: 24px;
-                    background: $orange;
-                    color: white;
-                    border-radius: 4px;
-                    padding: 4px;
-                    min-width: 100px;
+                    height: 30px;
+                    line-height: 30px;
                 }
 
                 a {
