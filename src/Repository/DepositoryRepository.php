@@ -13,4 +13,14 @@ use Doctrine\ORM\EntityRepository;
  */
 class DepositoryRepository extends EntityRepository {
 
+    public function getDepositoriesForSelect(?string $search) {
+        $qb = $this->createQueryBuilder("depot");
+
+        return $qb->select("depot.id AS id, depot.name AS text")
+            ->where("depot.name LIKE :search")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
 }

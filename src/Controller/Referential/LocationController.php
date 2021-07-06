@@ -5,6 +5,7 @@ namespace App\Controller\Referential;
 use App\Annotation\HasPermission;
 use App\Entity\Box;
 use App\Entity\Client;
+use App\Entity\Depository;
 use App\Entity\Location;
 use App\Entity\Role;
 use App\Helper\Form;
@@ -80,6 +81,7 @@ class LocationController extends AbstractController {
 
         $content = (object)$request->request->all();
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
+        $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
         $capacity = $content->capacity ?? null;
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
@@ -99,7 +101,9 @@ class LocationController extends AbstractController {
                 ->setActive($content->active)
                 ->setClient($client)
                 ->setDescription($content->description ?? null)
-                ->setDeposits(0);
+                ->setDeposits(0)
+                ->setType($content->locationType)
+                ->setDepot($depository);
 
             $location = new Location();
             $location
@@ -109,7 +113,9 @@ class LocationController extends AbstractController {
                 ->setActive($content->active)
                 ->setClient($client)
                 ->setDescription($content->description ?? null)
-                ->setDeposits(0);
+                ->setDeposits(0)
+                ->setType($content->locationType)
+                ->setDepot($depository);
 
             if ((int)$content->type === 1) {
                 $location->setCapacity($capacity)
@@ -158,6 +164,7 @@ class LocationController extends AbstractController {
 
         $content = (object)$request->request->all();
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
+        $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
         $capacity = $content->capacity ?? null;
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
@@ -175,7 +182,9 @@ class LocationController extends AbstractController {
                 ->setName($content->name)
                 ->setClient($client)
                 ->setActive($content->active)
-                ->setDescription($content->description ?? null);
+                ->setDescription($content->description ?? null)
+                ->setType($content->locationType)
+                ->setDepot($depository);
 
             if ((int)$content->type === 1) {
                 $location->setCapacity($capacity)

@@ -47,12 +47,19 @@ class Depository {
      */
     private Collection $deliveryRounds;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Location::class, mappedBy="depot")
+     */
+    private Collection $locations;
+
     public function __construct() {
         $this->preparations = new ArrayCollection();
         $this->deliveryRounds = new ArrayCollection();
+        $this->locations = new ArrayCollection();
     }
 
-    public function getId(): ?int {
+    public function getId(): ?int
+    {
         return $this->id;
     }
 
@@ -72,11 +79,11 @@ class Depository {
         return $this;
     }
 
-    public function getName(): ?int {
+    public function getName(): ?string {
         return $this->name;
     }
 
-    public function setName(int $name): self {
+    public function setName(string $name): self {
         $this->name = $name;
 
         return $this;
@@ -165,6 +172,44 @@ class Depository {
         $this->deliveryRounds = new ArrayCollection();
         foreach ($deliveryRounds as $deliveryRound) {
             $this->addDeliveryRound($deliveryRound);
+        }
+
+        return $this;
+    }
+
+    public function getLocation(): Collection
+    {
+        return $this->locations;
+    }
+
+    public function addLocation(Location $location): self {
+        if (!$this->locations->contains($location)) {
+            $this->locations[] = $location;
+            $location->setDepot($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLocation(Location $location): self {
+        if ($this->locations->removeElement($location)) {
+            if ($location->getDepot() === $this) {
+                $location->setDepot(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setLocations(?array $locations): self
+    {
+        foreach($this->getLocation()->toArray() as $location) {
+            $this->removeLocation($location);
+        }
+
+        $this->locations = new ArrayCollection();
+        foreach($locations as $location) {
+            $this->addLocation($location);
         }
 
         return $this;

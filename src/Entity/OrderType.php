@@ -33,7 +33,8 @@ class OrderType {
      */
     private ?string $name = null;
 
-    public function getId(): ?int {
+    public function getId(): ?int
+    {
         return $this->id;
     }
 
@@ -53,6 +54,7 @@ class OrderType {
 
     public function setName(string $name): self {
         $this->name = $name;
+
         return $this;
     }
 
