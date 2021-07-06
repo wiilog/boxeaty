@@ -9,7 +9,7 @@
 {% block stylesheets %}
     {{ parent() }}
     {% if display_new_command %}
-        {# {{ encore_entry_link_tags('counter_order') }} #}
+        {{ encore_entry_link_tags('counter_order') }}
     {% endif %}
 {% endblock %}
 
@@ -48,5 +48,5 @@
 {% endblock %}
 
 {% block javascripts %}
-{# {{ encore_entry_script_tags(display_new_command ? 'counter_order' : 'app') }} #}
+    {{ encore_entry_script_tags('counter_order') }}
 {% endblock %}

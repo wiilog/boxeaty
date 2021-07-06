@@ -10,7 +10,7 @@ $document.ready(() => {
         ajax: AJAX.route(`POST`, `location_new`),
         table: `#table-locations`,
         afterOpen: (modal) => {
-            toggleCapacityInput(modal.elem().find('[name="type"]'));
+            toggleCapacityInput(modal.elem().find('[name="kiosk"]'));
         }
     });
 
@@ -53,9 +53,9 @@ $document.ready(() => {
     });
 });
 
-$document.ready(() => fireTypeChangeEvent($('#modal-new-location').find('input[name="type"]')))
+$document.ready(() => fireTypeChangeEvent($('#modal-new-location').find('input[name="kiosk"]')))
     .arrive(`#modal-edit-location .location-type`, function() {
-        fireTypeChangeEvent($(this).find('input[name="type"]'));
+        fireTypeChangeEvent($(this).find('input[name="kiosk"]'));
     });
 
 function fireTypeChangeEvent($type) {
@@ -68,19 +68,30 @@ function toggleCapacityInput($typeRadio) {
     const $checkedRadio = $typeRadio.filter(`:checked`);
     const $modal = $typeRadio.closest(`.modal`);
     const $kioskFields = $modal.find(`.kiosk-fields`);
+    const $locationFields = $modal.find(`.location-fields`);
 
     if(parseInt($checkedRadio.val()) === 1) {
-        $kioskFields.removeClass(`d-none`);
-        $kioskFields.find(`input`).val(``);
-        $kioskFields.find(`input[data-required]`).each(function() {
-            $(this).prop(`required`, true);
-        })
+        toggleInputsIn($kioskFields, true);
+        toggleInputsIn($locationFields, false);
     } else {
-        $kioskFields.addClass(`d-none`);
-        $kioskFields.find(`input[required]`).each(function() {
+        toggleInputsIn($kioskFields, false);
+        toggleInputsIn($locationFields, true);
+    }
+}
+
+function toggleInputsIn($container, show) {
+    if(show) {
+        $container.removeClass(`d-none`);
+        $container.find(`input, select`).val(``);
+        $container.find(`input[data-required], select[data-required]`).each(function() {
+            $(this).prop(`required`, true);
+        });
+    } else {
+        $container.addClass(`d-none`);
+        $container.find(`input[required], select[required]`).each(function() {
             const $input = $(this);
             $input.data(`required`, $input.is(`[required]`));
             $input.prop(`required`, false);
-        })
+        });
     }
 }

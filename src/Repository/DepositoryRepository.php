@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Depository;
+use App\Entity\User;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -13,8 +14,14 @@ use Doctrine\ORM\EntityRepository;
  */
 class DepositoryRepository extends EntityRepository {
 
-    public function getDepositoriesForSelect(?string $search) {
+    public function getForSelect(?string $search, ?User $user) {
         $qb = $this->createQueryBuilder("depot");
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $qb->join("depot.client", "client")
+                ->andWhere("client.group IN (:groups)")
+                ->setParameter("groups", $user->getGroups());
+        }
 
         return $qb->select("depot.id AS id, depot.name AS text")
             ->where("depot.name LIKE :search")
