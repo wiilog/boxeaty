@@ -84,7 +84,7 @@ class Authenticator extends AbstractFormLoginAuthenticator {
             $token->getUser()->setLastLogin(new DateTime());
             $this->entityManager->flush();
 
-            if ($token->getUser()->getRole()->getShowNewOrderOnHome()) {
+            if ($token->getUser()->getRole()->getRedirectNewCounterOrder()) {
                 return new RedirectResponse($this->urlGenerator->generate(self::ORDERS_LIST_ROUTE));
             } else if ($token->getUser()->getRole()->getShowIndicatorsOnHome()) {
                 return new RedirectResponse($this->urlGenerator->generate(self::INDICATORS_ROUTE));
