@@ -51,7 +51,7 @@ export default class Select2 {
         if(type && !INSTANT_SELECT_TYPES[type]) {
             config.minimumInputLength = 1;
         }
-console.log($element.parent());
+
         $element.select2({
             placeholder: $element.data(`placeholder`),
             tags: $element.is('[data-editable]'),

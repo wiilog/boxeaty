@@ -23,6 +23,7 @@ yarn-error.log
 ###< symfony/webpack-encore-bundle ###
 
 /.idea/
+/.run
 /public/exports/
 /public/persistent/imports
 /public/persistent/traces
