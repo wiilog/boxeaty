@@ -95,7 +95,7 @@ class GlobalSettingController extends AbstractController {
             $data[] = [
                 "id" => $day->getId(),
                 "day" => $day->getDay() . " " . self::MONTHS[$day->getMonth()],
-                "actions" => '<button class="silent" data-listener="delete"><i class="icon fas fa-trash-alt"></i></button>',
+                "actions" => '<button class="silent" data-listener="delete"><i class="icon bxi bxi-trash"></i></button>',
             ];
         }
 
@@ -119,8 +119,15 @@ class GlobalSettingController extends AbstractController {
             "month" => $content->month
         ]);
 
+        $month = (int)$content->month;
+        $day = (int)$content->day;
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, 2024);
+
+        if($day > $daysInMonth) {
+            $form->addError("day", "Ce jour n'existe pas");
+        }
+
         if ($existing) {
-            dump("fuck");
             $form->addError("day", "Ce jour ferié existe déjà");
             $form->addError("month", "Ce jour ferié existe déjà");
         }
