@@ -1,0 +1,23 @@
+<div class="row">
+    <div class="col-12 col-md-6">
+        <label>
+            Nom du dépôt
+            <input type="text" name="name" class="data" placeholder="Nom du dépôt" value="{{ depository.name }}" required/>
+        </label>
+    </div>
+    <div class="col-12 toggle">
+        <span class="label">Statut</span>
+
+        <input type="radio" id="{{ depository.id ? 'edit' : 'new' }}-depository-active" name="active" class="data" value="1" {{ depository.active ? 'checked' }} required/>
+        <label for="{{ depository.id ? 'edit' : 'new' }}-depository-active">Actif</label>
+
+        <input type="radio" id="{{ depository.id ? 'edit' : 'new' }}-depository-inactive" name="active" class="data" value="0" {{ not depository.active ? 'checked' }} required/>
+        <label for="{{ depository.id ? 'edit' : 'new' }}-depository-inactive">Inactif</label>
+    </div>
+    <div class="col-12 col-md-6">
+        <label>
+            Description
+            <input type="text" name="description" class="data" placeholder="Description du dépôt" value="{{ depository.description }}" required/>
+        </label>
+    </div>
+</div>

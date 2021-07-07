@@ -64,6 +64,12 @@ class ExportService {
         "Forme",
     ];
 
+    public const DEPOSITORY_HEADER = [
+        "Nom du dépôt",
+        "Statut",
+        "Description",
+    ];
+
     public const ROLE_HEADER = [
         "Nom",
         "Actif",
