@@ -1,0 +1,29 @@
+<div class="box global-settings ">
+    <h1>
+        Transports
+        <button class="secondary float-end" type="submit">Enregistrer</button>
+    </h1>
+
+    <h3>Type de mobilité</h3>
+    <div class="w-75">
+        <div class="inline-form">
+            <label class="col-5">Libellé
+                <input type="text" name="nameDeliveryMethode" class="data" required/>
+            </label>
+            <label> Icône
+                <select name="icon" class="data select2-no-min-width" data-s2 data-no-empty-option data-no-searching
+                        data-icon>
+                    {% for index, icon in icons %}
+                        <option class="transport-icon-{{ icon }} w-25" value={{ icon }}>
+                            {{ icon }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button id="add-transport-mode" class="secondary"><i class="icon fas fa-plus"></i> Ajouter</button>
+        </div>
+
+        <table id="table-delivery-methode"></table>
+
+    </div>
+</div>

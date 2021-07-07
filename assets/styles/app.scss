@@ -433,7 +433,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .bxi {
     display: inline-block;
-    width: 1em;
     height: 1em;
     vertical-align: -.125em;
+}
+
+.ico {
+    height: 20px;
 }

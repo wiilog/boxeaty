@@ -5,7 +5,9 @@
     min-width: 200px;
     min-height: 38px;
 }
-
+.select2-no-min-width {
+    min-width: initial !important;
+}
 .select2-container {
     width: 100% !important;
 }

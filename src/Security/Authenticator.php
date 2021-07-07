@@ -27,7 +27,7 @@ class Authenticator extends AbstractFormLoginAuthenticator {
     public const LOGIN_ERROR = "Identifiants incorrects";
     public const LOGIN_ROUTE = "login";
     public const HOME_ROUTE = "home";
-    public const ORDERS_LIST_ROUTE = "orders_list";
+    public const ORDERS_LIST_ROUTE = "counter_orders_list";
     public const INDICATORS_ROUTE = "indicators";
 
     public const PASSWORD_ERROR = "Le mot de passe doit contenir au moins un chiffre, une majuscule et une minuscule. Il doit faire au moins 8 caractères.";
