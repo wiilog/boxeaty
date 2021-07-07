@@ -173,5 +173,4 @@ class SelectController extends AbstractController {
             "results" => $results,
         ]);
     }
-
 }

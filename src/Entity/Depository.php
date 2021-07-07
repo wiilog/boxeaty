@@ -48,7 +48,7 @@ class Depository {
     private Collection $deliveryRounds;
 
     /**
-     * @ORM\OneToMany(targetEntity=Location::class, mappedBy="depot")
+     * @ORM\OneToMany(targetEntity=Location::class, mappedBy="depository")
      */
     private Collection $locations;
 

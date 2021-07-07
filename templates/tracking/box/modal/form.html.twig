@@ -58,6 +58,15 @@
             </select>
         </label>
     </div>
+    <div class="col-12 toggle">
+        <span class="label">Catégorie</span>
+
+        <input type="radio" id="{{ box.id ? 'edit' : 'new' }}-box" name="box" class="data" value="1" {{ box.box ? 'checked' }}/>
+        <label for="{{ box.id ? 'edit' : 'new' }}-box">Box</label>
+
+        <input type="radio" id="{{ box.id ? 'edit' : 'new' }}-crate" name="box" class="data" value="0" {{ not box.box ? 'checked' }}/>
+        <label for="{{ box.id ? 'edit' : 'new' }}-crate">Caisse</label>
+    </div>
     <div class="col-12">
         <label>Commentaire</label>
         <div class="data" data-wysiwyg="comment">{{ box.comment | raw }}</div>
