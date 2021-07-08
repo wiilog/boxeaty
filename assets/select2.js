@@ -4,7 +4,6 @@ import 'select2/src/js/select2/i18n/fr';
 
 const ROUTES = {
     box: `ajax_select_boxes`,
-    depository: `ajax_select_depositories`,
     group: `ajax_select_groups`,
     client: `ajax_select_clients`,
     multiSite: `ajax_select_multi_sites`,
@@ -18,14 +17,16 @@ const ROUTES = {
     orderDepositTicket: `ajax_select_counter_order_deposit_tickets`,
     depository: `ajax_select_depositories`,
     deliverer: `ajax_select_deliverers`,
-}
+    deliveryMethod: `ajax_select_delivery_methods`,
+};
 
 const INSTANT_SELECT_TYPES = {
     type: true,
     quality: true,
     group: true,
     depository: true,
-}
+    deliveryMethod: true,
+};
 
 export default class Select2 {
     static init($element) {

@@ -14,6 +14,7 @@ import Toolbar from 'quill/modules/toolbar';
 import Snow from 'quill/themes/snow';
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 import {createPopper} from '@popperjs/core';
+import Leaflet from "leaflet";
 
 import './util';
 import './pages/security';
@@ -27,6 +28,8 @@ export const $document = $(document);
 const routes = require(`../public/generated/routes.json`);
 Routing.setRoutingData(routes);
 global.Routing = Routing;
+
+Leaflet.Icon.Default.imagePath = '/build/vendor/leaflet/images/';
 
 // make all modals static
 BootstrapModal.Default.backdrop = `static`;

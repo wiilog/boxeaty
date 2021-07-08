@@ -4,9 +4,15 @@
 namespace App\Controller\Operation;
 
 use App\Entity\ClientOrder;
+use App\Entity\Delivery;
+use App\Entity\DeliveryMethod;
+use App\Entity\DeliveryRound;
+use App\Entity\Depository;
 use App\Entity\Role;
 use App\Annotation\HasPermission;
 use App\Entity\Status;
+use App\Entity\User;
+use App\Helper\Form;
 use App\Helper\FormatHelper;
 use DateInterval;
 use DatePeriod;
@@ -40,13 +46,13 @@ class PlanningController extends AbstractController {
     public function content(Request $request, EntityManagerInterface $manager, bool $json = true): Response {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
 
-        if($request->query->has("from")) {
+        if ($request->query->has("from")) {
             $from = DateTime::createFromFormat("Y-m-d", $request->query->get("from"));
         } else {
             $from = new DateTime();
         }
 
-        if($request->query->has("to")) {
+        if ($request->query->has("to")) {
             $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"));
         } else {
             $to = (clone $from)->modify("+20 days");
@@ -71,7 +77,7 @@ class PlanningController extends AbstractController {
             $orders = $ordersByDate[$date->format(FormatHelper::DATE_COMPACT)] ?? [];
 
             $column = [
-                "title" => FormatHelper::weekDay($date) . " " . $date->format("d") . " "  . FormatHelper::month($date),
+                "title" => FormatHelper::weekDay($date) . " " . $date->format("d") . " " . FormatHelper::month($date),
                 "orders" => Stream::from($orders)
                     ->sort(fn($a, $b) => $sort[$a->getStatus()->getCode()] - $sort[$b->getStatus()->getCode()])
                     ->values(),
@@ -80,7 +86,7 @@ class PlanningController extends AbstractController {
             $planning[] = $column;
         }
 
-        if($json) {
+        if ($json) {
             return $this->json([
                 "planning" => $this->renderView("operation/planning/content.html.twig", [
                     "planning" => $planning,
@@ -90,6 +96,88 @@ class PlanningController extends AbstractController {
             return $this->render("operation/planning/content.html.twig", [
                 "planning" => $planning,
             ]);
+        }
+    }
+
+    /**
+     * @Route("/tournee/template", name="planning_delivery_round_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_PLANNING)
+     */
+    public function deliveryRoundTemplate(Request $request, EntityManagerInterface $manager): Response {
+        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
+
+        $from = DateTime::createFromFormat("Y-m-d", $request->query->get("from"));
+        $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"));
+
+        return $this->json([
+            "submit" => $this->generateUrl("planning_delivery_round"),
+            "template" => $this->renderView("operation/planning/modal/new_delivery_round.html.twig", [
+                "orders" => $clientOrderRepository->findDeliveriesBetween($from, $to, $request->query->all()),
+            ])
+        ]);
+    }
+
+    /**
+     * @Route("/tournee", name="planning_delivery_round", options={"expose": true})
+     * @HasPermission(Role::MANAGE_PLANNING)
+     */
+    public function deliveryRound(Request $request, EntityManagerInterface $manager): Response {
+        $form = Form::create();
+
+        $content = (object)$request->request->all();
+        $deliverer = isset($content->deliverer) ? $manager->getRepository(User::class)->find($content->deliverer) : null;
+        $method = isset($content->method) ? $manager->getRepository(DeliveryMethod::class)->find($content->method) : null;
+        $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
+        $orders = $manager->getRepository(ClientOrder::class)->findBy(["id" => $content->assigned]);
+
+        if (count($orders) === 0) {
+            $form->addError("Vous devez sélectionner au moins une livraison");
+        }
+
+        if ($form->isValid()) {
+            $statusRepository = $manager->getRepository(Status::class);
+
+            $prepared = Stream::from($orders)
+                ->filter(fn(ClientOrder $order) => $order->getPreparation())
+                ->filter(fn(ClientOrder $order) => $order->getPreparation()->getStatus()->getCode() === Status::PREPARATION_PREPARED)
+                ->count();
+
+            if ($prepared === count($orders)) {
+                $status = $statusRepository->findOneBy(["code" => Status::ROUND_AWAITING_DELIVERER]);
+                $deliveryStatus = $statusRepository->findOneBy(["code" => Status::DELIVERY_AWAITING_DELIVERER]);
+
+                foreach ($orders as $order) {
+                    $delivery = (new Delivery())
+                        ->setOrder($order)
+                        ->setStatus($deliveryStatus);
+
+                    $manager->persist($delivery);
+                }
+            } else {
+                $status = $statusRepository->findOneBy(["code" => Status::ROUND_CREATED]);
+            }
+
+            $round = (new DeliveryRound())
+                ->setStatus($status)
+                ->setDeliverer($deliverer)
+                ->setDeliveryMethod($method)
+                ->setDepository($depository)
+                ->setOrders($orders)
+                ->setOrder(Stream::from($orders)
+                    ->keymap(fn(ClientOrder $order, int $i) => [$order->getId(), $i])
+                    ->toArray())
+                ->setCost($content->cost)
+                ->setDistance($content->distance);
+
+            $manager->persist($round);
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+                "message" => "Tournée créée avec succès",
+            ]);
+        } else {
+            return $form->errors();
         }
     }
 

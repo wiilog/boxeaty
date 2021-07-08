@@ -20,7 +20,7 @@
         &>div {
             display: flex;
             flex-direction: row;
-            align-items: flex-start;
+            align-content: flex-start;
             flex-wrap: wrap;
             flex: 1 1 auto;
             border: 1px solid $grey-dark;
@@ -28,97 +28,124 @@
             padding: 4px;
             width: 100%;
 
-            .order {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                min-height: 50px;
-                border: 1px solid transparent;
-                border-radius: 4px;
-                padding: 6px;
-                font-size: 0.9rem;
-                width: 200px;
-
-                &:not(:last-child) {
-                    margin-bottom: 6px;
-                }
-
-                &.to-validate {
-                    background: rgba($orange, 10%);
-                    border-color: $orange;
-                }
-
-                &.planned {
-                    background: $grey;
-                    border-color: #BDBDBD;
-                }
-
-                &.preparing {
-                    background: $grey;
-                    border-color: $blue;
-                }
-
-                &.delivering {
-                    background: rgba($green, 10%);
-                    border-color: $green;
-                }
-
-                &.late {
-                    background: rgba($red, 10%);
-                    border-color: $red;
-                }
-
-                .title {
-                    font-size: 1.2rem;
-                    font-weight: bold;
-                }
-
-                label {
-                    margin-top: 0;
-                    font-size: 0.9rem;
-                    text-align: left;
-                }
-
-                label:not(.inline) strong {
-                    display: block;
-                    margin-top: -0.4rem;
-                }
-
-                .muted {
-                    color: $grey-darker;
-                }
-
-                .status {
-                    display: block;
-                    background: white;
-                    border-radius: 4px;
-                    padding: 8px 16px;
-                    font-size: 1rem;
-                    line-height: 1rem;
-                    margin: 8px auto;
-                    color: $blue;
-                }
-
-                .side-by-side {
-                    display: flex;
-                    align-items: center;
-                    margin: auto;
-
-                    :not(:first-child) {
-                        margin-left: 4px;
-                    }
-                }
-
-                .validate {
-                    margin: 8px auto;
-                    height: 30px;
-                    line-height: 30px;
-                }
-
-                a {
-                    margin: auto;
-                }
+            .order:not(:last-child) {
+                margin-bottom: 6px;
             }
         }
+    }
+}
+
+.order {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 50px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 6px;
+    font-size: 0.9rem;
+    width: 200px;
+
+    &.to-validate {
+        background: rgba($orange, 10%);
+        border-color: $orange;
+    }
+
+    &.planned {
+        background: $grey;
+        border-color: #BDBDBD;
+    }
+
+    &.preparing {
+        background: $grey;
+        border-color: $blue;
+    }
+
+    &.delivering {
+        background: rgba($green, 10%);
+        border-color: $green;
+    }
+
+    &.late {
+        background: rgba($red, 10%);
+        border-color: $red;
+    }
+
+    .title {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    label {
+        margin-top: 0;
+        font-size: 0.9rem;
+        text-align: left;
+    }
+
+    label:not(.inline) strong {
+        display: block;
+        margin-top: -0.4rem;
+    }
+
+    .muted {
+        color: $grey-darker;
+    }
+
+    .status {
+        display: block;
+        background: white;
+        border-radius: 4px;
+        padding: 8px 16px;
+        font-size: 1rem;
+        line-height: 1rem;
+        margin: 8px auto;
+        color: $blue;
+    }
+
+    .side-by-side {
+        display: flex;
+        align-items: center;
+        margin: auto;
+
+        :not(:first-child) {
+            margin-left: 4px;
+        }
+    }
+
+    .validate {
+        margin: 8px auto;
+        height: 30px;
+        line-height: 30px;
+    }
+
+    a {
+        margin: auto;
+    }
+}
+
+.deliveries-container {
+    .available-deliveries, .assigned-deliveries {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        overflow-y: auto;
+        background-color: $grey;
+        border-radius: 8px;
+        padding: 4px;
+
+        .order {
+            margin-top: 5px;
+            margin-left: 5px;
+        }
+    }
+
+    .available-deliveries {
+        height: 200px;
+        flex-direction: row;
+    }
+
+    .assigned-deliveries {
+        height: 200px;
+        flex-direction: column;
     }
 }

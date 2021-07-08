@@ -18,7 +18,13 @@ class Preparation {
     private ?int $id = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=ClientOrder::class, mappedBy="preparation")
+     * @ORM\ManyToOne(targetEntity=Status::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private ?Status $status;
+
+    /**
+     * @ORM\OneToOne(targetEntity=ClientOrder::class, inversedBy="preparation")
      * @ORM\JoinColumn(nullable=false)
      */
     private ?ClientOrder $order;
@@ -31,6 +37,15 @@ class Preparation {
 
     public function getId(): ?int {
         return $this->id;
+    }
+
+    public function getStatus(): ?Status {
+        return $this->status;
+    }
+
+    public function setStatus(?Status $status): self {
+        $this->status = $status;
+        return $this;
     }
 
     public function getOrder(): ?ClientOrder {
