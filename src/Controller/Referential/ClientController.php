@@ -219,13 +219,14 @@ class ClientController extends AbstractController {
                 "success" => true,
                 "message" => "Client <strong>{$client->getName()}</strong> désactivé avec succès"
             ]);
-        } else
+        } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
                 "message" => "Le client n'existe pas"
             ]);
         }
+    }
 
 
     /**

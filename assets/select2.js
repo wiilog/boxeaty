@@ -4,6 +4,7 @@ import 'select2/src/js/select2/i18n/fr';
 
 const ROUTES = {
     box: `ajax_select_boxes`,
+    depository: `ajax_select_depositories`,
     group: `ajax_select_groups`,
     client: `ajax_select_clients`,
     multiSite: `ajax_select_multi_sites`,

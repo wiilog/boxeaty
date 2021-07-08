@@ -24,6 +24,9 @@ class GlobalSetting {
     public const MAILER_SENDER_NAME = "MAILER_SENDER_NAME";
     public const MAILER_SENDER_EMAIL = "MAILER_SENDER_EMAIL";
 
+    public const AUTO_VALIDATION_DELAY = "AUTO_VALIDATION_DELAY";
+    public const AUTO_VALIDATION_BOX_QUANTITY = "AUTO_VALIDATION_BOX_QUANTITY";
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

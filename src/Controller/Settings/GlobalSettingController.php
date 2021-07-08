@@ -36,6 +36,8 @@ class GlobalSettingController extends AbstractController {
             "box_capacities" => $this->asArray($settings, GlobalSetting::BOX_CAPACITIES),
             "box_shapes" => $this->asArray($settings, GlobalSetting::BOX_SHAPES),
             "payment_modes" => $this->asArray($settings, GlobalSetting::PAYMENT_MODES),
+            "auto_validation_delay" => $settings[GlobalSetting::AUTO_VALIDATION_DELAY],
+            "auto_validation_box_quantity" => $settings[GlobalSetting::AUTO_VALIDATION_BOX_QUANTITY],
             "mailer" => [
                 "host" => $settings[GlobalSetting::MAILER_HOST],
                 "port" => $settings[GlobalSetting::MAILER_PORT],
@@ -81,7 +83,7 @@ class GlobalSettingController extends AbstractController {
             $data[] = [
                 "id" => $day->getId(),
                 "day" => $day->getDay() . " " . FormatHelper::MONTHS[$day->getMonth()],
-                "actions" => '<button class="silent w-100" data-listener="delete"><i class="icon fas fa-trash-alt"></i></button>',
+                "actions" => '<button class="silent w-100" data-listener="delete"><i class="icon bxi bxi-trash"></i></button>',
             ];
         }
 
@@ -105,8 +107,15 @@ class GlobalSettingController extends AbstractController {
             "month" => $content->month
         ]);
 
+        $month = (int)$content->month;
+        $day = (int)$content->day;
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, 2024);
+
+        if($day > $daysInMonth) {
+            $form->addError("day", "Ce jour n'existe pas");
+        }
+
         if ($existing) {
-            dump("fuck");
             $form->addError("day", "Ce jour ferié existe déjà");
             $form->addError("month", "Ce jour ferié existe déjà");
         }

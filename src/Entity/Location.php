@@ -17,6 +17,18 @@ class Location {
 
     public const MIN_KIOSK_CAPACITY = 1;
 
+    const RECEPTION = "Reception";
+    const EXPEDITION = "Expedition";
+    const STOCK = "Stock";
+    const QUALITY = "Qualite";
+
+    const LOCATION_TYPES = [
+        1 => self::RECEPTION,
+        2 => self::EXPEDITION,
+        3 => self::STOCK,
+        4 => self::QUALITY
+    ];
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -83,6 +95,16 @@ class Location {
      * @ORM\OneToMany(targetEntity=Collect::class, mappedBy="location")
      */
     private Collection $collects;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private ?int $type = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="locations")
+     */
+    private ?Depository $depot = null;
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
@@ -306,5 +328,36 @@ class Location {
 
         return $this;
     }
+
+
+    public function getType(): ?int
+    {
+        return $this->type;
+    }
+
+    public function setType(?int $type): self
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getDepot(): ?Depository
+    {
+        return $this->depot;
+    }
+
+    public function setDepot(?Depository $depot): self {
+        if($this->depot && $this->depot !== $depot) {
+            $this->depot->removeLocation($this);
+        }
+        $this->depot = $depot;
+        if($depot) {
+            $depot->addLocation($this);
+        }
+
+        return $this;
+    }
+
 
 }

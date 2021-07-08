@@ -66,6 +66,12 @@ $document.click(e => {
     if(!$target.closest(selector).exists() && !$target.is(selector)) {
         $(`#menu-dropdown, .category-dropdown, .dropdown-menu`).hide();
     }
+
+    if($target.hasClass('display-profile')) {
+        $('#menu-dropdown').hide();
+    } else if($target.hasClass('display-menu')) {
+        $('.dropdown-menu').hide();
+    }
 });
 
 Quill.register({
@@ -112,7 +118,7 @@ function initializeDropdown() {
         }
 
         createPopper($button[0], $dropdown[0], {
-            placement: `left`,
+            placement: $button.data(`placement`) || `left`,
         });
     })
 }
@@ -133,4 +139,4 @@ $document.ready(() => {
             Modal.load(ajax);
         });
     }
-})
+});

@@ -22,10 +22,9 @@ class Depository {
     private ?int $id = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="depositories")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\OneToMany(targetEntity=Client::class, mappedBy="depository")
      */
-    private ?Client $client = null;
+    private Collection $clients;
 
     /**
      * @ORM\Column(type="string")
@@ -47,36 +46,27 @@ class Depository {
      */
     private Collection $deliveryRounds;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Location::class, mappedBy="depot")
+     */
+    private Collection $locations;
+
     public function __construct() {
         $this->preparations = new ArrayCollection();
         $this->deliveryRounds = new ArrayCollection();
+        $this->locations = new ArrayCollection();
     }
 
-    public function getId(): ?int {
+    public function getId(): ?int
+    {
         return $this->id;
     }
 
-    public function getClient(): ?Client {
-        return $this->client;
-    }
-
-    public function setClient(?Client $client): self {
-        if ($this->client && $this->client !== $client) {
-            $this->client->removeDepository($this);
-        }
-        $this->client = $client;
-        if ($client) {
-            $client->addDepository($this);
-        }
-
-        return $this;
-    }
-
-    public function getName(): ?int {
+    public function getName(): ?string {
         return $this->name;
     }
 
-    public function setName(int $name): self {
+    public function setName(string $name): self {
         $this->name = $name;
 
         return $this;
@@ -165,6 +155,84 @@ class Depository {
         $this->deliveryRounds = new ArrayCollection();
         foreach ($deliveryRounds as $deliveryRound) {
             $this->addDeliveryRound($deliveryRound);
+        }
+
+        return $this;
+    }
+
+    public function getLocations(): Collection
+    {
+        return $this->locations;
+    }
+
+    public function addLocation(Location $location): self {
+        if (!$this->locations->contains($location)) {
+            $this->locations[] = $location;
+            $location->setDepot($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLocation(Location $location): self {
+        if ($this->locations->removeElement($location)) {
+            if ($location->getDepot() === $this) {
+                $location->setDepot(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setLocations(?array $locations): self
+    {
+        foreach($this->getLocation()->toArray() as $location) {
+            $this->removeLocation($location);
+        }
+
+        $this->locations = new ArrayCollection();
+        foreach($locations as $location) {
+            $this->addLocation($location);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Client[]
+     */
+    public function getClients(): Collection {
+        return $this->clients;
+    }
+
+    public function addClient(Client $client): self {
+        if (!$this->clients->contains($client)) {
+            $this->clients[] = $client;
+            $client->setDepository($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClient(Client $client): self {
+        if ($this->clients->removeElement($client)) {
+            // set the owning side to null (unless already changed)
+            if ($client->getDepository() === $this) {
+                $client->setDepository(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setClients(?array $clients): self {
+        foreach ($this->getClients()->toArray() as $client) {
+            $this->removeClient($client);
+        }
+
+        $this->clients = new ArrayCollection();
+        foreach ($clients as $client) {
+            $this->addClient($client);
         }
 
         return $this;

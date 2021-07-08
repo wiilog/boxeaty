@@ -183,3 +183,7 @@
 .dataTables_wrapper thead th:not(.sorting_disabled) {
     cursor: pointer;
 }
+
+div.dataTables_scrollBody {
+    position: initial !important;
+}
