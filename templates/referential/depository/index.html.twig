@@ -1,0 +1,27 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Référentiel{% endblock %}
+{% block page %}Dépôt{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+            <div class="right">
+                <a href="{{ path('depositories_export') }}" class="outline"><i class="icon fas fa-download"></i> Export au format CSV</a>
+                <button class="primary new-depository"><i class="icon fas fa-plus"></i> Nouveau dépôt</button>
+            </div>
+        </div>
+
+        <table id="table-depositories"
+               data-initial-data="{{ initial_depositories }}"
+               data-default-order="{{ depositories_order | json_encode }}">
+        </table>
+    </div>
+
+    {% include 'referential/depository/modal/new.html.twig' with {depository: new_depository} %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('depository_list') }}
+{% endblock %}

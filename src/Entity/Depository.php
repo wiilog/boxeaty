@@ -22,10 +22,9 @@ class Depository {
     private ?int $id = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="depositories")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\OneToMany(targetEntity=Client::class, mappedBy="depository")
      */
-    private ?Client $client = null;
+    private Collection $clients;
 
     /**
      * @ORM\Column(type="string")
@@ -61,22 +60,6 @@ class Depository {
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getClient(): ?Client {
-        return $this->client;
-    }
-
-    public function setClient(?Client $client): self {
-        if ($this->client && $this->client !== $client) {
-            $this->client->removeDepository($this);
-        }
-        $this->client = $client;
-        if ($client) {
-            $client->addDepository($this);
-        }
-
-        return $this;
     }
 
     public function getName(): ?string {
@@ -177,7 +160,7 @@ class Depository {
         return $this;
     }
 
-    public function getLocation(): Collection
+    public function getLocations(): Collection
     {
         return $this->locations;
     }
@@ -210,6 +193,46 @@ class Depository {
         $this->locations = new ArrayCollection();
         foreach($locations as $location) {
             $this->addLocation($location);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Client[]
+     */
+    public function getClients(): Collection {
+        return $this->clients;
+    }
+
+    public function addClient(Client $client): self {
+        if (!$this->clients->contains($client)) {
+            $this->clients[] = $client;
+            $client->setDepository($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClient(Client $client): self {
+        if ($this->clients->removeElement($client)) {
+            // set the owning side to null (unless already changed)
+            if ($client->getDepository() === $this) {
+                $client->setDepository(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setClients(?array $clients): self {
+        foreach ($this->getClients()->toArray() as $client) {
+            $this->removeClient($client);
+        }
+
+        $this->clients = new ArrayCollection();
+        foreach ($clients as $client) {
+            $this->addClient($client);
         }
 
         return $this;

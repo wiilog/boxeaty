@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Depository;
+use App\Entity\User;
+use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -13,8 +15,19 @@ use Doctrine\ORM\EntityRepository;
  */
 class DepositoryRepository extends EntityRepository {
 
-    public function getDepositoriesForSelect(?string $search) {
+    public const DEFAULT_DATATABLE_ORDER = [['name', 'asc']];
+    private const DEFAULT_DATATABLE_START = 0;
+    private const DEFAULT_DATATABLE_LENGTH = 10;
+
+    public function getForSelect(?string $search, ?User $user) {
         $qb = $this->createQueryBuilder("depot");
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $qb->join("depot.client", "client")
+                ->andWhere("client.group IN (:groups)")
+                ->setParameter("groups", $user->getGroups());
+        }
+
         return $qb->select("depot.id AS id, depot.name AS text")
             ->where("depot.name LIKE :search")
             ->setMaxResults(15)
@@ -23,4 +36,50 @@ class DepositoryRepository extends EntityRepository {
             ->getArrayResult();
     }
 
+    public function findForDatatable(array $params): array {
+        $search = $params["search"]["value"] ?? null;
+
+        $qb = $this->createQueryBuilder("depository");
+        $total = QueryHelper::count($qb, "depository");
+
+        if ($search) {
+            $qb->where($qb->expr()->orX(
+                "depository.name LIKE :search",
+                "depository.description LIKE :search",
+            ))->setParameter("search", "%$search%");
+        }
+
+
+        if (!empty($params["order"])) {
+            foreach ($params["order"] ?? [] as $order) {
+                $column = $params["columns"][$order["column"]]["data"];
+                $qb->addOrderBy("depository.$column", $order["dir"]);
+            }
+        }
+        else {
+            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+                $qb->addOrderBy("depository.$column", $dir);
+            }
+        }
+
+        $filtered = QueryHelper::count($qb, "depository");
+
+        $qb->setFirstResult($params["start"] ?? self::DEFAULT_DATATABLE_START)
+            ->setMaxResults($params["length"] ?? self::DEFAULT_DATATABLE_LENGTH);
+
+        return [
+            "data" => $qb->getQuery()->getResult(),
+            "total" => $total,
+            "filtered" => $filtered,
+        ];
+    }
+
+    public function iterateAll() {
+        return $this->createQueryBuilder("depository")
+            ->select("depository.name AS name")
+            ->addSelect("IF(depository.active = 1, 'Actif', 'Inactif') AS active")
+            ->addSelect("depository.description AS description")
+            ->getQuery()
+            ->toIterable();
+    }
 }

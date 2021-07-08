@@ -54,7 +54,8 @@
         "twig/cssinliner-extra": "^3.3",
         "twig/extra-bundle": "^3.0",
         "twig/twig": "^3.0",
-        "wiilog/common": "dev-master"
+        "wiilog/common": "dev-master",
+      "ext-calendar": "*"
     },
     "require-dev": {
         "symfony/browser-kit": "^5.3",

@@ -89,42 +89,44 @@ class LocationController extends AbstractController {
             $form->addError("name", "Un emplacement avec ce nom existe déjà");
         }
 
-        if ($content->type && (!$capacity || $capacity < Location::MIN_KIOSK_CAPACITY)) {
+        if ($content->kiosk && (!$capacity || $capacity < Location::MIN_KIOSK_CAPACITY)) {
             $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
 
         if ($form->isValid()) {
             $deporte = new Location();
             $deporte
-                ->setKiosk($content->type)
+                ->setKiosk($content->kiosk)
                 ->setName($content->name . "_deporte")
                 ->setActive($content->active)
                 ->setClient($client)
                 ->setDescription($content->description ?? null)
-                ->setDeposits(0)
-                ->setType($content->locationType)
-                ->setDepot($depository);
+                ->setDeposits(0);
 
             $location = new Location();
             $location
                 ->setDeporte($deporte)
-                ->setKiosk($content->type)
+                ->setKiosk($content->kiosk)
                 ->setName($content->name)
                 ->setActive($content->active)
                 ->setClient($client)
                 ->setDescription($content->description ?? null)
-                ->setDeposits(0)
-                ->setType($content->locationType)
-                ->setDepot($depository);
+                ->setDeposits(0);
 
-            if ((int)$content->type === 1) {
+            if ((int)$content->kiosk === 1) {
                 $location->setCapacity($capacity)
-                    ->setMessage($content->message ?? null);
+                    ->setMessage($content->message ?? null)
+                    ->setType(null)
+                    ->setDepot(null);
 
                 $deporte->setCapacity($capacity)
-                    ->setMessage($content->message ?? null);
+                    ->setMessage($content->message ?? null)
+                    ->setType(null)
+                    ->setDepot(null);
             } else {
-                $location->setCapacity(null)
+                $location->setType($content->type)
+                    ->setDepot($depository)
+                    ->setCapacity(null)
                     ->setMessage(null);
             }
 
@@ -172,26 +174,28 @@ class LocationController extends AbstractController {
             $form->addError("label", "Un autre emplacement avec ce nom existe déjà");
         }
 
-        if ($content->type && (!$capacity || $capacity < Location::MIN_KIOSK_CAPACITY)) {
+        if ($content->kiosk && (!$capacity || $capacity < Location::MIN_KIOSK_CAPACITY)) {
             $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
 
         if ($form->isValid()) {
-            $location
-                ->setKiosk($content->type)
+            $location->setKiosk($content->kiosk)
                 ->setName($content->name)
                 ->setClient($client)
                 ->setActive($content->active)
-                ->setDescription($content->description ?? null)
-                ->setType($content->locationType)
-                ->setDepot($depository);
+                ->setDescription($content->description ?? null);
 
-            if ((int)$content->type === 1) {
+            if ((int)$content->kiosk === 1) {
                 $location->setCapacity($capacity)
-                    ->setMessage($content->message ?? null);
+                    ->setMessage($content->message ?? null)
+                    ->setType(null)
+                    ->setDepot(null);
             } else {
-                $location->setCapacity(null)
-                    ->setMessage($content->message ?? null);
+                $location
+                    ->setType($content->type)
+                    ->setDepot($depository)
+                    ->setCapacity(null)
+                    ->setMessage(null);
             }
 
             $manager->flush();

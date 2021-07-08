@@ -19,6 +19,10 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class SelectController extends AbstractController {
 
+    protected function getUser(): ?User {
+        return parent::getUser();
+    }
+
     /**
      * @Route("/select/box", name="ajax_select_boxes", options={"expose": true})
      */
@@ -90,7 +94,7 @@ class SelectController extends AbstractController {
      * @Route("/select/depository", name="ajax_select_depositories", options={"expose": true})
      */
     public function depositories(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Depository::class)->getDepositoriesForSelect($request->query->get("term"));
+        $results = $manager->getRepository(Depository::class)->getForSelect($request->query->get("term"), $this->getUser());
 
         return $this->json([
             "results" => $results,

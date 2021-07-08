@@ -19,7 +19,7 @@
     </label>
 
     <div class="w-75">
-        <label>Jours fériés ou non ouvrés majoration sur livraison à cette date</label>
+        <label>Jours fériés ou non ouvrés (majoration sur livraison à cette date)</label>
         <div class="inline-form">
             <label>
                 Jour
@@ -27,7 +27,7 @@
             </label>
             <label>
                 Mois
-                <select name="month" class="data" data-s2 required>
+                <select name="month" class="data" data-s2 data-no-empty-option required>
                     {% for number, month in constant('App\\Helper\\FormatHelper::MONTHS') %}
                         <option value="{{ number }}">{{ month }}</option>
                     {% endfor %}

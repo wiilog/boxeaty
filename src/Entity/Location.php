@@ -97,12 +97,12 @@ class Location {
     private Collection $collects;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private ?int $type = null;
 
     /**
-     * @ORM\ManyToOne (targetEntity=Depository::class, inversedBy="locations")
+     * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="locations")
      */
     private ?Depository $depository = null;
 
@@ -335,7 +335,7 @@ class Location {
         return $this->type;
     }
 
-    public function setType(int $type): self
+    public function setType(?int $type): self
     {
         $this->type = $type;
 

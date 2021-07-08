@@ -32,6 +32,18 @@ label {
     font-size: 1.2rem;
     margin-top: 1rem;
 
+    &.inline {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 0;
+
+        input[type="radio"] {
+            margin-top: -5px;
+            margin-right: 5px;
+        }
+    }
+
     [data-toggle="tooltip"] {
         display: inline-block;
         background: url(../images/question-mark.svg) no-repeat;
@@ -40,7 +52,7 @@ label {
         margin-bottom: 5px;
     }
 
-    input, select {
+    input:not([type="radio"]), select {
         display: block;
         width: 100%;
     }
