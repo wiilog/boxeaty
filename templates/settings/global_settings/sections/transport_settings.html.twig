@@ -11,12 +11,9 @@
                 <input type="text" name="nameDeliveryMethode" class="data" required/>
             </label>
             <label> Icône
-                <select name="icon" class="data select2-no-min-width" data-s2 data-no-empty-option data-no-searching
-                        data-icon>
+                <select name="icon" class="data" data-s2 data-no-empty-option data-no-searching data-icon>
                     {% for index, icon in icons %}
-                        <option class="transport-icon-{{ icon }} w-25" value={{ icon }}>
-                            {{ icon }}
-                        </option>
+                        <option class="w-25" value={{ icon }}></option>
                     {% endfor %}
                 </select>
             </label>
@@ -24,6 +21,5 @@
         </div>
 
         <table id="table-delivery-methode"></table>
-
     </div>
 </div>

@@ -131,6 +131,5 @@ $(document).arrive(`[data-s2]`, function() {
 });
 
 function format(state) {
-    if(!state.id) return state.text;
-    return $("<img class='transport-icon-" + state.text.trim() + "' src='" + "/images/" + state.text.trim() + ".svg'/>");
+    return $(`<i class="bxi bxi-${state.id}"></i>`);
 }
