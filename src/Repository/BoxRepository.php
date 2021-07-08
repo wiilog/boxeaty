@@ -22,6 +22,8 @@ class BoxRepository extends EntityRepository {
     public function iterateAll() {
         return $this->createQueryBuilder("box")
             ->select("box.number AS number")
+            ->addSelect("box.creationDate AS creationDate")
+            ->addSelect("box.isBox AS isBox")
             ->addSelect("join_location.name AS location")
             ->addSelect("box.state AS state")
             ->addSelect("join_quality.name AS quality")

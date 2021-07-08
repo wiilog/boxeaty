@@ -93,7 +93,9 @@ class ExportService {
     ];
 
     public const BOX_HEADER = [
-        "Numéro Box",
+        "Code",
+        "Date de création",
+        "Box",
         "Emplacement",
         "Etat",
         "Qualité",

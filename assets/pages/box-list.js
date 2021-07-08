@@ -17,8 +17,9 @@ $(document).ready(() => {
         ajax: AJAX.route(`POST`, `boxes_api`),
         columns: [
             {data: `id`, class: `d-none`},
-            {data: `number`, title: `Code Box/Caisse`},
+            {data: `number`, title: `Code`},
             {data: `creationDate`, title: `Date de création`},
+            {data: `isBox`, title: `Box`},
             {data: `location`, title: `Emplacement`},
             {data: `state`, title: `Etat`},
             {data: `quality`, title: `Qualité`},

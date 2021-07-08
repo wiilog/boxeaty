@@ -342,12 +342,12 @@ class Location {
         return $this;
     }
 
-    public function getDepot(): ?Depository
+    public function getDepository(): ?Depository
     {
         return $this->depository;
     }
 
-    public function setDepot(?Depository $depository): self {
+    public function setDepository(?Depository $depository): self {
         if($this->depository && $this->depository !== $depository) {
             $this->depository->removeLocation($this);
         }

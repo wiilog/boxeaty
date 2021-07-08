@@ -133,7 +133,7 @@ class LocationRepository extends EntityRepository {
         }
 
         return $qb->select("location.id AS id, location.name AS text")
-            ->where("location.name LIKE :search")
+            ->andWhere("location.name LIKE :search")
             ->andWhere("location.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")

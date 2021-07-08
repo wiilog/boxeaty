@@ -168,7 +168,7 @@ class Depository {
     public function addLocation(Location $location): self {
         if (!$this->locations->contains($location)) {
             $this->locations[] = $location;
-            $location->setDepot($this);
+            $location->setDepository($this);
         }
 
         return $this;
@@ -176,8 +176,8 @@ class Depository {
 
     public function removeLocation(Location $location): self {
         if ($this->locations->removeElement($location)) {
-            if ($location->getDepot() === $this) {
-                $location->setDepot(null);
+            if ($location->getDepository() === $this) {
+                $location->setDepository(null);
             }
         }
 
@@ -186,7 +186,7 @@ class Depository {
 
     public function setLocations(?array $locations): self
     {
-        foreach($this->getLocation()->toArray() as $location) {
+        foreach($this->getLocations()->toArray() as $location) {
             $this->removeLocation($location);
         }
 

@@ -63,16 +63,13 @@ export default class Modal {
     }
 
     static load(ajax, config = {}) {
-        console.log(config);
         if(typeof ajax === 'string') {
-            console.log(config);
 
             Modal.html({
                 ...config,
                 template: ajax,
             });
         } else {
-            console.log(config);
             ajax.json(response => {
                 delete response.success;
 

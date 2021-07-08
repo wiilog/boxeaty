@@ -101,7 +101,9 @@ class LocationController extends AbstractController {
                 ->setActive($content->active)
                 ->setClient($client)
                 ->setDescription($content->description ?? null)
-                ->setDeposits(0);
+                ->setDeposits(0)
+                ->setType($content->locationType)
+                ->setDepository($depository);
 
             $location = new Location();
             $location
@@ -111,21 +113,23 @@ class LocationController extends AbstractController {
                 ->setActive($content->active)
                 ->setClient($client)
                 ->setDescription($content->description ?? null)
-                ->setDeposits(0);
+                ->setDeposits(0)
+                ->setType($content->locationType)
+                ->setDepository($depository);
 
             if ((int)$content->kiosk === 1) {
                 $location->setCapacity($capacity)
                     ->setMessage($content->message ?? null)
                     ->setType(null)
-                    ->setDepot(null);
+                    ->setDepository(null);
 
                 $deporte->setCapacity($capacity)
                     ->setMessage($content->message ?? null)
                     ->setType(null)
-                    ->setDepot(null);
+                    ->setDepository(null);
             } else {
                 $location->setType($content->type)
-                    ->setDepot($depository)
+                    ->setDepository($depository)
                     ->setCapacity(null)
                     ->setMessage(null);
             }
@@ -183,17 +187,19 @@ class LocationController extends AbstractController {
                 ->setName($content->name)
                 ->setClient($client)
                 ->setActive($content->active)
-                ->setDescription($content->description ?? null);
+                ->setDescription($content->description ?? null)
+                ->setType($content->locationType)
+                ->setDepository($depository);
 
             if ((int)$content->kiosk === 1) {
                 $location->setCapacity($capacity)
                     ->setMessage($content->message ?? null)
                     ->setType(null)
-                    ->setDepot(null);
+                    ->setDepository(null);
             } else {
                 $location
                     ->setType($content->type)
-                    ->setDepot($depository)
+                    ->setDepository($depository)
                     ->setCapacity(null)
                     ->setMessage(null);
             }
