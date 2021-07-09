@@ -1,0 +1,81 @@
+{% macro order_data(order) %}
+    data-id="{{ order.id }}"
+    data-expected-delivery="{{ order.expectedDelivery | date('d/m/Y') }}"
+    data-address="{{ order.client.address }}"
+    data-delivery-method="{{ order.deliveryMethod.id }}"
+{% endmacro %}
+
+{% macro order_link(order, show_links) %}
+    {% if show_links %}
+        {# TODO: redirect to the right page #}
+        <a href="{# {{ path('client_orders_list', {order: 1}) }} #}">Voir la commande</a>
+    {% endif %}
+{% endmacro %}
+
+{% macro order_card(order, show_links = true) %}
+    {% if order.status.code == constant('App\\Entity\\Status::ORDER_TO_VALIDATE') %}
+        <div class="order to-validate" {{ _self.order_data(order) }}>
+            <span class="title">{{ order.client.name }}</span>
+            <label>Livraison souhaitée <strong>{{ order.expectedDelivery | date('d/m/Y') }}</strong></label>
+            <label>Commande <strong>N°{{ order.number }}</strong></label>
+
+            <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
+
+            {# TODO: open validation modal #}
+            <span class="status"><i class="bxi bxi-validate"></i> A valider BoxEaty</span>
+            <button class="primary validate">Valider</button>
+
+            {{ _self.order_link(order, show_links) }}
+        </div>
+    {% elseif order.status.code == constant('App\\Entity\\Status::ORDER_PLANNED') %}
+        <div class="order planned" {{ _self.order_data(order) }}>
+            <span class="title">{{ order.client.name }}</span>
+            <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
+
+            <span class="status"><i class="bxi bxi-calendar"></i> Planifiée</span>
+            {{ _self.order_link(order, show_links) }}
+        </div>
+    {% elseif order.preparation %}
+        <div class="order preparing" {{ _self.order_data(order) }}>
+            <span class="title">{{ order.client.name }}</span>
+
+            {% if order.deliveryRound %}
+                <label class="inline">Tournée <strong>N°238961</strong></label>
+                <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
+                <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
+
+                <span class="status"><i class="bxi bxi-preparing"></i> En préparation</span>
+            {% else %}
+                <label class="inline">Validée par <strong>{{ order.validator }}</strong></label>
+                <span class="status"><i class="bxi bxi-loading"></i> En préparation</span>
+            {% endif %}
+
+            {{ _self.order_link(order, show_links) }}
+        </div>
+    {% elseif order.delivery %}
+        {% if order.expectedDelivery > date() %}
+            <div class="order late" {{ _self.order_data(order) }}>
+                <span class="title">{{ order.client.name }}</span>
+                <label class="inline">Tournée <strong>N°785236</strong></label>
+                <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
+                <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
+
+                <div class="side-by-side">
+                    <span class="status"><i class="bxi bxi-late"></i> Retard</span>
+                    <button class="primary icon"><i class="fas fa-envelope"></i></button>
+                </div>
+                {{ _self.order_link(order, show_links) }}
+            </div>
+        {% else %}
+            <div class="order delivering" {{ _self.order_data(order) }}>
+                <span class="title">{{ order.client.name }}</span>
+                <label class="inline">Tournée <strong>N°654823</strong></label>
+                <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
+                <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
+
+                <span class="status"><i class="bxi bxi-transit"></i> En transit</span>
+                {{ _self.order_link(order, show_links) }}
+            </div>
+        {% endif %}
+    {% endif %}
+{% endmacro %}

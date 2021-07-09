@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Box;
 use App\Entity\BoxType;
 use App\Entity\Client;
+use App\Entity\DeliveryMethod;
 use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\Group;
@@ -172,6 +173,39 @@ class SelectController extends AbstractController {
      */
     public function anyLocation(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(Location::class)->getAnyForSelect($request->query->get("term"), $this->getUser());
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/depot", name="ajax_select_depositories", options={"expose": true})
+     */
+    public function depository(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Depository::class)->getForSelect($request->query->get("term"), $this->getUser());
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/livreur", name="ajax_select_deliverers", options={"expose": true})
+     */
+    public function deliverer(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(User::class)->getDelivererForSelect($request->query->get("term"), $this->getUser());
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/mode-livraison", name="ajax_select_delivery_methods", options={"expose": true})
+     */
+    public function deliveryMethod(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(DeliveryMethod::class)->getForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,

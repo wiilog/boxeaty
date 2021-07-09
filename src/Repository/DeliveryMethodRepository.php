@@ -19,6 +19,16 @@ class DeliveryMethodRepository extends EntityRepository
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
+    public function getForSelect(?string $search) {
+        return $this->createQueryBuilder("delivery_method")
+            ->select("delivery_method.id AS id, delivery_method.name AS text")
+            ->where("delivery_method.name LIKE :search")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
     public function findForDatatable(array $params): array
     {
         $qb = $this->createQueryBuilder("dm")

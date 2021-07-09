@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\DeliveryRoundRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -50,6 +52,20 @@ class DeliveryRound {
      * @ORM\Column(type="decimal", precision=8, scale=2)
      */
     private ?string $distance = null;
+
+    /**
+     * @ORM\Column(type="json")
+     */
+    private ?array $order = [];
+
+    /**
+     * @ORM\OneToMany(targetEntity=ClientOrder::class, mappedBy="deliveryRound")
+     */
+    private Collection $orders;
+
+    public function __construct() {
+        $this->orders = new ArrayCollection();
+    }
 
     public function getId(): ?int {
         return $this->id;
@@ -121,6 +137,54 @@ class DeliveryRound {
 
     public function setDistance(string $distance): self {
         $this->distance = $distance;
+
+        return $this;
+    }
+
+    public function getOrder(): array {
+        return $this->order;
+    }
+
+    public function setOrder(array $order): self {
+        $this->order = $order;
+        return $this;
+    }
+
+    /**
+     * @return Collection|ClientOrder[]
+     */
+    public function getOrders(): Collection {
+        return $this->orders;
+    }
+
+    public function addOrder(ClientOrder $order): self {
+        if (!$this->orders->contains($order)) {
+            $this->orders[] = $order;
+            $order->setDeliveryRound($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(ClientOrder $order): self {
+        if ($this->orders->removeElement($order)) {
+            if ($order->getDeliveryRound() === $this) {
+                $order->setDeliveryRound(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setOrders(?array $orders): self {
+        foreach ($this->getOrders()->toArray() as $order) {
+            $this->removeOrder($order);
+        }
+
+        $this->orders = new ArrayCollection();
+        foreach ($orders as $order) {
+            $this->addOrder($order);
+        }
 
         return $this;
     }

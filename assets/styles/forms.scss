@@ -13,7 +13,7 @@ input:focus, select { outline: none; }
         display: flex;
         flex-direction: row;
         align-items: center;
-        margin: 0 10px;
+        margin: 0;
         flex-wrap: wrap;
 
         input, select {
@@ -192,6 +192,15 @@ button, a {
         @include button(silent);
     }
 
+    &.icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 35px;
+        height: 35px;
+        padding: 0;
+    }
+
     .icon {
         display: inline-block;
         margin-right: 5px;
@@ -264,4 +273,20 @@ button, a {
 
 .file-delete-icon {
     margin-left: 5px;
+}
+
+.text-form-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+
+    input:not(:first-child), select:not(:first-child) {
+        margin-left: 4px;
+    }
+
+    input:not(:last-child), select:not(:last-child) {
+        margin-right: 4px;
+    }
 }

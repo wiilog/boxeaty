@@ -2,10 +2,7 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\GlobalSetting;
 use App\Entity\OrderType;
-use App\Entity\Status;
-use App\Service\ExportService;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
@@ -22,10 +19,10 @@ class OrderFixtures extends Fixture implements FixtureGroupInterface {
     public function load(ObjectManager $manager) {
         $output = new ConsoleOutput();
 
-        $statusRepository = $manager->getRepository(Status::class);
+        $orderTypeRepository = $manager->getRepository(OrderType::class);
 
         foreach (self::TYPES as $code => $name) {
-            if ($statusRepository->findOneBy(["name" => $name]) === null) {
+            if ($orderTypeRepository->findOneBy(["code" => $code]) === null) {
                 $type = (new OrderType())
                     ->setCode($code)
                     ->setName($name);

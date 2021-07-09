@@ -9,6 +9,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import "~select2/src/scss/core";
 @import "~quill/dist/quill.core.css";
 @import "~quill/dist/quill.snow.css";
+@import "~leaflet/dist/leaflet.css";
 
 @import "mixins";
 @import "fonts";
@@ -44,6 +45,7 @@ body.full-height main {
 
     .box {
         flex: 1 1 100%;
+        max-height: calc(100vh - 320px);
     }
 }
 
@@ -436,6 +438,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     display: inline-block;
     height: 1em;
     vertical-align: -.125em;
+    margin-right: 3px;
 }
 
 .ico {

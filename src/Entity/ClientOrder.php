@@ -84,9 +84,14 @@ class ClientOrder {
     private ?float $servicePrice = null;
 
     /**
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\ManyToOne(targetEntity=User::class)
      */
-    private ?string $comment = null;
+    private ?User $validator = null;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private ?DateTime $validatedAt = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="clientOrders")
@@ -95,14 +100,29 @@ class ClientOrder {
     private ?User $requester = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=Collect::class, mappedBy="order", cascade={"persist", "remove"})
+     * @ORM\Column(type="text", nullable=true)
      */
-    private ?Collect $collect = null;
+    private ?string $comment = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=DeliveryRound::class, inversedBy="orders")
+     */
+    private ?DeliveryRound $deliveryRound = null;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Preparation::class, mappedBy="order", cascade={"persist", "remove"})
+     */
+    private ?Preparation $preparation = null;
 
     /**
      * @ORM\OneToOne(targetEntity=Delivery::class, mappedBy="order", cascade={"persist", "remove"})
      */
     private ?Delivery $delivery = null;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Collect::class, mappedBy="order", cascade={"persist", "remove"})
+     */
+    private ?Collect $collect = null;
 
     /**
      * @ORM\ManyToMany(targetEntity=Box::class, inversedBy="clientOrders")
@@ -117,7 +137,6 @@ class ClientOrder {
     public function getId(): ?int {
         return $this->id;
     }
-
 
     public function getNumber(): ?string {
         return $this->number;
@@ -298,6 +317,24 @@ class ClientOrder {
         return $this;
     }
 
+    public function getValidator(): ?User {
+        return $this->validator;
+    }
+
+    public function setValidator(?User $validator): self {
+        $this->validator = $validator;
+        return $this;
+    }
+
+    public function getValidatedAt(): ?DateTime {
+        return $this->validatedAt;
+    }
+
+    public function setValidatedAt(?DateTime $validatedAt): self {
+        $this->validatedAt = $validatedAt;
+        return $this;
+    }
+
     public function getRequester(): ?User {
         return $this->requester;
     }
@@ -324,17 +361,17 @@ class ClientOrder {
         return $this;
     }
 
-    public function getCollect(): ?Collect {
-        return $this->collect;
+    public function getPreparation(): ?Preparation {
+        return $this->preparation;
     }
 
-    public function setCollect(?Collect $collect): self {
-        if ($this->collect && $this->collect->getOrder() === $this) {
-            $this->collect->setOrder(null);
+    public function setPreparation(?Preparation $preparation): self {
+        if ($this->preparation && $this->preparation->getOrder() === $this) {
+            $this->preparation->setOrder(null);
         }
-        $this->collect = $collect;
-        if ($collect) {
-            $collect->setOrder($this);
+        $this->preparation = $preparation;
+        if ($preparation) {
+            $preparation->setOrder($this);
         }
 
         return $this;
@@ -351,6 +388,39 @@ class ClientOrder {
         $this->delivery = $delivery;
         if ($delivery) {
             $delivery->setOrder($this);
+        }
+
+        return $this;
+    }
+
+    public function getCollect(): ?Collect {
+        return $this->collect;
+    }
+
+    public function setCollect(?Collect $collect): self {
+        if ($this->collect && $this->collect->getOrder() === $this) {
+            $this->collect->setOrder(null);
+        }
+        $this->collect = $collect;
+        if ($collect) {
+            $collect->setOrder($this);
+        }
+
+        return $this;
+    }
+
+
+    public function getDeliveryRound(): ?DeliveryRound {
+        return $this->deliveryRound;
+    }
+
+    public function setDeliveryRound(?DeliveryRound $deliveryRound): self {
+        if ($this->deliveryRound && $this->deliveryRound !== $deliveryRound) {
+            $this->deliveryRound->removeOrder($this);
+        }
+        $this->deliveryRound = $deliveryRound;
+        if ($deliveryRound) {
+            $deliveryRound->addOrder($this);
         }
 
         return $this;
