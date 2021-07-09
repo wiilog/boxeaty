@@ -102,7 +102,8 @@ function importTemplateChanged($dataTypeImport = null) {
 
     const templateDirectory = '/templates';
     const configDownloadLink = {
-        box: {label: 'Box', url: `${templateDirectory}/Box.csv`},
+        box: {label: 'Box/Caisse', url: `${templateDirectory}/Box.csv`},
+        location: {label: 'Emplacement', url: `${templateDirectory}/Emplacement.csv`},
     };
 
     const valTypeImport = $dataTypeImport ? $dataTypeImport.val() : '';

@@ -46,7 +46,7 @@ class LocationRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "location");
 
         if ($search) {
-            $qb->join("location.client", "client")
+            $qb->leftJoin("location.client", "client")
                 ->andWhere($qb->expr()->orX(
                     "location.name LIKE :search",
                     "location.description LIKE :search",

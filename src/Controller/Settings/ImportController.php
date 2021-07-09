@@ -110,7 +110,7 @@ class ImportController extends AbstractController {
             $session->set("draft-import", $import);
 
             $preAssignments = [];
-            foreach (Import::FIELDS as $code => $config) {
+            foreach (Import::FIELDS[$content->type] as $code => $config) {
                 $closest = null;
                 $closestDistance = PHP_INT_MAX;
 
@@ -130,7 +130,7 @@ class ImportController extends AbstractController {
             return $this->json([
                 "success" => true,
                 "next" => $this->renderView("settings/import/modal/fields_association.html.twig", [
-                    "fields" => Import::FIELDS,
+                    "fields" => Import::FIELDS[$content->type],
                     "pre_assignments" => $preAssignments,
                     "file_fields" => Stream::from($fields)
                         ->map(fn($field, $id) => [
@@ -166,7 +166,7 @@ class ImportController extends AbstractController {
 
         $associations = explode(",", $content->associations);
 
-        foreach (Import::FIELDS as $name => $config) {
+        foreach (Import::FIELDS[$import->getDataType()] as $name => $config) {
             if (isset($config["required"]) && $config["required"] && !in_array($name, $associations)) {
                 $form->addError("Le champ <b>{$config['name']}</b> est requis mais n'est associé à aucune colonne du fichier");
             }
