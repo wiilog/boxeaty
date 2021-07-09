@@ -240,7 +240,7 @@ button, a {
 
 .modal {
     input:not([type="checkbox"]):not([type="radio"]) {
-        width: 100% !important;
+        width: 100%;
     }
 }
 
@@ -273,6 +273,41 @@ button, a {
 
 .file-delete-icon {
     margin-left: 5px;
+}
+
+.header-section {
+    height: 40px;
+    width: 100%;
+    background-color: $orange-lightest;
+    border-radius: 10px;
+
+    h3 {
+        color: $orange;
+        font-family: Retroyal, sans-serif;
+        font-weight: bolder;
+        font-size: 25px;
+        margin: auto 0;
+    }
+
+    &:before {
+        display: block;
+        content: '';
+        background: url("../images/left-element.svg") no-repeat;
+        background-size: 15px;
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+    }
+
+    &:after {
+        display: block;
+        content: '';
+        background: url("../images/right-element.svg") no-repeat;
+        background-size: 15px;
+        width: 20px;
+        height: 20px;
+        margin-left: 12px;
+    }
 }
 
 .text-form-wrapper {

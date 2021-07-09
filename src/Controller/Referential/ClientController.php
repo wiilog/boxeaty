@@ -4,6 +4,9 @@ namespace App\Controller\Referential;
 
 use App\Annotation\HasPermission;
 use App\Entity\Client;
+use App\Entity\ClientOrderInformation;
+use App\Entity\DeliveryMethod;
+use App\Entity\Depository;
 use App\Entity\Group;
 use App\Entity\Location;
 use App\Entity\Role;
@@ -31,6 +34,7 @@ class ClientController extends AbstractController {
     public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("referential/client/index.html.twig", [
             "new_client" => new Client(),
+            "new_client_order_information" => new ClientOrderInformation(),
             "initial_clients" => $this->api($request, $manager)->getContent(),
             "clients_order" => ClientRepository::DEFAULT_DATATABLE_ORDER
         ]);
@@ -83,6 +87,9 @@ class ClientController extends AbstractController {
 
         $contact = $manager->getRepository(User::class)->find($content->contact);
         $group = $manager->getRepository(Group::class)->find($content->group);
+        $deliveryMethod = isset($content->deliveryMethod) ? $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod) : null;
+        $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
+
         $multiSite = isset($content->linkedMultiSite) ? $clientRepository->find($content->linkedMultiSite) : null;
         $depositTicketsClients = $clientRepository->findBy(["id" => $depositTicketsClientsIds]);
 
@@ -102,7 +109,21 @@ class ClientController extends AbstractController {
                 ->setGroup($group)
                 ->setLinkedMultiSite($multiSite)
                 ->setDepositTicketClients($depositTicketsClients)
-                ->setDepositTicketValidity($content->depositTicketValidity);
+                ->setDepositTicketValidity($content->depositTicketValidity)
+                ->setMailNotificationOrderPreparation((bool)$content->mailNotificationOrderPreparation);
+
+            $clientOrderInformation = (new ClientOrderInformation())
+                ->setClient($client)
+                ->setDeliveryMethod($deliveryMethod)
+                ->setDepository($depository)
+                ->setDepositoryDistance($content->depositoryDistance ?? null)
+                ->setTokenAmount($content->tokenAmount ?? null)
+                ->setOrderType($content->orderType ?? null)
+                ->setIsClosedParkOrder((bool)$content->isClosedParkOrder ?? null)
+                ->setWorkingDayDeliveryRate($content->workingDayDeliveryRate ?? null)
+                ->setNonWorkingDayDeliveryRate($content->nonWorkingDayDeliveryRate ?? null)
+                ->setServiceCost($content->serviceCost ?? null)
+                ->setComment($content->comment ?? null);
 
             $out = (new Location())
                 ->setClient($client)
@@ -121,6 +142,7 @@ class ClientController extends AbstractController {
             }
 
             $manager->persist($client);
+            $manager->persist($clientOrderInformation);
             $manager->persist($out);
             $manager->flush();
 
@@ -137,11 +159,14 @@ class ClientController extends AbstractController {
      * @Route("/modifier/template/{client}", name="client_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function editTemplate(Client $client): Response {
+    public function editTemplate(Client $client, EntityManagerInterface $manager): Response {
+        $clientOrderInformation = $manager->getRepository(ClientOrderInformation::class)->findOneBy(['client' => $client]);
+
         return $this->json([
             "submit" => $this->generateUrl("client_edit", ["client" => $client->getId()]),
             "template" => $this->renderView("referential/client/modal/edit.html.twig", [
                 "client" => $client,
+                "clientOrderInformation" => $clientOrderInformation
             ])
         ]);
     }
@@ -164,6 +189,10 @@ class ClientController extends AbstractController {
         $depositTicketsClients = $clientRepository->findBy(["id" => $depositTicketsClientsIds]);
 
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
+        $clientOrderInformation = $manager->getRepository(ClientOrderInformation::class)->findOneBy(['client' => $existing]);
+
+        $deliveryMethod = isset($content->deliveryMethod) ? $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod) : $clientOrderInformation->getDeliveryMethod();
+        $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : $clientOrderInformation->getDepository();
         if ($existing !== null && $existing !== $client) {
             $form->addError("name", "Un autre client avec ce nom existe déjà");
         }
@@ -179,7 +208,22 @@ class ClientController extends AbstractController {
                 ->setGroup($group)
                 ->setLinkedMultiSite($multiSite)
                 ->setDepositTicketClients($depositTicketsClients)
-                ->setDepositTicketValidity($content->depositTicketValidity);
+                ->setDepositTicketValidity($content->depositTicketValidity)
+                ->setMailNotificationOrderPreparation((bool)$content->mailNotificationOrderPreparation);
+
+            if(isset($clientOrderInformation)) {
+                $clientOrderInformation
+                    ->setDeliveryMethod($deliveryMethod)
+                    ->setDepository($depository)
+                    ->setDepositoryDistance($content->depositoryDistance ?? $clientOrderInformation->getDepositoryDistance())
+                    ->setTokenAmount($content->tokenAmount ?? $clientOrderInformation->getTokenAmount())
+                    ->setOrderType($content->orderType ?? $clientOrderInformation->getOrderType())
+                    ->setIsClosedParkOrder((bool)$content->isClosedParkOrder ?? $clientOrderInformation->isClosedParkOrder())
+                    ->setWorkingDayDeliveryRate($content->workingDayDeliveryRate ?? $clientOrderInformation->getWorkingDayDeliveryRate())
+                    ->setNonWorkingDayDeliveryRate($content->nonWorkingDayDeliveryRate ?? $clientOrderInformation->getNonWorkingDayDeliveryRate())
+                    ->setServiceCost($content->serviceCost ?? $clientOrderInformation->getServiceCost())
+                    ->setComment($content->comment ?? $clientOrderInformation->getComment());
+            }
 
             $manager->flush();
 

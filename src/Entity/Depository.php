@@ -51,10 +51,16 @@ class Depository {
      */
     private Collection $locations;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ClientOrderInformation::class, mappedBy="depository")
+     */
+    private $clientOrderInformation;
+
     public function __construct() {
         $this->preparations = new ArrayCollection();
         $this->deliveryRounds = new ArrayCollection();
         $this->locations = new ArrayCollection();
+        $this->clientOrderInformation = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -233,6 +239,36 @@ class Depository {
         $this->clients = new ArrayCollection();
         foreach ($clients as $client) {
             $this->addClient($client);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ClientOrderInformation[]
+     */
+    public function getClientOrderInformation(): Collection
+    {
+        return $this->clientOrderInformation;
+    }
+
+    public function addClientOrderInformation(ClientOrderInformation $clientOrderInformation): self
+    {
+        if (!$this->clientOrderInformation->contains($clientOrderInformation)) {
+            $this->clientOrderInformation[] = $clientOrderInformation;
+            $clientOrderInformation->setDepository($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClientOrderInformation(ClientOrderInformation $clientOrderInformation): self
+    {
+        if ($this->clientOrderInformation->removeElement($clientOrderInformation)) {
+            // set the owning side to null (unless already changed)
+            if ($clientOrderInformation->getDepository() === $this) {
+                $clientOrderInformation->setDepository(null);
+            }
         }
 
         return $this;

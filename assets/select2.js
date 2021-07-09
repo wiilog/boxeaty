@@ -42,7 +42,10 @@ export default class Select2 {
 
         $element.removeAttr(`data-s2`);
         $element.attr(`data-s2-initialized`, ``);
-        $element.wrap(`<div style="position: relative"/>`);
+
+        if(!$element.closest(`[data-s2-wrapper]`).exists()) {
+            $element.wrap(`<div data-s2-wrapper style="position: relative"/>`);
+        }
 
         const config = {};
         if(type) {
@@ -85,7 +88,12 @@ export default class Select2 {
             },
             ...config,
         });
-        $element.parent().find('.select2-container').addClass(classes);
+
+        $element.parent().find('.select2-container').addClass(classes
+            .split(' ')
+            .filter(css => css !== 'select2-hidden-accessible')
+            .join(' '));
+
         $element.on('select2:open', function(e) {
             const evt = "scroll.select2";
             $(e.target).parents().off(evt);

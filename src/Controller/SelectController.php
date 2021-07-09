@@ -95,7 +95,7 @@ class SelectController extends AbstractController {
      * @Route("/select/depository", name="ajax_select_depositories", options={"expose": true})
      */
     public function depositories(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Depository::class)->getForSelect($request->query->get("term"), $this->getUser());
+        $results = $manager->getRepository(Depository::class)->getForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,
@@ -183,7 +183,7 @@ class SelectController extends AbstractController {
      * @Route("/select/depot", name="ajax_select_depositories", options={"expose": true})
      */
     public function depository(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Depository::class)->getForSelect($request->query->get("term"), $this->getUser());
+        $results = $manager->getRepository(Depository::class)->getForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,
