@@ -1,0 +1,24 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Traçabilité{% endblock %}
+{% block page %}Commandes client{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('client_order') }}
+{% endblock %}
+
+{% block filter_header %}
+    {% include 'filters/client_order_filters.html.twig' %}
+{% endblock %}
+
+{% block content %}
+    <div class="box first-box row client-order-container">
+        <table id="table-client-order" class="orderRow" ></table>
+    </div>
+    {% include 'tracking/client_order/modal/delete.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('client_order') }}
+{% endblock %}

@@ -9,7 +9,9 @@ use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\Group;
 use App\Entity\Location;
+use App\Entity\OrderType;
 use App\Entity\Quality;
+use App\Entity\Status;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -58,6 +60,27 @@ class SelectController extends AbstractController {
             (array)$request->query->get("items"),
             $this->getUser()
         );
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+    /**
+     * @Route("/select/commande-client/status", name="ajax_select_status", options={"expose": true})
+     */
+    public function status(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Status::class)->getForSelect($request->query->get("term"));
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/commande-client/type", name="ajax_select_order_type", options={"expose": true})
+     */
+    public function orderType(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(OrderType::class)->getForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,

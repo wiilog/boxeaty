@@ -4,6 +4,8 @@ import 'select2/src/js/select2/i18n/fr';
 
 const ROUTES = {
     box: `ajax_select_boxes`,
+    status: 'ajax_select_status',
+    orderType: 'ajax_select_order_type',
     depository: `ajax_select_depositories`,
     group: `ajax_select_groups`,
     client: `ajax_select_clients`,

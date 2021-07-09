@@ -27,7 +27,7 @@ html {
 
 body {
     font-family: 'Retroyal', sans-serif;
-    background-color: $grey;
+    background-color: #F8F8F8;
     max-width: 100%;
     height: 100%;
     overflow-x: hidden;
@@ -436,4 +436,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     width: 1em;
     height: 1em;
     vertical-align: -.125em;
+}
+
+.order-card{
+    background-color: #F8F8F8;
 }

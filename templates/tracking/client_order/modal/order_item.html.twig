@@ -1,0 +1,34 @@
+{% if item.status.code == 'ORDER_TRANSIT' %}
+    {% set statusIcon =  'transit'%}
+{% elseif  item.status.code == 'ORDER_FINISHED' %}
+    {% set statusIcon =  'end'%}
+{% else %}
+    {% set statusIcon =  ''%}
+{% endif %}
+
+<div class="row box order-card">
+    <div class="row between">
+        <div class="row col-sm-7 col-12">
+            <p class="col-8">Livraison prévue le <br><span> {{ item.expectedDelivery }} </span></p>
+            <div class="col-4 status"><i class="icon bxi bxi-{{ statusIcon }}" ></i> {{ item.status.name }}</div>
+        </div>
+        <div class="row col-sm-5 col-12">
+            <div class="col-2">
+                {% if item.automatic %}
+                    <i class="icon bxi bxi-automatic"></i>
+                {% endif %}
+            </div>
+            <p class="col-8">Commande N°{{ item.number }} </p>
+            <div class="col-2" data-listener="delete"><i class="icon bxi bxi-trash-circle" ></i></div>
+        </div>
+        <div class="row col-sm-7 col-12">
+            <p class="col-8"><span> {{ item.location.name }} </span><br> {{ item.location.address }} </p>
+            <div class="col-4 deliveryMethod"><i class="icon bxi bxi-" {{ item.deliveryMethod.icon }}></i></div>
+        </div>
+        <div class="row col-sm-5 col-12 ">
+            <div><span class="right">Montant Total {{ item.deliveryPrice + item.servicePrice }}€</span><br><span class="right typeName">{{ item.type.name }}</span></div>
+        </div>
+        <p class="col-sm-8 col-12">Commandé par {{ item.requester.username }}</p>
+        <a class="col-sm-4 col-12 detail"  style="color:#EB611B"> Voir le détail</a>
+    </div>
+</div>
