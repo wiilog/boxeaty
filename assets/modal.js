@@ -338,10 +338,12 @@ export function processForm($parent, $button = null) {
                 value = $input.find(`.ql-editor`).html();
             } else if($input.attr(`type`) === `checkbox`) {
                 value = $input.is(`:checked`) ? `1` : `0`;
-            } else if(typeof value === 'string') {
-                value = $input.val().trim();
             } else {
                 value = $input.val() || null;
+            }
+
+            if(typeof value === `string`) {
+                value = value.trim();
             }
 
             if(value !== null) {
@@ -350,6 +352,32 @@ export function processForm($parent, $button = null) {
         }
     }
 
+    addDataArray($parent, data);
+
+    if($button && $button.attr(`name`)) {
+        data.append($button.attr(`name`), $button.val());
+    }
+
+    // add uploads
+    if(modal && uploads[modal.id]) {
+        for(const [name, file] of Object.entries(uploads[modal.id])) {
+            data.append(name, file)
+        }
+    }
+
+    if(modal && modal.config.processor) {
+        modal.config.processor(data, errors, modal);
+    }
+
+    // display errors under each field
+    for(const error of errors) {
+        error.elements.forEach($elem => showInvalid($elem, error.message));
+    }
+
+    return errors.length === 0 ? data : false;
+}
+
+function addDataArray($parent, data) {
     const $arrays = $parent.find(`select.data-array, input.data-array`);
     const grouped = {};
     for(const element of $arrays) {
@@ -372,22 +400,6 @@ export function processForm($parent, $button = null) {
             })
             .filter(val => val !== null));
     }
-
-    if($button && $button.attr(`name`)) {
-        data.append($button.attr(`name`), $button.val());
-    }
-
-    if(modal && uploads[modal.id]) {
-        for(const [name, file] of Object.entries(uploads[modal.id])) {
-            data.append(name, file)
-        }
-    }
-
-    for(const error of errors) {
-        error.elements.forEach($elem => showInvalid($elem, error.message));
-    }
-
-    return errors.length === 0 ? data : false;
 }
 
 export function handleErrors(element, result) {

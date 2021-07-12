@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\PreparationRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -20,10 +18,16 @@ class Preparation {
     private ?int $id = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=Delivery::class, mappedBy="preparation")
+     * @ORM\ManyToOne(targetEntity=Status::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private ?Delivery $delivery;
+    private ?Status $status;
+
+    /**
+     * @ORM\OneToOne(targetEntity=ClientOrder::class, inversedBy="preparation")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private ?ClientOrder $order;
 
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="preparations")
@@ -35,17 +39,26 @@ class Preparation {
         return $this->id;
     }
 
-    public function getDelivery(): ?Delivery {
-        return $this->delivery;
+    public function getStatus(): ?Status {
+        return $this->status;
     }
 
-    public function setDelivery(?Delivery $delivery): self {
-        if ($this->delivery && $this->delivery->getPreparation() === $this) {
-            $this->delivery->setPreparation(null);
+    public function setStatus(?Status $status): self {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getOrder(): ?ClientOrder {
+        return $this->order;
+    }
+
+    public function setOrder(?ClientOrder $order): self {
+        if ($this->order && $this->order->getPreparation() === $this) {
+            $this->order->setPreparation(null);
         }
-        $this->delivery = $delivery;
-        if ($delivery) {
-            $delivery->setPreparation($this);
+        $this->order = $order;
+        if ($order) {
+            $order->setPreparation($this);
         }
 
         return $this;

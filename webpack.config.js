@@ -36,6 +36,14 @@ Encore
     .addPlugin(new CopyPlugin({
         patterns : [
             {
+                from: "node_modules/leaflet/dist/images",
+                to: "vendor/leaflet/images"
+            }
+        ]
+    }))
+    .addPlugin(new CopyPlugin({
+        patterns : [
+            {
                 from: "node_modules/qr-scanner/qr-scanner-worker.min.js",
                 to: "vendor/qr-scanner-worker.min.js"
             },

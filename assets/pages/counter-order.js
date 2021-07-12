@@ -81,7 +81,7 @@ function addInput(element, code) {
 
             $container.append(`
                 <div class="item">
-                    <input type="text" name="items" class="data data-array mt-1" value="${code}" data-price="${modification}" readonly>
+                    <input type="text" name="items" class="data-array mt-1" value="${code}" data-price="${modification}" readonly>
                     <span class="floating-icon delete-item">
                         <i class="fas fa-times"></i>
                     </span>

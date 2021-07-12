@@ -28,3 +28,12 @@ export class String {
         return result;
     }
 }
+
+FormData.prototype.asObject = function() {
+    const object = {};
+    this.forEach((value, key) => {
+        object[key] = value;
+    });
+
+    return object;
+}

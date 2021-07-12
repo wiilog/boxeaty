@@ -18,13 +18,17 @@ const ROUTES = {
     quality: `ajax_select_quality`,
     orderBox: `ajax_select_counter_order_boxes`,
     orderDepositTicket: `ajax_select_counter_order_deposit_tickets`,
-}
+    deliverer: `ajax_select_deliverers`,
+    deliveryMethod: `ajax_select_delivery_methods`,
+};
 
 const INSTANT_SELECT_TYPES = {
     type: true,
     quality: true,
     group: true,
-}
+    depository: true,
+    deliveryMethod: true,
+};
 
 export default class Select2 {
     static init($element) {

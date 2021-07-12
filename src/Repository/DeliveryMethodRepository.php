@@ -12,15 +12,23 @@ use Doctrine\ORM\EntityRepository;
  * @method DeliveryMethod[]    findAll()
  * @method DeliveryMethod[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class DeliveryMethodRepository extends EntityRepository
-{
+class DeliveryMethodRepository extends EntityRepository {
 
     public const DEFAULT_DATATABLE_ORDER = [["name", "asc"]];
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
-    public function findForDatatable(array $params): array
-    {
+    public function getForSelect(?string $search) {
+        return $this->createQueryBuilder("delivery_method")
+            ->select("delivery_method.id AS id, delivery_method.name AS text")
+            ->where("delivery_method.name LIKE :search")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    public function findForDatatable(array $params): array {
         $qb = $this->createQueryBuilder("dm")
             ->andWhere("dm.deleted = 0");
 
@@ -47,4 +55,5 @@ class DeliveryMethodRepository extends EntityRepository
             "filtered" => $filtered,
         ];
     }
+
 }
