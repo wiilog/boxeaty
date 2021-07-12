@@ -3,7 +3,7 @@
 {% for column in planning %}
     <div class="column">
         <h3>{{ column.title }}</h3>
-        <div>
+        <div class="column-content">
             {% for order in column.orders %}
                 {{ order_card(order) }}
             {% endfor %}
