@@ -1,7 +1,7 @@
 import "../styles/pages/order.scss";
 import {$document} from "../app";
 import AJAX from "../ajax";
-import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
+import {initDatatable} from "../datatable";
 import Modal from "../modal";
 
 $document.ready(() => {
@@ -13,7 +13,6 @@ $document.ready(() => {
         ],
         listeners: {
             delete: data => {
-                console.log(data);
                 const ajax = AJAX.route(`POST`, `client_order_delete_template`, {
                     clientOrder: data.id
                 });

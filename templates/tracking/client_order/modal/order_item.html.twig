@@ -1,34 +1,40 @@
 {% if item.status.code == 'ORDER_TRANSIT' %}
-    {% set statusIcon =  'transit'%}
+    {% set statusIcon =  'transit' %}
 {% elseif  item.status.code == 'ORDER_FINISHED' %}
-    {% set statusIcon =  'end'%}
+    {% set statusIcon =  'end' %}
 {% else %}
-    {% set statusIcon =  ''%}
+    {% set statusIcon =  '' %}
 {% endif %}
 
-<div class="row box order-card">
+<div class="order-card">
     <div class="row between">
-        <div class="row col-sm-7 col-12">
-            <p class="col-8">Livraison prévue le <br><span> {{ item.expectedDelivery }} </span></p>
-            <div class="col-4 status"><i class="icon bxi bxi-{{ statusIcon }}" ></i> {{ item.status.name }}</div>
-        </div>
-        <div class="row col-sm-5 col-12">
-            <div class="col-2">
+        <div class="d-flex justify-content-between col-12">
+            <div class="order-date-container w-40">
+                <span>Livraison prévue le <strong>{{ item.expectedDelivery }}</strong></span>
+            </div>
+            <div class="status"><i class="icon bxi bxi-{{ statusIcon }}"></i> {{ item.status.name }}</div>
+            <div class="expand"></div>
+            <div class="order-number-container w-30">
                 {% if item.automatic %}
                     <i class="icon bxi bxi-automatic"></i>
                 {% endif %}
+                <span>Commande <span class="no-wrap">N°{{ item.number }}</span></span>
+                <div data-listener="delete"><i class="bxi bxi-trash-circle"></i></div>
             </div>
-            <p class="col-8">Commande N°{{ item.number }} </p>
-            <div class="col-2" data-listener="delete"><i class="icon bxi bxi-trash-circle" ></i></div>
         </div>
-        <div class="row col-sm-7 col-12">
-            <p class="col-8"><span> {{ item.location.name }} </span><br> {{ item.location.address }} </p>
-            <div class="col-4 deliveryMethod"><i class="icon bxi bxi-" {{ item.deliveryMethod.icon }}></i></div>
+        <div class="d-flex justify-content-between col-12">
+            <p class="w-40"><strong>{{ item.location.name }}</strong><br> {{ item.location.address }}</p>
+            <div class="delivery-method">
+                <i class="icon bxi bxi-{{ item.deliveryMethod.icon }}"></i>
+                {{ item.deliveryMethod.name }} qui va très vite
+            </div>
+            <div class="expand"></div>
+            <div class="w-30 right">
+                <strong>Montant Total {{ item.deliveryPrice + item.servicePrice }}€</strong>
+                <strong class="typeName">{{ item.type.name }}</strong>
+            </div>
         </div>
-        <div class="row col-sm-5 col-12 ">
-            <div><span class="right">Montant Total {{ item.deliveryPrice + item.servicePrice }}€</span><br><span class="right typeName">{{ item.type.name }}</span></div>
-        </div>
-        <p class="col-sm-8 col-12">Commandé par {{ item.requester.username }}</p>
-        <a class="col-sm-4 col-12 detail"  style="color:#EB611B"> Voir le détail</a>
+        <span class="col-6 ordered-by">Commandé par : {{ item.requester.username }}</span>
+        <a class="col-6 detail" style="color:#EB611B"> Voir le détail</a>
     </div>
 </div>

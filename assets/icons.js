@@ -38,7 +38,10 @@ function loadSVG(element) {
         .find(clss => clss.startsWith(`bxi-`))
         .substring(4);
 
-    element.insertAdjacentHTML(`beforebegin`, icons[icon]);
-    element.previousSibling.classList = element.classList;
-    element.remove();
+
+    if(icons[icon]) {
+        element.insertAdjacentHTML(`beforebegin`, icons[icon]);
+        element.previousSibling.classList = element.classList;
+        element.remove();
+    }
 }

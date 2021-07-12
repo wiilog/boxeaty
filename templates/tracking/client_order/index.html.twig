@@ -14,8 +14,11 @@
 
 {% block content %}
     <div class="box first-box row client-order-container">
-        <table id="table-client-order" class="orderRow" ></table>
+        <table id="table-client-order" class="orderRow"
+               data-initial-data="{{ initial_orders }}"
+               data-default-order="{{ orders_order | json_encode }}"></table>
     </div>
+
     {% include 'tracking/client_order/modal/delete.html.twig' %}
 {% endblock %}
 

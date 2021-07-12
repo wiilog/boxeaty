@@ -66,11 +66,12 @@ class SelectController extends AbstractController {
             "results" => $results,
         ]);
     }
+
     /**
-     * @Route("/select/commande-client/status", name="ajax_select_status", options={"expose": true})
+     * @Route("/select/commande-client/status", name="ajax_select_order_status", options={"expose": true})
      */
-    public function status(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Status::class)->getForSelect($request->query->get("term"));
+    public function orderStatus(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Status::class)->getOrderStatusForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,
