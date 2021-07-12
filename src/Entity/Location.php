@@ -104,7 +104,7 @@ class Location {
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="locations")
      */
-    private ?Depository $depot = null;
+    private ?Depository $depository = null;
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
@@ -342,18 +342,18 @@ class Location {
         return $this;
     }
 
-    public function getDepot(): ?Depository
+    public function getDepository(): ?Depository
     {
-        return $this->depot;
+        return $this->depository;
     }
 
-    public function setDepot(?Depository $depot): self {
-        if($this->depot && $this->depot !== $depot) {
-            $this->depot->removeLocation($this);
+    public function setDepository(?Depository $depository): self {
+        if($this->depository && $this->depository !== $depository) {
+            $this->depository->removeLocation($this);
         }
-        $this->depot = $depot;
-        if($depot) {
-            $depot->addLocation($this);
+        $this->depository = $depository;
+        if($depository) {
+            $depository->addLocation($this);
         }
 
         return $this;

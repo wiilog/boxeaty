@@ -101,6 +101,11 @@ class Box {
     private ?int $uses = null;
 
     /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $isBox = null;
+
+    /**
      * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="box")
      */
     private Collection $depositTickets;
@@ -405,4 +410,13 @@ class Box {
         return $this;
     }
 
+    public function isBox(): ?bool {
+        return $this->isBox;
+    }
+
+    public function setIsBox(?bool $isBox): self {
+        $this->isBox = $isBox;
+
+        return $this;
+    }
 }

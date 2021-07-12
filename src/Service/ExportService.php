@@ -64,6 +64,12 @@ class ExportService {
         "Forme",
     ];
 
+    public const DEPOSITORY_HEADER = [
+        "Nom du dépôt",
+        "Statut",
+        "Description",
+    ];
+
     public const ROLE_HEADER = [
         "Nom",
         "Actif",
@@ -87,7 +93,9 @@ class ExportService {
     ];
 
     public const BOX_HEADER = [
-        "Numéro Box",
+        "Code",
+        "Date de création",
+        "Box",
         "Emplacement",
         "Etat",
         "Qualité",

@@ -31,7 +31,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class BoxController extends AbstractController {
 
     /**
-     * @Route("/liste", name="boxes_list")
+     * @Route("/liste", name="boxes_list", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
@@ -51,20 +51,18 @@ class BoxController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
+        /** @var Box $box */
         foreach ($boxes["data"] as $box) {
             $data[] = [
                 "id" => $box->getId(),
                 "number" => $box->getNumber(),
                 "creationDate" => FormatHelper::datetime($box->getCreationDate()),
+                "isBox" => $box->isBox() ? 'Oui' : 'Non',
                 "location" => FormatHelper::named($box->getLocation()),
                 "state" => Box::NAMES[$box->getState()] ?? "-",
                 "quality" => FormatHelper::named($box->getQuality()),
                 "owner" => FormatHelper::named($box->getOwner()),
                 "type" => FormatHelper::named($box->getType()),
-                "actions" => $this->renderView("datatable_actions.html.twig", [
-                    "editable" => true,
-                    "deletable" => true,
-                ]),
             ];
         }
 
@@ -85,6 +83,7 @@ class BoxController extends AbstractController {
         $form = Form::create();
 
         $content = (object)$request->request->all();
+
         $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
         $owner = isset($content->owner) ? $manager->getRepository(Client::class)->find($content->owner) : null;
         $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
@@ -109,7 +108,8 @@ class BoxController extends AbstractController {
                 ->setQuality($quality)
                 ->setOwner($owner)
                 ->setState($content->state ?? null)
-                ->setComment($content->comment ?? null);
+                ->setComment($content->comment ?? null)
+                ->setIsBox($content->box);
             $manager->persist($box);
 
             [$tracking, $record] = $boxRecordService->generateBoxRecords($box, [], $this->getUser());
@@ -195,7 +195,8 @@ class BoxController extends AbstractController {
                 ->setQuality($quality)
                 ->setOwner($owner)
                 ->setState($content->state ?? null)
-                ->setComment($content->comment ?? null);
+                ->setComment($content->comment ?? null)
+                ->setIsBox($content->box);
 
             [$tracking, $record] = $boxRecordService->generateBoxRecords(
                 $box,

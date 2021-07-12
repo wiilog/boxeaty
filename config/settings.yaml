@@ -92,7 +92,7 @@ parameters:
           route: box_types_list
           permission: App\Entity\Role::MANAGE_BOX_TYPES
         - name: Dépôt
-          #route: depository_list
+          route: depositories_list
           permission: App\Entity\Role::MANAGE_DEPOSITORIES
     - name: Paramétrage
       icon: cog

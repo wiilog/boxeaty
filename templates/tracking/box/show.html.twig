@@ -14,7 +14,13 @@
 {% block content %}
     <div class="row box-show">
         <div class="col-md-4 col-12 details box-details">
-            <h3>Détails de la Box</h3>
+            <div class="d-flex justify-content-between">
+                <h3>Détails de la Box</h3>
+                <div>
+                    <span class="primary edit-box round"><i class="icon bxi bxi-edit-circle"></i></span>
+                    <span class="primary delete-box round"><i class="icon bxi bxi-trash-circle"></i></span>
+                </div>
+            </div>
             <p>Code : <strong>{{ box.number }}</strong></p>
             <p>Emplacement : <strong>{{ box.location ? box.location.name }}</strong></p>
             <p>Qualité : <strong>{{ box.quality ? box.quality.name }}</strong></p>

@@ -10,6 +10,17 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class DeliveryMethod {
 
+    public const BIKE = 0;
+    public const LIGHT_TRUCK = 1;
+    public const HEAVY_TRUCK = 2;
+
+    public const TRANSPORT_TYPES = [
+        self::BIKE => "bike",
+        self::LIGHT_TRUCK => "light-truck",
+        self::HEAVY_TRUCK => "heavy-truck",
+    ];
+    const DEFAULT_DATATABLE_ORDER = [["name", "asc"]] ;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

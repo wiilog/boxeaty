@@ -120,9 +120,9 @@ class Client {
     private ?DeliveryMethod $deliveryMethod = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=Depository::class, mappedBy="client")
+     * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clients")
      */
-    private Collection $depositories;
+    private ?Depository $depository = null;
 
     /**
      * @ORM\Column(type="float")
@@ -165,7 +165,6 @@ class Client {
         $this->clients = new ArrayCollection();
         $this->boxes = new ArrayCollection();
         $this->depositTicketsClients = new ArrayCollection();
-        $this->depositories = new ArrayCollection();
         $this->orderTypes = new ArrayCollection();
     }
 
@@ -439,41 +438,17 @@ class Client {
         return $this;
     }
 
-    /**
-     * @return Collection|Depository[]
-     */
-    public function getDepositories(): Collection {
-        return $this->depositories;
+    public function getDepository(): ?Depository {
+        return $this->depository;
     }
 
-    public function addDepository(Depository $depository): self {
-        if (!$this->depositories->contains($depository)) {
-            $this->depositories[] = $depository;
-            $depository->setClient($this);
+    public function setDepository(?Depository $depository): self {
+        if ($this->depository && $this->depository !== $depository) {
+            $this->depository->removeClient($this);
         }
-
-        return $this;
-    }
-
-    public function removeDepository(Depository $depository): self {
-        if ($this->depositories->removeElement($depository)) {
-            // set the owning side to null (unless already changed)
-            if ($depository->getClient() === $this) {
-                $depository->setClient(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function setDepositories(?array $depositories): self {
-        foreach ($this->getDepositories()->toArray() as $depositorie) {
-            $this->removeDepository($depositorie);
-        }
-
-        $this->depositories = new ArrayCollection();
-        foreach ($depositories as $depositorie) {
-            $this->addDepository($depositorie);
+        $this->depository = $depository;
+        if ($depository) {
+            $depository->addClient($this);
         }
 
         return $this;

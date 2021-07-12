@@ -29,6 +29,10 @@ const INSTANT_SELECT_TYPES = {
 export default class Select2 {
     static init($element) {
         const type = $element.data(`s2`);
+        const icon = $element.is(`[data-icon]`);
+        const disableSearch = $element.is(`[data-no-searching]`);
+        const classes =  $element.attr('class');
+
         if(!$element.find(`option[selected]`).exists() && !type &&
             !$element.is(`[data-no-empty-option]`) && !$element.is(`[data-editable]`)) {
             $element.prepend(`<option selected>`);
@@ -51,6 +55,15 @@ export default class Select2 {
             };
         }
 
+        if (icon) {
+            config.templateResult = format;
+            config.templateSelection = format;
+        }
+
+        if (disableSearch) {
+            config.minimumResultsForSearch = -1;
+        }
+
         if(type && !INSTANT_SELECT_TYPES[type]) {
             config.minimumInputLength = 1;
         }
@@ -58,7 +71,7 @@ export default class Select2 {
         $element.select2({
             placeholder: $element.data(`placeholder`),
             tags: $element.is('[data-editable]'),
-            allowClear: !$element.is(`[multiple]`),
+            allowClear: !$element.is(`[data-no-empty-option]` || !$element.is(`[multiple]`)),
             dropdownParent: $element.parent(),
             language: {
                 errorLoading: () => `Une erreur est survenue`,
@@ -70,7 +83,7 @@ export default class Select2 {
             },
             ...config,
         });
-
+        $element.parent().find('.select2-container').addClass(classes);
         $element.on('select2:open', function(e) {
             const evt = "scroll.select2";
             $(e.target).parents().off(evt);
@@ -118,3 +131,7 @@ $(document).ready(() => $(`[data-s2]`).each((id, elem) => Select2.init($(elem)))
 $(document).arrive(`[data-s2]`, function() {
     Select2.init($(this));
 });
+
+function format(state) {
+    return $(`<i class="bxi bxi-${state.id}"></i>`);
+}

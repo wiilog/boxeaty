@@ -19,6 +19,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import "datatable";
 @import "settings";
 @import "timeline";
+@import "icons";
 
 html {
     height: 100%;
@@ -433,9 +434,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .bxi {
     display: inline-block;
-    width: 1em;
     height: 1em;
     vertical-align: -.125em;
+}
+
+.ico {
+    height: 20px;
 }
 
 .order-card{

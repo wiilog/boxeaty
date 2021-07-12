@@ -22,6 +22,8 @@ class BoxRepository extends EntityRepository {
     public function iterateAll() {
         return $this->createQueryBuilder("box")
             ->select("box.number AS number")
+            ->addSelect("box.creationDate AS creationDate")
+            ->addSelect("box.isBox AS isBox")
             ->addSelect("join_location.name AS location")
             ->addSelect("box.state AS state")
             ->addSelect("join_quality.name AS quality")
@@ -115,6 +117,15 @@ class BoxRepository extends EntityRepository {
                 case("creationDate"):
                     $qb->andWhere("DATE(box.creationDate) = :value")
                         ->setParameter("value", $value);
+                    break;
+                case("depository"):
+                    $qb->leftJoin("box.location", "filter_location")
+                        ->andWhere("filter_location.depository = :filter_depository")
+                        ->setParameter("filter_depository", $value);
+                    break;
+                case("box"):
+                    $qb->andWhere("box.box = :filter_isbox")
+                        ->setParameter("filter_isbox", $value);
                     break;
                 default:
                     $qb->andWhere("box.$name = :filter_$name")

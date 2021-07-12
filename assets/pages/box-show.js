@@ -5,9 +5,28 @@ import AJAX from "../ajax";
 import Flash from "../flash";
 
 import "../styles/pages/box-show.scss";
+import Modal from "../modal";
 
 $(document).ready(() => {
     getBoxTrackingMovements();
+
+    $(`.edit-box`).click(() => {
+        const ajax = AJAX.route(`POST`, `box_edit_template`, {
+            box: $('#box-id').val()
+        });
+        Modal.load(ajax);
+    });
+
+    $(`.delete-box`).click(() => {
+        const ajax = AJAX.route(`POST`, `box_delete_template`, {
+            box: $('#box-id').val()
+        });
+        Modal.load(ajax, {
+            success : () =>{
+                window.location.href = Routing.generate(`boxes_list`);
+            }
+        })
+    });
 
     $('.comment-search').on('change', function () {
         getBoxTrackingMovements(0);
