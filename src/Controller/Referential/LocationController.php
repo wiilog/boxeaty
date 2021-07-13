@@ -102,7 +102,7 @@ class LocationController extends AbstractController {
                 ->setClient($client)
                 ->setDescription($content->description ?? null)
                 ->setDeposits(0)
-                ->setType($content->locationType)
+                ->setType($content->type ?? null)
                 ->setDepository($depository);
 
             $location = new Location();
@@ -114,7 +114,7 @@ class LocationController extends AbstractController {
                 ->setClient($client)
                 ->setDescription($content->description ?? null)
                 ->setDeposits(0)
-                ->setType($content->locationType)
+                ->setType($content->type ?? null)
                 ->setDepository($depository);
 
             if ((int)$content->kiosk === 1) {
@@ -188,7 +188,7 @@ class LocationController extends AbstractController {
                 ->setClient($client)
                 ->setActive($content->active)
                 ->setDescription($content->description ?? null)
-                ->setType($content->locationType)
+                ->setType($content->type ?? null)
                 ->setDepository($depository);
 
             if ((int)$content->kiosk === 1) {

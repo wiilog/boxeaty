@@ -57,6 +57,15 @@ class LocationRepository extends EntityRepository {
                 ->setParameter("exact_search", $search);
         }
 
+        foreach ($params["filters"] ?? [] as $name => $value) {
+            switch ($name) {
+                case "depository":
+                    $qb->andWhere("location.depository = :raw_value")
+                        ->setParameter("raw_value", $value);
+                    break;
+            }
+        }
+
         if (!empty($params["order"])) {
             foreach ($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
