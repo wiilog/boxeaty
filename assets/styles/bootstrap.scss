@@ -32,8 +32,6 @@
 @import "~bootstrap/scss/helpers";
 
 @import "~bootstrap/scss/utilities/api";
-$max: 50;
-$step: 10;
 
 @for $i from 1 through 100 / 5 {
     $value: $i * 5;
