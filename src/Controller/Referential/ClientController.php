@@ -12,6 +12,7 @@ use App\Entity\DeliveryMethod;
 use App\Entity\Depository;
 use App\Entity\Group;
 use App\Entity\Location;
+use App\Entity\OrderRecurrence;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
@@ -316,12 +317,15 @@ class ClientController extends AbstractController {
             'template' => $this->renderView('referential/client/box_types.html.twig', [
                 'client' => $client,
             ]),
-            'totalCrateTypePrice' => Stream::from($client->getClientBoxTypes())->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float) $clientBoxType->getCost())->sum()
+            'totalCrateTypePrice' => Stream::from($client->getClientBoxTypes())
+                ->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float) $clientBoxType->getCost())
+                ->sum()
         ]);
     }
 
     /**
      * @Route("/add-box-type", name="add_client_box_type", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function addBoxType(Request $request, EntityManagerInterface $manager) {
         $form = Form::create();
@@ -368,6 +372,7 @@ class ClientController extends AbstractController {
 
     /**
      * @Route("/delete-client-box-type", name="delete_client_box_type", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function deleteClientBoxType(Request $request, EntityManagerInterface $manager): Response {
 
@@ -412,27 +417,16 @@ class ClientController extends AbstractController {
 
         $content = (object)$request->request->all();
 
-        $client = $manager->getRepository(Client::class)->find($content->client);
-        $boxType = $manager->getRepository(BoxType::class)->find($content->type);
-        $clientBoxTypes = $client->getClientBoxTypes();
-
         if ($content->quantity < 1) {
             $form->addError("quantity", "La quantité doit être supérieure ou égale à 1");
         } elseif ($content->price < 0) {
             $form->addError("price", "Le tarif personnalisé doit être supérieur ou égal à 0");
         }
 
-        foreach ($clientBoxTypes as $currentBoxType) {
-            if($currentBoxType->getBoxType()->getId() === $boxType->getId()) {
-                $form->addError("type", 'Ce type de Box est déjà présent dans le modèle de caisse');
-            }
-        }
-
         if($form->isValid()) {
-            $name = $boxType->getName();
+            $name = $clientBoxType->getBoxType()->getName();
 
             $clientBoxType
-                ->setBoxType($boxType)
                 ->setQuantity((int) $content->quantity)
                 ->setCost((float) $content->price);
 
@@ -448,18 +442,145 @@ class ClientController extends AbstractController {
     }
 
     /**
-     * @Route("/border-recurrence-api", name="order_recurrence_api", options={"expose": true})
+     * @Route("/order-recurrence-api", name="order_recurrence_api", options={"expose": true})
      */
     public function orderRecurrenceApi(Request $request, EntityManagerInterface $manager): Response {
         $id = $request->query->get('id');
         $client = $manager->getRepository(Client::class)->find($id);
 
+        $clientOrderInformation = $client->getClientOrderInformation() ?? null;
+        $orderRecurrence = $clientOrderInformation ? $clientOrderInformation->getOrderRecurrence() : null;
+
+        $crateTypePrice = Stream::from($client->getClientBoxTypes())
+            ->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float) $clientBoxType->getCost())
+            ->sum();
+
         return $this->json([
             'success' => true,
             'template' => $this->renderView('referential/client/order_recurrence.html.twig', [
                 'clientOrderInformation' => $client->getClientOrderInformation() ?? null,
+            ]),
+            'orderRecurrencePrice' => $orderRecurrence ? $orderRecurrence->getFrequency() * $crateTypePrice : 0,
+        ]);
+    }
+
+    /**
+     * @Route("/client-box-type-delete/template/{clientBoxType}", name="client_box_type_delete_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENTS)
+     */
+    public function clientBoxTypeDeleteTemplate(ClientBoxType $clientBoxType): Response {
+        return $this->json([
+            "submit" => $this->generateUrl("client_box_type_delete", ["clientBoxType" => $clientBoxType->getId()]),
+            "template" => $this->renderView("referential/client/modal/delete_client_box_type.html.twig", [
+                "clientBoxType" => $clientBoxType,
             ])
         ]);
+    }
+
+    /**
+     * @Route("/client-box-type-delete/{clientBoxType}", name="client_box_type_delete", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENTS)
+     */
+    public function clientBoxTypeDelete(EntityManagerInterface $manager, ClientBoxType $clientBoxType): Response {
+
+        $manager->remove($clientBoxType);
+        $manager->flush();
+
+        return $this->json([
+            "success" => true,
+            "message" => "Le type de Box <strong>{$clientBoxType->getBoxType()->getName()}</strong> a été supprimé"
+        ]);
+    }
+
+    /**
+     * @Route("/modifier-recurrence-commande/template/{orderRecurrence}", name="order_recurrence_edit_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENTS)
+     */
+    public function orderRecurrenceEditTemplate(OrderRecurrence $orderRecurrence): Response {
+        return $this->json([
+            "submit" => $this->generateUrl("order_recurrence_edit", ["orderRecurrence" => $orderRecurrence->getId()]),
+            "template" => $this->renderView("referential/client/modal/edit_order_recurrence.html.twig", [
+                "orderRecurrence" => $orderRecurrence,
+            ])
+        ]);
+    }
+
+    /**
+     * @Route("/modifier-recurrence-commande/{orderRecurrence}", name="order_recurrence_edit", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENTS)
+     */
+    public function orderRecurrenceEdit(Request $request, OrderRecurrence $orderRecurrence, EntityManagerInterface $manager): Response {
+        $form = Form::create();
+
+        $content = (object)$request->request->all();
+
+        if ($form->isValid()) {
+            $orderRecurrence
+                ->setFrequency($content->frequency)
+                ->setCrateAmount($content->crateAmount)
+                ->setDay($content->day)
+                ->setStart(new DateTime($content->start))
+                ->setEnd(new DateTime($content->end))
+                ->setDeliveryFlatRate($content->deliveryFlatRate)
+                ->setServiceFlatRate($content->serviceFlatRate);
+
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+                "message" => "La récurrence de commande a bien été modifiée",
+            ]);
+        } else {
+            return $form->errors();
+        }
+    }
+
+    /**
+     * @Route("/ajouter-recurrence-commande", name="add_order_recurrence", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENTS)
+     */
+    public function orderRecurrenceAdd(Request $request, EntityManagerInterface $manager): Response {
+        $form = Form::create();
+
+        $content = (object)$request->request->all();
+
+        if ($content->frequency < 0) {
+            $form->addError("frequency", "La fréquence doit être supérieure ou égale à 0");
+        } elseif($content->crateAmount < 0) {
+            $form->addError("crateAmount", "Le nombre de caisses doit être supérieur ou égal à 0");
+        } elseif(new DateTime($content->end) < new DateTime($content->start)) {
+            $form->addError("end", "La date de fin doit être supérieure à la date de début");
+        } elseif($content->deliveryFlatRate < 0) {
+            $form->addError("deliveryFlatRate", "Le forfait livraison commande libre doit être supérieur ou égal à 0");
+        } elseif($content->serviceFlatRate < 0) {
+            $form->addError("serviceFlatRate", "Le forfait de service à la commande libre doit être supérieur ou égal à 0");
+        }
+
+        if ($form->isValid()) {
+            $client = $manager->getRepository(Client::class)->find($content->client);
+            $clientOrderInformation = $client->getClientOrderInformation();
+
+            $orderRecurrence = (new OrderRecurrence())
+                ->setFrequency($content->frequency)
+                ->setCrateAmount($content->crateAmount)
+                ->setDay($content->day)
+                ->setStart(new DateTime($content->start))
+                ->setEnd(new DateTime($content->end))
+                ->setDeliveryFlatRate($content->deliveryFlatRate)
+                ->setServiceFlatRate($content->serviceFlatRate);
+
+            $clientOrderInformation->setOrderRecurrence($orderRecurrence);
+
+            $manager->persist($orderRecurrence);
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+                "message" => "La récurrence de commande a bien été ajoutée",
+            ]);
+        } else {
+            return $form->errors();
+        }
     }
 
 }

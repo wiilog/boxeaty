@@ -32,6 +32,7 @@ $(document).ready(() => {
         ajax: AJAX.route(`POST`, `add_client_box_type`),
         success: () => {
             getBoxTypes();
+            getBoxRecurrence();
         }
     });
 
@@ -39,13 +40,16 @@ $(document).ready(() => {
 
     $(document).arrive(`.delete-client-box-type`, function () {
         $(this).click(() => {
-            AJAX.route(`POST`, `delete_client_box_type`, {
-                id: $(this).data('id'),
-            }).json((result) => {
-                if(result.success) {
+            const ajax = AJAX.route(`POST`, `client_box_type_delete_template`, {
+                clientBoxType: $(this).data('id'),
+            });
+
+            Modal.load(ajax, {
+                success : () =>{
                     getBoxTypes();
+                    getBoxRecurrence();
                 }
-            })
+            });
         });
     });
 
@@ -55,7 +59,39 @@ $(document).ready(() => {
                 clientBoxType: $(this).data('id'),
             });
 
-            Modal.load(ajax);
+            Modal.load(ajax, {
+                success : () =>{
+                    getBoxTypes();
+                    getBoxRecurrence();
+                }
+            });
+        });
+    });
+
+    const addOrderRecurrence = Modal.static(`#modal-add-order-recurrence`, {
+        ajax: AJAX.route(`POST`, `add_order_recurrence`),
+        success: () => {
+            getBoxTypes();
+            getBoxRecurrence();
+        }
+    });
+
+    $(document).arrive(`.add-order-ocurrence`, function () {
+        $(this).click(() => addOrderRecurrence.open());
+    });
+
+    $(document).arrive(`.edit-order-ocurrence`, function () {
+        $(this).click(() => {
+            const ajax = AJAX.route(`POST`, `order_recurrence_edit_template`, {
+                orderRecurrence: $(this).data('id'),
+            });
+
+            Modal.load(ajax, {
+                success : () =>{
+                    getBoxTypes();
+                    getBoxRecurrence();
+                }
+            });
         });
     });
 });
@@ -73,6 +109,7 @@ function getBoxRecurrence() {
     AJAX.route(`GET`, `order_recurrence_api`, {
         id: $('#client-id').val()
     }).json((response) => {
-        $('.order-recurrence-container').empty().append(response.template);
+        $('.order-recurrence-wrapper').empty().append(response.template);
+        $('.order-recurrence-price').text(response.orderRecurrencePrice);
     });
 }

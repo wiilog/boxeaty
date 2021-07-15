@@ -4,8 +4,8 @@
     <div class="box-type-card">
         <img src="">
         <span class="body-text-semi-bold">{{ clientBoxType.quantity }} x {{ boxType.name }}</span>
-        <span class="body-text">TU {{ clientBoxType.cost }} Cts €</span>
-        <span class="body-text-semi-bold">{{ totalPrice | number_format(2, '.') }} Cts €</span>
+        <span class="body-text">TU {{ clientBoxType.cost }}€</span>
+        <span class="body-text-semi-bold">{{ totalPrice | number_format(2, '.') }}€</span>
         <div class="actions-wrapper">
             <span class="edit-client-box-type round" data-id="{{ clientBoxType.id }}"><i class="icon bxi bxi-edit-circle"></i></span>
             <span class="delete-client-box-type round" data-id="{{ clientBoxType.id }}"><i class="icon bxi bxi-trash-circle"></i></span>

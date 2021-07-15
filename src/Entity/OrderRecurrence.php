@@ -47,6 +47,11 @@ class OrderRecurrence
      */
     private $serviceFlatRate;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $day;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -120,6 +125,18 @@ class OrderRecurrence
     public function setServiceFlatRate(float $serviceFlatRate): self
     {
         $this->serviceFlatRate = $serviceFlatRate;
+
+        return $this;
+    }
+
+    public function getDay(): ?int
+    {
+        return $this->day;
+    }
+
+    public function setDay(int $day): self
+    {
+        $this->day = $day;
 
         return $this;
     }
