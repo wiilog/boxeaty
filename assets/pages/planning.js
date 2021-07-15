@@ -15,8 +15,11 @@ $(document).ready(() => {
 
         AJAX.route(`GET`, `planning_content`, params).json(data => {
             $(`#planning`).html(data.planning);
+            initializePlanning();
         });
     });
+
+    initializePlanning();
 
     $(`.new-delivery-round`).click(() => {
         const params = processForm($filters).asObject();
@@ -61,6 +64,16 @@ $(document).ready(() => {
         });
     });
 });
+
+function initializePlanning() {
+    const sortables = sortable(`.column-content`, {
+        acceptFrom: `.column-content`,
+    });
+
+    for(const column of sortables) {
+        column.addEventListener(`sortupdate`, e => changePlannedDate(e.detail));
+    }
+}
 
 function updateAverage($element) {
     const count = $(`.assigned-deliveries .order[data-id]`).length;
@@ -107,4 +120,20 @@ function processSortables(data, errors, modal) {
     });
 
     data.append(`assigned`, assigned.toArray());
+}
+
+async function changePlannedDate(detail) {
+    sortable(`.column-content`, `disable`);
+
+    const $item = $(detail.item);
+    const $destination = $(detail.destination.container).parent();
+
+    const result = await AJAX.route(`POST`, `planning_change_date`, {
+        order: $item.data(`id`),
+        date: $destination.data(`date`),
+    }).json();
+
+    $item.replaceWith(result.card);
+
+    sortable(`.column-content`, `enable`);
 }
