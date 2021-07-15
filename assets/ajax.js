@@ -36,8 +36,6 @@ export default class AJAX {
             body = undefined;
         } else if(!(body instanceof FormData) && (typeof body === `object` || Array.isArray(body))) {
             body = JSON.stringify(body);
-        } else if(!body && this.method !== `GET` || this.method !== `DELETE`) {
-            body = JSON.stringify(this.params);
         }
 
         let url;

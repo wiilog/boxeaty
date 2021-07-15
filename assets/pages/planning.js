@@ -130,8 +130,7 @@ async function changePlannedDate(detail) {
 
     const result = await AJAX.route(`POST`, `planning_change_date`, {
         order: $item.data(`id`),
-        date: $destination.data(`date`),
-    }).json();
+    }).json($destination.data(`date`));
 
     $item.replaceWith(result.card);
 

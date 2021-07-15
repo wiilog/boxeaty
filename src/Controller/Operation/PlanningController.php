@@ -105,8 +105,7 @@ class PlanningController extends AbstractController {
      * @HasPermission(Role::MANAGE_PLANNING)
      */
     public function changeDate(Request $request, EntityManagerInterface $manager, ClientOrder $order): Response {
-        $content = json_decode($request->getContent());
-        $date = DateTime::createFromFormat("Y-m-d", $content->date);
+        $date = DateTime::createFromFormat("Y-m-d", $request->getContent());
 
         $order->setExpectedDelivery($date);
         $manager->flush();
