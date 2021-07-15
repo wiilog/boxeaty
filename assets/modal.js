@@ -246,7 +246,7 @@ export default class Modal {
 }
 
 export function clearForm($elem) {
-    $elem.find(`input.data:not([type=checkbox]):not([type=radio]), select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
+    $elem.find(`input.data:not([type=checkbox]):not([type=radio]):not([type=hidden]), select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
     $elem.find(`input[type=checkbox]:checked, input[type=radio]:checked`).prop(`checked`, false);
 
     for(const check of $elem.find(`input[type=checkbox][checked], input[type=radio][checked]`)) {

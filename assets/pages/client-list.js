@@ -74,6 +74,11 @@ $(document).ready(() => {
 
                 Modal.load(ajax, {table})
             },
+            action: data => {
+                window.location.href = Routing.generate(`client_show`, {
+                    client: data.id
+                });
+            },
         }
     });
 });

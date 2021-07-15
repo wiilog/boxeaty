@@ -114,12 +114,28 @@ class Client {
      */
     private $mailNotificationOrderPreparation;
 
+    /**
+     * @ORM\OneToOne(targetEntity=ClientOrderInformation::class, cascade={"persist", "remove"})
+     */
+    private $clientOrderInformation;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clients")
+     */
+    private ?Depository $depository = null;
+
+    /**
+     * @ORM\OneToMany(targetEntity=ClientBoxType::class, mappedBy="client")
+     */
+    private $clientBoxTypes;
+
     public function __construct() {
         $this->users = new ArrayCollection();
         $this->kiosks = new ArrayCollection();
         $this->clients = new ArrayCollection();
         $this->boxes = new ArrayCollection();
         $this->depositTicketsClients = new ArrayCollection();
+        $this->clientBoxTypes = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -381,6 +397,58 @@ class Client {
     public function setMailNotificationOrderPreparation(?bool $mailNotificationOrderPreparation): self
     {
         $this->mailNotificationOrderPreparation = $mailNotificationOrderPreparation;
+
+        return $this;
+    }
+
+    public function getClientOrderInformation(): ?ClientOrderInformation
+    {
+        return $this->clientOrderInformation;
+    }
+
+    public function setClientOrderInformation(?ClientOrderInformation $clientOrderInformation): self
+    {
+        $this->clientOrderInformation = $clientOrderInformation;
+
+        return $this;
+    }
+
+    public function getDepository(): ?Depository {
+        return $this->depository;
+    }
+
+    public function setDepository(?Depository $depository): Client {
+        $this->depository = $depository;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ClientBoxType[]
+     */
+    public function getClientBoxTypes(): Collection
+    {
+        return $this->clientBoxTypes;
+    }
+
+    public function addClientBoxType(ClientBoxType $clientBoxType): self
+    {
+        if (!$this->clientBoxTypes->contains($clientBoxType)) {
+            $this->clientBoxTypes[] = $clientBoxType;
+            $clientBoxType->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClientBoxType(ClientBoxType $clientBoxType): self
+    {
+        if ($this->clientBoxTypes->removeElement($clientBoxType)) {
+            // set the owning side to null (unless already changed)
+            if ($clientBoxType->getClient() === $this) {
+                $clientBoxType->setClient(null);
+            }
+        }
 
         return $this;
     }

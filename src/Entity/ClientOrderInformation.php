@@ -10,6 +10,16 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ClientOrderInformation
 {
+    public const BUY = 0;
+    public const MANAGE = 1;
+    public const BENEFIT = 2;
+
+    public const ORDER_TYPES = [
+        self::BUY => 'Achat / Négoce',
+        self::MANAGE => 'Gestion autonome',
+        self::BENEFIT => 'Prestation ponctuelle',
+    ];
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -71,6 +81,16 @@ class ClientOrderInformation
      * @ORM\OneToOne(targetEntity=Client::class, cascade={"persist", "remove"})
      */
     private $client;
+
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $paymentModes = [];
+
+    /**
+     * @ORM\OneToOne(targetEntity=OrderRecurrence::class, cascade={"persist", "remove"})
+     */
+    private $orderRecurrence;
 
     public function getId(): ?int
     {
@@ -205,6 +225,30 @@ class ClientOrderInformation
     public function setClient(?Client $client): self
     {
         $this->client = $client;
+
+        return $this;
+    }
+
+    public function getPaymentModes(): ?array
+    {
+        return $this->paymentModes;
+    }
+
+    public function setPaymentModes(?array $paymentModes): self
+    {
+        $this->paymentModes = $paymentModes;
+
+        return $this;
+    }
+
+    public function getOrderRecurrence(): ?OrderRecurrence
+    {
+        return $this->orderRecurrence;
+    }
+
+    public function setOrderRecurrence(?OrderRecurrence $orderRecurrence): self
+    {
+        $this->orderRecurrence = $orderRecurrence;
 
         return $this;
     }
