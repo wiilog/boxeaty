@@ -1,0 +1,127 @@
+@import "../mixins";
+
+.client-show {
+    @include box();
+
+    flex: 1;
+    width: 100%;
+    padding-right: 0;
+    margin-top: -30px;
+
+    .edit-client, .delete-client, .edit-client-box-type, .delete-client-box-type {
+        font-size: 2.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .contact-information {
+        display: flex;
+        justify-content: space-between;
+        background-color: $grey;
+        border-radius: 10px;
+    }
+
+    .order-information-container {
+        border-left: $grey-dark 4px dotted;
+        padding-top: 0;
+    }
+
+    .card-item {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: $grey;
+        width: 30%;
+        height: 35px;
+        border-radius: 5px;
+
+        &:not(:nth-of-type(3n + 1)) {
+            margin-left: 10px;
+        }
+
+        &.delivery-method {
+            width: 100%;
+        }
+    }
+
+    .circle {
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+
+        &.checked {
+            background: url("../../images/tick.svg") no-repeat, $green;
+            background-position: center;
+            background-size: 50%;
+        }
+
+        &:not(.checked) {
+            background: url("../../images/mark.svg") no-repeat, $red;
+            background-position: center;
+            background-size: 35%;
+        }
+    }
+
+    .comment-container {
+        background-color: $grey;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        padding: 10px 20px;
+        margin-left: 10px;
+
+        p {
+            padding: 0;
+            margin: 0;
+        }
+    }
+
+    .order-type {
+        border: 1px solid $green;
+        border-radius: 5px;
+        color: $green;
+        padding: 6px 0;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+    }
+
+    .orange-text {
+        color: $orange;
+    }
+
+    .crate-type-container {
+        border: 1px solid #F2F2F2;
+        border-radius: 10px;
+        padding: 10px 20px;
+
+        .box-type-card {
+            background-color: $grey;
+            border-radius: 10px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            &:first-of-type {
+                margin-top: 25px;
+            }
+
+            &:not(:first-of-type) {
+                margin-top: 10px;
+            }
+        }
+    }
+
+    .order-recurrence-container {
+        border: 1px solid #F2F2F2;
+        border-radius: 10px;
+        padding: 10px 20px;
+    }
+
+    .actions-wrapper {
+        display: flex;
+        flex-direction: row;
+    }
+}

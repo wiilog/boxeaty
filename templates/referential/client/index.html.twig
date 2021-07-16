@@ -19,7 +19,10 @@
         </table>
     </div>
 
-    {% include 'referential/client/modal/new.html.twig' with {client: new_client} %}
+    {% include 'referential/client/modal/new.html.twig' with {
+        client: new_client,
+        clientOrderInformation: new_client_order_information
+    } %}
 {% endblock %}
 
 {% block javascripts %}
