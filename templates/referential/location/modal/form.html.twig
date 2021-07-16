@@ -68,8 +68,8 @@
         <label>
             Dépôt
             <select name="depository" class="data" data-s2="depository" data-placeholder="Sélectionnez un depot" required>
-                {% if location.depot %}
-                    <option value="{{ location.depot.id }}" selected>{{ location.depot.name }}</option>
+                {% if location.depository %}
+                    <option value="{{ location.depository.id }}" selected>{{ location.depository.name }}</option>
                 {% endif %}
             </select>
         </label>

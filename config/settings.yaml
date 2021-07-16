@@ -71,7 +71,7 @@ parameters:
           route: counter_orders_list
         - name: Commande client
           permission: [App\Entity\Role::CREATE_CLIENT_ORDERS, App\Entity\Role::MANAGE_CLIENT_ORDERS]
-          #route: client_orders_list
+          route: client_orders_list
         - name: Planification
           permission: App\Entity\Role::MANAGE_PLANNING
           route: planning

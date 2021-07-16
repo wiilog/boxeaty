@@ -33,6 +33,14 @@
 
 @import "~bootstrap/scss/utilities/api";
 
+@for $i from 1 through 100 / 5 {
+    $value: $i * 5;
+
+    .w-#{$value} {
+        width: #{$value * 1%} !important;
+    }
+}
+
 .dropdown {
     .dropdown-menu {
         position: absolute;

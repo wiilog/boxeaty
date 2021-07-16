@@ -46,7 +46,7 @@ class LocationRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "location");
 
         if ($search) {
-            $qb->join("location.client", "client")
+            $qb->leftJoin("location.client", "client")
                 ->andWhere($qb->expr()->orX(
                     "location.name LIKE :search",
                     "location.description LIKE :search",
@@ -55,6 +55,15 @@ class LocationRepository extends EntityRepository {
                 ))
                 ->setParameter("search", "%$search%")
                 ->setParameter("exact_search", $search);
+        }
+
+        foreach ($params["filters"] ?? [] as $name => $value) {
+            switch ($name) {
+                case "depository":
+                    $qb->andWhere("location.depository = :raw_value")
+                        ->setParameter("raw_value", $value);
+                    break;
+            }
         }
 
         if (!empty($params["order"])) {

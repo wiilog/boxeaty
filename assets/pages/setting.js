@@ -72,11 +72,8 @@ $document.ready(() => {
         }
     });
 
-
-
     $(`button[type="submit"]`).click(() => AJAX
         .route(`POST`, `settings_update`)
         .json(processForm($(`.global-settings`)))
     );
-
 });

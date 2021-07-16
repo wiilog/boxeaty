@@ -14,9 +14,8 @@ use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController {
@@ -52,7 +51,7 @@ class SecurityController extends AbstractController {
     /**
      * @Route("/register", name="register")
      */
-    public function register(Request $request, Mailer $mailer, UserPasswordEncoderInterface $encoder): Response {
+    public function register(Request $request, Mailer $mailer, UserPasswordHasherInterface $encoder): Response {
         if ($this->getUser()) {
             return $this->redirectToRoute(Authenticator::HOME_ROUTE);
         }
@@ -93,7 +92,7 @@ class SecurityController extends AbstractController {
             if ($valid) {
                 $noAccess = $em->getRepository(Role::class)->findOneBy(["code" => Role::ROLE_NO_ACCESS]);
 
-                $user->setPassword($encoder->encodePassword($user, $password))
+                $user->setPassword($encoder->hashPassword($user, $password))
                     ->setActive(true)
                     ->setRole($noAccess)
                     ->setCreationDate(new DateTime());

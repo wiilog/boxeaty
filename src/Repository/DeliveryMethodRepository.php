@@ -12,8 +12,7 @@ use Doctrine\ORM\EntityRepository;
  * @method DeliveryMethod[]    findAll()
  * @method DeliveryMethod[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class DeliveryMethodRepository extends EntityRepository
-{
+class DeliveryMethodRepository extends EntityRepository {
 
     public const DEFAULT_DATATABLE_ORDER = [["name", "asc"]];
     private const DEFAULT_DATATABLE_START = 0;
@@ -57,4 +56,5 @@ class DeliveryMethodRepository extends EntityRepository
             "filtered" => $filtered,
         ];
     }
+
 }

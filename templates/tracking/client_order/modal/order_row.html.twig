@@ -1,0 +1,10 @@
+<div class="row order-row">
+    <div class="col-xxl-6 col-12">
+        {% include 'tracking/client_order/modal/order_item.html.twig' with {item:item1} %}
+    </div>
+    <div class="col-xxl-6 col-12 mt-xxl-0 mt-4">
+        {% if item2 is defined %}
+            {% include 'tracking/client_order/modal/order_item.html.twig' with {item:item2} %}
+        {% endif %}
+    </div>
+</div>

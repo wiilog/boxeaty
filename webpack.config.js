@@ -31,6 +31,7 @@ Encore
     .addEntry("counter_order_list", "./assets/pages/counter-order-list.js")
     .addEntry("counter_order", "./assets/pages/counter-order.js")
     .addEntry("planning", "./assets/pages/planning.js")
+    .addEntry("client_order", "./assets/pages/client-order.js")
     .autoProvidejQuery()
 
     .addPlugin(new CopyPlugin({

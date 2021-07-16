@@ -69,6 +69,11 @@ class ClientOrder {
     private ?bool $shouldCreateCollect = null;
 
     /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $automatic = null;
+
+    /**
      * @ORM\Column(type="integer", nullable=true)
      */
     private ?int $collectBoxNumber = null;
@@ -283,6 +288,16 @@ class ClientOrder {
 
     public function setShouldCreateCollect(bool $shouldCreateCollect): self {
         $this->shouldCreateCollect = $shouldCreateCollect;
+
+        return $this;
+    }
+
+    public function getAutomatic(): ?bool {
+        return $this->automatic;
+    }
+
+    public function setAutomatic(bool $automatic): self {
+        $this->automatic = $automatic;
 
         return $this;
     }
