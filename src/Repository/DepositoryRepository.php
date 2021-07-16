@@ -19,17 +19,11 @@ class DepositoryRepository extends EntityRepository {
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
-    public function getForSelect(?string $search, ?User $user) {
+    public function getForSelect(?string $search) {
         $qb = $this->createQueryBuilder("depository");
 
-        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
-            $qb->join("depository.client", "client")
-                ->andWhere("client.group IN (:groups)")
-                ->setParameter("groups", $user->getGroups());
-        }
-
         return $qb->select("depository.id AS id, depository.name AS text")
-            ->where("depository.name LIKE :search")
+            ->andWhere("depository.name LIKE :search")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
