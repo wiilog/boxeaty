@@ -62,7 +62,7 @@ class GlobalSettingController extends AbstractController {
 
         $settings = $manager->getRepository(GlobalSetting::class)->getAll();
         foreach ($settings as $setting) {
-            $setting->setValue($content[$setting->getName()] ?? null ?: null);
+            $setting->setValue($content[$setting->getName()] ?? null);
         }
 
         $manager->flush();

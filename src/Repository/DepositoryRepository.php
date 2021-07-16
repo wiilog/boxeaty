@@ -4,7 +4,6 @@ namespace App\Repository;
 
 use App\Entity\Depository;
 use App\Helper\QueryHelper;
-use App\Entity\User;
 use Doctrine\ORM\EntityRepository;
 
 /**

@@ -120,7 +120,7 @@ class ClientRepository extends EntityRepository {
         }
 
         return $qb->select("client.id AS id, client.name AS text")
-            ->where("client.name LIKE :search")
+            ->andWhere("client.name LIKE :search")
             ->andWhere("client.active = 1")
             ->andWhere("client.isMultiSite = 1")
             ->setMaxResults(15)

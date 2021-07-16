@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\DeliveryMethodRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -43,6 +45,16 @@ class DeliveryMethod {
      */
     private ?bool $deleted = false;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ClientOrderInformation::class, mappedBy="deliveryMethod")
+     */
+    private $clientOrderInformation;
+
+    public function __construct()
+    {
+        $this->clientOrderInformation = new ArrayCollection();
+    }
+
     public function getId(): ?int {
         return $this->id;
     }
@@ -73,6 +85,36 @@ class DeliveryMethod {
 
     public function setDeleted(?bool $deleted): self {
         $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ClientOrderInformation[]
+     */
+    public function getClientOrderInformation(): Collection
+    {
+        return $this->clientOrderInformation;
+    }
+
+    public function addClientOrderInformation(ClientOrderInformation $clientOrderInformation): self
+    {
+        if (!$this->clientOrderInformation->contains($clientOrderInformation)) {
+            $this->clientOrderInformation[] = $clientOrderInformation;
+            $clientOrderInformation->setDeliveryMethod($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClientOrderInformation(ClientOrderInformation $clientOrderInformation): self
+    {
+        if ($this->clientOrderInformation->removeElement($clientOrderInformation)) {
+            // set the owning side to null (unless already changed)
+            if ($clientOrderInformation->getDeliveryMethod() === $this) {
+                $clientOrderInformation->setDeliveryMethod(null);
+            }
+        }
 
         return $this;
     }

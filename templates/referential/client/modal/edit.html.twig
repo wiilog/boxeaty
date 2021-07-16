@@ -1,5 +1,5 @@
 <div id="modal-edit-client" class="modal fade">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xxl">
         <div class="modal-content">
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
             <h1>Modifier le client</h1>
@@ -7,9 +7,16 @@
             <div class="body">
                 {% include 'referential/client/modal/form.html.twig' %}
             </div>
-            <div class="footer">
-                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="submit" class="primary">Enregistrer</button>
+            <div class="footer row justify-content-evenly">
+                <div class="col-5"></div>
+                <div class="col-5 d-flex">
+                    <div class="w-100 pe-2">
+                        <button type="button" class="secondary w-100" data-bs-dismiss="modal">Annuler</button>
+                    </div>
+                    <div class="w-100 ps-2">
+                        <button type="submit" class="primary w-100">Enregistrer</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
