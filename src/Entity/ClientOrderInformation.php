@@ -2,14 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\ClientOrderInformationRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=ClientOrderInformationRepository::class)
+ * @ORM\Entity()
  */
-class ClientOrderInformation
-{
+class ClientOrderInformation {
+
     public const BUY = 0;
     public const MANAGE = 1;
     public const BENEFIT = 2;

@@ -14,7 +14,10 @@ $(document).ready(() => {
         const ajax = AJAX.route(`POST`, `client_edit_template`, {
             client: $('#client-id').val()
         });
-        Modal.load(ajax);
+
+        Modal.load(ajax, {
+            success: () => window.location.reload()
+        });
     });
 
     $(`.delete-client`).click(() => {
@@ -101,7 +104,7 @@ function getBoxTypes() {
         id: $('#client-id').val()
     }).json((response) => {
         $('.box-type-card-wrapper').empty().append(response.template);
-        $('.total-crate-type-price').text(response.totalCrateTypePrice + '€');
+        $('.total-crate-type-price').text(`à ${response.totalCrateTypePrice} €`);
     });
 }
 
@@ -110,6 +113,6 @@ function getBoxRecurrence() {
         id: $('#client-id').val()
     }).json((response) => {
         $('.order-recurrence-wrapper').empty().append(response.template);
-        $('.order-recurrence-price').text(response.orderRecurrencePrice);
+        $('.order-recurrence-price').text(`${response.orderRecurrencePrice} € HT/mois`);
     });
 }

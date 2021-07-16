@@ -204,7 +204,10 @@ class ClientController extends AbstractController {
         $depositTicketsClients = $clientRepository->findBy(["id" => $depositTicketsClientsIds]);
 
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
-        $clientOrderInformation = $manager->getRepository(ClientOrderInformation::class)->findOneBy(['client' => $existing]);
+        if(!$client->getClientOrderInformation()) {
+            $client->setClientOrderInformation(new ClientOrderInformation());
+        }
+        $clientOrderInformation = $client->getClientOrderInformation();
 
         $deliveryMethod = isset($content->deliveryMethod) ? $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod) : $clientOrderInformation->getDeliveryMethod();
         $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : $clientOrderInformation->getDepository();

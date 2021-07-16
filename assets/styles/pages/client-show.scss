@@ -8,7 +8,16 @@
     padding-right: 0;
     margin-top: -30px;
 
+    .edit-client, .delete-client, .edit-client-box-type, .delete-client-box-type {
+        font-size: 2.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
     .contact-information {
+        display: flex;
+        justify-content: space-between;
         background-color: $grey;
         border-radius: 10px;
     }
@@ -90,7 +99,7 @@
         .box-type-card {
             background-color: $grey;
             border-radius: 10px;
-            padding: 2px;
+            padding: 8px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -109,5 +118,10 @@
         border: 1px solid #F2F2F2;
         border-radius: 10px;
         padding: 10px 20px;
+    }
+
+    .actions-wrapper {
+        display: flex;
+        flex-direction: row;
     }
 }

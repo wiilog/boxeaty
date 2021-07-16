@@ -7,8 +7,8 @@
         <span class="body-text">TU {{ clientBoxType.cost }}€</span>
         <span class="body-text-semi-bold">{{ totalPrice | number_format(2, '.') }}€</span>
         <div class="actions-wrapper">
-            <span class="edit-client-box-type round" data-id="{{ clientBoxType.id }}"><i class="icon bxi bxi-edit-circle"></i></span>
-            <span class="delete-client-box-type round" data-id="{{ clientBoxType.id }}"><i class="icon bxi bxi-trash-circle"></i></span>
+            <div class="edit-client-box-type round" data-id="{{ clientBoxType.id }}"><i class="icon bxi bxi-edit-circle"></i></div>
+            <div class="delete-client-box-type round" data-id="{{ clientBoxType.id }}"><i class="icon bxi bxi-trash-circle"></i></div>
         </div>
     </div>
 {% endfor %}

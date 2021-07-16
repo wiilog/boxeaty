@@ -317,6 +317,10 @@ button, a {
     justify-content: center;
     white-space: nowrap;
 
+    input, select {
+        min-width: initial !important;
+    }
+
     input:not(:first-child), select:not(:first-child) {
         margin-left: 4px;
     }

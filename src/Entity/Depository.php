@@ -54,7 +54,7 @@ class Depository {
     /**
      * @ORM\OneToMany(targetEntity=ClientOrderInformation::class, mappedBy="depository")
      */
-    private $clientOrderInformation;
+    private Collection $clientOrderInformation;
 
     public function __construct() {
         $this->preparations = new ArrayCollection();

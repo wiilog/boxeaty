@@ -1,15 +1,14 @@
 <div class="row">
     {% set orderRecurrence = orderRecurrence is defined and orderRecurrence ? orderRecurrence : null %}
-    <div class="d-flex">
-        <span>Tous les
-            <input type="number" name="frequency" class="data w-25" width="20" value="{{ orderRecurrence ? orderRecurrence.frequency }}" required> semaines, livrer
-            <input type="number" name="crateAmount" class="data w-25" value="{{ orderRecurrence ? orderRecurrence.crateAmount }}" required> caisses le
-            <select name="day" class="data w-25" required>
+    <div class="text-form-wrapper">
+        Tous les
+            <input type="number" name="frequency" class="data" value="{{ orderRecurrence ? orderRecurrence.frequency }}" required> semaines, livrer
+            <input type="number" name="crateAmount" class="data" value="{{ orderRecurrence ? orderRecurrence.crateAmount }}" required> caisses le
+            <select name="day" class="data" required>
                 {% for index, day in constant('App\\Helper\\FormatHelper::WEEK_DAYS') | slice(0, -1) %}
                     <option value="{{ index }}" {{ orderRecurrence and orderRecurrence.day == index ? 'selected' }}>{{ day }}</option>
                 {% endfor %}
             </select>
-        </span>
     </div>
     <div class="d-flex mt-2">
         <span>A partir du <input type="date" class="data w-25" name="start" value="{{ orderRecurrence ? orderRecurrence.start | format_helper('date', 'Y-m-d') }}" required> jusqu'au
