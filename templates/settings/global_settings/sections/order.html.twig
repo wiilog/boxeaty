@@ -23,11 +23,11 @@
         <div class="inline-form">
             <label>
                 Jour
-                <input type="number" name="day" class="data" min="0" max="31" required>
+                <input type="number" name="day" class="add-data" min="0" max="31" required>
             </label>
             <label>
                 Mois
-                <select name="month" class="data" data-s2 data-no-empty-option required>
+                <select name="month" class="add-data" data-s2 data-no-empty-option required>
                     {% for number, month in constant('App\\Helper\\FormatHelper::MONTHS') %}
                         <option value="{{ number }}">{{ month }}</option>
                     {% endfor %}

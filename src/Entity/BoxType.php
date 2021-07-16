@@ -46,8 +46,14 @@ class BoxType {
      */
     private Collection $boxes;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ClientBoxType::class, mappedBy="boxType")
+     */
+    private $clientBoxTypes;
+
     public function __construct() {
         $this->boxes = new ArrayCollection();
+        $this->clientBoxTypes = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -113,6 +119,36 @@ class BoxType {
             // set the owning side to null (unless already changed)
             if ($box->getType() === $this) {
                 $box->setType(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ClientBoxType[]
+     */
+    public function getClientBoxTypes(): Collection
+    {
+        return $this->clientBoxTypes;
+    }
+
+    public function addClientBoxType(ClientBoxType $clientBoxType): self
+    {
+        if (!$this->clientBoxTypes->contains($clientBoxType)) {
+            $this->clientBoxTypes[] = $clientBoxType;
+            $clientBoxType->setBoxType($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClientBoxType(ClientBoxType $clientBoxType): self
+    {
+        if ($this->clientBoxTypes->removeElement($clientBoxType)) {
+            // set the owning side to null (unless already changed)
+            if ($clientBoxType->getBoxType() === $this) {
+                $clientBoxType->setBoxType(null);
             }
         }
 

@@ -1,0 +1,10 @@
+{% set orderRecurrence = clientOrderInformation.orderRecurrence is defined and clientOrderInformation ? clientOrderInformation.orderRecurrence : null %}
+{% set frequency = orderRecurrence is defined and orderRecurrence ? orderRecurrence.frequency : null %}
+<span class="body-text">
+    <strong>{{ orderRecurrence ? orderRecurrence.crateAmount : '0' }} caisse{{ orderRecurrence and orderRecurrence.crateAmount > 1 ? 's' : '' }}</strong>{{ (frequency and frequency > 1) ? ', toutes les' : ' chaque' }}
+    <strong>{{ frequency and frequency > 1 ? orderRecurrence.frequency }} {{ (frequency and frequency > 1) ? 'semaines' : 'semaine' }}</strong> jusqu'au
+    <strong>{{ orderRecurrence ? orderRecurrence.end | format_helper('date') : '-' }}</strong>
+</span>
+<div class="d-flex justify-content-end mt-3">
+    <button class="primary {{ orderRecurrence ? 'edit-order-ocurrence' : 'add-order-ocurrence' }}" data-id="{{ orderRecurrence ? orderRecurrence.id }}">{{ orderRecurrence ? 'Modifier la récurrence' : 'Ajouter une récurrence' }}</button>
+</div>

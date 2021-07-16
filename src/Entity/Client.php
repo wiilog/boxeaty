@@ -110,14 +110,14 @@ class Client {
     private Collection $depositTicketsClients;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="boolean", nullable=true)
      */
-    private ?string $paymentMode;
+    private $mailNotificationOrderPreparation;
 
     /**
-     * @ORM\ManyToOne(targetEntity=DeliveryMethod::class)
+     * @ORM\OneToOne(targetEntity=ClientOrderInformation::class, cascade={"persist", "remove"})
      */
-    private ?DeliveryMethod $deliveryMethod = null;
+    private $clientOrderInformation;
 
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clients")
@@ -125,39 +125,9 @@ class Client {
     private ?Depository $depository = null;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\OneToMany(targetEntity=ClientBoxType::class, mappedBy="client")
      */
-    private ?float $distance;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private ?int $tokens;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private ?bool $closedParcOrder;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    private ?float $servicePrice;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    private ?float $deliveryPriceWorkingDay;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    private ?float $deliveryPriceOffDay;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=OrderType::class)
-     */
-    private Collection $orderTypes;
+    private $clientBoxTypes;
 
     public function __construct() {
         $this->users = new ArrayCollection();
@@ -165,7 +135,7 @@ class Client {
         $this->clients = new ArrayCollection();
         $this->boxes = new ArrayCollection();
         $this->depositTicketsClients = new ArrayCollection();
-        $this->orderTypes = new ArrayCollection();
+        $this->clientBoxTypes = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -419,22 +389,27 @@ class Client {
         return $this;
     }
 
-    public function getPaymentMode(): ?string {
-        return $this->paymentMode;
+    public function getMailNotificationOrderPreparation(): ?bool
+    {
+        return $this->mailNotificationOrderPreparation;
     }
 
-    public function setPaymentMode(string $paymentMode): self {
-        $this->paymentMode = $paymentMode;
+    public function setMailNotificationOrderPreparation(?bool $mailNotificationOrderPreparation): self
+    {
+        $this->mailNotificationOrderPreparation = $mailNotificationOrderPreparation;
 
         return $this;
     }
 
-    public function getDeliveryMethod(): ?DeliveryMethod {
-        return $this->deliveryMethod;
+    public function getClientOrderInformation(): ?ClientOrderInformation
+    {
+        return $this->clientOrderInformation;
     }
 
-    public function setDeliveryMethod(?DeliveryMethod $deliveryMethod): self {
-        $this->deliveryMethod = $deliveryMethod;
+    public function setClientOrderInformation(?ClientOrderInformation $clientOrderInformation): self
+    {
+        $this->clientOrderInformation = $clientOrderInformation;
+
         return $this;
     }
 
@@ -442,106 +417,37 @@ class Client {
         return $this->depository;
     }
 
-    public function setDepository(?Depository $depository): self {
-        if ($this->depository && $this->depository !== $depository) {
-            $this->depository->removeClient($this);
-        }
+    public function setDepository(?Depository $depository): Client {
         $this->depository = $depository;
-        if ($depository) {
-            $depository->addClient($this);
-        }
-
-        return $this;
-    }
-
-    public function getDistance(): ?float {
-        return $this->distance;
-    }
-
-    public function setDistance(float $distance): self {
-        $this->distance = $distance;
-
-        return $this;
-    }
-
-    public function getTokens(): ?int {
-        return $this->tokens;
-    }
-
-    public function setTokens(int $tokens): self {
-        $this->tokens = $tokens;
-
-        return $this;
-    }
-
-    public function getClosedParcOrder(): ?bool {
-        return $this->closedParcOrder;
-    }
-
-    public function setClosedParcOrder(bool $closedParcOrder): self {
-        $this->closedParcOrder = $closedParcOrder;
-
-        return $this;
-    }
-
-    public function getServicePrice(): ?float {
-        return $this->servicePrice;
-    }
-
-    public function setServicePrice(float $servicePrice): self {
-        $this->servicePrice = $servicePrice;
-
-        return $this;
-    }
-
-    public function getDeliveryPriceWorkingDay(): ?float {
-        return $this->deliveryPriceWorkingDay;
-    }
-
-    public function setDeliveryPriceWorkingDay(float $deliveryPriceWorkingDay): self {
-        $this->deliveryPriceWorkingDay = $deliveryPriceWorkingDay;
-
-        return $this;
-    }
-
-    public function getDeliveryPriceOffDay(): ?float {
-        return $this->deliveryPriceOffDay;
-    }
-
-    public function setDeliveryPriceOffDay(float $deliveryPriceOffDay): self {
-        $this->deliveryPriceOffDay = $deliveryPriceOffDay;
 
         return $this;
     }
 
     /**
-     * @return Collection|OrderType[]
+     * @return Collection|ClientBoxType[]
      */
-    public function getOrderTypes(): Collection {
-        return $this->orderTypes;
+    public function getClientBoxTypes(): Collection
+    {
+        return $this->clientBoxTypes;
     }
 
-    public function addOrderType(OrderType $orderType): self {
-        if (!$this->orderTypes->contains($orderType)) {
-            $this->orderTypes[] = $orderType;
+    public function addClientBoxType(ClientBoxType $clientBoxType): self
+    {
+        if (!$this->clientBoxTypes->contains($clientBoxType)) {
+            $this->clientBoxTypes[] = $clientBoxType;
+            $clientBoxType->setClient($this);
         }
 
         return $this;
     }
 
-    public function removeOrderType(OrderType $orderType): self {
-        $this->orderTypes->removeElement($orderType);
-        return $this;
-    }
-
-    public function setOrderTypes(?array $orderTypes): self {
-        foreach ($this->getOrderTypes()->toArray() as $orderTyp) {
-            $this->removeOrderType($orderTyp);
-        }
-
-        $this->orderTypes = new ArrayCollection();
-        foreach ($orderTypes as $orderTyp) {
-            $this->addOrderType($orderTyp);
+    public function removeClientBoxType(ClientBoxType $clientBoxType): self
+    {
+        if ($this->clientBoxTypes->removeElement($clientBoxType)) {
+            // set the owning side to null (unless already changed)
+            if ($clientBoxType->getClient() === $this) {
+                $clientBoxType->setClient(null);
+            }
         }
 
         return $this;

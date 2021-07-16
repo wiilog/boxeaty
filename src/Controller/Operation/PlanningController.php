@@ -78,6 +78,7 @@ class PlanningController extends AbstractController {
 
             $column = [
                 "title" => FormatHelper::weekDay($date) . " " . $date->format("d") . " " . FormatHelper::month($date),
+                "date" => $date->format("Y-m-d"),
                 "orders" => Stream::from($orders)
                     ->sort(fn($a, $b) => $sort[$a->getStatus()->getCode()] - $sort[$b->getStatus()->getCode()])
                     ->values(),
@@ -97,6 +98,25 @@ class PlanningController extends AbstractController {
                 "planning" => $planning,
             ]);
         }
+    }
+
+    /**
+     * @Route("/changer-date/{order}", name="planning_change_date", options={"expose": true})
+     * @HasPermission(Role::MANAGE_PLANNING)
+     */
+    public function changeDate(Request $request, EntityManagerInterface $manager, ClientOrder $order): Response {
+        $date = DateTime::createFromFormat("Y-m-d", $request->getContent());
+
+        $order->setExpectedDelivery($date);
+        $manager->flush();
+
+        return $this->json([
+            "success" => true,
+            "message" => "La date de livraison a été modifiée au <strong>{$date->format('d/m/Y')}</strong>",
+            "card" => $this->renderView("operation/planning/card.html.twig", [
+                "order" => $order,
+            ]),
+        ]);
     }
 
     /**
