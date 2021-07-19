@@ -279,13 +279,12 @@ button, a {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
     padding-top: 5px;
     padding-bottom: 5px;
     background-color: $orange-lightest;
     border-radius: 10px;
 
-    .modal-content & {
+    &:not(.header-section-rounded) {
         margin-right: -3rem;
         margin-left: -3rem;
         border-radius: 0 !important;
@@ -295,8 +294,8 @@ button, a {
         color: $orange;
         line-height: 1;
         font-family: Retroyal, sans-serif;
-        font-weight: normal;
-        font-size: 32px;
+        font-weight: bolder;
+        font-size: 27px;
         margin: 0;
         display: inline-block;
     }
