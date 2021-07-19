@@ -21,7 +21,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/tracabilite/commande-comptoir")
+ * @Route("/operation/commande-comptoir")
  */
 class CounterOrderController extends AbstractController {
 
@@ -33,7 +33,7 @@ class CounterOrderController extends AbstractController {
      * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
-        return $this->render("tracking/counter_order/index.html.twig", [
+        return $this->render("operation/counter_order/index.html.twig", [
             "new_order" => new CounterOrder(),
             "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => CounterOrderRepository::DEFAULT_DATATABLE_ORDER,
