@@ -49,22 +49,22 @@ class BoxType {
     /**
      * @ORM\OneToMany(targetEntity=ClientBoxType::class, mappedBy="boxType")
      */
-    private $clientBoxTypes;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    private $volume;
+    private Collection $clientBoxTypes;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $weight;
+    private ?float $volume = null;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
-    private $image;
+    private ?float $weight = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Attachment::class)
+     */
+    private ?Attachment $image = null;
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
@@ -175,7 +175,7 @@ class BoxType {
         return $this->volume;
     }
 
-    public function setVolume(float $volume): self
+    public function setVolume(?float $volume): self
     {
         $this->volume = $volume;
 
@@ -194,15 +194,12 @@ class BoxType {
         return $this;
     }
 
-    public function getImage(): ?string
-    {
+    public function getImage(): ?Attachment {
         return $this->image;
     }
 
-    public function setImage(?string $image): self
-    {
+    public function setImage(?Attachment $image): self {
         $this->image = $image;
-
         return $this;
     }
 

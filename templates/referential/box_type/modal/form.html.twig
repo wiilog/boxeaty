@@ -7,10 +7,13 @@
                     ou <span class="click-here">cliquez ici</span>
                 </div>
                 <div class="file-confirmation {{ not box_type.image ? 'd-none' }}">
-                    Le fichier <strong class="file-name">{{ box_type.image ? box_type.image }}</strong> a bien été ajouté.
-                    <i class="fas fa-trash cursor-pointer file-delete-icon"></i>
+                    <img class="image-visualisation" src="{{ box_type.image ? asset('persistent/box_type/') ~ box_type.image.serverName }}"/>
+                    <input type="hidden" name="fileDeleted" class="data" value="0"/>
+                    <span class="file-delete-icon">
+                        <i class="fas fa-trash cursor-pointer"></i>
+                    </span>
                 </div>
-                <input type="file" name="attachment" class="data d-none" accept=".png, .jpg, .svg, .jpeg" value="{{ box_type.image ? asset('persistent/box_type/') ~ box_type.image }}" required>
+                <input type="file" name="image" class="data d-none" accept=".png, .jpg, .svg, .jpeg">
             </div>
         </label>
     </div>
@@ -58,13 +61,13 @@
     <div class="col-12 col-md-6">
         <label>
             Volume (m³)
-            <input type="number" name="volume" class="data" placeholder="Renseignez un volume" value="{{ box_type.volume }}" required/>
+            <input type="number" name="volume" class="data" placeholder="Renseignez un volume" value="{{ box_type.volume }}"/>
         </label>
     </div>
     <div class="col-12 col-md-6">
         <label>
             Poids (kg)
-            <input type="number" name="weight" class="data" placeholder="Renseignez un poids" value="{{ box_type.weight }}" required/>
+            <input type="number" name="weight" class="data" placeholder="Renseignez un poids" value="{{ box_type.weight }}"/>
         </label>
     </div>
 </div>
