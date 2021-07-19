@@ -32,6 +32,7 @@ Encore
     .addEntry("counter_order", "./assets/pages/counter-order.js")
     .addEntry("planning", "./assets/pages/planning.js")
     .addEntry("client_order", "./assets/pages/client-order.js")
+    .addEntry("export", "./assets/pages/export-index.js")
     .autoProvidejQuery()
 
     .addPlugin(new CopyPlugin({

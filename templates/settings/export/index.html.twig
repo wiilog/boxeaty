@@ -1,0 +1,68 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Paramétrage{% endblock %}
+{% block page %}Exports{% endblock %}
+
+{% block content %}
+    <div class="box exports">
+        <h1>
+            Liste des exports disponibles
+        </h1>
+        <div class="row mb-4">
+            <div class="col-4">
+                <span>Export général</span>
+            </div>
+            <div class="col d-flex">
+                <button class="primary">Export général au format CSV</button>
+                <span data-toggle="tooltip" class="d-flex align-items-center"
+                      title="Comprend Box, Mouvements, Tickets-consigne, Emplacements, Groupes, Types de Box, Utilisateurs, Rôles et Qualités.">
+                        <i class="fas fa-question-circle"></i></span>
+            </div>
+            <div class="{{ not unique_date ? 'dates-filter' }}">
+                <label class="dates">
+                    {{ not unique_date ? 'Du' }}
+                    <input type="date" name="{{ name }}" class="data"  {% if from is defined %}value="{{ from | date('Y-m-d') }}"{% endif %}>
+                </label>
+                {% if not unique_date %}
+                    <label class="dates">
+                        au
+                        <input type="date" name="to" class="data" {% if to is defined %}value="{{ to | date('Y-m-d') }}"{% endif %}>
+                    </label>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-4">
+                <span>Export des commandes</span>
+            </div>
+            <div class="col d-flex">
+                <button class="primary">Commandes Assiettes en main</button>
+                <span data-toggle="tooltip" class="d-flex align-items-center"
+                      title="Données commandes pour le type de commande Assiette en main">
+                        <i class="fas fa-question-circle"></i></span>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-4"></div>
+            <div class="col d-flex">
+                <button class="primary">Commandes à la carte</button>
+                <span data-toggle="tooltip" class="d-flex align-items-center"
+                      title="Données commandes pour le type de commande à la carte">
+                    <i class="fas fa-question-circle"></i></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col d-flex">
+                <button class="primary">Commandes Négoce</button>
+                <span data-toggle="tooltip" class="d-flex align-items-center"
+                      title="Données commandes pour le type Négoce">
+                <i class="fas fa-question-circle"></i></span>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+    {% block javascripts %}
+        {{ encore_entry_script_tags('export') }}
+    {% endblock %}

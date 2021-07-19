@@ -114,5 +114,5 @@ parameters:
           route: imports_list
           permission: App\Entity\Role::MANAGE_IMPORTS
         - name: Exports
-          #route: exports
+          route: exports_index
           permission: App\Entity\Role::MANAGE_EXPORTS
