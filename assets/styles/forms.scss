@@ -276,36 +276,46 @@ button, a {
 }
 
 .header-section {
-    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
+    padding-top: 5px;
+    padding-bottom: 5px;
     background-color: $orange-lightest;
     border-radius: 10px;
 
-    h3 {
+    .modal-content & {
+        margin-right: -3rem;
+        margin-left: -3rem;
+        border-radius: 0 !important;
+    }
+
+    .header-section-label {
         color: $orange;
+        line-height: 1;
         font-family: Retroyal, sans-serif;
-        font-weight: bolder;
-        font-size: 25px;
-        margin: auto 0;
+        font-weight: normal;
+        font-size: 32px;
+        margin: 0;
+        display: inline-block;
+    }
+
+    &:before,
+    &:after {
+        display: inline-block;
+        content: '';
+        width: 20px;
+        height: 20px;
     }
 
     &:before {
-        display: block;
-        content: '';
         background: url("../images/left-element.svg") no-repeat;
-        background-size: 15px;
-        width: 20px;
-        height: 20px;
         margin-right: 12px;
     }
 
     &:after {
-        display: block;
-        content: '';
         background: url("../images/right-element.svg") no-repeat;
-        background-size: 15px;
-        width: 20px;
-        height: 20px;
         margin-left: 12px;
     }
 }
