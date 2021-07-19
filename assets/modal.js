@@ -114,7 +114,7 @@ export default class Modal {
     setupFileUploader() {
         const modal = this;
         const $dropframe = this.element.find(`.attachment-drop-frame`);
-        const $input = $dropframe.find(`input[name=attachment]`);
+        const $input = $dropframe.find(`input[type="file"]`);
 
         if($dropframe.exists()) {
             [`dragenter`, `dragover`, `dragleave`, `drop`].forEach(event => {
@@ -145,6 +145,16 @@ export default class Modal {
 
             $fileConfirmation.find('.file-delete-icon').on('click', function(e) {
                 $input.val('').trigger('change');
+                const $button = $(this);
+                const $fileInformation = $button.closest('.file-confirmation');
+                const $imageVisualisation = $fileInformation.find('.image-visualisation');
+                if ($imageVisualisation.exists()) {
+                    $imageVisualisation.attr('src', '');
+                }
+                const $fileDeleted = $fileInformation.find('[name="fileDeleted"]');
+                if ($fileDeleted.exists()) {
+                    $fileDeleted.val(1);
+                }
                 e.preventDefault();
             });
 
@@ -323,7 +333,9 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
         }
 
         if($input.is(`[required]`) && !$input.val()) {
-            if(!(modal && $input.is(`[type="file"]`)) || !uploads[modal.id][$input.attr(`name`)]) {
+            if(!(modal && $input.is(`[type="file"]`))
+                || !uploads[modal.id]
+                || !uploads[modal.id][$input.attr(`name`)]) {
                 errors.push({
                     elements: [$input],
                     message: `Ce champ est requis`,
@@ -459,5 +471,21 @@ function proceedFileSaving($input, file, $fileEmpty, $fileConfirmation, modal) {
         $fileEmpty.addClass('d-none');
         $fileConfirmation.removeClass('d-none');
         $fileConfirmation.find('.file-name').text(file.name);
+
+        const $imageVisualisation = $fileConfirmation.find('.image-visualisation');
+        if ($imageVisualisation.exists()) {
+            showImage(file, $imageVisualisation);
+        }
+    }
+}
+
+function showImage(file, $image) {
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            $image
+                .attr('src', e.target.result);
+        };
+        reader.readAsDataURL(file);
     }
 }

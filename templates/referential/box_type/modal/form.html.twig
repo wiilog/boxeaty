@@ -1,4 +1,22 @@
 <div class="row">
+    <div class="col-12 justify-content-center d-flex mb-3">
+        <label>
+            <div class="attachment-drop-frame {{ box_type.image ? 'is-valid' }}">
+                <div class="file-empty cursor-pointer {{ box_type.image ? 'd-none' }}">
+                    Faites glisser votre image ici<br>
+                    ou <span class="click-here">cliquez ici</span>
+                </div>
+                <div class="file-confirmation {{ not box_type.image ? 'd-none' }}">
+                    <img class="image-visualisation" src="{{ box_type.image ? asset('persistent/box_type/') ~ box_type.image.serverName }}"/>
+                    <input type="hidden" name="fileDeleted" class="data" value="0"/>
+                    <span class="file-delete-icon">
+                        <i class="fas fa-trash cursor-pointer"></i>
+                    </span>
+                </div>
+                <input type="file" name="image" class="data d-none" accept=".png, .jpg, .svg, .jpeg">
+            </div>
+        </label>
+    </div>
     <div class="col-12 col-md-6">
         <label>
             Nom du type de Box
@@ -38,6 +56,18 @@
                     <option value="{{ shape }}" {{ box_type.shape == shape ? 'selected' }}>{{ shape }}</option>
                 {% endfor %}
             </select>
+        </label>
+    </div>
+    <div class="col-12 col-md-6">
+        <label>
+            Volume (m³)
+            <input type="number" name="volume" class="data" placeholder="Renseignez un volume" value="{{ box_type.volume }}"/>
+        </label>
+    </div>
+    <div class="col-12 col-md-6">
+        <label>
+            Poids (kg)
+            <input type="number" name="weight" class="data" placeholder="Renseignez un poids" value="{{ box_type.weight }}"/>
         </label>
     </div>
 </div>
