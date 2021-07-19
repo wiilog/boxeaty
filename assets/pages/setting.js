@@ -30,7 +30,7 @@ $document.ready(() => {
 
         if (processForm($form)) {
             AJAX.route(`POST`, `work_free_day_add`)
-                .json(processForm($form), result => {
+                .json(processForm($form, null, {data: `add-data`}), result => {
                     if (handleErrors($form, result)) {
                         workFreeDayTable.ajax.reload();
                         clearForm($form);
@@ -43,7 +43,7 @@ $document.ready(() => {
         const $form = $(this).closest(`.inline-form`);
         if (processForm($form)) {
             AJAX.route(`POST`, `delivery_mode_add`)
-                .json(processForm($form), result => {
+                .json(processForm($form, null, {data: `add-data`}), result => {
                     if (handleErrors($form, result)) {
                         deliveryMethodTable.ajax.reload();
                         $("input[name=nameDeliveryMethode]").val('');
@@ -72,11 +72,8 @@ $document.ready(() => {
         }
     });
 
-
-
     $(`button[type="submit"]`).click(() => AJAX
         .route(`POST`, `settings_update`)
         .json(processForm($(`.global-settings`)))
     );
-
 });

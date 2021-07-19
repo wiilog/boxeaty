@@ -25,12 +25,15 @@ class LocationRepository extends EntityRepository {
         return $this->createQueryBuilder("location")
             ->select("IF(location.kiosk = 0, 'Emplacement', 'Borne') AS type")
             ->addSelect("location.name AS name")
-            ->addSelect("client.name AS client_name")
+            ->addSelect("join_depository.name AS depository")
+            ->addSelect("join_client.name AS client_name")
             ->addSelect("location.active AS active")
             ->addSelect("location.description AS description")
             ->addSelect("COUNT(box) AS boxes")
             ->addSelect("location.capacity AS capacity")
-            ->leftJoin("location.client", "client")
+            ->addSelect("location.type AS locationType")
+            ->leftJoin("location.client", "join_client")
+            ->leftJoin("location.depository", "join_depository")
             ->leftJoin(Box::class, "box", Join::WITH, "box.location = location.id")
             ->groupBy("location")
             ->getQuery()
@@ -55,6 +58,15 @@ class LocationRepository extends EntityRepository {
                 ))
                 ->setParameter("search", "%$search%")
                 ->setParameter("exact_search", $search);
+        }
+
+        foreach ($params["filters"] ?? [] as $name => $value) {
+            switch ($name) {
+                case "depository":
+                    $qb->andWhere("location.depository = :raw_value")
+                        ->setParameter("raw_value", $value);
+                    break;
+            }
         }
 
         if (!empty($params["order"])) {
