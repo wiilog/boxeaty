@@ -51,6 +51,21 @@ class BoxType {
      */
     private $clientBoxTypes;
 
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $volume;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $weight;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $image;
+
     public function __construct() {
         $this->boxes = new ArrayCollection();
         $this->clientBoxTypes = new ArrayCollection();
@@ -151,6 +166,42 @@ class BoxType {
                 $clientBoxType->setBoxType(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getVolume(): ?float
+    {
+        return $this->volume;
+    }
+
+    public function setVolume(float $volume): self
+    {
+        $this->volume = $volume;
+
+        return $this;
+    }
+
+    public function getWeight(): ?float
+    {
+        return $this->weight;
+    }
+
+    public function setWeight(?float $weight): self
+    {
+        $this->weight = $weight;
+
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
 
         return $this;
     }

@@ -27,6 +27,7 @@ yarn-error.log
 /public/exports/
 /public/persistent/imports
 /public/persistent/traces
+/public/persistent/box_type
 
 ###> assoconnect/mjml-bundle ###
 /templates/emails/*.html.twig

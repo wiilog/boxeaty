@@ -309,7 +309,7 @@ class ClientController extends AbstractController {
     }
 
     /**
-     * @Route("/box-types-api", name="box_types_api", options={"expose": true})
+     * @Route("/box-types-api", name="client_box_types_api", options={"expose": true})
      */
     public function boxTypesApi(Request $request, EntityManagerInterface $manager): Response {
         $id = $request->query->get('id');
