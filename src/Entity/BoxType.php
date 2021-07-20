@@ -49,11 +49,17 @@ class BoxType {
     /**
      * @ORM\OneToMany(targetEntity=ClientBoxType::class, mappedBy="boxType")
      */
-    private $clientBoxTypes;
+    private Collection $clientBoxTypes;
+
+    /**
+     * @ORM\OneToMany(targetEntity=ClientOrderLine::class, mappedBy="boxType")
+     */
+    private Collection $clientOrderLines;
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
         $this->clientBoxTypes = new ArrayCollection();
+        $this->clientOrderLines = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -155,4 +161,40 @@ class BoxType {
         return $this;
     }
 
+    /**
+     * @return Collection|ClientOrderLine[]
+     */
+    public function getClientOrderLines(): Collection {
+        return $this->clientOrderLines;
+    }
+
+    public function addClientOrderLine(ClientOrderLine $clientOrderLine): self {
+        if (!$this->clientOrderLines->contains($clientOrderLine)) {
+            $this->clientOrderLines[] = $clientOrderLine;
+            $clientOrderLine->setBoxType($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClientOrderLine(ClientOrderLine $clientOrderLine): self {
+        if ($this->clientOrderLines->removeElement($clientOrderLine)) {
+            if ($clientOrderLine->getBoxType() === $this) {
+                $clientOrderLine->setBoxType(null);
+            }
+        }
+        return $this;
+    }
+
+    public function setClientOrderLines(?array $clientOrderLines): self {
+        foreach($this->getClientOrderLines()->toArray() as $clientOrderLine) {
+            $this->removeClientOrderLine($clientOrderLine);
+        }
+
+        $this->clientOrderLines = new ArrayCollection();
+        foreach($clientOrderLines as $clientOrderLine) {
+            $this->addClientOrderLine($clientOrderLine);
+        }
+        return $this;
+    }
 }
