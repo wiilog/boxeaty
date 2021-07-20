@@ -141,7 +141,7 @@ class BoxController extends AbstractController {
      */
     public function show(Box $box): Response {
         $existClientOrder = $box->getClientOrders()->filter(fn($clientOrder) => $clientOrder->getStatus() ==
-            (Status::PREPARATION || Status::PREPARATION_PREPARED || Status::PREPARATION_PREPARING ||Status::COLLECT || Status::DELIVERY ))->first();
+            (Status::CATEGORY_PREPARATION || Status::CODE_PREPARATION_PREPARED || Status::CODE_PREPARATION_PREPARING ||Status::CATEGORY_COLLECT || Status::CATEGORY_DELIVERY ))->first();
         $clientOrderNumber = "";
         $clientOrderStatus = "";
         if($existClientOrder){

@@ -61,7 +61,7 @@ class ClientOrderRepository extends EntityRepository {
             ->leftJoin("client_order.delivery", "delivery")
             ->leftJoin("delivery.status", "delivery_status")
             ->andWhere("delivery_status.code IN (:statuses)")
-            ->setParameter("statuses", [Status::DELIVERY_PLANNED, Status::DELIVERY_PREPARING])
+            ->setParameter("statuses", [Status::CODE_DELIVERY_PLANNED, Status::CODE_DELIVERY_PREPARING])
             ->getQuery()
             ->getResult();
     }
