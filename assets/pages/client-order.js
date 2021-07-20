@@ -1,4 +1,4 @@
-import "../styles/pages/order.scss";
+import "../styles/pages/counter-order.scss";
 import {$document} from "../app";
 import AJAX from "../ajax";
 import {initDatatable} from "../datatable";
