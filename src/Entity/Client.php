@@ -117,7 +117,7 @@ class Client {
     /**
      * @ORM\OneToOne(targetEntity=ClientOrderInformation::class, cascade={"persist", "remove"})
      */
-    private $clientOrderInformation;
+    private ?ClientOrderInformation $clientOrderInformation = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clients")
@@ -403,6 +403,10 @@ class Client {
 
     public function getClientOrderInformation(): ?ClientOrderInformation
     {
+        if(!$this->clientOrderInformation) {
+            $this->clientOrderInformation = new ClientOrderInformation();
+        }
+
         return $this->clientOrderInformation;
     }
 

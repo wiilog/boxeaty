@@ -39,6 +39,11 @@ class User implements UserInterface {
     private ?string $password = null;
 
     /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private ?string $apiKey = null;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private ?DateTime $creationDate = null;
@@ -175,6 +180,15 @@ class User implements UserInterface {
     public function setPassword(string $password): self {
         $this->password = $password;
 
+        return $this;
+    }
+
+    public function getApiKey(): ?string {
+        return $this->apiKey;
+    }
+
+    public function setApiKey(?string $apiKey): self {
+        $this->apiKey = $apiKey;
         return $this;
     }
 

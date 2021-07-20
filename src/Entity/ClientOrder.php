@@ -84,6 +84,11 @@ class ClientOrder {
     private ?int $collectBoxNumber = null;
 
     /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private ?int $cratesAmount = null;
+
+    /**
      * @ORM\Column(type="decimal", precision=8, scale=2)
      */
     private ?float $deliveryPrice = null;
@@ -271,6 +276,16 @@ class ClientOrder {
 
     public function setCollectBoxNumber(int $collectBoxNumber): self {
         $this->collectBoxNumber = $collectBoxNumber;
+
+        return $this;
+    }
+
+    public function getCratesAmount(): ?float {
+        return $this->cratesAmount;
+    }
+
+    public function setCratesAmount(float $cratesAmount): self {
+        $this->cratesAmount = $cratesAmount;
 
         return $this;
     }
