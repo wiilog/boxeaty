@@ -90,6 +90,21 @@ class User implements UserInterface {
     private ?bool $deliverer = null;
 
     /**
+     * @ORM\ManyToOne(targetEntity=DeliveryMethod::class)
+     */
+    private ?DeliveryMethod $deliveryMethod = null;
+
+    /**
+     * @ORM\Column(type="boolean", options={"default": 0})
+     */
+    private ?bool $deliveryAssignmentMail = null;
+
+    /**
+     * @ORM\Column(type="boolean", options={"default": 0})
+     */
+    private ?bool $deliveryAssignmentPreparationMail = null;
+
+    /**
      * @ORM\OneToMany(targetEntity=DepositTicket::class, mappedBy="orderUser")
      */
     private Collection $orderDepositTickets;
@@ -363,12 +378,39 @@ class User implements UserInterface {
         return $this;
     }
 
-    public function getDeliverer(): ?bool {
+    public function isDeliverer(): ?bool {
         return $this->deliverer;
     }
 
     public function setDeliverer(?bool $deliverer): self {
         $this->deliverer = $deliverer;
+        return $this;
+    }
+
+    public function getDeliveryMethod(): ?DeliveryMethod {
+        return $this->deliveryMethod;
+    }
+
+    public function setDeliveryMethod(?DeliveryMethod $deliveryMethod): self {
+        $this->deliveryMethod = $deliveryMethod;
+        return $this;
+    }
+
+    public function getDeliveryAssignmentMail(): ?bool {
+        return $this->deliveryAssignmentMail;
+    }
+
+    public function setDeliveryAssignmentMail(?bool $deliveryAssignmentMail): self {
+        $this->deliveryAssignmentMail = $deliveryAssignmentMail;
+        return $this;
+    }
+
+    public function getDeliveryAssignmentPreparationMail(): ?bool {
+        return $this->deliveryAssignmentPreparationMail;
+    }
+
+    public function setDeliveryAssignmentPreparationMail(?bool $deliveryAssignmentPreparationMail): self {
+        $this->deliveryAssignmentPreparationMail = $deliveryAssignmentPreparationMail;
         return $this;
     }
 

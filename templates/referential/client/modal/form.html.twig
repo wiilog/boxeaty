@@ -1,93 +1,237 @@
-<div class="row">
-    <div class="col-12">
-        <label>
-            Nom
-            <input type="text" name="name" class="data" placeholder="Nom du client" value="{{ client.name }}" required/>
-        </label>
-    </div>
-    <div class="col-12 toggle">
-        <span class="label">Statut</span>
+<div class="row justify-content-evenly">
+    <div class="col-12 col-lg-6 col-xl-5 mb-sm-3">
+        <div class="header-section d-flex justify-content-center align-items-center">
+            <h2 class="header-section-label">Informations client</h2>
+        </div>
+        <div class="d-sm-flex mt-3">
+            <div class="col-6 pe-0 pe-sm-3">
+                <label>
+                    Nom
+                    <input type="text" name="name" class="data" placeholder="Nom du client" value="{{ client.name }}"
+                           required/>
+                </label>
+            </div>
+            <div class="col-6 toggle ps-0 ps-sm-3">
+                <span class="label">Statut</span>
+                <div class="d-flex">
+                    <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-active" name="active" class="data"
+                           value="1" {{ client.active ? 'checked' }}/>
+                    <label for="{{ client.id ? 'edit' : 'new' }}-client-active">Actif</label>
 
-        <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-active" name="active" class="data" value="1" {{ client.active ? 'checked' }}/>
-        <label for="{{ client.id ? 'edit' : 'new' }}-client-active">Actif</label>
+                    <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-inactive" name="active" class="data"
+                           value="0" {{ not client.active ? 'checked' }}/>
+                    <label for="{{ client.id ? 'edit' : 'new' }}-client-inactive">Inactif</label>
+                </div>
+            </div>
+        </div>
+        <div class="d-sm-flex mt-3">
+            <div class="col-12 col-sm-6 pe-0 pe-sm-3">
+                <label>
+                    Adresse
+                    <input type="text" name="address" class="data" placeholder="Adresse" value="{{ client.address }}"
+                           required/>
+                </label>
+            </div>
+            <div class="col-12 col-sm-6 ps-0 ps-sm-3">
+                <label>
+                    Groupe
+                    <select class="data" name="group" data-s2="group" data-placeholder="Sélectionnez un groupe..."
+                            required>
+                        {% if client.group %}
+                            <option value="{{ client.group.id }}" selected>{{ client.group.name }}</option>
+                        {% endif %}
+                    </select>
+                </label>
+            </div>
+        </div>
+        <div class="d-sm-flex">
+            <div class="d-flex col-12 col-sm-6 align-items-center">
+                <label class="mt-0 pe-2">Multi-site</label>
+                <div class="form-check form-switch">
+                    <input class="form-check-input form-check-input-xl data mt-0" type="checkbox" name="isMultiSite"
+                           id="{{ client.id ? 'edit' : 'new' }}-is-multi-site" {{ client.isMultiSite ? 'checked' }}>
+                    <label class="form-check-label form-check-label-xl"
+                           for="{{ client.id ? 'edit' : 'new' }}-is-multi-site"></label>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6">
+                <label>
+                    Client multi-site lié
+                    <select class="data" name="linkedMultiSite" data-s2="multiSite"
+                            data-placeholder="Sélectionnez un client..." {{ client.isMultiSite ? 'disabled' }}>
+                        {% if client.linkedMultiSite %}
+                            <option value="{{ client.linkedMultiSite.id }}"
+                                    selected>{{ client.linkedMultiSite.name }}</option>
+                        {% endif %}
+                    </select>
+                </label>
+            </div>
+        </div>
+        <div class="d-sm-flex mt-3">
+            <div class="ol-12 col-sm-6 pe-0 pe-sm-3">
+                <label>
+                    Contact principal
+                    <select class="data" name="contact" data-s2="user" data-placeholder="Sélectionnez un utilisateur..."
+                            required>
+                        {% if client.contact %}
+                            <option value="{{ client.contact.id }}" selected>{{ client.contact.username }}</option>
+                        {% endif %}
+                    </select>
+                </label>
+            </div>
+            <div class="col-12 col-sm-6 ps-0 ps-sm-3">
+                <label>
+                    Téléphone
+                    <input type="tel" name="phoneNumber" class="data" placeholder="Numéro de téléphone"
+                           value="{{ client.phoneNumber }}" required/>
+                </label>
+            </div>
+        </div>
+        <div class="d-sm-flex mt-3">
+            <div class="col-12 col-sm-6 pe-0 pe-sm-3">
+                <label>
+                    Ticket‑consigne valable dans la borne
+                    <select class="data" name="depositTicketsClients" data-s2="client"
+                            data-placeholder="Sélectionnez des clients..." multiple required>
+                        {% if not client.id %}
+                            <option class="client-self-name" value="0" selected>Client actuel</option>
+                        {% endif %}
 
-        <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-inactive" name="active" class="data" value="0" {{ not client.active ? 'checked' }}/>
-        <label for="{{ client.id ? 'edit' : 'new' }}-client-inactive">Inactif</label>
-    </div>
-    <div class="col-md-6 col-12">
-        <label>
-            Adresse
-            <input type="text" name="address" class="data" placeholder="Adresse" value="{{ client.address }}" required/>
-        </label>
-    </div>
-    <div class="col-md-6 col-12">
-        <label>
-            Téléphone
-            <input type="tel" name="phoneNumber" class="data" placeholder="Numéro de téléphone" value="{{ client.phoneNumber }}" required/>
-        </label>
-    </div>
-    <div class="col-12">
-        <label>
-            Contact principal
-            <select class="data" name="contact" data-s2="user" data-placeholder="Sélectionnez un utilisateur..." required>
-                {% if client.contact %}
-                    <option value="{{ client.contact.id }}" selected>{{ client.contact.username }}</option>
-                {% endif %}
-            </select>
-        </label>
-    </div>
-    <div class="col-12">
-        <label>Propriétés</label>
-        <div class="form-check form-switch">
-            <input class="form-check-input data" type="checkbox" name="isMultiSite"
-                   id="{{ client.id ? 'edit' : 'new' }}-is-multi-site" {{ client.isMultiSite ? 'checked' }}>
-            <label class="form-check-label" for="{{ client.id ? 'edit' : 'new' }}-is-multi-site">Multi-site</label>
+                        {% for client in client.depositTicketsClients %}
+                            <option value="{{ client.id }}" selected>{{ client.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <div class="col-12 col-sm-6 ps-0 ps-sm-3 d-flex flex-column justify-content-between">
+                <label>
+                    Validité ticket‑consigne
+                </label>
+                <select class="data" name="depositTicketValidity" data-s2
+                        data-placeholder="Sélectionnez une durée de validité..." required>
+                    {% for i in 1..24 %}
+                        <option value="{{ i }}" {{ i == client.depositTicketValidity or not client.depositTicketValidity and i == 3 ? 'selected' }}>
+                            {{ i }} mois
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-12 d-flex align-items-center mt-3">
+            <label class="mt-0 pe-2">Notification mail à la préparation de la commande</label>
+            <div class="form-check form-switch">
+                <input class="form-check-input form-check-input-xl data mt-0" type="checkbox"
+                       name="mailNotificationOrderPreparation"
+                       id="{{ client.id ? 'edit' : 'new' }}-mail-notification-order-preparation" {{ client.mailNotificationOrderPreparation ? 'checked' }}>
+                <label class="form-check-label form-check-label-xl"
+                       for="{{ client.id ? 'edit' : 'new' }}-mail-notification-order-preparation"></label>
+            </div>
         </div>
     </div>
-    <div class="col-md-6 col-12">
-        <label>
-            Groupe
-            <select class="data" name="group" data-s2="group" data-placeholder="Sélectionnez un groupe..." required>
-                {% if client.group %}
-                    <option value="{{ client.group.id }}" selected>{{ client.group.name }}</option>
-                {% endif %}
-            </select>
-        </label>
-    </div>
-    <div class="col-md-6 col-12">
-        <label>
-            Client multi-site lié
-            <select class="data" name="linkedMultiSite" data-s2="multiSite" data-placeholder="Sélectionnez un client..." {{ client.isMultiSite ? 'disabled' }}>
-                {% if client.linkedMultiSite %}
-                    <option value="{{ client.linkedMultiSite.id }}" selected>{{ client.linkedMultiSite.name }}</option>
-                {% endif %}
-            </select>
-        </label>
-    </div>
-    <div class="col-md-6 col-12">
-        <label>
-            Ticket‑consigne valable dans la borne
-            <select class="data" name="depositTicketsClients" data-s2="client" data-placeholder="Sélectionnez des clients..." multiple required>
-                {% if not client.id %}
-                    <option class="client-self-name" value="0" selected>Client actuel</option>
-                {% endif %}
+    <div class="col-12 col-lg-6 col-xl-5">
+        <div class="header-section d-flex justify-content-center align-items-center">
+            <h2 class="header-section-label">Informations commande</h2>
+        </div>
+        <div class="d-sm-flex mt-3">
+            <div class="col-12 col-sm-6 pe-0 pe-sm-3">
+                <label>
+                    Type de mobilité
+                    <select class="data" name="deliveryMethod" data-s2="deliveryMethod"
+                            data-placeholder="Sélectionnez un type...">
+                        {% if clientOrderInformation ? clientOrderInformation.deliveryMethod %}
+                            <option value="{{ clientOrderInformation.deliveryMethod.id }}" selected>
+                                {{ clientOrderInformation.deliveryMethod.name }}
+                            </option>
+                        {% endif %}
+                    </select>
+                </label>
+            </div>
+            <div class="col-12 col-sm-6 ps-0 ps-sm-3">
+                <label>
+                    Dépôt affecté
+                    <select class="data" name="depository" data-s2="depository"
+                            data-placeholder="Sélectionnez un dépôt...">
+                        {% if clientOrderInformation ? clientOrderInformation.depository %}
+                            <option value="{{ clientOrderInformation.depository.id }}" selected>
+                                {{ clientOrderInformation.depository.name }}
+                            </option>
+                        {% endif %}
+                    </select>
+                </label>
+            </div>
+        </div>
+        <div class="d-sm-flex mt-3">
+            <div class="col-12 col-sm-6 pe-0 pe-sm-3">
+                <label>
+                    Distance du dépôt (km)
+                    <input type="number" name="depositoryDistance" class="data" placeholder="Distance du dépôt"
+                           value="{{ clientOrderInformation ? clientOrderInformation.depositoryDistance }}"/>
+                </label>
+            </div>
+            <div class="col-12 col-sm-6 ps-0 ps-sm-3">
+                <label>
+                    Nombre de jetons
+                    <input type="number" name="tokenAmount" class="data" placeholder="Nombre de jetons"
+                           value="{{ clientOrderInformation ? clientOrderInformation.tokenAmount }}"/>
+                </label>
+            </div>
+        </div>
+        <div class="col-12 toggle mt-4">
+            <span class="label">Type de commande disponible</span>
+            <div class="d-flex flex-column flex-xxl-row w-50">
+                <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-order-type-buy" name="orderType" class="data"
+                       value="1" {{ clientOrderInformation ? clientOrderInformation.orderType == 1 ? 'checked' }}/>
+                <label for="{{ client.id ? 'edit' : 'new' }}-order-type-buy">Achat / Négoce</label>
 
-                {% for client in client.depositTicketsClients %}
-                    <option value="{{ client.id }}" selected>{{ client.name }}</option>
-                {% endfor %}
-            </select>
-        </label>
-    </div>
-    <div class="col-md-6 col-12">
-        <label>
-            Validité ticket‑consigne
-            <select class="data" name="depositTicketValidity" data-s2 data-placeholder="Sélectionnez une durée de validité..." required>
-                {% for i in 1..24 %}
-                    <option value="{{ i }}" {{ i == client.depositTicketValidity or not client.depositTicketValidity and i == 3 ? 'selected' }}>
-                        {{ i }} mois
-                    </option>
-                {% endfor %}
-            </select>
-        </label>
+                <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-order-type-manage" name="orderType"
+                       class="data"
+                       value="2" {{ clientOrderInformation ? clientOrderInformation.orderType == 2 ? 'checked' }}/>
+                <label for="{{ client.id ? 'edit' : 'new' }}-order-type-manage">Gestion autonome</label>
+
+                <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-order-type-benefit" name="orderType"
+                       class="data"
+                       value="3" {{ clientOrderInformation ? clientOrderInformation.orderType == 3 ? 'checked' }}/>
+                <label for="{{ client.id ? 'edit' : 'new' }}-order-type-benefit">Prestation ponctuelle</label>
+            </div>
+        </div>
+        <div class="col-12 d-flex align-items-center mt-3">
+            <label class="mt-0 pe-2">Commande en parc fermé</label>
+            <div class="form-check form-switch">
+                <input class="form-check-input form-check-input-xl data mt-0" type="checkbox"
+                       name="isClosedParkOrder"
+                       id="{{ client.id ? 'edit' : 'new' }}-is-closed-park-order" {{ clientOrderInformation ? clientOrderInformation.closedParkOrder ? 'checked' }}>
+                <label class="form-check-label form-check-label-xl"
+                       for="{{ client.id ? 'edit' : 'new' }}-is-closed-park-order"></label>
+            </div>
+        </div>
+        <div class="d-sm-flex mt-3">
+            <div class="col-12 col-sm-6 pe-0 pe-sm-3">
+                <label>
+                    Tarif livraison jour ouvré
+                    <input type="number" name="workingDayDeliveryRate" class="data" placeholder="Renseignez un tarif..."
+                           value="{{ clientOrderInformation ? clientOrderInformation.workingDayDeliveryRate }}"/>
+                </label>
+            </div>
+            <div class="col-12 col-sm-6 ps-0 ps-sm-3">
+                <label>
+                    Tarif livraison jour non ouvré
+                    <input type="number" name="nonWorkingDayDeliveryRate" class="data"
+                           placeholder="Renseignez un tarif..."
+                           value="{{ clientOrderInformation ? clientOrderInformation.nonWorkingDayDeliveryRate }}"/>
+                </label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 mt-3 pe-3">
+            <label>
+                Frais de service
+                <input type="number" name="serviceCost" class="data" placeholder="Frais de service"
+                       value="{{ clientOrderInformation ? clientOrderInformation.serviceCost }}"/>
+            </label>
+        </div>
+        <div class="col-12 mt-3">
+            <label>Commentaire</label>
+            <div class="data"
+                 data-wysiwyg="comment">{{ clientOrderInformation ? clientOrderInformation.comment | raw }}</div>
+        </div>
     </div>
 </div>

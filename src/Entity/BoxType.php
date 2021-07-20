@@ -46,8 +46,35 @@ class BoxType {
      */
     private Collection $boxes;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ClientBoxType::class, mappedBy="boxType")
+     */
+    private Collection $clientBoxTypes;
+
+    /**
+     * @ORM\OneToMany(targetEntity=ClientOrderLine::class, mappedBy="boxType")
+     */
+    private Collection $clientOrderLines;
+
+    /**
+     * @ORM\Column(type="decimal", precision=5, scale=2, nullable=true)
+     */
+    private ?float $volume = null;
+
+    /**
+     * @ORM\Column(type="decimal", precision=5, scale=2, nullable=true)
+     */
+    private ?float $weight = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Attachment::class)
+     */
+    private ?Attachment $image = null;
+
     public function __construct() {
         $this->boxes = new ArrayCollection();
+        $this->clientBoxTypes = new ArrayCollection();
+        $this->clientOrderLines = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -119,4 +146,103 @@ class BoxType {
         return $this;
     }
 
+    /**
+     * @return Collection|ClientBoxType[]
+     */
+    public function getClientBoxTypes(): Collection
+    {
+        return $this->clientBoxTypes;
+    }
+
+    public function addClientBoxType(ClientBoxType $clientBoxType): self
+    {
+        if (!$this->clientBoxTypes->contains($clientBoxType)) {
+            $this->clientBoxTypes[] = $clientBoxType;
+            $clientBoxType->setBoxType($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClientBoxType(ClientBoxType $clientBoxType): self
+    {
+        if ($this->clientBoxTypes->removeElement($clientBoxType)) {
+            // set the owning side to null (unless already changed)
+            if ($clientBoxType->getBoxType() === $this) {
+                $clientBoxType->setBoxType(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getVolume(): ?float
+    {
+        return $this->volume;
+    }
+
+    public function setVolume(?float $volume): self
+    {
+        $this->volume = $volume;
+
+        return $this;
+    }
+
+    public function getWeight(): ?float
+    {
+        return $this->weight;
+    }
+
+    public function setWeight(?float $weight): self
+    {
+        $this->weight = $weight;
+
+        return $this;
+    }
+
+    public function getImage(): ?Attachment {
+        return $this->image;
+    }
+
+    public function setImage(?Attachment $image): self {
+        $this->image = $image;
+        return $this;
+    }
+
+    /**
+     * @return Collection|ClientOrderLine[]
+     */
+    public function getClientOrderLines(): Collection {
+        return $this->clientOrderLines;
+    }
+
+    public function addClientOrderLine(ClientOrderLine $clientOrderLine): self {
+        if (!$this->clientOrderLines->contains($clientOrderLine)) {
+            $this->clientOrderLines[] = $clientOrderLine;
+            $clientOrderLine->setBoxType($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClientOrderLine(ClientOrderLine $clientOrderLine): self {
+        if ($this->clientOrderLines->removeElement($clientOrderLine)) {
+            if ($clientOrderLine->getBoxType() === $this) {
+                $clientOrderLine->setBoxType(null);
+            }
+        }
+        return $this;
+    }
+
+    public function setClientOrderLines(?array $clientOrderLines): self {
+        foreach($this->getClientOrderLines()->toArray() as $clientOrderLine) {
+            $this->removeClientOrderLine($clientOrderLine);
+        }
+
+        $this->clientOrderLines = new ArrayCollection();
+        foreach($clientOrderLines as $clientOrderLine) {
+            $this->addClientOrderLine($clientOrderLine);
+        }
+        return $this;
+    }
 }

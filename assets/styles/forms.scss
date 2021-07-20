@@ -236,11 +236,16 @@ button, a {
     &.is-invalid {
         background: $pale-red;
     }
+
+    .image-visualisation {
+        max-width: 50px;
+        max-height: 50px;
+    }
 }
 
 .modal {
     input:not([type="checkbox"]):not([type="radio"]) {
-        width: 100% !important;
+        width: 100%;
     }
 }
 
@@ -275,12 +280,60 @@ button, a {
     margin-left: 5px;
 }
 
+.header-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: $orange-lightest;
+    border-radius: 10px;
+
+    &:not(.header-section-rounded) {
+        margin-right: -3rem;
+        margin-left: -3rem;
+        border-radius: 0 !important;
+    }
+
+    .header-section-label {
+        color: $orange;
+        line-height: 1;
+        font-family: Retroyal, sans-serif;
+        font-weight: bolder;
+        font-size: 27px;
+        margin: 0;
+        display: inline-block;
+    }
+
+    &:before,
+    &:after {
+        display: inline-block;
+        content: '';
+        width: 20px;
+        height: 20px;
+    }
+
+    &:before {
+        background: url("../images/left-element.svg") no-repeat;
+        margin-right: 12px;
+    }
+
+    &:after {
+        background: url("../images/right-element.svg") no-repeat;
+        margin-left: 12px;
+    }
+}
+
 .text-form-wrapper {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
     white-space: nowrap;
+
+    input, select {
+        min-width: initial !important;
+    }
 
     input:not(:first-child), select:not(:first-child) {
         margin-left: 4px;

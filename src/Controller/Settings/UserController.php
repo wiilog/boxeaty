@@ -4,6 +4,7 @@ namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
 use App\Entity\Client;
+use App\Entity\DeliveryMethod;
 use App\Entity\Group;
 use App\Entity\Role;
 use App\Entity\User;
@@ -99,6 +100,7 @@ class UserController extends AbstractController {
 
         $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(",", $content->clients)]);
         $groups = $manager->getRepository(Group::class)->findBy(["id" => explode(",", $content->groups)]);
+        $deliveryMethod = $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod);
 
         if ($form->isValid()) {
             $user = new User();
@@ -109,6 +111,10 @@ class UserController extends AbstractController {
                 ->setPassword($encoder->encodePassword($user, $content->password))
                 ->setGroups($groups)
                 ->setClients($clients)
+                ->setDeliverer($content->deliverer)
+                ->setDeliveryAssignmentMail($content->deliveryAssignmentMail)
+                ->setDeliveryAssignmentPreparationMail($content->deliveryAssignmentPreparationMail)
+                ->setDeliveryMethod($deliveryMethod)
                 ->setCreationDate(new DateTime());
 
             $manager->persist($user);
@@ -185,12 +191,22 @@ class UserController extends AbstractController {
             $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(",", $content->clients)]);
             $groups = $manager->getRepository(Group::class)->findBy(["id" => explode(",", $content->groups)]);
 
+                if (isset($content->deliveryMEthod)) {
+                    $deliveryMethod = $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod);
+                } else {
+                    $deliveryMethod = null;
+                }
+
             $user->setUsername($content->username)
                 ->setEmail($content->email)
                 ->setRole($role)
                 ->setActive($content->active)
                 ->setGroups($groups)
                 ->setClients($clients)
+                ->setDeliverer($content->deliverer)
+                ->setDeliveryAssignmentMail($content->deliveryAssignmentMail)
+                ->setDeliveryAssignmentPreparationMail($content->deliveryAssignmentPreparationMail)
+                ->setDeliveryMethod($deliveryMethod)
                 ->setCreationDate(new DateTime());
 
             if (isset($content->password)) {

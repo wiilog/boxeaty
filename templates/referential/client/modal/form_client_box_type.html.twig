@@ -1,0 +1,24 @@
+<div class="row">
+    <div class="col-12">
+        <label>Type
+            <select class="data" name="type" data-s2="type" data-no-empty-option required
+                    data-placeholder="Sélectionnez un type de Box..." {{ clientBoxType is defined and clientBoxType.boxType ? 'disabled' }}>
+                {% if clientBoxType is defined and clientBoxType.boxType %}
+                    <option value="{{ clientBoxType.boxType.id }}" selected>{{ clientBoxType.boxType.name }}</option>
+                {% endif %}
+            </select>
+        </label>
+    </div>
+    <div class="col-md-6 col-12">
+        <label>Quantité
+            <input type="number" class="data" name="quantity" value="{{ clientBoxType is defined ? clientBoxType.quantity }}" required
+                   placeholder="Renseignez une quantité..."/>
+        </label>
+    </div>
+    <div class="col-md-6 col-12">
+        <label>Tarif personnalisé
+            <input type="number" class="data" name="price" value="{{ clientBoxType is defined ? clientBoxType.cost }}" required
+                   placeholder="Renseignez un tarif..."/>
+        </label>
+    </div>
+</div>

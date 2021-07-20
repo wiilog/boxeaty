@@ -46,17 +46,21 @@ class LocationController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
+        /** @var Location $location */
         foreach ($locations["data"] as $location) {
             $data[] = [
                 "id" => $location->getId(),
                 "kiosk" => $location->isKiosk() ? "Borne" : "Emplacement",
                 "name" => $location->getName(),
+                "depository" => $location->getDepository() ? $location->getDepository()->getName() : '-',
                 "client_name" => FormatHelper::named($location->getClient()),
                 "active" => FormatHelper::bool($location->isActive()),
                 "client" => FormatHelper::named($location->getClient()),
                 "description" => $location->getDescription() ?: "-",
                 "boxes" => $boxRepository->count(["location" => $location]),
                 "capacity" => $location->getCapacity() ?? "-",
+                "location_type" => $location->getType() ? Location::LOCATION_TYPES[$location->getType()] : '-',
+                "container_amount" => !$location->getBoxes()->isEmpty() ? $location->getBoxes()->count() : '-',
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
@@ -102,7 +106,7 @@ class LocationController extends AbstractController {
                 ->setClient($client)
                 ->setDescription($content->description ?? null)
                 ->setDeposits(0)
-                ->setType($content->locationType)
+                ->setType($content->type ?? null)
                 ->setDepository($depository);
 
             $location = new Location();
@@ -114,7 +118,7 @@ class LocationController extends AbstractController {
                 ->setClient($client)
                 ->setDescription($content->description ?? null)
                 ->setDeposits(0)
-                ->setType($content->locationType)
+                ->setType($content->type ?? null)
                 ->setDepository($depository);
 
             if ((int)$content->kiosk === 1) {
@@ -188,7 +192,7 @@ class LocationController extends AbstractController {
                 ->setClient($client)
                 ->setActive($content->active)
                 ->setDescription($content->description ?? null)
-                ->setType($content->locationType)
+                ->setType($content->type ?? null)
                 ->setDepository($depository);
 
             if ((int)$content->kiosk === 1) {
@@ -277,6 +281,7 @@ class LocationController extends AbstractController {
 
         return $exportService->export(function($output) use ($exportService, $locations) {
             foreach ($locations as $location) {
+                $location["locationType"] = $location["locationType"] ? Location::LOCATION_TYPES[$location["locationType"]] : '';
                 $exportService->putLine($output, $location);
             }
         }, "export-emplacement-$today.csv", ExportService::LOCATION_HEADER);
