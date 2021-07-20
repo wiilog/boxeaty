@@ -43,6 +43,11 @@ class ClientOrder {
     private ?Collection $orderStatusHistory;
 
     /**
+     * @ORM\OneToMany(targetEntity=ClientOrderLine::class, mappedBy="clientOrder")
+     */
+    private ?Collection $lines;
+
+    /**
      * @ORM\ManyToOne(targetEntity=Client::class)
      */
     private ?Client $client = null;
@@ -77,6 +82,11 @@ class ClientOrder {
      * @ORM\Column(type="integer", nullable=true)
      */
     private ?int $collectBoxNumber = null;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private ?int $cratesAmount = null;
 
     /**
      * @ORM\Column(type="decimal", precision=8, scale=2)
@@ -129,14 +139,9 @@ class ClientOrder {
      */
     private ?Collect $collect = null;
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Box::class, inversedBy="clientOrders")
-     */
-    private Collection $boxes;
-
-    public function __construct() {
+    public function __construct(){
+        $this->lines = new ArrayCollection();
         $this->orderStatusHistory = new ArrayCollection();
-        $this->boxes = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -167,43 +172,6 @@ class ClientOrder {
 
     public function setClient(?Client $client): self {
         $this->client = $client;
-        return $this;
-    }
-
-    /**
-     * @return Collection|Box[]
-     */
-    public function getBoxes(): Collection {
-        return $this->boxes;
-    }
-
-    public function addBox(Box $box): self {
-        if (!$this->boxes->contains($box)) {
-            $this->boxes[] = $box;
-            $box->addClientOrder($this);
-        }
-
-        return $this;
-    }
-
-    public function removeBox(Box $box): self {
-        if ($this->boxes->removeElement($box)) {
-            $box->addClientOrder($this);
-        }
-
-        return $this;
-    }
-
-    public function setBoxes(?array $boxes): self {
-        foreach ($this->getBoxes()->toArray() as $box) {
-            $this->removeBox($box);
-        }
-
-        $this->boxes = new ArrayCollection();
-        foreach ($boxes as $box) {
-            $this->addBox($box);
-        }
-
         return $this;
     }
 
@@ -308,6 +276,16 @@ class ClientOrder {
 
     public function setCollectBoxNumber(int $collectBoxNumber): self {
         $this->collectBoxNumber = $collectBoxNumber;
+
+        return $this;
+    }
+
+    public function getCratesAmount(): ?float {
+        return $this->cratesAmount;
+    }
+
+    public function setCratesAmount(float $cratesAmount): self {
+        $this->cratesAmount = $cratesAmount;
 
         return $this;
     }
@@ -424,7 +402,6 @@ class ClientOrder {
         return $this;
     }
 
-
     public function getDeliveryRound(): ?DeliveryRound {
         return $this->deliveryRound;
     }
@@ -441,4 +418,42 @@ class ClientOrder {
         return $this;
     }
 
+    /**
+     * @return Collection|ClientOrderLine[]
+     */
+    public function getLines(): Collection {
+        return $this->lines;
+    }
+
+    public function addLine(ClientOrderLine $line): self {
+        if (!$this->lines->contains($line)) {
+            $this->lines[] = $line;
+            $line->setClientOrder($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLine(ClientOrderLine $line): self {
+        if ($this->lines->removeElement($line)) {
+            if ($line->getClientOrder() === $this) {
+                $line->setClientOrder(null);
+            }
+        }
+        return $this;
+    }
+
+    public function setLines(?array $lines): self {
+        foreach($this->getLines()->toArray() as $clientOrderLine) {
+            $this->removeLine($clientOrderLine);
+        }
+
+        $this->lines = new ArrayCollection();
+
+        foreach($lines as $clientOrderLine) {
+            $this->addLine($clientOrderLine);
+        }
+
+        return $this;
+    }
 }

@@ -15,7 +15,7 @@ $document.ready(() => {
     });
 
     const emptyLocationModal = Modal.static(`#modal-empty-location`, {
-        ajax: AJAX.route(`POST`, `api_empty_kiosk`),
+        ajax: AJAX.route(`POST`, `api_kiosk_empty_kiosk`),
         table: `#table-locations`,
     });
 
@@ -26,11 +26,14 @@ $document.ready(() => {
         columns: [
             {data: `kiosk`, title: `Type`},
             {data: `name`, title: `Nom de l'emplacement`},
+            {data: `depository`, title: `Dépôt`},
             {data: `client_name`, title: `Nom du client`},
             {data: `active`, title: `Actif`},
             {data: `description`, title: `Description`},
             {data: `boxes`, title: `Nombre de Box`, orderable: false},
             {data: `capacity`, title: `Capacité`},
+            {data: `location_type`, title: `Type d'emplacement`},
+            {data: `container_amount`, title: `Nombre de contenants`},
             DATATABLE_ACTIONS,
         ],
         listeners: {

@@ -47,7 +47,7 @@ class CounterOrderService {
     public function renderBoxes(): array {
         return [
             "submit" => $this->router->generate("counter_order_boxes_submit"),
-            "template" => $this->twig->render("tracking/counter_order/modal/boxes.html.twig", [
+            "template" => $this->twig->render("operation/counter_order/modal/boxes.html.twig", [
                 "session" => $this->getToken(),
                 "boxes" => $this->get(Box::class),
                 "price" => $this->getBoxesPrice(),
@@ -58,7 +58,7 @@ class CounterOrderService {
     public function renderDepositTickets(): array {
         return [
             "submit" => $this->router->generate("counter_order_deposit_tickets_submit"),
-            "template" => $this->twig->render("tracking/counter_order/modal/deposit_tickets.html.twig", [
+            "template" => $this->twig->render("operation/counter_order/modal/deposit_tickets.html.twig", [
                 "session" => $this->getToken(),
                 "tickets" => $this->get(DepositTicket::class),
                 "price" => $this->getTicketsPrice(),
@@ -69,7 +69,7 @@ class CounterOrderService {
     public function renderPayment(): array {
         return [
             "submit" => $this->router->generate("counter_order_confirm"),
-            "template" => $this->twig->render("tracking/counter_order/modal/payment.html.twig", [
+            "template" => $this->twig->render("operation/counter_order/modal/payment.html.twig", [
                 "session" => $this->getToken(),
                 "boxes" => $this->get(Box::class),
                 "tickets" => $this->get(DepositTicket::class),
@@ -80,7 +80,7 @@ class CounterOrderService {
 
     public function renderConfirmation(): array {
         return [
-            "template" => $this->twig->render("tracking/counter_order/modal/confirmation.html.twig"),
+            "template" => $this->twig->render("operation/counter_order/modal/confirmation.html.twig"),
         ];
     }
 

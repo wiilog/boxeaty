@@ -6,7 +6,7 @@ import $ from "jquery";
 import Scan from "../scan";
 import {SECONDS, String, Time} from "../util";
 
-import "../styles/pages/order.scss";
+import "../styles/pages/counter-order.scss";
 import Flash from "../flash";
 
 $document.ready(() => {

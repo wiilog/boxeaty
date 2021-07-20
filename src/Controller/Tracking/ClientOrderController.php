@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/tracabilite/commande-client")
+ * @Route("/operation/commande-client")
  */
 class ClientOrderController extends AbstractController {
 
@@ -27,7 +27,7 @@ class ClientOrderController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENT_ORDERS, ROLE::VIEW_ALL_ORDERS)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
-        return $this->render("tracking/client_order/index.html.twig", [
+        return $this->render("operation/client_order/index.html.twig", [
             "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER
         ]);
@@ -48,7 +48,6 @@ class ClientOrderController extends AbstractController {
                 "id" => $order->getId(),
                 "status" => $order->getStatus(),
                 "automatic" => $order->getAutomatic(),
-                "boxes" => FormatHelper::boxes($order->getBoxes()),
                 "client" => $order->getClient(),
                 "number" => $order->getNumber(),
                 "location" => $order->getClient(),
@@ -66,7 +65,7 @@ class ClientOrderController extends AbstractController {
             if ($previousItem) {
                 $groupedData[] = [
                     'id' => $item['id'],
-                    'col' => $this->renderView('tracking\client_order\modal\order_row.html.twig', ['item1' => $previousItem, 'item2' => $item])
+                    'col' => $this->renderView('operation/client_order/order_row.html.twig', ['item1' => $previousItem, 'item2' => $item])
                 ];
                 $previousItem = null;
             } else {
@@ -76,7 +75,7 @@ class ClientOrderController extends AbstractController {
         if ($previousItem) {
             $groupedData[] = [
                 'id' => $previousItem['id'],
-                'col' => $this->renderView('tracking\client_order\modal\order_row.html.twig', ['item1' => $previousItem])
+                'col' => $this->renderView('operation/client_order/order_row.html.twig', ['item1' => $previousItem])
             ];
         }
 
@@ -95,7 +94,7 @@ class ClientOrderController extends AbstractController {
     public function deleteTemplate(ClientOrder $clientOrder): Response {
         return $this->json([
             "submit" => $this->generateUrl("client_order_delete", ["clientOrder" => $clientOrder->getId()]),
-            "template" => $this->renderView("tracking/client_order/modal/delete.html.twig", [
+            "template" => $this->renderView("operation/client_order/modal/delete.html.twig", [
                 "clientOrder" => $clientOrder,
             ])
         ]);
@@ -115,4 +114,18 @@ class ClientOrderController extends AbstractController {
         ]);
     }
 
+    /**
+     * @Route("/voir/template/{clientOrder}", name="client_order_show_template", options={"expose": true})
+     * TODO HasPermission(Role::MANAGE_USERS) ??
+     */
+    public function editTemplate(EntityManagerInterface $manager, ClientOrder $clientOrder): Response {
+        $roles = $manager->getRepository(Role::class)->findBy(["active" => true]);
+
+        return $this->json([
+            "template" => $this->renderView("operation/client_order/modal/show.html.twig", [
+                "clientOrder" => $clientOrder,
+                "roles" => $roles,
+            ])
+        ]);
+    }
 }

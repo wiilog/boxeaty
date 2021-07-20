@@ -28,7 +28,8 @@ class DeliveryMethodRepository extends EntityRepository {
             ->getArrayResult();
     }
 
-    public function findForDatatable(array $params): array {
+    public function findForDatatable(array $params): array
+    {
         $qb = $this->createQueryBuilder("dm")
             ->andWhere("dm.deleted = 0");
 

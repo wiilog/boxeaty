@@ -64,7 +64,6 @@ export default class Modal {
 
     static load(ajax, config = {}) {
         if(typeof ajax === 'string') {
-
             Modal.html({
                 ...config,
                 template: ajax,
@@ -115,7 +114,7 @@ export default class Modal {
     setupFileUploader() {
         const modal = this;
         const $dropframe = this.element.find(`.attachment-drop-frame`);
-        const $input = $dropframe.find(`input[name=attachment]`);
+        const $input = $dropframe.find(`input[type="file"]`);
 
         if($dropframe.exists()) {
             [`dragenter`, `dragover`, `dragleave`, `drop`].forEach(event => {
@@ -146,6 +145,16 @@ export default class Modal {
 
             $fileConfirmation.find('.file-delete-icon').on('click', function(e) {
                 $input.val('').trigger('change');
+                const $button = $(this);
+                const $fileInformation = $button.closest('.file-confirmation');
+                const $imageVisualisation = $fileInformation.find('.image-visualisation');
+                if ($imageVisualisation.exists()) {
+                    $imageVisualisation.attr('src', '');
+                }
+                const $fileDeleted = $fileInformation.find('[name="fileDeleted"]');
+                if ($fileDeleted.exists()) {
+                    $fileDeleted.val(1);
+                }
                 e.preventDefault();
             });
 
@@ -246,7 +255,7 @@ export default class Modal {
 }
 
 export function clearForm($elem) {
-    $elem.find(`input.data:not([type=checkbox]):not([type=radio]), select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
+    $elem.find(`input.data:not([type=checkbox]):not([type=radio]):not([type=hidden]), select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
     $elem.find(`input[type=checkbox]:checked, input[type=radio]:checked`).prop(`checked`, false);
 
     for(const check of $elem.find(`input[type=checkbox][checked], input[type=radio][checked]`)) {
@@ -258,7 +267,7 @@ export function clearForm($elem) {
     $elem.find(`[contenteditable="true"]`).html(``);
 }
 
-export function processForm($parent, $button = null) {
+export function processForm($parent, $button = null, classes = {data: `data`, array: `data-array`}) {
     let modal = null;
     if($parent instanceof Modal) {
         modal = $parent;
@@ -267,7 +276,7 @@ export function processForm($parent, $button = null) {
 
     const errors = [];
     const data = new FormData();
-    const $inputs = $parent.find(`select.data, input.data, input[data-repeat], textarea.data, .data[data-wysiwyg]`);
+    const $inputs = $parent.find(`select.${classes.data}, input.${classes.data}, input[data-repeat], textarea.${classes.data}, .data[data-wysiwyg]`);
 
     //clear previous errors
     $parent.find(`.is-invalid`).removeClass(`is-invalid`);
@@ -324,7 +333,9 @@ export function processForm($parent, $button = null) {
         }
 
         if($input.is(`[required]`) && !$input.val()) {
-            if(!(modal && $input.is(`[type="file"]`)) || !uploads[modal.id][$input.attr(`name`)]) {
+            if(!(modal && $input.is(`[type="file"]`))
+                || !uploads[modal.id]
+                || !uploads[modal.id][$input.attr(`name`)]) {
                 errors.push({
                     elements: [$input],
                     message: `Ce champ est requis`,
@@ -352,7 +363,7 @@ export function processForm($parent, $button = null) {
         }
     }
 
-    addDataArray($parent, data);
+    addDataArray($parent, data, classes);
 
     if($button && $button.attr(`name`)) {
         data.append($button.attr(`name`), $button.val());
@@ -377,8 +388,8 @@ export function processForm($parent, $button = null) {
     return errors.length === 0 ? data : false;
 }
 
-function addDataArray($parent, data) {
-    const $arrays = $parent.find(`select.data-array, input.data-array`);
+function addDataArray($parent, data, classes) {
+    const $arrays = $parent.find(`select.${classes.array}, input.${classes.array}`);
     const grouped = {};
     for(const element of $arrays) {
         if(grouped[element.name] === undefined) {
@@ -460,5 +471,21 @@ function proceedFileSaving($input, file, $fileEmpty, $fileConfirmation, modal) {
         $fileEmpty.addClass('d-none');
         $fileConfirmation.removeClass('d-none');
         $fileConfirmation.find('.file-name').text(file.name);
+
+        const $imageVisualisation = $fileConfirmation.find('.image-visualisation');
+        if ($imageVisualisation.exists()) {
+            showImage(file, $imageVisualisation);
+        }
+    }
+}
+
+function showImage(file, $image) {
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            $image
+                .attr('src', e.target.result);
+        };
+        reader.readAsDataURL(file);
     }
 }

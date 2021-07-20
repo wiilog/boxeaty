@@ -2,12 +2,19 @@
 
 namespace App\Controller;
 
+use App\Annotation\Authenticated;
 use App\Entity\Box;
 use App\Entity\Client;
+use App\Entity\ClientOrder;
+use App\Entity\ClientOrderLine;
+use App\Entity\DeliveryRound;
+use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
 use App\Entity\User;
+use App\Helper\FormatHelper;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use WiiCommon\Helper\Stream;
 use WiiCommon\Helper\StringHelper;
 use App\Service\BoxRecordService;
@@ -26,8 +33,14 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ApiController extends AbstractController {
 
+    private ?User $user = null;
+
+    public function setUser(?User $user): void {
+        $this->user = $user;
+    }
+
     /**
-     * @Route("/ping", name="api_ping")
+     * @Route("/kiosk/ping", name="api_kiosk_ping")
      */
     public function ping(): Response {
         return $this->json([
@@ -36,7 +49,7 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/config", name="api_config")
+     * @Route("/kiosk/config", name="api_kiosk_config")
      */
     public function config(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
@@ -65,7 +78,7 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/kiosks", name="api_kiosks")
+     * @Route("/kiosk/kiosks", name="api_kiosk_kiosks")
      */
     public function kiosks(EntityManagerInterface $manager): Response {
         $kiosks = Stream::from($manager->getRepository(Location::class)->findBy(["kiosk" => true]))
@@ -79,7 +92,7 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/check-code", name="api_check_code")
+     * @Route("/kiosk/check-code", name="api_kiosk_check_code")
      */
     public function checkCode(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
@@ -98,7 +111,7 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/kiosks/{kiosk}", name="api_get_kiosks", requirements={"kiosk"="\d+"}, methods={"GET"})
+     * @Route("/kiosk/kiosks/{kiosk}", name="api_kiosk_get_kiosks", requirements={"kiosk"="\d+"}, methods={"GET"})
      */
     public function kiosk(Location $kiosk): Response {
         if ($kiosk && $kiosk->isKiosk()) {
@@ -126,7 +139,7 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/kiosks/empty", name="api_empty_kiosk", options={"expose": true})
+     * @Route("/kiosk/kiosks/empty", name="api_kiosk_empty_kiosk", options={"expose": true})
      */
     public function emptyKiosk(Request $request,
                                BoxRecordService $boxRecordService,
@@ -175,7 +188,7 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/box/retrieve", name="api_retrieve_box")
+     * @Route("/kiosk/box/retrieve", name="api_kiosk_retrieve_box")
      */
     public function retrieveBox(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
@@ -201,7 +214,7 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/box/drop", name="api_drop_box")
+     * @Route("/kiosk/box/drop", name="api_kiosk_drop_box")
      */
     public function dropBox(Request $request,
                             BoxRecordService $boxRecordService,
@@ -269,7 +282,7 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/deposit-ticket/statistics", name="api_deposit_ticket_statistics")
+     * @Route("/kiosk/deposit-ticket/statistics", name="api_kiosk_deposit_ticket_statistics")
      */
     public function depositTicketStatistics(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
@@ -297,7 +310,7 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/deposit-ticket/mail", name="api_deposit_ticket_mail")
+     * @Route("/kiosk/deposit-ticket/mail", name="api_kiosk_deposit_ticket_mail")
      */
     public function mailDepositTicket(Request $request, EntityManagerInterface $manager, Mailer $mailer): Response {
         $content = json_decode($request->getContent());
@@ -339,7 +352,7 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/deposit-ticket/print", name="api_deposit_ticket_print")
+     * @Route("/kiosk/deposit-ticket/print", name="api_kiosk_deposit_ticket_print")
      */
     public function depositTicketPrint(Request $request): Response {
         $ticket = $this->createDepositTicket(json_decode($request->getContent()));
@@ -354,7 +367,7 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/deposit-ticket/image/{ticket}", name="api_deposit_ticket_image")
+     * @Route("/kiosk/deposit-ticket/image/{ticket}", name="api_kiosk_deposit_ticket_image")
      */
     public function depositTicketImage(Image $snappy, DepositTicket $ticket): Response {
         $client = $ticket->getLocation() ? $ticket->getLocation()->getClient() : null;
@@ -415,6 +428,84 @@ class ApiController extends AbstractController {
         $manager->flush();
 
         return $depositTicket;
+    }
+
+    /**
+     * @Route("/mobile/login", name="api_mobile_login")
+     */
+    public function login(Request $request, EntityManagerInterface $manager, UserPasswordHasherInterface $hasher): Response {
+        $content = json_decode($request->getContent());
+
+        $user = $manager->getRepository(User::class)->findOneBy(["email" => $content->email]);
+        if ($user && $hasher->isPasswordValid($user, $content->password)) {
+            $user->setApiKey(bin2hex(random_bytes(16)));
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+                "token" => $user->getApiKey(),
+            ]);
+        }
+
+        return $this->json([
+            "success" => false,
+            "message" => "Identifiants invalides"
+        ]);
+    }
+
+    /**
+     * @Route("/mobile/depositories", name="api_mobile_depositories")
+     * @Authenticated()
+     */
+    public function depositories(EntityManagerInterface $manager): Response {
+        return $this->json($manager->getRepository(Depository::class)->getAll());
+    }
+
+    /**
+     * @Route("/mobile/delivery-rounds", name="api_mobile_delivery_rounds")
+     * @Authenticated()
+     */
+    public function deliveryRounds(EntityManagerInterface $manager): Response {
+        $rounds = $manager->getRepository(DeliveryRound::class)->findAwaitingDeliverer($this->user);
+
+        $serialized = Stream::from($rounds)
+            ->map(fn(DeliveryRound $round) => [
+                "id" => $round->getId(),
+                "number" => $round->getNumber(),
+                "status" => FormatHelper::named($round->getStatus()),
+                "depository" => FormatHelper::named($round->getDepository()),
+                "expected_date" => Stream::from($round->getOrders())
+                    ->map(fn(ClientOrder $order) => $order->getExpectedDelivery())
+                    ->sort()
+                    ->first(),
+                "crate_amount" => Stream::from($round->getOrders())
+                    ->map(fn(ClientOrder $order) => $order->getCratesAmount())
+                    ->sum(),
+                "token_amount" => Stream::from($round->getOrders())
+                    ->map(fn(ClientOrder $order) => $order->getClient()->getClientOrderInformation()->getTokenAmount())
+                    ->sum(),
+                "orders" => $round->getOrders()->map(fn(ClientOrder $order) => [
+                    "id" => $order->getId(),
+                    "client" => FormatHelper::named($order->getClient()),
+                    "lines" => $order->getClientOrderLines()->map(fn(ClientOrderLine $line) => [
+                        "box_type" => [
+                            "id" => $line->getBoxType()->getId(),
+                            "name" => $line->getBoxType()->getName(),
+                        ],
+                        "quantity" => $line->getQuantity(),
+                    ])
+                ]),
+                "order" => $round->getOrder(),
+            ])
+            ->sort(fn(array $a, array $b) => $a["expected_date"] <=> $b["expected_date"])
+            ->toArray();
+
+        $result = [];
+        foreach ($serialized as $round) {
+            $result[$round["expected_date"]->format("Y-m-d")][] = $round;
+        }
+
+        return $this->json($result);
     }
 
 }

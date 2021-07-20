@@ -103,4 +103,41 @@
             </select>
         </label>
     </div>
+    <div class="col-md-6 col-12">
+        <label>Paramètres</label>
+        <div class="form-check form-switch">
+            <input class="form-check-input data" type="checkbox" name="deliverer"
+                   id="{{ user.id ? 'edit' : 'new' }}-deliverer" {{ user.deliverer ? 'checked' }}>
+            <label class="form-check-label" for="{{ user.id ? 'edit' : 'new' }}-deliverer">
+                Livreur
+            </label>
+        </div>
+        <div class="form-check form-switch">
+            <input class="form-check-input data" type="checkbox" name="deliveryAssignmentMail"
+                   id="{{ user.id ? 'edit' : 'new' }}-mail-delivery-round" {{ user.deliveryAssignmentMail ? 'checked' }}>
+            <label class="form-check-label" for="{{ user.id ? 'edit' : 'new' }}-mail-delivery-round">
+                Mail d'affectation de tournée
+            </label>
+        </div>
+        <div class="form-check form-switch">
+            <input class="form-check-input data" type="checkbox" name="deliveryAssignmentPreparationMail"
+                   id="{{ user.id ? 'edit' : 'new' }}-mail-preparation" {{ user.deliveryAssignmentPreparationMail ? 'checked' }}>
+            <label class="form-check-label" for="{{ user.id ? 'edit' : 'new' }}-mail-preparation">
+                Mail d'affectation de tournée à la fin de préparation avec poids volume
+            </label>
+        </div>
+    </div>
+    <div class="col-md-6 col-12">
+        <label>
+            Mobilité
+            <select name="deliveryMethod"
+                    class="data"
+                    data-s2="deliveryMethod"
+                    data-placeholder="Sélectionnez une mobilité">
+                {% if user.deliveryMethod %}
+                    <option value="{{ user.deliveryMethod.id }}" selected>{{ user.deliveryMethod.name }}</option>
+                {% endif %}
+            </select>
+        </label>
+    </div>
 </div>

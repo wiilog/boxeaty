@@ -7,11 +7,13 @@
     <h3>Type de mobilité</h3>
     <div class="w-75">
         <div class="inline-form">
-            <label class="col-5">Libellé
-                <input type="text" name="nameDeliveryMethode" class="data" required/>
+            <label class="col-5">
+                Libellé
+                <input type="text" name="nameDeliveryMethode" class="add-data" required/>
             </label>
-            <label> Icône
-                <select name="icon" class="data" data-s2 data-no-empty-option data-no-searching data-icon>
+            <label>
+                Icône
+                <select name="icon" class="add-data" data-s2 data-no-empty-option data-no-searching data-icon>
                     {% for index, icon in icons %}
                         <option class="w-25" value={{ icon }}></option>
                     {% endfor %}

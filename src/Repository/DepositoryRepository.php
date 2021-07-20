@@ -4,7 +4,6 @@ namespace App\Repository;
 
 use App\Entity\Depository;
 use App\Helper\QueryHelper;
-use App\Entity\User;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -19,17 +18,11 @@ class DepositoryRepository extends EntityRepository {
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
-    public function getForSelect(?string $search, ?User $user) {
+    public function getForSelect(?string $search) {
         $qb = $this->createQueryBuilder("depository");
 
-        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
-            $qb->join("depository.client", "client")
-                ->andWhere("client.group IN (:groups)")
-                ->setParameter("groups", $user->getGroups());
-        }
-
         return $qb->select("depository.id AS id, depository.name AS text")
-            ->where("depository.name LIKE :search")
+            ->andWhere("depository.name LIKE :search")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
@@ -82,4 +75,12 @@ class DepositoryRepository extends EntityRepository {
             ->getQuery()
             ->toIterable();
     }
+
+    public function getAll(): array {
+        return $this->createQueryBuilder("depository")
+            ->where("depository.active = 1")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
 }

@@ -115,10 +115,6 @@ class Box {
      */
     private Collection $counterOrders;
 
-    /**
-     * @ORM\ManyToMany(targetEntity=ClientOrder::class, mappedBy="boxes")
-     */
-    private Collection $clientOrders;
 
     /**
      * @ORM\Column(type="datetime", nullable=false)
@@ -350,29 +346,6 @@ class Box {
         return $this;
     }
 
-    /**
-     * @return Collection|ClientOrder[]
-     */
-    public function getClientOrders(): Collection {
-        return $this->clientOrders;
-    }
-
-    public function addClientOrder(ClientOrder $order): self {
-        if (!$this->clientOrders->contains($order)) {
-            $this->clientOrders[] = $order;
-            $order->addBox($this);
-        }
-
-        return $this;
-    }
-
-    public function removeClientOrder(ClientOrder $order): self {
-        if ($this->clientOrders->removeElement($order)) {
-            $order->removeBox($this);
-        }
-
-        return $this;
-    }
 
     public function getCreationDate(): ?DateTime {
         return $this->creationDate;

@@ -1,0 +1,17 @@
+<div id="modal-add-client-box-type" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Ajouter une Box au modèle de caisse</h1>
+
+            <div class="body">
+                {% include 'referential/client/modal/form_client_box_type.html.twig' %}
+            </div>
+            <input type="hidden" class="data" name="client" value="{{ clientId }}"/>
+            <div class="footer">
+                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="primary">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>

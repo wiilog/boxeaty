@@ -53,7 +53,7 @@
 
     &.planned {
         background: $grey;
-        border-color: #BDBDBD;
+        border-color: $grey-order-finished;
     }
 
     &.preparing {
@@ -80,11 +80,16 @@
         margin-top: 0;
         font-size: 0.9rem;
         text-align: left;
-    }
 
-    label:not(.inline) strong {
-        display: block;
-        margin-top: -0.4rem;
+        strong {
+            margin-left: 4px;
+            margin-right: 4px;
+        }
+
+        &:not(.inline) strong {
+            display: block;
+            margin-top: -0.4rem;
+        }
     }
 
     .muted {
@@ -121,6 +126,9 @@
     a {
         margin: auto;
     }
+}
+.column-content{
+    min-height: 150px;
 }
 
 .deliveries-container {

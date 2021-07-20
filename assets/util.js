@@ -37,3 +37,12 @@ FormData.prototype.asObject = function() {
 
     return object;
 }
+
+FormData.fromObject = function(object) {
+    const data = new FormData();
+    for(const [key, value] of Object.entries(object)) {
+        data.append(key, value);
+    }
+
+    return data;
+}

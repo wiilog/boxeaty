@@ -1,9 +1,9 @@
 {% from 'operation/planning/macros.html.twig' import order_card %}
 
 {% for column in planning %}
-    <div class="column">
+    <div class="column" data-date="{{ column.date }}">
         <h3>{{ column.title }}</h3>
-        <div>
+        <div class="column-content">
             {% for order in column.orders %}
                 {{ order_card(order) }}
             {% endfor %}
