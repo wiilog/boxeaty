@@ -141,3 +141,21 @@ input{
         text-align: right;
     }
 }
+
+.details-content {
+    .client-order-line {
+        border-radius: 5px;
+        background-color: #f8f8f8;
+        margin-top: .30rem;
+        margin-bottom: .30rem;
+        padding-top: .5rem;
+        padding-bottom: .5rem;
+
+        .box-type-image {
+            width: 30px;
+            height: 30px;
+            object-fit: cover;
+        }
+    }
+}
+

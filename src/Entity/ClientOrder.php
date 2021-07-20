@@ -45,7 +45,7 @@ class ClientOrder {
     /**
      * @ORM\OneToMany(targetEntity=ClientOrderLine::class, mappedBy="clientOrder")
      */
-    private ?Collection $clientOrderLines;
+    private ?Collection $lines;
 
     /**
      * @ORM\ManyToOne(targetEntity=Client::class)
@@ -135,7 +135,7 @@ class ClientOrder {
     private ?Collect $collect = null;
 
     public function __construct(){
-        $this->clientOrderLines = new ArrayCollection();
+        $this->lines = new ArrayCollection();
         $this->orderStatusHistory = new ArrayCollection();
     }
 
@@ -407,37 +407,39 @@ class ClientOrder {
     /**
      * @return Collection|ClientOrderLine[]
      */
-    public function getClientOrderLines(): Collection {
-        return $this->clientOrderLines;
+    public function getLines(): Collection {
+        return $this->lines;
     }
 
-    public function addClientOrderLine(ClientOrderLine $clientOrderLine): self {
-        if (!$this->clientOrderLines->contains($clientOrderLine)) {
-            $this->clientOrderLines[] = $clientOrderLine;
-            $clientOrderLine->setClientOrder($this);
+    public function addLine(ClientOrderLine $line): self {
+        if (!$this->lines->contains($line)) {
+            $this->lines[] = $line;
+            $line->setClientOrder($this);
         }
 
         return $this;
     }
 
-    public function removeClientOrderLine(ClientOrderLine $clientOrderLine): self {
-        if ($this->clientOrderLines->removeElement($clientOrderLine)) {
-            if ($clientOrderLine->getClientOrder() === $this) {
-                $clientOrderLine->setClientOrder(null);
+    public function removeLine(ClientOrderLine $line): self {
+        if ($this->lines->removeElement($line)) {
+            if ($line->getClientOrder() === $this) {
+                $line->setClientOrder(null);
             }
         }
         return $this;
     }
 
-    public function setClientOrderLines(?array $clientOrderLines): self {
-        foreach($this->getClientOrderLines()->toArray() as $clientOrderLine) {
-            $this->removeClientOrderLine($clientOrderLine);
+    public function setLines(?array $lines): self {
+        foreach($this->getLines()->toArray() as $clientOrderLine) {
+            $this->removeLine($clientOrderLine);
         }
 
-        $this->clientOrderLines = new ArrayCollection();
-        foreach($clientOrderLines as $clientOrderLine) {
-            $this->addClientOrderLine($clientOrderLine);
+        $this->lines = new ArrayCollection();
+
+        foreach($lines as $clientOrderLine) {
+            $this->addLine($clientOrderLine);
         }
+
         return $this;
     }
 }

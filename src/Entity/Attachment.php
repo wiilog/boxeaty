@@ -73,7 +73,7 @@ class Attachment {
     }
 
     public function getPath(): string {
-        return 'public/' . Attachment::ATTACHMENT_DIRECTORY_PATHS[$this->type] . '/' . $this->serverName;
+        return Attachment::ATTACHMENT_DIRECTORY_PATHS[$this->type] . '/' . $this->serverName;
     }
 
 }

@@ -7,7 +7,7 @@
                     ou <span class="click-here">cliquez ici</span>
                 </div>
                 <div class="file-confirmation {{ not box_type.image ? 'd-none' }}">
-                    <img class="image-visualisation" src="{{ box_type.image ? asset('persistent/box_type/') ~ box_type.image.serverName }}"/>
+                    <img class="image-visualisation" src="{{ box_type.image ? asset(box_type.image.path) }}"/>
                     <input type="hidden" name="fileDeleted" class="data" value="0"/>
                     <span class="file-delete-icon">
                         <i class="fas fa-trash cursor-pointer"></i>

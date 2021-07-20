@@ -70,11 +70,11 @@ class ClientOrderLine {
 
     public function setClientOrder(?ClientOrder $clientOrder): self {
         if($this->clientOrder && $this->clientOrder !== $clientOrder) {
-            $this->clientOrder->removeClientOrderLine($this);
+            $this->clientOrder->removeLine($this);
         }
         $this->clientOrder = $clientOrder;
         if($clientOrder) {
-            $clientOrder->addClientOrderLine($this);
+            $clientOrder->addLine($this);
         }
 
         return $this;
