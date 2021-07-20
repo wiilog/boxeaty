@@ -48,7 +48,6 @@ class ClientOrderController extends AbstractController {
                 "id" => $order->getId(),
                 "status" => $order->getStatus(),
                 "automatic" => $order->getAutomatic(),
-                "boxes" => FormatHelper::boxes($order->getBoxes()),
                 "client" => $order->getClient(),
                 "number" => $order->getNumber(),
                 "location" => $order->getClient(),
@@ -115,4 +114,18 @@ class ClientOrderController extends AbstractController {
         ]);
     }
 
+    /**
+     * @Route("/voir/template/{clientOrder}", name="client_order_show_template", options={"expose": true})
+     * TODO HasPermission(Role::MANAGE_USERS) ??
+     */
+    public function editTemplate(EntityManagerInterface $manager, ClientOrder $clientOrder): Response {
+        $roles = $manager->getRepository(Role::class)->findBy(["active" => true]);
+
+        return $this->json([
+            "template" => $this->renderView("operation/client_order/modal/show.html.twig", [
+                "clientOrder" => $clientOrder,
+                "roles" => $roles,
+            ])
+        ]);
+    }
 }

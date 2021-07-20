@@ -27,7 +27,7 @@ $(document).ready(() => {
             DATATABLE_ACTIONS,
         ],
         listeners: {
-            edit: data => {
+            edit: (data) => {
                 const ajax = AJAX.route(`POST`, `user_edit_template`, {
                     user: data.id
                 });
