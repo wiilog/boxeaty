@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Box;
 use App\Entity\Client;
+use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
@@ -435,6 +436,14 @@ class ApiController extends AbstractController {
             "success" => false,
             "message" => "Identifiants invalides"
         ]);
+    }
+
+    /**
+     * @Route("/mobile/depositories", name="api_mobile_depositories")
+     */
+    public function depositories(EntityManagerInterface $manager): Response {
+        dump($manager->getRepository(Depository::class)->getAll());
+        return $this->json($manager->getRepository(Depository::class)->getAll());
     }
 
 }
