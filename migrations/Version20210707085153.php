@@ -20,8 +20,7 @@ final class Version20210707085153 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('UPDATE box SET box.is_box = 1');
-
+        $this->addSql('ALTER TABLE box ADD is_box TINYINT(1) NOT NULL DEFAULT 1 ;');
     }
 
 

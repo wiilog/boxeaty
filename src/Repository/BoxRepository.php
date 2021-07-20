@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Box;
+use App\Entity\Depository;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
@@ -124,7 +125,7 @@ class BoxRepository extends EntityRepository {
                         ->setParameter("filter_depository", $value);
                     break;
                 case("box"):
-                    $qb->andWhere("box.box = :filter_isbox")
+                    $qb->andWhere("box.isBox = :filter_isbox")
                         ->setParameter("filter_isbox", $value);
                     break;
                 default:
@@ -170,6 +171,23 @@ class BoxRepository extends EntityRepository {
             "total" => $total,
             "filtered" => $filtered,
         ];
+    }
+
+    public function getByDepository(Depository $depository)
+    {
+        return $this->createQueryBuilder('crate')
+            ->select('crate.id AS crateId')
+            ->addSelect('crate.number AS crateNumber')
+            ->addSelect('location.name AS crateLocation')
+            ->addSelect('type.name AS crateType')
+            ->leftJoin("crate.location", "location")
+            ->leftJoin("crate.type", "type")
+            ->andWhere("location.depository = :depository")
+            ->andWhere('crate.isBox = 0')
+            ->andWhere('location.type = 1')
+            ->setParameter("depository", $depository)
+            ->getQuery()
+            ->execute();
     }
 
 }

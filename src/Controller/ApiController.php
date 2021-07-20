@@ -442,8 +442,15 @@ class ApiController extends AbstractController {
      * @Route("/mobile/depositories", name="api_mobile_depositories")
      */
     public function depositories(EntityManagerInterface $manager): Response {
-        dump($manager->getRepository(Depository::class)->getAll());
         return $this->json($manager->getRepository(Depository::class)->getAll());
+    }
+
+    /**
+     * @Route("/mobile/crates", name="api_mobile_crates")
+     */
+    public function crates(EntityManagerInterface $manager, Request $request): Response {
+        $depository = $manager->getRepository(Depository::class)->find($request->query->get('depository'));
+        return $this->json($manager->getRepository(Box::class)->getByDepository($depository));
     }
 
 }

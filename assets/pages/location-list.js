@@ -59,6 +59,7 @@ $document.ready(() => {
 $document.ready(() => fireTypeChangeEvent($('#modal-new-location').find('input[name="kiosk"]')))
     .arrive(`#modal-edit-location .location-type`, function() {
         fireTypeChangeEvent($(this).find('input[name="kiosk"]'));
+        toggleCapacityInput($(this).find('input[name="kiosk"]'));
     });
 
 function fireTypeChangeEvent($type) {
@@ -85,7 +86,7 @@ function toggleCapacityInput($typeRadio) {
 function toggleInputsIn($container, show) {
     if(show) {
         $container.removeClass(`d-none`);
-        $container.find(`input, select`).val(``);
+        $container.find(`input:not(.no-clear), select`).val(``);
         $container.find(`input[data-required], select[data-required]`).each(function() {
             $(this).prop(`required`, true);
         });

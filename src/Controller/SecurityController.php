@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController {
@@ -69,6 +70,9 @@ class SecurityController extends AbstractController {
 
             $user->setEmail($request->request->get("email"))
                 ->setUsername($request->request->get("username"))
+                ->setDeliverer(false)
+                ->setDeliveryAssignmentMail(false)
+                ->setDeliveryAssignmentPreparationMail(false)
                 ->addGroup($em->getRepository(Group::class)->find($request->request->get("group")));
 
             if ($existing) {
