@@ -48,7 +48,6 @@ class ClientOrderController extends AbstractController {
                 "id" => $order->getId(),
                 "status" => $order->getStatus(),
                 "automatic" => $order->getAutomatic(),
-                "boxes" => FormatHelper::boxes($order->getBoxes()),
                 "client" => $order->getClient(),
                 "number" => $order->getNumber(),
                 "location" => $order->getClient(),
