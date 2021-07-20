@@ -52,12 +52,17 @@ class BoxType {
     private Collection $clientBoxTypes;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\OneToMany(targetEntity=ClientOrderLine::class, mappedBy="boxType")
+     */
+    private Collection $clientOrderLines;
+
+    /**
+     * @ORM\Column(type="decimal", precision=5, scale=2, nullable=true)
      */
     private ?float $volume = null;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="decimal", precision=5, scale=2, nullable=true)
      */
     private ?float $weight = null;
 
@@ -69,6 +74,7 @@ class BoxType {
     public function __construct() {
         $this->boxes = new ArrayCollection();
         $this->clientBoxTypes = new ArrayCollection();
+        $this->clientOrderLines = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -203,4 +209,40 @@ class BoxType {
         return $this;
     }
 
+    /**
+     * @return Collection|ClientOrderLine[]
+     */
+    public function getClientOrderLines(): Collection {
+        return $this->clientOrderLines;
+    }
+
+    public function addClientOrderLine(ClientOrderLine $clientOrderLine): self {
+        if (!$this->clientOrderLines->contains($clientOrderLine)) {
+            $this->clientOrderLines[] = $clientOrderLine;
+            $clientOrderLine->setBoxType($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClientOrderLine(ClientOrderLine $clientOrderLine): self {
+        if ($this->clientOrderLines->removeElement($clientOrderLine)) {
+            if ($clientOrderLine->getBoxType() === $this) {
+                $clientOrderLine->setBoxType(null);
+            }
+        }
+        return $this;
+    }
+
+    public function setClientOrderLines(?array $clientOrderLines): self {
+        foreach($this->getClientOrderLines()->toArray() as $clientOrderLine) {
+            $this->removeClientOrderLine($clientOrderLine);
+        }
+
+        $this->clientOrderLines = new ArrayCollection();
+        foreach($clientOrderLines as $clientOrderLine) {
+            $this->addClientOrderLine($clientOrderLine);
+        }
+        return $this;
+    }
 }
