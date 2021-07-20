@@ -26,9 +26,11 @@
             <p>Etat : <strong>{{ box.state ? constant('App\\Entity\\Box::NAMES')[box.state] }}</strong></p>
             <p>Prix : <strong>{{ box.type ? box.type.price|format_helper('price') }}</strong></p>
             <p>Propriétaire : <strong>{{ box.owner ? box.owner.name }}</strong></p>
-            <p>Opération en cours :
-                <a href="">Commande Client {{ clientOrderNumber }} - {{ clientOrderStatus }}</a>
-            </p>
+            {% if clientOrderInProgress %}
+                <p>Opération en cours :
+                    <a href="">Commande Client {{ clientOrderInProgress.number }} - {{ clientOrderInProgress.status.name }}</a>
+                </p>
+            {% endif %}
         </div>
         <div class="col-md-8 col-12 right-column">
             {% if not box.box %}

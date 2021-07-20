@@ -6,6 +6,7 @@ use App\Annotation\HasPermission;
 use App\Entity\Box;
 use App\Entity\BoxType;
 use App\Entity\Client;
+use App\Entity\ClientOrder;
 use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
@@ -139,19 +140,14 @@ class BoxController extends AbstractController {
      * @Route("/voir/{box}", name="box_show", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function show(Box $box): Response {
-        $existClientOrder = $box->getClientOrders()->filter(fn($clientOrder) => $clientOrder->getStatus() ==
-            (Status::CATEGORY_PREPARATION || Status::CODE_PREPARATION_PREPARED || Status::CODE_PREPARATION_PREPARING ||Status::CATEGORY_COLLECT || Status::CATEGORY_DELIVERY ))->first();
-        $clientOrderNumber = "";
-        $clientOrderStatus = "";
-        if($existClientOrder){
-            $clientOrderNumber = $existClientOrder->getNumber();
-            $clientOrderStatus = $existClientOrder->getStatus()->getName();
-        }
+    public function show(Box $box,
+                         EntityManagerInterface $entityManager): Response {
+        $clientOrderRepository = $entityManager->getRepository(ClientOrder::class);
+        $clientOrderInProgress = $clientOrderRepository->findLastInProgressFor($box);
+
         return $this->render('tracking/box/show.html.twig', [
             "box" => $box,
-            "clientOrderNumber" => $clientOrderNumber,
-            "clientOrderStatus" => $clientOrderStatus
+            "clientOrderInProgress" => $clientOrderInProgress
         ]);
     }
 
