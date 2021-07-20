@@ -3,11 +3,13 @@
 .timeline-line {
     .timeline-line-comment {
         border-radius: 5px;
-        width: 36vw;
-        padding: 15px;
+        background-color: #F8F8F8;
+        padding: 0 10px;
         position: relative;
-        margin-left: 32%;
         overflow-wrap: break-word;
+        display: flex;
+        align-items: center;
+        max-height: 40px;
 
         &:empty {
             min-height: initial;
@@ -20,43 +22,56 @@
         }
     }
 
+    .timeline-line-title {
+        padding: 0 30px;
+        position: relative;
+        background-color: inherit;
 
-    &:not(:last-child) .timeline-line-comment::before {
+        strong {
+            font-size: 18pt;
+            margin-right: 15px;
+        }
+    }
+
+    &:not(:last-child) .timeline-line-title::before{
         content: "";
         position: absolute;
         width: 1px;
         background-color: #CECECE;
+        border: #CECECE solid 1px;
         top: -25px;
         bottom: -20px;
-        left: -7.5%;
-    }
-
-    .timeline-line-title {
-        padding: 10px 30px;
-        position: relative;
-        background-color: inherit;
-        width: 28%;
+        left: 1.5%;
     }
 
     .timeline-line-marker {
         display: inline-block;
-        padding: 10px 40px 10px 0;
+        padding: 0 40px 0 0;
         position: relative;
         background-color: inherit;
         width: 28%;
         text-align: right;
+
+        strong {
+            font-size: 18pt;
+        }
     }
 
     .timeline-line-marker::after {
         content: '';
         position: absolute;
-        width: 40px;
-        height: 40px;
+        width: 20px;
+        height: 20px;
         right: -17px;
         background-color: $blue;
-        border: 3px solid white;
         border-radius: 50%;
         z-index: 1;
-        top: 0px;
+        top: 0;
+    }
+
+    &:first-child {
+        .timeline-line-marker::after {
+            background-color: $green !important;
+        }
     }
 }

@@ -2,7 +2,7 @@
 
 {% block menu %}Traçabilité{% endblock %}
 {% block page %}
-    <a href="{{ path('boxes_list') }}" class="text-white text-decoration-none">Box</a> | Détails
+    <a href="{{ path('boxes_list') }}" class="text-white text-decoration-none">Box-Caisse</a> | Détails
 {% endblock %}
 
 {% block stylesheets %}
@@ -15,26 +15,43 @@
     <div class="row box-show">
         <div class="col-md-4 col-12 details box-details">
             <div class="d-flex justify-content-between">
-                <h3>Détails de la Box</h3>
+                <h3>{{ box.box ? "Code Box" : "Code Caisse" }} : {{ box.number }}</h3>
                 <div>
-                    <span class="primary edit-box round"><i class="icon bxi bxi-edit-circle"></i></span>
-                    <span class="primary delete-box round"><i class="icon bxi bxi-trash-circle"></i></span>
+                    <span class="primary edit-box"><i class="icon bxi bxi-edit-circle"></i></span>
+                    <span class="primary delete-box"><i class="icon bxi bxi-trash-circle"></i></span>
                 </div>
             </div>
-            <p>Code : <strong>{{ box.number }}</strong></p>
             <p>Emplacement : <strong>{{ box.location ? box.location.name }}</strong></p>
             <p>Qualité : <strong>{{ box.quality ? box.quality.name }}</strong></p>
             <p>Etat : <strong>{{ box.state ? constant('App\\Entity\\Box::NAMES')[box.state] }}</strong></p>
             <p>Prix : <strong>{{ box.type ? box.type.price|format_helper('price') }}</strong></p>
+            <p>Propriétaire : <strong>{{ box.owner ? box.owner.name }}</strong></p>
+            <p>Opération en cours :
+                <a href="">Commande Client {{ clientOrderNumber }} - {{ clientOrderStatus }}</a>
+            </p>
         </div>
         <div class="col-md-8 col-12 right-column">
-            <div class="owner box-details">
-                <h3>Propriétaire</h3>
-                <p class="fs-5 mb-0">{{ box.owner ? box.owner.name }}</p>
-            </div>
+            {% if not box.box %}
+                <div class="owner box-details">
+                    <div class="d-flex flex-md-row flex-column justify-content-between mb-3">
+                        <h3>Contenu de la caisse en temps réel (Box)</h3>
+                        <label class="d-flex align-items-center text-nowrap mt-0">
+                            Conditionnement rapide :
+                            <select name="box" class="data add-box-to-cart" data-s2="box" data-placeholder="Entrée pour valider">
+                            </select>
+                        </label>
+                    </div>
+                    <div class="d-flex refresh-after-add">
+                    </div>
+                </div>
+            {% endif %}
             <div class="history box-details">
                 <div class="d-flex flex-md-row flex-column justify-content-between mb-3">
-                    <h3 class="mb-0">Historique de la Box</h3>
+                    {% if not box.box %}
+                        <h3 class="mb-0">Historique de la Caisse</h3>
+                    {% else %}
+                        <h3 class="mb-0">Historique de la Box</h3>
+                    {% endif %}
                     <label class="d-flex align-items-center text-nowrap mt-0">
                         Rechercher :
                         <input type="text" class="comment-search data" placeholder="Entrée pour valider">

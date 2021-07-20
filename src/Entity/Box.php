@@ -130,11 +130,22 @@ class Box {
      */
     private Collection $collects;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Box::class, mappedBy="crate")
+     */
+    private Collection $containedBoxes;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Box::class, inversedBy="containedBoxes")
+     */
+    private ?Box $crate;
+
     public function __construct() {
         $this->boxRecords = new ArrayCollection();
         $this->counterOrders = new ArrayCollection();
         $this->creationDate = new DateTime("now");
         $this->collects = new ArrayCollection();
+        $this->containedBoxes = new ArrayCollection();
     }
 
     public function fromRecord(BoxRecord $record): self {
@@ -416,6 +427,61 @@ class Box {
 
     public function setIsBox(?bool $isBox): self {
         $this->isBox = $isBox;
+
+        return $this;
+    }
+
+    public function getCrate(): ?Box{
+        return $this->crate;
+    }
+
+    public function setCrate(?Box $crate): self {
+        if($this->crate && $this->crate !== $crate) {
+            $this->crate->removeContainedBox($this);
+        }
+        $this->crate = $crate;
+        if($crate) {
+            $crate->addContainedBox($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Box[]
+     */
+    public function getContainedBoxes(): Collection {
+        return $this->containedBoxes;
+    }
+
+    public function addContainedBox(Box $containedBox): self {
+        if (!$this->containedBoxes->contains($containedBox)) {
+            $this->containedBoxes[] = $containedBox;
+            $containedBox->setCrate($this);
+        }
+
+        return $this;
+    }
+
+    public function removeContainedBox(Box $containedBox): self {
+        if ($this->containedBoxes->removeElement($containedBox)) {
+            if ($containedBox->getCrate() === $this) {
+                $containedBox->setCrate(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setContainedBoxes(?array $containedBoxes): self {
+        foreach($this->getContainedBoxes()->toArray() as $containedBox) {
+            $this->removeContainedBox($containedBox);
+        }
+
+        $this->containedBoxes = new ArrayCollection();
+        foreach($containedBoxes as $containedBox) {
+            $this->addContainedBox($containedBox);
+        }
 
         return $this;
     }

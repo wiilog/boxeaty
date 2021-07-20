@@ -43,6 +43,7 @@
             .history-wrapper {
                 overflow-y: auto;
                 height: 90%;
+                padding-left: 20%;
             }
         }
     }
@@ -68,5 +69,22 @@
         align-items: center;
         padding: 0;
 
+    }
+
+    .box-style{
+        padding: 10px;
+        margin-right: 20px;
+        background-color: #F8F8F8;
+        text-align: center;
+
+        label{
+            margin: 0;
+        }
+    }
+
+    .refresh-after-add{
+        flex-wrap: wrap;
+        overflow-y: auto;
+        max-height: 146px;
     }
 }

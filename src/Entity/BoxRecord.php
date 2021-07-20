@@ -163,10 +163,10 @@ class BoxRecord {
         return $this;
     }
 
-    public function copyBox(?Box $from = null): self {
+    public function copyBox(?Box $from = null, ?Box $crate = null): self {
         $box = $from ?? $this->box ?? null;
         if ($box) {
-            $this->setLocation($box->getLocation())
+            $this->setLocation($crate ? $crate->getLocation() : $box->getLocation())
                 ->setClient($box->getOwner())
                 ->setQuality($box->getQuality())
                 ->setState($box->getState())

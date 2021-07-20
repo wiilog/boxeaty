@@ -9,12 +9,19 @@ import Modal from "../modal";
 
 $(document).ready(() => {
     getBoxTrackingMovements();
+    getBoxInCrate();
 
     $(`.edit-box`).click(() => {
         const ajax = AJAX.route(`POST`, `box_edit_template`, {
             box: $('#box-id').val()
         });
-        Modal.load(ajax);
+        Modal.load(ajax, {
+            success : () =>{
+                window.location.href = Routing.generate(`box_show`, {
+                    box: $('#box-id').val()
+                });
+            }
+        })
     });
 
     $(`.delete-box`).click(() => {
@@ -27,6 +34,19 @@ $(document).ready(() => {
             }
         })
     });
+
+    $(document).arrive('.delete-box-in-crate', function() {
+        $(this).click(function() {
+            const ajax = AJAX.route(`POST`, `box_delete_in_crate_template`, {
+                box: $(this).data('id'),
+                crate: $('#box-id').val()
+            });
+            Modal.load(ajax , {
+                success: (response) => {
+                $('.refresh-after-add').replaceWith(response.template);
+            }});
+        });
+    })
 
     $('.comment-search').on('change', function () {
         getBoxTrackingMovements(0);
@@ -48,6 +68,20 @@ $(document).ready(() => {
         }, 800);
         return false;
     });
+
+    $('.add-box-to-cart').on(`change`, function (){
+        const box = $(this).val();
+
+        const ajax = AJAX.route(`GET`, `add_box_in_crate`, {
+            box: box,
+            crate: $('#box-id').val()
+        });
+        ajax.json( response =>{
+            $('.refresh-after-add').replaceWith(response.template);
+
+        });
+        $(this).empty();
+    });
 });
 
 function getBoxTrackingMovements(start = 0) {
@@ -65,20 +99,36 @@ function getBoxTrackingMovements(start = 0) {
                     $('.history-wrapper').empty();
                 }
                 const data = (result.data || []);
-                const historyLines = data.map(({state, color, comment, date}) => {
+                const historyLines = data.map(({state, comment, dateD, dateM, dateY, dateHIS, operator, location, depository}) => {
                     const $rawComment = $($.parseHTML(comment));
                     const trimmedComment = $rawComment.text().trim();
 
                     let $comment = `<div class="timeline-line-comment"></div>`;
                     if(trimmedComment.trim()) {
-                        $comment = `<div class="timeline-line-comment alert alert-${color}">${comment}</div>`;
+                        $comment = `<div class="timeline-line-comment">${comment}</div>`;
+                    }
+                    const $getOperator = $($.parseHTML(operator));
+                    const $getLocation = $($.parseHTML(location));
+                    let $operatorName = $getOperator.text();
+                    let $locationName = $getLocation.text();
+                    let $operator = ``;
+                    if($operatorName){
+                        $operator = `${operator}`;
+                        if($locationName){
+                            $operator = `${operator} - ${depository} - ${location}`;
+                        }
                     }
 
                     return `
-                        <div class="timeline-line">
-                            <span class="timeline-line-marker"><strong>${date}</strong></span>
-                            <span class="timeline-line-title ml-3">${state}</span>
-                            ${$comment}
+                        <div class="timeline-line d-flex">
+                            <span class="timeline-line-marker"><strong>${dateD} ${dateM} ${dateY}</strong><p>${dateHIS}</p></span>
+                            <div class="timeline-line-title ml-3">
+                                <div class="d-flex"><strong>${state}</strong>${$comment}</div>
+                                <p>
+                                Opérateur : ${$operator}
+                                </p>
+                            </div>
+                            
                         </div>
                     `;
                 });
@@ -115,4 +165,13 @@ function getBoxTrackingMovements(start = 0) {
                 $showMoreWrapper.remove();
             }
         })
+}
+
+function getBoxInCrate() {
+    const ajax = AJAX.route(`GET`, `box_in_crate_api`, {
+        id: $('#box-id').val()
+    });
+    ajax.json( response =>{
+        $('.refresh-after-add').replaceWith(response.template);
+    });
 }

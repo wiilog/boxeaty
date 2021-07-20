@@ -1,0 +1,10 @@
+<div class="d-flex refresh-after-add">
+    {% for containedBox in box.containedBoxes %}
+        <div class="box-style rounded">
+            <label>Boxeaty</label>
+            <label>{{ containedBox.quality.name }}</label>
+            <label><strong>{{ containedBox.number }}</strong></label>
+            <div class="primary delete-box-in-crate" data-id="{{ containedBox.id }}"><i class="icon bxi bxi-trash-circle round"></i></div>
+        </div>
+    {% endfor %}
+</div>
