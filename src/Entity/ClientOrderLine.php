@@ -25,13 +25,13 @@ class ClientOrderLine {
     private ?int $quantity = null;
 
     /**
-     * @ORM\ManyToOne (targetEntity=BoxType::class, inversedBy="clientOrderBoxType")
+     * @ORM\ManyToOne(targetEntity=BoxType::class, inversedBy="clientOrderLines")
      * @ORM\JoinColumn(nullable=false)
      */
     private ?BoxType $boxType = null;
 
     /**
-     * @ORM\ManyToOne (targetEntity=ClientOrder::class, inversedBy="clientOrderBoxType")
+     * @ORM\ManyToOne (targetEntity=ClientOrder::class, inversedBy="clientOrderLines")
      * @ORM\JoinColumn(nullable=false)
      */
     private ?ClientOrder $clientOrder = null;

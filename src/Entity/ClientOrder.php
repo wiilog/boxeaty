@@ -43,7 +43,7 @@ class ClientOrder {
     private ?Collection $orderStatusHistory;
 
     /**
-     * @ORM\OneToMany(targetEntity=ClientOrderLine::class, mappedBy="clientOrder", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity=ClientOrderLine::class, mappedBy="clientOrder")
      */
     private ?Collection $clientOrderLines;
 
