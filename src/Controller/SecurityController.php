@@ -71,6 +71,9 @@ class SecurityController extends AbstractController {
 
             $user->setEmail($request->request->get("email"))
                 ->setUsername($request->request->get("username"))
+                ->setDeliverer(false)
+                ->setDeliveryAssignmentMail(false)
+                ->setDeliveryAssignmentPreparationMail(false)
                 ->addGroup($em->getRepository(Group::class)->find($request->request->get("group")));
 
             if ($existing) {

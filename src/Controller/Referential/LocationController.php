@@ -176,7 +176,6 @@ class LocationController extends AbstractController {
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
         $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
         $capacity = $content->capacity ?? null;
-
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $location) {
             $form->addError("label", "Un autre emplacement avec ce nom existe déjà");
@@ -185,14 +184,14 @@ class LocationController extends AbstractController {
         if ($content->kiosk && (!$capacity || $capacity < Location::MIN_KIOSK_CAPACITY)) {
             $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
-
+        dump($content);
         if ($form->isValid()) {
             $location->setKiosk($content->kiosk)
                 ->setName($content->name)
                 ->setClient($client)
                 ->setActive($content->active)
                 ->setDescription($content->description ?? null)
-                ->setType($content->type ?? null)
+                ->setType($content->type ? intval($content->type) : null)
                 ->setDepository($depository);
 
             if ((int)$content->kiosk === 1) {
@@ -202,7 +201,7 @@ class LocationController extends AbstractController {
                     ->setDepository(null);
             } else {
                 $location
-                    ->setType($content->type)
+                    ->setType($content->type ? intval($content->type) : null)
                     ->setDepository($depository)
                     ->setCapacity(null)
                     ->setMessage(null);

@@ -357,7 +357,6 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
             if(typeof value === `string`) {
                 value = value.trim();
             }
-
             if(value !== null) {
                 data.append($input.attr(`name`) || $input.attr(`data-wysiwyg`), value);
             }
