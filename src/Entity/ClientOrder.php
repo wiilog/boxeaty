@@ -387,7 +387,6 @@ class ClientOrder {
         return $this;
     }
 
-
     public function getDeliveryRound(): ?DeliveryRound {
         return $this->deliveryRound;
     }

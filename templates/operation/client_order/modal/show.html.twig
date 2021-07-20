@@ -55,8 +55,33 @@
                     <div class="header-section">
                         <span class="header-section-label">Évènement</span>
                     </div>
-                    <div class="details-content body">
-
+                    <div class="details-content body client-order-history">
+                        {% if clientOrder.orderStatusHistory|length > 0 %}
+                            {% for history in clientOrder.orderStatusHistory %}
+                                {% set lineColor = (
+                                    (history.status and history.status.code == constant('App\\Entity\\Status::ORDER_FINISHED')) ? 'client-order-history-finished' :
+                                    ((history.status and history.status.code == constant('App\\Entity\\Status::ORDER_TRANSIT')) ? 'client-order-history-transit')
+                                ) %}
+                                <div class="client-order-history-line {{ lineColor }}">
+                                    <div class="client-order-history-date">
+                                        <div class="title">{{ history.changedAt|date('d/m/Y') }}</div>
+                                        <div class="subtitle">{{ history.changedAt|date('H:i') }}</div>
+                                    </div>
+                                    <div class="client-order-history-status {{ loop.first ? 'first' }}">
+                                        {% if history.status %}
+                                            <div class="title">{{ history.status.name }}</div>
+                                        {% endif %}
+                                        {% if history.justification is not empty %}
+                                            <div class="subtitle">{{ history.justification }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="row empty-client-order">
+                                <div class="col-12 text-center">Aucune évènement</div>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
                 <div>
