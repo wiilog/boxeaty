@@ -69,14 +69,20 @@ export default class Modal {
                 template: ajax,
             });
         } else {
-            ajax.json(response => {
-                delete response.success;
+            ajax.json(
+                (response) => {
+                    delete response.success;
 
-                Modal.html({
-                    ...config,
-                    ...response,
+                    Modal.html({
+                        ...config,
+                        ...response,
+                    });
+                },
+                () => {
+                    if (config.error) {
+                        config.error();
+                    }
                 });
-            });
         }
     }
 
@@ -87,6 +93,10 @@ export default class Modal {
 
         $modal.on('hidden.bs.modal', function() {
             $(this).remove();
+
+            if(config.afterHidden) {
+                config.afterHidden(modal);
+            }
         })
 
         const modal = new Modal();
