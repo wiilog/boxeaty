@@ -52,12 +52,12 @@ class BoxType {
     private Collection $clientBoxTypes;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="decimal", precision=5, scale=2, nullable=true)
      */
     private ?float $volume = null;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="decimal", precision=5, scale=2, nullable=true)
      */
     private ?float $weight = null;
 
