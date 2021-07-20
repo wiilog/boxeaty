@@ -9,6 +9,7 @@ use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\BoxTypeRepository;
+use App\Service\BoxTypeService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -74,11 +75,15 @@ class BoxTypeController extends AbstractController {
      * @Route("/nouveau", name="box_type_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOX_TYPES)
      */
-    public function new(Request $request, EntityManagerInterface $manager): Response {
+    public function new(Request $request,
+                        EntityManagerInterface $entityManager,
+                        BoxTypeService $boxTypeService): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $existing = $manager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
+        $content->image = $request->files->get('image');
+
+        $existing = $entityManager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Ce type de Box existe déjà");
         }
@@ -89,14 +94,8 @@ class BoxTypeController extends AbstractController {
 
         if ($form->isValid()) {
             $boxType = new BoxType();
-            $boxType->setName($content->name)
-                ->setPrice($content->price)
-                ->setActive($content->active)
-                ->setCapacity($content->capacity)
-                ->setShape($content->shape);
-
-            $manager->persist($boxType);
-            $manager->flush();
+            $boxTypeService->persistBoxType($entityManager, $boxType, $content);
+            $entityManager->flush();
 
             return $this->json([
                 "success" => true,
@@ -130,23 +129,23 @@ class BoxTypeController extends AbstractController {
      * @Route("/modifier/{boxType}", name="box_type_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOX_TYPES)
      */
-    public function edit(Request $request, EntityManagerInterface $manager, BoxType $boxType): Response {
+    public function edit(Request $request,
+                         EntityManagerInterface $entityManager,
+                         BoxType $boxType,
+                         BoxTypeService $boxTypeService): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $existing = $manager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
+        $content->image = $request->files->get('image');
+
+        $existing = $entityManager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $boxType) {
             $form->addError("name", "Un autre type de Box avec ce nom existe déjà");
         }
 
         if ($form->isValid()) {
-            $boxType->setName($content->name)
-                ->setPrice($content->price)
-                ->setActive($content->active)
-                ->setCapacity($content->capacity)
-                ->setShape($content->shape);
-
-            $manager->flush();
+            $boxTypeService->persistBoxType($entityManager, $boxType, $content);
+            $entityManager->flush();
 
             return $this->json([
                 "success" => true,

@@ -100,7 +100,7 @@ $(document).ready(() => {
 });
 
 function getBoxTypes() {
-    AJAX.route(`GET`, `box_types_api`, {
+    AJAX.route(`GET`, `client_box_types_api`, {
         id: $('#client-id').val()
     }).json((response) => {
         $('.box-type-card-wrapper').empty().append(response.template);

@@ -3,14 +3,18 @@
 namespace App\Entity;
 
 use App\Repository\AttachmentRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=AttachmentRepository::class)
  */
 class Attachment {
+
+    public const TYPE_BOX_TYPE_IMAGE = 'TYPE_BOX_TYPE_IMAGE';
+
+    public const ATTACHMENT_DIRECTORY_PATHS = [
+        self::TYPE_BOX_TYPE_IMAGE => 'persistent/box_type'
+    ];
 
     /**
      * @ORM\Id
@@ -22,35 +26,54 @@ class Attachment {
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private ?string $name = null;
+    private ?string $originalName = null;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private ?string $path = null;
+    private ?string $serverName = null;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=false)
+     */
+    private ?string $type = null;
 
     public function getId(): ?int {
         return $this->id;
     }
 
-    public function getName(): ?string {
-        return $this->name;
+    public function getOriginalName(): ?string {
+        return $this->originalName;
     }
 
-    public function setName(?string $name): self {
-        $this->name = $name;
+    public function setOriginalName(?string $originalName): self {
+        $this->originalName = $originalName;
 
         return $this;
     }
 
-    public function getPath(): ?string {
-        return $this->path;
+    public function getServerName(): ?string {
+        return $this->serverName;
     }
 
-    public function setPath(?string $path): self {
-        $this->path = $path;
+    public function setServerName(?string $serverName): self {
+        $this->serverName = $serverName;
 
         return $this;
+    }
+
+    public function getType(): ?string {
+        return $this->type;
+    }
+
+    public function setType(?string $type): self {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getPath(): string {
+        return 'public/' . Attachment::ATTACHMENT_DIRECTORY_PATHS[$this->type] . '/' . $this->serverName;
     }
 
 }
