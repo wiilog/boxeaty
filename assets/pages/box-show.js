@@ -76,10 +76,10 @@ $(document).ready(() => {
             box: box,
             crate: $('#box-id').val()
         });
-        ajax.json( response =>{
-            $('.refresh-after-add').replaceWith(response.template);
-
-        });
+        ajax.json()
+            .then(response =>{
+                $('.refresh-after-add').replaceWith(response.template);
+            });
         $(this).empty();
     });
 });
@@ -93,7 +93,8 @@ function getBoxTrackingMovements(start = 0) {
     const search = $('.comment-search').val();
 
     AJAX.route('GET', 'get_box_mouvements', {box: $('#box-id').val(), search, start})
-        .json((result) => {
+        .json()
+        .then((result) => {
             if(result.success) {
                 if (start === 0) {
                     $('.history-wrapper').empty();
@@ -171,7 +172,8 @@ function getBoxInCrate() {
     const ajax = AJAX.route(`GET`, `box_in_crate_api`, {
         id: $('#box-id').val()
     });
-    ajax.json( response =>{
-        $('.refresh-after-add').replaceWith(response.template);
-    });
+    ajax.json()
+        .then(response =>{
+            $('.refresh-after-add').replaceWith(response.template);
+        });
 }

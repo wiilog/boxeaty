@@ -69,16 +69,17 @@ export default class Modal {
                 template: ajax,
             });
         } else {
-            ajax.json(
-                (response) => {
+            ajax
+                .json()
+                .then((response) => {
                     delete response.success;
 
                     Modal.html({
                         ...config,
                         ...response,
                     });
-                },
-                () => {
+                })
+                .catch(() => {
                     if (config.error) {
                         config.error();
                     }
@@ -195,42 +196,44 @@ export default class Modal {
         }
 
         if(this.config.ajax) {
-            return this.config.ajax.json(data, result => {
-                if(!handleErrors(this.element, result)) {
-                    return;
-                }
-
-                //refresh the datatable
-                if(this.config && this.config.table) {
-                    if(this.config.table.ajax) {
-                        this.config.table.ajax.reload();
-                    } else {
-                        $(this.config.table).DataTable().ajax.reload();
+            return this.config.ajax
+                .json(data)
+                .then(result => {
+                    if(!handleErrors(this.element, result)) {
+                        return;
                     }
-                }
 
-                if(result.menu) {
-                    $(`#menu-dropdown`).replaceWith(result.menu);
-                }
+                    //refresh the datatable
+                    if(this.config && this.config.table) {
+                        if(this.config.table.ajax) {
+                            this.config.table.ajax.reload();
+                        } else {
+                            $(this.config.table).DataTable().ajax.reload();
+                        }
+                    }
 
-                if(result.modal) {
-                    delete result.success;
-                    delete result.menu;
+                    if(result.menu) {
+                        $(`#menu-dropdown`).replaceWith(result.menu);
+                    }
 
-                    Modal.html({
-                        ...this.config,
-                        ...result.modal,
-                    });
-                }
+                    if(result.modal) {
+                        delete result.success;
+                        delete result.menu;
 
-                if(!this.config.keepOpen) {
-                    this.close();
-                }
+                        Modal.html({
+                            ...this.config,
+                            ...result.modal,
+                        });
+                    }
 
-                if(result.success && this.config.success) {
-                    this.config.success(result);
-                }
-            });
+                    if(!this.config.keepOpen) {
+                        this.close();
+                    }
+
+                    if(result.success && this.config.success) {
+                        this.config.success(result);
+                    }
+                });
         } else {
             return new Promise((resolve) => {
                 if(!this.config.keepOpen) {

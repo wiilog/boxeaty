@@ -100,19 +100,19 @@ $(document).ready(() => {
 });
 
 function getBoxTypes() {
-    AJAX.route(`GET`, `client_box_types_api`, {
-        id: $('#client-id').val()
-    }).json((response) => {
-        $('.box-type-card-wrapper').empty().append(response.template);
-        $('.total-crate-type-price').text(`à ${response.totalCrateTypePrice} €`);
-    });
+    AJAX.route(`GET`, `client_box_types_api`, {id: $('#client-id').val()})
+        .json()
+        .then((response) => {
+            $('.box-type-card-wrapper').empty().append(response.template);
+            $('.total-crate-type-price').text(`à ${response.totalCrateTypePrice} €`);
+        });
 }
 
 function getBoxRecurrence() {
-    AJAX.route(`GET`, `order_recurrence_api`, {
-        id: $('#client-id').val()
-    }).json((response) => {
-        $('.order-recurrence-wrapper').empty().append(response.template);
-        $('.order-recurrence-price').text(`${response.orderRecurrencePrice} € HT/mois`);
-    });
+    AJAX.route(`GET`, `order_recurrence_api`, {id: $('#client-id').val()})
+        .json()
+        .then((response) => {
+            $('.order-recurrence-wrapper').empty().append(response.template);
+            $('.order-recurrence-price').text(`${response.orderRecurrencePrice} € HT/mois`);
+        });
 }

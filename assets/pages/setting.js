@@ -14,13 +14,13 @@ $document.ready(() => {
         ],
         listeners: {
             delete: data => {
-                AJAX.route(`POST`, `work_free_day_delete`, {
-                    day: data.id
-                }).json((result) => {
-                    if(result.success) {
-                        workFreeDayTable.ajax.reload();
-                    }
-                });
+                AJAX.route(`POST`, `work_free_day_delete`, {day: data.id})
+                    .json()
+                    .then((result) => {
+                        if(result.success) {
+                            workFreeDayTable.ajax.reload();
+                        }
+                    });
             },
         }
     });
@@ -30,7 +30,8 @@ $document.ready(() => {
 
         if (processForm($form)) {
             AJAX.route(`POST`, `work_free_day_add`)
-                .json(processForm($form, null, {data: `add-data`}), result => {
+                .json(processForm($form, null, {data: `add-data`}))
+                .then(result => {
                     if (handleErrors($form, result)) {
                         workFreeDayTable.ajax.reload();
                         clearForm($form);
@@ -43,7 +44,8 @@ $document.ready(() => {
         const $form = $(this).closest(`.inline-form`);
         if (processForm($form)) {
             AJAX.route(`POST`, `delivery_mode_add`)
-                .json(processForm($form, null, {data: `add-data`}), result => {
+                .json(processForm($form, null, {data: `add-data`}))
+                .then(result => {
                     if (handleErrors($form, result)) {
                         deliveryMethodTable.ajax.reload();
                         $("input[name=nameDeliveryMethode]").val('');
@@ -61,13 +63,13 @@ $document.ready(() => {
         ],
         listeners: {
             delete: data => {
-                AJAX.route(`POST`, `delivery_methode_delete`, {
-                    deliveryMethod: data.id
-                }).json((result) => {
-                    if(result.success) {
-                        deliveryMethodTable.ajax.reload();
-                    }
-                });
+                AJAX.route(`POST`, `delivery_methode_delete`, {deliveryMethod: data.id})
+                    .json()
+                    .then((result) => {
+                        if(result.success) {
+                            deliveryMethodTable.ajax.reload();
+                        }
+                    });
             },
         }
     });
