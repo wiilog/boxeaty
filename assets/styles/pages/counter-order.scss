@@ -1,217 +1,122 @@
 @import "../variables";
 
 .new-order {
-  position: absolute;
-  right: 50px;
-  top: 160px;
+    position: absolute;
+    right: 50px;
+    top: 160px;
 
-  button {
-    height: 70px !important;
-    width: 70px !important;
-    border-radius: 50% !important;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    button {
+        height: 70px !important;
+        width: 70px !important;
+        border-radius: 50% !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
-    svg {
-      margin-right: 0 !important;
-      font-size: 20px;
+        svg {
+            margin-right: 0 !important;
+            font-size: 20px;
+        }
     }
-  }
 }
 
 .left-pane {
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid #EEE;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #EEE;
 
-  .scanned-boxes, .scanned-tickets {
-    position: relative;
-    flex: 1 1 auto;
+    .scanned-boxes, .scanned-tickets {
+        position: relative;
+        flex: 1 1 auto;
 
-    .placeholder {
-      position: absolute;
-      top: 5px;
-      z-index: 1;
-      color: #888;
-      overflow: hidden;
+        .placeholder {
+            position: absolute;
+            top: 5px;
+            z-index: 1;
+            color: #888;
+            overflow: hidden;
+        }
+
+        .item {
+            z-index: 2;
+            background: white;
+            position: relative;
+            top: 0;
+            left: 0;
+        }
     }
-
-    .item {
-      z-index: 2;
-      background: white;
-      position: relative;
-      top: 0;
-      left: 0;
-    }
-  }
 }
 
 .scan-container {
-  position: relative;
-  min-height: 300px;
-  margin-bottom: 15px;
+    position: relative;
+    min-height: 300px;
+    margin-bottom: 15px;
 
-  img {
-    position: absolute;
-    padding: 2rem;
-    max-height: 100%;
-    max-width: 100%;
-    z-index: 1000;
-    opacity: 0.5;
-  }
-
-  video, .no-camera-found {
-    border-radius: 10px;
-    width: 100%;
-  }
-
-  .no-camera-found {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 300px;
-    padding: 30px;
-    background: $grey;
-
-    p {
-      margin-top: 15px;
-      margin-bottom: 0;
-      text-align: center;
+    img {
+        position: absolute;
+        padding: 2rem;
+        max-height: 100%;
+        max-width: 100%;
+        z-index: 1000;
+        opacity: 0.5;
     }
-  }
+
+    video, .no-camera-found {
+        border-radius: 10px;
+        width: 100%;
+    }
+
+    .no-camera-found {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 300px;
+        padding: 30px;
+        background: $grey;
+
+        p {
+            margin-top: 15px;
+            margin-bottom: 0;
+            text-align: center;
+        }
+    }
 }
 
 .payment-price {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  div {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 24px;
-    border-radius: 8px;
-    padding: 8px 32px;
-    text-align: center;
-    font-size: 2rem;
 
-    strong {
-      margin-left: 12px;
-      font-size: 2.5rem;
+    div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 24px;
+        border-radius: 8px;
+        padding: 8px 32px;
+        text-align: center;
+        font-size: 2rem;
+
+        strong {
+            margin-left: 12px;
+            font-size: 2.5rem;
+        }
     }
-  }
 }
 
 .deposit-ticket-header {
-  display: flex;
-  align-items: center;
-
-  [data-toggle="tooltip"] {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    margin-left: 15px;
-    float: right;
-    width: 35px;
-    height: 35px;
-  }
-}
 
-.order-card {
-  text-align: left;
-  color: #1E1F44;
-  background: #F8F8F8;
-  border-radius: 16px;
-  padding: 16px;
-
-  .order-date-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-
-    strong {
-      margin-left: 5px;
-      white-space: nowrap;
+    [data-toggle="tooltip"] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-left: 15px;
+        float: right;
+        width: 35px;
+        height: 35px;
     }
-  }
-
-  .order-number-container {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-
-    span {
-      text-align: right;
-    }
-
-    .bxi-trash-circle {
-      margin-left: 12px;
-      height: 2rem;
-    }
-  }
-
-  .fill {
-    flex: 1 1 auto;
-  }
-
-  .between {
-    justify-content: space-between;
-  }
-
-  strong {
-    font-weight: bold;
-    font-size: 15pt;
-    align-items: start;
-  }
-
-  .right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-  }
-
-  .typeName {
-    font-weight: normal;
-    font-size: medium;
-  }
-
-  .status {
-    display: flex;
-    align-items: center;
-    background-color: rgb(118, 179, 157, 0.1);
-    font-size: 0.9rem;
-    border-radius: 2px;
-    border-width: 1px;
-    border-style: solid;
-    border-color: #76B39D;
-    height: 35px;
-    padding: 4px 12px;
-  }
-
-  .delivery-method {
-    display: flex;
-    align-items: center;
-    background-color: white;
-    font-size: 0.9rem;
-    height: 35px;
-    padding: 4px 12px;
-  }
-
-  .expand {
-    flex: 1 1 auto;
-  }
-
-  .ordered-by {
-    color: $grey-darker;
-  }
-
-  .show-detail {
-    align-items: normal;
-    text-align: right;
-  }
 }

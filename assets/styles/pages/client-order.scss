@@ -1,1 +1,143 @@
 @import "../variables";
+
+.form-switch {
+    padding-left: 0em;
+}
+
+.select{
+    width: 40%;
+    font-size: 18px;
+    padding-bottom: 20px;
+}
+
+input{
+    background-color: $grey;
+}
+
+.emptyCart{
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 175px;
+}
+
+.boxTypeNumber{
+    width: 50px !important;
+}
+
+.cartBox{
+    background-color: #F8F8F8;
+    color: #1E1F44;
+    align-items: center;
+}
+
+.bxi-trash-circle{
+    width: 25px;
+    height: 25px;
+}
+
+.remove{
+    border: none;
+    background-color: $grey;
+    width: 50px;
+}
+
+.deliveryMethodIcon{
+    width: 25px;
+    height: 25px;
+}
+
+.order-card {
+    text-align: left;
+    color: #1E1F44;
+    background: #F8F8F8;
+    border-radius: 16px;
+    padding: 16px;
+
+    .order-date-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+
+        strong {
+            margin-left: 5px;
+            white-space: nowrap;
+        }
+    }
+
+    .order-number-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+
+        span {
+            text-align: right;
+        }
+
+        .bxi-trash-circle {
+            margin-left: 12px;
+            height: 2rem;
+        }
+    }
+
+    .fill {
+        flex: 1 1 auto;
+    }
+
+    .between {
+        justify-content: space-between;
+    }
+
+    strong {
+        font-weight: bold;
+        font-size: 15pt;
+        align-items: start;
+    }
+
+    .right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .typeName {
+        font-weight: normal;
+        font-size: medium;
+    }
+
+    .status {
+        display: flex;
+        align-items: center;
+        background-color: rgb(118, 179, 157, 0.1);
+        font-size: 0.9rem;
+        border-radius: 2px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: #76B39D;
+        height: 35px;
+        padding: 4px 12px;
+    }
+
+    .delivery-method {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        font-size: 0.9rem;
+        height: 35px;
+        padding: 4px 12px;
+    }
+
+    .expand {
+        flex: 1 1 auto;
+    }
+
+    .ordered-by {
+        color: $grey-darker;
+    }
+
+    .show-detail {
+        align-items: normal;
+        text-align: right;
+    }
+}
