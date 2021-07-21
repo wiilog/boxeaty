@@ -23,7 +23,7 @@ class DeliveryRoundRepository extends EntityRepository {
             ->where("status.code IN (:status)")
             ->andWhere("orders.id IS NOT NULL")
             ->andWhere("delivery_round.deliverer = :deliverer")
-            ->setParameter("status", [Status::ROUND_CREATED, Status::ROUND_AWAITING_DELIVERER])
+            ->setParameter("status", [Status::CODE_ROUND_CREATED, Status::CODE_ROUND_AWAITING_DELIVERER])
             ->setParameter("deliverer", $deliverer)
             ->getQuery()
             ->getResult();

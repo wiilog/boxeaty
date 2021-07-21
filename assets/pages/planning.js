@@ -13,10 +13,12 @@ $(document).ready(() => {
     $filters.find(`.filter`).click(function () {
         const params = processForm($filters).asObject();
 
-        AJAX.route(`GET`, `planning_content`, params).json(data => {
-            $(`#planning`).html(data.planning);
-            initializePlanning();
-        });
+        AJAX.route(`GET`, `planning_content`, params)
+            .json()
+            .then(data => {
+                $(`#planning`).html(data.planning);
+                initializePlanning();
+            });
     });
 
     initializePlanning();

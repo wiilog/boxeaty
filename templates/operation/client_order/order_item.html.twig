@@ -1,6 +1,6 @@
-{% if item.status.code == 'ORDER_TRANSIT' %}
+{% if item.status.code == constant('App\\Entity\\Status::CODE_ORDER_TRANSIT') %}
     {% set statusIcon =  'transit' %}
-{% elseif  item.status.code == 'ORDER_FINISHED' %}
+{% elseif  item.status.code == constant('App\\Entity\\Status::CODE_ORDER_FINISHED') %}
     {% set statusIcon =  'end' %}
 {% else %}
     {% set statusIcon =  '' %}

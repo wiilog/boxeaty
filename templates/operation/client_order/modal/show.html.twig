@@ -59,8 +59,8 @@
                         {% if clientOrder.orderStatusHistory|length > 0 %}
                             {% for history in clientOrder.orderStatusHistory %}
                                 {% set lineColor = (
-                                    (history.status and history.status.code == constant('App\\Entity\\Status::ORDER_FINISHED')) ? 'client-order-history-finished' :
-                                    ((history.status and history.status.code == constant('App\\Entity\\Status::ORDER_TRANSIT')) ? 'client-order-history-transit')
+                                    (history.status and history.status.code == constant('App\\Entity\\Status::CODE_ORDER_FINISHED')) ? 'client-order-history-finished' :
+                                    ((history.status and history.status.code == constant('App\\Entity\\Status::CODE_ORDER_TRANSIT')) ? 'client-order-history-transit')
                                 ) %}
                                 <div class="client-order-history-line {{ lineColor }}">
                                     <div class="client-order-history-date">

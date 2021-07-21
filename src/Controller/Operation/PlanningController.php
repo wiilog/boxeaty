@@ -65,9 +65,9 @@ class PlanningController extends AbstractController {
         }
 
         $sort = [
-            Status::ORDER_TO_VALIDATE => 1,
-            Status::ORDER_PLANNED => 2,
-            Status::ORDER_TRANSIT => 3,
+            Status::CODE_ORDER_TO_VALIDATE => 1,
+            Status::CODE_ORDER_PLANNED => 2,
+            Status::CODE_ORDER_TRANSIT => 3,
         ];
 
         //generate cards configuration for twig
@@ -159,12 +159,12 @@ class PlanningController extends AbstractController {
 
             $prepared = Stream::from($orders)
                 ->filter(fn(ClientOrder $order) => $order->getPreparation())
-                ->filter(fn(ClientOrder $order) => $order->getPreparation()->getStatus()->getCode() === Status::PREPARATION_PREPARED)
+                ->filter(fn(ClientOrder $order) => $order->getPreparation()->getStatus()->getCode() === Status::CODE_PREPARATION_PREPARED)
                 ->count();
 
             if ($prepared === count($orders)) {
-                $status = $statusRepository->findOneBy(["code" => Status::ROUND_AWAITING_DELIVERER]);
-                $deliveryStatus = $statusRepository->findOneBy(["code" => Status::DELIVERY_AWAITING_DELIVERER]);
+                $status = $statusRepository->findOneBy(["code" => Status::CODE_ROUND_AWAITING_DELIVERER]);
+                $deliveryStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_AWAITING_DELIVERER]);
 
                 foreach ($orders as $order) {
                     $delivery = (new Delivery())
@@ -174,7 +174,7 @@ class PlanningController extends AbstractController {
                     $manager->persist($delivery);
                 }
             } else {
-                $status = $statusRepository->findOneBy(["code" => Status::ROUND_CREATED]);
+                $status = $statusRepository->findOneBy(["code" => Status::CODE_ROUND_CREATED]);
             }
 
             $round = (new DeliveryRound())
