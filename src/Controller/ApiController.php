@@ -12,6 +12,7 @@ use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
+use App\Entity\Preparation;
 use App\Entity\User;
 use App\Helper\FormatHelper;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -519,6 +520,14 @@ class ApiController extends AbstractController {
     public function crates(EntityManagerInterface $manager, Request $request): Response {
         $depository = $manager->getRepository(Depository::class)->find($request->query->get('depository'));
         return $this->json($manager->getRepository(Box::class)->getByDepository($depository));
+    }
+
+    /**
+     * @Route("/mobile/preparations", name="api_mobile_preparations")
+     */
+    public function preparations(EntityManagerInterface $manager, Request $request): Response {
+        $depository = $manager->getRepository(Depository::class)->find($request->query->get('depository'));
+        return $this->json($manager->getRepository(Preparation::class)->getByDepository($depository));
     }
 
 }
