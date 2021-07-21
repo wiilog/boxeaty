@@ -70,7 +70,7 @@ $(function() {
                     <i class="col"></i>
                     <input type="number" name="quantity" value="1" min="1" max="1000" class="data-array col cartBoxNumber">
                     <span class="col bigTxt">${typeBoxData.text}</span>
-                    <span class="col">T.U ${typeBoxData.price} €</span>
+                    <span class="col">T.U. ${typeBoxData.price} €</span>
                     <span class="totalPrice col bigTxt"  > ${typeBoxData.price} €</span>
                     <button class="remove" value="${typeBoxData.id}"><i class="bxi bxi-trash-circle col"></i></button>
                 </div>

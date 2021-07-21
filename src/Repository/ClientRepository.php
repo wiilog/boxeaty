@@ -89,7 +89,10 @@ class ClientRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search, ?string $group, ?User $user) {
+    public function getForSelect(?string $search,
+                                 ?string $group,
+                                 ?User $user,
+                                 ?bool $costInformationNeeded = false) {
         $qb = $this->createQueryBuilder("client");
 
         if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
@@ -102,15 +105,27 @@ class ClientRepository extends EntityRepository {
                 ->setParameter("group", $group);
         }
 
-        return $qb->select("client.id AS id, information.workingDayDeliveryRate AS workingRate, information.nonWorkingDayDeliveryRate AS nonWorkingRate, information.serviceCost AS serviceCost, client.address AS address, client.name AS text")
+        $qb
+            ->select("client.id AS id")
+            ->addSelect("client.name AS text")
+            ->addSelect("information.workingDayDeliveryRate AS workingRate")
+            ->addSelect("information.nonWorkingDayDeliveryRate AS nonWorkingRate")
+            ->addSelect("information.serviceCost AS serviceCost")
+            ->addSelect("client.address AS address")
             ->leftjoin("client.clientOrderInformation", "information")
-            ->andWhere("information.workingDayDeliveryRate IS NOT NULL")
-            ->andWhere("information.nonWorkingDayDeliveryRate IS NOT NULL")
-            ->andWhere("information.serviceCost IS NOT NULL")
             ->andWhere("client.name LIKE :search")
             ->andWhere("client.active = 1")
             ->setMaxResults(15)
-            ->setParameter("search", "%$search%")
+            ->setParameter("search", "%$search%");
+
+        if ($costInformationNeeded) {
+            $qb
+                ->andWhere("information.workingDayDeliveryRate IS NOT NULL")
+                ->andWhere("information.nonWorkingDayDeliveryRate IS NOT NULL")
+                ->andWhere("information.serviceCost IS NOT NULL");
+        }
+
+        return $qb
             ->getQuery()
             ->getArrayResult();
     }
