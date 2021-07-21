@@ -28,7 +28,7 @@ class PreparationRepository extends EntityRepository {
             ->leftJoin('preparation.status', 'join_status')
             ->leftJoin('join_client.clientOrderInformation', 'join_clientOrderInformation')
             ->andWhere("join_status.code = :status")
-            ->setParameter("status", Status::PREPARATION_PREPARING);
+            ->setParameter("status", Status::CODE_PREPARATION_PREPARING);
 
         if($depository) {
             $qb
