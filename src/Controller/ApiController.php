@@ -12,6 +12,7 @@ use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
+use App\Entity\Quality;
 use App\Entity\User;
 use App\Helper\FormatHelper;
 use App\Service\BoxStateService;
@@ -515,11 +516,70 @@ class ApiController extends AbstractController {
     }
 
     /**
+     * @Route("/mobile/locations", name="api_mobile_locations")
+     */
+    public function locations(EntityManagerInterface $manager): Response {
+        return $this->json($manager->getRepository(Location::class)->getAll());
+    }
+
+    /**
+     * @Route("/mobile/qualities", name="api_mobile_qualities")
+     */
+    public function qualities(EntityManagerInterface $manager): Response {
+        return $this->json($manager->getRepository(Quality::class)->getAll());
+    }
+
+    /**
      * @Route("/mobile/crates", name="api_mobile_crates")
      */
     public function crates(EntityManagerInterface $manager, Request $request): Response {
         $depository = $manager->getRepository(Depository::class)->find($request->query->get('depository'));
         return $this->json($manager->getRepository(Box::class)->getByDepository($depository));
+    }
+
+    /**
+     * @Route("/mobile/box", name="api_mobile_box")
+     */
+    public function box(EntityManagerInterface $manager, Request $request): Response {
+        return $this->json($manager->getRepository(Box::class)->getByNumber($request->query->get('box')));
+    }
+
+    /**
+     * @Route("/mobile/reverse-tracking", name="api_mobile_reverse_tracking")
+     * @Authenticated
+     */
+    public function reverseTracking(EntityManagerInterface $manager, Request $request, BoxRecordService $boxRecordService): Response {
+
+        $boxRepository = $manager->getRepository(Box::class);
+        $locationRepository = $manager->getRepository(Location::class);
+        $qualityRepository = $manager->getRepository(Quality::class);
+
+        $args = json_decode($request->getContent(), true);
+        $args['boxes'] = explode(',', $args['boxes']);
+        /**
+         * @var $boxes Box[]
+         */
+        $boxes = [];
+
+        foreach ($args['boxes'] as $box) {
+            $boxes[] = $boxRepository->find($box);
+        }
+        $boxes[] = $boxRepository->findOneBy(['number' => $args['crate']]);
+        $chosenQuality = $qualityRepository->find($args['quality']);
+        $chosenLocation = $locationRepository->find($args['location']);
+        foreach ($boxes as $box) {
+            $box
+                ->setLocation($chosenLocation)
+                ->setQuality($chosenQuality);
+            $record = $boxRecordService->createBoxRecord($box, true);
+            $record
+                ->setBox($box)
+                ->setState(BoxStateService::STATE_RECORD_IDENTIFIED)
+                ->setUser($this->user);
+            $manager->persist($record);
+        }
+        $manager->flush();
+        return $this->json([]);
     }
 
 }

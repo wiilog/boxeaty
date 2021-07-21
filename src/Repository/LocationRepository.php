@@ -166,4 +166,10 @@ class LocationRepository extends EntityRepository {
             ->getSingleScalarResult();
     }
 
+    public function getAll() {
+        return $this->createQueryBuilder("location")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
 }

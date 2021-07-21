@@ -191,4 +191,20 @@ class BoxRepository extends EntityRepository {
             ->execute();
     }
 
+    public function getByNumber(string $number)
+    {
+        return $this->createQueryBuilder('box')
+            ->select('box.id AS boxId')
+            ->addSelect('box.number AS boxNumber')
+            ->addSelect('type.name AS boxType')
+            ->leftJoin("box.location", "location")
+            ->leftJoin("box.type", "type")
+            ->andWhere('box.isBox = 1')
+            ->andWhere('box.number = :number')
+            ->andWhere('box.state = 1')
+            ->setParameter("number", $number)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 }
