@@ -466,13 +466,14 @@ class ApiController extends AbstractController {
      * @Authenticated()
      */
     public function deliveryRounds(EntityManagerInterface $manager): Response {
+        $now = new DateTime("today midnight");
         $rounds = $manager->getRepository(DeliveryRound::class)->findAwaitingDeliverer($this->user);
 
         $serialized = Stream::from($rounds)
             ->map(fn(DeliveryRound $round) => [
                 "id" => $round->getId(),
                 "number" => $round->getNumber(),
-                "status" => FormatHelper::named($round->getStatus()),
+                "status" => $round->getStatus()->getCode(),
                 "depository" => FormatHelper::named($round->getDepository()),
                 "expected_date" => Stream::from($round->getOrders())
                     ->map(fn(ClientOrder $order) => $order->getExpectedDelivery())
@@ -487,7 +488,7 @@ class ApiController extends AbstractController {
                 "orders" => $round->getOrders()->map(fn(ClientOrder $order) => [
                     "id" => $order->getId(),
                     "client" => FormatHelper::named($order->getClient()),
-                    "lines" => $order->getClientOrderLines()->map(fn(ClientOrderLine $line) => [
+                    "lines" => $order->getLines()->map(fn(ClientOrderLine $line) => [
                         "box_type" => [
                             "id" => $line->getBoxType()->getId(),
                             "name" => $line->getBoxType()->getName(),
@@ -502,7 +503,11 @@ class ApiController extends AbstractController {
 
         $result = [];
         foreach ($serialized as $round) {
-            $result[$round["expected_date"]->format("Y-m-d")][] = $round;
+            if($round["expected_date"] < $now) {
+                $result[$now->format("Y-m-d")][] = $round;
+            } else {
+                $result[$round["expected_date"]->format("Y-m-d")][] = $round;
+            }
         }
 
         return $this->json($result);

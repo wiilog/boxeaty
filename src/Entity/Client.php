@@ -115,7 +115,7 @@ class Client {
     private $mailNotificationOrderPreparation;
 
     /**
-     * @ORM\OneToOne(targetEntity=ClientOrderInformation::class, cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity=ClientOrderInformation::class, inversedBy="client", cascade={"persist", "remove"})
      */
     private ?ClientOrderInformation $clientOrderInformation = null;
 

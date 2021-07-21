@@ -21,7 +21,7 @@ class StatusFixtures extends Fixture implements FixtureGroupInterface {
             Status::ROUND_CREATED => "Créé",
             Status::ROUND_AWAITING_DELIVERER => "Attente livreur",
             Status::ROUND_TAKEN_DELIVERER => "Enlevée par livreur",
-            Status::ROUND_FINISHED => "Créé",
+            Status::ROUND_FINISHED => "Terminé",
         ],
         Status::PREPARATION => [
             Status::PREPARATION_PREPARING => "En préparation",

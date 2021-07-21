@@ -20,10 +20,10 @@ class DeliveryRoundRepository extends EntityRepository {
         return $this->createQueryBuilder("delivery_round")
             ->join("delivery_round.status", "status")
             ->join("delivery_round.orders", "orders")
-            ->where("status.code = :status")
+            ->where("status.code IN (:status)")
             ->andWhere("orders.id IS NOT NULL")
             ->andWhere("delivery_round.deliverer = :deliverer")
-            ->setParameter("status", Status::ROUND_AWAITING_DELIVERER)
+            ->setParameter("status", [Status::ROUND_CREATED, Status::ROUND_AWAITING_DELIVERER])
             ->setParameter("deliverer", $deliverer)
             ->getQuery()
             ->getResult();

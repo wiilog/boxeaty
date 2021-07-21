@@ -81,10 +81,11 @@ class AnnotationListener {
 
         $userRepository = $this->manager->getRepository(User::class);
 
-        $authorization = $request->headers->get("authorization", "");
+        $authorization = $request->headers->get("x-authorization", "");
         preg_match("/Bearer (\w*)/i", $authorization, $matches);
 
         $user = $matches ? $userRepository->findByApiKey($matches[1]) : null;
+        dump($request->headers->all(), $authorization, $matches, $matches[1] ?? null, $user);
         if ($user) {
             $controller->setUser($user);
         } else {
