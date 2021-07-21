@@ -316,9 +316,15 @@ class BoxController extends AbstractController {
                         ? ($movement['date']->format("d") . ' ' . FormatHelper::MONTHS[$movement['date']->format('n')] . ' ' . $movement['date']->format("Y"))
                         : '',
                     'time' => isset($movement['date']) ? $movement['date']->format('H:i') : 'Non définie',
-                    'state' => (isset($movement['state']) && isset(BoxStateService::BOX_STATES[$movement['state']]))
-                        ? BoxStateService::BOX_STATES[$movement['state']]
+                    'state' => (isset($movement['state']) && isset(BoxStateService::RECORD_STATES[$movement['state']]))
+                        ? BoxStateService::RECORD_STATES[$movement['state']]
                         : '-',
+                    'crate' => !empty($movement['crateId'])
+                        ? [
+                            'number' => $movement['crateNumber'],
+                            'id' => $movement['crateId']
+                        ]
+                        : null,
                     'operator' => $movement['operator'] ?? "",
                     'location' => $movement['location'] ?? "",
                     'depository' => $movement['depository'] ?? "",
@@ -331,13 +337,13 @@ class BoxController extends AbstractController {
      * @Route("/add-box", name="add_box_in_crate", options={"expose": true}, methods={"GET"})
      */
     public function addBoxInCrate(Request $request,
-                                  EntityManagerInterface $manager,
-                                    BoxRecordService $service){
-        /** @var Box $crate */
-        $crate = $manager->getRepository(Box::class)->find($request->query->get("crate"));
+                                  EntityManagerInterface $entityManager,
+                                  BoxRecordService $boxRecordService){
 
-        /** @var Box $box */
-        $box = $manager->getRepository(Box::class)->find($request->query->get("box"));
+        $boxRepository = $entityManager->getRepository(Box::class);
+
+        $crate = $boxRepository->find($request->query->get("crate"));
+        $box = $boxRepository->find($request->query->get("box"));
 
         if($box->getCrate()){
             return $this->json([
@@ -348,28 +354,16 @@ class BoxController extends AbstractController {
         }
         $box->setCrate($crate);
 
-        [$tracking, $record] = $service->generateBoxRecords(
-            $box,
-            [
-                'location' => $crate->getLocation(),
-                'state' => $crate->getState(),
-                'comment' => $crate->getComment(),
-            ],
-            $this->getUser(),
-            $crate
-        );
+        $tracking = $boxRecordService->createBoxRecord($box, true);
 
-        if ($tracking) {
-            $tracking->setBox($box);
-            $manager->persist($tracking);
-        }
-
-        if ($record) {
-            $record->setBox($box);
-            $manager->persist($record);
-        }
-
-        $manager->flush();
+        $tracking
+            ->setBox($box)
+            ->setUser($this->getUser())
+            ->setLocation($crate->getLocation())
+            ->setCrate($crate)
+            ->setState(BoxStateService::STATE_RECORD_PACKING);
+        $entityManager->persist($tracking);
+        $entityManager->flush();
 
         return $this->json([
             "success" => true,
@@ -395,38 +389,31 @@ class BoxController extends AbstractController {
      * @Route("/supprimer-box-in-crate", name="box_delete_in_crate", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function deleteBoxInCrate(Request $request, EntityManagerInterface $manager, BoxRecordService $service): Response {
+    public function deleteBoxInCrate(Request $request,
+                                     EntityManagerInterface $entityManager,
+                                     BoxRecordService $boxRecordService): Response {
 
         /** @var Box $box */
-        $box = $manager->getRepository(Box::class)->find($request->query->get("box"));
+        $box = $entityManager->getRepository(Box::class)->find($request->query->get("box"));
 
-        [$tracking, $record] = $service->generateBoxRecords(
-            $box,
-            [
-                'location' => null,
-                'state' => BoxStateService::BOX_STATES[$box->getState()],
-                'comment' => null
-            ],
-            $this->getUser()
-        );
+        $oldCrate = $box->getCrate();
 
-        if ($tracking) {
-            $tracking->setBox($box);
-            $manager->persist($tracking);
-        }
+        $tracking = $boxRecordService->createBoxRecord($box, true);
 
-        if ($record) {
-            $record->setBox($box);
-            $manager->persist($record);
-        }
+        $tracking
+            ->setBox($box)
+            ->setUser($this->getUser())
+            ->setLocation($oldCrate->getLocation())
+            ->setCrate($oldCrate)
+            ->setState(BoxStateService::STATE_RECORD_UNPACKING);
 
-        $crate = $box->getCrate();
         $box->setCrate(null);
-        $manager->flush();
+        $entityManager->persist($tracking);
+        $entityManager->flush();
 
         return $this->json([
             "success" => true,
-            "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $crate]),
+            "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $oldCrate]),
             "message" => "Box <strong>{$box->getNumber()}</strong> supprimée avec succès"
         ]);
     }

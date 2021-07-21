@@ -115,6 +115,11 @@ class Box {
      */
     private ?Collection $boxPreparationLines;
 
+    /**
+     * @ORM\OneToMany(targetEntity=BoxRecord::class, mappedBy="crate")
+     */
+    private ?Collection $cratePackingRecords;
+
     public function __construct() {
         $this->boxRecords = new ArrayCollection();
         $this->counterOrders = new ArrayCollection();
@@ -123,6 +128,7 @@ class Box {
         $this->containedBoxes = new ArrayCollection();
         $this->cratePreparationLines = new ArrayCollection();
         $this->boxPreparationLines = new ArrayCollection();
+        $this->cratePackingRecords = new ArrayCollection();
     }
 
     public function fromRecord(BoxRecord $record): self {
@@ -511,6 +517,45 @@ class Box {
         $this->boxPreparationLines = new ArrayCollection();
         foreach($lines as $line) {
             $this->addBoxPreparationLine($line);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|BoxRecord[]
+     */
+    public function getCratePackingRecords(): Collection {
+        return $this->cratePackingRecords;
+    }
+
+    public function addCratePackingRecord(BoxRecord $boxRecord): self {
+        if (!$this->cratePackingRecords->contains($boxRecord)) {
+            $this->cratePackingRecords[] = $boxRecord;
+            $boxRecord->setCrate($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCratePackingRecord(BoxRecord $boxRecord): self {
+        if ($this->cratePackingRecords->removeElement($boxRecord)) {
+            if ($boxRecord->getCrate() === $this) {
+                $boxRecord->setCrate(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setCratePackingRecords(?array $boxRecords): self {
+        foreach($this->getCratePackingRecords()->toArray() as $boxRecord) {
+            $this->removeCratePackingRecord($boxRecord);
+        }
+
+        $this->cratePackingRecords = new ArrayCollection();
+        foreach($boxRecords as $boxRecord) {
+            $this->addCratePackingRecord($boxRecord);
         }
 
         return $this;

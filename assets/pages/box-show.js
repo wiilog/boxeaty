@@ -100,7 +100,7 @@ function getBoxTrackingMovements(start = 0) {
                     $('.history-wrapper').empty();
                 }
                 const data = (result.data || []);
-                const historyLines = data.map(({state, comment, date, time, operator, location, depository}) => {
+                const historyLines = data.map(({state, crate, comment, date, time, operator, location, depository}) => {
                     const $rawComment = $($.parseHTML(comment));
                     const trimmedComment = $rawComment.text().trim();
 
@@ -114,16 +114,16 @@ function getBoxTrackingMovements(start = 0) {
                         subtitle = `Opérateur : ${operator}`;
                     }
                     if (depository) {
-                        if (subtitle) {
-                            subtitle += ' - ';
-                        }
+                        subtitle = subtitle ? `${subtitle} - ` : '';
                         subtitle += depository;
                     }
                     if (location) {
-                        if (subtitle) {
-                            subtitle += ' - ';
-                        }
+                        subtitle = subtitle ? `${subtitle} - ` : '';
                         subtitle += location;
+                    }
+
+                    if (crate) {
+                        state += ` dans la caisse <a href="${Routing.generate('box_show', {box: crate.id})}">${crate.number}</a>`;
                     }
 
                     return `
@@ -133,7 +133,6 @@ function getBoxTrackingMovements(start = 0) {
                                 <div class="d-flex"><strong>${state}</strong>${$comment}</div>
                                 <p>${subtitle}</p>
                             </div>
-                            
                         </div>
                     `;
                 });
