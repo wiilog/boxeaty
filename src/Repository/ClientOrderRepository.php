@@ -124,4 +124,20 @@ class ClientOrderRepository extends EntityRepository {
         ];
     }
 
+    /**
+     * @param $date
+     * @return mixed|null
+     */
+    public function getLastNumberByDate(string $date): ?string {
+        $result = $this->createQueryBuilder('clientOrder')
+            ->select('clientOrder.number')
+            ->where('clientOrder.number LIKE :value')
+            ->orderBy('clientOrder.createdAt', 'DESC')
+            ->addOrderBy('clientOrder.number', 'DESC')
+            ->setParameter('value', ClientOrder::PREFIX_NUMBER . '-' . $date . '%')
+            ->getQuery()
+            ->execute();
+        return $result ? $result[0]['number'] : null;
+    }
+
 }

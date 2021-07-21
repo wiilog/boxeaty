@@ -153,7 +153,6 @@ class SelectController extends AbstractController {
      */
     public function types(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(BoxType::class)->getForSelect($request->query->get("term"));
-
         return $this->json([
             "results" => $results,
         ]);

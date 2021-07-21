@@ -34,6 +34,7 @@ Leaflet.Icon.Default.imagePath = '/build/vendor/leaflet/images/';
 // make all modals static
 BootstrapModal.Default.backdrop = `static`;
 
+$document.ready(() => $('.show-onload').modal("show"));
 //tooltips
 $document.ready(() => $('[data-toggle="tooltip"]').tooltip())
     .arrive(`[data-toggle="tooltip"]`, function() {

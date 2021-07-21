@@ -29,7 +29,7 @@ class ClientOrderLine {
     private ?BoxType $boxType = null;
 
     /**
-     * @ORM\ManyToOne (targetEntity=ClientOrder::class, inversedBy="clientOrderLines")
+     * @ORM\ManyToOne (targetEntity=ClientOrder::class, inversedBy="lines")
      * @ORM\JoinColumn(nullable=false)
      */
     private ?ClientOrder $clientOrder = null;

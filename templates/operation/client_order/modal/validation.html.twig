@@ -1,0 +1,17 @@
+<div id="modal-validation-client-order" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Validation de votre commande</h1>
+            {{ dump(clientOrder) }}
+            <div class="body">
+                {%  include 'operation/client_order/modal/formValidation.html.twig' %}
+            </div>
+            <input id="redirection" type="hidden" value="{{ redirection is defined and redirection ? redirection : 0 }} ">
+            <div class="footer">
+                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="primary">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>

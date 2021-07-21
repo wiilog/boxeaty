@@ -71,7 +71,7 @@ class BoxTypeRepository extends EntityRepository {
 
     public function getForSelect(?string $search) {
         return $this->createQueryBuilder("box_type")
-            ->select("box_type.id AS id, box_type.name AS text")
+            ->select("box_type.id AS id, box_type.name AS text, box_type.price as price")
             ->where("box_type.name LIKE :search")
             ->andWhere("box_type.active = 1")
             ->setMaxResults(15)

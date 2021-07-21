@@ -102,7 +102,11 @@ class ClientRepository extends EntityRepository {
                 ->setParameter("group", $group);
         }
 
-        return $qb->select("client.id AS id, client.name AS text")
+        return $qb->select("client.id AS id, information.workingDayDeliveryRate AS workingRate, information.nonWorkingDayDeliveryRate AS nonWorkingRate, information.serviceCost AS serviceCost, client.address AS address, client.name AS text")
+            ->leftjoin("client.clientOrderInformation", "information")
+            ->andWhere("information.workingDayDeliveryRate IS NOT NULL")
+            ->andWhere("information.nonWorkingDayDeliveryRate IS NOT NULL")
+            ->andWhere("information.serviceCost IS NOT NULL")
             ->andWhere("client.name LIKE :search")
             ->andWhere("client.active = 1")
             ->setMaxResults(15)

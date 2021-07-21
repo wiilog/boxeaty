@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ClientOrder {
 
+const PREFIX_NUMBER = 'CO';
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -79,11 +80,6 @@ class ClientOrder {
     private ?bool $automatic = null;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private ?int $collectBoxNumber = null;
-
-    /**
      * @ORM\Column(type="decimal", precision=8, scale=2)
      */
     private ?float $deliveryPrice = null;
@@ -99,7 +95,7 @@ class ClientOrder {
     private ?User $validator = null;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable = true)
      */
     private ?DateTime $validatedAt = null;
 
@@ -129,6 +125,10 @@ class ClientOrder {
      */
     private ?Delivery $delivery = null;
 
+    /**
+     * @ORM\Column(type="integer", nullable= "true")
+     */
+    private ?int $collectNumber = null;
     /**
      * @ORM\OneToOne(targetEntity=Collect::class, mappedBy="order", cascade={"persist", "remove"})
      */
@@ -261,16 +261,6 @@ class ClientOrder {
 
     public function setAutomatic(bool $automatic): self {
         $this->automatic = $automatic;
-
-        return $this;
-    }
-
-    public function getCollectBoxNumber(): ?int {
-        return $this->collectBoxNumber;
-    }
-
-    public function setCollectBoxNumber(int $collectBoxNumber): self {
-        $this->collectBoxNumber = $collectBoxNumber;
 
         return $this;
     }
@@ -440,6 +430,24 @@ class ClientOrder {
             $this->addLine($clientOrderLine);
         }
 
+        return $this;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getCollectNumber(): ?int
+    {
+        return $this->collectNumber;
+    }
+
+    /**
+     * @param int|null $collectNumber
+     * @return self
+     */
+    public function setCollectNumber(?int $collectNumber): self
+    {
+        $this->collectNumber = $collectNumber;
         return $this;
     }
 }
