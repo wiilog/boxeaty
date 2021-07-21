@@ -76,8 +76,9 @@ class DepositoryRepository extends EntityRepository {
             ->toIterable();
     }
 
-    public function getAll() {
+    public function getAll(): array {
         return $this->createQueryBuilder("depository")
+            ->where("depository.active = 1")
             ->getQuery()
             ->getArrayResult();
     }

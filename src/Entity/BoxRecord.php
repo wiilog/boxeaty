@@ -24,6 +24,12 @@ class BoxRecord {
     private ?DateTime $date = null;
 
     /**
+     * @ORM\ManyToOne(targetEntity=Box::class, inversedBy="cratePackingRecords")
+     * @ORM\JoinColumn(nullable=true)
+     */
+    private ?Box $crate = null;
+
+    /**
      * @ORM\ManyToOne(targetEntity=Box::class, inversedBy="boxRecords")
      * @ORM\JoinColumn(nullable=false)
      */
@@ -160,6 +166,22 @@ class BoxRecord {
 
     public function setTrackingMovement(bool $trackingMovement): self {
         $this->trackingMovement = $trackingMovement;
+        return $this;
+    }
+
+    public function getCrate(): ?Box {
+        return $this->crate;
+    }
+
+    public function setCrate(?Box $crate): self {
+        if($this->crate && $this->crate !== $crate) {
+            $this->crate->removeCratePackingRecord($this);
+        }
+        $this->crate = $crate;
+        if($crate) {
+            $crate->addCratePackingRecord($this);
+        }
+
         return $this;
     }
 

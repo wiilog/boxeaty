@@ -12,6 +12,7 @@ use App\Entity\BoxRecord;
 use App\Helper\FormatHelper;
 use App\Repository\BoxRecordRepository;
 use App\Service\BoxRecordService;
+use App\Service\BoxStateService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -39,7 +40,7 @@ class TrackingMovementController extends AbstractController {
             "initial_movements" => $this->api($request, $manager)->getContent(),
             "movements_order" => BoxRecordRepository::DEFAULT_DATATABLE_ORDER,
             "qualities" => $qualities,
-            "states" => Box::NAMES,
+            "states" => BoxStateService::RECORD_STATES
         ]);
     }
 
@@ -65,7 +66,7 @@ class TrackingMovementController extends AbstractController {
                 "location" => FormatHelper::named($movement->getLocation()),
                 "box" => $movement->getBox()->getNumber(),
                 "quality" => FormatHelper::named($movement->getQuality()),
-                "state" => Box::NAMES[$movement->getState()] ?? "-",
+                "state" => BoxStateService::RECORD_STATES[$movement->getState()] ?? "-",
                 "client" => FormatHelper::named($movement->getClient()),
                 "user" => FormatHelper::user($movement->getUser()),
                 "actions" => $actions,
@@ -158,7 +159,7 @@ class TrackingMovementController extends AbstractController {
             "template" => $this->renderView("tracking/movement/modal/edit.html.twig", [
                 "movement" => $movement,
                 "qualities" => $qualities,
-                "states" => Box::NAMES,
+                "states" => BoxStateService::RECORD_STATES,
             ])
         ]);
     }
@@ -259,7 +260,7 @@ class TrackingMovementController extends AbstractController {
 
         return $exportService->export(function($output) use ($exportService, $movements) {
             foreach ($movements as $movement) {
-                $movement["state"] = Box::NAMES[$movement["state"]] ?? "Inconnu";
+                $movement["state"] = BoxStateService::RECORD_STATES[$movement["state"]] ?? "Inconnu";
                 $exportService->putLine($output, $movement);
             }
         }, "export-tracabilite-$today.csv", ExportService::MOVEMENT_HEADER);

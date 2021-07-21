@@ -1,0 +1,98 @@
+<div id="modal-edit-user" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Détails de la commande</h1>
+
+            <div class="body">
+                <div>
+                    <div class="header-section">
+                        <span class="header-section-label">Liste des Box</span>
+                    </div>
+                    <div class="details-content body">
+                        {% if clientOrder.lines|length > 0 %}
+                            {% for line in clientOrder.lines %}
+                                <div class="row client-order-line">
+                                    <div class="col-auto">
+                                        {% if line.boxType.image %}
+                                            <img src="{{ asset(line.boxType.image.path) }}"
+                                                 class="box-type-image"
+                                                 alt="image"/>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col">
+                                        {{ line.quantity }}&nbsp;&times;&nbsp; Box de type <b>{{ line.boxType.name }}</b>
+                                    </div>
+                                    <div class="col-3">
+                                        T.U. {{ line.boxType.price|format_helper('price') }}
+                                    </div>
+                                    <div class="col-3">
+                                        {{ (line.quantity * line.boxType.price)|format_helper('price') }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="row empty-client-order">
+                                <div class="col-12 text-center">Aucune Box à afficher</div>
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-auto">
+                                {% if clientOrder.deliveryPrice %}
+                                    Livraison <b>{{ clientOrder.deliveryPrice|format_helper('price') }}</b>
+                                {% endif %}
+                            </div>
+                            <div class="col-auto ml-4">
+                                {% if clientOrder.servicePrice %}
+                                    Service <b>{{ clientOrder.servicePrice|format_helper('price') }}</b>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="header-section">
+                        <span class="header-section-label">Évènement</span>
+                    </div>
+                    <div class="details-content body client-order-history">
+                        {% if clientOrder.orderStatusHistory|length > 0 %}
+                            {% for history in clientOrder.orderStatusHistory %}
+                                {% set lineColor = (
+                                    (history.status and history.status.code == constant('App\\Entity\\Status::CODE_ORDER_FINISHED')) ? 'client-order-history-finished' :
+                                    ((history.status and history.status.code == constant('App\\Entity\\Status::CODE_ORDER_TRANSIT')) ? 'client-order-history-transit')
+                                ) %}
+                                <div class="client-order-history-line {{ lineColor }}">
+                                    <div class="client-order-history-date">
+                                        <div class="title">{{ history.changedAt|date('d/m/Y') }}</div>
+                                        <div class="subtitle">{{ history.changedAt|date('H:i') }}</div>
+                                    </div>
+                                    <div class="client-order-history-status {{ loop.first ? 'first' }}">
+                                        {% if history.status %}
+                                            <div class="title">{{ history.status.name }}</div>
+                                        {% endif %}
+                                        {% if history.justification is not empty %}
+                                            <div class="subtitle">{{ history.justification }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="row empty-client-order">
+                                <div class="col-12 text-center">Aucune évènement</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    <div class="header-section">
+                        <span class="header-section-label">Preuve de livraison et collecte</span>
+                    </div>
+                    <div class="details-content body">
+{# TODO #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

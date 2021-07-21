@@ -37,7 +37,7 @@ class BoxRecordService {
         return [$tracking ?? null, $record ?? null];
     }
 
-    private function createBoxRecord(Box $box, bool $trackingMovement): BoxRecord {
+    public function createBoxRecord(Box $box, bool $trackingMovement): BoxRecord {
         return (new BoxRecord())
             ->setDate(new DateTime())
             ->setTrackingMovement($trackingMovement)

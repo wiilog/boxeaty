@@ -77,7 +77,7 @@ class ClientOrderInformation {
     private $depository;
 
     /**
-     * @ORM\OneToOne(targetEntity=Client::class, cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity=Client::class, mappedBy="clientOrderInformation", cascade={"persist", "remove"})
      */
     private $client;
 

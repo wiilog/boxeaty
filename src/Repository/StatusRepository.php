@@ -19,7 +19,7 @@ class StatusRepository extends EntityRepository {
             ->where("status.category = :category")
             ->andWhere("status.name LIKE :search")
             ->setMaxResults(15)
-            ->setParameter("category", Status::ORDER)
+            ->setParameter("category", Status::CATEGORY_ORDER)
             ->setParameter("search", "%$search%")
             ->getQuery()
             ->getArrayResult();

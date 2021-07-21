@@ -6,6 +6,7 @@ use App\Entity\Box;
 use App\Entity\Depository;
 use App\Entity\User;
 use App\Helper\QueryHelper;
+use App\Service\BoxStateService;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -72,7 +73,7 @@ class BoxRepository extends EntityRepository {
         return $qb->select("box.id AS id, box.number AS text, type.price AS price")
             ->join("box.type", "type")
             ->andWhere("box.number LIKE :search")
-            ->andWhere("box.state = '" . Box::CLIENT . "'")
+            ->andWhere("box.state = '" . BoxStateService::STATE_BOX_CLIENT . "'")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()

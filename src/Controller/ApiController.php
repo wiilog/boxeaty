@@ -2,13 +2,19 @@
 
 namespace App\Controller;
 
+use App\Annotation\Authenticated;
 use App\Entity\Box;
 use App\Entity\Client;
+use App\Entity\ClientOrder;
+use App\Entity\ClientOrderLine;
+use App\Entity\DeliveryRound;
 use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
 use App\Entity\User;
+use App\Helper\FormatHelper;
+use App\Service\BoxStateService;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use WiiCommon\Helper\Stream;
 use WiiCommon\Helper\StringHelper;
@@ -27,6 +33,12 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/api")
  */
 class ApiController extends AbstractController {
+
+    private ?User $user = null;
+
+    public function setUser(?User $user): void {
+        $this->user = $user;
+    }
 
     /**
      * @Route("/kiosk/ping", name="api_kiosk_ping")
@@ -143,7 +155,7 @@ class ApiController extends AbstractController {
             $oldState = $box->getState();
             $oldComment = $box->getComment();
 
-            $box->setState(Box::UNAVAILABLE)
+            $box->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
                 ->setLocation($kiosk->getDeporte())
                 ->setComment($content->comment ?? null);
 
@@ -184,7 +196,7 @@ class ApiController extends AbstractController {
 
         $box = $manager->getRepository(Box::class)->findOneBy([
             "number" => $content->number,
-            "state" => Box::CONSUMER,
+            "state" => BoxStateService::STATE_BOX_CONSUMER,
         ]);
 
         if ($box && $box->getType() && $box->getOwner()) {
@@ -213,7 +225,7 @@ class ApiController extends AbstractController {
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
         $box = $manager->getRepository(Box::class)->findOneBy([
             "number" => $content->number,
-            "state" => Box::CONSUMER,
+            "state" => BoxStateService::STATE_BOX_CONSUMER,
         ]);
 
         if ($box
@@ -228,7 +240,7 @@ class ApiController extends AbstractController {
             $box
                 ->setCanGenerateDepositTicket(true)
                 ->setUses($box->getUses() + 1)
-                ->setState(Box::UNAVAILABLE)
+                ->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
                 ->setLocation($kiosk)
                 ->setComment($content->comment ?? null);
 
@@ -426,9 +438,13 @@ class ApiController extends AbstractController {
         $content = json_decode($request->getContent());
 
         $user = $manager->getRepository(User::class)->findOneBy(["email" => $content->email]);
-        if($user && $hasher->isPasswordValid($user, $content->password)) {
+        if ($user && $hasher->isPasswordValid($user, $content->password)) {
+            $user->setApiKey(bin2hex(random_bytes(16)));
+            $manager->flush();
+
             return $this->json([
                 "success" => true,
+                "token" => $user->getApiKey(),
             ]);
         }
 
@@ -440,9 +456,62 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/mobile/depositories", name="api_mobile_depositories")
+     * @Authenticated()
      */
     public function depositories(EntityManagerInterface $manager): Response {
         return $this->json($manager->getRepository(Depository::class)->getAll());
+    }
+
+    /**
+     * @Route("/mobile/delivery-rounds", name="api_mobile_delivery_rounds")
+     * @Authenticated()
+     */
+    public function deliveryRounds(EntityManagerInterface $manager): Response {
+        $now = new DateTime("today midnight");
+        $rounds = $manager->getRepository(DeliveryRound::class)->findAwaitingDeliverer($this->user);
+
+        $serialized = Stream::from($rounds)
+            ->map(fn(DeliveryRound $round) => [
+                "id" => $round->getId(),
+                "number" => $round->getNumber(),
+                "status" => $round->getStatus()->getCode(),
+                "depository" => FormatHelper::named($round->getDepository()),
+                "expected_date" => Stream::from($round->getOrders())
+                    ->map(fn(ClientOrder $order) => $order->getExpectedDelivery())
+                    ->sort()
+                    ->first(),
+                "crate_amount" => Stream::from($round->getOrders())
+                    ->map(fn(ClientOrder $order) => $order->getCratesAmount())
+                    ->sum(),
+                "token_amount" => Stream::from($round->getOrders())
+                    ->map(fn(ClientOrder $order) => $order->getClient()->getClientOrderInformation()->getTokenAmount())
+                    ->sum(),
+                "orders" => $round->getOrders()->map(fn(ClientOrder $order) => [
+                    "id" => $order->getId(),
+                    "client" => FormatHelper::named($order->getClient()),
+                    "lines" => $order->getLines()->map(fn(ClientOrderLine $line) => [
+                        "box_type" => [
+                            "id" => $line->getBoxType()->getId(),
+                            "name" => $line->getBoxType()->getName(),
+                        ],
+                        "quantity" => $line->getQuantity(),
+                    ])
+                ]),
+                "order" => $round->getOrder(),
+            ])
+            ->sort(fn(array $a, array $b) => $a["expected_date"] <=> $b["expected_date"])
+            ->toArray();
+
+        $result = [];
+        foreach ($serialized as $round) {
+            if($round["expected_date"] < $now) {
+                $result[$now->format("Y-m-d")][] = $round;
+            } else {
+                $result[$round["expected_date"]->format("Y-m-d")][] = $round;
+            }
+        }
+
+        return $this->json($result);
     }
 
     /**
