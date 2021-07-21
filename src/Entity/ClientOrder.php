@@ -13,7 +13,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ClientOrder {
 
-const PREFIX_NUMBER = 'CO';
+    public const PREFIX_NUMBER = 'CO';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -80,6 +81,11 @@ const PREFIX_NUMBER = 'CO';
     private ?bool $automatic = null;
 
     /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private ?int $cratesAmount = null;
+
+    /**
      * @ORM\Column(type="decimal", precision=8, scale=2)
      */
     private ?float $deliveryPrice = null;
@@ -95,7 +101,7 @@ const PREFIX_NUMBER = 'CO';
     private ?User $validator = null;
 
     /**
-     * @ORM\Column(type="datetime", nullable = true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private ?DateTime $validatedAt = null;
 
@@ -129,6 +135,7 @@ const PREFIX_NUMBER = 'CO';
      * @ORM\Column(type="integer", nullable= "true")
      */
     private ?int $collectNumber = null;
+
     /**
      * @ORM\OneToOne(targetEntity=Collect::class, mappedBy="order", cascade={"persist", "remove"})
      */
@@ -265,6 +272,17 @@ const PREFIX_NUMBER = 'CO';
         return $this;
     }
 
+
+    public function getCratesAmount(): ?float {
+        return $this->cratesAmount;
+    }
+
+    public function setCratesAmount(float $cratesAmount): self {
+        $this->cratesAmount = $cratesAmount;
+
+        return $this;
+    }
+
     public function getDeliveryPrice(): ?float {
         return $this->deliveryPrice;
     }
@@ -377,7 +395,6 @@ const PREFIX_NUMBER = 'CO';
         return $this;
     }
 
-
     public function getDeliveryRound(): ?DeliveryRound {
         return $this->deliveryRound;
     }
@@ -433,20 +450,11 @@ const PREFIX_NUMBER = 'CO';
         return $this;
     }
 
-    /**
-     * @return int|null
-     */
-    public function getCollectNumber(): ?int
-    {
+    public function getCollectNumber(): ?int {
         return $this->collectNumber;
     }
 
-    /**
-     * @param int|null $collectNumber
-     * @return self
-     */
-    public function setCollectNumber(?int $collectNumber): self
-    {
+    public function setCollectNumber(?int $collectNumber): self {
         $this->collectNumber = $collectNumber;
         return $this;
     }

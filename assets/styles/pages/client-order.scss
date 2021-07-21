@@ -159,3 +159,71 @@ input{
     }
 }
 
+.client-order-history {
+    .client-order-history-line {
+        display: flex;
+
+        & > * {
+            flex: 1;
+            padding: 1rem;
+            color: $black;
+
+            .title {
+                font-size: 20px;
+            }
+
+            .subtitle {
+                font-size: 17px;
+            }
+        }
+
+        .client-order-history-date {
+            text-align: right;
+        }
+
+        &.client-order-history-finished .client-order-history-status {
+            &:before,
+            &:after {
+                background-color: $grey-order-finished;
+            }
+        }
+        &.client-order-history-transit .client-order-history-status {
+            &:before,
+            &:after {
+                background-color: $green;
+            }
+        }
+
+        .client-order-history-status {
+            position: relative;
+
+            &:before,
+            &:after {
+                content: "";
+                position: absolute;
+                background-color: $blue;
+            }
+
+            &.first:before {
+                width: 0;
+            }
+
+            &:before {
+                left: 0;
+                bottom: calc(100% - 20px);
+                width: 2px;
+                height: 100%;
+            }
+
+            &:after {
+                z-index: 1;
+                width: 16px;
+                height: 16px;
+                border-radius: 8px;
+                left: -7px;
+                top: 20px;
+            }
+        }
+    }
+}
+

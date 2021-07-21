@@ -30,11 +30,8 @@ export default class AJAX {
         return ajax;
     }
 
-    json(body, callback) {
-        if(typeof body === 'function') {
-            callback = body;
-            body = undefined;
-        } else if(!(body instanceof FormData) && (typeof body === `object` || Array.isArray(body))) {
+    json(body) {
+        if(!(body instanceof FormData) && (typeof body === `object` || Array.isArray(body))) {
             body = JSON.stringify(body);
         }
 
@@ -69,16 +66,12 @@ export default class AJAX {
             })
             .then((json) => {
                 treatFetchCallback(json);
-
-                if(callback) {
-                    callback(json);
-                }
-
                 return json;
             })
             .catch(error => {
                 console.error(error);
                 Flash.add("danger", `Une erreur est survenue lors du traitement de votre requête par le serveur`);
+                throw error;
             });
     }
 

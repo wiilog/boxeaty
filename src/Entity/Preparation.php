@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PreparationRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -34,6 +36,15 @@ class Preparation {
      * @ORM\JoinColumn(nullable=false)
      */
     private ?Depository $depository;
+
+    /**
+     * @ORM\OneToMany(targetEntity=PreparationLine::class, mappedBy="preparation")
+     */
+    private Collection $lines;
+
+    public function __construct() {
+        $this->lines = new ArrayCollection();
+    }
 
     public function getId(): ?int {
         return $this->id;
@@ -75,6 +86,45 @@ class Preparation {
         $this->depository = $depository;
         if ($depository) {
             $depository->addPreparation($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|PreparationLine[]
+     */
+    public function getLines(): Collection {
+        return $this->lines;
+    }
+
+    public function addLine(PreparationLine $line): self {
+        if (!$this->lines->contains($line)) {
+            $this->lines[] = $line;
+            $line->setPreparation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLine(PreparationLine $line): self {
+        if ($this->lines->removeElement($line)) {
+            if ($line->getPreparation() === $this) {
+                $line->setPreparation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setLines(?array $lines): self {
+        foreach($this->getLines()->toArray() as $line) {
+            $this->removeLine($line);
+        }
+
+        $this->lines = new ArrayCollection();
+        foreach($lines as $line) {
+            $this->addLine($line);
         }
 
         return $this;

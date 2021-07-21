@@ -30,10 +30,10 @@
         <label>
             État
             <select name="state" class="data" data-s2 data-placeholder="Sélectionnez un état">
-                {% for state, label in constant('App\\Entity\\Box::NAMES') %}
-                <option value="{{ state }}" {{ box.state == state ? 'selected' }}>
-                    {{ label }}
-                </option>
+                {% for state, label in constant('App\\Service\\BoxStateService::BOX_STATES') %}
+                    <option value="{{ state }}" {{ box.state == state ? 'selected' }}>
+                        {{ label }}
+                    </option>
                 {% endfor %}
             </select>
         </label>

@@ -69,25 +69,27 @@ function addInput(element, code) {
             number: code
         };
 
-        AJAX.route(GET, `counter_order_info`, params).json(response => {
-            if(!response.success) {
-                return;
-            }
+        AJAX.route(GET, `counter_order_info`, params)
+            .json()
+            .then(response => {
+                if(!response.success) {
+                    return;
+                }
 
-            const $totalPrice = $modal.find(`input[name="price"]`);
-            const modification = type === `box` ? response.price : -response.price;
+                const $totalPrice = $modal.find(`input[name="price"]`);
+                const modification = type === `box` ? response.price : -response.price;
 
-            updatePriceInput($totalPrice, Math.abs(modification));
+                updatePriceInput($totalPrice, Math.abs(modification));
 
-            $container.append(`
-                <div class="item">
-                    <input type="text" name="items" class="data-array mt-1" value="${code}" data-price="${modification}" readonly>
-                    <span class="floating-icon delete-item">
-                        <i class="fas fa-times"></i>
-                    </span>
-                </div>
-            `);
-        });
+                $container.append(`
+                    <div class="item">
+                        <input type="text" name="items" class="data-array mt-1" value="${code}" data-price="${modification}" readonly>
+                        <span class="floating-icon delete-item">
+                            <i class="fas fa-times"></i>
+                        </span>
+                    </div>
+                `);
+            });
     } else {
         if(type === `box`) {
             Flash.add(`danger`, `Cette Box a déjà été scannée`, true);

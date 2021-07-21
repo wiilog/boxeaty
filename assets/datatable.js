@@ -71,9 +71,10 @@ export function initDatatable(table, config) {
             });
         }
 
-        ajax.json(content, data => {
-            callback(data);
-        });
+        ajax.json(content)
+            .then(data => {
+                callback(data);
+            });
     };
 
     const initial = $table.data(`initial-data`);
