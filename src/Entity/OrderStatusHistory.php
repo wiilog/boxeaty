@@ -31,7 +31,7 @@ class OrderStatusHistory {
     private ?Status $status = null;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     private ?string $justification = null;
 
