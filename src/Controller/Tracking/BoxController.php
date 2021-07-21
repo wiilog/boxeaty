@@ -11,9 +11,9 @@ use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\BoxRecord;
-use App\Entity\Status;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
+use App\Service\BoxStateService;
 use WiiCommon\Helper\Stream;
 use App\Repository\BoxRepository;
 use App\Service\BoxRecordService;
@@ -60,7 +60,7 @@ class BoxController extends AbstractController {
                 "creationDate" => FormatHelper::datetime($box->getCreationDate()),
                 "isBox" => $box->isBox() ? 'Oui' : 'Non',
                 "location" => FormatHelper::named($box->getLocation()),
-                "state" => Box::NAMES[$box->getState()] ?? "-",
+                "state" => BoxStateService::BOX_STATES[$box->getState()] ?? "-",
                 "quality" => FormatHelper::named($box->getQuality()),
                 "owner" => FormatHelper::named($box->getOwner()),
                 "type" => FormatHelper::named($box->getType()),
@@ -283,7 +283,7 @@ class BoxController extends AbstractController {
 
         return $exportService->export(function($output) use ($exportService, $boxes) {
             foreach ($boxes as $box) {
-                $box["state"] = Box::NAMES[$box["state"]];
+                $box["state"] = BoxStateService::BOX_STATES[$box["state"]];
                 $exportService->putLine($output, $box);
             }
         }, "export-box-$today.csv", ExportService::BOX_HEADER);
@@ -303,23 +303,21 @@ class BoxController extends AbstractController {
 
         $boxMovementsResult = $boxRecordRepository->getBoxRecords($box, $start, $length, $search);
 
-
-
         return $this->json([
             'success' => true,
             'isTail' => ($start + $length) >= $boxMovementsResult['totalCount'],
             'data' => Stream::from($boxMovementsResult['data'])
                 ->map(fn(array $movement) => [
                     'comment' => str_replace("Powered by Froala Editor", "", $movement['comment']),
-                    'color' => (isset($movement['state']) && isset(Box::LINKED_COLORS[$movement['state']]))
-                        ? Box::LINKED_COLORS[$movement['state']]
-                        : Box::DEFAULT_COLOR,
-                    'dateD' => isset($movement['date']) ? $movement['date']->format("d") : '',
-                    'dateM' => isset($movement['date']) ? FormatHelper::MONTHS[$movement['date']->format('n')] : '',
-                    'dateY' => isset($movement['date']) ? $movement['date']->format("Y") : '',
-                    'dateHIS' => isset($movement['date']) ? $movement['date']->format('H:i') : 'Non définie',
-                    'state' => (isset($movement['state']) && isset(Box::NAMES[$movement['state']]))
-                        ? Box::NAMES[$movement['state']]
+                    'color' => (isset($movement['state']) && isset(BoxStateService::LINKED_COLORS[$movement['state']]))
+                        ? BoxStateService::LINKED_COLORS[$movement['state']]
+                        : BoxStateService::DEFAULT_COLOR,
+                    'date' => isset($movement['date'])
+                        ? ($movement['date']->format("d") . ' ' . FormatHelper::MONTHS[$movement['date']->format('n')] . ' ' . $movement['date']->format("Y"))
+                        : '',
+                    'time' => isset($movement['date']) ? $movement['date']->format('H:i') : 'Non définie',
+                    'state' => (isset($movement['state']) && isset(BoxStateService::BOX_STATES[$movement['state']]))
+                        ? BoxStateService::BOX_STATES[$movement['state']]
                         : '-',
                     'operator' => $movement['operator'] ?? "",
                     'location' => $movement['location'] ?? "",
@@ -335,8 +333,6 @@ class BoxController extends AbstractController {
     public function addBoxInCrate(Request $request,
                                   EntityManagerInterface $manager,
                                     BoxRecordService $service){
-        dump($request->query->all());
-
         /** @var Box $crate */
         $crate = $manager->getRepository(Box::class)->find($request->query->get("crate"));
 
@@ -408,7 +404,7 @@ class BoxController extends AbstractController {
             $box,
             [
                 'location' => null,
-                'state' => Box::NAMES[$box->getState()],
+                'state' => BoxStateService::BOX_STATES[$box->getState()],
                 'comment' => null
             ],
             $this->getUser()
@@ -424,13 +420,13 @@ class BoxController extends AbstractController {
             $manager->persist($record);
         }
 
-        $crate= $box->getCrate();
+        $crate = $box->getCrate();
         $box->setCrate(null);
         $manager->flush();
 
         return $this->json([
             "success" => true,
-            "template" => $this->renderView("tracking/box/box_in_crate.html.twig",["box" => $crate]),
+            "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $crate]),
             "message" => "Box <strong>{$box->getNumber()}</strong> supprimée avec succès"
         ]);
     }

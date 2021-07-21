@@ -41,11 +41,11 @@ $(document).ready(() => {
                 box: $(this).data('id'),
                 crate: $('#box-id').val()
             });
-            Modal.load(ajax , {
+            Modal.load(ajax, {
                 success: (response) => {
-                $('.refresh-after-add').replaceWith(response.template);
-            }});
-        });
+                    $('.refresh-after-add').replaceWith(response.template);
+                }});
+            });
     })
 
     $('.comment-search').on('change', function () {
@@ -100,7 +100,7 @@ function getBoxTrackingMovements(start = 0) {
                     $('.history-wrapper').empty();
                 }
                 const data = (result.data || []);
-                const historyLines = data.map(({state, comment, dateD, dateM, dateY, dateHIS, operator, location, depository}) => {
+                const historyLines = data.map(({state, comment, date, time, operator, location, depository}) => {
                     const $rawComment = $($.parseHTML(comment));
                     const trimmedComment = $rawComment.text().trim();
 
@@ -108,26 +108,30 @@ function getBoxTrackingMovements(start = 0) {
                     if(trimmedComment.trim()) {
                         $comment = `<div class="timeline-line-comment">${comment}</div>`;
                     }
-                    const $getOperator = $($.parseHTML(operator));
-                    const $getLocation = $($.parseHTML(location));
-                    let $operatorName = $getOperator.text();
-                    let $locationName = $getLocation.text();
-                    let $operator = ``;
-                    if($operatorName){
-                        $operator = `${operator}`;
-                        if($locationName){
-                            $operator = `${operator} - ${depository} - ${location}`;
+
+                    let subtitle;
+                    if(operator){
+                        subtitle = `Opérateur : ${operator}`;
+                    }
+                    if (depository) {
+                        if (subtitle) {
+                            subtitle += ' - ';
                         }
+                        subtitle += depository;
+                    }
+                    if (location) {
+                        if (subtitle) {
+                            subtitle += ' - ';
+                        }
+                        subtitle += location;
                     }
 
                     return `
                         <div class="timeline-line d-flex">
-                            <span class="timeline-line-marker"><strong>${dateD} ${dateM} ${dateY}</strong><p>${dateHIS}</p></span>
+                            <span class="timeline-line-marker"><strong>${date}</strong><p>${time}</p></span>
                             <div class="timeline-line-title ml-3">
                                 <div class="d-flex"><strong>${state}</strong>${$comment}</div>
-                                <p>
-                                Opérateur : ${$operator}
-                                </p>
+                                <p>${subtitle}</p>
                             </div>
                             
                         </div>

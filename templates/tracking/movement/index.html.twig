@@ -23,7 +23,7 @@
         </table>
     </div>
 
-    {% include 'tracking/movement/modal/new.html.twig' with {movement: new_movement} %}
+    {% include 'tracking/movement/modal/new.html.twig' with {movement: new_movement, qualities: qualities, states: states} %}
     {% include 'tracking/movement/modal/delete.html.twig' %}
 {% endblock %}
 

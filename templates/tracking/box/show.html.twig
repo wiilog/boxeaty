@@ -23,7 +23,7 @@
             </div>
             <p>Emplacement : <strong>{{ box.location ? box.location.name }}</strong></p>
             <p>Qualité : <strong>{{ box.quality ? box.quality.name }}</strong></p>
-            <p>Etat : <strong>{{ box.state ? constant('App\\Entity\\Box::NAMES')[box.state] }}</strong></p>
+            <p>Etat : <strong>{{ box.state ? constant('App\\Service\\BoxStateService::BOX_STATES')[box.state] }}</strong></p>
             <p>Prix : <strong>{{ box.type ? box.type.price|format_helper('price') }}</strong></p>
             <p>Propriétaire : <strong>{{ box.owner ? box.owner.name }}</strong></p>
             {% if clientOrderInProgress %}
@@ -47,7 +47,7 @@
                     </div>
                 </div>
             {% endif %}
-            <div class="history box-details">
+            <div class="history box-details {{ box.box ? 'mt-0' }}">
                 <div class="d-flex flex-md-row flex-column justify-content-between mb-3">
                     {% if not box.box %}
                         <h3 class="mb-0">Historique de la Caisse</h3>

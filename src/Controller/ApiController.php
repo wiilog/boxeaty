@@ -14,6 +14,7 @@ use App\Entity\GlobalSetting;
 use App\Entity\Location;
 use App\Entity\User;
 use App\Helper\FormatHelper;
+use App\Service\BoxStateService;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use WiiCommon\Helper\Stream;
 use WiiCommon\Helper\StringHelper;
@@ -154,7 +155,7 @@ class ApiController extends AbstractController {
             $oldState = $box->getState();
             $oldComment = $box->getComment();
 
-            $box->setState(Box::UNAVAILABLE)
+            $box->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
                 ->setLocation($kiosk->getDeporte())
                 ->setComment($content->comment ?? null);
 
@@ -195,7 +196,7 @@ class ApiController extends AbstractController {
 
         $box = $manager->getRepository(Box::class)->findOneBy([
             "number" => $content->number,
-            "state" => Box::CONSUMER,
+            "state" => BoxStateService::STATE_BOX_CONSUMER,
         ]);
 
         if ($box && $box->getType() && $box->getOwner()) {
@@ -224,7 +225,7 @@ class ApiController extends AbstractController {
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
         $box = $manager->getRepository(Box::class)->findOneBy([
             "number" => $content->number,
-            "state" => Box::CONSUMER,
+            "state" => BoxStateService::STATE_BOX_CONSUMER,
         ]);
 
         if ($box
@@ -239,7 +240,7 @@ class ApiController extends AbstractController {
             $box
                 ->setCanGenerateDepositTicket(true)
                 ->setUses($box->getUses() + 1)
-                ->setState(Box::UNAVAILABLE)
+                ->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
                 ->setLocation($kiosk)
                 ->setComment($content->comment ?? null);
 

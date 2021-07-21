@@ -13,36 +13,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Box {
 
-    public const AVAILABLE = 1;
-    public const UNAVAILABLE = 2;
-    public const CONSUMER = 3;
-    public const CLIENT = 4;
-    public const OUT = 5;
-    public const PACKING = 6;
-    public const UNPACKING = 7;
-
-    public const NAMES = [
-        self::AVAILABLE => "Disponible",
-        self::UNAVAILABLE => "Indisponible",
-        self::CONSUMER => "Consommateur",
-        self::CLIENT => "Client",
-        self::OUT => "Sorti",
-        self::PACKING => "Conditionné",
-        self::UNPACKING => "Déconditionné",
-    ];
-
-    public const LINKED_COLORS = [
-        self::AVAILABLE => "success",
-        self::UNAVAILABLE => "danger",
-        self::CONSUMER => "primary",
-        self::CLIENT => "warning",
-        self::OUT => "secondary",
-        self::PACKING => "info",
-        self::UNPACKING => "dark",
-    ];
-
-    public const DEFAULT_COLOR = 'dark';
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
