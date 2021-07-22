@@ -1,5 +1,16 @@
 @import "../variables";
 
+
+.box-type-image {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+}
+
+.cartBoxNumber {
+    min-width: initial !important;
+}
+
 .form-switch {
     padding-left: 0em;
 }
@@ -148,12 +159,6 @@ input{
         margin-bottom: .30rem;
         padding-top: .5rem;
         padding-bottom: .5rem;
-
-        .box-type-image {
-            width: 30px;
-            height: 30px;
-            object-fit: cover;
-        }
     }
 }
 

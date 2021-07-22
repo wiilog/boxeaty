@@ -33,10 +33,10 @@ class ClientOrderController extends AbstractController {
     public CounterOrderService $service;
 
     /**
-     * @Route("/liste/{redirection}", name="client_orders_list", options={"expose": true})
+     * @Route("/liste", name="client_orders_list", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENT_ORDERS, ROLE::VIEW_ALL_ORDERS)
      */
-    public function list(Request $request, EntityManagerInterface $manager, $redirection = 0): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         $deliveryMethod = $manager->getRepository(DeliveryMethod::class);
         $orderTypes = $manager->getRepository(OrderType::class);
         $now = date('Y-m-d');
@@ -47,8 +47,7 @@ class ClientOrderController extends AbstractController {
             "deliveryMethods" => $deliveryMethod->findBy([]),
             "orderTypes"=> $orderTypes->findBy([]),
             "initial_orders" => $this->api($request, $manager)->getContent(),
-            "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER,
-            "redirection" => $redirection,
+            "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER
         ]);
     }
 

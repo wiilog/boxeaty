@@ -4,7 +4,7 @@ import Modal from "../modal";
 import AJAX, {GET} from "../ajax";
 import $ from "jquery";
 import Scan from "../scan";
-import {SECONDS, String, Time} from "../util";
+import {SECONDS, StringHelper, Time} from "../util";
 
 import "../styles/pages/counter-order.scss";
 import Flash from "../flash";
@@ -12,9 +12,7 @@ import Flash from "../flash";
 $document.ready(() => {
     $(`#scan-box`).click(() => openBoxesModal());
     $(`#scan-deposit-ticket`).click(() => openDepositTicketModal());
-    $(`#new-counter-order`).click(() => window.location.href = Routing.generate(`home`, {
-        redirection: '1'
-    }));
+    $(`#new-counter-order`).click(() => window.location.href = Routing.generate(`home`, { new: '1' }));
 
     $document.arrive(`[data-manual]`, function() {
         $(this).on(`change`, _ => addInput(this, Number(this.value)));
@@ -105,13 +103,13 @@ function addInput(element, code) {
 
 function openBoxesModal() {
     Modal.load(AJAX.route(`GET`, `counter_order_boxes_template`, {
-        session: String.random(16),
+        session: StringHelper.random(16),
     }));
 }
 
 function openDepositTicketModal() {
     Modal.load(AJAX.route(`GET`, `counter_order_deposit_tickets_template`, {
-        session: String.random(16),
+        session: StringHelper.random(16),
     }));
 }
 
@@ -119,5 +117,5 @@ function updatePriceInput($input, delta) {
     const priceValue = Number($input.data('raw-value')) || 0;
     const newPriceValue = priceValue + delta;
     $input.data('raw-value', newPriceValue);
-    $input.val(newPriceValue.toFixed(2).replace('.', ','));
+    $input.val(StringHelper.formatPrice(newPriceValue));
 }

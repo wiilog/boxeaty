@@ -43,6 +43,10 @@ export default class Modal {
                 //close all select2 elements
                 $(this).select2('close');
             });
+
+            if(config.afterHidden) {
+                config.afterHidden(modal);
+            }
         });
 
         modal.element.on('shown.bs.modal', () => {
@@ -94,6 +98,11 @@ export default class Modal {
 
         $modal.on('hidden.bs.modal', function() {
             $(this).remove();
+
+            modal.element.find('[data-s2-initialized]').each(function() {
+                //close all select2 elements
+                $(this).select2('close');
+            });
 
             if(config.afterHidden) {
                 config.afterHidden(modal);

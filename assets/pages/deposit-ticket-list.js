@@ -4,7 +4,7 @@ import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
-import {String} from "../util";
+import {StringHelper} from "../util";
 
 $(document).ready(() => {
     const newDepositTicketModal = Modal.static(`#modal-new-deposit-ticket`, {
@@ -18,7 +18,7 @@ $(document).ready(() => {
     });
 
     $(`.new-deposit-ticket`).click(() => {
-        newDepositTicketModal.elem().find(`[name="number"]`).val(String.random(5))
+        newDepositTicketModal.elem().find(`[name="number"]`).val(StringHelper.random(5))
         newDepositTicketModal.open()
     });
 

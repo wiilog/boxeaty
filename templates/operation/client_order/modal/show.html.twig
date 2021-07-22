@@ -24,10 +24,10 @@
                                         {{ line.quantity }}&nbsp;&times;&nbsp; Box de type <b>{{ line.boxType.name }}</b>
                                     </div>
                                     <div class="col-3">
-                                        T.U. {{ line.boxType.price|format_helper('price') }}
+                                        T.U. {{ line.unitPrice|format_helper('price') }}
                                     </div>
                                     <div class="col-3">
-                                        {{ (line.quantity * line.boxType.price)|format_helper('price') }}
+                                        {{ (line.quantity * line.unitPrice)|format_helper('price') }}
                                     </div>
                                 </div>
                             {% endfor %}

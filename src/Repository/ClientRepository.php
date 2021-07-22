@@ -95,8 +95,23 @@ class ClientRepository extends EntityRepository {
                                  ?bool $costInformationNeeded = false) {
         $qb = $this->createQueryBuilder("client");
 
-        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
-            $qb->andWhere("client.group IN (:groups)")
+        $exprBuilder = $qb->expr();
+
+        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $userClients = $user->getClients();
+
+            if (!$userClients->isEmpty()) {
+                $qb
+                    ->andWhere($exprBuilder->orX(
+                        'client IN (:userClients)',
+                        'linkedMultiSite IN (:userClients)'
+                    ))
+                    ->leftJoin('client.linkedMultiSite', 'linkedMultiSite')
+                    ->setParameter('userClients', $userClients);
+            }
+
+            $qb
+                ->andWhere("client.group IN (:groups)")
                 ->setParameter("groups", $user->getGroups());
         }
 

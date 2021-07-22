@@ -18,7 +18,7 @@ export class Time {
 
 export const UPPERCASE_AND_DIGITS = `ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`;
 
-export class String {
+export class StringHelper {
     static random(length, set = UPPERCASE_AND_DIGITS) {
         let result = ``;
         for(let i = 0; i < length; i++) {
@@ -26,6 +26,15 @@ export class String {
         }
 
         return result;
+    }
+
+    static formatPrice(floatPrice) {
+        const price = floatPrice || 0;
+        const priceStr = price.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        return `${priceStr} €`;
     }
 }
 
