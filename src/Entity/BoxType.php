@@ -52,7 +52,7 @@ class BoxType {
     private Collection $clientBoxTypes;
 
     /**
-     * @ORM\OneToMany(targetEntity=ClientOrderLine::class, mappedBy="boxType")
+     * @ORM\OneToMany(targetEntity=ClientOrderLine::class, mappedBy="boxType", cascade={"persist", "remove"})
      */
     private Collection $clientOrderLines;
 

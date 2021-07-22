@@ -14,6 +14,7 @@ use App\Entity\Status;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\ClientOrderRepository;
+use App\Service\ClientOrderService;
 use App\Service\CounterOrderService;
 use App\Service\UniqueNumberService;
 use DateTime;
@@ -105,16 +106,17 @@ class ClientOrderController extends AbstractController {
     }
 
     /**
-     * @Route("/validation/{clientOrder}", name="client_order_validate_template", options={"expose": true})
+     * @Route("/validate/template", name="client_order_validate_template", options={"expose": true})
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
     public function validateTemplate(Request $request,
                         EntityManagerInterface $entityManager,
-                        UniqueNumberService $uniqueNumberService,
-                        ClientOrder $clientOrder): Response {
+                         ClientOrderService $clientOrderService): Response {
 
         return $this->json([
-            "submit" => $this->generateUrl("client_order_validate", ["clientOrder" => $clientOrder ->getId(),]),
+            "submit" => $this->generateUrl("client_order_new", [
+                "clientOrder" => $clientOrder ->getId(),
+                ]),
             "template" => $this->renderView("operation/client_order/modal/validation.html.twig", [
                 "clientOrder" => $clientOrder,
             ])
@@ -122,7 +124,7 @@ class ClientOrderController extends AbstractController {
     }
 
     /**
-     * @Route("/validation/{clientOrder}", name="client_order_validate", options={"expose": true})
+     * @Route("/validate/{clientOrder}", name="client_order_validate", options={"expose": true})
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
     public function validate(){
@@ -130,72 +132,24 @@ class ClientOrderController extends AbstractController {
     }
 
     /**
-     * @Route("/nouvelle", name="client_order_new", options={"expose": true})
+     * @Route("/new", name="client_order_new", options={"expose": true})
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
     public function new(Request $request,
                         EntityManagerInterface $entityManager,
-                        UniqueNumberService $uniqueNumberService): Response {
+                        ClientOrderService $clientOrderService): Response {
 
-        $form = Form::create();
-        $content = (object)$request->request->all();
-        $statusRepository = $entityManager->getRepository(Status::class);
-        $typeRepository = $entityManager->getRepository(OrderType::class);
-        $clientRepository = $entityManager->getRepository(Client::class);
-        $clientOrderInformationRepository = $entityManager->getRepository(ClientOrderInformation::class);
-        $deliveryMethodRepository = $entityManager->getRepository(DeliveryMethod::class);
+        $clientOrder = $clientOrderService->createClientOrder($this->getUser(), $entityManager, $request);
+       // $date = $clientOrder->getExpectedDelivery();
 
-        $deliveryMethod = $deliveryMethodRepository->findOneBy(["id"=>$content->deliveryMethod]);
-        $requester = $this->getUser();
-        $status = $statusRepository->findOneBy(['code'=>'ORDER_PLANNED']);
-        $client = $clientRepository->findOneBy(["id"=>$content->client]);
-        $information = $clientOrderInformationRepository->findOneBy(["client"=>$client->getId()]);
-        if(isset($information)){
-            $deliveryRate = $information->getWorkingDayDeliveryRate();
-            $serviceCost = $information->getServiceCost();
-        }else{
-            $deliveryRate = null;
-            $serviceCost = null;
-        }
-        $number = $uniqueNumberService->createUniqueNumber($entityManager, ClientOrder::PREFIX_NUMBER, ClientOrder::class);
-        $now = new DateTime('now', new DateTimeZone('Europe/Paris'));
-        $expectedDelivery = new DateTime($content->date);
-        $type = $typeRepository->findOneBy(["code"=>$content->type]);
-        $collect = false;
-        $collectNumber = 0;
-        if($type->getCode() == 'AUTONOMOUS_MANAGEMENT'){
-           $collect = $content->collect;
-          // $collectNumber = $content->collectNumber;
-        }
-
-        if ($form->isValid()) {
-            $clientOrder = (new ClientOrder())
-                ->setNumber($number)
-                ->setCreatedAt($now)
-                ->setExpectedDelivery($expectedDelivery)
-                ->setClient($client)
-                ->setShouldCreateCollect($collect)
-                ->setCollectNumber($collectNumber)
-                ->setAutomatic(false)
-                ->setDeliveryPrice($deliveryRate)
-                ->setServicePrice($serviceCost)
-                ->setValidatedAt(null)
-                ->setComment($content->comment ?? null)
-                ->setType($type)
-                ->setStatus($status)
-                ->setDeliveryMethod($deliveryMethod)
-                ->setRequester($requester)
-                ->setValidator(null)
-                ->setDeliveryRound(null);
-        }
-
-        $entityManager->persist($clientOrder);
-        $entityManager->flush();
 
        return $this->json([
-            "clientOrder" => $clientOrder->getId(),
-            "success" => true,
-            "message" => "Commande créé avec succès",
+           "clientOrder" => $clientOrder->getId(),
+           "template" => $this->renderView("operation/client_order/modal/validation.html.twig", [
+               "clientOrder" => $clientOrder,
+              // "expectedDelivery" => FormatHelper::dateMonth($date),
+           ]),
+           "success" => true,
         ]);
     }
 
@@ -220,6 +174,7 @@ class ClientOrderController extends AbstractController {
         $manager->remove($clientOrder);
         $manager->flush();
 
+        $clientOrder = $clientOrderService->createClientOrder($this->getUser(), $entityManager, $request);
         return $this->json([
             "success" => true,
             "message" => "Commande client <strong>{$clientOrder->getNumber()}</strong> supprimée avec succès"

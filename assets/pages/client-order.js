@@ -103,7 +103,7 @@ function openNewClientOrderModal() {
     const newClientOrderModal = Modal.static(`#modal-new-client-order`, {
         ajax: AJAX.route(`POST`, `client_order_new`),
         success: (response) => {
-            openValidationClientOrderModal(response.clientOrder);
+            Modal.load(response.template);
         },
         afterHidden: () => {
             removeNewRequestInURL();
@@ -244,12 +244,12 @@ function addBoxTypeToCart($modal, typeBoxData) {
                     <input type="number" name="quantity" value="${initialQuantity}" min="1" max="1000" class="data-array cartBoxNumber">
                 </div>
                 <span class="col bigTxt">${typeBoxData.name}</span>
-                <input name="unitPrice" value="${unitPrice}" type="hidden"/>
+                <input name="unitPrice" class="data-array" value="${unitPrice}" type="hidden"/>
                 <span class="col-2 unit-price-item">T.U. ${unitPriceStr}</span>
                 <span class="totalPrice col-2 bigTxt"></span>
                 <button class="remove d-inline-flex" value="${typeBoxData.id}"><i class="bxi bxi-trash-circle col"></i></button>
+                <input type="hidden" name="boxTypeId" class="data-array" value="${typeBoxData.id}">
             </div>
-            <input type="hidden" name="boxTypeId" class="data-array">
         `);
         $cartContainer.append($boxTypeLine);
 

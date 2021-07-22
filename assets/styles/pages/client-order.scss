@@ -55,6 +55,19 @@ input{
     width: 25px;
     height: 25px;
 }
+.recap{
+    background: $grey ;
+    color: #1E1F44;
+    width: 110px;
+    border-radius: 3px;
+    height: 27px;
+}
+
+.dotted{
+    display: flex;
+    flex: auto;
+    border-bottom: 1px dotted #1E1F44;
+}
 
 .order-card {
     text-align: left;

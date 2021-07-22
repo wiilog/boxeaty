@@ -59,7 +59,7 @@ export default class Modal {
             const $button = $(this);
 
             $button.load(function() {
-                return config.submitter ? config.submitter() : modal.handleSubmit($button)
+                return config.submitter ? config.submitter($button) : modal.handleSubmit($button)
             });
         });
 
