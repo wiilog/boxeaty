@@ -47,22 +47,23 @@ $(function() {
         }
     })
 
+    let clientData
     $modal.find('[name="client"]').on('change', function(){
-        const clientData = $(this).select2('data')[0];
+        clientData = $(this).select2('data')[0];
+        const $clientAddress = $(`#clientAddress`);
+        const $servicePrice = $(`#servicePrice`);
         if(clientData) {
-            $(`#clientAddress`).text(clientData.address);
-            $modal.find('[name="date"]').on('change', function(){
-                const $date = new Date($modal.find('[name="date"]').val());
-                const deliveryFee = ($date.getDay() === 6 || $date.getDay() === 7)
-                    ? clientData.nonWorkingRate
-                    : clientData.workingRate;
-                $("#deliveryPrice").text(`Frais de transport (HT) ${deliveryFee}`);
-            });
-            $("#servicePrice").text("Frais de service " + clientData.serviceCost);
+            $clientAddress.text(clientData.address);
+            $servicePrice.text("Frais de service " + StringHelper.formatPrice(clientData.serviceCost));
         } else{
-            $(`#clientAddress`).text("");
+            $clientAddress.text("");
+            $servicePrice.text("");
         }
-    })
+        updateDeliveryFee(clientData);
+    });
+    $modal.find('[name="date"]').on('change', function(){
+        updateDeliveryFee(clientData);
+    });
 
     $modal.find(".add-box-to-cart-button").on('click', function(){
         addSelectedBoxTypeToCart($modal);
@@ -265,5 +266,21 @@ function addBoxTypeToCart($modal, typeBoxData) {
 
     if($modal.find(`.cartBox`).exists()) {
         $modal.find(".emptyCart").addClass(`d-none`);
+    }
+}
+
+function updateDeliveryFee(clientData) {
+    const $deliveryPrice = $("#deliveryPrice");
+    if (clientData) {
+        const $date = $(this);
+        const date = new Date($date.val());
+        // saturday or sunday
+        const deliveryFee = (date.getDay() === 6 || date.getDay() === 0)
+            ? clientData.nonWorkingRate
+            : clientData.workingRate;
+        $deliveryPrice.text(`Frais de transport (HT) ${StringHelper.formatPrice(deliveryFee)}`);
+    }
+    else {
+        $deliveryPrice.text('');
     }
 }

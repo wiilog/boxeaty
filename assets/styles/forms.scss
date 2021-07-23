@@ -140,7 +140,7 @@ input[type=number]::-webkit-inner-spin-button {
         border-color: $grey;
         color: black;
         background-color: $grey;
-        width: 200px;
+        min-width: 200px;
         margin-top: 0;
     }
 
@@ -162,7 +162,7 @@ input[type=number]::-webkit-inner-spin-button {
     }
 }
 
-.orangeToggle {
+.orange-toggle {
    @extend .toggle;
 
     input[type="radio"] + label {
@@ -170,16 +170,12 @@ input[type=number]::-webkit-inner-spin-button {
         border-color: $orange;
         color: $orange;
         background-color: white;
-        width: 200px;
-        margin-top: 0;
     }
 
     input[type="radio"]:checked + label {
         @include button(primary);
         background: $orange !important;
         border-color: $orange;
-        color: white !important;
-        cursor: default;
     }
 
     input[type=radio] + label:hover {

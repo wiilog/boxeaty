@@ -1,10 +1,16 @@
 <div class="newClientOrder">
     <div class="row">
-        <div class="clientOrderType" id="clientOrder">
+        <div class="clientOrderType">
             {% for orderType in orderTypes %}
-                <input type="radio" id="{{ orderType.name }}" name="type" class="data"
-                       value="{{ orderType.code }}" {{ clientOrder.type == orderType.id ? 'checked' }} required/>
-                <label for="{{ orderType.name }}">{{ orderType.name }}</label>
+                <input type="radio"
+                       name="type"
+                       class="data"
+                       value="{{ orderType.id }}"
+                       {{ clientOrder.type == orderType ? 'checked' }}
+                       required/>
+                <label>
+                    {{ orderType.name }}
+                </label>
             {% endfor %}
         </div>
     </div>
@@ -20,16 +26,18 @@
                     <input name="client-cost-information-needed"
                            value="1"
                            type="hidden">
-                    <select name="client"
-                            class="data"
-                            data-s2="client"
-                            data-include-params="input[name=client-cost-information-needed]"
-                            data-placeholder="Sélectionnez un client"
-                            required>
-                        {% if clientOrder.client and clientOrder.client.clientOrderInformation.workingDayDeliveryRate is not null %}
-                            <option value="{{ clientOrder.client.id }}" selected></option>
-                        {% endif %}
-                    </select>
+                    <label>
+                        <select name="client"
+                                class="data"
+                                data-s2="client"
+                                data-include-params="input[name=client-cost-information-needed]"
+                                data-placeholder="Sélectionnez un client"
+                                required>
+                            {% if clientOrder.client and clientOrder.client.clientOrderInformation.workingDayDeliveryRate is not null %}
+                                <option value="{{ clientOrder.client.id }}" selected></option>
+                            {% endif %}
+                        </select>
+                    </label>
                 </div>
                 <span id="clientAddress" class="smallTxt col-6 "></span>
             </div>
@@ -84,17 +92,16 @@
         </div>
 
         <div class="transport row">
-            <label class="orangeToggle col-7">
+            <div class="orange-toggle col-7">
                 <span class="bigTxt">Transport</span>
                 <div class="row">
                     {% for deliveryMethod in deliveryMethods %}
-                        <div class="col mb-2 p-0">
+                        <div class="col-auto mb-2">
                             <input type="radio" id="{{ deliveryMethod.name }}" name="deliveryMethod" class="data "
                                    value="{{ deliveryMethod.id }}" {{ clientOrder.deliveryMethod == deliveryMethod.id ? 'checked' }}
                                    required/>
                             <label for="{{ deliveryMethod.name }}">
-                                <img class="deliveryMethodIcon" src="{{ asset(deliveryMethod.icon) }}"
-                                     alt={{ deliveryMethod.name }}>
+                                <i class="icon ico bxi bxi-{{ deliveryMethod.icon }}"></i>
                                 {{ deliveryMethod.name }}
                             </label>
                         </div>
@@ -102,7 +109,7 @@
                     <span class="bigTxt col-12" id="deliveryPrice"></span>
                     <span class="bigTxt col-12" id="servicePrice"></span>
                 </div>
-            </label>
+            </div>
 
             <label class="col-5">
                 <span class="bigTxt">Date de livraison souhaitée</span>

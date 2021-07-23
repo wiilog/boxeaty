@@ -5,8 +5,7 @@ namespace App\Controller\Operation;
 use App\Annotation\HasPermission;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
-use App\Entity\ClientOrderInformation;
-use App\Entity\Delivery;
+use App\Entity\ClientOrderLine;
 use App\Entity\DeliveryMethod;
 use App\Entity\OrderType;
 use App\Entity\Role;
@@ -136,10 +135,94 @@ class ClientOrderController extends AbstractController {
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
     public function new(Request $request,
+                        UniqueNumberService $uniqueNumberService,
                         EntityManagerInterface $entityManager,
                         ClientOrderService $clientOrderService): Response {
 
-        $clientOrder = $clientOrderService->createClientOrder($this->getUser(), $entityManager, $request);
+
+        $form = Form::create();
+        $content = (object)$request->request->all();
+        $statusRepository = $entityManager->getRepository(Status::class);
+        $typeRepository = $entityManager->getRepository(OrderType::class);
+        $clientRepository = $entityManager->getRepository(Client::class);
+        $deliveryMethodRepository = $entityManager->getRepository(DeliveryMethod::class);
+
+        $deliveryMethod = $deliveryMethodRepository->findOneBy(["id" => $content->deliveryMethod]);
+        $status = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE]);
+        $client = $clientRepository->find($content->client);
+
+        $typeId = $content->type ?? null;
+        $type = $typeId
+            ? $typeRepository->find($content->type)
+            : null;
+        if (!$type) {
+            $form->addError('Vous devez sélectionner au moins un type de commande');
+        }
+        $clientId = $content->client ?? null;
+        $client = $clientId
+            ? $clientRepository->find($content->client)
+            : null;
+        if (!$client) {
+            $form->addError('client', 'Ce champ est requis');
+        }
+
+        $information = $client->getClientOrderInformation();
+        $expectedDelivery = DateTime::createFromFormat('Y-m-d\TH:i', $content->date);
+
+        if (isset($information)) {
+            // check if it's the weekend
+            $deliveryRate = !in_array($expectedDelivery->format('N'), [6, 7])
+                ? $information->getWorkingDayDeliveryRate()
+                : $information->getNonWorkingDayDeliveryRate();
+            $serviceCost = $information->getServiceCost();
+        } else {
+            $deliveryRate = null;
+            $serviceCost = null;
+        }
+        $number = $uniqueNumberService->createUniqueNumber($entityManager, ClientOrder::PREFIX_NUMBER, ClientOrder::class);
+        $now = new DateTime('now', new DateTimeZone('Europe/Paris'));
+        $collect = false;
+        $collectNumber = 0;
+        if ($type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
+            $collect = $content->collect;
+            // $collectNumber = $content->collectNumber;
+        }
+
+        $handledCartLines = $clientOrderService->handleCartLines($entityManager, $form, $content);
+        if ($form->isValid()) {
+            $clientOrder = (new ClientOrder())
+                ->setNumber($number)
+                ->setCreatedAt($now)
+                ->setExpectedDelivery($expectedDelivery)
+                ->setClient($client)
+                ->setShouldCreateCollect($collect)
+                ->setCollectNumber($collectNumber)
+                ->setAutomatic(false)
+                ->setDeliveryPrice($deliveryRate)
+                ->setServicePrice($serviceCost)
+                ->setValidatedAt(null)
+                ->setComment($content->comment ?? null)
+                ->setType($type)
+                ->setStatus($status)
+                ->setDeliveryMethod($deliveryMethod)
+                ->setRequester($requester)
+                ->setValidator(null)
+                ->setDeliveryRound(null);
+
+            foreach ($handledCartLines as $cartLine) {
+                $clientOrderLine = new ClientOrderLine();
+                $clientOrderLine
+                    ->setBoxType($cartLine['boxType'])
+                    ->setQuantity($cartLine['quantity'])
+                    ->setCustomUnitPrice($cartLine['customUnitPrice'])
+                    ->setClientOrder($clientOrder);
+
+                $entityManager->persist($clientOrderLine);
+            }
+
+            $entityManager->persist($clientOrder);
+            $entityManager->flush();
+        }
        // $date = $clientOrder->getExpectedDelivery();
 
 
@@ -147,7 +230,7 @@ class ClientOrderController extends AbstractController {
            "clientOrder" => $clientOrder->getId(),
            "template" => $this->renderView("operation/client_order/modal/validation.html.twig", [
                "clientOrder" => $clientOrder,
-              // "expectedDelivery" => FormatHelper::dateMonth($date),
+               "expectedDelivery" => FormatHelper::dateMonth($date),
            ]),
            "success" => true,
         ]);
