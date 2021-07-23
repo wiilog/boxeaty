@@ -200,6 +200,7 @@ export default class Modal {
 
     handleSubmit($button) {
         const data = processForm(this, $button);
+        console.log(data);
         if(data === false) {
             return;
         }

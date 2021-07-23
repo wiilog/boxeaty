@@ -85,6 +85,7 @@ class BoxTypeRepository extends EntityRepository {
                 'text' => $boxType->getName(),
                 'name' => $boxType->getName(),
                 'price' => $boxType->getPrice(),
+                'volume' => $boxType->getVolume(),
                 'image' => $boxType->getImage()
                     ? $boxType->getImage()->getPath()
                     : null,

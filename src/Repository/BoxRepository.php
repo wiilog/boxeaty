@@ -173,4 +173,23 @@ class BoxRepository extends EntityRepository {
         ];
     }
 
+    public function getCrateAverageVolume(): float {
+        $queryBuilder = $this->createQueryBuilder('crate')
+            ->select('SUM(type.volume) AS volumeSum')
+            ->addSelect('COUNT(crate.id) AS boxNumber')
+            ->where('crate.isBox = 0')
+            ->andWhere('crate.isBox = 0')
+            ->andWhere('type.volume IS NOT NULL')
+            ->join('crate.type', 'type');
+        $res = $queryBuilder
+            ->getQuery()
+            ->getResult();
+        $volumeSum = $res[0]['volumeSum'] ?? 0;
+        $boxNumber = $res[0]['boxNumber'] ?? 0;
+
+        return $boxNumber > 0
+            ? ($volumeSum / $boxNumber)
+            : 0;
+    }
+
 }

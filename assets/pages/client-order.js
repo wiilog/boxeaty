@@ -38,6 +38,7 @@ $(function() {
 
         $modal.find('.crates-amount-to-collect-container').hide();
         $modal.find('[name="collectRequired"]').prop('checked', false);
+        $modal.find('[name="cratesAmountToCollect"]').prop('required', false);
         const $autonomousManagement = $modal.find('.autonomous-management');
         if(type === 'AUTONOMOUS_MANAGEMENT'){
             toggleCratesAmountToCollect = true;
@@ -51,6 +52,7 @@ $(function() {
     $modal.find('[name="collectRequired"]').on('change', function(){
         if (toggleCratesAmountToCollect) {
             $modal.find('.crates-amount-to-collect-container').show();
+            $modal.find('[name="cratesAmountToCollect"]').prop('required', true);
         }
     });
 
@@ -78,6 +80,7 @@ $(function() {
 
     $modal.on('keyup','[name="quantity"]' , function(){
         onBoxTypeQuantityChange($(this));
+        updateCrateNumberAverage($modal);
     });
 
     $modal.find('.add-box-type-model-button').on('click', function () {
@@ -164,6 +167,7 @@ function onBoxTypeQuantityChange($quantity) {
     const totalPrice = unitPrice * quantity;
     const totalPriceStr = StringHelper.formatPrice(totalPrice);
     $totalPrice.text(totalPriceStr);
+
 }
 
 function addBoxTypeModel($modal) {
@@ -178,6 +182,7 @@ function addBoxTypeModel($modal) {
                     for (const boxType of boxTypes) {
                         addBoxTypeToCart($modal, boxType);
                     }
+                    updateCrateNumberAverage($modal);
                     Flash.add('success', 'Le modèle de caisse a bien été ajouté au panier.');
                 }
                 else {
@@ -196,12 +201,12 @@ function addSelectedBoxTypeToCart($modal) {
 
     if (typeBoxData
         && !$modal.find(`.cart-container > [data-id=${typeBoxData.id}]`).exists()) {
-        addBoxTypeToCart($modal, typeBoxData);
+        addBoxTypeToCart($modal, typeBoxData, true);
     }
     $select2.val(null).trigger("change");
 }
 
-function addBoxTypeToCart($modal, typeBoxData) {
+function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = false) {
     const unitPrice = typeBoxData.price || typeBoxData.unitPrice || 0;
     const unitPriceStr = StringHelper.formatPrice(unitPrice);
 
@@ -227,6 +232,7 @@ function addBoxTypeToCart($modal, typeBoxData) {
             `
             : '';
         const initialQuantity = typeBoxData.quantity || 1;
+        const volume = typeBoxData.volume || 0;
         const $boxTypeLine = $(`
             <div class="cartBox my-2 row" data-id="${typeBoxData.id}">
                 <span class="col-auto">
@@ -237,6 +243,7 @@ function addBoxTypeToCart($modal, typeBoxData) {
                 </div>
                 <span class="col bigTxt">${typeBoxData.name}</span>
                 <input name="unitPrice" class="data-array" value="${unitPrice}" type="hidden"/>
+                <input name="volume" value="${volume}" type="hidden"/>
                 <span class="col-2 unit-price-item">T.U. ${unitPriceStr}</span>
                 <span class="totalPrice col-2 bigTxt"></span>
                 <button class="remove d-inline-flex" value="${typeBoxData.id}"><i class="bxi bxi-trash-circle col"></i></button>
@@ -258,6 +265,10 @@ function addBoxTypeToCart($modal, typeBoxData) {
     if($modal.find(`.cartBox`).exists()) {
         $modal.find(".emptyCart").addClass(`d-none`);
     }
+
+    if (calculateAverageCrateNumber) {
+        updateCrateNumberAverage($modal);
+    }
 }
 
 function updateDeliveryFee(clientData, $date) {
@@ -273,4 +284,44 @@ function updateDeliveryFee(clientData, $date) {
     else {
         $deliveryPrice.text('');
     }
+}
+
+function updateCrateNumberAverage($modal) {
+    AJAX
+        .route('GET', 'get_crate_average_volume')
+        .json()
+        .then(({average}) => {
+            let boxesVolume = [];
+            $modal
+                .find('.cart-container .cartBox')
+                .each(function() {
+                    const $line = $(this);
+                    const quantity = Number($line.find('[name="quantity"]').val()) || 0;
+                    const volume = Number($line.find('[name="volume"]').val()) || 0;
+                    console.log((quantity && volume)
+                        ? (quantity * volume)
+                        : null)
+                    boxesVolume.push(
+                        (quantity && volume)
+                            ? (quantity * volume)
+                            : null
+                    );
+                });
+            boxesVolume = boxesVolume
+                .filter((volume) => volume)
+                .reduce((sum, volume) => (sum + volume), 0);
+
+            const crateAverage = boxesVolume
+                ? Math.ceil(boxesVolume / average)
+                : null;
+
+            const $crateNumberAverage = $modal.find('.crate-number-average');
+            if (crateAverage) {
+                const crateAverageInt = Math.ceil(crateAverage);
+                $crateNumberAverage.text(`Représente environ ${crateAverageInt} caisse${crateAverageInt > 1 ? 's' : ''}`);
+            }
+            else {
+                $crateNumberAverage.text('');
+            }
+        });
 }

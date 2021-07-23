@@ -432,4 +432,15 @@ class BoxController extends AbstractController {
             "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $crate]),
         ]);
     }
+
+
+    /**
+     * @Route("/crate-average-volume", name="get_crate_average_volume", options={"expose": true})
+     */
+    public function getCrateAverageVolume(EntityManagerInterface $entityManager): JsonResponse {
+        $boxRepository = $entityManager->getRepository(Box::class);
+        return $this->json([
+            'average' => $boxRepository->getCrateAverageVolume()
+        ]);
+    }
 }

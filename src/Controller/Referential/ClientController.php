@@ -338,6 +338,7 @@ class ClientController extends AbstractController {
                     'unitPrice' => $clientBoxType->getUnitPrice(),
                     'quantity' => $clientBoxType->getQuantity(),
                     'name' => $clientBoxType->getBoxType()->getName(),
+                    'volume' => $clientBoxType->getBoxType()->getVolume(),
                     'image' => $clientBoxType->getBoxType()->getImage()
                         ? $clientBoxType->getBoxType()->getImage()->getPath()
                         : null
