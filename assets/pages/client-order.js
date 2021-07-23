@@ -13,13 +13,13 @@ $(function() {
     initOrderDatatable();
 
     const getParams = URL.getRequestQuery()
-    if (getParams.new === '1') {
-        removeOrderRequestInURL();
+    if (getParams.action === 'new') {
         openNewClientOrderModal();
+        removeActionRequestInURL();
     }
-    else if (getParams.order) {
-        removeNewRequestInURL();
-        openOrderEditModal(getParams.order);
+    else if (getParams.action === 'show'
+             && getParams['action-data']) {
+        openOrderEditModal(getParams['action-data'] );
     }
 
     $document.on('click', '.show-detail', function () {
@@ -30,7 +30,7 @@ $(function() {
     })
 
     $(`#new-client-order`).on('click', function(){
-        window.location.href = Routing.generate(`client_orders_list`, {new: 1})
+        window.location.href = Routing.generate(`client_orders_list`, {action: 'new'})
     });
 
     let toggleCollectNumber = false;
@@ -84,13 +84,6 @@ $(function() {
     $modal.find('.add-box-type-model-button').on('click', function () {
         addBoxTypeModel($modal);
     });
-
-    // TODO REMOVE
-    if($modal.find('#redirection').val() == 1){
-
-    }else if($modal.find('#redirection').val() == 2){
-        openValidationClientOrderModal();
-    }
 });
 
 function openOrderEditModal(clientOrderId) {
@@ -100,10 +93,10 @@ function openOrderEditModal(clientOrderId) {
 
     Modal.load(ajax, {
         afterHidden: () => {
-            removeOrderRequestInURL();
+            removeActionRequestInURL();
         },
         error: () => {
-            removeOrderRequestInURL();
+            removeActionRequestInURL();
         }
     });
 }
@@ -147,26 +140,21 @@ function initOrderDatatable() {
 
 function setOrderRequestInURL(order) {
     const getParams = URL.getRequestQuery()
-    if (getParams.order !== String(order)) {
-        getParams.order = order;
+    if (getParams.action !== 'show'
+        && getParams['action-data'] !== `${order}`) {
+        getParams.action = 'show';
+        getParams['action-data'] = order;
         const newUrl = URL.createRequestQuery(getParams);
         URL.pushState(document.title, newUrl);
     }
 }
 
-function removeOrderRequestInURL() {
+function removeActionRequestInURL() {
     const getParams = URL.getRequestQuery()
-    if (getParams.hasOwnProperty('order')) {
-        delete getParams.order;
-        const newUrl = URL.createRequestQuery(getParams);
-        URL.pushState(document.title, newUrl);
-    }
-}
-
-function removeNewRequestInURL() {
-    const getParams = URL.getRequestQuery()
-    if (getParams.hasOwnProperty('new')) {
-        delete getParams.new;
+    if (getParams.hasOwnProperty('action')
+        || getParams.hasOwnProperty('action-data')) {
+        delete getParams.action;
+        delete getParams['action-data'];
         const newUrl = URL.createRequestQuery(getParams);
         URL.pushState(document.title, newUrl);
     }

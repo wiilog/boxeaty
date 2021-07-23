@@ -19,6 +19,8 @@ class RoleService {
             $hasPermission = false;
             $permissionCount = count($permissions);
             $index = 0;
+
+            // if the user has at least one permission we return true
             while (!$hasPermission
                    && $index < $permissionCount) {
                 $permission = $permissions[$index];

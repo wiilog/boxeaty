@@ -149,7 +149,6 @@ class ClientOrderController extends AbstractController {
 
         $deliveryMethod = $deliveryMethodRepository->findOneBy(["id" => $content->deliveryMethod]);
         $status = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE]);
-        $client = $clientRepository->find($content->client);
 
         $typeId = $content->type ?? null;
         $type = $typeId
@@ -167,7 +166,7 @@ class ClientOrderController extends AbstractController {
         }
 
         $information = $client->getClientOrderInformation();
-        $expectedDelivery = DateTime::createFromFormat('Y-m-d\TH:i', $content->date);
+        $expectedDelivery = DateTime::createFromFormat('Y-m-d\TH:i', $content->date ?? null);
 
         if (isset($information)) {
             // check if it's the weekend
@@ -180,7 +179,7 @@ class ClientOrderController extends AbstractController {
             $serviceCost = null;
         }
         $number = $uniqueNumberService->createUniqueNumber($entityManager, ClientOrder::PREFIX_NUMBER, ClientOrder::class);
-        $now = new DateTime('now', new DateTimeZone('Europe/Paris'));
+        $now = new DateTime('now');
         $collect = false;
         $collectNumber = 0;
         if ($type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
@@ -223,14 +222,13 @@ class ClientOrderController extends AbstractController {
             $entityManager->persist($clientOrder);
             $entityManager->flush();
         }
-       // $date = $clientOrder->getExpectedDelivery();
 
 
        return $this->json([
-           "clientOrder" => $clientOrder->getId(),
+           "clientOrder" => $clientOrder ? $clientOrder->getId() : null,
            "template" => $this->renderView("operation/client_order/modal/validation.html.twig", [
                "clientOrder" => $clientOrder,
-               "expectedDelivery" => FormatHelper::dateMonth($date),
+               "expectedDelivery" => FormatHelper::dateMonth($expectedDelivery),
            ]),
            "success" => true,
         ]);
