@@ -45,7 +45,7 @@
                 </div>
                 <span id="clientAddress" class="smallTxt col-6 "></span>
             </div>
-            <div class="row form-switch autonomousManagement d-none">
+            <div class="row form-switch autonomous-management d-none">
                 <label class="form-check-label bigTxt col-8" for="{{ clientOrder.id ? 'edit' : 'new' }}-collect">
                     Avez-vous besoin de faire une collecte ?
                     <span class="smallTxt">(Box à nettoyer)</span>
@@ -56,12 +56,13 @@
                        id="{{ clientOrder.id ? 'edit' : 'new' }}-collect"
                        {{ clientOrder.collect ? 'checked' }}
                        required>
-                <div class="crate-amount-to-collect-container">
+                <div class="crates-amount-to-collect-container">
                     <label>
                         Caisses à collecter
                         <input type="number"
-                               class="arrow mt-2"
-                               name="crateAmountToCollect"
+                               class="arrow mt-2 data"
+                               name="cratesAmountToCollect"
+                               value="{{ clientOrder.cratesAmountToCollect }}"
                                placeholder="1"
                                min="1"
                                required>
@@ -84,7 +85,7 @@
                         <div class="col-auto">
                             <button class="primary add-box-to-cart-button"><i class="icon bxi bxi-whiteCart"></i></button>
                         </div>
-                        <div class="col autonomousManagement d-none">
+                        <div class="col autonomous-management d-none">
                             <button class="secondary w-100 add-box-type-model-button">Ajouter mon modèle de caisse</button>
                         </div>
                     </div>

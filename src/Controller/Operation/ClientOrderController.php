@@ -192,9 +192,9 @@ class ClientOrderController extends AbstractController {
         if ($type && $type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
             $collectRequired = (bool) ($content->collectRequired ?? false);
             if($collectRequired){
-                if (!isset($content->crateAmountToCollect)
-                    || $content->crateAmountToCollect < 1) {
-                    $form->addError('crateAmountToCollect', 'Le nombre de caisses à collecter est invalide');
+                if (!isset($content->cratesAmountToCollect)
+                    || $content->cratesAmountToCollect < 1) {
+                    $form->addError('cratesAmountToCollect', 'Le nombre de caisses à collecter est invalide');
                 }
             }
         }
@@ -206,7 +206,7 @@ class ClientOrderController extends AbstractController {
                 ->setCreatedAt($now)
                 ->setExpectedDelivery($expectedDelivery)
                 ->setClient($client)
-                ->setCratesAmountToCollect($crateNumberToCollect ?? null)
+                ->setCratesAmountToCollect($content->cratesAmountToCollect ?? null)
                 ->setCollectRequired($collectRequired ?? false)
                 ->setAutomatic(false)
                 ->setDeliveryPrice($deliveryRate)

@@ -56,13 +56,6 @@ input{
     height: 25px;
 
 }
-.recap{
-    background: $grey ;
-    color: #1E1F44;
-    width: 110px;
-    border-radius: 3px;
-    height: 27px;
-}
 
 .dotted{
     display: flex;
@@ -244,3 +237,15 @@ input{
     }
 }
 
+#modal-validation-client-order {
+    .delivery-method-selected {
+        background: $grey;
+        color: $blue;
+        border-radius: 3px;
+
+        label {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+    }
+}
