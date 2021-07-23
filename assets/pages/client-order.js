@@ -15,7 +15,6 @@ $(function() {
     const getParams = URL.getRequestQuery()
     if (getParams.action === 'new') {
         openNewClientOrderModal();
-        removeActionRequestInURL();
     }
     else if (getParams.action === 'show'
              && getParams['action-data']) {
@@ -67,10 +66,10 @@ $(function() {
             $clientAddress.text("");
             $servicePrice.text("");
         }
-        updateDeliveryFee(clientData);
+        updateDeliveryFee(clientData, $modal.find('[name="date"]'));
     });
     $modal.find('[name="date"]').on('change', function(){
-        updateDeliveryFee(clientData);
+        updateDeliveryFee(clientData, $(this));
     });
 
     $modal.find(".add-box-to-cart-button").on('click', function(){
@@ -105,18 +104,14 @@ function openNewClientOrderModal() {
     const newClientOrderModal = Modal.static(`#modal-new-client-order`, {
         ajax: AJAX.route(`POST`, `client_order_new`),
         success: (response) => {
-            Modal.load(response.template);
+            removeActionRequestInURL();
+            Modal.load(response.validationTemplate);
         },
         afterHidden: () => {
-            removeNewRequestInURL();
+            removeActionRequestInURL();
         },
     });
     newClientOrderModal.open();
-}
-
-function openValidationClientOrderModal(clientOrder) {
-    const validationClientOrderModal = Modal.load(AJAX.route(`POST`, `client_order_validate_template`, {clientOrder:clientOrder}), );
-
 }
 
 function initOrderDatatable() {
@@ -265,12 +260,11 @@ function addBoxTypeToCart($modal, typeBoxData) {
     }
 }
 
-function updateDeliveryFee(clientData) {
+function updateDeliveryFee(clientData, $date) {
     const $deliveryPrice = $("#deliveryPrice");
     if (clientData) {
-        const $date = $(this);
         const date = new Date($date.val());
-        // saturday or sunday
+        // week-end
         const deliveryFee = (date.getDay() === 6 || date.getDay() === 0)
             ? clientData.nonWorkingRate
             : clientData.workingRate;

@@ -147,19 +147,28 @@ class ClientOrderController extends AbstractController {
         $clientRepository = $entityManager->getRepository(Client::class);
         $deliveryMethodRepository = $entityManager->getRepository(DeliveryMethod::class);
 
-        $deliveryMethod = $deliveryMethodRepository->findOneBy(["id" => $content->deliveryMethod]);
         $status = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE]);
+        $requester = $this->getUser();
+
+        $deliveryMethodId = $content->deliveryMethod ?? null;
+        $deliveryMethod = $deliveryMethodId
+            ? $deliveryMethodRepository->find($deliveryMethodId)
+            : null;
+        if (!$deliveryMethod) {
+            $form->addError('Vous devez sélectionner au moins un moyen de transport');
+        }
 
         $typeId = $content->type ?? null;
         $type = $typeId
-            ? $typeRepository->find($content->type)
+            ? $typeRepository->find($typeId)
             : null;
         if (!$type) {
             $form->addError('Vous devez sélectionner au moins un type de commande');
         }
+
         $clientId = $content->client ?? null;
         $client = $clientId
-            ? $clientRepository->find($content->client)
+            ? $clientRepository->find($clientId)
             : null;
         if (!$client) {
             $form->addError('client', 'Ce champ est requis');
@@ -180,13 +189,22 @@ class ClientOrderController extends AbstractController {
         }
         $number = $uniqueNumberService->createUniqueNumber($entityManager, ClientOrder::PREFIX_NUMBER, ClientOrder::class);
         $now = new DateTime('now');
-        $collect = false;
         $collectNumber = 0;
-        if ($type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
-            $collect = $content->collect;
-            // $collectNumber = $content->collectNumber;
+        if ($type && $type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
+            $collectRequired = (bool) ($content->collectRequired ?? false);
+            if($collect){
+                if (!isset($content->crateNumberToCollect)
+                    || $content->crateNumberToCollect < 1) {
+                    $form->addError('crateNumberToCollect', 'Le nombre de caisses à collecter est invalide');
+                }
+                else {
+                    $crateNumberToCollect = $content->crateNumberToCollect;
+// TODO new collect
+                }
+            }
         }
 
+        $form->addError('toto');
         $handledCartLines = $clientOrderService->handleCartLines($entityManager, $form, $content);
         if ($form->isValid()) {
             $clientOrder = (new ClientOrder())
@@ -194,8 +212,8 @@ class ClientOrderController extends AbstractController {
                 ->setCreatedAt($now)
                 ->setExpectedDelivery($expectedDelivery)
                 ->setClient($client)
-                ->setShouldCreateCollect($collect)
-                ->setCollectNumber($collectNumber)
+                ->setCollect() // TODO new collect
+                ->setCollectNumber($crateNumberToCollect ?? null)
                 ->setAutomatic(false)
                 ->setDeliveryPrice($deliveryRate)
                 ->setServicePrice($serviceCost)
@@ -221,17 +239,19 @@ class ClientOrderController extends AbstractController {
 
             $entityManager->persist($clientOrder);
             $entityManager->flush();
+
+            return $this->json([
+                "success" => true,
+                "validationTemplate" => $this->renderView("operation/client_order/modal/validation.html.twig", [
+                    "clientOrder" => $clientOrder,
+                    "expectedDelivery" => FormatHelper::dateMonth($expectedDelivery),
+                ]),
+            ]);
+        } else {
+            return $form->errors();
         }
 
-
-       return $this->json([
-           "clientOrder" => $clientOrder ? $clientOrder->getId() : null,
-           "template" => $this->renderView("operation/client_order/modal/validation.html.twig", [
-               "clientOrder" => $clientOrder,
-               "expectedDelivery" => FormatHelper::dateMonth($expectedDelivery),
-           ]),
-           "success" => true,
-        ]);
+        return $this->json($result);
     }
 
     /**

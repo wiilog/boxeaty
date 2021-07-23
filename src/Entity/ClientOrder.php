@@ -73,11 +73,6 @@ class ClientOrder {
     /**
      * @ORM\Column(type="boolean")
      */
-    private ?bool $shouldCreateCollect = null;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
     private ?bool $automatic = null;
 
     /**
@@ -252,16 +247,6 @@ class ClientOrder {
         return $this;
     }
 
-    public function getShouldCreateCollect(): ?bool {
-        return $this->shouldCreateCollect;
-    }
-
-    public function setShouldCreateCollect(bool $shouldCreateCollect): self {
-        $this->shouldCreateCollect = $shouldCreateCollect;
-
-        return $this;
-    }
-
     public function getAutomatic(): ?bool {
         return $this->automatic;
     }
@@ -271,7 +256,6 @@ class ClientOrder {
 
         return $this;
     }
-
 
     public function getCratesAmount(): ?float {
         return $this->cratesAmount;

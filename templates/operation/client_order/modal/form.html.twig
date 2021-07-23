@@ -22,6 +22,7 @@
             <h2 class="header-section-label">Information</h2>
         </div>
         <div class="content-section">
+        <div class="content-section">
             <label>Demandeur&nbsp;: {{ requester.username }}</label>
             <span class="bigTxt">Veuillez selectionner le site que vous voulez approvisionner</span>
             <div class="row">
@@ -53,7 +54,7 @@
                        id="{{ clientOrder.id ? 'edit' : 'new' }}-collect" {{ clientOrder.collect ? 'checked' }} required>
                 <div class="collectNumber">
                     <label for="collectNumber">Caisses à collecter</label>
-                    <input type="number" id="collectNumber" class="arrow m-2" name="collectNumber" placeholder="1" min="1"
+                    <input type="number" id="collectNumber" class="arrow m-2" name="crateNumberToCollect" placeholder="1" min="1"
                            required>
                 </div>
             </div>

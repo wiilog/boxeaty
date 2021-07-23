@@ -26,17 +26,9 @@ use Twig\Environment;
 class ClientOrderService
 {
 
-    /** @Required */
-    public UniqueNumberService $uniqueNumberService;
-
-    public function createClientOrder(User $requester, EntityManagerInterface $entityManager, Request $request): ?ClientOrder
-    {
-
-    }
-
     public function handleCartLines(EntityManagerInterface $entityManager,
                                     Form $form,
-                                    object $formContent): array {
+                                    object $formContent): ? array {
 
         $quantities = Stream::explode(',', $formContent->quantity ?? "")->filter(fn($e) => $e);
         $boxTypeIds = Stream::explode(',', $formContent->boxTypeId ?? "")->filter(fn($e) => $e);
@@ -81,7 +73,7 @@ class ClientOrderService
             $form->addError("Le panier est invalide");
         }
 
-        return $handledCartLines;
+        return $handledCartLines ?? null;
     }
 
     public function createClientOrderLine(ClientOrder $clientOrder, EntityManagerInterface $entityManager, Request $request): ?ClientOrderLine
