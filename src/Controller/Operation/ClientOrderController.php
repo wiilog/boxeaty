@@ -105,13 +105,13 @@ class ClientOrderController extends AbstractController {
     }
 
     /**
-     * @Route("/validate/template", name="client_order_validate_template", options={"expose": true})
+     * @Route("/validate/template", name="client_order_validation_template", options={"expose": true})
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
     public function validateTemplate(Request $request,
                         EntityManagerInterface $entityManager,
                          ClientOrderService $clientOrderService): Response {
-
+        // TODO ALEX
         return $this->json([
             "submit" => $this->generateUrl("client_order_new", [
                 "clientOrder" => $clientOrder ->getId(),

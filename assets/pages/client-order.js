@@ -18,14 +18,18 @@ $(function() {
     }
     else if (getParams.action === 'show'
              && getParams['action-data']) {
-        openOrderEditModal(getParams['action-data'] );
+        openOrderShowModal(getParams['action-data']);
+    }
+    else if (getParams.action === 'validation'
+             && getParams['action-data']) {
+        openOrderValidationModal(getParams['action-data']);
     }
 
     $document.on('click', '.show-detail', function () {
         const $link = $(this);
         const clientOrderId = $link.data('id');
-        setOrderRequestInURL(clientOrderId);
-        openOrderEditModal(clientOrderId);
+        setOrderRequestInURL(clientOrderId); // TODO ALEX action = show or validation en fonction du statut de la commande
+        openOrderShowModal(clientOrderId);
     })
 
     $(`#new-client-order`).on('click', function(){
@@ -88,8 +92,23 @@ $(function() {
     });
 });
 
-function openOrderEditModal(clientOrderId) {
+function openOrderShowModal(clientOrderId) {
     const ajax = AJAX.route(`POST`, `client_order_show_template`, {
+        clientOrder: clientOrderId
+    });
+
+    Modal.load(ajax, {
+        afterHidden: () => {
+            removeActionRequestInURL();
+        },
+        error: () => {
+            removeActionRequestInURL();
+        }
+    });
+}
+
+function openOrderValidationModal(clientOrderId) {
+    const ajax = AJAX.route(`POST`, `client_order_validation_template`, {
         clientOrder: clientOrderId
     });
 
