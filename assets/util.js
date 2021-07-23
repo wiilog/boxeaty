@@ -34,7 +34,7 @@ export class StringHelper {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        return `${priceStr} €`;
+        return `${priceStr}`;
     }
 }
 

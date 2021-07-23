@@ -11,7 +11,7 @@
         <span class="col-md-4 col-12 text-end">{{ clientOrder.requester.phone }}</span>
     </div>
     <div class="row justify-content-between">
-        <p class="col-md-8 col-12"><span class="bigTxt">Collecte</span> (Box à nettoyer) : {{ clientOrder.collectNumber }} caisses</p>
+        <p class="col-md-8 col-12"><span class="bigTxt">Collecte</span> (Box à nettoyer) : {{ clientOrder.collectRequired }} caisses</p>
         <span class="recap text-end col-md-4 col-12">
             <img class="deliveryMethodIcon " src="{{ asset(clientOrder.deliveryMethod.icon) }}" alt={{ clientOrder.deliveryMethod.name }}>
             {{ clientOrder.deliveryMethod.name }}
@@ -26,52 +26,23 @@
     </div>
     <span class="bigTxt"> Date de livraison : {{ expectedDelivery }}</span>
 
-    <div class="details-content body">
-        {% if clientOrder.lines|length > 0 %}
-            {% for line in clientOrder.lines %}
-                <div class="row client-order-line">
-                    <div class="col-auto">
-                        {% if line.boxType.image %}
-                            <img src="{{ asset(line.boxType.image.path) }}"
-                                 class="box-type-image"
-                                 alt="image"/>
-                        {% endif %}
-                    </div>
-                    <div class="col">
-                        {{ line.quantity }}&nbsp;&times;&nbsp; Box de type <b>{{ line.boxType.name }}</b>
-                    </div>
-                    <div class="col-3">
-                        T.U. {{ line.boxType.price|format_helper('price') }}
-                    </div>
-                    <div class="col-3">
-                        {{ (line.quantity * line.boxType.price)|format_helper('price') }}
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="row empty-client-order">
-                <div class="col-12 text-center">Aucune Box à afficher</div>
-            </div>
-        {% endif %}
-    <div class="header-section">
-        <h2 class="header-section-label">Montant de la commande</h2>
-    </div>
+    {% include 'operation/client_order/modal/boxList.html.twig' %}
 
     <span class="bigTxt">Récapitulatif de commande</span>
     <div class="row justify-content-between">
         <span class="col-1">Box</span>
         <div class="col-8 dotted "></div>
-        <span class="col-1 text-end">{{ clientOrder.deliveryPrice }} €</span>
+        <span class="col-1 text-end">{{ clientOrder.deliveryPrice|format_helper('price') }} </span>
     </div>
     <div class="row justify-content-between">
         <span class="col-1">Livraison</span>
         <div class="col-8 dotted "></div>
-        <span class="col-1 text-end">{{ clientOrder.deliveryPrice }} €</span>
+        <span class="col-1 text-end">{{ clientOrder.deliveryPrice|format_helper('price') }}</span>
     </div>
     <div class="row justify-content-between">
         <span class="col-1">Service</span>
         <div class="col-8 dotted "></div>
-        <span class="col-1 text-end">{{ clientOrder.servicePrice }} €</span>
+        <span class="col-1 text-end">{{ clientOrder.servicePrice|format_helper('price') }}</span>
     </div>
     <div class="row justify-content-between">
         <span class="col-1">Collecte</span>

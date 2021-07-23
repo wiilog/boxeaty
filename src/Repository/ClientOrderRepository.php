@@ -160,7 +160,7 @@ class ClientOrderRepository extends EntityRepository {
             ->where('clientOrder.number LIKE :value')
             ->orderBy('clientOrder.createdAt', 'DESC')
             ->addOrderBy('clientOrder.number', 'DESC')
-            ->setParameter('value', ClientOrder::PREFIX_NUMBER . '-' . $date . '%')
+            ->setParameter('value', ClientOrder::PREFIX_NUMBER . $date . '%')
             ->getQuery()
             ->execute();
         return $result ? $result[0]['number'] : null;
