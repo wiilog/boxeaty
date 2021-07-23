@@ -2,13 +2,16 @@
     <div class="row">
         <div class="clientOrderType">
             {% for orderType in orderTypes %}
+                {% set inputId = 'order-type-' ~ (clientOrder ? 'edit-') ~ orderType.id  %}
                 <input type="radio"
+                       id="{{ inputId }}"
                        name="type"
                        class="data"
                        value="{{ orderType.id }}"
+                       data-code="{{ orderType.code }}"
                        {{ clientOrder.type == orderType ? 'checked' }}
                        required/>
-                <label>
+                <label for="{{ inputId }}">
                     {{ orderType.name }}
                 </label>
             {% endfor %}
@@ -42,8 +45,10 @@
                 <span id="clientAddress" class="smallTxt col-6 "></span>
             </div>
             <div class="row form-switch autonomousManagement d-none">
-                <label class="form-check-label bigTxt col-8" for="{{ clientOrder.id ? 'edit' : 'new' }}-collect">Avez-vous
-                    besoin de faire une collecte? <span class="smallTxt">(Box à nettoyer)  </span></label>
+                <label class="form-check-label bigTxt col-8" for="{{ clientOrder.id ? 'edit' : 'new' }}-collect">
+                    Avez-vous besoin de faire une collecte ?
+                    <span class="smallTxt">(Box à nettoyer)</span>
+                </label>
                 <input class="form-check-input data col-4" type="checkbox" name="collect"
                        id="{{ clientOrder.id ? 'edit' : 'new' }}-collect" {{ clientOrder.collect ? 'checked' }} required>
                 <div class="collectNumber">

@@ -33,19 +33,27 @@ $(function() {
         window.location.href = Routing.generate(`client_orders_list`, {new: 1})
     });
 
+    let toggleCollectNumber = false;
     $modal.find('[name="type"]').on('change', function(){
-        const type = $(this).val();
+        const type = $(this).data('code');
 
         $modal.find('.collectNumber').hide();
+        $modal.find('[name="collect"]').prop('checked', false);
+        const $autonomousManagement = $modal.find('.autonomousManagement');
         if(type === 'AUTONOMOUS_MANAGEMENT'){
-            $modal.find('.autonomousManagement').removeClass('d-none');
-            $modal.find('[name="collect"]').on('change', function(){
-                $modal.find('.collectNumber').toggle();
-        });
+            toggleCollectNumber = true;
+            $autonomousManagement.removeClass('d-none');
         } else{
-            $modal.find('.autonomousManagement').addClass('d-none');
+            toggleCollectNumber = false;
+            $autonomousManagement.addClass('d-none');
         }
-    })
+    });
+
+    $modal.find('[name="collect"]').on('change', function(){
+        if (toggleCollectNumber) {
+            $modal.find('.collectNumber').toggle();
+        }
+    });
 
     let clientData
     $modal.find('[name="client"]').on('change', function(){
