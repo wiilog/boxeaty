@@ -189,22 +189,16 @@ class ClientOrderController extends AbstractController {
         }
         $number = $uniqueNumberService->createUniqueNumber($entityManager, ClientOrder::PREFIX_NUMBER, ClientOrder::class);
         $now = new DateTime('now');
-        $collectNumber = 0;
         if ($type && $type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
             $collectRequired = (bool) ($content->collectRequired ?? false);
-            if($collect){
-                if (!isset($content->crateNumberToCollect)
-                    || $content->crateNumberToCollect < 1) {
-                    $form->addError('crateNumberToCollect', 'Le nombre de caisses à collecter est invalide');
-                }
-                else {
-                    $crateNumberToCollect = $content->crateNumberToCollect;
-// TODO new collect
+            if($collectRequired){
+                if (!isset($content->crateAmountToCollect)
+                    || $content->crateAmountToCollect < 1) {
+                    $form->addError('crateAmountToCollect', 'Le nombre de caisses à collecter est invalide');
                 }
             }
         }
 
-        $form->addError('toto');
         $handledCartLines = $clientOrderService->handleCartLines($entityManager, $form, $content);
         if ($form->isValid()) {
             $clientOrder = (new ClientOrder())
@@ -212,8 +206,8 @@ class ClientOrderController extends AbstractController {
                 ->setCreatedAt($now)
                 ->setExpectedDelivery($expectedDelivery)
                 ->setClient($client)
-                ->setCollect() // TODO new collect
-                ->setCollectNumber($crateNumberToCollect ?? null)
+                ->setCratesAmountToCollect($crateNumberToCollect ?? null)
+                ->setCollectRequired($collectRequired ?? false)
                 ->setAutomatic(false)
                 ->setDeliveryPrice($deliveryRate)
                 ->setServicePrice($serviceCost)

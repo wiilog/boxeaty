@@ -127,9 +127,14 @@ class ClientOrder {
     private ?Delivery $delivery = null;
 
     /**
-     * @ORM\Column(type="integer", nullable= "true")
+     * @ORM\Column(type="integer", nullable="true")
      */
-    private ?int $collectNumber = null;
+    private ?int $cratesAmountToCollect = null;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private bool $collectRequired = false;
 
     /**
      * @ORM\OneToOne(targetEntity=Collect::class, mappedBy="order", cascade={"persist", "remove"})
@@ -434,12 +439,21 @@ class ClientOrder {
         return $this;
     }
 
-    public function getCollectNumber(): ?int {
-        return $this->collectNumber;
+    public function getCratesAmountToCollect(): ?int {
+        return $this->cratesAmountToCollect;
     }
 
-    public function setCollectNumber(?int $collectNumber): self {
-        $this->collectNumber = $collectNumber;
+    public function setCratesAmountToCollect(?int $cratesAmountToCollect): self {
+        $this->cratesAmountToCollect = $cratesAmountToCollect;
+        return $this;
+    }
+
+    public function isCollectRequired(): bool {
+        return $this->collectRequired;
+    }
+
+    public function setCollectRequired(bool $collectRequired): self {
+        $this->collectRequired = $collectRequired;
         return $this;
     }
 }

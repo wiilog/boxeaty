@@ -32,25 +32,25 @@ $(function() {
         window.location.href = Routing.generate(`client_orders_list`, {action: 'new'})
     });
 
-    let toggleCollectNumber = false;
+    let toggleCrateAmountToCollect = false;
     $modal.find('[name="type"]').on('change', function(){
         const type = $(this).data('code');
 
-        $modal.find('.collectNumber').hide();
-        $modal.find('[name="collect"]').prop('checked', false);
-        const $autonomousManagement = $modal.find('.autonomousManagement');
+        $modal.find('.crate-amount-to-collect-container').hide();
+        $modal.find('[name="collectRequired"]').prop('checked', false);
+        const $autonomousManagement = $modal.find('.autonomous-management');
         if(type === 'AUTONOMOUS_MANAGEMENT'){
-            toggleCollectNumber = true;
+            toggleCrateAmountToCollect = true;
             $autonomousManagement.removeClass('d-none');
         } else{
-            toggleCollectNumber = false;
+            toggleCrateAmountToCollect = false;
             $autonomousManagement.addClass('d-none');
         }
     });
 
     $modal.find('[name="collect"]').on('change', function(){
-        if (toggleCollectNumber) {
-            $modal.find('.collectNumber').toggle();
+        if (toggleCrateAmountToCollect) {
+            $modal.find('.crateNumberToCollect').toggle();
         }
     });
 
