@@ -57,7 +57,6 @@ $(document).ready(() => {
             {data: `group`, title: `Groupe`},
             {data: `linkedMultiSite`, title: `Multi-site lié`},
             {data: `multiSite`, title: `Multi-site`},
-            DATATABLE_ACTIONS,
         ],
         listeners: {
             edit: data => {

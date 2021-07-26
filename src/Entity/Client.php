@@ -129,6 +129,16 @@ class Client {
      */
     private $clientBoxTypes;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $prorateAmount;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $paymentModes;
+
     public function __construct() {
         $this->users = new ArrayCollection();
         $this->kiosks = new ArrayCollection();
@@ -453,6 +463,30 @@ class Client {
                 $clientBoxType->setClient(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getProrateAmount(): ?int
+    {
+        return $this->prorateAmount;
+    }
+
+    public function setProrateAmount(?int $prorateAmount): self
+    {
+        $this->prorateAmount = $prorateAmount;
+
+        return $this;
+    }
+
+    public function getPaymentModes(): ?string
+    {
+        return $this->paymentModes;
+    }
+
+    public function setPaymentModes(?string $paymentModes): self
+    {
+        $this->paymentModes = $paymentModes;
 
         return $this;
     }

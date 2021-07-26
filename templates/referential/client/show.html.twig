@@ -24,11 +24,11 @@
                     </div>
                     <div class="col-4 p-0 d-flex justify-content-end">
                     <span class="edit-client round" data-id="{{ client.id }}">
-                        <i class="icon bxi bxi-edit-circle"></i>
+                        <i class="icon bxi bxi-edit-circle cursor-pointer"></i>
                     </span>
-                        <span class="delete-client round" data-id="{{ client.id }}">
-                            <i class="icon bxi bxi-trash-circle"></i>
-                        </span>
+                    <span class="delete-client round" data-id="{{ client.id }}">
+                        <i class="icon bxi bxi-trash-circle cursor-pointer"></i>
+                    </span>
                     </div>
                 </div>
                 <div class="col-8">
@@ -63,8 +63,8 @@
                     <div class="row mt-4">
                         <span class="big-text">Moyen de paiement préféré</span>
                         <div class="d-flex">
-                            {% if clientOrderInformation %}
-                                {% for paymentMode in clientOrderInformation.paymentModes %}
+                            {% if client.paymentModes is not empty %}
+                                {% for paymentMode in client.paymentModes|split(',') %}
                                     <div class="card-item">{{ paymentMode }}</div>
                                 {% endfor %}
                             {% else %}
@@ -73,7 +73,7 @@
                         </div>
                     </div>
                     <div class="row mt-4">
-                        <span class="body-text">Montant prorata (HT): <strong>50€</strong></span>
+                        <span class="body-text">Montant prorata (HT): <strong>{{ client.prorateAmount|format_helper('price') }}</strong></span>
                     </div>
                     <div class="d-flex mt-4">
                         <div class="circle {{ client.mailNotificationOrderPreparation ? 'checked' }} pe-2"></div>
@@ -108,16 +108,16 @@
                         </div>
                     {% endif %}
                     <div class="row mt-4">
-                        <span class="body-text"><strong>{{ clientOrderInformation ? clientOrderInformation.tokenAmount : '-' }}</strong> jeton{{ clientOrderInformation and clientOrderInformation.tokenAmount > 1 ? 's' : '' }} par commande</span>
+                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.tokenAmount ? clientOrderInformation.tokenAmount : 'aucun ' }}</strong> jeton{{ clientOrderInformation and clientOrderInformation.tokenAmount > 1 ? 's' : '' }} par commande</span>
                     </div>
                     <div class="row mt-4">
-                        <span class="body-text"><strong>{{ clientOrderInformation ? clientOrderInformation.workingDayDeliveryRate : '-' }}€</strong> en forfait livraison jour ouvré</span>
+                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.workingDayDeliveryRate ? clientOrderInformation.workingDayDeliveryRate|format_helper('price') : '- €' }}</strong> en forfait livraison jour ouvré</span>
                     </div>
                     <div class="row mt-4">
-                        <span class="body-text"><strong>{{ clientOrderInformation ? clientOrderInformation.nonWorkingDayDeliveryRate : '-' }}€</strong> en forfait livraison jour non ouvré</span>
+                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.nonWorkingDayDeliveryRate ? clientOrderInformation.nonWorkingDayDeliveryRate|format_helper('price') : '- €' }}</strong> en forfait livraison jour non ouvré</span>
                     </div>
                     <div class="row mt-4">
-                        <span class="body-text"><strong>{{ clientOrderInformation ? clientOrderInformation.serviceCost : '-' }}€</strong> en frais de service</span>
+                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.serviceCost ? clientOrderInformation.serviceCost|format_helper('price') : '- €' }}</strong> en frais de service</span>
                     </div>
                     {% if clientOrderInformation and clientOrderInformation.comment %}
                         <div class="row mt-4">
