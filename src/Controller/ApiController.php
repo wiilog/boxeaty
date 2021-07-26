@@ -490,7 +490,14 @@ class ApiController extends AbstractController {
                     ->sum(),
                 "orders" => $round->getOrders()->map(fn(ClientOrder $order) => [
                     "id" => $order->getId(),
-                    "client" => FormatHelper::named($order->getClient()),
+                    "client" => [
+                        "id" => $order->getClient()->getId(),
+                        "name" => FormatHelper::named($order->getClient()),
+                        "address" => $order->getClient()->getAddress(),
+                        "contact" => FormatHelper::user($order->getClient()->getContact()),
+                        "phone" => $order->getClient()->getPhoneNumber(),
+                        "token_amount" => $order->getClient()->get
+                    ],
                     "lines" => $order->getLines()->map(fn(ClientOrderLine $line) => [
                         "box_type" => [
                             "id" => $line->getBoxType()->getId(),
