@@ -26,7 +26,7 @@ $document.ready(() => {
     });
 
     $(`#add-work-free-day`).click(function () {
-        const $form = $(this).closest(`.inline-form`);
+        const $form = $(this).closest(`.work-free-day-form`);
 
         if (processForm($form)) {
             AJAX.route(`POST`, `work_free_day_add`)
