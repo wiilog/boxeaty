@@ -84,7 +84,9 @@ class BoxTypeRepository extends EntityRepository {
             ->map(fn (BoxType $boxType) => [
                 'id' => $boxType->getId(),
                 'text' => $extended
-                    ? $boxType->getName() . ' - ' . ($boxType->getVolume() ?? 'N/C') . ' - ' . FormatHelper::price($boxType->getPrice())
+                    ? $boxType->getName() . ' - ' . ($boxType->getVolume()
+                        ? $boxType->getVolume() . 'm³'
+                        : 'N/C') . ' - ' . FormatHelper::price($boxType->getPrice())
                     : $boxType->getName(),
                 'name' => $boxType->getName(),
                 'price' => $boxType->getPrice(),

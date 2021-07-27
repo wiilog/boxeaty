@@ -15,7 +15,6 @@ const ROUTES = {
     kiosk: `ajax_select_kiosks`,
     location: `ajax_select_locations`,
     type: `ajax_select_type`,
-    extended_type: `ajax_select_extended_type`,
     quality: `ajax_select_quality`,
     orderBox: `ajax_select_counter_order_boxes`,
     orderDepositTicket: `ajax_select_counter_order_deposit_tickets`,

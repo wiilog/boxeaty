@@ -76,7 +76,11 @@
         <div class="content-section">
             <div class="row justify-content-between">
                 <div class="select col-md-6 col-12">
-                    <select name="boxType" class="data w-100" data-s2="extended_type"
+                    <input name="extended-type"
+                           value="1"
+                           type="hidden">
+                    <select name="boxType" class="data w-100" data-s2="type"
+                            data-include-params="input[name=extended-type]"
                             data-placeholder="Type Box - Volume - Tarif"></select>
                 </div>
                 <div class="col-md-6 col-12">
