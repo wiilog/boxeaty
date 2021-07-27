@@ -255,10 +255,15 @@ class ClientOrderController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
      */
     public function delete(EntityManagerInterface $entityManager, ClientOrder $clientOrder): Response {
+        $lines = $clientOrder->getLines();
+
+        foreach ($lines as $line){
+            $entityManager->remove($line);
+        }
+
         $entityManager->remove($clientOrder);
         $entityManager->flush();
 
-        //$clientOrder = $clientOrderService->createClientOrder($this->getUser(), $entityManager, $request);
         return $this->json([
             "success" => true,
             "message" => "Commande client <strong>{$clientOrder->getNumber()}</strong> supprimée avec succès"
