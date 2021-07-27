@@ -64,8 +64,8 @@ class ClientRepository extends EntityRepository {
                     QueryHelper::order($qb, "client.contact.username", $order["dir"]);
                 } else if ($column === "group") {
                     QueryHelper::order($qb, "client.group.name", $order["dir"]);
-                } else if ($column === "multiSite") {
-                    QueryHelper::order($qb, "client.multiSite.name", $order["dir"]);
+                } else if ($column === "linkedMultiSite") {
+                    QueryHelper::order($qb, "client.linkedMultiSite.name", $order["dir"]);
                 } else {
                     $qb->addOrderBy("client.$column", $order["dir"]);
                 }

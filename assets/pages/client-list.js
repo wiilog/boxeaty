@@ -56,7 +56,7 @@ $(document).ready(() => {
             {data: `contact`, title: `Contact attribué`},
             {data: `group`, title: `Groupe`},
             {data: `linkedMultiSite`, title: `Multi-site lié`},
-            {data: `multiSite`, title: `Multi-site`},
+            {data: `isMultiSite`, title: `Multi-site`},
         ],
         listeners: {
             edit: data => {

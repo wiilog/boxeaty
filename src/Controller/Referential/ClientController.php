@@ -66,7 +66,7 @@ class ClientController extends AbstractController {
                 "contact" => FormatHelper::user($client->getContact()),
                 "group" => FormatHelper::named($client->getGroup()),
                 "linkedMultiSite" => FormatHelper::named($client->getLinkedMultiSite()),
-                "multiSite" => $client->isMultiSite() ? "Oui" : "Non",
+                "isMultiSite" => $client->isMultiSite() ? "Oui" : "Non",
             ];
         }
 

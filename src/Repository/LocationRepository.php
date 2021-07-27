@@ -75,12 +75,14 @@ class LocationRepository extends EntityRepository {
                 if ($column === "client_name") {
                     $qb->leftJoin("location.client", "location_client")
                         ->addOrderBy("location_client.name", $order["dir"]);
-                } if ($column === "container_amount") {
+                } else if ($column === "container_amount") {
                     $qb
                         ->leftJoin('location.boxes', 'box')
                         ->groupBy('location')
                         ->addOrderBy("COUNT(box)", $order["dir"]);
-                }else {
+                } else if ($column === "location_type") {
+                    $qb->addOrderBy('location.type', $order["dir"]);
+                } else {
                     $qb->addOrderBy("location.$column", $order["dir"]);
                 }
             }
