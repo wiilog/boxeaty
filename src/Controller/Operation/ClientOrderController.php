@@ -38,6 +38,7 @@ class ClientOrderController extends AbstractController {
         $deliveryMethod = $manager->getRepository(DeliveryMethod::class);
         $orderTypes = $manager->getRepository(OrderType::class);
         $now = date('Y-m-d');
+        
         return $this->render("operation/client_order/index.html.twig", [
             "new_client_order" => new ClientOrder(),
             "now" => date('Y-m-d', strtotime($now.'+ 1 days')),

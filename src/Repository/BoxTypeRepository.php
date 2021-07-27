@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\BoxType;
+use App\Helper\FormatHelper;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
 use WiiCommon\Helper\Stream;
@@ -70,7 +71,7 @@ class BoxTypeRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search) {
+    public function getForSelect(?string $search, $extended = false) {
         $boxTypes = $this->createQueryBuilder("box_type")
             ->where("box_type.name LIKE :search")
             ->andWhere("box_type.active = 1")
@@ -82,7 +83,9 @@ class BoxTypeRepository extends EntityRepository {
         return Stream::from($boxTypes)
             ->map(fn (BoxType $boxType) => [
                 'id' => $boxType->getId(),
-                'text' => $boxType->getName(),
+                'text' => $extended
+                    ? $boxType->getName() . ' - ' . ($boxType->getVolume() ?? 'N/C') . ' - ' . FormatHelper::price($boxType->getPrice())
+                    : $boxType->getName(),
                 'name' => $boxType->getName(),
                 'price' => $boxType->getPrice(),
                 'volume' => $boxType->getVolume(),
