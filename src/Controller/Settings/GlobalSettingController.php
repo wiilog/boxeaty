@@ -111,13 +111,7 @@ class GlobalSettingController extends AbstractController {
             "month" => $content->month
         ]);
 
-        $month = (int)$content->month;
-        $day = (int)$content->day;
-        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, 2024);
-
-        if($day > $daysInMonth) {
-            $form->addError("day", "Ce jour n'existe pas");
-        }
+        // TODO Gérer la validation les derniers jours du mois
 
         if ($existing) {
             $form->addError("day", "Ce jour ferié existe déjà");
