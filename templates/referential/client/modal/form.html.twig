@@ -16,11 +16,11 @@
                 <div class="d-flex">
                     <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-active" name="active" class="data"
                            value="1" {{ client.active ? 'checked' }}/>
-                    <label for="{{ client.id ? 'edit' : 'new' }}-client-active">Actif</label>
+                    <label for="{{ client.id ? 'edit' : 'new' }}-client-active" class="free-radio-button w-100">Actif</label>
 
                     <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-inactive" name="active" class="data"
                            value="0" {{ not client.active ? 'checked' }}/>
-                    <label for="{{ client.id ? 'edit' : 'new' }}-client-inactive">Inactif</label>
+                    <label for="{{ client.id ? 'edit' : 'new' }}-client-inactive" class="free-radio-button w-100">Inactif</label>
                 </div>
             </div>
         </div>

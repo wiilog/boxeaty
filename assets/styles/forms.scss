@@ -140,8 +140,11 @@ input[type=number]::-webkit-inner-spin-button {
         border-color: $grey;
         color: black;
         background-color: $grey;
-        min-width: 200px;
         margin-top: 0;
+
+        &:not(.free-radio-button) {
+            min-width: 200px;
+        }
     }
 
     input[type="radio"]:checked + label {
