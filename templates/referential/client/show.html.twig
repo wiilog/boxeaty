@@ -69,7 +69,7 @@
                         </div>
                     </div>
                     <div class="row mt-4">
-                        <span class="big-text">Moyen de paiement préféré</span>
+                        <span class="big-text">Moyen(s) de paiement préféré(s)</span>
                         <div class="d-flex">
                             {% if client.paymentModes is not empty %}
                                 {% for paymentMode in client.paymentModes|split(',') %}
@@ -104,9 +104,13 @@
                     <div class="row mt-4">
                         <span class="big-text">Dépôt au départ</span>
                         <div class="d-flex">
-                            {% set depository = clientOrderInformation.depository is defined and clientOrderInformation.depository ? clientOrderInformation.depository : null %}
+                            {% set depository = clientOrderInformation.depository is defined and clientOrderInformation.depository
+                                ? clientOrderInformation.depository
+                                : null %}
                             {% if depository %}
                                 <span class="body-text">{{ depository.name }} à {{ clientOrderInformation.depositoryDistance ~ 'km' }}</span>
+                            {% else %}
+                                <span class="body-text">-</span>
                             {% endif %}
                         </div>
                     </div>

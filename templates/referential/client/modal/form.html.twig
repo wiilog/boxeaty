@@ -202,17 +202,17 @@
             <span class="label">Type de commande disponible</span>
             <div class="d-flex flex-column flex-xxl-row w-50">
                 <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-order-type-buy" name="orderType" class="data"
-                       value="1" {{ clientOrderInformation ? clientOrderInformation.orderType == 1 ? 'checked' }}/>
+                       value="0" {{ clientOrderInformation ? clientOrderInformation.orderType == 0 ? 'checked' }}/>
                 <label for="{{ client.id ? 'edit' : 'new' }}-order-type-buy">Achat / Négoce</label>
 
                 <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-order-type-manage" name="orderType"
                        class="data"
-                       value="2" {{ clientOrderInformation ? clientOrderInformation.orderType == 2 ? 'checked' }}/>
+                       value="1" {{ clientOrderInformation ? clientOrderInformation.orderType == 1 ? 'checked' }}/>
                 <label for="{{ client.id ? 'edit' : 'new' }}-order-type-manage">Gestion autonome</label>
 
                 <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-order-type-benefit" name="orderType"
                        class="data"
-                       value="3" {{ clientOrderInformation ? clientOrderInformation.orderType == 3 ? 'checked' }}/>
+                       value="2" {{ clientOrderInformation ? clientOrderInformation.orderType == 2 ? 'checked' }}/>
                 <label for="{{ client.id ? 'edit' : 'new' }}-order-type-benefit">Prestation ponctuelle</label>
             </div>
         </div>
