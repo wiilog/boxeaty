@@ -100,6 +100,11 @@ $(function() {
     $modal.find('.add-box-type-model-button').on('click', function () {
         addBoxTypeModel($modal);
     });
+
+    $modal.find('input[name=type]').on('click', function () {
+        $modal.find('.client-order-container').removeClass('d-none');
+        $modal.find('.footer').removeClass('d-none');
+    });
 });
 
 function openOrderShowModal(clientOrderId) {
