@@ -1,0 +1,133 @@
+<div class="newClientOrder">
+    <div class="row">
+        <div class="clientOrderType">
+            {% for orderType in orderTypes %}
+                {% set inputId = 'order-type-' ~ (clientOrder ? 'edit-') ~ orderType.id %}
+                <input type="radio"
+                       id="{{ inputId }}"
+                       name="type"
+                       class="data"
+                       value="{{ orderType.id }}"
+                       data-code="{{ orderType.code }}"
+                        {{ clientOrder.type == orderType ? 'checked' }}
+                       required/>
+                <label for="{{ inputId }}">
+                    {{ orderType.name }}
+                </label>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="header-section">
+        <h2 class="header-section-label">Information</h2>
+    </div>
+    <div class="content-section">
+        <label>Demandeur&nbsp;: {{ requester.username }}</label>
+        <span class="bigTxt">Veuillez selectionner le site que vous voulez approvisionner</span>
+        <div class="row">
+            <div class="select">
+                <input name="client-cost-information-needed"
+                       value="1"
+                       type="hidden">
+                <label>
+                    <select name="client"
+                            class="data"
+                            data-s2="client"
+                            data-include-params="input[name=client-cost-information-needed]"
+                            data-placeholder="Sélectionnez un client"
+                            required>
+                        {% if clientOrder.client and clientOrder.client.clientOrderInformation.workingDayDeliveryRate is not null %}
+                            <option value="{{ clientOrder.client.id }}" selected></option>
+                        {% endif %}
+                    </select>
+                </label>
+            </div>
+            <span id="clientAddress" class="smallTxt col-6 "></span>
+        </div>
+        <div class="row form-switch autonomous-management d-none">
+            <label class="form-check-label bigTxt col-8" for="{{ clientOrder.id ? 'edit' : 'new' }}-collect">
+                Avez-vous besoin de faire une collecte ?
+                <span class="smallTxt">(Box à nettoyer)</span>
+            </label>
+            <input class="form-check-input data col-4"
+                   type="checkbox"
+                   name="collectRequired"
+                   id="{{ clientOrder.id ? 'edit' : 'new' }}-collect"
+                    {{ clientOrder.collectRequired ? 'checked' }}
+                   required>
+            <div class="crates-amount-to-collect-container">
+                <label>
+                    Caisses à collecter
+                    <input type="number"
+                           class="arrow mt-2 data"
+                           name="cratesAmountToCollect"
+                           value="{{ clientOrder.cratesAmountToCollect }}"
+                           placeholder="1"
+                           min="1">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-section">
+        <h2 class="header-section-label ">Ajouter une box</h2>
+    </div>
+
+    <div class="content-section">
+        <div class="row justify-content-between">
+            <div class="select col-md-6 col-12">
+                <select name="boxType" class="data w-100" data-s2="type"
+                        data-placeholder="Type Box - Volume - Tarif"></select>
+            </div>
+            <div class="col-md-6 col-12">
+                <div class="row">
+                    <div class="col-auto">
+                        <button class="primary add-box-to-cart-button"><i class="icon bxi bxi-whiteCart"></i></button>
+                    </div>
+                    <div class="col autonomous-management d-none">
+                        <button class="secondary w-100 add-box-type-model-button">Ajouter mon modèle de caisse</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-section">
+        <h2 class="header-section-label">Panier</h2>
+    </div>
+
+    <div class="cart-container cartBox content-section">
+        <div class="emptyCart justify-content-center">
+            <img src="{{ asset('images/doubleBoxes.svg') }}" alt="Panier vide">
+            <p class="bigTxt">Votre panier est vide</p>
+        </div>
+    </div>
+
+    <div class="crate-number-average"></div>
+
+    <div class="header-section">
+        <h2 class="header-section-label">Livraison</h2>
+    </div>
+    <div class="row content-section">
+        <div class="orange-toggle transport col-md-7 col-12">
+            <p class="bigTxt col-12">Transport</p>
+            {% for deliveryMethod in deliveryMethods %}
+                <input type="radio" id="{{ deliveryMethod.name }}" name="deliveryMethod" class="data "
+                       value="{{ deliveryMethod.id }}" {{ clientOrder.deliveryMethod == deliveryMethod.id ? 'checked' }}
+                       required/>
+                <label for="{{ deliveryMethod.name }}">
+                    <i class="icon ico bxi bxi-{{ deliveryMethod.icon }}"></i>
+                    {{ deliveryMethod.name }}
+                </label>
+            {% endfor %}
+        </div>
+        <div class="col-md-5 col-12">
+            <span class="bigTxt">Date de livraison souhaitée</span>
+            <input type="datetime-local" name="date" class="data" placeholder="Date de livraison"
+                   min="{{ now }}T00:00" required/>
+        </div>
+        <span class="bigTxt col-12" id="deliveryPrice"></span>
+        <span class="bigTxt col-12" id="servicePrice"></span>
+    </div>
+    <label class="bigTxt"> Commentaire sur la livraison</label>
+    <div class="data" data-wysiwyg="comment">{{ clientOrder.comment | raw }}</div>
+</div>

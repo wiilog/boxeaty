@@ -342,9 +342,31 @@ class ClientController extends AbstractController {
             'template' => $this->renderView('referential/client/box_types.html.twig', [
                 'client' => $client,
             ]),
-            'totalCrateTypePrice' => Stream::from($client->getClientBoxTypes())
-                ->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float) $clientBoxType->getCost())
-                ->sum()
+            'totalCrateTypePrice' => FormatHelper::price(
+                Stream::from($client->getClientBoxTypes())
+                    ->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float) $clientBoxType->getCustomUnitPrice())
+                    ->sum()
+            )
+        ]);
+    }
+
+    /**
+     * @Route("/{client}/box-types", name="client_box_types", options={"expose": true})
+     */
+    public function getBoxTypes(Client $client): Response {
+        return $this->json([
+            'box-types' => $client->getClientBoxTypes()
+                ->map(fn (ClientBoxType $clientBoxType) => [
+                    'id' => $clientBoxType->getBoxType()->getId(),
+                    'unitPrice' => $clientBoxType->getUnitPrice(),
+                    'quantity' => $clientBoxType->getQuantity(),
+                    'name' => $clientBoxType->getBoxType()->getName(),
+                    'volume' => $clientBoxType->getBoxType()->getVolume(),
+                    'image' => $clientBoxType->getBoxType()->getImage()
+                        ? $clientBoxType->getBoxType()->getImage()->getPath()
+                        : null
+                ])
+                ->toArray()
         ]);
     }
 
@@ -363,13 +385,14 @@ class ClientController extends AbstractController {
 
         if ($content->quantity < 1) {
             $form->addError("quantity", "La quantité doit être supérieure ou égale à 1");
-        } elseif ($content->price < 0) {
-            $form->addError("price", "Le tarif personnalisé doit être supérieur ou égal à 0");
+        } elseif ($content->customPrice < 0) {
+            $form->addError("customPrice", "Le tarif personnalisé doit être supérieur ou égal à 0");
         }
 
         foreach ($clientBoxTypes as $clientBoxType) {
             if($clientBoxType->getBoxType()->getId() === $boxType->getId()) {
                 $form->addError("type", 'Ce type de Box est déjà présent dans le modèle de caisse');
+                break;
             }
         }
 
@@ -377,11 +400,15 @@ class ClientController extends AbstractController {
 
             $name = $boxType->getName();
 
+            $customPrice = $content->customPrice
+                ? (float) $content->customPrice
+                : null;
+
             $clientBoxType = (new ClientBoxType())
                 ->setClient($client)
                 ->setBoxType($boxType)
                 ->setQuantity((int) $content->quantity)
-                ->setCost((float) $content->price);
+                ->setCustomUnitPrice($customPrice);
 
             $manager->persist($clientBoxType);
             $manager->flush();
@@ -444,16 +471,19 @@ class ClientController extends AbstractController {
 
         if ($content->quantity < 1) {
             $form->addError("quantity", "La quantité doit être supérieure ou égale à 1");
-        } elseif ($content->price < 0) {
-            $form->addError("price", "Le tarif personnalisé doit être supérieur ou égal à 0");
+        } elseif ($content->customPrice < 0) {
+            $form->addError("customPrice", "Le tarif personnalisé doit être supérieur ou égal à 0");
         }
 
         if($form->isValid()) {
             $name = $clientBoxType->getBoxType()->getName();
 
+            $customPrice = $content->customPrice
+                ? (float) $content->customPrice
+                : null;
             $clientBoxType
                 ->setQuantity((int) $content->quantity)
-                ->setCost((float) $content->price);
+                ->setCustomUnitPrice($customPrice);
 
             $manager->flush();
 
@@ -477,7 +507,7 @@ class ClientController extends AbstractController {
         $orderRecurrence = $clientOrderInformation ? $clientOrderInformation->getOrderRecurrence() : null;
 
         $crateTypePrice = Stream::from($client->getClientBoxTypes())
-            ->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float) $clientBoxType->getCost())
+            ->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float) $clientBoxType->getCustomUnitPrice())
             ->sum();
 
         return $this->json([

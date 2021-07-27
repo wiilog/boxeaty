@@ -103,11 +103,17 @@ class SelectController extends AbstractController {
     /**
      * @Route("/select/client", name="ajax_select_clients", options={"expose": true})
      */
-    public function clients(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Client::class)->getForSelect(
+    public function clients(Request $request,
+                            EntityManagerInterface $manager): Response {
+        $clientRepository = $manager->getRepository(Client::class);
+
+        $clientCostInformationNeeded = $request->query->getBoolean('client-cost-information-needed');
+
+        $results = $clientRepository->getForSelect(
             $request->query->get("term"),
             $request->query->get("groups"),
-            $this->getUser()
+            $this->getUser(),
+            $clientCostInformationNeeded
         );
 
         return $this->json([
@@ -153,7 +159,6 @@ class SelectController extends AbstractController {
      */
     public function types(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(BoxType::class)->getForSelect($request->query->get("term"));
-
         return $this->json([
             "results" => $results,
         ]);

@@ -1,13 +1,34 @@
 @import "../variables";
 
+
+.box-type-image {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+}
+
+.type-box-input {
+    button {
+        padding: 0 5px;
+    }
+
+    .cartBoxNumber {
+        min-width: initial !important;
+        text-align: center;
+        background-color: white;
+        border: 1px solid lightgray !important;
+        border-radius: 5px;
+        margin: 0 3px;
+        width: 45px !important;
+    }
+}
+
 .form-switch {
     padding-left: 0em;
 }
 
 .select{
-    width: 40%;
     font-size: 18px;
-    padding-bottom: 20px;
 }
 
 input{
@@ -29,6 +50,8 @@ input{
     background-color: #F8F8F8;
     color: #1E1F44;
     align-items: center;
+    padding-right: 25px;
+    padding-left: 25px;
 }
 
 .bxi-trash-circle{
@@ -45,6 +68,11 @@ input{
 .deliveryMethodIcon{
     width: 25px;
     height: 25px;
+
+}
+
+.dotted{
+    border-bottom: 2px dotted #1E1F44;
 }
 
 .order-card {
@@ -150,12 +178,6 @@ input{
         margin-bottom: .30rem;
         padding-top: .5rem;
         padding-bottom: .5rem;
-
-        .box-type-image {
-            width: 30px;
-            height: 30px;
-            object-fit: cover;
-        }
     }
 }
 
@@ -227,3 +249,15 @@ input{
     }
 }
 
+#modal-validation-client-order {
+    .delivery-method-selected {
+        background: $grey;
+        color: $blue;
+        border-radius: 3px;
+
+        label {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+    }
+}

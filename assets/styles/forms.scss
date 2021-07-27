@@ -140,7 +140,7 @@ input[type=number]::-webkit-inner-spin-button {
         border-color: $grey;
         color: black;
         background-color: $grey;
-        width: 200px;
+        min-width: 200px;
         margin-top: 0;
     }
 
@@ -161,6 +161,82 @@ input[type=number]::-webkit-inner-spin-button {
         border-color: $blue;
     }
 }
+
+.orange-toggle {
+   @extend .toggle;
+
+    input[type="radio"] + label {
+        @include button(secondary);
+        border-color: $orange;
+        color: $orange;
+        background-color: white;
+        min-width: 20px;
+        margin: 3px;
+    }
+
+    input[type="radio"]:checked + label {
+        @include button(primary);
+        background: $orange !important;
+        border-color: $orange;
+    }
+
+    input[type=radio] + label:hover {
+        border-color: $orange;
+        color: $orange;
+    }
+
+    input[type=radio]:checked + label:hover {
+        border-color: $orange;
+    }
+}
+
+.bigTxt{
+    color: #1E1F44;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.smallTxt{
+    color: #6D757D;
+    font-size: 14px;
+    padding-top: 10px;
+}
+
+.clientOrderType {
+    margin-left: auto;
+    margin-right: auto;
+    width: 650px;
+
+    @extend .toggle;
+
+    margin-bottom: 10px;
+    input[type="radio"] + label {
+        @include button(secondary);
+        background: #E5E5E5 !important;
+        border-color: #E5E5E5;
+        color: #BDBDBD !important;
+        width: 200px;
+        margin-top: 0;
+    }
+
+    input[type="radio"]:checked + label {
+        @include button(primary);
+        background: white !important;
+        border-color: #76B39D;
+        color: #76B39D !important;
+        cursor: default;
+    }
+
+    input[type=radio] + label:hover {
+        border-color: #76B39D;
+        color: #76B39D;
+    }
+
+    input[type=radio]:checked + label:hover {
+        border-color: #76B39D;
+    }
+}
+
 
 .radio {
     display: flex;
@@ -323,6 +399,11 @@ button, a {
     }
 }
 
+.content-section {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
 .text-form-wrapper {
     display: flex;
     flex-direction: row;
@@ -341,4 +422,8 @@ button, a {
     input:not(:last-child), select:not(:last-child) {
         margin-right: 4px;
     }
+}
+
+.form-switch {
+    cursor: pointer;
 }

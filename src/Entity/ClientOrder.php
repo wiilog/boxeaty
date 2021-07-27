@@ -7,11 +7,14 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use WiiCommon\Helper\Stream;
 
 /**
  * @ORM\Entity(repositoryClass=ClientOrderRepository::class)
  */
 class ClientOrder {
+
+    public const PREFIX_NUMBER = 'CO';
 
     /**
      * @ORM\Id
@@ -71,17 +74,7 @@ class ClientOrder {
     /**
      * @ORM\Column(type="boolean")
      */
-    private ?bool $shouldCreateCollect = null;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
     private ?bool $automatic = null;
-
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private ?int $collectBoxNumber = null;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
@@ -104,7 +97,7 @@ class ClientOrder {
     private ?User $validator = null;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private ?DateTime $validatedAt = null;
 
@@ -133,6 +126,16 @@ class ClientOrder {
      * @ORM\OneToOne(targetEntity=Delivery::class, mappedBy="order", cascade={"persist", "remove"})
      */
     private ?Delivery $delivery = null;
+
+    /**
+     * @ORM\Column(type="integer", nullable="true")
+     */
+    private ?int $cratesAmountToCollect = null;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private bool $collectRequired = false;
 
     /**
      * @ORM\OneToOne(targetEntity=Collect::class, mappedBy="order", cascade={"persist", "remove"})
@@ -250,32 +253,12 @@ class ClientOrder {
         return $this;
     }
 
-    public function getShouldCreateCollect(): ?bool {
-        return $this->shouldCreateCollect;
-    }
-
-    public function setShouldCreateCollect(bool $shouldCreateCollect): self {
-        $this->shouldCreateCollect = $shouldCreateCollect;
-
-        return $this;
-    }
-
     public function getAutomatic(): ?bool {
         return $this->automatic;
     }
 
     public function setAutomatic(bool $automatic): self {
         $this->automatic = $automatic;
-
-        return $this;
-    }
-
-    public function getCollectBoxNumber(): ?int {
-        return $this->collectBoxNumber;
-    }
-
-    public function setCollectBoxNumber(int $collectBoxNumber): self {
-        $this->collectBoxNumber = $collectBoxNumber;
 
         return $this;
     }
@@ -455,5 +438,30 @@ class ClientOrder {
         }
 
         return $this;
+    }
+
+    public function getCratesAmountToCollect(): ?int {
+        return $this->cratesAmountToCollect;
+    }
+
+    public function setCratesAmountToCollect(?int $cratesAmountToCollect): self {
+        $this->cratesAmountToCollect = $cratesAmountToCollect;
+        return $this;
+    }
+
+    public function isCollectRequired(): bool {
+        return $this->collectRequired;
+    }
+
+    public function setCollectRequired(bool $collectRequired): self {
+        $this->collectRequired = $collectRequired;
+        return $this;
+    }
+
+    public function getCartAmountPrice(?array $lines){
+       return Stream::from($lines)->reduce(function(int $total, $line) {
+            $boxType = $line['boxType'];
+            return $total + ($boxType->getPrice() * $line['quantity']);
+        }, 0);
     }
 }

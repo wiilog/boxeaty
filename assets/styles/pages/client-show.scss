@@ -111,6 +111,12 @@
             &:not(:first-of-type) {
                 margin-top: 10px;
             }
+
+            .box-type-image {
+                width: 30px;
+                height: 30px;
+                object-fit: cover;
+            }
         }
     }
 

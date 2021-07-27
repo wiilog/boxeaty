@@ -5,6 +5,7 @@ import AJAX from "../ajax";
 import Modal from "../modal";
 
 import "../styles/pages/client-show.scss";
+import {StringHelper} from "../util";
 
 $(document).ready(() => {
     getBoxTypes();
@@ -104,7 +105,7 @@ function getBoxTypes() {
         .json()
         .then((response) => {
             $('.box-type-card-wrapper').empty().append(response.template);
-            $('.total-crate-type-price').text(`à ${response.totalCrateTypePrice} €`);
+            $('.total-crate-type-price').text(`à ${response.totalCrateTypePrice}`);
         });
 }
 
@@ -113,6 +114,6 @@ function getBoxRecurrence() {
         .json()
         .then((response) => {
             $('.order-recurrence-wrapper').empty().append(response.template);
-            $('.order-recurrence-price').text(`${response.orderRecurrencePrice} € HT/mois`);
+            $('.order-recurrence-price').text(`${StringHelper.formatPrice(response.orderRecurrencePrice)} HT/mois`);
         });
 }

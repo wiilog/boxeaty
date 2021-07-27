@@ -85,7 +85,9 @@ class FormatHelper {
     }
 
     public static function dateMonth(?DateTimeInterface $date, $else = "-"): ?string {
-        return $date ? $date->format("d")." ".self::MONTHS[$date->format("n")]." ".$date->format("Y") : $else;
+        return $date
+            ? ($date->format("d") . " " . self::MONTHS[$date->format("n")] . " " . $date->format("Y"))
+            : $else;
     }
 
     public static function datetime(?DateTimeInterface $date, $format = self::DATETIME_FORMAT, $else = "-"): ?string {
