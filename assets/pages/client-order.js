@@ -78,7 +78,12 @@ $(function() {
         if(clientData) {
             $clientAddress.text(clientData.address);
             $servicePrice.text("Frais de service " + StringHelper.formatPrice(clientData.serviceCost));
-        } else{
+            $('.transport').find('input[name=deliveryMethod]').each(function() {
+                if(parseInt($(this).val()) === parseInt(clientData.deliveryMethod)) {
+                    $(this).prop('checked', true);
+                }
+            });
+        } else {
             $clientAddress.text("");
             $servicePrice.text("");
         }

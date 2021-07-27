@@ -213,8 +213,8 @@ class ClientController extends AbstractController {
         }
         $clientOrderInformation = $client->getClientOrderInformation();
 
-        $deliveryMethod = isset($content->deliveryMethod) ? $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod) : $clientOrderInformation->getDeliveryMethod();
-        $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : $clientOrderInformation->getDepository();
+        $deliveryMethod = isset($content->deliveryMethod) ? $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod) : null;
+        $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
         if ($existing !== null && $existing !== $client) {
             $form->addError("name", "Un autre client avec ce nom existe déjà");
         }

@@ -141,11 +141,13 @@ class ClientRepository extends EntityRepository {
         $qb
             ->select("client.id AS id")
             ->addSelect("client.name AS text")
-            ->addSelect("information.workingDayDeliveryRate AS workingRate")
-            ->addSelect("information.nonWorkingDayDeliveryRate AS nonWorkingRate")
-            ->addSelect("information.serviceCost AS serviceCost")
+            ->addSelect("join_information.workingDayDeliveryRate AS workingRate")
+            ->addSelect("join_information.nonWorkingDayDeliveryRate AS nonWorkingRate")
+            ->addSelect("join_information.serviceCost AS serviceCost")
             ->addSelect("client.address AS address")
-            ->leftjoin("client.clientOrderInformation", "information")
+            ->addSelect("join_deliveryMethod.id AS deliveryMethod")
+            ->leftjoin("client.clientOrderInformation", "join_information")
+            ->leftjoin("join_information.deliveryMethod", "join_deliveryMethod")
             ->andWhere("client.name LIKE :search")
             ->andWhere("client.active = 1")
             ->setMaxResults(15)
@@ -153,9 +155,9 @@ class ClientRepository extends EntityRepository {
 
         if ($costInformationNeeded) {
             $qb
-                ->andWhere("information.workingDayDeliveryRate IS NOT NULL")
-                ->andWhere("information.nonWorkingDayDeliveryRate IS NOT NULL")
-                ->andWhere("information.serviceCost IS NOT NULL");
+                ->andWhere("join_information.workingDayDeliveryRate IS NOT NULL")
+                ->andWhere("join_information.nonWorkingDayDeliveryRate IS NOT NULL")
+                ->andWhere("join_information.serviceCost IS NOT NULL");
         }
 
         return $qb
