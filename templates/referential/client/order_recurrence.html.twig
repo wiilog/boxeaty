@@ -6,5 +6,9 @@
     <strong>{{ orderRecurrence ? orderRecurrence.end | format_helper('date') : '-' }}</strong>
 </span>
 <div class="d-flex justify-content-end mt-3">
-    <button class="primary {{ orderRecurrence ? 'edit-order-ocurrence' : 'add-order-ocurrence' }}" data-id="{{ orderRecurrence ? orderRecurrence.id }}">{{ orderRecurrence ? 'Modifier la récurrence' : 'Ajouter une récurrence' }}</button>
+    {% if orderRecurrence %}
+        <button class="secondary delete-recurrence" data-id="{{ orderRecurrence ? orderRecurrence.id }}">Supprimer la récurrence</button>
+    {% endif %}
+    <button class="primary {{ orderRecurrence ? 'edit-order-recurrence' : 'add-order-recurrence' }}"
+            data-id="{{ orderRecurrence ? orderRecurrence.id }}">{{ orderRecurrence ? 'Modifier la récurrence' : 'Ajouter une récurrence' }}</button>
 </div>

@@ -638,4 +638,21 @@ class ClientController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/supprimer-recurrence-commande/{orderRecurrence}", name="order_recurrence_delete", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENTS)
+     */
+    public function orderRecurrenceDelete(OrderRecurrence $orderRecurrence, EntityManagerInterface $manager): Response {
+        $clientOrderInformation = $manager->getRepository(ClientOrderInformation::class)->findOneBy(["orderRecurrence" => $orderRecurrence]);
+
+        $clientOrderInformation->setOrderRecurrence(null);
+        $manager->remove($orderRecurrence);
+        $manager->flush();
+
+        return $this->json([
+            'success' => true,
+            'message' => 'La récurrence a bien été supprimée'
+        ]);
+    }
+
 }
