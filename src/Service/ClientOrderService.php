@@ -17,6 +17,10 @@ use DateTimeZone;
 use mysql_xdevapi\Exception;
 use PhpParser\Node\Expr\Cast\Object_;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Routing\RouterInterface;
 use WiiCommon\Helper\Stream;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,6 +29,23 @@ use Twig\Environment;
 
 class ClientOrderService
 {
+
+    /** @Required */
+    public SessionInterface $session;
+
+    /** @Required */
+    public RequestStack $request;
+
+    /** @Required */
+    public RouterInterface $router;
+
+    /** @Required */
+    public Environment $twig;
+
+    /** @Required */
+    public EntityManagerInterface $manager;
+
+    private ?string $token = null;
 
     public function handleCartLines(EntityManagerInterface $entityManager,
                                     Form $form,
@@ -83,11 +104,8 @@ class ClientOrderService
         $content = (object)$request->request->all();
         $quantity = $content->quantity;
         $boxType = $boxTypeRepository->findBy(["id" => $content->boxTypeId]);
-        dump($boxType);
         if ($form->isValid()) {
-            dump('coucou');
             for ($i = 0; $i < count($boxType); $i++) {
-                dump("test");
                 $clientOrderLine = (new ClientOrderLine())
                     ->setClientOrder($clientOrder)
                     ->setBoxType($boxType[$i])
@@ -99,6 +117,49 @@ class ClientOrderService
 
 
         return $clientOrderLine ?? null;
+    }
+
+    /**
+     * @return array|Box[]|DepositTicket[]
+     */
+    public function get(string $class): array {
+        $id = $this->getToken();
+
+        if(!isset($this->$class)) {
+            $this->$class = $this->entityManager
+                ->getRepository($class)
+                ->findBy(["number" => $this->session->get("client_order.$id.$class", [])]);
+        }
+
+        return $this->$class;
+    }
+
+    public function getToken(): ?string {
+        if (!$this->token) {
+            $this->token = $this->request->getCurrentRequest()->get("session");
+
+            if (!preg_match("/^[A-Z0-9]{8,32}$/i", $this->token)) {
+                throw new BadRequestHttpException("Invalid client order session token");
+            }
+        }
+
+        return $this->token;
+    }
+
+    public function renderNew(): array {
+        return [
+            "submit" => $this->router->generate("client_order_new"),
+            "template" => $this->twig->render("operation/client_order/modal/new.html.twig", [
+                "session" => $this->getToken(),
+                "clientOrder" => $this->get(ClientOrder::class),
+            ])
+        ];
+    }
+
+    public function renderShow(): array {
+        return [
+            "submit" => $this->router->generate("client_order_new"),
+        ];
     }
 
 }

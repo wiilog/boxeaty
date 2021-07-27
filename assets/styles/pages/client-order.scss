@@ -7,8 +7,20 @@
     object-fit: cover;
 }
 
-.cartBoxNumber {
-    min-width: initial !important;
+.type-box-input {
+    button {
+        padding: 0 5px;
+    }
+
+    .cartBoxNumber {
+        min-width: initial !important;
+        text-align: center;
+        background-color: white;
+        border: 1px solid lightgray !important;
+        border-radius: 5px;
+        margin: 0 3px;
+        width: 45px !important;
+    }
 }
 
 .form-switch {
@@ -38,6 +50,8 @@ input{
     background-color: #F8F8F8;
     color: #1E1F44;
     align-items: center;
+    padding-right: 25px;
+    padding-left: 25px;
 }
 
 .bxi-trash-circle{

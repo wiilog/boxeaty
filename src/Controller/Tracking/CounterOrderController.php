@@ -183,7 +183,6 @@ class CounterOrderController extends AbstractController {
         } else {
             $modal = $this->service->renderPayment();
         }
-
         return $this->json([
             "success" => true,
             "modal" => $modal,

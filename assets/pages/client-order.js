@@ -25,6 +25,10 @@ $(function() {
         openOrderValidationModal(getParams['action-data']);
     }
 
+    $('#modal-validation-client-order').find('.submit-button').on('click', function(){
+        window.location.href = Routing.generate('client_order_validation_template', {action : 'validation'});
+    });
+
     $document.on('click', '.show-detail', function () {
         const $link = $(this);
         const clientOrderId = $link.data('id');
@@ -55,9 +59,15 @@ $(function() {
 
     $modal.find('[name="collectRequired"]').on('change', function(){
         if (toggleCratesAmountToCollect) {
-            $modal.find('.crates-amount-to-collect-container').show();
-            $modal.find('[name="cratesAmountToCollect"]').prop('required', true);
+            $modal.find('.crates-amount-to-collect-container').toggle();
+            $modal.find('[name="cratesAmountToCollect"]').prop('required', $(this).is(':checked'));
         }
+    });
+
+    $(document).arrive(`.increase, .decrease`, function() {
+        $(this).on('click', function() {
+            updateInputValue($(this));
+        });
     });
 
     let clientData
@@ -82,7 +92,7 @@ $(function() {
         addSelectedBoxTypeToCart($modal);
     })
 
-    $modal.on('keyup','[name="quantity"]' , function(){
+    $modal.on('click','.increase, .decrease' , function(){
         onBoxTypeQuantityChange($(this));
         updateCrateNumberAverage($modal);
     });
@@ -109,7 +119,7 @@ function openOrderShowModal(clientOrderId) {
 
 function openOrderValidationModal(clientOrderId) {
     const ajax = AJAX.route(`POST`, `client_order_validation_template`, {
-        clientOrder: clientOrderId
+        clientOrder: clientOrderId,
     });
 
     Modal.load(ajax, {
@@ -127,7 +137,13 @@ function openNewClientOrderModal() {
         ajax: AJAX.route(`POST`, `client_order_new`),
         success: (response) => {
             removeActionRequestInURL();
-            Modal.load(response.validationTemplate);
+            Modal.load(response.validationTemplate, {
+                afterOpen: modal=> {
+                    $('#modal-validation-client-order').find('.submit-button').on('click', function(){
+                        window.location.href = Routing.generate('client_orders_list');
+                    });
+                },
+            });
         },
         afterHidden: () => {
             removeActionRequestInURL();
@@ -137,7 +153,7 @@ function openNewClientOrderModal() {
 }
 
 function initOrderDatatable() {
-    return initDatatable(`#table-client-order`, {
+    const table = initDatatable(`#table-client-order`, {
         ajax: AJAX.route(`POST`, `client_orders_api`),
         scrollX: false,
         columns: [
@@ -153,6 +169,7 @@ function initOrderDatatable() {
             },
         }
     });
+    return table;
 }
 
 function setOrderRequestInURL(order) {
@@ -217,7 +234,6 @@ function addBoxTypeModel($modal) {
 function addSelectedBoxTypeToCart($modal) {
     const $select2 = $modal.find('[name="boxType"]');
     const [typeBoxData] = $select2.select2('data');
-
     if (typeBoxData
         && !$modal.find(`.cart-container > [data-id=${typeBoxData.id}]`).exists()) {
         addBoxTypeToCart($modal, typeBoxData, true);
@@ -258,7 +274,11 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
                     <div class="box-type-image">${boxTypeImage}</div>
                 </span>
                 <div class="col-2">
-                    <input type="number" name="quantity" value="${initialQuantity}" min="1" max="1000" class="data-array cartBoxNumber">
+                <div class="row type-box-input">
+                    <button class="col-3 secondary decrease">-</button>
+                    <input type="number" name="quantity" value="${initialQuantity}" min="1" max="1000" class="data-array col-6 cartBoxNumber">
+                    <button class="col-3 secondary increase">+</button>
+                </div>
                 </div>
                 <span class="col bigTxt">${typeBoxData.name}</span>
                 <input name="unitPrice" class="data-array" value="${unitPrice}" type="hidden"/>
@@ -290,6 +310,16 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
     }
 }
 
+function updateInputValue($button) {
+    const $input = $button.siblings('input').first();
+    const value = parseInt($input.val());
+    if($button.hasClass('increase') && value !== 1000){
+        $input.val(value+1);
+    } else if($button.hasClass('decrease') && value !== 1) {
+        $input.val(value-1);
+    }
+}
+
 function updateDeliveryFee(clientData, $date) {
     const $deliveryPrice = $("#deliveryPrice");
     if (clientData) {
@@ -317,9 +347,6 @@ function updateCrateNumberAverage($modal) {
                     const $line = $(this);
                     const quantity = Number($line.find('[name="quantity"]').val()) || 0;
                     const volume = Number($line.find('[name="volume"]').val()) || 0;
-                    console.log((quantity && volume)
-                        ? (quantity * volume)
-                        : null)
                     boxesVolume.push(
                         (quantity && volume)
                             ? (quantity * volume)
@@ -333,7 +360,6 @@ function updateCrateNumberAverage($modal) {
             const crateAverage = boxesVolume
                 ? Math.ceil(boxesVolume / average)
                 : null;
-
             const $crateNumberAverage = $modal.find('.crate-number-average');
             if (crateAverage) {
                 const crateAverageInt = Math.ceil(crateAverage);

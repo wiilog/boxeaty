@@ -14,10 +14,8 @@ use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\ClientOrderRepository;
 use App\Service\ClientOrderService;
-use App\Service\CounterOrderService;
 use App\Service\UniqueNumberService;
 use DateTime;
-use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,7 +28,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ClientOrderController extends AbstractController {
 
     /** @Required */
-    public CounterOrderService $service;
+    public ClientOrderService $service;
 
     /**
      * @Route("/liste", name="client_orders_list", options={"expose": true})
@@ -105,29 +103,17 @@ class ClientOrderController extends AbstractController {
     }
 
     /**
-     * @Route("/validate/template", name="client_order_validation_template", options={"expose": true})
+     * @Route("/validate/template/{clientOrderId}", name="client_order_validation_template", options={"expose": true})
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
     public function validateTemplate(Request $request,
                         EntityManagerInterface $entityManager,
-                         ClientOrderService $clientOrderService): Response {
+                        ClientOrderService $clientOrderService,
+                        $clientOrderId): Response {
         // TODO ALEX
         return $this->json([
-            "submit" => $this->generateUrl("client_order_new", [
-                "clientOrder" => $clientOrder ->getId(),
-                ]),
-            "template" => $this->renderView("operation/client_order/modal/validation.html.twig", [
-                "clientOrder" => $clientOrder,
-            ])
+            "submit" => $this->generateUrl("client_orders_list"),
         ]);
-    }
-
-    /**
-     * @Route("/validate/{clientOrder}", name="client_order_validate", options={"expose": true})
-     * @HasPermission(Role::CREATE_CLIENT_ORDERS)
-     */
-    public function validate(){
-
     }
 
     /**
@@ -220,10 +206,12 @@ class ClientOrderController extends AbstractController {
                 ->setValidator(null)
                 ->setDeliveryRound(null);
 
+            $cartPrice = $clientOrder->getCartAmountPrice($handledCartLines);
             foreach ($handledCartLines as $cartLine) {
+                $boxType = $cartLine['boxType'];
                 $clientOrderLine = new ClientOrderLine();
                 $clientOrderLine
-                    ->setBoxType($cartLine['boxType'])
+                    ->setBoxType($boxType)
                     ->setQuantity($cartLine['quantity'])
                     ->setCustomUnitPrice($cartLine['customUnitPrice'])
                     ->setClientOrder($clientOrder);
@@ -238,6 +226,7 @@ class ClientOrderController extends AbstractController {
                 "success" => true,
                 "validationTemplate" => $this->renderView("operation/client_order/modal/validation.html.twig", [
                     "clientOrder" => $clientOrder,
+                    "cartPrice" => $cartPrice,
                     "expectedDelivery" => FormatHelper::dateMonth($expectedDelivery),
                 ]),
             ]);
@@ -265,11 +254,11 @@ class ClientOrderController extends AbstractController {
      * @Route("/supprimer/{clientOrder}", name="client_order_delete", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
      */
-    public function delete(EntityManagerInterface $manager, ClientOrder $clientOrder): Response {
-        $manager->remove($clientOrder);
-        $manager->flush();
+    public function delete(EntityManagerInterface $entityManager, ClientOrder $clientOrder): Response {
+        $entityManager->remove($clientOrder);
+        $entityManager->flush();
 
-        $clientOrder = $clientOrderService->createClientOrder($this->getUser(), $entityManager, $request);
+        //$clientOrder = $clientOrderService->createClientOrder($this->getUser(), $entityManager, $request);
         return $this->json([
             "success" => true,
             "message" => "Commande client <strong>{$clientOrder->getNumber()}</strong> supprimée avec succès"

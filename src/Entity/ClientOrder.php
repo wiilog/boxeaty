@@ -7,6 +7,7 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use WiiCommon\Helper\Stream;
 
 /**
  * @ORM\Entity(repositoryClass=ClientOrderRepository::class)
@@ -455,5 +456,12 @@ class ClientOrder {
     public function setCollectRequired(bool $collectRequired): self {
         $this->collectRequired = $collectRequired;
         return $this;
+    }
+
+    public function getCartAmountPrice(?array $lines){
+       return Stream::from($lines)->reduce(function(int $total, $line) {
+            $boxType = $line['boxType'];
+            return $total + ($boxType->getPrice() * $line['quantity']);
+        }, 0);
     }
 }
