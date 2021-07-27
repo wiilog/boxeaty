@@ -202,7 +202,8 @@ function removeActionRequestInURL() {
 function onBoxTypeQuantityChange($quantity) {
     const $row = $quantity.closest('.cartBox');
     const unitPrice = $row.find('[name="unitPrice"]').val();
-    const quantity = $quantity.val();
+    const $input = $quantity.siblings('input').first();
+    const quantity = $input.val();
 
     const $totalPrice = $row.find('.totalPrice');
     const totalPrice = unitPrice * quantity;
