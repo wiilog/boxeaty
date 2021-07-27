@@ -9,6 +9,7 @@ use App\Entity\ClientBoxType;
 use App\Entity\ClientOrderInformation;
 use App\Entity\DeliveryMethod;
 use App\Entity\Depository;
+use App\Entity\GlobalSetting;
 use App\Entity\Group;
 use App\Entity\Location;
 use App\Entity\OrderRecurrence;
@@ -32,15 +33,18 @@ use WiiCommon\Helper\Stream;
 class ClientController extends AbstractController {
 
     /**
-     * @Route("/liste", name="clients_list")
+     * @Route("/liste", name="clients_list", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
+        $paymentModes = $manager->getRepository(GlobalSetting::class)->getValue(GlobalSetting::PAYMENT_MODES);
+
         return $this->render("referential/client/index.html.twig", [
             "new_client" => new Client(),
             "new_client_order_information" => new ClientOrderInformation(),
             "initial_clients" => $this->api($request, $manager)->getContent(),
-            "clients_order" => ClientRepository::DEFAULT_DATATABLE_ORDER
+            "clients_order" => ClientRepository::DEFAULT_DATATABLE_ORDER,
+            "paymentModes" => explode(',', $paymentModes),
         ]);
     }
 
@@ -62,11 +66,7 @@ class ClientController extends AbstractController {
                 "contact" => FormatHelper::user($client->getContact()),
                 "group" => FormatHelper::named($client->getGroup()),
                 "linkedMultiSite" => FormatHelper::named($client->getLinkedMultiSite()),
-                "multiSite" => $client->isMultiSite() ? "Oui" : "Non",
-                "actions" => $this->renderView("datatable_actions.html.twig", [
-                    "editable" => true,
-                    "deletable" => true
-                ]),
+                "isMultiSite" => $client->isMultiSite() ? "Oui" : "Non",
             ];
         }
 
@@ -124,7 +124,9 @@ class ClientController extends AbstractController {
                 ->setLinkedMultiSite($multiSite)
                 ->setDepositTicketClients($depositTicketsClients)
                 ->setDepositTicketValidity($content->depositTicketValidity)
-                ->setMailNotificationOrderPreparation((bool)$content->mailNotificationOrderPreparation);
+                ->setMailNotificationOrderPreparation((bool)$content->mailNotificationOrderPreparation)
+                ->setProrateAmount($content->prorateAmount)
+                ->setPaymentModes($content->paymentModes);
 
             $clientOrderInformation = (new ClientOrderInformation())
                 ->setClient($client)
@@ -149,6 +151,7 @@ class ClientController extends AbstractController {
                 ->setDeporte(null);
 
             $client->setOutLocation($out);
+            $client->setClientOrderInformation($clientOrderInformation);
 
             //0 is used to select the client we're creating
             if (in_array(0, $depositTicketsClientsIds)) {
@@ -173,14 +176,16 @@ class ClientController extends AbstractController {
      * @Route("/modifier/template/{client}", name="client_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function editTemplate(Client $client): Response {
+    public function editTemplate(Client $client, EntityManagerInterface $manager): Response {
         $clientOrderInformation = $client->getClientOrderInformation();
+        $paymentModes = $manager->getRepository(GlobalSetting::class)->getValue(GlobalSetting::PAYMENT_MODES);
 
         return $this->json([
             "submit" => $this->generateUrl("client_edit", ["client" => $client->getId()]),
             "template" => $this->renderView("referential/client/modal/edit.html.twig", [
                 "client" => $client,
-                "clientOrderInformation" => $clientOrderInformation
+                "clientOrderInformation" => $clientOrderInformation,
+                "paymentModes" => explode(',', $paymentModes),
             ])
         ]);
     }
@@ -226,7 +231,9 @@ class ClientController extends AbstractController {
                 ->setLinkedMultiSite($multiSite)
                 ->setDepositTicketClients($depositTicketsClients)
                 ->setDepositTicketValidity($content->depositTicketValidity)
-                ->setMailNotificationOrderPreparation((bool)$content->mailNotificationOrderPreparation);
+                ->setMailNotificationOrderPreparation((bool)$content->mailNotificationOrderPreparation)
+                ->setProrateAmount($content->prorateAmount ?? null)
+                ->setPaymentModes($content->paymentModes ?? null);
 
             if(isset($clientOrderInformation)) {
                 $clientOrderInformation
@@ -240,6 +247,22 @@ class ClientController extends AbstractController {
                     ->setNonWorkingDayDeliveryRate($content->nonWorkingDayDeliveryRate ?? $clientOrderInformation->getNonWorkingDayDeliveryRate())
                     ->setServiceCost($content->serviceCost ?? $clientOrderInformation->getServiceCost())
                     ->setComment($content->comment ?? $clientOrderInformation->getComment());
+            } else {
+                $clientOrderInformation = (new ClientOrderInformation())
+                    ->setClient($client)
+                    ->setDeliveryMethod($deliveryMethod)
+                    ->setDepository($depository)
+                    ->setDepositoryDistance($content->depositoryDistance ?? null)
+                    ->setTokenAmount($content->tokenAmount ?? null)
+                    ->setOrderType($content->orderType ?? null)
+                    ->setIsClosedParkOrder((bool)$content->isClosedParkOrder ?? null)
+                    ->setWorkingDayDeliveryRate($content->workingDayDeliveryRate ?? null)
+                    ->setNonWorkingDayDeliveryRate($content->nonWorkingDayDeliveryRate ?? null)
+                    ->setServiceCost($content->serviceCost ?? null)
+                    ->setComment($content->comment ?? null);
+
+                $manager->persist($clientOrderInformation);
+                $client->setClientOrderInformation($clientOrderInformation);
             }
 
             $manager->flush();

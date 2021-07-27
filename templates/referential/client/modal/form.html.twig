@@ -54,7 +54,7 @@
                            for="{{ client.id ? 'edit' : 'new' }}-is-multi-site"></label>
                 </div>
             </div>
-            <div class="col-12 col-sm-6">
+            <div class="col-12 col-sm-6 ps-sm-3">
                 <label>
                     Client multi-site lié
                     <select class="data" name="linkedMultiSite" data-s2="multiSite"
@@ -115,6 +115,28 @@
                         </option>
                     {% endfor %}
                 </select>
+            </div>
+        </div>
+        <div class="d-sm-flex mt-3">
+            <div class="col-12 col-sm-6 pe-0 pe-sm-3">
+                <label>
+                    Montant proratat (HT)
+                    <input class="data" name="prorateAmount"
+                           placeholder="Renseignez un montant..." value="{{ client.prorateAmount }}"/>
+                </label>
+            </div>
+            <div class="col-12 col-sm-6 ps-0 ps-sm-3 d-flex flex-column justify-content-between">
+                <label>
+                    Moyen(s) de paiement préféré(s)
+                    <select class="data" name="paymentModes" data-s2 data-editable
+                            data-placeholder="Sélectionnez un ou plusieurs moyen(s) de paiement..." required multiple>
+                        {% for paymentMode in paymentModes %}
+                            <option value="{{ paymentMode }}"
+                                    {{ (paymentMode in client.paymentModes|split(',')) ? 'selected' }}>{{ paymentMode }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
             </div>
         </div>
         <div class="col-12 d-flex align-items-center mt-3">
