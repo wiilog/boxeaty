@@ -200,7 +200,7 @@ function removeActionRequestInURL() {
 }
 
 function onBoxTypeQuantityChange($quantity) {
-    const $row = $quantity.closest('.cartBox');
+    const $row = $quantity.closest('.cart-box');
     const unitPrice = $row.find('[name="unitPrice"]').val();
     const $input = $quantity.siblings('input').first();
     const quantity = $input.val();
@@ -252,7 +252,7 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
     const unitPriceStr = StringHelper.formatPrice(unitPrice);
 
     const $cartContainer = $modal.find(".cart-container");
-    const $alreadyAddedBox = $cartContainer.find(`.cartBox[data-id="${typeBoxData.id}"]`);
+    const $alreadyAddedBox = $cartContainer.find(`.cart-box[data-id="${typeBoxData.id}"]`);
     if ($alreadyAddedBox.exists()) {
         const $quantity = $alreadyAddedBox.find('[name="quantity"]');
         const $unitPrice = $alreadyAddedBox.find('[name="unitPrice"]');
@@ -275,7 +275,7 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
         const initialQuantity = typeBoxData.quantity || 1;
         const volume = typeBoxData.volume || 0;
         const $boxTypeLine = $(`
-            <div class="cartBox my-2 row" data-id="${typeBoxData.id}">
+            <div class="cart-box box-type-line my-2 row" data-id="${typeBoxData.id}">
                 <span class="col-auto">
                     <div class="box-type-image">${boxTypeImage}</div>
                 </span>
@@ -299,16 +299,16 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
 
         $boxTypeLine.find(".remove").on('click', function(){
             $boxTypeLine.remove();
-            if(!$modal.find(`.cartBox`).exists()) {
-                $modal.find(".emptyCart").removeClass(`d-none`);
+            if(!$modal.find(`.box-type-line`).exists()) {
+                $modal.find(".empty-cart").removeClass(`d-none`);
             }
         });
 
         onBoxTypeQuantityChange($boxTypeLine.find('[name="quantity"]'));
     }
 
-    if($modal.find(`.cartBox`).exists()) {
-        $modal.find(".emptyCart").addClass(`d-none`);
+    if($modal.find(`.cart-box`).exists()) {
+        $modal.find(".empty-cart").addClass(`d-none`);
     }
 
     if (calculateAverageCrateNumber) {
@@ -348,7 +348,7 @@ function updateCrateNumberAverage($modal) {
         .then(({average}) => {
             let boxesVolume = [];
             $modal
-                .find('.cart-container .cartBox')
+                .find('.cart-container .box-type-line')
                 .each(function() {
                     const $line = $(this);
                     const quantity = Number($line.find('[name="quantity"]').val()) || 0;
@@ -367,6 +367,7 @@ function updateCrateNumberAverage($modal) {
                 ? Math.ceil(boxesVolume / average)
                 : null;
             const $crateNumberAverage = $modal.find('.crate-number-average');
+
             if (crateAverage) {
                 const crateAverageInt = Math.ceil(crateAverage);
                 $crateNumberAverage.text(`Représente environ ${crateAverageInt} caisse${crateAverageInt > 1 ? 's' : ''}`);

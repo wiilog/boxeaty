@@ -1,6 +1,5 @@
 @import "../variables";
 
-
 .box-type-image {
     width: 30px;
     height: 30px;
@@ -24,7 +23,7 @@
 }
 
 .form-switch {
-    padding-left: 0em;
+    padding-left: 0;
 }
 
 .select{
@@ -35,7 +34,7 @@ input{
     background-color: $grey;
 }
 
-.emptyCart{
+.empty-cart{
     justify-content: center;
     margin-left: auto;
     margin-right: auto;
@@ -46,7 +45,7 @@ input{
     width: 50px !important;
 }
 
-.cartBox{
+.cart-box{
     background-color: #F8F8F8;
     color: #1E1F44;
     align-items: center;
@@ -260,4 +259,11 @@ input{
             margin-bottom: 5px;
         }
     }
+}
+
+.crate-number-average {
+    font-size: 20px;
+    font-weight: 700;
+    color: $blue;
+    margin: 10px 0 25px;
 }
