@@ -59,7 +59,7 @@ class ExportService {
     ];
 
     public const BOX_TYPE_HEADER = [
-        "Type de Box",
+        "Type de Box / Caisse",
         "Prix",
         "Actif",
         "Contenance",
