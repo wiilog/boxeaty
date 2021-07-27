@@ -128,7 +128,7 @@
             <div class="col-12 col-sm-6 ps-0 ps-sm-3 d-flex flex-column justify-content-between">
                 <label>
                     Moyen(s) de paiement préféré(s)
-                    <select class="data" name="paymentModes" data-s2 data-editable
+                    <select class="data" name="paymentModes" data-s2 data-no-empty-option
                             data-placeholder="Sélectionnez un ou plusieurs moyen(s) de paiement..." required multiple>
                         {% for paymentMode in paymentModes %}
                             <option value="{{ paymentMode }}"
