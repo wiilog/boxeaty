@@ -202,24 +202,31 @@ class GlobalSettingController extends AbstractController {
             "name" => $name,
         ]);
 
-        // chek
-        if ($existing) {
-            return $this->json([
+        if ($existing && $existing->getDeleted() && $existing->getIcon() === $icon) {
+            $existing->setDeleted(false);
+            $response = [
+                "success" => true,
+                "message" => "Le type de mobilité ${name} a bien été réactivé"
+            ];
+        } else if($existing && !$existing->getDeleted()) {
+            $response = [
                 "success" => false,
-                "message" => "Ce type de mobilité existe dèja",
-            ]);
-        }
-        $deliveryMethode = new DeliveryMethod();
-        $deliveryMethode->setName($name)
-            ->setIcon($icon);
+                "message" => "Ce type de mobilité existe déjà"
+            ];
+        } else {
+            $deliveryMethod = (new DeliveryMethod())
+                ->setName($name)
+                ->setIcon($icon);
 
-        $manager->persist($deliveryMethode);
+            $manager->persist($deliveryMethod);
+            $response = [
+                "success" => true,
+                "message" => "Le type de mobilité ${name} a bien été créé"
+            ];
+        }
         $manager->flush();
 
-        return $this->json([
-            "success" => true,
-            "message" => "Un nouveau type de mobilité à bien été créé",
-        ]);
+        return $this->json($response);
     }
 
     /**

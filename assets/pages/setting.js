@@ -46,9 +46,11 @@ $document.ready(() => {
             AJAX.route(`POST`, `delivery_mode_add`)
                 .json(processForm($form, null, {data: `add-data`}))
                 .then(result => {
-                    if (handleErrors($form, result)) {
-                        deliveryMethodTable.ajax.reload();
-                        $("input[name=nameDeliveryMethode]").val('');
+                    if(result.success) {
+                        if (handleErrors($form, result)) {
+                            deliveryMethodTable.ajax.reload();
+                            $("input[name=nameDeliveryMethode]").val('');
+                        }
                     }
                 });
         }
