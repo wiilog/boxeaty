@@ -203,8 +203,7 @@ function onBoxTypeQuantityChange($quantity) {
     const $row = $quantity.closest('.cart-box');
     const unitPrice = $row.find('[name="unitPrice"]').val();
     const $input = $quantity.siblings('input').first();
-    const quantity = $input.val();
-
+    const quantity = $input.val() > 0 ? $input.val() : 1;
     const $totalPrice = $row.find('.totalPrice');
     const totalPrice = unitPrice * quantity;
     const totalPriceStr = StringHelper.formatPrice(totalPrice);
