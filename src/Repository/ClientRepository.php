@@ -57,6 +57,24 @@ class ClientRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
+        foreach ($params["filters"] ?? [] as $name => $value) {
+            switch ($name) {
+                case("client"):
+                    $qb
+                        ->andWhere("client.id = :filter_client")
+                        ->setParameter("filter_client", $value);
+                    break;
+                case("multiSite"):
+                    $qb->andWhere("client.linkedMultiSite = :filter_multiSite")
+                        ->setParameter("filter_multiSite", $value);
+                    break;
+                default:
+                    $qb->andWhere("client.$name = :filter_$name")
+                        ->setParameter("filter_$name", $value);
+                    break;
+            }
+        }
+
         if (!empty($params["order"])) {
             foreach ($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
