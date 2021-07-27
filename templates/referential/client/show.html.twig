@@ -13,12 +13,20 @@
 {% block bodyclass %}full-height{% endblock %}
 {% block content %}
     <div class="row client-show">
-        {% set clientOrderInformation = client.clientOrderInformation is defined and client.clientOrderInformation ? client.clientOrderInformation : null %}
+        {% set clientOrderInformation = client.clientOrderInformation is defined and client.clientOrderInformation
+            ? client.clientOrderInformation
+            : null %}
         <div class="col-6">
             <div class="row w-100">
                 <div class="row contact-information p-3">
                     <div class="row col-8">
-                        <span class="subtitle text-uppercase">{{ client.name }}</span>
+                        <div class="d-flex">
+                            <span class="subtitle text-uppercase pe-3">{{ client.name }}</span>
+                            {% if client.multiSite %}
+                                <img src="{{ asset('images/multi-site.svg') }}" alt="Icône client multi-site"
+                                     width="30px" data-toggle="tooltip" title="Client multi-site">
+                            {% endif %}
+                        </div>
                         <span class="body-text-semi-bold">{{ client.address }}</span>
                         <span class="body-text mt-2">{{ client.contact.username }} - {{ client.phoneNumber }}</span>
                     </div>
@@ -26,7 +34,7 @@
                     <span class="edit-client round" data-id="{{ client.id }}">
                         <i class="icon bxi bxi-edit-circle cursor-pointer"></i>
                     </span>
-                    <span class="delete-client round" data-id="{{ client.id }}">
+                        <span class="delete-client round" data-id="{{ client.id }}">
                         <i class="icon bxi bxi-trash-circle cursor-pointer"></i>
                     </span>
                     </div>
