@@ -29,13 +29,13 @@ class Preparation {
      * @ORM\OneToOne(targetEntity=ClientOrder::class, inversedBy="preparation")
      * @ORM\JoinColumn(nullable=false)
      */
-    private ?ClientOrder $order;
+    private ?ClientOrder $order = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="preparations")
      * @ORM\JoinColumn(nullable=false)
      */
-    private ?Depository $depository;
+    private ?Depository $depository = null;
 
     /**
      * @ORM\OneToMany(targetEntity=PreparationLine::class, mappedBy="preparation")
@@ -64,12 +64,14 @@ class Preparation {
     }
 
     public function setOrder(?ClientOrder $order): self {
-        if ($this->order && $this->order->getPreparation() === $this) {
-            $this->order->setPreparation(null);
+        if ($this->order && $this->order->getPreparation() !== $this) {
+            $oldPreparation = $this->order;
+            $this->order = null;
+            $oldPreparation->setPreparation(null);
         }
         $this->order = $order;
-        if ($order) {
-            $order->setPreparation($this);
+        if ($this->order && $this->order->getPreparation() !== $this) {
+            $this->order->setPreparation($this);
         }
 
         return $this;

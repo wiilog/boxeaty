@@ -132,7 +132,7 @@
 }
 
 .deliveries-container {
-    .available-deliveries, .assigned-deliveries {
+    .available-deliveries, .assigned-deliveries, .available-order-for-start, .orders-to-start {
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
@@ -147,12 +147,12 @@
         }
     }
 
-    .available-deliveries {
+    .available-deliveries, .available-order-for-start {
         height: 200px;
         flex-direction: row;
     }
 
-    .assigned-deliveries {
+    .assigned-deliveries, .orders-to-start {
         height: 200px;
         flex-direction: column;
     }

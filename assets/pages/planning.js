@@ -58,6 +58,43 @@ $(document).ready(() => {
         });
     });
 
+    $(`.start-delivery`).click(() => {
+        const params = processForm($filters).asObject();
+        const ajax = AJAX.route(`POST`, `planning_delivery_initialize_template`, params);
+        Modal.load(ajax,{
+            processor: processSortables,
+            afterOpen: modal => {
+                const available = sortable(`.available-order-for-start`, {
+                    acceptFrom: `.deliveries`,
+                })[0];
+                const assigned = sortable(`.orders-to-start`, {
+                    acceptFrom: `.deliveries`,
+                })[0];
+            },
+            success: (result)=> {
+                const ajax = AJAX.route(`POST`, `planning_delivery_start_template`, {params, assignedForStart: result.assignedForStart, depository: result.depository});
+                ajax.json()
+                    .then(() => {
+                        AJAX.route(`POST`, `planning_delivery_start_check_stock`, {assignedForStart: result.assignedForStart, depository: result.depository}).json();
+                        $(".loading").addClass('d-none');
+                        $(".containers").removeClass('d-none');
+                    });
+
+                Modal.load(ajax, {
+                        processor: processSortables,
+                        afterOpen: modal => {
+                            const available = sortable(`.available-order-for-start`, {
+                                acceptFrom: `.deliveries`,
+                            })[0];
+                            const assigned = sortable(`.orders-to-start`, {
+                                acceptFrom: `.deliveries`,
+                            })[0];
+                        }
+                    });
+            }
+        });
+    });
+
     $document.arrive(`[data-sortable]`, function () {
         const $this = $(this);
 
@@ -120,8 +157,12 @@ function processSortables(data, errors, modal) {
     const assigned = $modal.find(`.assigned-deliveries .order[data-id]:not(.d-none)`).map(function () {
         return $(this).data(`id`);
     });
+    const ready = $modal.find(`.orders-to-start .order[data-id]:not(.d-none)`).map(function () {
+        return $(this).data(`id`);
+    });
 
-    data.append(`assigned`, assigned.toArray());
+    data.append(`assignedForRound`, assigned.toArray());
+    data.append(`assignedForStart`, ready.toArray());
 }
 
 async function changePlannedDate(detail) {

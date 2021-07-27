@@ -70,6 +70,23 @@ class ClientOrderRepository extends EntityRepository {
             ->getResult();
     }
 
+    /**
+     * @return ClientOrder[]
+     */
+    public function findOrders(array $params, DateTime $from, DateTime $to): array {
+        if($from == null && $to == null){
+            $returnOrderBetween = $this->createQueryBuilder('client_order');
+        } else {
+            $returnOrderBetween = $this->createBetween($from, $to, $params);
+        }
+        return $returnOrderBetween
+            ->leftJoin("client_order.status", "client_order_status")
+            ->andWhere("client_order_status.code IN (:status)")
+            ->setParameter("status", [Status::CODE_ORDER_PLANNED])
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findForDatatable(array $params, User $user): array {
         $qb = $this->createQueryBuilder("clientOrder");
 

@@ -1,0 +1,41 @@
+{% import 'operation/planning/macros.html.twig' as macros %}
+
+<div id="modal-start-delivery" class="modal ade">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Lancement des livraisons</h1>
+            <div class="inline-form">
+                <label class="inline">
+                    Période de lancement {% include('filters/filter_items/date_item.html.twig') with {
+                        from: from ,
+                        to: to
+                    } %}
+                </label>
+                <label class="inline">
+                    Dépôt
+                    <select name="depository" data-s2="depository" class="data"
+                            data-placeholder="Sélectionnez la mobilité" required>
+                        {# <option selected>{{ depository }}</option> #}
+                    </select>
+                </label>
+            </div>
+            <div class="d-flex justify-content-center loading">
+                <div class="spinner-border">
+                    <span class="sr-only">Calcul en cours...</span>
+                </div>
+            </div>
+            <div class="d-none containers">
+                {% include('operation/planning/modal/stock_and_deliveries_containers.html.twig') with {
+                    orders: orders,
+                    assignedForStart: assignedForStart,
+                } %}
+            </div>
+
+            <div class="footer">
+                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="primary submit-button">Suivant</button>
+            </div>
+        </div>
+    </div>
+</div>
