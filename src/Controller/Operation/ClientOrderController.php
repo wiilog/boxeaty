@@ -43,7 +43,7 @@ class ClientOrderController extends AbstractController {
             "new_client_order" => new ClientOrder(),
             "now" => date('Y-m-d', strtotime($now.'+ 1 days')),
             "requester" => $this->getUser(),
-            "deliveryMethods" => $deliveryMethod->findBy([]),
+            "deliveryMethods" => $deliveryMethod->findBy(["deleted" => false], ["name" => "ASC"]),
             "orderTypes"=> $orderTypes->findBy([]),
             "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER

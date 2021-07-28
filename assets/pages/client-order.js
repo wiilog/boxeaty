@@ -305,6 +305,7 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
             $boxTypeLine.remove();
             if(!$modal.find(`.box-type-line`).exists()) {
                 $modal.find(".empty-cart").removeClass(`d-none`);
+                $modal.find(".crate-number-average").addClass('d-none').empty();
             }
         });
 
@@ -375,9 +376,11 @@ function updateCrateNumberAverage($modal) {
             if (crateAverage) {
                 const crateAverageInt = Math.ceil(crateAverage);
                 $crateNumberAverage.text(`Représente environ ${crateAverageInt} caisse${crateAverageInt > 1 ? 's' : ''}`);
+                $crateNumberAverage.removeClass('d-none');
             }
             else {
                 $crateNumberAverage.text('');
+                $crateNumberAverage.addClass('d-none');
             }
         });
 }

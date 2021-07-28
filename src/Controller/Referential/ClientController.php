@@ -385,7 +385,7 @@ class ClientController extends AbstractController {
 
         if ($content->quantity < 1) {
             $form->addError("quantity", "La quantité doit être supérieure ou égale à 1");
-        } elseif ($content->customPrice < 0) {
+        } elseif (isset($content->customPrice) && $content->customPrice < 0) {
             $form->addError("customPrice", "Le tarif personnalisé doit être supérieur ou égal à 0");
         }
 
@@ -400,9 +400,7 @@ class ClientController extends AbstractController {
 
             $name = $boxType->getName();
 
-            $customPrice = $content->customPrice
-                ? (float) $content->customPrice
-                : null;
+            $customPrice = isset($content->customPrice) ? (float) $content->customPrice : null;
 
             $clientBoxType = (new ClientBoxType())
                 ->setClient($client)
@@ -471,16 +469,15 @@ class ClientController extends AbstractController {
 
         if ($content->quantity < 1) {
             $form->addError("quantity", "La quantité doit être supérieure ou égale à 1");
-        } elseif ($content->customPrice < 0) {
+        } elseif (isset($content->customPrice) && $content->customPrice < 0) {
             $form->addError("customPrice", "Le tarif personnalisé doit être supérieur ou égal à 0");
         }
 
         if($form->isValid()) {
             $name = $clientBoxType->getBoxType()->getName();
 
-            $customPrice = $content->customPrice
-                ? (float) $content->customPrice
-                : null;
+            $customPrice = isset($content->customPrice) ? (float) $content->customPrice : null;
+
             $clientBoxType
                 ->setQuantity((int) $content->quantity)
                 ->setCustomUnitPrice($customPrice);
