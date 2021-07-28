@@ -2,13 +2,16 @@ import "../styles/pages/client-order.scss";
 import {$document} from "../app";
 import AJAX from "../ajax";
 import {initDatatable} from "../datatable";
-import Modal, {clearForm} from "../modal";
+import Modal from "../modal";
 import {StringHelper, URL} from "../util";
 import $ from "jquery";
 import Flash from "../flash";
+import {DateTools} from "../util";
 
 
 $(function() {
+    DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 20);
+
     const $modal = $(`#modal-new-client-order`);
     initOrderDatatable();
 
