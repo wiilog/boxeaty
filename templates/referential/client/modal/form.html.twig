@@ -16,11 +16,13 @@
                 <div class="d-flex">
                     <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-active" name="active" class="data"
                            value="1" {{ client.active ? 'checked' }}/>
-                    <label for="{{ client.id ? 'edit' : 'new' }}-client-active" class="free-radio-button w-100">Actif</label>
+                    <label for="{{ client.id ? 'edit' : 'new' }}-client-active"
+                           class="free-radio-button w-100">Actif</label>
 
                     <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-inactive" name="active" class="data"
                            value="0" {{ not client.active ? 'checked' }}/>
-                    <label for="{{ client.id ? 'edit' : 'new' }}-client-inactive" class="free-radio-button w-100">Inactif</label>
+                    <label for="{{ client.id ? 'edit' : 'new' }}-client-inactive"
+                           class="free-radio-button w-100">Inactif</label>
                 </div>
             </div>
         </div>
@@ -199,21 +201,32 @@
             </div>
         </div>
         <div class="col-12 toggle mt-4">
-            <span class="label">Type de commande disponible</span>
-            <div class="d-flex flex-column flex-xxl-row w-50">
-                <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-order-type-buy" name="orderType" class="data"
-                       value="0" {{ clientOrderInformation ? clientOrderInformation.orderType == 0 ? 'checked' }}/>
-                <label for="{{ client.id ? 'edit' : 'new' }}-order-type-buy">Achat / Négoce</label>
-
-                <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-order-type-manage" name="orderType"
-                       class="data"
-                       value="1" {{ clientOrderInformation ? clientOrderInformation.orderType == 1 ? 'checked' }}/>
-                <label for="{{ client.id ? 'edit' : 'new' }}-order-type-manage">Gestion autonome</label>
-
-                <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-order-type-benefit" name="orderType"
-                       class="data"
-                       value="2" {{ clientOrderInformation ? clientOrderInformation.orderType == 2 ? 'checked' }}/>
-                <label for="{{ client.id ? 'edit' : 'new' }}-order-type-benefit">Prestation ponctuelle</label>
+            {% set orderTypes = clientOrderInformation and clientOrderInformation.orderTypes is not empty
+                ? clientOrderInformation.orderTypes
+                : null %}
+            <span class="label">Type(s) de commande disponible(s)</span>
+            <div class="d-flex">
+                <input class="data-array radio-like" type="checkbox" name="orderType"
+                       value="{{ constant('App\\Entity\\ClientOrderInformation::BUY') }}"
+                       id="{{ client.id ? 'edit' : 'new' }}-order-type-buy"
+                        {{ constant('App\\Entity\\ClientOrderInformation::BUY') in orderTypes ? 'checked' }}>
+                <label class="radio-like" for="{{ client.id ? 'edit' : 'new' }}-order-type-buy">
+                    Achat / Négoce
+                </label>
+                <input class="data-array radio-like" type="checkbox" name="orderType"
+                       value="{{ constant('App\\Entity\\ClientOrderInformation::MANAGE') }}"
+                       id="{{ client.id ? 'edit' : 'new' }}-order-type-manage"
+                        {{ constant('App\\Entity\\ClientOrderInformation::MANAGE') in orderTypes ? 'checked' }}>
+                <label class="radio-like" for="{{ client.id ? 'edit' : 'new' }}-order-type-manage">
+                    Gestion autonome
+                </label>
+                <input class="data-array radio-like" type="checkbox" name="orderType"
+                       value="{{ constant('App\\Entity\\ClientOrderInformation::BENEFIT') }}"
+                       id="{{ client.id ? 'edit' : 'new' }}-order-type-benefit"
+                        {{ constant('App\\Entity\\ClientOrderInformation::BENEFIT') in orderTypes ? 'checked' }}>
+                <label class="radio-like"
+                       for="{{ client.id ? 'edit' : 'new' }}-order-type-benefit">
+                    Prestation ponctuelle
             </div>
         </div>
         <div class="col-12 d-flex align-items-center mt-3">
