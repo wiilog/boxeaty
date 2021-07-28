@@ -37,9 +37,9 @@ class ClientOrderInformation {
     private $tokenAmount;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="json", nullable=true)
      */
-    private $orderType;
+    private $orderTypes = [];
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
@@ -115,14 +115,14 @@ class ClientOrderInformation {
         return $this;
     }
 
-    public function getOrderType(): ?int
+    public function getOrderTypes(): ?array
     {
-        return $this->orderType;
+        return $this->orderTypes;
     }
 
-    public function setOrderType(?int $orderType): self
+    public function setOrderTypes(?array $orderTypes): self
     {
-        $this->orderType = $orderType;
+        $this->orderTypes = $orderTypes;
 
         return $this;
     }

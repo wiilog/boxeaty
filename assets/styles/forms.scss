@@ -430,3 +430,36 @@ button, a {
 .form-switch {
     cursor: pointer;
 }
+
+input[type=checkbox].radio-like {
+    display: none;
+}
+
+input[type=checkbox].radio-like + label.radio-like {
+    @include button(secondary);
+    border-color: $grey;
+    color: black;
+    background-color: $grey;
+    margin-top: 0;
+
+    &:not(.free-radio-button) {
+        min-width: 200px;
+    }
+}
+
+input[type=checkbox].radio-like:checked + label.radio-like {
+    @include button(primary);
+    background: $blue !important;
+    border-color: $blue;
+    color: white !important;
+    cursor: default;
+}
+
+input[type=checkbox].radio-like + label.radio-like:hover {
+    border-color: $blue;
+    color: $blue;
+}
+
+input[type=checkbox].radio-like:checked + label.radio-like:hover {
+    border-color: $blue;
+}
