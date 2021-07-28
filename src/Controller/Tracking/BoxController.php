@@ -303,12 +303,14 @@ class BoxController extends AbstractController {
 
         $boxMovementsResult = $boxRecordRepository->getBoxRecords($box, $start, $length, $search);
 
+        dump(Stream::from($boxMovementsResult['data']));
+
         return $this->json([
             'success' => true,
             'isTail' => ($start + $length) >= $boxMovementsResult['totalCount'],
             'data' => Stream::from($boxMovementsResult['data'])
                 ->map(fn(array $movement) => [
-                    'comment' => str_replace("Powered by Froala Editor", "", $movement['comment']),
+                    'quality' => $movement['quality'] ?? "",
                     'color' => (isset($movement['state']) && isset(BoxStateService::LINKED_COLORS[$movement['state']]))
                         ? BoxStateService::LINKED_COLORS[$movement['state']]
                         : BoxStateService::DEFAULT_COLOR,

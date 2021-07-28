@@ -100,13 +100,13 @@ function getBoxTrackingMovements(start = 0) {
                     $('.history-wrapper').empty();
                 }
                 const data = (result.data || []);
-                const historyLines = data.map(({state, crate, comment, date, time, operator, location, depository}) => {
-                    const $rawComment = $($.parseHTML(comment));
-                    const trimmedComment = $rawComment.text().trim();
+                const historyLines = data.map(({state, crate, quality, date, time, operator, location, depository}) => {
+                    const $rawQuality = $($.parseHTML(quality));
+                    const trimmedQuality = $rawQuality.text().trim();
 
-                    let $comment = `<div class="timeline-line-comment"></div>`;
-                    if(trimmedComment.trim()) {
-                        $comment = `<div class="timeline-line-comment">${comment}</div>`;
+                    let $quality = `<div class="timeline-line-comment"></div>`;
+                    if(trimmedQuality.trim()) {
+                        $quality = `<div class="timeline-line-comment">${quality}</div>`;
                     }
 
                     let subtitle;
@@ -130,7 +130,7 @@ function getBoxTrackingMovements(start = 0) {
                         <div class="timeline-line d-flex">
                             <span class="timeline-line-marker"><strong>${date}</strong><p>${time}</p></span>
                             <div class="timeline-line-title ml-3">
-                                <div class="d-flex"><strong>${state}</strong>${$comment}</div>
+                                <div class="d-flex"><strong>${state}</strong>${$quality}</div>
                                 <p>${subtitle}</p>
                             </div>
                         </div>
