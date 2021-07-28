@@ -57,10 +57,9 @@ class LocationController extends AbstractController {
                 "active" => FormatHelper::bool($location->isActive()),
                 "client" => FormatHelper::named($location->getClient()),
                 "description" => $location->getDescription() ?: "-",
-                "boxes" => $boxRepository->count(["location" => $location]),
                 "capacity" => $location->getCapacity() ?? "-",
                 "location_type" => $location->getType() ? Location::LOCATION_TYPES[$location->getType()] : '-',
-                "container_amount" => !$location->getBoxes()->isEmpty() ? $location->getBoxes()->count() : '-',
+                "container_amount" => $boxRepository->count(["location" => $location]),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
