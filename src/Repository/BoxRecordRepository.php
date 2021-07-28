@@ -133,7 +133,7 @@ class BoxRecordRepository extends EntityRepository {
         $exprBuilder = $queryBuilder->expr();
 
         $queryBuilder
-            ->select("record.comment AS comment")
+            ->select("join_quality.name AS quality")
             ->addSelect("record.date AS date")
             ->addSelect("record.state AS state")
             ->addSelect("join_operator.username AS operator")
@@ -142,6 +142,7 @@ class BoxRecordRepository extends EntityRepository {
             ->addSelect("join_crate.number AS crateNumber")
             ->addSelect("join_crate.id AS crateId")
             ->leftJoin("record.user", "join_operator")
+            ->leftJoin("record.quality", "join_quality")
             ->leftJoin("record.location", "join_location")
             ->leftJoin("join_location.depository", "join_depository")
             ->leftJoin("record.crate", "join_crate")
@@ -157,7 +158,13 @@ class BoxRecordRepository extends EntityRepository {
 
         if($search) {
             $queryBuilder
-                ->andWhere("record.comment LIKE :search")
+                ->andWhere($exprBuilder->orX(
+                    "join_quality.name LIKE :search",
+                    "join_location.name LIKE :search",
+                    "join_depository.name LIKE :search",
+                    "join_operator.username LIKE :search",
+                    "DATE(record.date) LIKE :search"
+                ))
                 ->setParameter("search", '%' . $search . '%');
         }
 
