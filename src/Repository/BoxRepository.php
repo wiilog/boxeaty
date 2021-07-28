@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Helper\QueryHelper;
 use App\Service\BoxStateService;
 use Doctrine\ORM\EntityRepository;
+use WiiCommon\Helper\Stream;
 
 /**
  * @method Box|null find($id, $lockMode = null, $lockVersion = null)
@@ -89,12 +90,17 @@ class BoxRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "box");
 
         if ($search) {
+            $state = Stream::from(BoxStateService::BOX_STATES)
+                ->filter(fn($value) => strpos($value, $search) > -1)
+                ->firstKey();
+
             $qb->leftJoin("box.location", "search_location")
                 ->leftJoin("box.owner", "search_owner")
                 ->leftJoin("box.quality", "search_quality")
                 ->leftJoin("box.type", "search_type")
                 ->andWhere($qb->expr()->orX(
                     "box.number LIKE :search",
+                    "box.state LIKE :state",
                     "search_location.name LIKE :search",
                     "search_owner.name LIKE :search",
                     "search_quality.name LIKE :search",
@@ -102,7 +108,8 @@ class BoxRepository extends EntityRepository {
                     "DATE_FORMAT(box.creationDate, '%d/%m/%Y') LIKE :search",
                     "DATE_FORMAT(box.creationDate, '%H:%i') LIKE :search"
                 ))
-                ->setParameter("search", "%$search%");
+                ->setParameter("search", "%$search%")
+                ->setParameter("state", $state + 1);
         }
 
         foreach ($params["filters"] ?? [] as $name => $value) {
