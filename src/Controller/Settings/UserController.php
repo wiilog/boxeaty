@@ -100,7 +100,11 @@ class UserController extends AbstractController {
 
         $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(",", $content->clients)]);
         $groups = $manager->getRepository(Group::class)->findBy(["id" => explode(",", $content->groups)]);
-        $deliveryMethod = $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod);
+
+        $deliveryMethod = null;
+        if(isset($content->deliveryMethod)){
+            $deliveryMethod = $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod);
+        }
 
         if ($form->isValid()) {
             $user = new User();
