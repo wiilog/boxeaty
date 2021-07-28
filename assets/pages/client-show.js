@@ -127,6 +127,8 @@ function getBoxRecurrence() {
         .json()
         .then((response) => {
             $('.order-recurrence-wrapper').empty().append(response.template);
-            $('.order-recurrence-price').text(`${StringHelper.formatPrice(response.orderRecurrencePrice)} HT/mois`);
+            $('.order-recurrence-price').text(`${response.orderRecurrencePrice 
+                ? StringHelper.formatPrice(response.orderRecurrencePrice) + 'HT/mois' 
+                : ''} `);
         });
 }
