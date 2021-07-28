@@ -1,7 +1,7 @@
 import {$document} from "../app";
 
 import $ from "jquery";
-import Modal, {processForm} from "../modal";
+import Modal, {clearForm, processForm} from "../modal";
 import sortable from '../../node_modules/html5sortable/dist/html5sortable.es.js';
 import "../styles/pages/planning.scss";
 import AJAX from "../ajax";
@@ -9,6 +9,27 @@ import {findCoordinates, Map} from "../maps";
 
 $(document).ready(() => {
     const $filters = $(`.filters`);
+
+    $(`input[name=from], input[name=to]`).on(`change`, function () {
+        const $to = $(this).parent().siblings(`.dates`).first().find(`input[name=to]`);
+        const $from = $(this).parent().siblings(`.dates`).first().find(`input[name=from]`);
+
+        if ($(this).hasClass(`from`)) {
+            let date = new Date($(this).val());
+            date.setDate(date.getDate() + 20);
+            let max = date
+                .getFullYear() + "-" + ('0' + (date
+                .getMonth() + 1))
+                    .slice(-2) + "-" + ('0' + date
+                    .getDate())
+                .slice(-2);
+
+            $to.attr('min', $(this).val());
+            $to.attr('max', max);
+        } else {
+            $from.attr('max', $(this).val());
+        }
+    });
 
     $filters.find(`.filter`).click(function () {
         const params = processForm($filters).asObject();
@@ -56,6 +77,10 @@ $(document).ready(() => {
                 });
             },
         });
+    });
+
+    $(`.empty-filters`).click(function() {
+        clearForm($(this).parents(`.filters`))
     });
 
     $document.arrive(`[data-sortable]`, function () {

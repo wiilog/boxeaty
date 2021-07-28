@@ -4,12 +4,16 @@
 <div class="{{ not unique_date ? 'dates-filter' }}">
     <label class="dates">
         {{ not unique_date ? 'Du' }}
-        <input type="date" name="{{ name }}" class="data"  {% if from is defined %}value="{{ from | date('Y-m-d') }}"{% endif %}>
+        <input type="date" name="{{ name }}" class="data from"
+               min="{{ now }}"
+               value="{{ from | date('Y-m-d') }}">
     </label>
     {% if not unique_date %}
         <label class="dates">
             au
-            <input type="date" name="to" class="data" {% if to is defined %}value="{{ to | date('Y-m-d') }}"{% endif %}>
+            <input type="date" name="to" class="data to"
+                   min="{{ now }}"
+                   value="{{ to | date('Y-m-d') }}">
         </label>
     {% endif %}
 </div>

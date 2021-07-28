@@ -2,7 +2,7 @@ import "../styles/pages/client-order.scss";
 import {$document} from "../app";
 import AJAX from "../ajax";
 import {initDatatable} from "../datatable";
-import Modal from "../modal";
+import Modal, {clearForm} from "../modal";
 import {StringHelper, URL} from "../util";
 import $ from "jquery";
 import Flash from "../flash";
