@@ -5,15 +5,13 @@
     <label class="dates">
         {{ not unique_date ? 'Du' }}
         <input type="date" name="{{ name }}" class="data from"
-               min="{{ now }}"
-               value="{{ from | date('Y-m-d') }}">
+               min="{{ now }}">
     </label>
     {% if not unique_date %}
         <label class="dates">
             au
             <input type="date" name="to" class="data to"
-                   min="{{ now }}"
-                   value="{{ to | date('Y-m-d') }}">
+                   min="{{ now }}">
         </label>
     {% endif %}
 </div>
