@@ -31,7 +31,9 @@
                         <span class="header-section-label">Évènement</span>
                     </div>
                     <div class="details-content body client-order-history"></div>
-                    <button class="primary edit-status-button">Modifier le status</button>
+                    {% if clientOrder.orderStatusHistory is not empty %}
+                        <button class="primary edit-status-button">Modifier le statut</button>
+                    {% endif %}
                 </div>
                 <div>
                     <div class="header-section">
@@ -41,6 +43,7 @@
 {# TODO #}
                     </div>
                 </div>
+            <input type="hidden" value="" name="clientOrderId">
             </div>
         </div>
     </div>

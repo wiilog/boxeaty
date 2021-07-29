@@ -15,7 +15,8 @@ $(function() {
     const $modal = $(`#modal-new-client-order`);
     initOrderDatatable();
 
-    const getParams = URL.getRequestQuery()
+    // TODO Voir avec Adrien
+    /*const getParams = URL.getRequestQuery()
     if (getParams.action === 'new') {
         openNewClientOrderModal();
     }
@@ -26,7 +27,7 @@ $(function() {
     else if (getParams.action === 'validation'
              && getParams['action-data']) {
         openOrderValidationModal(getParams['action-data']);
-    }
+    }*/
 
     $('#modal-validation-client-order').find('.submit-button').on('click', function(){
         window.location.href = Routing.generate('client_order_validation_template', {action : 'validation'});
@@ -37,11 +38,13 @@ $(function() {
         const clientOrderId = $link.data('id');
         setOrderRequestInURL(clientOrderId); // TODO ALEX action = show or validation en fonction du statut de la commande
         openOrderShowModal(clientOrderId);
+    });
 
-        $document.on('click', '.edit-status-button',function(){
-            openEditStatusModal(clientOrderId);
+    $(document).arrive('.edit-status-button', function() {
+        $(this).on('click', () => {
+            openEditStatusModal($('input[name=clientOrderId]').val());
         });
-    })
+    });
 
     $(`#new-client-order`).on('click', function(){
         window.location.href = Routing.generate(`client_orders_list`, {action: 'new'})
@@ -141,6 +144,7 @@ function openOrderShowModal(clientOrderId) {
 
     Modal.load(ajax, {
         afterOpen: () => {
+            $('input[name=clientOrderId]').val(clientOrderId);
             getTimeLine($(`#modal-show-client-order`), clientOrderId);
         }
     });
