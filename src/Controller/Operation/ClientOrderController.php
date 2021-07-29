@@ -59,8 +59,8 @@ class ClientOrderController extends AbstractController {
         $orders = $manager->getRepository(ClientOrder::class)
             ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
         $data = [];
-        /** @var ClientOrder $order */
 
+        /** @var ClientOrder $order */
         foreach ($orders["data"] as $order) {
             $lines = Stream::from($order->getLines())
                 ->map(fn(ClientOrderLine $line) => [
