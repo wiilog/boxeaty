@@ -94,7 +94,7 @@ export default class Modal {
     static html(config = {}) {
         const $modal = $(config.template);
         $modal.appendTo(`body`);
-        $modal.modal(`show`);
+        $modal.first().modal(`show`);
 
         $modal.on('hidden.bs.modal', function() {
             $(this).remove();

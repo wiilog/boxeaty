@@ -37,6 +37,10 @@ $(function() {
         const clientOrderId = $link.data('id');
         setOrderRequestInURL(clientOrderId); // TODO ALEX action = show or validation en fonction du statut de la commande
         openOrderShowModal(clientOrderId);
+
+        $document.on('click', '.edit-status-button',function(){
+            openEditStatusModal(clientOrderId);
+        });
     })
 
     $(`#new-client-order`).on('click', function(){
@@ -115,17 +119,29 @@ $(function() {
     });
 });
 
+function openEditStatusModal(clientOrderId){
+    const ajax = AJAX.route(`POST`, `client_order_edit_status_template`, {
+        clientOrder: clientOrderId
+    });
+    Modal.load(ajax, {
+        afterHidden: () => {
+            removeActionRequestInURL();
+            getTimeLine($(`#modal-show-client-order`), clientOrderId);
+        },
+        error: () => {
+            removeActionRequestInURL();
+        }
+    });
+}
+
 function openOrderShowModal(clientOrderId) {
     const ajax = AJAX.route(`POST`, `client_order_show_template`, {
         clientOrder: clientOrderId
     });
 
     Modal.load(ajax, {
-        afterHidden: () => {
-            removeActionRequestInURL();
-        },
-        error: () => {
-            removeActionRequestInURL();
+        afterOpen: () => {
+            getTimeLine($(`#modal-show-client-order`), clientOrderId);
         }
     });
 }
@@ -215,7 +231,7 @@ function onBoxTypeQuantityChange($quantity) {
     const $totalPrice = $row.find('.totalPrice');
     const totalPrice = unitPrice * quantity;
     const totalPriceStr = StringHelper.formatPrice(totalPrice);
-    $totalPrice.text(totalPriceStr);
+    $totalPrice.text(totalPriceStr+" €");
 
 }
 
@@ -242,6 +258,15 @@ function addBoxTypeModel($modal) {
     else {
         Flash.add('warning', `Le client de la commande n'est pas sélectionné.`);
     }
+}
+
+function getTimeLine($modal, $clientOrder) {
+        AJAX
+            .route(`GET`, `client_order_history_api`, {id: $clientOrder})
+            .json()
+            .then((res) => {
+                $modal.find(`.client-order-history`).empty().append(res.template);
+            });
 }
 
 function addSelectedBoxTypeToCart($modal) {
@@ -294,9 +319,9 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
                 </div>
                 </div>
                 <span class="col bigTxt">${typeBoxData.name}</span>
-                <input name="unitPrice" class="data-array" value="${unitPrice}" type="hidden"/>
+                <input name="unitPrice" class="data-array" value="${unitPrice} " type="hidden"/>
                 <input name="volume" value="${volume}" type="hidden"/>
-                <span class="col-2 unit-price-item">T.U. ${unitPriceStr}</span>
+                <span class="col-2 unit-price-item">T.U. ${unitPriceStr} €</span>
                 <span class="totalPrice col-2 bigTxt"></span>
                 <button class="remove d-inline-flex" value="${typeBoxData.id}"><i class="bxi bxi-trash-circle col"></i></button>
                 <input type="hidden" name="boxTypeId" class="data-array" value="${typeBoxData.id}">

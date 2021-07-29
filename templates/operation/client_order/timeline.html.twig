@@ -1,0 +1,26 @@
+{% if clientOrder.orderStatusHistory|length > 0 %}
+    {% for history in clientOrder.orderStatusHistory %}
+        {% set lineColor = (
+            (history.status and history.status.code == constant('App\\Entity\\Status::CODE_ORDER_FINISHED')) ? 'client-order-history-finished' :
+            ((history.status and history.status.code == constant('App\\Entity\\Status::CODE_ORDER_TRANSIT')) ? 'client-order-history-transit')
+            ) %}
+        <div class="client-order-history-line {{ lineColor }}">
+            <div class="client-order-history-date">
+                <div class="title">{{ history.changedAt|date('d/m/Y') }}</div>
+                <div class="subtitle">{{ history.changedAt|date('H:i') }}</div>
+            </div>
+            <div class="client-order-history-status {{ loop.first ? 'first' }}">
+                {% if history.status %}
+                    <div class="title">{{ history.status.name }}</div>
+                {% endif %}
+                {% if history.justification is not empty %}
+                    <div class="subtitle">{{ history.justification|raw }}</div>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="row empty-client-order">
+        <div class="col-12 text-center">Aucun évènement</div>
+    </div>
+{% endif %}

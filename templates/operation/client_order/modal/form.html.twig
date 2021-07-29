@@ -1,6 +1,6 @@
 <div class="newClientOrder">
     <div class="row">
-        <div class="clientOrderType">
+        <div class="clientOrderType orange-toggle">
             {% for orderType in orderTypes %}
                 {% set inputId = 'order-type-' ~ (clientOrder ? 'edit-') ~ orderType.id %}
                 <input type="radio"
