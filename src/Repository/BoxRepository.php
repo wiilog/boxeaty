@@ -94,22 +94,27 @@ class BoxRepository extends EntityRepository {
                 ->filter(fn($value) => strpos($value, $search) > -1)
                 ->firstKey();
 
-            $qb->leftJoin("box.location", "search_location")
-                ->leftJoin("box.owner", "search_owner")
-                ->leftJoin("box.quality", "search_quality")
-                ->leftJoin("box.type", "search_type")
-                ->andWhere($qb->expr()->orX(
-                    "box.number LIKE :search",
-                    "box.state LIKE :state",
-                    "search_location.name LIKE :search",
-                    "search_owner.name LIKE :search",
-                    "search_quality.name LIKE :search",
-                    "search_type.name LIKE :search",
-                    "DATE_FORMAT(box.creationDate, '%d/%m/%Y') LIKE :search",
-                    "DATE_FORMAT(box.creationDate, '%H:%i') LIKE :search"
-                ))
-                ->setParameter("search", "%$search%")
-                ->setParameter("state", $state + 1);
+            if(isset($state)) {
+                $qb
+                    ->andWhere("box.state LIKE :state")
+                    ->setParameter("state", $state + 1);
+            } else {
+                $qb
+                    ->leftJoin("box.location", "search_location")
+                    ->leftJoin("box.owner", "search_owner")
+                    ->leftJoin("box.quality", "search_quality")
+                    ->leftJoin("box.type", "search_type")
+                    ->andWhere($qb->expr()->orX(
+                        "box.number LIKE :search",
+                        "search_location.name LIKE :search",
+                        "search_owner.name LIKE :search",
+                        "search_quality.name LIKE :search",
+                        "search_type.name LIKE :search",
+                        "DATE_FORMAT(box.creationDate, '%d/%m/%Y') LIKE :search",
+                        "DATE_FORMAT(box.creationDate, '%H:%i') LIKE :search"
+                    ))
+                    ->setParameter("search", "%$search%");
+            }
         }
 
         foreach ($params["filters"] ?? [] as $name => $value) {
