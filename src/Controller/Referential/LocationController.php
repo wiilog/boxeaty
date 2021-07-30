@@ -11,6 +11,7 @@ use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\LocationRepository;
+use App\Service\BoxStateService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,10 +30,19 @@ class LocationController extends AbstractController {
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
+        $boxRepository = $manager->getRepository(Box::class);
+        $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0);
+        $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0);
+        $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1);
+        $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1);
         return $this->render("referential/location/index.html.twig", [
             "new_location" => new Location(),
             "initial_locations" => $this->api($request, $manager)->getContent(),
             "locations_order" => LocationRepository::DEFAULT_DATATABLE_ORDER,
+            "crateUnavailable" => $crateUnavailable,
+            "crateAvailable" => $crateAvailable,
+            "boxUnavailable" => $boxUnavailable,
+            "boxAvailable" => $boxAvailable,
         ]);
     }
 

@@ -1,5 +1,5 @@
 import {$document} from '../app';
-
+import "../styles/pages/location.scss";
 import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
