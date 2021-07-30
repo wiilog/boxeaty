@@ -55,7 +55,7 @@ class PlanningController extends AbstractController {
         }
 
         if ($request->query->has("to")) {
-            $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"));
+            $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"))->modify("+1 day");
         } else {
             $to = (clone $from)->modify("+20 days");
         }
