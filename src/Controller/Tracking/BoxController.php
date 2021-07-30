@@ -303,8 +303,6 @@ class BoxController extends AbstractController {
 
         $boxMovementsResult = $boxRecordRepository->getBoxRecords($box, $start, $length, $search);
 
-        dump(Stream::from($boxMovementsResult['data']));
-
         return $this->json([
             'success' => true,
             'isTail' => ($start + $length) >= $boxMovementsResult['totalCount'],
