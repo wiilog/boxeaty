@@ -498,13 +498,14 @@ class ApiController extends AbstractController {
                     ->sum(),
                 "orders" => $round->getOrders()->map(fn(ClientOrder $order) => [
                     "id" => $order->getId(),
+                    "crate_amount" => $order->getPreparation()->getLines()->count(),
+                    "token_amount" => $order->getTokensAmount(),
                     "client" => [
                         "id" => $order->getClient()->getId(),
                         "name" => FormatHelper::named($order->getClient()),
                         "address" => $order->getClient()->getAddress(),
                         "contact" => FormatHelper::user($order->getClient()->getContact()),
                         "phone" => $order->getClient()->getPhoneNumber(),
-                        "token_amount" => $order->getClient()->get
                     ],
                     "lines" => $order->getLines()->map(fn(ClientOrderLine $line) => [
                         "box_type" => [
@@ -533,6 +534,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/mobile/preparations", name="api_mobile_preparations")
+     * @Authenticated
      */
     public function preparations(EntityManagerInterface $manager, Request $request): Response {
         $depository = $manager->getRepository(Depository::class)->find($request->query->get('depository'));
@@ -541,6 +543,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/mobile/locations", name="api_mobile_locations")
+     * @Authenticated
      */
     public function locations(EntityManagerInterface $manager): Response {
         return $this->json($manager->getRepository(Location::class)->getAll());
@@ -548,6 +551,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/mobile/qualities", name="api_mobile_qualities")
+     * @Authenticated
      */
     public function qualities(EntityManagerInterface $manager): Response {
         return $this->json($manager->getRepository(Quality::class)->getAll());
@@ -555,6 +559,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/mobile/crates", name="api_mobile_crates")
+     * @Authenticated
      */
     public function crates(EntityManagerInterface $manager, Request $request): Response {
         $depository = $manager->getRepository(Depository::class)->find($request->query->get('depository'));
@@ -563,6 +568,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/mobile/box", name="api_mobile_box")
+     * @Authenticated
      */
     public function box(EntityManagerInterface $manager, Request $request): Response {
         return $this->json($manager->getRepository(Box::class)->getByNumber($request->query->get('box')));

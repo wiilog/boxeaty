@@ -39,13 +39,13 @@ class ClientOrderController extends AbstractController {
         $deliveryMethod = $manager->getRepository(DeliveryMethod::class);
         $orderTypes = $manager->getRepository(OrderType::class);
         $now = date('Y-m-d');
-        
+
         return $this->render("operation/client_order/index.html.twig", [
             "new_client_order" => new ClientOrder(),
-            "now" => date('Y-m-d', strtotime($now.'+ 1 days')),
+            "now" => date('Y-m-d', strtotime($now . '+ 1 days')),
             "requester" => $this->getUser(),
             "deliveryMethods" => $deliveryMethod->findBy(["deleted" => false], ["name" => "ASC"]),
-            "orderTypes"=> $orderTypes->findBy([]),
+            "orderTypes" => $orderTypes->findBy([]),
             "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER
         ]);
@@ -117,9 +117,9 @@ class ClientOrderController extends AbstractController {
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
     public function validateTemplate(Request $request,
-                        EntityManagerInterface $entityManager,
-                        ClientOrderService $clientOrderService,
-                        $clientOrderId): Response {
+                                     EntityManagerInterface $entityManager,
+                                     ClientOrderService $clientOrderService,
+                                     $clientOrderId): Response {
         // TODO ALEX
         return $this->json([
             "submit" => $this->generateUrl("client_orders_list"),
@@ -186,8 +186,8 @@ class ClientOrderController extends AbstractController {
         $number = $uniqueNumberService->createUniqueNumber($entityManager, ClientOrder::PREFIX_NUMBER, ClientOrder::class);
         $now = new DateTime('now');
         if ($type && $type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
-            $collectRequired = (bool) ($content->collectRequired ?? false);
-            if($collectRequired){
+            $collectRequired = (bool)($content->collectRequired ?? false);
+            if ($collectRequired) {
                 if (!isset($content->cratesAmountToCollect)
                     || $content->cratesAmountToCollect < 1) {
                     $form->addError('cratesAmountToCollect', 'Le nombre de caisses à collecter est invalide');
@@ -214,7 +214,8 @@ class ClientOrderController extends AbstractController {
                 ->setDeliveryMethod($deliveryMethod)
                 ->setRequester($requester)
                 ->setValidator(null)
-                ->setDeliveryRound(null);
+                ->setDeliveryRound(null)
+                ->setTokensAmount($client->getClientOrderInformation()->getTokenAmount());
 
             $cartPrice = $clientOrder->getCartAmountPrice($handledCartLines);
             foreach ($handledCartLines as $cartLine) {
@@ -267,7 +268,7 @@ class ClientOrderController extends AbstractController {
     public function delete(EntityManagerInterface $entityManager, ClientOrder $clientOrder): Response {
         $lines = $clientOrder->getLines();
 
-        foreach ($lines as $line){
+        foreach ($lines as $line) {
             $entityManager->remove($line);
         }
 
@@ -294,4 +295,5 @@ class ClientOrderController extends AbstractController {
             ])
         ]);
     }
+
 }
