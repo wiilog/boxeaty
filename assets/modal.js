@@ -94,7 +94,7 @@ export default class Modal {
     static html(config = {}) {
         const $modal = $(config.template);
         $modal.appendTo(`body`);
-        $modal.first().modal(`show`);
+        $modal.modal(`show`);
 
         $modal.on('hidden.bs.modal', function() {
             $(this).remove();
@@ -308,7 +308,12 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
         let $input = $(input);
 
         if($input.attr(`type`) === `radio`) {
-            $input = $parent.find(`input[type="radio"][name="${input.name}"]:checked`);
+            const $checked = $parent.find(`input[type="radio"][name="${input.name}"]:checked`);
+            if($checked.exists()) {
+                $input = $checked;
+            } else {
+                $input = $parent.find(`input[type="radio"][name="${input.name}"]`);
+            }
         } else if($input.attr(`type`) === `number`) {
             let val = parseInt($input.val());
             let min = parseInt($input.attr('min'));
@@ -333,8 +338,7 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
                     message,
                 });
             }
-        }
-        else if($input.attr(`type`) === `tel`) {
+        } else if($input.attr(`type`) === `tel`) {
             const regex = /^(?:(?:\+|00)33[\s.-]{0,3}(?:\(0\)[\s.-]{0,3})?|0)[1-9](?:(?:[\s.-]?\d{2}){4}|\d{2}(?:[\s.-]?\d{3}){2})$/;
             if($input.val() && !$input.val().match(regex)) {
                 errors.push({
@@ -355,14 +359,21 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
             }
         }
 
-        if($input.is(`[required]`) && !$input.val()) {
-            if(!(modal && $input.is(`[type="file"]`))
-                || !uploads[modal.id]
-                || !uploads[modal.id][$input.attr(`name`)]) {
+        if($input.is(`[required]`) || $input.is(`[data-required]`)) {
+            if(([`radio`, `checkbox`].includes($input.attr(`type`)) && !$input.is(`:checked`))) {
                 errors.push({
-                    elements: [$input],
-                    message: `Ce champ est requis`,
+                    global: true,
+                    message: `Vous devez sélectionner au moins un élément`,
                 });
+            } else if($input.is(`[data-wysiwyg]`) && !$input.find(`.ql-editor`).text() || !$input.is(`[data-wysiwyg]`) && !$input.val()) {
+                if (!(modal && $input.is(`[type="file"]`))
+                    || !uploads[modal.id]
+                    || !uploads[modal.id][$input.attr(`name`)]) {
+                    errors.push({
+                        elements: [$input],
+                        message: `Ce champ est requis`,
+                    });
+                }
             }
         }
 
@@ -403,8 +414,13 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
     }
 
     // display errors under each field
+    modal.element.find(`.global-error`).remove();
     for(const error of errors) {
-        error.elements.forEach($elem => showInvalid($elem, error.message));
+        if(error.global) {
+            showGlobalInvalid(modal.element, error.message);
+        } else {
+            error.elements.forEach($elem => showInvalid($elem, error.message));
+        }
     }
 
     return errors.length === 0 ? data : false;
@@ -452,14 +468,21 @@ export function handleErrors(element, result) {
 }
 
 function showInvalid($field, message) {
+    let $parent;
     if($field.is(`[data-s2-initialized]`)) {
         $field = $field.parent().find(`.select2-selection`);
     } else if($field.is(`[type="file"]`)) {
         $field = $field.parent();
     }
 
+    if($field.is(`[data-wysiwyg`)) {
+        $parent = $field.parent();
+    } else {
+        $parent = $field.parents(`label`);
+    }
+
     $field.addClass(`is-invalid`);
-    $field.parents(`label`).append(`<span class="invalid-feedback">${message}</span>`);
+    $parent.append(`<span class="invalid-feedback">${message}</span>`);
 }
 
 function showGlobalInvalid($modal, message) {

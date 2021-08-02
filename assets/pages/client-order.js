@@ -16,16 +16,16 @@ $(function() {
     initOrderDatatable();
 
     // TODO Voir avec Adrien
-    /*const getParams = URL.getRequestQuery()
-    if (getParams.action === 'new') {
+    const params = URL.getRequestQuery()
+    if (params.action === 'new') {
         openNewClientOrderModal();
     }
-    else if (getParams.action === 'show'
-             && getParams['action-data']) {
+    /*else if (params.action === 'show'
+             && params['action-data']) {
         openOrderShowModal(getParams['action-data']);
     }
-    else if (getParams.action === 'validation'
-             && getParams['action-data']) {
+    else if (params.action === 'validation'
+             && params['action-data']) {
         openOrderValidationModal(getParams['action-data']);
     }*/
 

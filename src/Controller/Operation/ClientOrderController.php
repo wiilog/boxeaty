@@ -40,13 +40,13 @@ class ClientOrderController extends AbstractController {
         $deliveryMethod = $manager->getRepository(DeliveryMethod::class);
         $orderTypes = $manager->getRepository(OrderType::class);
         $now = date('Y-m-d');
-        
+
         return $this->render("operation/client_order/index.html.twig", [
             "new_client_order" => new ClientOrder(),
-            "now" => date('Y-m-d', strtotime($now.'+ 1 days')),
+            "now" => date('Y-m-d', strtotime($now . '+ 1 days')),
             "requester" => $this->getUser(),
             "deliveryMethods" => $deliveryMethod->findBy(["deleted" => false], ["name" => "ASC"]),
-            "orderTypes"=> $orderTypes->findBy([]),
+            "orderTypes" => $orderTypes->findBy([]),
             "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER
         ]);
@@ -118,9 +118,9 @@ class ClientOrderController extends AbstractController {
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
     public function validateTemplate(Request $request,
-                        EntityManagerInterface $entityManager,
-                        ClientOrderService $clientOrderService,
-                        $clientOrderId): Response {
+                                     EntityManagerInterface $entityManager,
+                                     ClientOrderService $clientOrderService,
+                                     $clientOrderId): Response {
         // TODO ALEX
         return $this->json([
             "submit" => $this->generateUrl("client_orders_list"),
@@ -187,8 +187,8 @@ class ClientOrderController extends AbstractController {
         $number = $uniqueNumberService->createUniqueNumber($entityManager, ClientOrder::PREFIX_NUMBER, ClientOrder::class);
         $now = new DateTime('now');
         if ($type && $type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
-            $collectRequired = (bool) ($content->collectRequired ?? false);
-            if($collectRequired){
+            $collectRequired = (bool)($content->collectRequired ?? false);
+            if ($collectRequired) {
                 if (!isset($content->cratesAmountToCollect)
                     || $content->cratesAmountToCollect < 1) {
                     $form->addError('cratesAmountToCollect', 'Le nombre de caisses à collecter est invalide');
@@ -268,11 +268,12 @@ class ClientOrderController extends AbstractController {
     public function editStatusTemplate(ClientOrder $clientOrder): Response {
         return $this->json([
             "submit" => $this->generateUrl("client_order_edit_status", ["clientOrder" => $clientOrder->getId()]),
-            "template" => $this->renderView("operation/client_order/modal/editStatus.html.twig", [
+            "template" => $this->renderView("operation/client_order/modal/edit_status.html.twig", [
                 "clientOrder" => $clientOrder,
             ])
         ]);
     }
+
     /**
      * @Route("/status/{clientOrder}", name="client_order_edit_status", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
@@ -282,7 +283,7 @@ class ClientOrderController extends AbstractController {
         $content = (object)$request->request->all();
         $now = new DateTime('now');
         $statusRepository = $entityManager->getRepository(Status::class);
-        $status = $statusRepository->findOneBy(['id'=>$content->status]);
+        $status = $statusRepository->findOneBy(['id' => $content->status]);
         if ($form->isValid()) {
             $clientOrder
                 ->setStatus($status);
@@ -315,7 +316,7 @@ class ClientOrderController extends AbstractController {
     public function delete(EntityManagerInterface $entityManager, ClientOrder $clientOrder): Response {
         $lines = $clientOrder->getLines();
 
-        foreach ($lines as $line){
+        foreach ($lines as $line) {
             $entityManager->remove($line);
         }
 

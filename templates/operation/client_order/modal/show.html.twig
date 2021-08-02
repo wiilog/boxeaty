@@ -12,39 +12,38 @@
 
                     {% include 'operation/client_order/modal/boxList.html.twig' %}
 
-                        <div class="row">
-                            <div class="col-auto">
-                                {% if clientOrder.deliveryPrice %}
-                                    Livraison <b>{{ clientOrder.deliveryPrice|format_helper('price') }}</b>
-                                {% endif %}
-                            </div>
-                            <div class="col-auto ml-4">
-                                {% if clientOrder.servicePrice %}
-                                    Service <b>{{ clientOrder.servicePrice|format_helper('price') }}</b>
-                                {% endif %}
-                            </div>
+                    <div class="row">
+                        <div class="col-auto">
+                            {% if clientOrder.deliveryPrice %}
+                                Livraison <b>{{ clientOrder.deliveryPrice|format_helper('price') }}</b>
+                            {% endif %}
+                        </div>
+                        <div class="col-auto ml-4">
+                            {% if clientOrder.servicePrice %}
+                                Service <b>{{ clientOrder.servicePrice|format_helper('price') }}</b>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                <div>
-                    <div class="header-section">
-                        <span class="header-section-label">Évènement</span>
-                    </div>
-                    <div class="details-content body client-order-history"></div>
-                    {% if clientOrder.orderStatusHistory is not empty %}
-                        <button class="primary edit-status-button">Modifier le statut</button>
-                    {% endif %}
-                </div>
-                <div>
-                    <div class="header-section">
-                        <span class="header-section-label">Preuve de livraison et collecte</span>
-                    </div>
-                    <div class="details-content body">
-{# TODO #}
-                    </div>
-                </div>
-            <input type="hidden" value="" name="clientOrderId">
             </div>
+            <div>
+                <div class="header-section">
+                    <span class="header-section-label">Évènement</span>
+                </div>
+                <div class="details-content body client-order-history"></div>
+                {% if clientOrder.editableStatusHistory is not empty %}
+                    <button class="primary edit-status-button mb-2">Modifier le statut</button>
+                {% endif %}
+            </div>
+            <div>
+                <div class="header-section">
+                    <span class="header-section-label">Preuve de livraison et collecte</span>
+                </div>
+                <div class="details-content body">
+                    {# TODO #}
+                </div>
+            </div>
+            <input type="hidden" value="" name="clientOrderId">
         </div>
     </div>
 </div>
