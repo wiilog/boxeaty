@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Box;
 use App\Entity\Depository;
+use App\Entity\Location;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use App\Service\BoxStateService;
@@ -79,6 +80,21 @@ class BoxRepository extends EntityRepository {
             ->setParameter("search", "%$search%")
             ->getQuery()
             ->getArrayResult();
+    }
+
+    public function getLocationData($available, $isBox) {
+        $qb = $this->createQueryBuilder("box");
+
+        return $qb->select("COUNT(box.id)")
+            ->leftJoin("box.location","location")
+            ->where("box.state = :available")
+            ->andWhere("location.active = 1")
+            ->andWhere("location.type = 3")
+            ->andWhere("box.isBox = :isBox")
+            ->setParameter("available", "$available")
+            ->setParameter("isBox", "$isBox")
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     public function findForDatatable(array $params, ?User $user): array {

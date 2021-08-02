@@ -53,6 +53,15 @@ input{
     padding-left: 25px;
 }
 
+.edit-status-button {
+    float: right;
+    margin: 5px;
+}
+
+.edit-status {
+    width: auto;
+}
+
 .bxi-trash-circle{
     width: 25px;
     height: 25px;
@@ -67,7 +76,6 @@ input{
 .deliveryMethodIcon{
     width: 25px;
     height: 25px;
-
 }
 
 .dotted{
@@ -181,6 +189,10 @@ input{
 }
 
 .client-order-history {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
     .client-order-history-line {
         display: flex;
 

@@ -85,7 +85,7 @@ parameters:
         - name: Groupe
           route: groups_list
           permission: App\Entity\Role::MANAGE_GROUPS
-        - name: Emplacement
+        - name: Emplacement et stock
           route: locations_list
           permission: App\Entity\Role::MANAGE_LOCATIONS
         - name: Type de Box / Caisse

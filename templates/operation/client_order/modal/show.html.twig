@@ -1,4 +1,4 @@
-<div id="modal-edit-user" class="modal fade">
+<div id="modal-show-client-order" class="modal fade">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -12,62 +12,38 @@
 
                     {% include 'operation/client_order/modal/boxList.html.twig' %}
 
-                        <div class="row">
-                            <div class="col-auto">
-                                {% if clientOrder.deliveryPrice %}
-                                    Livraison <b>{{ clientOrder.deliveryPrice|format_helper('price') }}</b>
-                                {% endif %}
-                            </div>
-                            <div class="col-auto ml-4">
-                                {% if clientOrder.servicePrice %}
-                                    Service <b>{{ clientOrder.servicePrice|format_helper('price') }}</b>
-                                {% endif %}
-                            </div>
+                    <div class="row">
+                        <div class="col-auto">
+                            {% if clientOrder.deliveryPrice %}
+                                Livraison <b>{{ clientOrder.deliveryPrice|format_helper('price') }}</b>
+                            {% endif %}
+                        </div>
+                        <div class="col-auto ml-4">
+                            {% if clientOrder.servicePrice %}
+                                Service <b>{{ clientOrder.servicePrice|format_helper('price') }}</b>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                <div>
-                    <div class="header-section">
-                        <span class="header-section-label">Évènement</span>
-                    </div>
-                    <div class="details-content body client-order-history">
-                        {% if clientOrder.orderStatusHistory|length > 0 %}
-                            {% for history in clientOrder.orderStatusHistory %}
-                                {% set lineColor = (
-                                    (history.status and history.status.code == constant('App\\Entity\\Status::CODE_ORDER_FINISHED')) ? 'client-order-history-finished' :
-                                    ((history.status and history.status.code == constant('App\\Entity\\Status::CODE_ORDER_TRANSIT')) ? 'client-order-history-transit')
-                                ) %}
-                                <div class="client-order-history-line {{ lineColor }}">
-                                    <div class="client-order-history-date">
-                                        <div class="title">{{ history.changedAt|date('d/m/Y') }}</div>
-                                        <div class="subtitle">{{ history.changedAt|date('H:i') }}</div>
-                                    </div>
-                                    <div class="client-order-history-status {{ loop.first ? 'first' }}">
-                                        {% if history.status %}
-                                            <div class="title">{{ history.status.name }}</div>
-                                        {% endif %}
-                                        {% if history.justification is not empty %}
-                                            <div class="subtitle">{{ history.justification }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="row empty-client-order">
-                                <div class="col-12 text-center">Aucune évènement</div>
-                            </div>
-                        {% endif %}
-                    </div>
+            </div>
+            <div>
+                <div class="header-section">
+                    <span class="header-section-label">Évènement</span>
                 </div>
-                <div>
-                    <div class="header-section">
-                        <span class="header-section-label">Preuve de livraison et collecte</span>
-                    </div>
-                    <div class="details-content body">
-{# TODO #}
-                    </div>
+                <div class="details-content body client-order-history"></div>
+                {% if clientOrder.editableStatusHistory is not empty %}
+                    <button class="primary edit-status-button mb-2">Modifier le statut</button>
+                {% endif %}
+            </div>
+            <div>
+                <div class="header-section">
+                    <span class="header-section-label">Preuve de livraison et collecte</span>
+                </div>
+                <div class="details-content body">
+                    {# TODO #}
                 </div>
             </div>
+            <input type="hidden" value="" name="clientOrderId">
         </div>
     </div>
 </div>

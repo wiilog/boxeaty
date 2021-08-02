@@ -208,6 +208,31 @@ class ClientOrder {
         return $this->orderStatusHistory;
     }
 
+    /**
+     * @return OrderStatusHistory[]
+     */
+    public function getEditableStatusHistory(): array {
+        $previousStatus = null;
+        $statuses = [];
+
+        $history = array_reverse($this->getOrderStatusHistory()->toArray());
+        foreach ($history as $status) {
+            $hierarchy = array_search($status->getStatus()->getCode(), Status::ORDER_STATUS_HIERARCHY);
+
+            if ($previousStatus !== null && $hierarchy > $previousStatus) {
+                break;
+            }
+
+            $statuses[] = $status;
+            $previousStatus = $hierarchy;
+        }
+
+        return Stream::from($statuses)
+            ->slice(1)
+            ->reverse()
+            ->toArray();
+    }
+
     public function addOrderStatusHistory(OrderStatusHistory $orderStatusHistory): self {
         if (!$this->orderStatusHistory->contains($orderStatusHistory)) {
             $this->orderStatusHistory[] = $orderStatusHistory;
