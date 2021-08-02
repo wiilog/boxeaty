@@ -30,7 +30,7 @@
             </div>
             <div class="expand"></div>
             <div class="w-30 right">
-                <strong>Montant Total {{ (item.deliveryPrice + item.servicePrice)|format_helper('price') }}</strong>
+                <strong>Montant Total {{ (item.cartPrice + item.servicePrice + item.deliveryPrice)|format_helper('price') }}</strong>
                 <strong class="typeName">{{ item.type.name }}</strong>
             </div>
         </div>

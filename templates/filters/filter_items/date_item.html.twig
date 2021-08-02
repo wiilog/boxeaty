@@ -1,5 +1,6 @@
 {% set unique_date = unique_date is defined and unique_date %}
 {% set name = name is defined and name ? name : 'from' %}
+{% set now = now is defined and now ? now %}
 
 <div class="{{ not unique_date ? 'dates-filter' }}">
     <label class="dates">

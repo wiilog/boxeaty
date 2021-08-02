@@ -22,6 +22,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use WiiCommon\Helper\Stream;
 
 /**
  * @Route("/operation/commande-client")
@@ -59,8 +60,15 @@ class ClientOrderController extends AbstractController {
         $orders = $manager->getRepository(ClientOrder::class)
             ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
         $data = [];
+
         /** @var ClientOrder $order */
         foreach ($orders["data"] as $order) {
+            $lines = Stream::from($order->getLines())
+                ->map(fn(ClientOrderLine $line) => [
+                    'boxType' => $line->getBoxType(),
+                    'quantity' => $line->getQuantity(),
+                ])->toArray();
+
             $data[] = [
                 "id" => $order->getId(),
                 "collect" => $order->getCollect(),
@@ -73,6 +81,7 @@ class ClientOrderController extends AbstractController {
                 "deliveryMethod" => $order->getDeliveryMethod(),
                 "deliveryPrice" => $order->getDeliveryPrice(),
                 "servicePrice" => $order->getServicePrice(),
+                "cartPrice" => $order->getCartAmountPrice($lines),
                 "type" => $order->getType(),
                 "expectedDelivery" => FormatHelper::dateMonth($order->getExpectedDelivery()),
             ];

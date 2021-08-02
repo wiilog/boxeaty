@@ -37,6 +37,7 @@
     "@popperjs/core": "^2.9.1",
     "arrive": "^2.4.1",
     "bootstrap": "git+https://github.com/wiilog/bootstrap.git#main",
+    "chart.js": "^3.5.0",
     "copy-webpack-plugin": "^7.0.0",
     "datatables.net": "^1.10.22",
     "datatables.net-buttons": "^1.6.4",

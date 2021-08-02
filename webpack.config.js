@@ -54,6 +54,14 @@ Encore
             }
         ]
     }))
+    .addPlugin(new CopyPlugin({
+        patterns : [
+            {
+                from: "node_modules/chart.js/dist/chart.min.js",
+                to: "vendor/chart.js/chart.min.js"
+            },
+        ]
+    }))
 
     .splitEntryChunks()
     .enableSingleRuntimeChunk()
