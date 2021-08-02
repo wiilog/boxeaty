@@ -35,6 +35,7 @@ class LocationController extends AbstractController {
         $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0);
         $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1);
         $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1);
+
         return $this->render("referential/location/index.html.twig", [
             "new_location" => new Location(),
             "initial_locations" => $this->api($request, $manager)->getContent(),
