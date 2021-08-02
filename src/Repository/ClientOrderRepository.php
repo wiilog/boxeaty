@@ -52,7 +52,7 @@ class ClientOrderRepository extends EntityRepository {
         return $this->createBetween($from, $to, $params)
             ->leftJoin("client_order.status", "status")
             ->andWhere("status.code IN (:statuses)")
-            ->setParameter("statuses", [Status::ORDER_TO_VALIDATE, Status::ORDER_PLANNED, Status::ORDER_TRANSIT])
+            ->setParameter("statuses", [Status::CODE_ORDER_TO_VALIDATE, Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TRANSIT])
             ->getQuery()
             ->getResult();
     }
@@ -153,4 +153,17 @@ class ClientOrderRepository extends EntityRepository {
 
         return $res[0] ?? null;
     }
+
+    public function getLastNumberByDate(string $date): ?string {
+        $result = $this->createQueryBuilder('clientOrder')
+            ->select('clientOrder.number')
+            ->where('clientOrder.number LIKE :value')
+            ->orderBy('clientOrder.createdAt', 'DESC')
+            ->addOrderBy('clientOrder.number', 'DESC')
+            ->setParameter('value', ClientOrder::PREFIX_NUMBER . $date . '%')
+            ->getQuery()
+            ->execute();
+        return $result ? $result[0]['number'] : null;
+    }
+
 }

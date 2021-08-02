@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\BoxType;
+use App\Helper\FormatHelper;
 use App\Helper\QueryHelper;
 use Doctrine\ORM\EntityRepository;
+use WiiCommon\Helper\Stream;
 
 /**
  * @method BoxType|null find($id, $lockMode = null, $lockVersion = null)
@@ -69,15 +71,31 @@ class BoxTypeRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search) {
-        return $this->createQueryBuilder("box_type")
-            ->select("box_type.id AS id, box_type.name AS text")
+    public function getForSelect(?string $search, $extended = false) {
+        $boxTypes = $this->createQueryBuilder("box_type")
             ->where("box_type.name LIKE :search")
             ->andWhere("box_type.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
-            ->getArrayResult();
+            ->getResult();
+
+        return Stream::from($boxTypes)
+            ->map(fn (BoxType $boxType) => [
+                'id' => $boxType->getId(),
+                'text' => $extended
+                    ? $boxType->getName() . ' - ' . ($boxType->getVolume()
+                        ? $boxType->getVolume() . 'm³'
+                        : 'N/C') . ' - ' . FormatHelper::price($boxType->getPrice())
+                    : $boxType->getName(),
+                'name' => $boxType->getName(),
+                'price' => $boxType->getPrice(),
+                'volume' => $boxType->getVolume(),
+                'image' => $boxType->getImage()
+                    ? $boxType->getImage()->getPath()
+                    : null,
+            ])
+            ->values();
     }
 
 }

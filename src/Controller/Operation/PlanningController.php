@@ -34,7 +34,9 @@ class PlanningController extends AbstractController {
      * @HasPermission(Role::MANAGE_PLANNING)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
+        $now = date('Y-m-d');
         return $this->render("operation/planning/index.html.twig", [
+            "now" => date('Y-m-d', strtotime($now . '+ 1 days')),
             "content" => $this->content($request, $manager, false)->getContent(),
         ]);
     }
@@ -53,7 +55,7 @@ class PlanningController extends AbstractController {
         }
 
         if ($request->query->has("to")) {
-            $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"));
+            $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"))->modify("+1 day");
         } else {
             $to = (clone $from)->modify("+20 days");
         }

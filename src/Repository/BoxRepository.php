@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Helper\QueryHelper;
 use App\Service\BoxStateService;
 use Doctrine\ORM\EntityRepository;
+use WiiCommon\Helper\Stream;
 
 /**
  * @method Box|null find($id, $lockMode = null, $lockVersion = null)
@@ -89,20 +90,31 @@ class BoxRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "box");
 
         if ($search) {
-            $qb->leftJoin("box.location", "search_location")
-                ->leftJoin("box.owner", "search_owner")
-                ->leftJoin("box.quality", "search_quality")
-                ->leftJoin("box.type", "search_type")
-                ->andWhere($qb->expr()->orX(
-                    "box.number LIKE :search",
-                    "search_location.name LIKE :search",
-                    "search_owner.name LIKE :search",
-                    "search_quality.name LIKE :search",
-                    "search_type.name LIKE :search",
-                    "DATE_FORMAT(box.creationDate, '%d/%m/%Y') LIKE :search",
-                    "DATE_FORMAT(box.creationDate, '%H:%i') LIKE :search"
-                ))
-                ->setParameter("search", "%$search%");
+            $state = Stream::from(BoxStateService::BOX_STATES)
+                ->filter(fn($value) => strpos($value, $search) > -1)
+                ->firstKey();
+
+            if(isset($state)) {
+                $qb
+                    ->andWhere("box.state LIKE :state")
+                    ->setParameter("state", $state + 1);
+            } else {
+                $qb
+                    ->leftJoin("box.location", "search_location")
+                    ->leftJoin("box.owner", "search_owner")
+                    ->leftJoin("box.quality", "search_quality")
+                    ->leftJoin("box.type", "search_type")
+                    ->andWhere($qb->expr()->orX(
+                        "box.number LIKE :search",
+                        "search_location.name LIKE :search",
+                        "search_owner.name LIKE :search",
+                        "search_quality.name LIKE :search",
+                        "search_type.name LIKE :search",
+                        "DATE_FORMAT(box.creationDate, '%d/%m/%Y') LIKE :search",
+                        "DATE_FORMAT(box.creationDate, '%H:%i') LIKE :search"
+                    ))
+                    ->setParameter("search", "%$search%");
+            }
         }
 
         foreach ($params["filters"] ?? [] as $name => $value) {
@@ -172,6 +184,25 @@ class BoxRepository extends EntityRepository {
             "total" => $total,
             "filtered" => $filtered,
         ];
+    }
+
+    public function getCrateAverageVolume(): float {
+        $queryBuilder = $this->createQueryBuilder('crate')
+            ->select('SUM(type.volume) AS volumeSum')
+            ->addSelect('COUNT(crate.id) AS boxNumber')
+            ->where('crate.isBox = 0')
+            ->andWhere('crate.isBox = 0')
+            ->andWhere('type.volume IS NOT NULL')
+            ->join('crate.type', 'type');
+        $res = $queryBuilder
+            ->getQuery()
+            ->getResult();
+        $volumeSum = $res[0]['volumeSum'] ?? 0;
+        $boxNumber = $res[0]['boxNumber'] ?? 0;
+
+        return $boxNumber > 0
+            ? ($volumeSum / $boxNumber)
+            : 0;
     }
 
     public function getByDepository(Depository $depository)

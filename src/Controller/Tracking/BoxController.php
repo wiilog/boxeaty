@@ -308,7 +308,7 @@ class BoxController extends AbstractController {
             'isTail' => ($start + $length) >= $boxMovementsResult['totalCount'],
             'data' => Stream::from($boxMovementsResult['data'])
                 ->map(fn(array $movement) => [
-                    'comment' => str_replace("Powered by Froala Editor", "", $movement['comment']),
+                    'quality' => $movement['quality'] ?? "",
                     'color' => (isset($movement['state']) && isset(BoxStateService::LINKED_COLORS[$movement['state']]))
                         ? BoxStateService::LINKED_COLORS[$movement['state']]
                         : BoxStateService::DEFAULT_COLOR,
@@ -430,6 +430,17 @@ class BoxController extends AbstractController {
         return $this->json([
             "success" => true,
             "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $crate]),
+        ]);
+    }
+
+
+    /**
+     * @Route("/crate-average-volume", name="get_crate_average_volume", options={"expose": true})
+     */
+    public function getCrateAverageVolume(EntityManagerInterface $entityManager): JsonResponse {
+        $boxRepository = $entityManager->getRepository(Box::class);
+        return $this->json([
+            'average' => $boxRepository->getCrateAverageVolume()
         ]);
     }
 }

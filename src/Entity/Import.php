@@ -72,7 +72,7 @@ class Import {
             "name" => "Propriétaire",
         ],
         self::TYPE => [
-            "name" => "Type de Box",
+            "name" => "Type de Box / Caisse",
         ],
         self::COMMENT => [
             "name" => "Commentaire",

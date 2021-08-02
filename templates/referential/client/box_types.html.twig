@@ -1,14 +1,18 @@
 {% for clientBoxType in client.clientBoxTypes %}
     {% set boxType = clientBoxType.boxType %}
-    {% set totalPrice = clientBoxType.quantity * clientBoxType.cost %}
+    {% set totalPrice = clientBoxType.quantity * clientBoxType.unitPrice %}
     <div class="box-type-card">
-        <img src="">
+        {% if boxType.image %}
+            <img src="{{ asset(boxType.image.path) }}"
+                 class="box-type-image"
+                 alt="image"/>
+        {% endif %}
         <span class="body-text-semi-bold">{{ clientBoxType.quantity }} x {{ boxType.name }}</span>
-        <span class="body-text">TU {{ clientBoxType.cost }}€</span>
-        <span class="body-text-semi-bold">{{ totalPrice | number_format(2, '.') }}€</span>
+        <span class="body-text">T.U. {{ clientBoxType.unitPrice | format_helper('price') }}</span>
+        <span class="body-text-semi-bold">{{ totalPrice | format_helper('price') }}</span>
         <div class="actions-wrapper">
-            <div class="edit-client-box-type round" data-id="{{ clientBoxType.id }}"><i class="icon bxi bxi-edit-circle"></i></div>
-            <div class="delete-client-box-type round" data-id="{{ clientBoxType.id }}"><i class="icon bxi bxi-trash-circle"></i></div>
+            <div class="edit-client-box-type round cursor-pointer" data-id="{{ clientBoxType.id }}"><i class="icon bxi bxi-edit-circle"></i></div>
+            <div class="delete-client-box-type round cursor-pointer" data-id="{{ clientBoxType.id }}"><i class="icon bxi bxi-trash-circle"></i></div>
         </div>
     </div>
 {% endfor %}

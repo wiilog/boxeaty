@@ -12,6 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class BoxType {
 
+    public const DEFAULT_VOLUME = 0.0005;
+
     use Active;
 
     /**
@@ -52,12 +54,12 @@ class BoxType {
     private Collection $clientBoxTypes;
 
     /**
-     * @ORM\OneToMany(targetEntity=ClientOrderLine::class, mappedBy="boxType")
+     * @ORM\OneToMany(targetEntity=ClientOrderLine::class, mappedBy="boxType", cascade={"persist", "remove"})
      */
     private Collection $clientOrderLines;
 
     /**
-     * @ORM\Column(type="decimal", precision=5, scale=2, nullable=true)
+     * @ORM\Column(type="decimal", precision=5, scale=4, nullable=true)
      */
     private ?float $volume = null;
 

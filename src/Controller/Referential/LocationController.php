@@ -57,10 +57,9 @@ class LocationController extends AbstractController {
                 "active" => FormatHelper::bool($location->isActive()),
                 "client" => FormatHelper::named($location->getClient()),
                 "description" => $location->getDescription() ?: "-",
-                "boxes" => $boxRepository->count(["location" => $location]),
                 "capacity" => $location->getCapacity() ?? "-",
                 "location_type" => $location->getType() ? Location::LOCATION_TYPES[$location->getType()] : '-',
-                "container_amount" => !$location->getBoxes()->isEmpty() ? $location->getBoxes()->count() : '-',
+                "container_amount" => $boxRepository->count(["location" => $location]),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
@@ -184,14 +183,14 @@ class LocationController extends AbstractController {
         if ($content->kiosk && (!$capacity || $capacity < Location::MIN_KIOSK_CAPACITY)) {
             $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
-        dump($content);
+
         if ($form->isValid()) {
             $location->setKiosk($content->kiosk)
                 ->setName($content->name)
                 ->setClient($client)
                 ->setActive($content->active)
                 ->setDescription($content->description ?? null)
-                ->setType($content->type ? intval($content->type) : null)
+                ->setType(isset($content->type) ? intval($content->type) : null)
                 ->setDepository($depository);
 
             if ((int)$content->kiosk === 1) {
@@ -201,7 +200,7 @@ class LocationController extends AbstractController {
                     ->setDepository(null);
             } else {
                 $location
-                    ->setType($content->type ? intval($content->type) : null)
+                    ->setType(isset($content->type) ? intval($content->type) : null)
                     ->setDepository($depository)
                     ->setCapacity(null)
                     ->setMessage(null);

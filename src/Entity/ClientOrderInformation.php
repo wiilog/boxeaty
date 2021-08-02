@@ -37,9 +37,9 @@ class ClientOrderInformation {
     private $tokenAmount;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="json", nullable=true)
      */
-    private $orderType;
+    private $orderTypes = [];
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
@@ -82,11 +82,6 @@ class ClientOrderInformation {
     private $client;
 
     /**
-     * @ORM\Column(type="json", nullable=true)
-     */
-    private $paymentModes = [];
-
-    /**
      * @ORM\OneToOne(targetEntity=OrderRecurrence::class, cascade={"persist", "remove"})
      */
     private $orderRecurrence;
@@ -120,14 +115,14 @@ class ClientOrderInformation {
         return $this;
     }
 
-    public function getOrderType(): ?int
+    public function getOrderTypes(): ?array
     {
-        return $this->orderType;
+        return $this->orderTypes;
     }
 
-    public function setOrderType(?int $orderType): self
+    public function setOrderTypes(?array $orderTypes): self
     {
-        $this->orderType = $orderType;
+        $this->orderTypes = $orderTypes;
 
         return $this;
     }
@@ -224,18 +219,6 @@ class ClientOrderInformation {
     public function setClient(?Client $client): self
     {
         $this->client = $client;
-
-        return $this;
-    }
-
-    public function getPaymentModes(): ?array
-    {
-        return $this->paymentModes;
-    }
-
-    public function setPaymentModes(?array $paymentModes): self
-    {
-        $this->paymentModes = $paymentModes;
 
         return $this;
     }

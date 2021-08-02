@@ -43,9 +43,18 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/kiosk/ping", name="api_kiosk_ping")
+     * @Route("/ping", name="api_ping")
      */
     public function ping(): Response {
+        return $this->json([
+            "success" => true,
+        ]);
+    }
+
+    /**
+     * @Route("/kiosk/ping", name="api_kiosk_ping")
+     */
+    public function kioskPing(): Response {
         return $this->json([
             "success" => true,
         ]);
@@ -57,7 +66,6 @@ class ApiController extends AbstractController {
     public function config(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
-        $client = null;
         if (isset($content->id)) {
             $kiosk = $manager->getRepository(Location::class)->find($content->id);
 

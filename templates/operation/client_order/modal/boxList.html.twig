@@ -1,0 +1,28 @@
+<div class="details-content body">
+    {% if clientOrder.lines|length > 0 %}
+    {% for line in clientOrder.lines %}
+        <div class="row client-order-line">
+            <div class="col-auto">
+                {% if line.boxType.image %}
+                    <img src="{{ asset(line.boxType.image.path) }}"
+                         class="box-type-image"
+                         alt="image"/>
+                {% endif %}
+            </div>
+            <div class="col">
+                {{ line.quantity }}&nbsp;&times;&nbsp; Box de type <b>{{ line.boxType.name }}</b>
+            </div>
+            <div class="col-3">
+                T.U. {{ line.unitPrice|format_helper('price') }}
+            </div>
+            <div class="col-3">
+                {{ (line.quantity * line.unitPrice)|format_helper('price') }}
+            </div>
+        </div>
+    {% endfor %}
+    {% else %}
+    <div class="row empty-client-order">
+        <div class="col-12 text-center">Aucune Box à afficher</div>
+    </div>
+{% endif %}
+</div>

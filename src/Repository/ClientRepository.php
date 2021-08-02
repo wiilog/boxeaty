@@ -57,6 +57,24 @@ class ClientRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
+        foreach ($params["filters"] ?? [] as $name => $value) {
+            switch ($name) {
+                case("client"):
+                    $qb
+                        ->andWhere("client.id = :filter_client")
+                        ->setParameter("filter_client", $value);
+                    break;
+                case("multiSite"):
+                    $qb->andWhere("client.linkedMultiSite = :filter_multiSite")
+                        ->setParameter("filter_multiSite", $value);
+                    break;
+                default:
+                    $qb->andWhere("client.$name = :filter_$name")
+                        ->setParameter("filter_$name", $value);
+                    break;
+            }
+        }
+
         if (!empty($params["order"])) {
             foreach ($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
@@ -64,8 +82,8 @@ class ClientRepository extends EntityRepository {
                     QueryHelper::order($qb, "client.contact.username", $order["dir"]);
                 } else if ($column === "group") {
                     QueryHelper::order($qb, "client.group.name", $order["dir"]);
-                } else if ($column === "multiSite") {
-                    QueryHelper::order($qb, "client.multiSite.name", $order["dir"]);
+                } else if ($column === "linkedMultiSite") {
+                    QueryHelper::order($qb, "client.linkedMultiSite.name", $order["dir"]);
                 } else {
                     $qb->addOrderBy("client.$column", $order["dir"]);
                 }
@@ -89,11 +107,29 @@ class ClientRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search, ?string $group, ?User $user) {
+    public function getForSelect(?string $search,
+                                 ?string $group,
+                                 ?User $user,
+                                 ?bool $costInformationNeeded = false) {
         $qb = $this->createQueryBuilder("client");
 
-        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
-            $qb->andWhere("client.group IN (:groups)")
+        $exprBuilder = $qb->expr();
+
+        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $userClients = $user->getClients();
+
+            if (!$userClients->isEmpty()) {
+                $qb
+                    ->andWhere($exprBuilder->orX(
+                        'client IN (:userClients)',
+                        'linkedMultiSite IN (:userClients)'
+                    ))
+                    ->leftJoin('client.linkedMultiSite', 'linkedMultiSite')
+                    ->setParameter('userClients', $userClients);
+            }
+
+            $qb
+                ->andWhere("client.group IN (:groups)")
                 ->setParameter("groups", $user->getGroups());
         }
 
@@ -102,11 +138,29 @@ class ClientRepository extends EntityRepository {
                 ->setParameter("group", $group);
         }
 
-        return $qb->select("client.id AS id, client.name AS text")
+        $qb
+            ->select("client.id AS id")
+            ->addSelect("client.name AS text")
+            ->addSelect("join_information.workingDayDeliveryRate AS workingRate")
+            ->addSelect("join_information.nonWorkingDayDeliveryRate AS nonWorkingRate")
+            ->addSelect("join_information.serviceCost AS serviceCost")
+            ->addSelect("client.address AS address")
+            ->addSelect("join_deliveryMethod.id AS deliveryMethod")
+            ->leftjoin("client.clientOrderInformation", "join_information")
+            ->leftjoin("join_information.deliveryMethod", "join_deliveryMethod")
             ->andWhere("client.name LIKE :search")
             ->andWhere("client.active = 1")
             ->setMaxResults(15)
-            ->setParameter("search", "%$search%")
+            ->setParameter("search", "%$search%");
+
+        if ($costInformationNeeded) {
+            $qb
+                ->andWhere("join_information.workingDayDeliveryRate IS NOT NULL")
+                ->andWhere("join_information.nonWorkingDayDeliveryRate IS NOT NULL")
+                ->andWhere("join_information.serviceCost IS NOT NULL");
+        }
+
+        return $qb
             ->getQuery()
             ->getArrayResult();
     }
