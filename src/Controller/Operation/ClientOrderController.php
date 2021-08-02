@@ -7,6 +7,7 @@ use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
 use App\Entity\DeliveryMethod;
+use App\Entity\OrderStatusHistory;
 use App\Entity\OrderType;
 use App\Entity\Role;
 use App\Entity\Status;
@@ -39,13 +40,13 @@ class ClientOrderController extends AbstractController {
         $deliveryMethod = $manager->getRepository(DeliveryMethod::class);
         $orderTypes = $manager->getRepository(OrderType::class);
         $now = date('Y-m-d');
-        
+
         return $this->render("operation/client_order/index.html.twig", [
             "new_client_order" => new ClientOrder(),
-            "now" => date('Y-m-d', strtotime($now.'+ 1 days')),
+            "now" => date('Y-m-d', strtotime($now . '+ 1 days')),
             "requester" => $this->getUser(),
             "deliveryMethods" => $deliveryMethod->findBy(["deleted" => false], ["name" => "ASC"]),
-            "orderTypes"=> $orderTypes->findBy([]),
+            "orderTypes" => $orderTypes->findBy([]),
             "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER
         ]);
@@ -117,9 +118,9 @@ class ClientOrderController extends AbstractController {
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
     public function validateTemplate(Request $request,
-                        EntityManagerInterface $entityManager,
-                        ClientOrderService $clientOrderService,
-                        $clientOrderId): Response {
+                                     EntityManagerInterface $entityManager,
+                                     ClientOrderService $clientOrderService,
+                                     $clientOrderId): Response {
         // TODO ALEX
         return $this->json([
             "submit" => $this->generateUrl("client_orders_list"),
@@ -186,8 +187,8 @@ class ClientOrderController extends AbstractController {
         $number = $uniqueNumberService->createUniqueNumber($entityManager, ClientOrder::PREFIX_NUMBER, ClientOrder::class);
         $now = new DateTime('now');
         if ($type && $type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
-            $collectRequired = (bool) ($content->collectRequired ?? false);
-            if($collectRequired){
+            $collectRequired = (bool)($content->collectRequired ?? false);
+            if ($collectRequired) {
                 if (!isset($content->cratesAmountToCollect)
                     || $content->cratesAmountToCollect < 1) {
                     $form->addError('cratesAmountToCollect', 'Le nombre de caisses à collecter est invalide');
@@ -261,13 +262,61 @@ class ClientOrderController extends AbstractController {
     }
 
     /**
+     * @Route("/status/template/{clientOrder}", name="client_order_edit_status_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
+     */
+    public function editStatusTemplate(ClientOrder $clientOrder): Response {
+        return $this->json([
+            "submit" => $this->generateUrl("client_order_edit_status", ["clientOrder" => $clientOrder->getId()]),
+            "template" => $this->renderView("operation/client_order/modal/edit_status.html.twig", [
+                "clientOrder" => $clientOrder,
+            ])
+        ]);
+    }
+
+    /**
+     * @Route("/status/{clientOrder}", name="client_order_edit_status", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
+     */
+    public function editStatus(ClientOrder $clientOrder, Request $request, EntityManagerInterface $entityManager): Response {
+        $form = Form::create();
+        $content = (object)$request->request->all();
+        $now = new DateTime('now');
+        $statusRepository = $entityManager->getRepository(Status::class);
+        $status = $statusRepository->findOneBy(['id' => $content->status]);
+        if ($form->isValid()) {
+            $clientOrder
+                ->setStatus($status);
+
+            $entityManager->persist($clientOrder);
+
+            $history = (new OrderStatusHistory())
+                ->setOrder($clientOrder)
+                ->setStatus($status)
+                ->setUser($this->getUser())
+                ->setChangedAt($now)
+                ->setJustification($content->justification);
+            $entityManager->persist($history);
+            $entityManager->flush();
+
+            return $this->json([
+                "success" => true,
+                "submit" => $this->generateUrl("client_order_show_template", ["clientOrder" => $clientOrder->getId()]),
+            ]);
+        } else {
+            return $form->errors();
+        }
+        return $this->json($result);
+    }
+
+    /**
      * @Route("/supprimer/{clientOrder}", name="client_order_delete", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
      */
     public function delete(EntityManagerInterface $entityManager, ClientOrder $clientOrder): Response {
         $lines = $clientOrder->getLines();
 
-        foreach ($lines as $line){
+        foreach ($lines as $line) {
             $entityManager->remove($line);
         }
 
@@ -294,4 +343,20 @@ class ClientOrderController extends AbstractController {
             ])
         ]);
     }
+
+    /**
+     * @Route("/client-order-history-api", name="client_order_history_api", options={"expose": true})
+     */
+    public function historyApi(Request $request, EntityManagerInterface $manager): Response {
+        $id = $request->query->get('id');
+        $clientOrder = $manager->getRepository(ClientOrder::class)->find($id);
+
+        return $this->json([
+            'success' => true,
+            'template' => $this->renderView('operation/client_order/timeline.html.twig', [
+                'clientOrder' => $clientOrder,
+            ]),
+        ]);
+    }
+
 }

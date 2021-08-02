@@ -15,18 +15,19 @@ $(function() {
     const $modal = $(`#modal-new-client-order`);
     initOrderDatatable();
 
-    const getParams = URL.getRequestQuery()
-    if (getParams.action === 'new') {
+    // TODO Voir avec Adrien
+    const params = URL.getRequestQuery()
+    if (params.action === 'new') {
         openNewClientOrderModal();
     }
-    else if (getParams.action === 'show'
-             && getParams['action-data']) {
+    /*else if (params.action === 'show'
+             && params['action-data']) {
         openOrderShowModal(getParams['action-data']);
     }
-    else if (getParams.action === 'validation'
-             && getParams['action-data']) {
+    else if (params.action === 'validation'
+             && params['action-data']) {
         openOrderValidationModal(getParams['action-data']);
-    }
+    }*/
 
     $('#modal-validation-client-order').find('.submit-button').on('click', function(){
         window.location.href = Routing.generate('client_order_validation_template', {action : 'validation'});
@@ -37,7 +38,13 @@ $(function() {
         const clientOrderId = $link.data('id');
         setOrderRequestInURL(clientOrderId); // TODO ALEX action = show or validation en fonction du statut de la commande
         openOrderShowModal(clientOrderId);
-    })
+    });
+
+    $(document).arrive('.edit-status-button', function() {
+        $(this).on('click', () => {
+            openEditStatusModal($('input[name=clientOrderId]').val());
+        });
+    });
 
     $(`#new-client-order`).on('click', function(){
         window.location.href = Routing.generate(`client_orders_list`, {action: 'new'})
@@ -115,17 +122,30 @@ $(function() {
     });
 });
 
+function openEditStatusModal(clientOrderId){
+    const ajax = AJAX.route(`POST`, `client_order_edit_status_template`, {
+        clientOrder: clientOrderId
+    });
+    Modal.load(ajax, {
+        afterHidden: () => {
+            removeActionRequestInURL();
+            getTimeLine($(`#modal-show-client-order`), clientOrderId);
+        },
+        error: () => {
+            removeActionRequestInURL();
+        }
+    });
+}
+
 function openOrderShowModal(clientOrderId) {
     const ajax = AJAX.route(`POST`, `client_order_show_template`, {
         clientOrder: clientOrderId
     });
 
     Modal.load(ajax, {
-        afterHidden: () => {
-            removeActionRequestInURL();
-        },
-        error: () => {
-            removeActionRequestInURL();
+        afterOpen: () => {
+            $('input[name=clientOrderId]').val(clientOrderId);
+            getTimeLine($(`#modal-show-client-order`), clientOrderId);
         }
     });
 }
@@ -215,7 +235,7 @@ function onBoxTypeQuantityChange($quantity) {
     const $totalPrice = $row.find('.totalPrice');
     const totalPrice = unitPrice * quantity;
     const totalPriceStr = StringHelper.formatPrice(totalPrice);
-    $totalPrice.text(totalPriceStr);
+    $totalPrice.text(totalPriceStr+" €");
 
 }
 
@@ -242,6 +262,15 @@ function addBoxTypeModel($modal) {
     else {
         Flash.add('warning', `Le client de la commande n'est pas sélectionné.`);
     }
+}
+
+function getTimeLine($modal, $clientOrder) {
+        AJAX
+            .route(`GET`, `client_order_history_api`, {id: $clientOrder})
+            .json()
+            .then((res) => {
+                $modal.find(`.client-order-history`).empty().append(res.template);
+            });
 }
 
 function addSelectedBoxTypeToCart($modal) {
@@ -294,9 +323,9 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
                 </div>
                 </div>
                 <span class="col bigTxt">${typeBoxData.name}</span>
-                <input name="unitPrice" class="data-array" value="${unitPrice}" type="hidden"/>
+                <input name="unitPrice" class="data-array" value="${unitPrice} " type="hidden"/>
                 <input name="volume" value="${volume}" type="hidden"/>
-                <span class="col-2 unit-price-item">T.U. ${unitPriceStr}</span>
+                <span class="col-2 unit-price-item">T.U. ${unitPriceStr} €</span>
                 <span class="totalPrice col-2 bigTxt"></span>
                 <button class="remove d-inline-flex" value="${typeBoxData.id}"><i class="bxi bxi-trash-circle col"></i></button>
                 <input type="hidden" name="boxTypeId" class="data-array" value="${typeBoxData.id}">

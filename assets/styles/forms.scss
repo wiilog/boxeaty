@@ -199,6 +199,12 @@ input[type=number]::-webkit-inner-spin-button {
     font-weight: bold;
 }
 
+.bigTxtOrange{
+    color: $orange;
+    font-size: 22px;
+    font-weight: bold;
+}
+
 .smallTxt{
     color: #6D757D;
     font-size: 14px;
@@ -209,35 +215,6 @@ input[type=number]::-webkit-inner-spin-button {
     margin-left: auto;
     margin-right: auto;
     width: 650px;
-
-    @extend .toggle;
-
-    margin-bottom: 10px;
-    input[type="radio"] + label {
-        @include button(secondary);
-        background: #E5E5E5 !important;
-        border-color: #E5E5E5;
-        color: #BDBDBD !important;
-        width: 200px;
-        margin-top: 0;
-    }
-
-    input[type="radio"]:checked + label {
-        @include button(primary);
-        background: white !important;
-        border-color: #76B39D;
-        color: #76B39D !important;
-        cursor: default;
-    }
-
-    input[type=radio] + label:hover {
-        border-color: #76B39D;
-        color: #76B39D;
-    }
-
-    input[type=radio]:checked + label:hover {
-        border-color: #76B39D;
-    }
 }
 
 

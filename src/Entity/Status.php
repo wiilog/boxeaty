@@ -37,6 +37,13 @@ class Status {
     public const CODE_COLLECT_TRANSIT = "COLLECT_TRANSIT";
     public const CODE_COLLECT_FINISHED = "COLLECT_FINISHED";
 
+    public const ORDER_STATUS_HIERARCHY = [
+        Status::CODE_ORDER_TO_VALIDATE,
+        Status::CODE_ORDER_PLANNED,
+        Status::CODE_ORDER_TRANSIT,
+        Status::CODE_ORDER_FINISHED,
+    ];
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
