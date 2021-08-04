@@ -59,7 +59,7 @@ parameters:
           route: tracking_movements_list
         - name: Indicateurs
           permission: App\Entity\Role::VIEW_INDICATORS
-          route: indicators_view
+          route: indicators_api
     - name: Opérations
       icon:
         type: custom
