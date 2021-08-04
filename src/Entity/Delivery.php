@@ -43,6 +43,11 @@ class Delivery {
      */
     private ?Attachment $photo = null;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $deliveredAt;
+
     public function getId(): ?int {
         return $this->id;
     }
@@ -97,6 +102,18 @@ class Delivery {
 
     public function setPhoto(?Attachment $photo): self {
         $this->photo = $photo;
+        return $this;
+    }
+
+    public function getDeliveredAt(): ?\DateTimeInterface
+    {
+        return $this->deliveredAt;
+    }
+
+    public function setDeliveredAt(?\DateTimeInterface $deliveredAt): self
+    {
+        $this->deliveredAt = $deliveredAt;
+
         return $this;
     }
 

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Box;
+use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\Status;
 use DateTime;
@@ -40,6 +41,11 @@ class ClientOrderRepository extends EntityRepository {
             $qb->leftJoin("client_order.deliveryRound", "_deliverer_delivery_round")
                 ->andWhere("_deliverer_delivery_round.deliverer = :deliverer")
                 ->setParameter("deliverer", $params["deliverer"]);
+        }
+
+        if(isset($params["client"])) {
+            $qb ->andWhere("client_order.client = :client")
+                ->setParameter("client", $params["client"]);
         }
 
         return $qb;
@@ -164,6 +170,23 @@ class ClientOrderRepository extends EntityRepository {
             ->getQuery()
             ->execute();
         return $result ? $result[0]['number'] : null;
+    }
+
+    public function findQuantityDeliveredBetweenDateAndClient(DateTime $from,
+                                                              DateTime $to,
+                                                              Client $client): int {
+        $result = $this->createQueryBuilder("client_order")
+            ->select('SUM(lines.quantity)')
+            ->leftJoin("client_order.delivery", "delivery")
+            ->leftJoin('client_order.lines','lines')
+            ->andWhere("delivery.deliveredAt BETWEEN :from AND :to")
+            ->andWhere("client_order.client = :client")
+            ->setParameter("client", $client)
+            ->setParameter("from", $from)
+            ->setParameter("to", $to)
+            ->getQuery()
+            ->getSingleScalarResult();
+        return $result ? intval($result) : 0;
     }
 
 }

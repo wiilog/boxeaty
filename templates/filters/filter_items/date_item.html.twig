@@ -6,13 +6,17 @@
     <label class="dates">
         {{ not unique_date ? 'Du' }}
         <input type="date" name="{{ name }}" class="data from"
-               min="{{ now }}">
+               {% if now is defined and now %}
+               min="{{ now }}"
+        {% endif %}>
     </label>
     {% if not unique_date %}
         <label class="dates">
             au
             <input type="date" name="to" class="data"
-                   min="{{ now }}">
+                    {% if now is defined and now%}
+                   min="{{ now }}"
+            {% endif %}>
         </label>
     {% endif %}
 </div>
