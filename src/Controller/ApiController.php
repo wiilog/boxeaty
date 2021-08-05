@@ -651,12 +651,10 @@ class ApiController extends AbstractController
                 $location = $crate->getLocation()->getName();
                 $number = $crate->getNumber();
                 if (!isset($availableCrates[$location])) {
-                    $availableCrates[$location] = [
-                        $number
-                    ];
-                } else {
-                    array_push($availableCrates[$location], $number);
+                    $availableCrates[$location] = [];
                 }
+
+                $availableCrates[$location][] = $number;
             }
         }
 
@@ -676,17 +674,28 @@ class ApiController extends AbstractController
                 $line->getBoxType()->getId()
             ])->toArray();
 
-        $boxes = $manager->getRepository(Box::class)->getAvailableAndCleanedBoxByType($boxTypes);
-
+        //$boxes = $manager->getRepository(Box::class)->getAvailableAndCleanedBoxByType($boxTypes);
+        $boxes = $manager->getRepository(Box::class)->findAll();
         $availableBoxes = [];
+        $typeQuantityAndVolume = [];
         foreach ($boxes as $box) {
-            if ($box->getLocation()) {
+            if ($box->getLocation() && $box->getType()) {
                 $type = $box->getType()->getName();
                 $location = $box->getLocation()->getName();
                 $number = $box->getNumber();
                 if (!isset($availableBoxes[$type])) {
                     $availableBoxes[$type] = [];
                 }
+
+                if (!isset($typeQuantityAndVolume[$type])) {
+                    $typeQuantityAndVolume[$type] = [
+                        'quantity' => 0,
+                        'volume' => 0
+                    ];
+                }
+
+                $typeQuantityAndVolume[$type]['quantity'] += 1;
+                $typeQuantityAndVolume[$type]['volume'] = $box->getType()->getVolume();
 
                 if(!isset($availableBoxes[$type][$location])) {
                     $availableBoxes[$type][$location] = [];
@@ -696,6 +705,33 @@ class ApiController extends AbstractController
             }
         }
 
-        return $this->json($availableBoxes);
+        dump($availableBoxes);
+
+        return $this->json([
+            'availableBoxes' => $availableBoxes,
+            'typeQuantity' => $typeQuantityAndVolume
+        ]);
+    }
+
+    /**
+     * @Route("/mobile/box-informations", name="api_mobile_box_informations")
+     */
+    public function boxInformations(EntityManagerInterface $manager, Request $request): Response {
+        $box = $request->query->get('box');
+        $crate = $request->query->get('crate');
+
+        $box = $manager->getRepository(Box::class)->findOneBy(['number' => $box]);
+        $crate = $manager->getRepository(Box::class)->findOneBy(['number' => $crate]);
+
+        $type = $box->getType()->getName();
+        $volume = $box->getType()->getVolume();
+        $number = $box->getNumber();
+
+        return $this->json([
+            'number' => $number,
+            'type' => $type,
+            'volume' => $volume,
+            'crateVolume' => $crate->getType()->getVolume()
+        ]);
     }
 }
