@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Box;
 use App\Entity\Depository;
-use App\Entity\Location;
+use App\Entity\Preparation;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use App\Service\BoxStateService;
@@ -252,6 +252,42 @@ class BoxRepository extends EntityRepository {
             ->setParameter("number", $number)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function getByPreparation(Preparation $preparation) {
+        $qb = $this->createQueryBuilder('box');
+
+        $qb->select('box.id AS id')
+            ->addSelect('box.number AS number')
+            ->addSelect('join_type.name AS type')
+            ->leftJoin('box.type', 'join_type')
+            ->leftJoin('box.boxPreparationLines', 'join_boxPreparationLines')
+            ->leftJoin('join_boxPreparationLines.preparation', 'join_preparation')
+            ->where('box.isBox = 0')
+            ->andWhere('join_preparation = :preparation')
+            ->setParameter('preparation', $preparation);
+
+        return $qb
+            ->getQuery()
+            ->execute();
+    }
+
+    public function getAvailableAndCleanedBoxByType(?array $boxTypes) {
+        $qb = $this->createQueryBuilder('box');
+
+        $qb->select('box')
+            ->leftJoin('box.quality', 'join_quality')
+            ->leftJoin('box.type', 'join_type')
+            ->where('box.isBox = 1')
+            ->andWhere('box.state = :state')
+            ->andWhere('join_type.id IN (:box_types)')
+            ->andWhere('join_quality.clean = 1')
+            ->setParameter('box_types', $boxTypes)
+            ->setParameter('state', BoxStateService::STATE_BOX_AVAILABLE);
+
+        return $qb
+            ->getQuery()
+            ->getResult();
     }
 
 }
