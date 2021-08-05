@@ -414,10 +414,10 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
     }
 
     // display errors under each field
-    modal.element.find(`.global-error`).remove();
+    $parent.find(`.global-error`).remove();
     for(const error of errors) {
         if(error.global) {
-            showGlobalInvalid(modal.element, error.message);
+            showGlobalInvalid($parent, error.message);
         } else {
             error.elements.forEach($elem => showInvalid($elem, error.message));
         }

@@ -17,7 +17,6 @@ function getIndicatorsValues() {
     const params = processForm($filters).asObject();
     AJAX.route(`GET`, `indicators_api`, params).json()
         .then((result) => {
-            console.log(result);
             $('.total-boxes').text(result.containersUsed);
             $('.waste-avoided').text(result.wasteAvoided + " KG");
             $('.soft-mobility-total-distance').text(result.softMobilityTotalDistance + " KM");

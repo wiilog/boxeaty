@@ -3,7 +3,7 @@
 
 namespace App\Controller\Tracking;
 
-
+use App\Annotation\HasPermission;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\Collect;
@@ -16,12 +16,23 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\EntityManagerInterface;
 use WiiCommon\Helper\Stream;
+use App\Entity\Role;
 
 /**
  * Route("tracabilite/indicateurs")
  */
 class IndicatorController extends AbstractController
 {
+
+    /**
+     * @Route("/index", name="indicators_index")
+     * @HasPermission(Role::VIEW_INDICATORS)
+     */
+    public function index(): Response   {
+
+        return $this->render("tracking/indicators/index.html.twig");
+    }
+
     /**
      * @Route("/api", name="indicators_api", options={"expose": true})
      */
