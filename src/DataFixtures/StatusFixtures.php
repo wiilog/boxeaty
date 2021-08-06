@@ -24,6 +24,7 @@ class StatusFixtures extends Fixture implements FixtureGroupInterface {
             Status::CODE_ROUND_FINISHED => "Terminé",
         ],
         Status::CATEGORY_PREPARATION => [
+            Status::CODE_PREPARATION_TO_PREPARE => "A préparer",
             Status::CODE_PREPARATION_PREPARING => "En préparation",
             Status::CODE_PREPARATION_PREPARED => "Préparé",
         ],

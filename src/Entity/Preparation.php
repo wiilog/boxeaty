@@ -42,6 +42,11 @@ class Preparation {
      */
     private Collection $lines;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="preparations")
+     */
+    private $operator;
+
     public function __construct() {
         $this->lines = new ArrayCollection();
     }
@@ -126,6 +131,18 @@ class Preparation {
         foreach($lines as $line) {
             $this->addLine($line);
         }
+
+        return $this;
+    }
+
+    public function getOperator(): ?User
+    {
+        return $this->operator;
+    }
+
+    public function setOperator(?User $operator): self
+    {
+        $this->operator = $operator;
 
         return $this;
     }

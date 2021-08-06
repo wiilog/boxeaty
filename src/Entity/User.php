@@ -176,6 +176,11 @@ class User implements UserInterface {
      */
     private Collection $counterOrders;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Preparation::class, mappedBy="operator")
+     */
+    private $preparations;
+
     public function __construct() {
         $this->clients = new ArrayCollection();
         $this->boxRecords = new ArrayCollection();
@@ -185,6 +190,7 @@ class User implements UserInterface {
         $this->orderStatusHistories = new ArrayCollection();
         $this->clientOrders = new ArrayCollection();
         $this->counterOrders = new ArrayCollection();
+        $this->preparations = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -647,6 +653,36 @@ class User implements UserInterface {
         $this->counterOrders = new ArrayCollection();
         foreach ($counterOrders as $order) {
             $this->addCounterOrder($order);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Preparation[]
+     */
+    public function getPreparations(): Collection
+    {
+        return $this->preparations;
+    }
+
+    public function addPreparation(Preparation $preparation): self
+    {
+        if (!$this->preparations->contains($preparation)) {
+            $this->preparations[] = $preparation;
+            $preparation->setOperator($this);
+        }
+
+        return $this;
+    }
+
+    public function removePreparation(Preparation $preparation): self
+    {
+        if ($this->preparations->removeElement($preparation)) {
+            // set the owning side to null (unless already changed)
+            if ($preparation->getOperator() === $this) {
+                $preparation->setOperator(null);
+            }
         }
 
         return $this;

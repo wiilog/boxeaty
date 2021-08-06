@@ -257,8 +257,7 @@ class BoxRepository extends EntityRepository {
     public function getByPreparation(Preparation $preparation) {
         $qb = $this->createQueryBuilder('box');
 
-        $qb->select('box.id AS id')
-            ->addSelect('box.number AS number')
+        $qb->select('box.number AS number')
             ->addSelect('join_type.name AS type')
             ->leftJoin('box.type', 'join_type')
             ->leftJoin('box.boxPreparationLines', 'join_boxPreparationLines')

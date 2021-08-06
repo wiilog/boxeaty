@@ -23,12 +23,14 @@ class PreparationRepository extends EntityRepository {
             ->addSelect('join_order.cratesAmount AS crateAmount')
             ->addSelect('join_clientOrderInformation.tokenAmount AS tokenAmount')
             ->addSelect('join_order.number AS orderNumber')
+            ->addSelect('join_operator.username AS operator')
             ->leftJoin('preparation.order', 'join_order')
             ->leftJoin('join_order.client', 'join_client')
             ->leftJoin('preparation.status', 'join_status')
             ->leftJoin('join_client.clientOrderInformation', 'join_clientOrderInformation')
-            ->andWhere("join_status.code = :status")
-            ->setParameter("status", Status::CODE_PREPARATION_PREPARING);
+            ->leftJoin('preparation.operator', 'join_operator')
+            ->andWhere("join_status.code IN (:status)")
+            ->setParameter("status", [Status::CODE_PREPARATION_TO_PREPARE, Status::CODE_PREPARATION_PREPARING]);
 
         if($depository) {
             $qb

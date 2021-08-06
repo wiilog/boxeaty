@@ -15,6 +15,7 @@ use App\Entity\GlobalSetting;
 use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Preparation;
+use App\Entity\Status;
 use App\Entity\User;
 use App\Helper\FormatHelper;
 use App\Service\BoxStateService;
@@ -546,11 +547,44 @@ class ApiController extends AbstractController
 
     /**
      * @Route("/mobile/preparations", name="api_mobile_preparations")
+     * @Authenticated
      */
     public function preparations(EntityManagerInterface $manager, Request $request): Response
     {
         $depository = $manager->getRepository(Depository::class)->find($request->query->get('depository'));
-        return $this->json($manager->getRepository(Preparation::class)->getByDepository($depository));
+        $preparations = $manager->getRepository(Preparation::class)->getByDepository($depository);
+
+        $toPrepare = Stream::from($preparations)->filter(fn($preparation) => !isset($preparation['operator']))->values();
+        $preparing = Stream::from($preparations)->filter(fn($preparation) => isset($preparation['operator']))->values();
+
+        return $this->json([
+            'toPrepare' => $toPrepare,
+            'preparing' => $preparing
+        ]);
+    }
+
+    /**
+     * @Route("/mobile/toggle-preparation-status", name="api_mobile_toggle_preparation_status")
+     * @Authenticated
+     */
+    public function togglePreparationStatus(EntityManagerInterface $manager, Request $request): Response
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if ($data['preparing']) {
+            $preparation = $manager->getRepository(Preparation::class)->find($data['id']);
+            $status = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_PREPARATION_PREPARING]);
+
+            $preparation
+                ->setStatus($status ?? $preparation->getStatus())
+                ->setOperator($this->user);
+
+            $manager->flush();
+        }
+
+        return $this->json([
+            'success' => true
+        ]);
     }
 
     /**
@@ -627,6 +661,7 @@ class ApiController extends AbstractController
 
     /**
      * @Route("/mobile/crates-to-prepare", name="api_mobile_crates_to_prepare")
+     * @Authenticated
      */
     public function cratesToPrepare(EntityManagerInterface $manager, Request $request): Response
     {
@@ -636,6 +671,7 @@ class ApiController extends AbstractController
 
     /**
      * @Route("/mobile/available-crates", name="api_mobile_available_crates")
+     * @Authenticated
      */
     public function availableCrates(EntityManagerInterface $manager, Request $request): Response
     {
@@ -663,6 +699,7 @@ class ApiController extends AbstractController
 
     /**
      * @Route("/mobile/available-boxes", name="api_mobile_available_boxes")
+     * @Authenticated
      */
     public function availableBoxes(EntityManagerInterface $manager, Request $request): Response
     {
@@ -705,8 +742,6 @@ class ApiController extends AbstractController
             }
         }
 
-        dump($availableBoxes);
-
         return $this->json([
             'availableBoxes' => $availableBoxes,
             'typeQuantity' => $typeQuantityAndVolume
@@ -715,6 +750,7 @@ class ApiController extends AbstractController
 
     /**
      * @Route("/mobile/box-informations", name="api_mobile_box_informations")
+     * @Authenticated
      */
     public function boxInformations(EntityManagerInterface $manager, Request $request): Response {
         $box = $request->query->get('box');
@@ -732,6 +768,50 @@ class ApiController extends AbstractController
             'type' => $type,
             'volume' => $volume,
             'crateVolume' => $crate->getType()->getVolume()
+        ]);
+    }
+
+    /**
+     * @Route("/mobile/create-box-pick-tracking-movement", name="create_box_pick_tracking_movement")
+     * @Authenticated
+     */
+    public function createBoxPickTrackingMovement(Request $request,
+                                                  EntityManagerInterface $manager,
+                                                  BoxRecordService $boxRecordService): Response {
+        $data = json_decode($request->getContent(), true);
+
+        foreach ($data['movements'] as $movement) {
+            $box = $manager->getRepository(Box::class)->findOneBy(['number' => $movement['box']]);
+            $date = new DateTime($movement['date']);
+
+            $user = $this->user;
+            $olderValues = [
+                'location' => $box->getLocation(),
+                'state' => $box->getState(),
+                'comment' => $box->getComment()
+            ];
+
+            $box
+                ->setLocation($box->getLocation()->getDeporte())
+                ->setState(BoxStateService::STATE_BOX_UNAVAILABLE);
+
+            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $olderValues, $user, $date);
+
+            if ($tracking) {
+                $tracking->setBox($box);
+                $manager->persist($tracking);
+            }
+
+            if ($record) {
+                $record->setBox($box);
+                $manager->persist($record);
+            }
+        }
+
+        $manager->flush();
+
+        return $this->json([
+            'success' => true,
         ]);
     }
 }
