@@ -18,6 +18,7 @@ use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\ClientRepository;
+use App\Service\ClientService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -91,7 +92,7 @@ class ClientController extends AbstractController {
      * @Route("/nouveau", name="client_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function new(Request $request, EntityManagerInterface $manager): Response {
+    public function new(Request $request, EntityManagerInterface $manager, ClientService $service): Response {
         $form = Form::create();
 
         $clientRepository = $manager->getRepository(Client::class);
@@ -112,9 +113,14 @@ class ClientController extends AbstractController {
             $form->addError("name", "Ce client existe déjà");
         }
 
+        $client = new Client();
+
+        if (!$service->updateCoordinates($client, $content->address)) {
+            $form->addError("address", "Adresse inconnue");
+        }
+
         if ($form->isValid()) {
-            $client = (new Client())
-                ->setName($content->name)
+            $client = $client->setName($content->name)
                 ->setAddress($content->address)
                 ->setPhoneNumber($content->phoneNumber)
                 ->setActive($content->active)
@@ -194,7 +200,7 @@ class ClientController extends AbstractController {
      * @Route("/modifier/{client}", name="client_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function edit(Request $request, EntityManagerInterface $manager, Client $client): Response {
+    public function edit(Request $request, EntityManagerInterface $manager, ClientService $service, Client $client): Response {
         $form = Form::create();
 
         $clientRepository = $manager->getRepository(Client::class);
@@ -208,7 +214,7 @@ class ClientController extends AbstractController {
         $depositTicketsClients = $clientRepository->findBy(["id" => $depositTicketsClientsIds]);
 
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
-        if(!$client->getClientOrderInformation()) {
+        if (!$client->getClientOrderInformation()) {
             $client->setClientOrderInformation(new ClientOrderInformation());
         }
         $clientOrderInformation = $client->getClientOrderInformation();
@@ -217,6 +223,10 @@ class ClientController extends AbstractController {
         $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
         if ($existing !== null && $existing !== $client) {
             $form->addError("name", "Un autre client avec ce nom existe déjà");
+        }
+
+        if (!$service->updateCoordinates($client, $content->address)) {
+            $form->addError("address", "Adresse inconnue");
         }
 
         if ($form->isValid()) {
@@ -235,7 +245,7 @@ class ClientController extends AbstractController {
                 ->setProrateAmount($content->prorateAmount ?? null)
                 ->setPaymentModes($content->paymentModes ?? null);
 
-            if(isset($clientOrderInformation)) {
+            if (isset($clientOrderInformation)) {
                 $clientOrderInformation
                     ->setDeliveryMethod($deliveryMethod)
                     ->setDepository($depository)
@@ -322,7 +332,7 @@ class ClientController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function($output) use ($exportService, $clients) {
+        return $exportService->export(function ($output) use ($exportService, $clients) {
             foreach ($clients as $client) {
                 $client["active"] = Client::NAMES[$client["active"]];
                 $exportService->putLine($output, $client);
@@ -344,7 +354,7 @@ class ClientController extends AbstractController {
             ]),
             'totalCrateTypePrice' => FormatHelper::price(
                 Stream::from($client->getClientBoxTypes())
-                    ->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float) $clientBoxType->getCustomUnitPrice())
+                    ->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float)$clientBoxType->getCustomUnitPrice())
                     ->sum()
             )
         ]);
@@ -356,7 +366,7 @@ class ClientController extends AbstractController {
     public function getBoxTypes(Client $client): Response {
         return $this->json([
             'box-types' => $client->getClientBoxTypes()
-                ->map(fn (ClientBoxType $clientBoxType) => [
+                ->map(fn(ClientBoxType $clientBoxType) => [
                     'id' => $clientBoxType->getBoxType()->getId(),
                     'unitPrice' => $clientBoxType->getUnitPrice(),
                     'quantity' => $clientBoxType->getQuantity(),
@@ -390,22 +400,22 @@ class ClientController extends AbstractController {
         }
 
         foreach ($clientBoxTypes as $clientBoxType) {
-            if($clientBoxType->getBoxType()->getId() === $boxType->getId()) {
+            if ($clientBoxType->getBoxType()->getId() === $boxType->getId()) {
                 $form->addError("type", 'Ce type de Box est déjà présent dans le modèle de caisse');
                 break;
             }
         }
 
-        if($form->isValid()) {
+        if ($form->isValid()) {
 
             $name = $boxType->getName();
 
-            $customPrice = isset($content->customPrice) ? (float) $content->customPrice : null;
+            $customPrice = isset($content->customPrice) ? (float)$content->customPrice : null;
 
             $clientBoxType = (new ClientBoxType())
                 ->setClient($client)
                 ->setBoxType($boxType)
-                ->setQuantity((int) $content->quantity)
+                ->setQuantity((int)$content->quantity)
                 ->setCustomUnitPrice($customPrice);
 
             $manager->persist($clientBoxType);
@@ -429,7 +439,7 @@ class ClientController extends AbstractController {
         $id = $request->query->get('id');
         $clientBoxType = $manager->getRepository(ClientBoxType::class)->find($id);
 
-        if($clientBoxType) {
+        if ($clientBoxType) {
             $manager->remove($clientBoxType);
             $manager->flush();
 
@@ -473,13 +483,13 @@ class ClientController extends AbstractController {
             $form->addError("customPrice", "Le tarif personnalisé doit être supérieur ou égal à 0");
         }
 
-        if($form->isValid()) {
+        if ($form->isValid()) {
             $name = $clientBoxType->getBoxType()->getName();
 
-            $customPrice = isset($content->customPrice) ? (float) $content->customPrice : null;
+            $customPrice = isset($content->customPrice) ? (float)$content->customPrice : null;
 
             $clientBoxType
-                ->setQuantity((int) $content->quantity)
+                ->setQuantity((int)$content->quantity)
                 ->setCustomUnitPrice($customPrice);
 
             $manager->flush();
@@ -504,7 +514,7 @@ class ClientController extends AbstractController {
         $orderRecurrence = $clientOrderInformation ? $clientOrderInformation->getOrderRecurrence() : null;
 
         $crateTypePrice = Stream::from($client->getClientBoxTypes())
-            ->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float) $clientBoxType->getCustomUnitPrice())
+            ->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float)$clientBoxType->getCustomUnitPrice())
             ->sum();
 
         return $this->json([
@@ -598,13 +608,13 @@ class ClientController extends AbstractController {
 
         if ($content->frequency < 0) {
             $form->addError("frequency", "La fréquence doit être supérieure ou égale à 0");
-        } elseif($content->crateAmount < 0) {
+        } elseif ($content->crateAmount < 0) {
             $form->addError("crateAmount", "Le nombre de caisses doit être supérieur ou égal à 0");
-        } elseif(new DateTime($content->end) < new DateTime($content->start)) {
+        } elseif (new DateTime($content->end) < new DateTime($content->start)) {
             $form->addError("end", "La date de fin doit être supérieure à la date de début");
-        } elseif($content->deliveryFlatRate < 0) {
+        } elseif ($content->deliveryFlatRate < 0) {
             $form->addError("deliveryFlatRate", "Le forfait livraison commande libre doit être supérieur ou égal à 0");
-        } elseif($content->serviceFlatRate < 0) {
+        } elseif ($content->serviceFlatRate < 0) {
             $form->addError("serviceFlatRate", "Le forfait de service à la commande libre doit être supérieur ou égal à 0");
         }
 

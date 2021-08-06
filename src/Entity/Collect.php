@@ -45,12 +45,12 @@ class Collect {
     private Collection $boxes;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Attachment::class)
+     * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
      */
     private ?Attachment $signature = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Attachment::class)
+     * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
      */
     private ?Attachment $photo = null;
 
