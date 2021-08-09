@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20210707085153 extends AbstractMigration
+final class Version20210804144525 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -19,10 +19,13 @@ final class Version20210707085153 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        if (!$schema->getTable("box")->hasColumn("is_box")) {
-            $this->addSql('ALTER TABLE box ADD is_box TINYINT(1) NOT NULL DEFAULT 1 ;');
-        }
+        // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql("UPDATE quality SET clean = 0");
     }
 
+    public function down(Schema $schema): void
+    {
+        // this down() migration is auto-generated, please modify it to your needs
 
+    }
 }

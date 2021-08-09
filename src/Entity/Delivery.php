@@ -34,12 +34,17 @@ class Delivery {
     private ?int $tokens = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Attachment::class)
+     * @ORM\Column(type="decimal", precision=8, scale=2)
+     */
+    private ?string $distance = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
      */
     private ?Attachment $signature = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Attachment::class)
+     * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
      */
     private ?Attachment $photo = null;
 
@@ -84,6 +89,15 @@ class Delivery {
     public function setTokens(int $tokens): self {
         $this->tokens = $tokens;
 
+        return $this;
+    }
+
+    public function getDistance(): ?string {
+        return $this->distance;
+    }
+
+    public function setDistance(?string $distance): self {
+        $this->distance = $distance;
         return $this;
     }
 

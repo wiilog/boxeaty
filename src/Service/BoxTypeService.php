@@ -5,9 +5,7 @@ namespace App\Service;
 use App\Entity\Attachment;
 use App\Entity\BoxType;
 use Doctrine\ORM\EntityManagerInterface;
-use stdClass;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Throwable;
+use StdClass;
 
 class BoxTypeService {
 
@@ -39,32 +37,4 @@ class BoxTypeService {
         $entityManager->persist($boxType);
     }
 
-    public function removeFile(Attachment $attachment): bool {
-        $directory = $this->getServerPath($attachment->getType());
-        $filePath = $directory . '/' . $attachment->getServerName();
-        try {
-            $success = unlink($filePath);
-        }
-        catch(Throwable $ignored) {
-            $success = false;
-        }
-        return $success;
-    }
-
-    private function saveFile(string $type, UploadedFile $file): string {
-        $directory = $this->getServerPath($type);
-        do {
-            $filename = uniqid() . '.' . strtolower($file->getClientOriginalExtension()) ?? '';
-            $filePath = $directory . '/' . $filename;
-        }
-        while (file_exists($filePath));
-
-        $file->move($directory, $filename);
-
-        return $filename;
-    }
-
-    private function getServerPath(string $type) {
-        return $this->kernel->getProjectDir() . '/public/' . Attachment::ATTACHMENT_DIRECTORY_PATHS[$type];
-    }
 }

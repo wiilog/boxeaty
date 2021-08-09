@@ -4,7 +4,6 @@ namespace App\Service;
 
 use App\Entity\Box;
 use App\Entity\BoxRecord;
-use App\Entity\Location;
 use App\Entity\User;
 use DateTime;
 
@@ -13,12 +12,10 @@ class BoxRecordService {
     /**
      * @return BoxRecord[]
      */
-    public function generateBoxRecords(Box $box, array $olderValues, ?User $loggedUser): array {
-        /** @var Location $oldLocation */
-        $oldLocation = $olderValues['location'] ?? null;
-        $oldLocationId = $oldLocation ? $oldLocation->getId() : null;
-        $oldState = $olderValues['state'] ?? null;
-        $oldComment = $olderValues['comment'] ?? null;
+    public function generateBoxRecords(Box $box, array $previousValues, ?User $loggedUser): array {
+        $oldLocationId = isset($previousValues["location"]) ? $previousValues["location"]->getId() : null;
+        $oldState = $previousValues["state"] ?? null;
+        $oldComment = $previousValues["comment"] ?? null;
 
         $newLocationId = $box->getLocation() ? $box->getLocation()->getId() : null;
         $newState = $box->getState();

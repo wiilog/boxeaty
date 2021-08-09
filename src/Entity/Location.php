@@ -57,7 +57,7 @@ class Location {
     private ?string $description = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="kiosks")
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="locations")
      */
     private ?Client $client = null;
 

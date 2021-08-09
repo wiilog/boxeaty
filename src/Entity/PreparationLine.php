@@ -36,6 +36,16 @@ class PreparationLine {
      */
     private ?Collection $boxes;
 
+    /**
+     * @ORM\Column(type="boolean", options={"default": 0})
+     */
+    private bool $taken;
+
+    /**
+     * @ORM\Column(type="boolean", options={"default": 0})
+     */
+    private bool $deposited;
+
     public function __construct() {
         $this->boxes = new ArrayCollection();
     }
@@ -112,4 +122,23 @@ class PreparationLine {
 
         return $this;
     }
+
+    public function isTaken(): bool {
+        return $this->taken;
+    }
+
+    public function setTaken(bool $taken): self {
+        $this->taken = $taken;
+        return $this;
+    }
+
+    public function isDeposited(): bool {
+        return $this->deposited;
+    }
+
+    public function setDeposited(bool $deposited): self {
+        $this->deposited = $deposited;
+        return $this;
+    }
+
 }

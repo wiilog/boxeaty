@@ -135,7 +135,9 @@
             <span class="bigTxt col-12" id="deliveryPrice"></span>
             <span class="bigTxt col-12" id="servicePrice"></span>
         </div>
-        <label class="bigTxt"> Commentaire sur la livraison</label>
-        <div class="data" data-wysiwyg="comment">{{ clientOrder.comment | raw }}</div>
+        <label class="bigTxt">
+            Commentaire sur la livraison
+            <textarea name="comment" class="data">{{ clientOrder.comment }}</textarea>
+        </label>
     </div>
 </div>

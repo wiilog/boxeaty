@@ -215,7 +215,8 @@ class ClientOrderController extends AbstractController {
                 ->setDeliveryMethod($deliveryMethod)
                 ->setRequester($requester)
                 ->setValidator(null)
-                ->setDeliveryRound(null);
+                ->setDeliveryRound(null)
+                ->setTokensAmount($client->getClientOrderInformation()->getTokenAmount());
 
             $cartPrice = $clientOrder->getCartAmountPrice($handledCartLines);
             foreach ($handledCartLines as $cartLine) {

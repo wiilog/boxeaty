@@ -82,6 +82,11 @@ class ClientOrder {
     private ?int $cratesAmount = null;
 
     /**
+     * @ORM\Column(type="integer")
+     */
+    private ?int $tokensAmount = null;
+
+    /**
      * @ORM\Column(type="decimal", precision=8, scale=2)
      */
     private ?float $deliveryPrice = null;
@@ -294,6 +299,16 @@ class ClientOrder {
 
     public function setCratesAmount(float $cratesAmount): self {
         $this->cratesAmount = $cratesAmount;
+
+        return $this;
+    }
+
+    public function getTokensAmount(): ?int {
+        return $this->tokensAmount;
+    }
+
+    public function setTokensAmount(int $tokensAmount): self {
+        $this->tokensAmount = $tokensAmount;
 
         return $this;
     }
