@@ -19,7 +19,7 @@ use WiiCommon\Helper\Stream;
 use App\Entity\Role;
 
 /**
- * Route("tracabilite/indicateurs")
+ * @Route("/tracabilite/indicateurs")
  */
 class IndicatorController extends AbstractController
 {
