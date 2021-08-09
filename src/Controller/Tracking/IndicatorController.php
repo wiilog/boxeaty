@@ -10,6 +10,7 @@ use App\Entity\Collect;
 use App\Entity\Delivery;
 use App\Entity\DeliveryMethod;
 use App\Entity\DeliveryRound;
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,15 +22,13 @@ use App\Entity\Role;
 /**
  * @Route("/tracabilite/indicateurs")
  */
-class IndicatorController extends AbstractController
-{
+class IndicatorController extends AbstractController {
 
     /**
      * @Route("/index", name="indicators_index")
      * @HasPermission(Role::VIEW_INDICATORS)
      */
     public function index(): Response   {
-
         return $this->render("tracking/indicators/index.html.twig");
     }
 
@@ -53,7 +52,6 @@ class IndicatorController extends AbstractController
                     "message" => "Vous devez renseigner les 3 filtres"
                 ]);
             } else {
-
                 $deliveryRepository = $manager->getRepository(Delivery::class);
                 $deliveryRoundsRepository = $manager->getRepository(DeliveryRound::class);
                 $collectRepository = $manager->getRepository(Collect::class);
@@ -61,8 +59,8 @@ class IndicatorController extends AbstractController
                 $client = $clientRepository->findOneBy(['id' => $params['client']]);
                 $clientOrderRepository = $manager->getRepository(ClientOrder::class);
 
-                $startDate = \DateTime::createFromFormat("Y-m-d", $params["from"]);
-                $endDate = \DateTime::createFromFormat("Y-m-d", $params["to"]);
+                $startDate = DateTime::createFromFormat("Y-m-d", $params["from"]);
+                $endDate = DateTime::createFromFormat("Y-m-d", $params["to"]);
 
                 for ($i = clone $startDate; $i <= $endDate; $i->modify("+1 day")) {
                     $chartLabels[] = $i->format("d/m/Y");
@@ -75,7 +73,9 @@ class IndicatorController extends AbstractController
                     $dataCollectedBoxs[] = $collectRepository->getTotalQuantityByClientAndCollectedDate($params['client'], $dateMin, $dateMax) ?? 0;
                 }
 
-                $returnRate = round((array_sum($dataCollectedBoxs) * 100) / array_sum($dataDeliveredBoxs), 2);;
+                if(array_sum($dataDeliveredBoxs)) {
+                    $returnRate = round((array_sum($dataCollectedBoxs) * 100) / array_sum($dataDeliveredBoxs), 2);
+                }
 
                 $isMultiSite = $client->isMultiSite();
                 $dateMin = clone $startDate;

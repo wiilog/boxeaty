@@ -30,6 +30,14 @@ export default class ChartJS {
                     radius: 0
                 }
             },
+            scales: {
+                yAxes: [{
+                    display: true,
+                    ticks: {
+                        suggestedMin: 0,
+                    },
+                }]
+            }
         };
         let chart = new Chart($canva, config);
     }
