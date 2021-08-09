@@ -1,0 +1,90 @@
+<mjml>
+    <mj-head>
+        <mj-attributes>
+            <mj-all padding="0"></mj-all>
+            <mj-body background-color="#F9F9EC"></mj-body>
+            <mj-text font-family="helvetica"></mj-text>
+            <mj-class name="title" line-height="300%" font-size="20px" align="left" font-family="helvetica"></mj-class>
+            <mj-class name="border" background-color="white" border-radius="10px"></mj-class>
+            <mj-class name="my-auto" padding-bottom="20px" padding-top="20px"></mj-class>
+        </mj-attributes>
+        <mj-style>
+            a {
+                text-decoration: none;
+            }
+        </mj-style>
+    </mj-head>
+
+    <mj-body>
+
+        <mj-section full-width="full-width" padding-bottom="20px" padding-top="30px">
+            <mj-column>
+                <mj-image width="300px" height="150px" src="{{ base64('images/email/logo.png') }}">
+                </mj-image>
+            </mj-column>
+        </mj-section>
+        <mj-section>
+            <mj-column width="100%">
+                <mj-text mj-class="title">Bonjour {{ deliveryRound.deliverer.username }}
+                </mj-text>
+                <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">La tournée {{deliveryRound.number}} vient de vous être affectée. Elle est prévue pour le {{ deliveryRound..clientOrder.expectedDelivery }} avec un départ du dépot : {{ deliveryRound.depository.name }}
+                </mj-text>
+                <mj-text mj-class="title">
+                    Récapitulatif des livraisons de la tournée :
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-section mj-class="border">
+
+            <mj-column width="40%">
+                <mj-text align="left" mj-class="my-auto">
+                    {{deliveryRound.step}}.{{ clientOrder.client.username }}<br/>.{{ clientOrder.client.address}}
+                </mj-text>
+            </mj-column>
+            <mj-column width="30%">
+                <mj-text align="left" mj-class="my-auto">
+                    Total Poids<br/>Total Volume
+                </mj-text>
+            </mj-column>
+            <mj-column width="30%">
+                <mj-text align="left" mj-class="my-auto">
+                    {{ totalWeigt }}  <br> {{ totalVolume }}
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-section>
+            <mj-column>
+                <mj-divider border-width="1px" border-style="none" border-color="black" padding-top="20px" />
+            </mj-column>
+        </mj-section>
+        <mj-section>
+            <mj-column width="100%" mj-class="my-auto">
+                <mj-text font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    Adresse de livraison :
+                </mj-text>
+                <mj-text line-height="3" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    {{ clientOrder.client.address }}
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-section>
+            <mj-column>
+                <mj-text font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    Retrouvez le suivi en temps réel sur votre espace client sur app.boxeaty.fr
+                </mj-text>
+                <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    Une question, un besoin particulier ? Nous restons disponible au 05.05.05.05 ou par email à mail@mail.fr
+                </mj-text>
+                <mj-text line-height="3" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    Cordialement
+                </mj-text>
+                <mj-text font-size="20px" align="left" color="#1E1F44" line-height="2" font-family="helvetica">
+                    L'équipe BoxEaty
+                </mj-text>
+                <mj-image align="left" width="200px" src="{{ base64('images/email/eat-consigned.png') }}">
+                </mj-image>
+            </mj-column>
+        </mj-section>
+
+    </mj-body>
+</mjml>
