@@ -564,30 +564,6 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route("/mobile/toggle-preparation-status", name="api_mobile_toggle_preparation_status")
-     * @Authenticated
-     */
-    public function togglePreparationStatus(EntityManagerInterface $manager, Request $request): Response
-    {
-        $data = json_decode($request->getContent(), true);
-
-        if ($data['preparing']) {
-            $preparation = $manager->getRepository(Preparation::class)->find($data['id']);
-            $status = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_PREPARATION_PREPARING]);
-
-            $preparation
-                ->setStatus($status ?? $preparation->getStatus())
-                ->setOperator($this->user);
-
-            $manager->flush();
-        }
-
-        return $this->json([
-            'success' => true
-        ]);
-    }
-
-    /**
      * @Route("/mobile/locations", name="api_mobile_locations")
      */
     public function locations(EntityManagerInterface $manager): Response
@@ -706,13 +682,22 @@ class ApiController extends AbstractController
         $query = $request->query;
         $preparation = $manager->getRepository(Preparation::class)->find($query->get('preparation'));
 
+        if ($query->get('preparing')) {
+            $status = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_PREPARATION_PREPARING]);
+
+            $preparation
+                ->setStatus($status ?? $preparation->getStatus())
+                ->setOperator($this->user);
+
+            $manager->flush();
+        }
+
         $boxTypes = Stream::from($preparation->getOrder()->getLines())
             ->map(fn(ClientOrderLine $line) => [
                 $line->getBoxType()->getId()
             ])->toArray();
 
-        //$boxes = $manager->getRepository(Box::class)->getAvailableAndCleanedBoxByType($boxTypes);
-        $boxes = $manager->getRepository(Box::class)->findAll();
+        $boxes = $manager->getRepository(Box::class)->getAvailableAndCleanedBoxByType($boxTypes);
         $availableBoxes = [];
         $typeQuantityAndVolume = [];
         foreach ($boxes as $box) {
@@ -772,7 +757,7 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route("/mobile/create-box-pick-tracking-movement", name="create_box_pick_tracking_movement")
+     * @Route("/mobile/create-box-pick-tracking-movement", name="api_mobile_create_box_pick_tracking_movement")
      * @Authenticated
      */
     public function createBoxPickTrackingMovement(Request $request,
@@ -809,6 +794,43 @@ class ApiController extends AbstractController
         }
 
         $manager->flush();
+
+        return $this->json([
+            'success' => true,
+        ]);
+    }
+
+    /**
+     * @Route("/mobile/end-preparation", name="api_mobile_end_preparation")
+     */
+    public function endPreparation(Request $request, EntityManagerInterface $manager, Mailer $mailer): Response {
+        $data = json_decode($request->getContent());
+
+        $preparation = $manager->getRepository(Preparation::class)->find($data['preparation']);
+        $preparedStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_PREPARATION_PREPARED]);
+        $awaitingDelivererStatus = $manager->getRepository(Status::class)->findOneBy([
+            'code' => Status::CODE_DELIVERY_AWAITING_DELIVERER
+        ]);
+
+        $delivery = $preparation->getOrder()->getDelivery();
+
+        $preparation->setStatus($preparedStatus);
+        $delivery->setStatus($awaitingDelivererStatus);
+
+        $manager->flush();
+
+        $users = $manager->getRepository(User::class)->findBy(['deliveryAssignmentPreparationMail' => true]);
+
+        if(!empty($users)) {
+            $mailer->send(
+                $users,
+                "BoxEaty - ",
+                $this->renderView("emails/delivery_round.html.twig", [
+                    "deliveryRound" => $preparation->getOrder()->getDeliveryRound(),
+                    "clientOrder" => $preparation->getOrder(),
+                ])
+            );
+        }
 
         return $this->json([
             'success' => true,

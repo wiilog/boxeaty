@@ -10,7 +10,7 @@
         </mj-attributes>
         <mj-style>
             a {
-                text-decoration: none;
+            text-decoration: none;
             }
         </mj-style>
     </mj-head>
@@ -27,18 +27,22 @@
             <mj-column width="100%">
                 <mj-text mj-class="title">Bonjour {{ deliveryRound.deliverer.username }}
                 </mj-text>
-                <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">La tournée {{deliveryRound.number}} vient de vous être affectée. Elle est prévue pour le {{ deliveryRound..clientOrder.expectedDelivery }} avec un départ du dépot : {{ deliveryRound.depository.name }}
+                <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">La
+                    tournée <strong>n°{{ deliveryRound.number }}</strong> vient de vous être affectée. Elle est prévue pour
+                    le <strong>{{ deliveryRound.clientOrder.expectedDelivery|date('Y/m/d') }}</strong> avec un départ du dépôt
+                    : <strong>{{ deliveryRound.depository.name }}</strong>
                 </mj-text>
                 <mj-text mj-class="title">
                     Récapitulatif des livraisons de la tournée :
                 </mj-text>
             </mj-column>
         </mj-section>
-        <mj-section mj-class="border">
 
+        {% for line in clientOrder.lines %}
+        <mj-section mj-class="border">
             <mj-column width="40%">
                 <mj-text align="left" mj-class="my-auto">
-                    {{deliveryRound.step}}.{{ clientOrder.client.username }}<br/>.{{ clientOrder.client.address}}
+                    {{ deliveryRound.step }}.{{ clientOrder.client.name }}<br>{{ clientOrder.client.address }}
                 </mj-text>
             </mj-column>
             <mj-column width="30%">
@@ -47,14 +51,15 @@
                 </mj-text>
             </mj-column>
             <mj-column width="30%">
+                {% set lines = preparation.lines %}
                 <mj-text align="left" mj-class="my-auto">
-                    {{ totalWeigt }}  <br> {{ totalVolume }}
+                    {{ totalWeight }}<br>{{ totalVolume }}
                 </mj-text>
             </mj-column>
         </mj-section>
         <mj-section>
             <mj-column>
-                <mj-divider border-width="1px" border-style="none" border-color="black" padding-top="20px" />
+                <mj-divider border-width="1px" border-style="none" border-color="black" padding-top="20px"/>
             </mj-column>
         </mj-section>
         <mj-section>
@@ -70,10 +75,11 @@
         <mj-section>
             <mj-column>
                 <mj-text font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
-                    Retrouvez le suivi en temps réel sur votre espace client sur app.boxeaty.fr
+                    Retrouvez la tournée sur l'application mobile Android BoxEaty
                 </mj-text>
                 <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
-                    Une question, un besoin particulier ? Nous restons disponible au 05.05.05.05 ou par email à mail@mail.fr
+                    Une question, un besoin particulier ? Nous restons disponible au 05.05.05.05.05 ou par email à
+                    mail@mail.fr
                 </mj-text>
                 <mj-text line-height="3" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
                     Cordialement
