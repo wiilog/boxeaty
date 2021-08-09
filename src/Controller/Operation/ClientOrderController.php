@@ -3,6 +3,7 @@
 namespace App\Controller\Operation;
 
 use App\Annotation\HasPermission;
+use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
@@ -39,6 +40,7 @@ class ClientOrderController extends AbstractController {
     public function list(Request $request, EntityManagerInterface $manager): Response {
         $deliveryMethod = $manager->getRepository(DeliveryMethod::class);
         $orderTypes = $manager->getRepository(OrderType::class);
+        $boxTypeRepository = $manager->getRepository(BoxType::class);
         $now = date('Y-m-d');
 
         return $this->render("operation/client_order/index.html.twig", [
@@ -48,7 +50,8 @@ class ClientOrderController extends AbstractController {
             "deliveryMethods" => $deliveryMethod->findBy(["deleted" => false], ["name" => "ASC"]),
             "orderTypes" => $orderTypes->findBy([]),
             "initial_orders" => $this->api($request, $manager)->getContent(),
-            "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER
+            "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER,
+            "starterKit" => $boxTypeRepository->findStarterKit()
         ]);
     }
 

@@ -97,5 +97,25 @@ class BoxTypeRepository extends EntityRepository {
             ])
             ->values();
     }
+    public function findStarterKit() {
+        $boxType = $this->createQueryBuilder("box_type")
+            ->where("box_type.name LIKE :kit")
+            ->setParameter("kit", BoxType::STARTER_KIT)
+            ->getQuery()
+            ->getSingleResult();
+
+        return [
+                'id' => $boxType->getId(),
+                'text' => $boxType->getName() . ' - ' . ($boxType->getVolume()
+                        ? $boxType->getVolume() . 'm³'
+                        : 'N/C') . ' - ' . FormatHelper::price($boxType->getPrice()),
+                'name' => $boxType->getName(),
+                'price' => $boxType->getPrice(),
+                'volume' => $boxType->getVolume(),
+                'image' => $boxType->getImage()
+                    ? $boxType->getImage()->getPath()
+                    : null,
+            ];
+    }
 
 }

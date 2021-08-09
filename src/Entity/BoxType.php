@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 class BoxType {
 
     public const DEFAULT_VOLUME = 0.0005;
+    public const STARTER_KIT = 'Kit de démarrage';
 
     use Active;
 

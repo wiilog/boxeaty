@@ -20,7 +20,7 @@
     <div class="col-12 col-md-6">
         <label>
             Nom du type de Box / Caisse
-            <input type="text" name="name" class="data" placeholder="Nom du type de Box / Caisse" value="{{ box_type.name }}" required/>
+            <input type="text" name="name" class="data" placeholder="Nom du type de Box / Caisse" value="{{ box_type.name }} " {{ box_type.name == starterKit.name ? 'disabled' }} required/>
         </label>
     </div>
     <div class="col-12 col-md-6">
@@ -34,9 +34,10 @@
 
         <input type="radio" id="{{ box_type.id ? 'edit' : 'new' }}-box-type-active" name="active" class="data" value="1" {{ box_type.active ? 'checked' }}/>
         <label for="{{ box_type.id ? 'edit' : 'new' }}-box-type-active">Actif</label>
-
-        <input type="radio" id="{{ box_type.id ? 'edit' : 'new' }}-box-type-inactive" name="active" class="data" value="0" {{ not box_type.active ? 'checked' }}/>
-        <label for="{{ box_type.id ? 'edit' : 'new' }}-box-type-inactive">Inactif</label>
+        {% if box_type.name != starterKit.name %}
+            <input type="radio" id="{{ box_type.id ? 'edit' : 'new' }}-box-type-inactive" name="active" class="data" value="0" {{ not box_type.active ? 'checked' }}/>
+            <label for="{{ box_type.id ? 'edit' : 'new' }}-box-type-inactive">Inactif</label>
+        {% endif %}
     </div>
     <div class="col-12 col-md-6">
         <label>

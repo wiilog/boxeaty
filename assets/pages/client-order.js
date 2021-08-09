@@ -65,6 +65,14 @@ $(function() {
             toggleCratesAmountToCollect = false;
             $autonomousManagement.addClass('d-none');
         }
+
+        const $starterKit = JSON.parse($(`#starterKit`).val());
+        if(type === 'PURCHASE_TRADE'){
+            addBoxTypeToCart($modal, $starterKit)
+        }else{
+            $modal.find('.box-type-line[data-id='+$starterKit.id+']').remove();
+            $modal.find(`.empty-cart`).removeClass(`d-none`);
+        }
     });
 
     $modal.find('[name="collectRequired"]').on('change', function(){

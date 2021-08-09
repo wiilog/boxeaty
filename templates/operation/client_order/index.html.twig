@@ -14,6 +14,7 @@
 
 {% block content %}
     <div class="box first-box row client-order-container">
+        <input id="starterKit" type="hidden" value="{{ starterKit | json_encode }}">
         <table id="table-client-order" class="orderRow"
                data-initial-data="{{ initial_orders }}"
                data-default-order="{{ orders_order | json_encode }}"></table>
