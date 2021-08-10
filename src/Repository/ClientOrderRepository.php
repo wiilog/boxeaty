@@ -189,4 +189,25 @@ class ClientOrderRepository extends EntityRepository {
         return $result ? intval($result) : 0;
     }
 
+    public function findToValidate() {
+        return $this->createQueryBuilder("clientOrder")
+            ->leftJoin('clientOrder.status', 'status')
+            ->andWhere("status.code LIKE :statusCode")
+            ->setParameter("statusCode", Status::CODE_ORDER_TO_VALIDATE)
+            ->getQuery()
+            ->getResult();
+    }
+
+
+    public function getTotalBox($clientOrder){
+        $result = $this->createQueryBuilder("clientOrder")
+            ->select('SUM(lines.quantity)')
+            ->leftJoin('clientOrder.lines','lines')
+            ->andWhere("clientOrder.id = :clientOrder")
+            ->setParameter("clientOrder", $clientOrder)
+            ->getQuery()
+            ->getSingleScalarResult();
+        return $result ? intval($result) : 0;
+    }
+
 }

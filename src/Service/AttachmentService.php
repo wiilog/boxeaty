@@ -68,7 +68,6 @@ class AttachmentService {
             $name = $this->generateName($type, $file->getClientOriginalExtension());
             $file->move($directory, $name);
         } else if (is_array($file)) {
-            dump($file[1]);
             $name = $this->generateName($type, self::EXTENSIONS[mime_content_type($file[1])]);
 
             file_put_contents("$directory/$name", file_get_contents($file[1]));

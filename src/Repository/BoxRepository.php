@@ -133,7 +133,6 @@ class BoxRepository extends EntityRepository {
             }
         }
 
-        dump($params);
         foreach ($params["filters"] ?? [] as $name => $value) {
             switch ($name) {
                 case("group"):
