@@ -54,6 +54,11 @@ class Collect {
      */
     private ?Attachment $photo = null;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $collectedAt;
+
     public function __construct() {
         $this->boxes = new ArrayCollection();
     }
@@ -165,6 +170,18 @@ class Collect {
 
     public function setPhoto(?Attachment $photo): self {
         $this->photo = $photo;
+        return $this;
+    }
+
+    public function getCollectedAt(): ?\DateTimeInterface
+    {
+        return $this->collectedAt;
+    }
+
+    public function setCollectedAt(?\DateTimeInterface $collectedAt): self
+    {
+        $this->collectedAt = $collectedAt;
+
         return $this;
     }
 

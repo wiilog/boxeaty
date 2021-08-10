@@ -216,6 +216,7 @@ class GlobalSettingController extends AbstractController {
         } else {
             $deliveryMethod = (new DeliveryMethod())
                 ->setName($name)
+                ->setType(array_search($icon, DeliveryMethod::TRANSPORT_TYPES))
                 ->setIcon($icon);
 
             $manager->persist($deliveryMethod);

@@ -15,6 +15,7 @@ import Snow from 'quill/themes/snow';
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 import {createPopper} from '@popperjs/core';
 import Leaflet from "leaflet";
+import Chart from "chart.js/auto";
 
 import './util';
 import './pages/security';
@@ -30,6 +31,9 @@ Routing.setRoutingData(routes);
 global.Routing = Routing;
 
 Leaflet.Icon.Default.imagePath = '/build/vendor/leaflet/images/';
+global.Chart = Chart;
+Chart.defaults.plugins.legend.display = true;
+Chart.defaults.plugins.legend.position = "right";
 
 // make all modals static
 BootstrapModal.Default.backdrop = `static`;
