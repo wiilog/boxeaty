@@ -62,12 +62,6 @@ class ClientOrderController extends AbstractController {
 
         /** @var ClientOrder $order */
         foreach ($orders["data"] as $order) {
-            $lines = Stream::from($order->getLines())
-                ->map(fn(ClientOrderLine $line) => [
-                    'boxType' => $line->getBoxType(),
-                    'quantity' => $line->getQuantity(),
-                ])->toArray();
-
             $data[] = [
                 "id" => $order->getId(),
                 "collect" => $order->getCollect(),
@@ -80,7 +74,7 @@ class ClientOrderController extends AbstractController {
                 "deliveryMethod" => $order->getDeliveryMethod(),
                 "deliveryPrice" => $order->getDeliveryPrice(),
                 "servicePrice" => $order->getServicePrice(),
-                "cartPrice" => $order->getCartAmountPrice($lines),
+                "cartPrice" => $order->getTotalAmount(),
                 "type" => $order->getType(),
                 "expectedDelivery" => FormatHelper::dateMonth($order->getExpectedDelivery()),
             ];
@@ -216,7 +210,6 @@ class ClientOrderController extends AbstractController {
                 ->setValidator(null)
                 ->setDeliveryRound(null);
 
-            $cartPrice = $clientOrder->getCartAmountPrice($handledCartLines);
             foreach ($handledCartLines as $cartLine) {
                 $boxType = $cartLine['boxType'];
                 $clientOrderLine = new ClientOrderLine();
@@ -236,15 +229,13 @@ class ClientOrderController extends AbstractController {
                 "success" => true,
                 "validationTemplate" => $this->renderView("operation/client_order/modal/validation.html.twig", [
                     "clientOrder" => $clientOrder,
-                    "cartPrice" => $cartPrice,
+                    "cartPrice" => $clientOrder->getTotalAmount(),
                     "expectedDelivery" => FormatHelper::dateMonth($expectedDelivery),
                 ]),
             ]);
         } else {
             return $form->errors();
         }
-
-        return $this->json($result);
     }
 
     /**

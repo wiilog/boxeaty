@@ -458,10 +458,27 @@ class ClientOrder {
         return $this;
     }
 
-    public function getCartAmountPrice(?array $lines){
-       return Stream::from($lines)->reduce(function(int $total, $line) {
-            $boxType = $line['boxType'];
-            return $total + ($boxType->getPrice() * $line['quantity']);
-        }, 0);
+    public function getTotalAmount(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getPrice() ?: 0)),
+                0
+            );
+    }
+
+    public function getTotalWeight(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getWeight() ?: 0)),
+                0
+            );
+    }
+
+    public function getTotalVolume(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getVolume() ?: 0)),
+                0
+            );
     }
 }

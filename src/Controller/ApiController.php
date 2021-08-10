@@ -698,6 +698,7 @@ class ApiController extends AbstractController
             ])->toArray();
 
         $boxes = $manager->getRepository(Box::class)->getAvailableAndCleanedBoxByType($boxTypes);
+
         $availableBoxes = [];
         $typeQuantityAndVolume = [];
         foreach ($boxes as $box) {
@@ -804,7 +805,7 @@ class ApiController extends AbstractController
      * @Route("/mobile/end-preparation", name="api_mobile_end_preparation")
      */
     public function endPreparation(Request $request, EntityManagerInterface $manager, Mailer $mailer): Response {
-        $data = json_decode($request->getContent());
+        $data = json_decode($request->getContent(), true);
 
         $preparation = $manager->getRepository(Preparation::class)->find($data['preparation']);
         $preparedStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_PREPARATION_PREPARED]);
@@ -815,19 +816,21 @@ class ApiController extends AbstractController
         $delivery = $preparation->getOrder()->getDelivery();
 
         $preparation->setStatus($preparedStatus);
-        $delivery->setStatus($awaitingDelivererStatus);
+        if(isset($delivery)) {
+            $delivery->setStatus($awaitingDelivererStatus);
+        }
 
         $manager->flush();
 
-        $users = $manager->getRepository(User::class)->findBy(['deliveryAssignmentPreparationMail' => true]);
+        $users = $manager->getRepository(User::class)->findBy(['deliveryAssignmentPreparationMail' => 1]);
 
         if(!empty($users)) {
             $mailer->send(
                 $users,
-                "BoxEaty - ",
+                "BoxEaty - Affectation de tournée",
                 $this->renderView("emails/delivery_round.html.twig", [
-                    "deliveryRound" => $preparation->getOrder()->getDeliveryRound(),
-                    "clientOrder" => $preparation->getOrder(),
+                    "expectedDelivery" => $preparation->getOrder()->getExpectedDelivery(),
+                    "deliveryRound" => $preparation->getOrder()->getDeliveryRound()
                 ])
             );
         }
