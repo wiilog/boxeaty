@@ -4,32 +4,22 @@ namespace App\Service;
 
 use App\Entity\Box;
 use App\Entity\BoxType;
-use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
-use App\Entity\DeliveryMethod;
 use App\Entity\DepositTicket;
-use App\Entity\OrderType;
-use App\Entity\Status;
-use App\Entity\User;
 use App\Helper\Form;
-use DateTimeZone;
-use mysql_xdevapi\Exception;
-use PhpParser\Node\Expr\Cast\Object_;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\RouterInterface;
 use WiiCommon\Helper\Stream;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 
 use Twig\Environment;
 
 class ClientOrderService
 {
-
     /** @Required */
     public SessionInterface $session;
 
@@ -43,7 +33,7 @@ class ClientOrderService
     public Environment $twig;
 
     /** @Required */
-    public EntityManagerInterface $manager;
+    public EntityManagerInterface $entityManager;
 
     private ?string $token = null;
 
@@ -97,7 +87,9 @@ class ClientOrderService
         return $handledCartLines ?? null;
     }
 
-    public function createClientOrderLine(ClientOrder $clientOrder, EntityManagerInterface $entityManager, Request $request): ?ClientOrderLine
+    public function createClientOrderLine(ClientOrder $clientOrder,
+                                          EntityManagerInterface $entityManager,
+                                          Request $request): ?ClientOrderLine
     {
         $boxTypeRepository = $entityManager->getRepository(BoxType::class);
         $form = Form::create();

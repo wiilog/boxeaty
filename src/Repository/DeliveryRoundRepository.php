@@ -17,7 +17,6 @@ use DateTime;
  */
 class DeliveryRoundRepository extends EntityRepository {
 
-
     public function findAwaitingDeliverer(User $deliverer) {
         return $this->createQueryBuilder("delivery_round")
             ->join("delivery_round.status", "status")
