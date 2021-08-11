@@ -15,10 +15,15 @@ class BoxTypeService {
     public function persistBoxType(EntityManagerInterface $entityManager,
                                    BoxType $boxType,
                                    StdClass $content): void {
+
+        if ($boxType->getName() !== BoxType::STARTER_KIT) {
+            $boxType
+                ->setName($content->name)
+                ->setActive($content->active);
+        }
+
         $boxType
-            ->setName($content->name)
             ->setPrice($content->price)
-            ->setActive($content->active)
             ->setCapacity($content->capacity)
             ->setShape($content->shape)
             ->setVolume($content->volume ?? null)

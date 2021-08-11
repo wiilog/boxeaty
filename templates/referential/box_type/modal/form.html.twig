@@ -1,20 +1,20 @@
 <div class="row">
     <div class="col-12 justify-content-center d-flex mb-3">
         <label>
-            <div class="attachment-drop-frame {{ box_type.image ? 'is-valid' }}">
-                <div class="file-empty cursor-pointer {{ box_type.image ? 'd-none' }}">
+            <span class="attachment-drop-frame {{ box_type.image ? 'is-valid' }}">
+                <span class="file-empty cursor-pointer {{ box_type.image ? 'd-none' }}">
                     Faites glisser votre image ici<br>
                     ou <span class="click-here">cliquez ici</span>
-                </div>
-                <div class="file-confirmation {{ not box_type.image ? 'd-none' }}">
+                </span>
+                <span class="file-confirmation {{ not box_type.image ? 'd-none' }}">
                     <img class="image-visualisation" src="{{ box_type.image ? asset(box_type.image.path) }}"/>
                     <input type="hidden" name="fileDeleted" class="data" value="0"/>
                     <span class="file-delete-icon">
                         <i class="fas fa-trash cursor-pointer"></i>
                     </span>
-                </div>
+                </span>
                 <input type="file" name="image" class="data d-none" accept=".png, .jpg, .svg, .jpeg">
-            </div>
+            </span>
         </label>
     </div>
     <div class="col-12 col-md-6">
@@ -32,11 +32,12 @@
     <div class="col-12 toggle">
         <span class="label">Statut</span>
 
-        <input type="radio" id="{{ box_type.id ? 'edit' : 'new' }}-box-type-active" name="active" class="data" value="1" {{ box_type.active ? 'checked' }}/>
-        <label for="{{ box_type.id ? 'edit' : 'new' }}-box-type-active">Actif</label>
+        {% set statusIdPrefix = (box_type.id ? 'edit' : 'new') ~ '-box-type' %}
+        <input type="radio" id="{{ statusIdPrefix }}-active" name="active" class="data" value="1" {{ box_type.active ? 'checked' }}/>
+        <label for="{{ statusIdPrefix }}-active">Actif</label>
         {% if box_type.name != starterKit.name %}
-            <input type="radio" id="{{ box_type.id ? 'edit' : 'new' }}-box-type-inactive" name="active" class="data" value="0" {{ not box_type.active ? 'checked' }}/>
-            <label for="{{ box_type.id ? 'edit' : 'new' }}-box-type-inactive">Inactif</label>
+            <input type="radio" id="{{ statusIdPrefix }}-inactive" name="active" class="data" value="0" {{ not box_type.active ? 'checked' }}/>
+            <label for="{{ statusIdPrefix }}-inactive">Inactif</label>
         {% endif %}
     </div>
     <div class="col-12 col-md-6">

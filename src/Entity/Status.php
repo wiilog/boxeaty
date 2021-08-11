@@ -11,7 +11,8 @@ use Doctrine\ORM\Mapping as ORM;
 class Status {
 
     public const CATEGORY_ORDER = "ORDER";
-    public const CODE_ORDER_TO_VALIDATE = "ORDER_TO_VALIDATE";
+    public const CODE_ORDER_TO_VALIDATE_CLIENT = "ORDER_TO_VALIDATE_CLIENT";
+    public const CODE_ORDER_TO_VALIDATE_BOXEATY = "ORDER_TO_VALIDATE_BOXEATY";
     public const CODE_ORDER_PLANNED = "ORDER_PLANNED";
     public const CODE_ORDER_TRANSIT = "ORDER_TRANSIT";
     public const CODE_ORDER_FINISHED = "ORDER_FINISHED";
@@ -38,7 +39,7 @@ class Status {
     public const CODE_COLLECT_FINISHED = "COLLECT_FINISHED";
 
     public const ORDER_STATUS_HIERARCHY = [
-        Status::CODE_ORDER_TO_VALIDATE,
+        Status::CODE_ORDER_TO_VALIDATE_BOXEATY,
         Status::CODE_ORDER_PLANNED,
         Status::CODE_ORDER_TRANSIT,
         Status::CODE_ORDER_FINISHED,

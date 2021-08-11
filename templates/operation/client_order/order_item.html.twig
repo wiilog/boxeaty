@@ -19,7 +19,7 @@
                     <i class="icon bxi bxi-automatic"></i>
                 {% endif %}
                 <span>Commande <span class="no-wrap">N°{{ item.number }}</span></span>
-                <div data-listener="delete"><i class="bxi bxi-trash-circle"></i></div>
+                <div data-listener="delete" class="cursor-pointer"><i class="bxi bxi-trash-circle"></i></div>
             </div>
         </div>
         <div class="d-flex justify-content-between col-12">
@@ -37,7 +37,7 @@
         <span class="col-6 ordered-by">Commandé par : {{ item.requester.username }}</span>
         <a class="col-6 show-detail cursor-pointer"
            data-id="{{ item.id }}"
-           style="color:#EB611B">
+           data-action="{{ item.linkAction }}">
             Voir les détails
         </a>
     </div>

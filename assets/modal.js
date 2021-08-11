@@ -96,18 +96,26 @@ export default class Modal {
         $modal.appendTo(`body`);
         $modal.modal(`show`);
 
-        $modal.on('hidden.bs.modal', function() {
-            $(this).remove();
+        if(config.afterShown) {
+            $modal
+                .on('shown.bs.modal', function() {
+                        config.afterShown(modal);
+                });
+        }
 
-            modal.element.find('[data-s2-initialized]').each(function() {
-                //close all select2 elements
-                $(this).select2('close');
+        $modal
+            .on('hidden.bs.modal', function() {
+                $(this).remove();
+
+                modal.element.find('[data-s2-initialized]').each(function() {
+                    //close all select2 elements
+                    $(this).select2('close');
+                });
+
+                if(config.afterHidden) {
+                    config.afterHidden(modal);
+                }
             });
-
-            if(config.afterHidden) {
-                config.afterHidden(modal);
-            }
-        })
 
         const modal = new Modal();
         modal.id = Math.floor(Math.random() * 1000000);
@@ -123,10 +131,17 @@ export default class Modal {
             config.afterOpen(modal);
         }
 
-        $modal.find(`button[type="submit"]`).click(function() {
+        $modal.find(`button[type="submit"]`).on('click', function() {
             const $button = $(this);
             $button.load(() => modal.handleSubmit($button));
         });
+
+
+        if(config.onPrevious) {
+            $modal.find(`button[name="previous"]`).on('click', function () {
+                config.onPrevious(modal);
+            });
+        }
 
         return modal;
     }

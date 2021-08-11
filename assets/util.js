@@ -64,6 +64,10 @@ export class URL {
     static pushState(title, url) {
         window.history.pushState({path: url}, title, url);
     }
+
+    static replaceState(title, url) {
+        window.history.replaceState({path: url}, title, url);
+    }
 }
 
 FormData.prototype.asObject = function() {

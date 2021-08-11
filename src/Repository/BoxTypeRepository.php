@@ -104,18 +104,22 @@ class BoxTypeRepository extends EntityRepository {
             ->getQuery()
             ->getSingleResult();
 
+        $volumeLabel = (
+            $boxType->getVolume()
+                ? $boxType->getVolume() . 'm³'
+                : 'N/C'
+        );
+
         return [
-                'id' => $boxType->getId(),
-                'text' => $boxType->getName() . ' - ' . ($boxType->getVolume()
-                        ? $boxType->getVolume() . 'm³'
-                        : 'N/C') . ' - ' . FormatHelper::price($boxType->getPrice()),
-                'name' => $boxType->getName(),
-                'price' => $boxType->getPrice(),
-                'volume' => $boxType->getVolume(),
-                'image' => $boxType->getImage()
-                    ? $boxType->getImage()->getPath()
-                    : null,
-            ];
+            'id' => $boxType->getId(),
+            'text' => $boxType->getName() . ' - ' . $volumeLabel . ' - ' . FormatHelper::price($boxType->getPrice()),
+            'name' => $boxType->getName(),
+            'price' => $boxType->getPrice(),
+            'volume' => $boxType->getVolume(),
+            'image' => $boxType->getImage()
+                ? $boxType->getImage()->getPath()
+                : null,
+        ];
     }
 
 }

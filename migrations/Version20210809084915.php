@@ -22,7 +22,7 @@ final class Version20210809084915 extends AbstractMigration
     {
         $this->addSql("
             INSERT INTO box_type (name, price, active, capacity, shape, volume)
-            VALUES ('" . BoxType::STARTER_KIT . "',0.00,1,'500ml','Rectangle', '" . BoxType::DEFAULT_VOLUME . "')
+            VALUES ('" . BoxType::STARTER_KIT . "', 0.00, 1, '500ml', 'Rectangle', '" . BoxType::DEFAULT_VOLUME . "')
         ");
     }
 

@@ -196,6 +196,13 @@ class ClientOrder {
         return $this->status;
     }
 
+    public function isOnStatusCode(string $code): bool {
+        return (
+            $this->getStatus()
+            && $this->getStatus()->getCode() === $code
+        );
+    }
+
     public function setStatus(Status $status): self {
         $this->status = $status;
         return $this;
@@ -371,7 +378,7 @@ class ClientOrder {
         return $this->comment;
     }
 
-    public function setComment(string $comment): self {
+    public function setComment(?string $comment): self {
         $this->comment = $comment;
 
         return $this;
@@ -498,10 +505,11 @@ class ClientOrder {
         return $this;
     }
 
-    public function getCartAmountPrice(?array $lines){
-       return Stream::from($lines)->reduce(function(int $total, $line) {
-            $boxType = $line['boxType'];
-            return $total + ($boxType->getPrice() * $line['quantity']);
-        }, 0);
+    public function getTotalAmount(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getPrice() ?: 0)),
+                0
+            );
     }
 }

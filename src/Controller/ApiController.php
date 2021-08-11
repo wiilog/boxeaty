@@ -504,7 +504,7 @@ class ApiController extends AbstractController {
                     ->sum(),
                 "orders" => $round->getOrders()->map(fn(ClientOrder $order) => [
                     "id" => $order->getId(),
-                    "delivered" => $order->getStatus()->getCode() === Status::CODE_ORDER_FINISHED,
+                    "delivered" => $order->isOnStatusCode(Status::CODE_ORDER_FINISHED),
                     "crate_amount" => $order->getPreparation() ? $order->getPreparation()->getLines()->count() : -1,
                     "token_amount" => $order->getTokensAmount(),
                     "preparation" => $order->getPreparation() ? [
@@ -685,8 +685,7 @@ class ApiController extends AbstractController {
                 ->setPhoto($photo);
 
             $unfinishedDeliveries = $deliveryRound->getOrders()
-                ->map(fn(ClientOrder $order) => $order->getStatus()->getCode())
-                ->filter(fn(string $code) => $code !== Status::CODE_ORDER_FINISHED)
+                ->filter(fn(ClientOrder $order) => !$order->isOnStatusCode(Status::CODE_ORDER_FINISHED))
                 ->count();
 
             if ($unfinishedDeliveries === 0) {

@@ -67,7 +67,7 @@ class PlanningController extends AbstractController {
         }
 
         $sort = [
-            Status::CODE_ORDER_TO_VALIDATE => 1,
+            Status::CODE_ORDER_TO_VALIDATE_BOXEATY => 1,
             Status::CODE_ORDER_PLANNED => 2,
             Status::CODE_ORDER_TRANSIT => 3,
         ];

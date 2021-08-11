@@ -15,29 +15,34 @@ $(function() {
     const $modal = $(`#modal-new-client-order`);
     initOrderDatatable();
 
-    // TODO Voir avec Adrien
     const params = URL.getRequestQuery()
     if (params.action === 'new') {
-        openNewClientOrderModal();
+        openOrderNewModal();
     }
-    /*else if (params.action === 'show'
+    else if (params.action === 'show'
              && params['action-data']) {
-        openOrderShowModal(getParams['action-data']);
+        openOrderShowModal(params['action-data']);
+    }
+    else if (params.action === 'edit'
+             && params['action-data']) {
+        openOrderEditModal(params['action-data']);
     }
     else if (params.action === 'validation'
              && params['action-data']) {
-        openOrderValidationModal(getParams['action-data']);
-    }*/
-
-    $('#modal-validation-client-order').find('.submit-button').on('click', function(){
-        window.location.href = Routing.generate('client_order_validation_template', {action : 'validation'});
-    });
+        openOrderValidationModal(params['action-data']);
+    }
 
     $document.on('click', '.show-detail', function () {
         const $link = $(this);
         const clientOrderId = $link.data('id');
-        setOrderRequestInURL(clientOrderId); // TODO ALEX action = show or validation en fonction du statut de la commande
-        openOrderShowModal(clientOrderId);
+        const action = $link.data('action');
+        setOrderRequestInURL(action, clientOrderId);
+        if (action === 'show') {
+            openOrderShowModal(clientOrderId);
+        }
+        else if (action === 'edit') {
+            openOrderEditModal(clientOrderId);
+        }
     });
 
     $(document).arrive('.edit-status-button', function() {
@@ -66,12 +71,14 @@ $(function() {
             $autonomousManagement.addClass('d-none');
         }
 
-        const $starterKit = JSON.parse($(`#starterKit`).val());
-        if(type === 'PURCHASE_TRADE'){
-            addBoxTypeToCart($modal, $starterKit)
-        }else{
-            $modal.find('.box-type-line[data-id='+$starterKit.id+']').remove();
-            $modal.find(`.empty-cart`).removeClass(`d-none`);
+        const starterKit = JSON.parse($(`#starterKit`).val());
+        if (starterKit) {
+            if (type === 'PURCHASE_TRADE') {
+                addBoxTypeToCart($modal, starterKit);
+            } else {
+                $modal.find('.box-type-line[data-id=' + starterKit.id + ']').remove();
+                $modal.find(`.empty-cart`).removeClass(`d-none`);
+            }
         }
     });
 
@@ -152,20 +159,65 @@ function openOrderShowModal(clientOrderId) {
 
     Modal.load(ajax, {
         afterOpen: () => {
-            $('input[name=clientOrderId]').val(clientOrderId);
-            getTimeLine($(`#modal-show-client-order`), clientOrderId);
+            const $modal = $(`#modal-show-client-order`);
+            $modal.find('input[name=clientOrderId]').val(clientOrderId);
+            getTimeLine($modal, clientOrderId);
         }
     });
 }
 
-function openOrderValidationModal(clientOrderId) {
-    const ajax = AJAX.route(`POST`, `client_order_validation_template`, {
-        clientOrder: clientOrderId,
-    });
+function openOrderEditModal(clientOrderId) {
+    const ajax = AJAX.route(`GET`, `client_order_edit_template`, {clientOrder: clientOrderId});
 
     Modal.load(ajax, {
+        table: '#table-client-order',
+        success: (response) => {
+            openOrderValidationModal(clientOrderId, response.validationTemplate);
+        },
+        afterShown: (modal) => {
+            const cartContentStr = modal.element.find('[name="cart-content"]').val();
+            const cartContent = cartContentStr && JSON.parse(cartContentStr);
+
+            for (const line of cartContent) {
+                addBoxTypeToCart(modal.element, line);
+            }
+
+            const newUrl = URL.createRequestQuery({
+                action: 'edit',
+                'action-data': clientOrderId
+            });
+            URL.pushState(document.title, newUrl);
+        },
         afterHidden: () => {
             removeActionRequestInURL();
+        },
+        error: () => {
+            removeActionRequestInURL();
+        },
+    });
+}
+
+function openOrderValidationModal(clientOrderId, modalContent = null) {
+    const content = (
+        modalContent
+        || AJAX.route(`POST`, `client_order_validation_template`, {clientOrder: clientOrderId})
+    );
+
+    Modal.load(content, {
+        submit: Routing.generate(`client_order_validation`, {clientOrder: clientOrderId}),
+        table: '#table-client-order',
+        afterShown: () => {
+            const newUrl = URL.createRequestQuery({
+                action: 'validation',
+                'action-data': clientOrderId
+            });
+            URL.pushState(document.title, newUrl);
+        },
+        afterHidden: () => {
+            removeActionRequestInURL();
+        },
+        onPrevious: () => {
+            openOrderEditModal(clientOrderId);
         },
         error: () => {
             removeActionRequestInURL();
@@ -173,22 +225,16 @@ function openOrderValidationModal(clientOrderId) {
     });
 }
 
-function openNewClientOrderModal() {
+function openOrderNewModal() {
     const newClientOrderModal = Modal.static(`#modal-new-client-order`, {
         ajax: AJAX.route(`POST`, `client_order_new`),
+        table: '#table-client-order',
         success: (response) => {
-            removeActionRequestInURL();
-            Modal.load(response.validationTemplate, {
-                afterOpen: modal=> {
-                    $('#modal-validation-client-order').find('.submit-button').on('click', function(){
-                        window.location.href = Routing.generate('client_orders_list');
-                    });
-                },
-            });
+            openOrderValidationModal(response.clientOrderId, response.validationTemplate);
         },
         afterHidden: () => {
             removeActionRequestInURL();
-        },
+        }
     });
     newClientOrderModal.open();
 }
@@ -213,11 +259,11 @@ function initOrderDatatable() {
     return table;
 }
 
-function setOrderRequestInURL(order) {
+function setOrderRequestInURL(action, order) {
     const getParams = URL.getRequestQuery()
-    if (getParams.action !== 'show'
+    if (getParams.action !== action
         && getParams['action-data'] !== `${order}`) {
-        getParams.action = 'show';
+        getParams.action = action;
         getParams['action-data'] = order;
         const newUrl = URL.createRequestQuery(getParams);
         URL.pushState(document.title, newUrl);
@@ -231,7 +277,7 @@ function removeActionRequestInURL() {
         delete getParams.action;
         delete getParams['action-data'];
         const newUrl = URL.createRequestQuery(getParams);
-        URL.pushState(document.title, newUrl);
+        URL.replaceState(document.title, newUrl);
     }
 }
 

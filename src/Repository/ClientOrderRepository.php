@@ -58,7 +58,7 @@ class ClientOrderRepository extends EntityRepository {
         return $this->createBetween($from, $to, $params)
             ->leftJoin("client_order.status", "status")
             ->andWhere("status.code IN (:statuses)")
-            ->setParameter("statuses", [Status::CODE_ORDER_TO_VALIDATE, Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TRANSIT])
+            ->setParameter("statuses", [Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TRANSIT])
             ->getQuery()
             ->getResult();
     }
@@ -151,7 +151,7 @@ class ClientOrderRepository extends EntityRepository {
             ))
             ->andWhere('status.code IN (:inProgressStatuses)')
             ->setParameter(':crateOrBox', $crateOrBox)
-            ->setParameter(':inProgressStatuses', [Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TO_VALIDATE, Status::CODE_ORDER_TRANSIT]);
+            ->setParameter(':inProgressStatuses', [Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_TRANSIT]);
 
         $res = $queryBuilder
             ->getQuery()
