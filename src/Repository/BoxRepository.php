@@ -154,8 +154,10 @@ class BoxRepository extends EntityRepository {
                         ->setParameter("filter_depository", $value);
                     break;
                 case("box"):
-                    $qb->andWhere("box.isBox = :filter_isbox")
-                        ->setParameter("filter_isbox", $value);
+                    if($value !== null && $value !== "") {
+                        $qb->andWhere("box.isBox IN (:filter_isbox)")
+                            ->setParameter("filter_isbox", explode(",", $value));
+                    }
                     break;
                 default:
                     $qb->andWhere("box.$name = :filter_$name")

@@ -10,7 +10,9 @@ use Doctrine\Migrations\AbstractMigration;
 final class Version20210705090328 extends AbstractMigration {
 
     public function up(Schema $schema): void {
-        $this->addSql("ALTER TABLE `order` RENAME TO `counter_order`");
+        if (!$schema->hasTable("counter_order")) {
+            $this->addSql("ALTER TABLE `order` RENAME TO `counter_order`");
+        }
     }
 
 }

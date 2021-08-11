@@ -1,6 +1,6 @@
 <div class="newClientOrder">
     <div class="row">
-        <div class="clientOrderType">
+        <div class="clientOrderType orange-toggle">
             {% for orderType in orderTypes %}
                 {% set inputId = 'order-type-' ~ (clientOrder ? 'edit-') ~ orderType.id %}
                 <input type="radio"
@@ -17,7 +17,7 @@
             {% endfor %}
         </div>
     </div>
-    <div class="client-order-container d-none">
+    <div class="client-order-container mt-2 {{ not clientOrder.id ? 'd-none' }}">
         <div class="header-section">
             <h2 class="header-section-label">Information</h2>
         </div>
@@ -36,8 +36,9 @@
                                 data-include-params="input[name=client-cost-information-needed]"
                                 data-placeholder="Sélectionnez un client"
                                 required>
-                            {% if clientOrder.client and clientOrder.client.clientOrderInformation.workingDayDeliveryRate is not null %}
-                                <option value="{{ clientOrder.client.id }}" selected></option>
+                            {% if clientOrder.client
+                                and clientOrder.client.clientOrderInformation.workingDayDeliveryRate is not null %}
+                                <option value="{{ clientOrder.client.id }}" selected>{{ clientOrder.client.name }}</option>
                             {% endif %}
                         </select>
                     </label>
@@ -53,8 +54,7 @@
                        type="checkbox"
                        name="collectRequired"
                        id="{{ clientOrder.id ? 'edit' : 'new' }}-collect"
-                        {{ clientOrder.collectRequired ? 'checked' }}
-                       required>
+                       {{ clientOrder.collectRequired ? 'checked' }}/>
                 <div class="crates-amount-to-collect-container">
                     <label>
                         Caisses à collecter
@@ -90,7 +90,8 @@
                             </button>
                         </div>
                         <div class="col autonomous-management d-none">
-                            <button class="secondary w-100 add-box-type-model-button">Ajouter mon modèle de caisse
+                            <button class="secondary w-100 add-box-type-model-button">
+                                Ajouter mon modèle de caisse
                             </button>
                         </div>
                     </div>
@@ -102,7 +103,11 @@
             <h2 class="header-section-label">Panier</h2>
         </div>
 
-        <div class="cart-container cart-box content-section">
+        {% if cartContent is defined and cartContent is not empty %}
+            <input type="hidden" name="cart-content" value="{{ cartContent | json_encode }}"/>
+        {% endif %}
+
+        <div class="cart-container content-section">
             <div class="empty-cart justify-content-center">
                 <img src="{{ asset('images/doubleBoxes.svg') }}" alt="Panier vide">
                 <p class="bigTxt">Votre panier est vide</p>
@@ -118,10 +123,15 @@
             <div class="orange-toggle transport col-md-7 col-12">
                 <p class="bigTxt col-12">Transport</p>
                 {% for deliveryMethod in deliveryMethods %}
-                    <input type="radio" id="{{ deliveryMethod.name }}" name="deliveryMethod" class="data "
-                           value="{{ deliveryMethod.id }}" {{ clientOrder.deliveryMethod == deliveryMethod.id ? 'checked' }}
+                    {% set inputId = 'delivery-method-' ~ (clientOrder ? 'edit-') ~ deliveryMethod.name %}
+                    <input type="radio"
+                           id="{{ inputId }}"
+                           name="deliveryMethod"
+                           class="data"
+                           value="{{ deliveryMethod.id }}"
+                           {{ clientOrder.deliveryMethod and (clientOrder.deliveryMethod.id == deliveryMethod.id) ? 'checked' }}
                            required/>
-                    <label for="{{ deliveryMethod.name }}">
+                    <label for="{{ inputId }}">
                         <i class="icon ico bxi bxi-{{ deliveryMethod.icon }}"></i>
                         {{ deliveryMethod.name }}
                     </label>
@@ -129,13 +139,20 @@
             </div>
             <div class="col-md-5 col-12">
                 <p class="bigTxt">Date de livraison souhaitée</p>
-                <input type="datetime-local" name="date" class="data" placeholder="Date de livraison"
-                       min="{{ now }}T00:00" required/>
+                <input type="datetime-local"
+                       name="date"
+                       class="data"
+                       placeholder="Date de livraison"
+                       value="{{ clientOrder.expectedDelivery ? clientOrder.expectedDelivery|date('Y-m-d\\TH:i') }}"
+                       min="{{ 'now + 1 days'|date('Y-m-d') }}T00:00"
+                       required/>
             </div>
             <span class="bigTxt col-12" id="deliveryPrice"></span>
             <span class="bigTxt col-12" id="servicePrice"></span>
         </div>
-        <label class="bigTxt"> Commentaire sur la livraison</label>
-        <div class="data" data-wysiwyg="comment">{{ clientOrder.comment | raw }}</div>
+        <label class="bigTxt">
+            Commentaire sur la livraison
+            <textarea name="comment" class="data">{{ clientOrder.comment }}</textarea>
+        </label>
     </div>
 </div>

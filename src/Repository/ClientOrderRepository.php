@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Box;
+use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\Status;
 use DateTime;
@@ -42,6 +43,11 @@ class ClientOrderRepository extends EntityRepository {
                 ->setParameter("deliverer", $params["deliverer"]);
         }
 
+        if(isset($params["client"])) {
+            $qb ->andWhere("client_order.client = :client")
+                ->setParameter("client", $params["client"]);
+        }
+
         return $qb;
     }
 
@@ -52,7 +58,7 @@ class ClientOrderRepository extends EntityRepository {
         return $this->createBetween($from, $to, $params)
             ->leftJoin("client_order.status", "status")
             ->andWhere("status.code IN (:statuses)")
-            ->setParameter("statuses", [Status::CODE_ORDER_TO_VALIDATE, Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TRANSIT])
+            ->setParameter("statuses", [Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TRANSIT])
             ->getQuery()
             ->getResult();
     }
@@ -145,7 +151,7 @@ class ClientOrderRepository extends EntityRepository {
             ))
             ->andWhere('status.code IN (:inProgressStatuses)')
             ->setParameter(':crateOrBox', $crateOrBox)
-            ->setParameter(':inProgressStatuses', [Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TO_VALIDATE, Status::CODE_ORDER_TRANSIT]);
+            ->setParameter(':inProgressStatuses', [Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_TRANSIT]);
 
         $res = $queryBuilder
             ->getQuery()
@@ -164,6 +170,23 @@ class ClientOrderRepository extends EntityRepository {
             ->getQuery()
             ->execute();
         return $result ? $result[0]['number'] : null;
+    }
+
+    public function findQuantityDeliveredBetweenDateAndClient(DateTime $from,
+                                                              DateTime $to,
+                                                              Client $client): int {
+        $result = $this->createQueryBuilder("client_order")
+            ->select('SUM(lines.quantity)')
+            ->leftJoin("client_order.delivery", "delivery")
+            ->leftJoin('client_order.lines','lines')
+            ->andWhere("delivery.deliveredAt BETWEEN :from AND :to")
+            ->andWhere("client_order.client = :client")
+            ->setParameter("client", $client)
+            ->setParameter("from", $from)
+            ->setParameter("to", $to)
+            ->getQuery()
+            ->getSingleScalarResult();
+        return $result ? intval($result) : 0;
     }
 
 }

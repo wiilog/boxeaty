@@ -3,13 +3,15 @@
 namespace App\Controller\Operation;
 
 use App\Annotation\HasPermission;
-use App\Entity\Client;
+use App\Entity\BoxType;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
 use App\Entity\DeliveryMethod;
+use App\Entity\OrderStatusHistory;
 use App\Entity\OrderType;
 use App\Entity\Role;
 use App\Entity\Status;
+use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\ClientOrderRepository;
@@ -18,8 +20,10 @@ use App\Service\UniqueNumberService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use WiiCommon\Helper\Stream;
 
@@ -38,16 +42,16 @@ class ClientOrderController extends AbstractController {
     public function list(Request $request, EntityManagerInterface $manager): Response {
         $deliveryMethod = $manager->getRepository(DeliveryMethod::class);
         $orderTypes = $manager->getRepository(OrderType::class);
-        $now = date('Y-m-d');
-        
+        $boxTypeRepository = $manager->getRepository(BoxType::class);
+
         return $this->render("operation/client_order/index.html.twig", [
             "new_client_order" => new ClientOrder(),
-            "now" => date('Y-m-d', strtotime($now.'+ 1 days')),
             "requester" => $this->getUser(),
             "deliveryMethods" => $deliveryMethod->findBy(["deleted" => false], ["name" => "ASC"]),
-            "orderTypes"=> $orderTypes->findBy([]),
+            "orderTypes" => $orderTypes->findBy([]),
             "initial_orders" => $this->api($request, $manager)->getContent(),
-            "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER
+            "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER,
+            "starterKit" => $boxTypeRepository->findStarterKit()
         ]);
     }
 
@@ -58,11 +62,8 @@ class ClientOrderController extends AbstractController {
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $orders = $manager->getRepository(ClientOrder::class)
             ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
-        $data = [];
-
-        /** @var ClientOrder $order */
-        foreach ($orders["data"] as $order) {
-            $data[] = [
+        $data = Stream::from($orders["data"])
+            ->map(fn (ClientOrder $order) => [
                 "id" => $order->getId(),
                 "collect" => $order->getCollect(),
                 "status" => $order->getStatus(),
@@ -77,8 +78,11 @@ class ClientOrderController extends AbstractController {
                 "cartPrice" => $order->getTotalAmount(),
                 "type" => $order->getType(),
                 "expectedDelivery" => FormatHelper::dateMonth($order->getExpectedDelivery()),
-            ];
-        }
+                "linkAction" => $order->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? 'validation' : 'show',
+                "linkLabel" => $order->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? 'Enregistrer la commande' : 'Voir les détails'
+            ])
+            ->toArray();
+
         $groupedData = [];
         $previousItem = null;
         foreach ($data as $item) {
@@ -107,16 +111,35 @@ class ClientOrderController extends AbstractController {
     }
 
     /**
-     * @Route("/validate/template/{clientOrderId}", name="client_order_validation_template", options={"expose": true})
+     * @Route("/validate/template/{clientOrder}", name="client_order_validation_template", options={"expose": true})
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
-    public function validateTemplate(Request $request,
-                        EntityManagerInterface $entityManager,
-                        ClientOrderService $clientOrderService,
-                        $clientOrderId): Response {
-        // TODO ALEX
+    public function validateTemplate(ClientOrder $clientOrder): Response {
         return $this->json([
-            "submit" => $this->generateUrl("client_orders_list"),
+            'template' => $this->renderView("operation/client_order/modal/validation.html.twig", [
+                "clientOrder" => $clientOrder
+            ])
+        ]);
+    }
+
+    /**
+     * @Route("/{clientOrder}/validate", name="client_order_validation", options={"expose": true})
+     * @HasPermission(Role::CREATE_CLIENT_ORDERS)
+     */
+    public function validate(ClientOrder $clientOrder,
+                             EntityManagerInterface $entityManager): Response {
+
+        if ($clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)) {
+            $statusRepository = $entityManager->getRepository(Status::class);
+            $validateBoxeatyStatus = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE_BOXEATY]);
+
+            $clientOrder->setStatus($validateBoxeatyStatus);
+
+            $entityManager->flush();
+        }
+
+        return $this->json([
+            "success" => true
         ]);
     }
 
@@ -129,113 +152,39 @@ class ClientOrderController extends AbstractController {
                         EntityManagerInterface $entityManager,
                         ClientOrderService $clientOrderService): Response {
 
-
-        $form = Form::create();
-        $content = (object)$request->request->all();
-        $statusRepository = $entityManager->getRepository(Status::class);
-        $typeRepository = $entityManager->getRepository(OrderType::class);
-        $clientRepository = $entityManager->getRepository(Client::class);
-        $deliveryMethodRepository = $entityManager->getRepository(DeliveryMethod::class);
-
-        $status = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE]);
-        $requester = $this->getUser();
-
-        $deliveryMethodId = $content->deliveryMethod ?? null;
-        $deliveryMethod = $deliveryMethodId
-            ? $deliveryMethodRepository->find($deliveryMethodId)
-            : null;
-        if (!$deliveryMethod) {
-            $form->addError('Vous devez sélectionner au moins un moyen de transport');
-        }
-
-        $typeId = $content->type ?? null;
-        $type = $typeId
-            ? $typeRepository->find($typeId)
-            : null;
-        if (!$type) {
-            $form->addError('Vous devez sélectionner au moins un type de commande');
-        }
-
-        $clientId = $content->client ?? null;
-        $client = $clientId
-            ? $clientRepository->find($clientId)
-            : null;
-        if (!$client) {
-            $form->addError('client', 'Ce champ est requis');
-        }
-
-        $information = $client->getClientOrderInformation();
-        $expectedDelivery = DateTime::createFromFormat('Y-m-d\TH:i', $content->date ?? null);
-
-        if (isset($information)) {
-            // check if it's the weekend
-            $deliveryRate = !in_array($expectedDelivery->format('N'), [6, 7])
-                ? $information->getWorkingDayDeliveryRate()
-                : $information->getNonWorkingDayDeliveryRate();
-            $serviceCost = $information->getServiceCost();
-        } else {
-            $deliveryRate = null;
-            $serviceCost = null;
-        }
         $number = $uniqueNumberService->createUniqueNumber($entityManager, ClientOrder::PREFIX_NUMBER, ClientOrder::class);
         $now = new DateTime('now');
-        if ($type && $type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
-            $collectRequired = (bool) ($content->collectRequired ?? false);
-            if($collectRequired){
-                if (!isset($content->cratesAmountToCollect)
-                    || $content->cratesAmountToCollect < 1) {
-                    $form->addError('cratesAmountToCollect', 'Le nombre de caisses à collecter est invalide');
-                }
-            }
-        }
 
-        $handledCartLines = $clientOrderService->handleCartLines($entityManager, $form, $content);
+        $clientOrder = new ClientOrder();
+        $form = Form::create();
+        $clientOrderService->updateClientOrder($request, $entityManager, $form, $clientOrder);
+
         if ($form->isValid()) {
-            $clientOrder = (new ClientOrder())
+            /** @var User $requester */
+            $requester = $this->getUser();
+
+            $clientOrder
                 ->setNumber($number)
                 ->setCreatedAt($now)
-                ->setExpectedDelivery($expectedDelivery)
-                ->setClient($client)
-                ->setCratesAmountToCollect($content->cratesAmountToCollect ?? null)
-                ->setCollectRequired($collectRequired ?? false)
                 ->setAutomatic(false)
-                ->setDeliveryPrice($deliveryRate)
-                ->setServicePrice($serviceCost)
                 ->setValidatedAt(null)
-                ->setComment($content->comment ?? null)
-                ->setType($type)
-                ->setStatus($status)
-                ->setDeliveryMethod($deliveryMethod)
-                ->setRequester($requester)
                 ->setValidator(null)
-                ->setDeliveryRound(null);
-
-            foreach ($handledCartLines as $cartLine) {
-                $boxType = $cartLine['boxType'];
-                $clientOrderLine = new ClientOrderLine();
-                $clientOrderLine
-                    ->setBoxType($boxType)
-                    ->setQuantity($cartLine['quantity'])
-                    ->setCustomUnitPrice($cartLine['customUnitPrice'])
-                    ->setClientOrder($clientOrder);
-
-                $entityManager->persist($clientOrderLine);
-            }
+                ->setDeliveryRound(null)
+                ->setRequester($requester);
 
             $entityManager->persist($clientOrder);
             $entityManager->flush();
 
             return $this->json([
                 "success" => true,
+                "clientOrderId" => $clientOrder->getId(),
                 "validationTemplate" => $this->renderView("operation/client_order/modal/validation.html.twig", [
-                    "clientOrder" => $clientOrder,
-                    "cartPrice" => $clientOrder->getTotalAmount(),
-                    "expectedDelivery" => FormatHelper::dateMonth($expectedDelivery),
+                    "clientOrder" => $clientOrder
                 ]),
             ]);
-        } else {
-            return $form->errors();
         }
+
+        return $form->errors();
     }
 
     /**
@@ -252,13 +201,61 @@ class ClientOrderController extends AbstractController {
     }
 
     /**
+     * @Route("/status/template/{clientOrder}", name="client_order_edit_status_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
+     */
+    public function editStatusTemplate(ClientOrder $clientOrder): Response {
+        return $this->json([
+            "submit" => $this->generateUrl("client_order_edit_status", ["clientOrder" => $clientOrder->getId()]),
+            "template" => $this->renderView("operation/client_order/modal/edit_status.html.twig", [
+                "clientOrder" => $clientOrder,
+            ])
+        ]);
+    }
+
+    /**
+     * @Route("/status/{clientOrder}", name="client_order_edit_status", options={"expose": true})
+     * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
+     */
+    public function editStatus(ClientOrder $clientOrder, Request $request, EntityManagerInterface $entityManager): Response {
+        $form = Form::create();
+        $content = (object)$request->request->all();
+        $now = new DateTime('now');
+        $statusRepository = $entityManager->getRepository(Status::class);
+        $status = $statusRepository->findOneBy(['id' => $content->status]);
+        if ($form->isValid()) {
+            $clientOrder
+                ->setStatus($status);
+
+            $entityManager->persist($clientOrder);
+
+            $history = (new OrderStatusHistory())
+                ->setOrder($clientOrder)
+                ->setStatus($status)
+                ->setUser($this->getUser())
+                ->setChangedAt($now)
+                ->setJustification($content->justification);
+            $entityManager->persist($history);
+            $entityManager->flush();
+
+            return $this->json([
+                "success" => true,
+                "submit" => $this->generateUrl("client_order_show_template", ["clientOrder" => $clientOrder->getId()]),
+            ]);
+        } else {
+            return $form->errors();
+        }
+        return $this->json($result);
+    }
+
+    /**
      * @Route("/supprimer/{clientOrder}", name="client_order_delete", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
      */
     public function delete(EntityManagerInterface $entityManager, ClientOrder $clientOrder): Response {
         $lines = $clientOrder->getLines();
 
-        foreach ($lines as $line){
+        foreach ($lines as $line) {
             $entityManager->remove($line);
         }
 
@@ -273,9 +270,8 @@ class ClientOrderController extends AbstractController {
 
     /**
      * @Route("/voir/template/{clientOrder}", name="client_order_show_template", options={"expose": true})
-     * TODO HasPermission(Role::MANAGE_USERS) ??
      */
-    public function editTemplate(EntityManagerInterface $manager, ClientOrder $clientOrder): Response {
+    public function showTemplate(EntityManagerInterface $manager, ClientOrder $clientOrder): Response {
         $roles = $manager->getRepository(Role::class)->findBy(["active" => true]);
 
         return $this->json([
@@ -285,4 +281,98 @@ class ClientOrderController extends AbstractController {
             ])
         ]);
     }
+
+    /**
+     * @Route("/{clientOrder}/edit/template", name="client_order_edit_template", options={"expose": true})
+     */
+    public function editTemplate(ClientOrder $clientOrder,
+                                 EntityManagerInterface $entityManager): Response {
+        /** @var User $requester */
+        $requester = $this->getUser();
+
+        if (!$clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
+            || $requester !== $clientOrder->getRequester()) {
+            throw new NotFoundHttpException('La commande client est introuvable.');
+        }
+
+        $orderTypeRepository = $entityManager->getRepository(OrderType::class);
+        $deliveryMethodRepository = $entityManager->getRepository(DeliveryMethod::class);
+
+        $cartContent = $clientOrder->getLines()
+            ->map(fn(ClientOrderLine $line) => [
+                'id' => $line->getBoxType()->getId(),
+                'unitPrice' => $line->getUnitPrice(),
+                'quantity' => $line->getQuantity(),
+                'name' => $line->getBoxType()->getName(),
+                'volume' => $line->getBoxType()->getVolume(),
+                'image' => $line->getBoxType()->getImage()
+                    ? $line->getBoxType()->getImage()->getPath()
+                    : null
+            ])
+            ->toArray();
+
+        return $this->json([
+            "submit" => $this->generateUrl("client_order_edit", ["clientOrder" => $clientOrder->getId()]),
+            "template" => $this->renderView("operation/client_order/modal/new.html.twig", [
+                "clientOrder" => $clientOrder,
+                "orderTypes" => $orderTypeRepository->findBy([]),
+                "deliveryMethods" => $deliveryMethodRepository->findBy(["deleted" => false], ["name" => "ASC"]),
+                'cartContent' => $cartContent
+            ])
+        ]);
+    }
+
+    /**
+     * @Route("/{clientOrder}/edit", name="client_order_edit", options={"expose": true})
+     * @HasPermission(Role::CREATE_CLIENT_ORDERS)
+     */
+    public function edit(Request $request,
+                         EntityManagerInterface $entityManager,
+                         ClientOrderService $clientOrderService,
+                         ClientOrder $clientOrder): JsonResponse {
+        $status = $clientOrder->getStatus();
+        $form = Form::create();
+
+        /** @var User $requester */
+        $requester = $this->getUser();
+
+        if (!$clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
+            || $requester !== $clientOrder->getRequester()) {
+            $form->addError('La commande client ne peut pas être modifiée.');
+        }
+
+        if ($form->isValid()) {
+            $clientOrderService->updateClientOrder($request, $entityManager, $form, $clientOrder);
+        }
+
+        // attention: validity can change in updateClientOrder
+        if ($form->isValid()) {
+            $entityManager->flush();
+
+            return $this->json([
+                "success" => true,
+                "clientOrderId" => $clientOrder->getId(),
+                "validationTemplate" => $this->renderView("operation/client_order/modal/validation.html.twig", [
+                    "clientOrder" => $clientOrder
+                ]),
+            ]);
+        }
+
+        return $form->errors();
+    }
+    /**
+     * @Route("/client-order-history-api", name="client_order_history_api", options={"expose": true})
+     */
+    public function historyApi(Request $request, EntityManagerInterface $manager): Response {
+        $id = $request->query->get('id');
+        $clientOrder = $manager->getRepository(ClientOrder::class)->find($id);
+
+        return $this->json([
+            'success' => true,
+            'template' => $this->renderView('operation/client_order/timeline.html.twig', [
+                'clientOrder' => $clientOrder,
+            ]),
+        ]);
+    }
+
 }

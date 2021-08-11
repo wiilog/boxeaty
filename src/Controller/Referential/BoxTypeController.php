@@ -31,6 +31,7 @@ class BoxTypeController extends AbstractController {
         $settingsRepository = $manager->getRepository(GlobalSetting::class);
         $capacities = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_CAPACITIES));
         $shapes = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_SHAPES));
+        $boxTypeRepository = $manager->getRepository(BoxType::class);
 
         return $this->render("referential/box_type/index.html.twig", [
             "new_box_type" => new BoxType(),
@@ -38,6 +39,7 @@ class BoxTypeController extends AbstractController {
             "box_types_order" => BoxTypeRepository::DEFAULT_DATATABLE_ORDER,
             "capacities" => $capacities ?: [],
             "shapes" => $shapes ?: [],
+            "starterKit" => $boxTypeRepository->findStarterKit(),
         ]);
     }
 
@@ -114,12 +116,13 @@ class BoxTypeController extends AbstractController {
         $settingsRepository = $manager->getRepository(GlobalSetting::class);
         $capacities = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_CAPACITIES));
         $shapes = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_SHAPES));
-
+        $boxTypeRepository = $manager->getRepository(BoxType::class);
         return $this->json([
             "submit" => $this->generateUrl("box_type_edit", ["boxType" => $boxType->getId()]),
             "template" => $this->renderView("referential/box_type/modal/edit.html.twig", [
                 "box_type" => $boxType,
                 "capacities" => $capacities ?: [],
+                "starterKit" => $boxTypeRepository->findStarterKit(),
                 "shapes" => $shapes ?: [],
             ])
         ]);

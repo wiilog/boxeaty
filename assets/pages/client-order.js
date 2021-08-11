@@ -15,29 +15,41 @@ $(function() {
     const $modal = $(`#modal-new-client-order`);
     initOrderDatatable();
 
-    const getParams = URL.getRequestQuery()
-    if (getParams.action === 'new') {
-        openNewClientOrderModal();
+    const params = URL.getRequestQuery()
+    if (params.action === 'new') {
+        openOrderNewModal();
     }
-    else if (getParams.action === 'show'
-             && getParams['action-data']) {
-        openOrderShowModal(getParams['action-data']);
+    else if (params.action === 'show'
+             && params['action-data']) {
+        openOrderShowModal(params['action-data']);
     }
-    else if (getParams.action === 'validation'
-             && getParams['action-data']) {
-        openOrderValidationModal(getParams['action-data']);
+    else if (params.action === 'edit'
+             && params['action-data']) {
+        openOrderEditModal(params['action-data']);
     }
-
-    $('#modal-validation-client-order').find('.submit-button').on('click', function(){
-        window.location.href = Routing.generate('client_order_validation_template', {action : 'validation'});
-    });
+    else if (params.action === 'validation'
+             && params['action-data']) {
+        openOrderValidationModal(params['action-data']);
+    }
 
     $document.on('click', '.show-detail', function () {
         const $link = $(this);
         const clientOrderId = $link.data('id');
-        setOrderRequestInURL(clientOrderId); // TODO ALEX action = show or validation en fonction du statut de la commande
-        openOrderShowModal(clientOrderId);
-    })
+        const action = $link.data('action');
+        setOrderRequestInURL(action, clientOrderId);
+        if (action === 'show') {
+            openOrderShowModal(clientOrderId);
+        }
+        else if (action === 'validation') {
+            openOrderValidationModal(clientOrderId);
+        }
+    });
+
+    $(document).arrive('.edit-status-button', function() {
+        $(this).on('click', () => {
+            openEditStatusModal($('input[name=clientOrderId]').val());
+        });
+    });
 
     $(`#new-client-order`).on('click', function(){
         window.location.href = Routing.generate(`client_orders_list`, {action: 'new'})
@@ -57,6 +69,16 @@ $(function() {
         } else{
             toggleCratesAmountToCollect = false;
             $autonomousManagement.addClass('d-none');
+        }
+
+        const starterKit = JSON.parse($(`#starterKit`).val());
+        if (starterKit) {
+            if (type === 'PURCHASE_TRADE') {
+                addBoxTypeToCart($modal, starterKit);
+            } else {
+                $modal.find('.box-type-line[data-id=' + starterKit.id + ']').remove();
+                $modal.find(`.empty-cart`).removeClass(`d-none`);
+            }
         }
     });
 
@@ -115,29 +137,93 @@ $(function() {
     });
 });
 
+function openEditStatusModal(clientOrderId){
+    const ajax = AJAX.route(`POST`, `client_order_edit_status_template`, {
+        clientOrder: clientOrderId
+    });
+    Modal.load(ajax, {
+        afterHidden: () => {
+            removeActionRequestInURL();
+            getTimeLine($(`#modal-show-client-order`), clientOrderId);
+        },
+        error: () => {
+            removeActionRequestInURL();
+        }
+    });
+}
+
 function openOrderShowModal(clientOrderId) {
     const ajax = AJAX.route(`POST`, `client_order_show_template`, {
         clientOrder: clientOrderId
     });
 
     Modal.load(ajax, {
+        afterOpen: () => {
+            const $modal = $(`#modal-show-client-order`);
+            $modal.find('input[name=clientOrderId]').val(clientOrderId);
+            getTimeLine($modal, clientOrderId);
+        },
         afterHidden: () => {
             removeActionRequestInURL();
         },
         error: () => {
             removeActionRequestInURL();
-        }
+        },
     });
 }
 
-function openOrderValidationModal(clientOrderId) {
-    const ajax = AJAX.route(`POST`, `client_order_validation_template`, {
-        clientOrder: clientOrderId,
-    });
+function openOrderEditModal(clientOrderId) {
+    const ajax = AJAX.route(`GET`, `client_order_edit_template`, {clientOrder: clientOrderId});
 
     Modal.load(ajax, {
+        table: '#table-client-order',
+        success: (response) => {
+            openOrderValidationModal(clientOrderId, response.validationTemplate);
+        },
+        afterShown: (modal) => {
+            const cartContentStr = modal.element.find('[name="cart-content"]').val();
+            const cartContent = cartContentStr && JSON.parse(cartContentStr);
+
+            for (const line of cartContent) {
+                addBoxTypeToCart(modal.element, line);
+            }
+
+            const newUrl = URL.createRequestQuery({
+                action: 'edit',
+                'action-data': clientOrderId
+            });
+            URL.pushState(document.title, newUrl);
+        },
         afterHidden: () => {
             removeActionRequestInURL();
+        },
+        error: () => {
+            removeActionRequestInURL();
+        },
+    });
+}
+
+function openOrderValidationModal(clientOrderId, modalContent = null) {
+    const content = (
+        modalContent
+        || AJAX.route(`POST`, `client_order_validation_template`, {clientOrder: clientOrderId})
+    );
+
+    Modal.load(content, {
+        submit: Routing.generate(`client_order_validation`, {clientOrder: clientOrderId}),
+        table: '#table-client-order',
+        afterShown: () => {
+            const newUrl = URL.createRequestQuery({
+                action: 'validation',
+                'action-data': clientOrderId
+            });
+            URL.pushState(document.title, newUrl);
+        },
+        afterHidden: () => {
+            removeActionRequestInURL();
+        },
+        onPrevious: () => {
+            openOrderEditModal(clientOrderId);
         },
         error: () => {
             removeActionRequestInURL();
@@ -145,22 +231,16 @@ function openOrderValidationModal(clientOrderId) {
     });
 }
 
-function openNewClientOrderModal() {
+function openOrderNewModal() {
     const newClientOrderModal = Modal.static(`#modal-new-client-order`, {
         ajax: AJAX.route(`POST`, `client_order_new`),
+        table: '#table-client-order',
         success: (response) => {
-            removeActionRequestInURL();
-            Modal.load(response.validationTemplate, {
-                afterOpen: modal=> {
-                    $('#modal-validation-client-order').find('.submit-button').on('click', function(){
-                        window.location.href = Routing.generate('client_orders_list');
-                    });
-                },
-            });
+            openOrderValidationModal(response.clientOrderId, response.validationTemplate);
         },
         afterHidden: () => {
             removeActionRequestInURL();
-        },
+        }
     });
     newClientOrderModal.open();
 }
@@ -185,11 +265,11 @@ function initOrderDatatable() {
     return table;
 }
 
-function setOrderRequestInURL(order) {
+function setOrderRequestInURL(action, order) {
     const getParams = URL.getRequestQuery()
-    if (getParams.action !== 'show'
+    if (getParams.action !== action
         && getParams['action-data'] !== `${order}`) {
-        getParams.action = 'show';
+        getParams.action = action;
         getParams['action-data'] = order;
         const newUrl = URL.createRequestQuery(getParams);
         URL.pushState(document.title, newUrl);
@@ -203,7 +283,7 @@ function removeActionRequestInURL() {
         delete getParams.action;
         delete getParams['action-data'];
         const newUrl = URL.createRequestQuery(getParams);
-        URL.pushState(document.title, newUrl);
+        URL.replaceState(document.title, newUrl);
     }
 }
 
@@ -215,7 +295,7 @@ function onBoxTypeQuantityChange($quantity) {
     const $totalPrice = $row.find('.totalPrice');
     const totalPrice = unitPrice * quantity;
     const totalPriceStr = StringHelper.formatPrice(totalPrice);
-    $totalPrice.text(totalPriceStr);
+    $totalPrice.text(totalPriceStr+" €");
 
 }
 
@@ -242,6 +322,15 @@ function addBoxTypeModel($modal) {
     else {
         Flash.add('warning', `Le client de la commande n'est pas sélectionné.`);
     }
+}
+
+function getTimeLine($modal, $clientOrder) {
+        AJAX
+            .route(`GET`, `client_order_history_api`, {id: $clientOrder})
+            .json()
+            .then((res) => {
+                $modal.find(`.client-order-history`).empty().append(res.template);
+            });
 }
 
 function addSelectedBoxTypeToCart($modal) {
@@ -294,9 +383,9 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
                 </div>
                 </div>
                 <span class="col bigTxt">${typeBoxData.name}</span>
-                <input name="unitPrice" class="data-array" value="${unitPrice}" type="hidden"/>
+                <input name="unitPrice" class="data-array" value="${unitPrice} " type="hidden"/>
                 <input name="volume" value="${volume}" type="hidden"/>
-                <span class="col-2 unit-price-item">T.U. ${unitPriceStr}</span>
+                <span class="col-2 unit-price-item">T.U. ${unitPriceStr} €</span>
                 <span class="totalPrice col-2 bigTxt"></span>
                 <button class="remove d-inline-flex" value="${typeBoxData.id}"><i class="bxi bxi-trash-circle col"></i></button>
                 <input type="hidden" name="boxTypeId" class="data-array" value="${typeBoxData.id}">
