@@ -9,6 +9,7 @@ use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
 use App\Entity\DeliveryMethod;
 use App\Entity\DepositTicket;
+use App\Entity\OrderStatusHistory;
 use App\Entity\OrderType;
 use App\Entity\Status;
 use App\Entity\User;

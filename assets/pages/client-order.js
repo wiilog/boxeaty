@@ -40,8 +40,8 @@ $(function() {
         if (action === 'show') {
             openOrderShowModal(clientOrderId);
         }
-        else if (action === 'edit') {
-            openOrderEditModal(clientOrderId);
+        else if (action === 'validation') {
+            openOrderValidationModal(clientOrderId);
         }
     });
 
@@ -162,7 +162,13 @@ function openOrderShowModal(clientOrderId) {
             const $modal = $(`#modal-show-client-order`);
             $modal.find('input[name=clientOrderId]').val(clientOrderId);
             getTimeLine($modal, clientOrderId);
-        }
+        },
+        afterHidden: () => {
+            removeActionRequestInURL();
+        },
+        error: () => {
+            removeActionRequestInURL();
+        },
     });
 }
 

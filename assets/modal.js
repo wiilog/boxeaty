@@ -18,6 +18,7 @@ function deleteUpload(modal, name) {
 }
 
 export default class Modal {
+    static isTemplateLoading = false;
     id;
     element;
     config;
@@ -73,21 +74,26 @@ export default class Modal {
                 template: ajax,
             });
         } else {
-            ajax
-                .json()
-                .then((response) => {
-                    delete response.success;
+            if(!Modal.isTemplateLoading){
+                Modal.isTemplateLoading = true;
+                ajax
+                    .json()
+                    .then((response) => {
+                        Modal.isTemplateLoading = false;
+                        delete response.success;
 
-                    Modal.html({
-                        ...config,
-                        ...response,
+                        Modal.html({
+                            ...config,
+                            ...response,
+                        });
+                    })
+                    .catch(() => {
+                        Modal.isTemplateLoading = false;
+                        if (config.error) {
+                            config.error();
+                        }
                     });
-                })
-                .catch(() => {
-                    if (config.error) {
-                        config.error();
-                    }
-                });
+            }
         }
     }
 
@@ -97,25 +103,23 @@ export default class Modal {
         $modal.modal(`show`);
 
         if(config.afterShown) {
-            $modal
-                .on('shown.bs.modal', function() {
-                        config.afterShown(modal);
-                });
+            $modal.on('shown.bs.modal', function() {
+                config.afterShown(modal);
+            });
         }
 
-        $modal
-            .on('hidden.bs.modal', function() {
-                $(this).remove();
+        $modal.on('hidden.bs.modal', function() {
+            $(this).remove();
 
-                modal.element.find('[data-s2-initialized]').each(function() {
-                    //close all select2 elements
-                    $(this).select2('close');
-                });
-
-                if(config.afterHidden) {
-                    config.afterHidden(modal);
-                }
+            modal.element.find('[data-s2-initialized]').each(function() {
+                //close all select2 elements
+                $(this).select2('close');
             });
+
+            if(config.afterHidden) {
+                config.afterHidden(modal);
+            }
+        });
 
         const modal = new Modal();
         modal.id = Math.floor(Math.random() * 1000000);

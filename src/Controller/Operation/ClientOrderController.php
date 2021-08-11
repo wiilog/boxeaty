@@ -78,7 +78,8 @@ class ClientOrderController extends AbstractController {
                 "cartPrice" => $order->getTotalAmount(),
                 "type" => $order->getType(),
                 "expectedDelivery" => FormatHelper::dateMonth($order->getExpectedDelivery()),
-                "linkAction" => $order->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? 'edit' : 'show'
+                "linkAction" => $order->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? 'validation' : 'show',
+                "linkLabel" => $order->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? 'Enregistrer la commande' : 'Voir les détails'
             ])
             ->toArray();
 
