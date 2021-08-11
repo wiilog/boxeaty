@@ -115,6 +115,14 @@ class ClientOrderController extends AbstractController {
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
     public function validateTemplate(ClientOrder $clientOrder): Response {
+        /** @var User $requester */
+        $requester = $this->getUser();
+
+        if (!$clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
+            || $requester !== $clientOrder->getRequester()) {
+            throw new NotFoundHttpException('La commande client est introuvable.');
+        }
+
         return $this->json([
             'template' => $this->renderView("operation/client_order/modal/validation.html.twig", [
                 "clientOrder" => $clientOrder
@@ -330,7 +338,6 @@ class ClientOrderController extends AbstractController {
                          EntityManagerInterface $entityManager,
                          ClientOrderService $clientOrderService,
                          ClientOrder $clientOrder): JsonResponse {
-        $status = $clientOrder->getStatus();
         $form = Form::create();
 
         /** @var User $requester */
