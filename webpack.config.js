@@ -12,6 +12,7 @@ Encore
     .setPublicPath("/build")
 
     .addEntry("app", "./assets/app.js")
+    .addEntry("home", "./assets/pages/home.js")
     .addEntry("security", "./assets/pages/security.js")
     .addEntry("box_list", "./assets/pages/box-list.js")
     .addEntry("depository_list", "./assets/pages/depository-list.js")

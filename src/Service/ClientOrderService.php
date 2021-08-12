@@ -44,23 +44,26 @@ class ClientOrderService
 
     private ?string $token = null;
 
-    /**
-     * @param Request $request
-     * @param EntityManagerInterface $entityManager
-     * @param User $requester
-     * @param ClientOrder $clientOrder
-     */
+    public function updateClientOrderStatus(ClientOrder $clientOrder, Status $status, User $user): OrderStatusHistory {
+        $now = new DateTime('now');
+        $history = (new OrderStatusHistory())
+            ->setOrder($clientOrder)
+            ->setStatus($status)
+            ->setUser($user)
+            ->setChangedAt($now);
+        $clientOrder
+            ->setStatus($status);
+        return $history;
+    }
+
     public function updateClientOrder(Request $request,
                                       EntityManagerInterface $entityManager,
                                       Form $form,
                                       ClientOrder $clientOrder): void {
         $content = (object) $request->request->all();
-        $statusRepository = $entityManager->getRepository(Status::class);
         $typeRepository = $entityManager->getRepository(OrderType::class);
         $clientRepository = $entityManager->getRepository(Client::class);
         $deliveryMethodRepository = $entityManager->getRepository(DeliveryMethod::class);
-
-        $status = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE_CLIENT]);
 
         $deliveryMethodId = $content->deliveryMethod ?? null;
         $deliveryMethod = $deliveryMethodId
@@ -122,7 +125,6 @@ class ClientOrderService
                 ->setServicePrice($serviceCost)
                 ->setComment($content->comment ?? null)
                 ->setType($type)
-                ->setStatus($status)
                 ->setDeliveryMethod($deliveryMethod)
                 ->setTokensAmount(($clientOrderInformation ? $clientOrderInformation->getTokenAmount() : null) ?: 0);
 
