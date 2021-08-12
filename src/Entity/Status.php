@@ -40,6 +40,7 @@ class Status {
     public const CODE_COLLECT_FINISHED = "COLLECT_FINISHED";
 
     public const ORDER_STATUS_HIERARCHY = [
+        Status::CODE_ORDER_TO_VALIDATE_CLIENT,
         Status::CODE_ORDER_TO_VALIDATE_BOXEATY,
         Status::CODE_ORDER_PLANNED,
         Status::CODE_ORDER_TRANSIT,

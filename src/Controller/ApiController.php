@@ -22,6 +22,7 @@ use App\Entity\User;
 use App\Helper\FormatHelper;
 use App\Service\AttachmentService;
 use App\Service\BoxStateService;
+use App\Service\ClientOrderService;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use WiiCommon\Helper\Stream;
@@ -549,15 +550,19 @@ class ApiController extends AbstractController {
      * @Route("/mobile/deliveries/start", name="api_mobile_deliveries_start")
      * @Authenticated()
      */
-    public function deliveryStart(EntityManagerInterface $manager, Request $request): Response {
+    public function deliveryStart(EntityManagerInterface $manager, Request $request, ClientOrderService $clientOrderService): Response {
         $data = json_decode($request->getContent());
         $order = $manager->getRepository(ClientOrder::class)->find($data->order);
 
         if ($order) {
             $statusRepository = $manager->getRepository(Status::class);
 
-            $order->setStatus($statusRepository->findByCode(Status::CODE_ORDER_TRANSIT));
-            $order->getDelivery()->setStatus($statusRepository->findByCode(Status::CODE_DELIVERY_TRANSIT));
+            $orderTransitStatus = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TRANSIT]);
+            $history = $clientOrderService->updateClientOrderStatus($order, $orderTransitStatus, $this->getUser());
+            $manager->persist($history);
+
+            $order->getDelivery()->setStatus($statusRepository->findOneBy(['code' => Status::CODE_DELIVERY_TRANSIT]));
+
             $manager->flush();
 
             return $this->json([
@@ -663,7 +668,11 @@ class ApiController extends AbstractController {
      * @Route("/mobile/deliveries/finish", name="api_mobile_deliveries_finish")
      * @Authenticated
      */
-    public function finishDelivery(EntityManagerInterface $manager, Request $request, AttachmentService $attachmentService): Response {
+    public function finishDelivery(EntityManagerInterface $manager,
+                                   Request $request,
+                                   AttachmentService $attachmentService,
+                                   ClientOrderService $clientOrderService): Response {
+
         $data = json_decode($request->getContent());
         $order = $manager->getRepository(ClientOrder::class)->find($data->order);
 
@@ -671,13 +680,15 @@ class ApiController extends AbstractController {
             $deliveryRound = $order->getDeliveryRound();
             $delivery = $order->getDelivery();
 
-            $orderStatus = $manager->getRepository(Status::class)->findByCode(Status::CODE_ORDER_FINISHED);
-            $deliveryStatus = $manager->getRepository(Status::class)->findByCode(Status::CODE_DELIVERY_DELIVERED);
+            $orderStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_ORDER_FINISHED]);
+            $deliveryStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_DELIVERY_DELIVERED]);
             $signature = $attachmentService->createAttachment(Attachment::TYPE_DELIVERY_SIGNATURE, ["signature", $data->signature]);
             $photo = $attachmentService->createAttachment(Attachment::TYPE_DELIVERY_PHOTO, ["photo", $data->photo]);
 
-            $order->setStatus($orderStatus)
-                ->setComment($data->comment);
+            $history = $clientOrderService->updateClientOrderStatus($order, $orderStatus, $this->getUser());
+            $manager->persist($history);
+
+            $order->setComment($data->comment);
 
             $delivery->setDistance($data->distance)
                 ->setStatus($deliveryStatus)
@@ -689,7 +700,7 @@ class ApiController extends AbstractController {
                 ->count();
 
             if ($unfinishedDeliveries === 0) {
-                $status = $manager->getRepository(Status::class)->findByCode(Status::CODE_ROUND_FINISHED);
+                $status = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_ROUND_FINISHED]);
                 $distance = Stream::from($deliveryRound->getOrders())
                     ->map(fn(ClientOrder $order) => $order->getDelivery()->getDistance())
                     ->sum();

@@ -259,7 +259,7 @@ export default class Modal {
                     }
 
                     if(result.success && this.config.success) {
-                        this.config.success(result);
+                        this.config.success(result, this);
                     }
                 });
         } else {

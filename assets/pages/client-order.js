@@ -45,16 +45,6 @@ $(function() {
         }
     });
 
-    $(document).arrive('.edit-status-button', function() {
-        $(this).on('click', () => {
-            openEditStatusModal($('input[name=clientOrderId]').val());
-        });
-    });
-
-    $(`#new-client-order`).on('click', function(){
-        window.location.href = Routing.generate(`client_orders_list`, {action: 'new'})
-    });
-
     let toggleCratesAmountToCollect = false;
     $modal.find('[name="type"]').on('change', function(){
         const type = $(this).data('code');
@@ -137,14 +127,20 @@ $(function() {
     });
 });
 
-function openEditStatusModal(clientOrderId){
+function openEditStatusModal(clientOrderId, editModal){
     const ajax = AJAX.route(`POST`, `client_order_edit_status_template`, {
         clientOrder: clientOrderId
     });
     Modal.load(ajax, {
+        table: '#table-client-order',
+        success: (res) => {
+            getTimeLine(editModal.element, clientOrderId);
+            if(res.hideEditStatusButton) {
+                editModal.element.find('.edit-status-button').remove();
+            }
+        },
         afterHidden: () => {
             removeActionRequestInURL();
-            getTimeLine($(`#modal-show-client-order`), clientOrderId);
         },
         error: () => {
             removeActionRequestInURL();
@@ -158,10 +154,14 @@ function openOrderShowModal(clientOrderId) {
     });
 
     Modal.load(ajax, {
-        afterOpen: () => {
-            const $modal = $(`#modal-show-client-order`);
-            $modal.find('input[name=clientOrderId]').val(clientOrderId);
-            getTimeLine($modal, clientOrderId);
+        afterOpen: (modal) => {
+            getTimeLine(modal.element, clientOrderId);
+
+            const $statusEditButton = modal.element.find('.edit-status-button');
+            $statusEditButton.off('click');
+            $statusEditButton.on('click', () => {
+                openEditStatusModal(clientOrderId, modal);
+            });
         },
         afterHidden: () => {
             removeActionRequestInURL();
@@ -325,12 +325,12 @@ function addBoxTypeModel($modal) {
 }
 
 function getTimeLine($modal, $clientOrder) {
-        AJAX
-            .route(`GET`, `client_order_history_api`, {id: $clientOrder})
-            .json()
-            .then((res) => {
-                $modal.find(`.client-order-history`).empty().append(res.template);
-            });
+    AJAX
+        .route(`GET`, `client_order_history_api`, {id: $clientOrder})
+        .json()
+        .then((res) => {
+            $modal.find(`.client-order-history`).empty().append(res.template);
+        });
 }
 
 function addSelectedBoxTypeToCart($modal) {

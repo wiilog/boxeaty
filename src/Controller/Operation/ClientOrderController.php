@@ -135,13 +135,15 @@ class ClientOrderController extends AbstractController {
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
     public function validate(ClientOrder $clientOrder,
-                             EntityManagerInterface $entityManager): Response {
+                             EntityManagerInterface $entityManager,
+                             ClientOrderService $clientOrderService): Response {
 
         if ($clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)) {
             $statusRepository = $entityManager->getRepository(Status::class);
             $validateBoxeatyStatus = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE_BOXEATY]);
 
-            $clientOrder->setStatus($validateBoxeatyStatus);
+            $history = $clientOrderService->updateClientOrderStatus($clientOrder, $validateBoxeatyStatus, $this->getUser());
+            $entityManager->persist($history);
 
             $entityManager->flush();
         }
@@ -159,7 +161,6 @@ class ClientOrderController extends AbstractController {
                         UniqueNumberService $uniqueNumberService,
                         EntityManagerInterface $entityManager,
                         ClientOrderService $clientOrderService): Response {
-
         $number = $uniqueNumberService->createUniqueNumber($entityManager, ClientOrder::PREFIX_NUMBER, ClientOrder::class);
         $now = new DateTime('now');
 
@@ -170,6 +171,9 @@ class ClientOrderController extends AbstractController {
         if ($form->isValid()) {
             /** @var User $requester */
             $requester = $this->getUser();
+            $statusRepository = $entityManager->getRepository(Status::class);
+            $status = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE_CLIENT]);
+            $history = $clientOrderService->updateClientOrderStatus($clientOrder, $status, $requester);
 
             $clientOrder
                 ->setNumber($number)
@@ -180,6 +184,7 @@ class ClientOrderController extends AbstractController {
                 ->setDeliveryRound(null)
                 ->setRequester($requester);
 
+            $entityManager->persist($history);
             $entityManager->persist($clientOrder);
             $entityManager->flush();
 
@@ -225,30 +230,24 @@ class ClientOrderController extends AbstractController {
      * @Route("/status/{clientOrder}", name="client_order_edit_status", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
      */
-    public function editStatus(ClientOrder $clientOrder, Request $request, EntityManagerInterface $entityManager): Response {
+    public function editStatus(ClientOrder $clientOrder,
+                               Request $request,
+                               EntityManagerInterface $entityManager,
+                               ClientOrderService $clientOrderService): Response {
+
         $form = Form::create();
         $content = (object)$request->request->all();
-        $now = new DateTime('now');
         $statusRepository = $entityManager->getRepository(Status::class);
         $status = $statusRepository->findOneBy(['id' => $content->status]);
         if ($form->isValid()) {
-            $clientOrder
-                ->setStatus($status);
-
-            $entityManager->persist($clientOrder);
-
-            $history = (new OrderStatusHistory())
-                ->setOrder($clientOrder)
-                ->setStatus($status)
-                ->setUser($this->getUser())
-                ->setChangedAt($now)
-                ->setJustification($content->justification);
+            $history = $clientOrderService->updateClientOrderStatus($clientOrder, $status, $this->getUser());
+            $history->setJustification($content->justification);
             $entityManager->persist($history);
             $entityManager->flush();
 
             return $this->json([
                 "success" => true,
-                "submit" => $this->generateUrl("client_order_show_template", ["clientOrder" => $clientOrder->getId()]),
+                'hideEditStatusButton' => $clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
             ]);
         } else {
             return $form->errors();
