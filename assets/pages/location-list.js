@@ -1,9 +1,10 @@
 import {$document} from '../app';
 import "../styles/pages/location.scss";
 import $ from "jquery";
-import Modal from "../modal";
+import Modal, {processForm} from "../modal";
 import AJAX from "../ajax";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
+import ChartJS from "../data-chart";
 
 $document.ready(() => {
     const newLocationModal = Modal.static(`#modal-new-location`, {
@@ -35,6 +36,7 @@ $document.ready(() => {
             {data: `container_amount`, title: `Nombre de contenants`, orderable: false},
             DATATABLE_ACTIONS,
         ],
+        onFilter: onFilter,
         listeners: {
             edit: data => {
                 const ajax = AJAX.route(`POST`, `location_edit_template`, {
@@ -97,4 +99,17 @@ function toggleInputsIn($container, show) {
             $input.prop(`required`, false);
         });
     }
+}
+ function drawChart(config) {
+     let $container = $('#historyChart');
+     $container.replaceWith('<canvas id="historyChart" width="400" height="150"></canvas>');
+     ChartJS.line($('#historyChart'), JSON.parse(config));
+ }
+
+ function onFilter(data) {
+     drawChart(data.config);
+     $('.box-available').text(data.boxAvailable);
+     $('.crate-available').text(data.crateAvailable);
+     $('.box-unavailable').text(data.boxUnavailable);
+     $('.crate-unavailable').text(data.crateUnavailable);
 }

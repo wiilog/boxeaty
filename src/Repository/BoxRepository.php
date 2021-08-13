@@ -82,7 +82,7 @@ class BoxRepository extends EntityRepository {
             ->getArrayResult();
     }
 
-    public function getLocationData($available, $isBox) {
+    public function getLocationData($available, $isBox, $depository) {
         $qb = $this->createQueryBuilder("box");
 
         return $qb->select("COUNT(box.id)")
@@ -90,9 +90,11 @@ class BoxRepository extends EntityRepository {
             ->where("box.state = :available")
             ->andWhere("location.active = 1")
             ->andWhere("location.type = 3")
+            ->andWhere("location.depository = :depository")
             ->andWhere("box.isBox = :isBox")
             ->setParameter("available", "$available")
             ->setParameter("isBox", "$isBox")
+            ->setParameter("depository", $depository)
             ->getQuery()
             ->getSingleScalarResult();
     }
