@@ -860,4 +860,73 @@ class ApiController extends AbstractController {
         return $this->json($availableBoxes);
     }
 
+    /**
+     * @Route("/mobile/box-informations", name="api_mobile_box_informations")
+     * @Authenticated
+     */
+    public function boxInformations(EntityManagerInterface $manager, Request $request): Response {
+        $box = $request->query->get('box');
+        $crate = $request->query->get('crate');
+
+        $box = $manager->getRepository(Box::class)->findOneBy(['number' => $box]);
+        if($crate) {
+            $crate = $manager->getRepository(Box::class)->findOneBy(['number' => $crate]);
+        }
+
+        if($box) {
+            $type = $box->getType()->getName();
+            $volume = $box->getType()->getVolume();
+            $number = $box->getNumber();
+
+            return $this->json([
+                'number' => $number,
+                'type' => $type,
+                'volume' => $volume,
+                'crateVolume' => $crate ? $crate->getType()->getVolume() : 0
+            ]);
+        }
+
+        return $this->json([
+            'success' => false
+        ]);
+    }
+
+    /**
+     * @Route("/mobile/moving", name="api_mobile_moving")
+     * @Authenticated
+     */
+    public function moving(EntityManagerInterface $manager, Request $request, BoxRecordService $boxRecordService): Response {
+
+        $boxRepository = $manager->getRepository(Box::class);
+        $locationRepository = $manager->getRepository(Location::class);
+        $qualityRepository = $manager->getRepository(Quality::class);
+
+        $args = json_decode($request->getContent(), true);
+        $scannedBoxesAndCrates = Stream::from($args['scannedBoxesAndCrates'])->map(fn($box) => $box['number'])->toArray();
+
+        $boxes = [];
+        foreach ($scannedBoxesAndCrates as $scannedBoxOrCrate) {
+            $boxes[] = $boxRepository->findOneBy(['number' => $scannedBoxOrCrate]);
+        }
+
+        $chosenQuality = $qualityRepository->find($args['quality']);
+        $chosenLocation = $locationRepository->find($args['location']);
+        foreach ($boxes as $box) {
+            $box
+                ->setLocation($chosenLocation)
+                ->setQuality($chosenQuality);
+
+            $record = $boxRecordService->createBoxRecord($box, true);
+            $record
+                ->setBox($box)
+                ->setState(BoxStateService::STATE_RECORD_IDENTIFIED)
+                ->setUser($this->user);
+
+            $manager->persist($record);
+        }
+
+        $manager->flush();
+        return $this->json([]);
+    }
+
 }
