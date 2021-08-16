@@ -13,4 +13,23 @@ use Doctrine\ORM\EntityRepository;
  */
 class CollectRepository extends EntityRepository {
 
+    public function getTotalQuantityByClientAndCollectedDate($client, $dateMin, $dateMax)
+    {
+        $qb = $this->createQueryBuilder('collecte')
+            ->select('sum(lines.quantity)')
+            ->where('collecte.collectedAt BETWEEN :dateMin AND :dateMax')
+            ->andWhere('clientOrder.client =:client')
+            ->join('collecte.order', 'clientOrder')
+            ->join('clientOrder.lines', 'lines')
+            ->setParameters([
+                'dateMin' => $dateMin,
+                'dateMax' => $dateMax,
+                'client' => $client,
+            ]);
+        $result = $qb
+            ->getQuery()
+            ->getSingleScalarResult();
+        return $result ? intval($result) : 0;
+    }
+
 }

@@ -158,7 +158,9 @@ class SelectController extends AbstractController {
      * @Route("/select/type", name="ajax_select_type", options={"expose": true})
      */
     public function types(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(BoxType::class)->getForSelect($request->query->get("term"));
+        $extendedType = $request->query->getBoolean('extended-type');
+
+        $results = $manager->getRepository(BoxType::class)->getForSelect($request->query->get("term"), $extendedType);
         return $this->json([
             "results" => $results,
         ]);

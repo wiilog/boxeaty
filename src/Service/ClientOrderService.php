@@ -9,27 +9,24 @@ use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
 use App\Entity\DeliveryMethod;
 use App\Entity\DepositTicket;
+use App\Entity\OrderStatusHistory;
 use App\Entity\OrderType;
 use App\Entity\Status;
 use App\Entity\User;
 use App\Helper\Form;
-use DateTimeZone;
-use mysql_xdevapi\Exception;
-use PhpParser\Node\Expr\Cast\Object_;
+use DateTime;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\RouterInterface;
 use WiiCommon\Helper\Stream;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 
 use Twig\Environment;
 
 class ClientOrderService
 {
-
     /** @Required */
     public SessionInterface $session;
 
@@ -43,11 +40,114 @@ class ClientOrderService
     public Environment $twig;
 
     /** @Required */
-    public EntityManagerInterface $manager;
+    public EntityManagerInterface $entityManager;
 
     private ?string $token = null;
 
-    public function handleCartLines(EntityManagerInterface $entityManager,
+    public function updateClientOrderStatus(ClientOrder $clientOrder, Status $status, User $user): OrderStatusHistory {
+        $now = new DateTime('now');
+        $history = (new OrderStatusHistory())
+            ->setOrder($clientOrder)
+            ->setStatus($status)
+            ->setUser($user)
+            ->setChangedAt($now);
+        $clientOrder
+            ->setStatus($status);
+        return $history;
+    }
+
+    public function updateClientOrder(Request $request,
+                                      EntityManagerInterface $entityManager,
+                                      Form $form,
+                                      ClientOrder $clientOrder): void {
+        $content = (object) $request->request->all();
+        $typeRepository = $entityManager->getRepository(OrderType::class);
+        $clientRepository = $entityManager->getRepository(Client::class);
+        $deliveryMethodRepository = $entityManager->getRepository(DeliveryMethod::class);
+
+        $deliveryMethodId = $content->deliveryMethod ?? null;
+        $deliveryMethod = $deliveryMethodId
+            ? $deliveryMethodRepository->find($deliveryMethodId)
+            : null;
+        if (!$deliveryMethod) {
+            $form->addError('Vous devez sélectionner au moins un moyen de transport');
+        }
+
+        $typeId = $content->type ?? null;
+        $type = $typeId
+            ? $typeRepository->find($typeId)
+            : null;
+        if (!$type) {
+            $form->addError('Vous devez sélectionner au moins un type de commande');
+        }
+
+        $clientId = $content->client ?? null;
+        $client = $clientId
+            ? $clientRepository->find($clientId)
+            : null;
+        if (!$client) {
+            $form->addError('client', 'Ce champ est requis');
+        }
+
+        $information = $client->getClientOrderInformation();
+        $expectedDelivery = DateTime::createFromFormat('Y-m-d\TH:i', $content->date ?? null);
+
+        if (isset($information)) {
+            // check if it's the weekend
+            $deliveryRate = !in_array($expectedDelivery->format('N'), [6, 7])
+                ? $information->getWorkingDayDeliveryRate()
+                : $information->getNonWorkingDayDeliveryRate();
+            $serviceCost = $information->getServiceCost();
+        } else {
+            $deliveryRate = null;
+            $serviceCost = null;
+        }
+
+        if ($type && $type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
+            $collectRequired = (bool)($content->collectRequired ?? false);
+            if ($collectRequired) {
+                if (!isset($content->cratesAmountToCollect)
+                    || $content->cratesAmountToCollect < 1) {
+                    $form->addError('cratesAmountToCollect', 'Le nombre de caisses à collecter est invalide');
+                }
+            }
+        }
+
+        $handledCartLines = $this->handleCartLines($entityManager, $form, $content);
+        if ($form->isValid()) {
+            $clientOrderInformation = $client->getClientOrderInformation();
+            $clientOrder = $clientOrder
+                ->setExpectedDelivery($expectedDelivery)
+                ->setClient($client)
+                ->setCratesAmountToCollect($content->cratesAmountToCollect ?? null)
+                ->setCollectRequired($collectRequired ?? false)
+                ->setDeliveryPrice($deliveryRate)
+                ->setServicePrice($serviceCost)
+                ->setComment($content->comment ?? null)
+                ->setType($type)
+                ->setDeliveryMethod($deliveryMethod)
+                ->setTokensAmount(($clientOrderInformation ? $clientOrderInformation->getTokenAmount() : null) ?: 0);
+
+            foreach ($clientOrder->getLines()->toArray() as $line) {
+                $clientOrder->removeLine($line);
+                $entityManager->remove($line);
+            }
+
+            foreach ($handledCartLines as $cartLine) {
+                $boxType = $cartLine['boxType'];
+                $clientOrderLine = new ClientOrderLine();
+                $clientOrderLine
+                    ->setBoxType($boxType)
+                    ->setQuantity($cartLine['quantity'])
+                    ->setCustomUnitPrice($cartLine['customUnitPrice'])
+                    ->setClientOrder($clientOrder);
+
+                $entityManager->persist($clientOrderLine);
+            }
+        }
+    }
+
+    private function handleCartLines(EntityManagerInterface $entityManager,
                                     Form $form,
                                     object $formContent): ? array {
 
@@ -73,10 +173,8 @@ class ClientOrderService
                 $unitPrice = (float) $unitPricesArray[$cartLineIndex];
                 if (!$boxType
                     || !$quantity
-                    || $quantity < 1
-                    || !$unitPrice
-                    || $unitPrice <= 0) {
-                    $form->addError("Le panier contient une ligne invalide");
+                    || $quantity < 1) {
+                    $form->addError("Veuillez saisir une quantité pour toutes les lignes du panier.");
                     $handledCartLines = [];
                     break;
                 }
@@ -97,7 +195,9 @@ class ClientOrderService
         return $handledCartLines ?? null;
     }
 
-    public function createClientOrderLine(ClientOrder $clientOrder, EntityManagerInterface $entityManager, Request $request): ?ClientOrderLine
+    public function createClientOrderLine(ClientOrder $clientOrder,
+                                          EntityManagerInterface $entityManager,
+                                          Request $request): ?ClientOrderLine
     {
         $boxTypeRepository = $entityManager->getRepository(BoxType::class);
         $form = Form::create();
@@ -144,22 +244,6 @@ class ClientOrderService
         }
 
         return $this->token;
-    }
-
-    public function renderNew(): array {
-        return [
-            "submit" => $this->router->generate("client_order_new"),
-            "template" => $this->twig->render("operation/client_order/modal/new.html.twig", [
-                "session" => $this->getToken(),
-                "clientOrder" => $this->get(ClientOrder::class),
-            ])
-        ];
-    }
-
-    public function renderShow(): array {
-        return [
-            "submit" => $this->router->generate("client_order_new"),
-        ];
     }
 
 }

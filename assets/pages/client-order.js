@@ -6,38 +6,43 @@ import Modal from "../modal";
 import {StringHelper, URL} from "../util";
 import $ from "jquery";
 import Flash from "../flash";
+import {DateTools} from "../util";
 
 
 $(function() {
+    DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 20);
+
     const $modal = $(`#modal-new-client-order`);
     initOrderDatatable();
 
-    const getParams = URL.getRequestQuery()
-    if (getParams.action === 'new') {
-        openNewClientOrderModal();
+    const params = URL.getRequestQuery()
+    if (params.action === 'new') {
+        openOrderNewModal();
     }
-    else if (getParams.action === 'show'
-             && getParams['action-data']) {
-        openOrderShowModal(getParams['action-data']);
+    else if (params.action === 'show'
+             && params['action-data']) {
+        openOrderShowModal(params['action-data']);
     }
-    else if (getParams.action === 'validation'
-             && getParams['action-data']) {
-        openOrderValidationModal(getParams['action-data']);
+    else if (params.action === 'edit'
+             && params['action-data']) {
+        openOrderEditModal(params['action-data']);
     }
-
-    $('#modal-validation-client-order').find('.submit-button').on('click', function(){
-        window.location.href = Routing.generate('client_order_validation_template', {action : 'validation'});
-    });
+    else if (params.action === 'validation'
+             && params['action-data']) {
+        openOrderValidationModal(params['action-data']);
+    }
 
     $document.on('click', '.show-detail', function () {
         const $link = $(this);
         const clientOrderId = $link.data('id');
-        setOrderRequestInURL(clientOrderId); // TODO ALEX action = show or validation en fonction du statut de la commande
-        openOrderShowModal(clientOrderId);
-    })
-
-    $(`#new-client-order`).on('click', function(){
-        window.location.href = Routing.generate(`client_orders_list`, {action: 'new'})
+        const action = $link.data('action');
+        setOrderRequestInURL(action, clientOrderId);
+        if (action === 'show') {
+            openOrderShowModal(clientOrderId);
+        }
+        else if (action === 'validation') {
+            openOrderValidationModal(clientOrderId);
+        }
     });
 
     let toggleCratesAmountToCollect = false;
@@ -54,6 +59,16 @@ $(function() {
         } else{
             toggleCratesAmountToCollect = false;
             $autonomousManagement.addClass('d-none');
+        }
+
+        const starterKit = JSON.parse($(`#starterKit`).val());
+        if (starterKit) {
+            if (type === 'PURCHASE_TRADE') {
+                addBoxTypeToCart($modal, starterKit);
+            } else {
+                $modal.find('.box-type-line[data-id=' + starterKit.id + ']').remove();
+                $modal.find(`.empty-cart`).removeClass(`d-none`);
+            }
         }
     });
 
@@ -78,7 +93,12 @@ $(function() {
         if(clientData) {
             $clientAddress.text(clientData.address);
             $servicePrice.text("Frais de service " + StringHelper.formatPrice(clientData.serviceCost));
-        } else{
+            $('.transport').find('input[name=deliveryMethod]').each(function() {
+                if(parseInt($(this).val()) === parseInt(clientData.deliveryMethod)) {
+                    $(this).prop('checked', true);
+                }
+            });
+        } else {
             $clientAddress.text("");
             $servicePrice.text("");
         }
@@ -100,7 +120,33 @@ $(function() {
     $modal.find('.add-box-type-model-button').on('click', function () {
         addBoxTypeModel($modal);
     });
+
+    $modal.find('input[name=type]').on('click', function () {
+        $modal.find('.client-order-container').removeClass('d-none');
+        $modal.find('.footer').removeClass('d-none');
+    });
 });
+
+function openEditStatusModal(clientOrderId, editModal){
+    const ajax = AJAX.route(`POST`, `client_order_edit_status_template`, {
+        clientOrder: clientOrderId
+    });
+    Modal.load(ajax, {
+        table: '#table-client-order',
+        success: (res) => {
+            getTimeLine(editModal.element, clientOrderId);
+            if(res.hideEditStatusButton) {
+                editModal.element.find('.edit-status-button').remove();
+            }
+        },
+        afterHidden: () => {
+            removeActionRequestInURL();
+        },
+        error: () => {
+            removeActionRequestInURL();
+        }
+    });
+}
 
 function openOrderShowModal(clientOrderId) {
     const ajax = AJAX.route(`POST`, `client_order_show_template`, {
@@ -108,46 +154,93 @@ function openOrderShowModal(clientOrderId) {
     });
 
     Modal.load(ajax, {
-        afterHidden: () => {
-            removeActionRequestInURL();
-        },
-        error: () => {
-            removeActionRequestInURL();
-        }
-    });
-}
+        afterOpen: (modal) => {
+            getTimeLine(modal.element, clientOrderId);
 
-function openOrderValidationModal(clientOrderId) {
-    const ajax = AJAX.route(`POST`, `client_order_validation_template`, {
-        clientOrder: clientOrderId,
-    });
-
-    Modal.load(ajax, {
-        afterHidden: () => {
-            removeActionRequestInURL();
-        },
-        error: () => {
-            removeActionRequestInURL();
-        }
-    });
-}
-
-function openNewClientOrderModal() {
-    const newClientOrderModal = Modal.static(`#modal-new-client-order`, {
-        ajax: AJAX.route(`POST`, `client_order_new`),
-        success: (response) => {
-            removeActionRequestInURL();
-            Modal.load(response.validationTemplate, {
-                afterOpen: modal=> {
-                    $('#modal-validation-client-order').find('.submit-button').on('click', function(){
-                        window.location.href = Routing.generate('client_orders_list');
-                    });
-                },
+            const $statusEditButton = modal.element.find('.edit-status-button');
+            $statusEditButton.off('click');
+            $statusEditButton.on('click', () => {
+                openEditStatusModal(clientOrderId, modal);
             });
         },
         afterHidden: () => {
             removeActionRequestInURL();
         },
+        error: () => {
+            removeActionRequestInURL();
+        },
+    });
+}
+
+function openOrderEditModal(clientOrderId) {
+    const ajax = AJAX.route(`GET`, `client_order_edit_template`, {clientOrder: clientOrderId});
+
+    Modal.load(ajax, {
+        table: '#table-client-order',
+        success: (response) => {
+            openOrderValidationModal(clientOrderId, response.validationTemplate);
+        },
+        afterShown: (modal) => {
+            const cartContentStr = modal.element.find('[name="cart-content"]').val();
+            const cartContent = cartContentStr && JSON.parse(cartContentStr);
+
+            for (const line of cartContent) {
+                addBoxTypeToCart(modal.element, line);
+            }
+
+            const newUrl = URL.createRequestQuery({
+                action: 'edit',
+                'action-data': clientOrderId
+            });
+            URL.pushState(document.title, newUrl);
+        },
+        afterHidden: () => {
+            removeActionRequestInURL();
+        },
+        error: () => {
+            removeActionRequestInURL();
+        },
+    });
+}
+
+function openOrderValidationModal(clientOrderId, modalContent = null) {
+    const content = (
+        modalContent
+        || AJAX.route(`POST`, `client_order_validation_template`, {clientOrder: clientOrderId})
+    );
+
+    Modal.load(content, {
+        submit: Routing.generate(`client_order_validation`, {clientOrder: clientOrderId}),
+        table: '#table-client-order',
+        afterShown: () => {
+            const newUrl = URL.createRequestQuery({
+                action: 'validation',
+                'action-data': clientOrderId
+            });
+            URL.pushState(document.title, newUrl);
+        },
+        afterHidden: () => {
+            removeActionRequestInURL();
+        },
+        onPrevious: () => {
+            openOrderEditModal(clientOrderId);
+        },
+        error: () => {
+            removeActionRequestInURL();
+        }
+    });
+}
+
+function openOrderNewModal() {
+    const newClientOrderModal = Modal.static(`#modal-new-client-order`, {
+        ajax: AJAX.route(`POST`, `client_order_new`),
+        table: '#table-client-order',
+        success: (response) => {
+            openOrderValidationModal(response.clientOrderId, response.validationTemplate);
+        },
+        afterHidden: () => {
+            removeActionRequestInURL();
+        }
     });
     newClientOrderModal.open();
 }
@@ -172,11 +265,11 @@ function initOrderDatatable() {
     return table;
 }
 
-function setOrderRequestInURL(order) {
+function setOrderRequestInURL(action, order) {
     const getParams = URL.getRequestQuery()
-    if (getParams.action !== 'show'
+    if (getParams.action !== action
         && getParams['action-data'] !== `${order}`) {
-        getParams.action = 'show';
+        getParams.action = action;
         getParams['action-data'] = order;
         const newUrl = URL.createRequestQuery(getParams);
         URL.pushState(document.title, newUrl);
@@ -190,19 +283,19 @@ function removeActionRequestInURL() {
         delete getParams.action;
         delete getParams['action-data'];
         const newUrl = URL.createRequestQuery(getParams);
-        URL.pushState(document.title, newUrl);
+        URL.replaceState(document.title, newUrl);
     }
 }
 
 function onBoxTypeQuantityChange($quantity) {
-    const $row = $quantity.closest('.cartBox');
+    const $row = $quantity.closest('.cart-box');
     const unitPrice = $row.find('[name="unitPrice"]').val();
-    const quantity = $quantity.val();
-
+    const $input = $quantity.siblings('input').first();
+    const quantity = $input.val() > 0 ? $input.val() : 1;
     const $totalPrice = $row.find('.totalPrice');
     const totalPrice = unitPrice * quantity;
     const totalPriceStr = StringHelper.formatPrice(totalPrice);
-    $totalPrice.text(totalPriceStr);
+    $totalPrice.text(totalPriceStr+" €");
 
 }
 
@@ -231,6 +324,15 @@ function addBoxTypeModel($modal) {
     }
 }
 
+function getTimeLine($modal, $clientOrder) {
+    AJAX
+        .route(`GET`, `client_order_history_api`, {id: $clientOrder})
+        .json()
+        .then((res) => {
+            $modal.find(`.client-order-history`).empty().append(res.template);
+        });
+}
+
 function addSelectedBoxTypeToCart($modal) {
     const $select2 = $modal.find('[name="boxType"]');
     const [typeBoxData] = $select2.select2('data');
@@ -246,7 +348,7 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
     const unitPriceStr = StringHelper.formatPrice(unitPrice);
 
     const $cartContainer = $modal.find(".cart-container");
-    const $alreadyAddedBox = $cartContainer.find(`.cartBox[data-id="${typeBoxData.id}"]`);
+    const $alreadyAddedBox = $cartContainer.find(`.cart-box[data-id="${typeBoxData.id}"]`);
     if ($alreadyAddedBox.exists()) {
         const $quantity = $alreadyAddedBox.find('[name="quantity"]');
         const $unitPrice = $alreadyAddedBox.find('[name="unitPrice"]');
@@ -269,7 +371,7 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
         const initialQuantity = typeBoxData.quantity || 1;
         const volume = typeBoxData.volume || 0;
         const $boxTypeLine = $(`
-            <div class="cartBox my-2 row" data-id="${typeBoxData.id}">
+            <div class="cart-box box-type-line my-2 row" data-id="${typeBoxData.id}">
                 <span class="col-auto">
                     <div class="box-type-image">${boxTypeImage}</div>
                 </span>
@@ -281,9 +383,9 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
                 </div>
                 </div>
                 <span class="col bigTxt">${typeBoxData.name}</span>
-                <input name="unitPrice" class="data-array" value="${unitPrice}" type="hidden"/>
+                <input name="unitPrice" class="data-array" value="${unitPrice} " type="hidden"/>
                 <input name="volume" value="${volume}" type="hidden"/>
-                <span class="col-2 unit-price-item">T.U. ${unitPriceStr}</span>
+                <span class="col-2 unit-price-item">T.U. ${unitPriceStr} €</span>
                 <span class="totalPrice col-2 bigTxt"></span>
                 <button class="remove d-inline-flex" value="${typeBoxData.id}"><i class="bxi bxi-trash-circle col"></i></button>
                 <input type="hidden" name="boxTypeId" class="data-array" value="${typeBoxData.id}">
@@ -293,16 +395,17 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
 
         $boxTypeLine.find(".remove").on('click', function(){
             $boxTypeLine.remove();
-            if(!$modal.find(`.cartBox`).exists()) {
-                $modal.find(".emptyCart").removeClass(`d-none`);
+            if(!$modal.find(`.box-type-line`).exists()) {
+                $modal.find(".empty-cart").removeClass(`d-none`);
+                $modal.find(".crate-number-average").addClass('d-none').empty();
             }
         });
 
         onBoxTypeQuantityChange($boxTypeLine.find('[name="quantity"]'));
     }
 
-    if($modal.find(`.cartBox`).exists()) {
-        $modal.find(".emptyCart").addClass(`d-none`);
+    if($modal.find(`.cart-box`).exists()) {
+        $modal.find(".empty-cart").addClass(`d-none`);
     }
 
     if (calculateAverageCrateNumber) {
@@ -342,7 +445,7 @@ function updateCrateNumberAverage($modal) {
         .then(({average}) => {
             let boxesVolume = [];
             $modal
-                .find('.cart-container .cartBox')
+                .find('.cart-container .box-type-line')
                 .each(function() {
                     const $line = $(this);
                     const quantity = Number($line.find('[name="quantity"]').val()) || 0;
@@ -361,12 +464,15 @@ function updateCrateNumberAverage($modal) {
                 ? Math.ceil(boxesVolume / average)
                 : null;
             const $crateNumberAverage = $modal.find('.crate-number-average');
+
             if (crateAverage) {
                 const crateAverageInt = Math.ceil(crateAverage);
                 $crateNumberAverage.text(`Représente environ ${crateAverageInt} caisse${crateAverageInt > 1 ? 's' : ''}`);
+                $crateNumberAverage.removeClass('d-none');
             }
             else {
                 $crateNumberAverage.text('');
+                $crateNumberAverage.addClass('d-none');
             }
         });
 }

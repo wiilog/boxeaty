@@ -82,6 +82,11 @@ class ClientOrder {
     private ?int $cratesAmount = null;
 
     /**
+     * @ORM\Column(type="integer")
+     */
+    private ?int $tokensAmount = null;
+
+    /**
      * @ORM\Column(type="decimal", precision=8, scale=2)
      */
     private ?float $deliveryPrice = null;
@@ -191,6 +196,13 @@ class ClientOrder {
         return $this->status;
     }
 
+    public function isOnStatusCode(string $code): bool {
+        return (
+            $this->getStatus()
+            && $this->getStatus()->getCode() === $code
+        );
+    }
+
     public function setStatus(Status $status): self {
         $this->status = $status;
         return $this;
@@ -201,6 +213,31 @@ class ClientOrder {
      */
     public function getOrderStatusHistory(): Collection {
         return $this->orderStatusHistory;
+    }
+
+    /**
+     * @return OrderStatusHistory[]
+     */
+    public function getEditableStatusHistory(): array {
+        $previousStatus = null;
+        $statuses = [];
+
+        $history = array_reverse($this->getOrderStatusHistory()->toArray());
+        foreach ($history as $status) {
+            $hierarchy = array_search($status->getStatus()->getCode(), Status::ORDER_STATUS_HIERARCHY);
+
+            if ($previousStatus !== null && $hierarchy > $previousStatus) {
+                break;
+            }
+
+            $statuses[] = $status;
+            $previousStatus = $hierarchy;
+        }
+
+        return Stream::from($statuses)
+            ->slice(1)
+            ->reverse()
+            ->toArray();
     }
 
     public function addOrderStatusHistory(OrderStatusHistory $orderStatusHistory): self {
@@ -273,6 +310,16 @@ class ClientOrder {
         return $this;
     }
 
+    public function getTokensAmount(): ?int {
+        return $this->tokensAmount;
+    }
+
+    public function setTokensAmount(int $tokensAmount): self {
+        $this->tokensAmount = $tokensAmount;
+
+        return $this;
+    }
+
     public function getDeliveryPrice(): ?float {
         return $this->deliveryPrice;
     }
@@ -331,7 +378,7 @@ class ClientOrder {
         return $this->comment;
     }
 
-    public function setComment(string $comment): self {
+    public function setComment(?string $comment): self {
         $this->comment = $comment;
 
         return $this;
@@ -458,10 +505,11 @@ class ClientOrder {
         return $this;
     }
 
-    public function getCartAmountPrice(?array $lines){
-       return Stream::from($lines)->reduce(function(int $total, $line) {
-            $boxType = $line['boxType'];
-            return $total + ($boxType->getPrice() * $line['quantity']);
-        }, 0);
+    public function getTotalAmount(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getPrice() ?: 0)),
+                0
+            );
     }
 }

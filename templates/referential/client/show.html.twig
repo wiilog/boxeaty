@@ -29,6 +29,7 @@
                         </div>
                         <span class="body-text-semi-bold">{{ client.address }}</span>
                         <span class="body-text mt-2">{{ client.contact.username }} - {{ client.phoneNumber }}</span>
+                        <span class="font-italic">Droits indicateurs: {{ constant('App\\Entity\\Role::VIEW_INDICATORS') in client.contact.role.permissions ? 'oui' : 'non' }}</span>
                     </div>
                     <div class="col-4 p-0 d-flex justify-content-end">
                     <span class="edit-client round" data-id="{{ client.id }}">
@@ -52,7 +53,7 @@
                         </div>
                     </div>
                     <div class="row mt-4">
-                        <span class="body-text">Tickets valable: <strong>24 mois</strong></span>
+                        <span class="body-text">Tickets valable: <strong>{{ client.depositTicketValidity }} mois</strong></span>
                     </div>
                     <div class="row mt-4">
                         <span class="big-text">Multi site lié</span>
@@ -69,7 +70,7 @@
                         </div>
                     </div>
                     <div class="row mt-4">
-                        <span class="big-text">Moyen de paiement préféré</span>
+                        <span class="big-text">Moyen(s) de paiement préféré(s)</span>
                         <div class="d-flex">
                             {% if client.paymentModes is not empty %}
                                 {% for paymentMode in client.paymentModes|split(',') %}
@@ -104,28 +105,38 @@
                     <div class="row mt-4">
                         <span class="big-text">Dépôt au départ</span>
                         <div class="d-flex">
-                            {% set depository = clientOrderInformation.depository is defined and clientOrderInformation.depository ? clientOrderInformation.depository : null %}
+                            {% set depository = clientOrderInformation.depository is defined and clientOrderInformation.depository
+                                ? clientOrderInformation.depository
+                                : null %}
                             {% if depository %}
                                 <span class="body-text">{{ depository.name }} à {{ clientOrderInformation.depositoryDistance ~ 'km' }}</span>
+                            {% else %}
+                                <span class="body-text">-</span>
                             {% endif %}
                         </div>
                     </div>
-                    {% if clientOrderInformation and clientOrderInformation.orderType %}
-                        <div class="order-type mt-4 w-75">
-                            <span>{{ constant('App\\Entity\\ClientOrderInformation::ORDER_TYPES')[clientOrderInformation.orderType] }}</span>
+                    {% if clientOrderInformation and clientOrderInformation.orderTypes is not empty %}
+                        <div class="d-flex flex-wrap">
+                            {% for orderType in clientOrderInformation.orderTypes %}
+                                {% if orderType != "" %}
+                                    <div class="order-type mt-4 w-50">
+                                        <span>{{ constant('App\\Entity\\ClientOrderInformation::ORDER_TYPES')[orderType] }}</span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                         </div>
                     {% endif %}
                     <div class="row mt-4">
                         <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.tokenAmount ? clientOrderInformation.tokenAmount : 'aucun ' }}</strong> jeton{{ clientOrderInformation and clientOrderInformation.tokenAmount > 1 ? 's' : '' }} par commande</span>
                     </div>
                     <div class="row mt-4">
-                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.workingDayDeliveryRate ? clientOrderInformation.workingDayDeliveryRate|format_helper('price') : '- €' }}€</strong> en forfait livraison jour ouvré</span>
+                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.workingDayDeliveryRate ? clientOrderInformation.workingDayDeliveryRate|format_helper('price') : '- €' }}</strong> en forfait livraison jour ouvré</span>
                     </div>
                     <div class="row mt-4">
-                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.nonWorkingDayDeliveryRate ? clientOrderInformation.nonWorkingDayDeliveryRate|format_helper('price') : '- €' }}€</strong> en forfait livraison jour non ouvré</span>
+                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.nonWorkingDayDeliveryRate ? clientOrderInformation.nonWorkingDayDeliveryRate|format_helper('price') : '- €' }}</strong> en forfait livraison jour non ouvré</span>
                     </div>
                     <div class="row mt-4">
-                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.serviceCost ? clientOrderInformation.serviceCost|format_helper('price') : '- €' }}€</strong> en frais de service</span>
+                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.serviceCost ? clientOrderInformation.serviceCost|format_helper('price') : '- €' }}</strong> en frais de service</span>
                     </div>
                     {% if clientOrderInformation and clientOrderInformation.comment %}
                         <div class="row mt-4">

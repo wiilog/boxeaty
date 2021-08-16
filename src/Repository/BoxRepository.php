@@ -4,10 +4,12 @@ namespace App\Repository;
 
 use App\Entity\Box;
 use App\Entity\Depository;
+use App\Entity\Preparation;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use App\Service\BoxStateService;
 use Doctrine\ORM\EntityRepository;
+use WiiCommon\Helper\Stream;
 
 /**
  * @method Box|null find($id, $lockMode = null, $lockVersion = null)
@@ -80,6 +82,21 @@ class BoxRepository extends EntityRepository {
             ->getArrayResult();
     }
 
+    public function getLocationData($available, $isBox) {
+        $qb = $this->createQueryBuilder("box");
+
+        return $qb->select("COUNT(box.id)")
+            ->leftJoin("box.location","location")
+            ->where("box.state = :available")
+            ->andWhere("location.active = 1")
+            ->andWhere("location.type = 3")
+            ->andWhere("box.isBox = :isBox")
+            ->setParameter("available", "$available")
+            ->setParameter("isBox", "$isBox")
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function findForDatatable(array $params, ?User $user): array {
         $search = $params["search"]["value"] ?? null;
 
@@ -89,20 +106,31 @@ class BoxRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "box");
 
         if ($search) {
-            $qb->leftJoin("box.location", "search_location")
-                ->leftJoin("box.owner", "search_owner")
-                ->leftJoin("box.quality", "search_quality")
-                ->leftJoin("box.type", "search_type")
-                ->andWhere($qb->expr()->orX(
-                    "box.number LIKE :search",
-                    "search_location.name LIKE :search",
-                    "search_owner.name LIKE :search",
-                    "search_quality.name LIKE :search",
-                    "search_type.name LIKE :search",
-                    "DATE_FORMAT(box.creationDate, '%d/%m/%Y') LIKE :search",
-                    "DATE_FORMAT(box.creationDate, '%H:%i') LIKE :search"
-                ))
-                ->setParameter("search", "%$search%");
+            $state = Stream::from(BoxStateService::BOX_STATES)
+                ->filter(fn($value) => strpos($value, $search) > -1)
+                ->firstKey();
+
+            if(isset($state)) {
+                $qb
+                    ->andWhere("box.state LIKE :state")
+                    ->setParameter("state", $state + 1);
+            } else {
+                $qb
+                    ->leftJoin("box.location", "search_location")
+                    ->leftJoin("box.owner", "search_owner")
+                    ->leftJoin("box.quality", "search_quality")
+                    ->leftJoin("box.type", "search_type")
+                    ->andWhere($qb->expr()->orX(
+                        "box.number LIKE :search",
+                        "search_location.name LIKE :search",
+                        "search_owner.name LIKE :search",
+                        "search_quality.name LIKE :search",
+                        "search_type.name LIKE :search",
+                        "DATE_FORMAT(box.creationDate, '%d/%m/%Y') LIKE :search",
+                        "DATE_FORMAT(box.creationDate, '%H:%i') LIKE :search"
+                    ))
+                    ->setParameter("search", "%$search%");
+            }
         }
 
         foreach ($params["filters"] ?? [] as $name => $value) {
@@ -126,8 +154,10 @@ class BoxRepository extends EntityRepository {
                         ->setParameter("filter_depository", $value);
                     break;
                 case("box"):
-                    $qb->andWhere("box.isBox = :filter_isbox")
-                        ->setParameter("filter_isbox", $value);
+                    if($value !== null && $value !== "") {
+                        $qb->andWhere("box.isBox IN (:filter_isbox)")
+                            ->setParameter("filter_isbox", explode(",", $value));
+                    }
                     break;
                 default:
                     $qb->andWhere("box.$name = :filter_$name")
@@ -224,6 +254,42 @@ class BoxRepository extends EntityRepository {
             ->setParameter("number", $number)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function getByPreparation(Preparation $preparation) {
+        $qb = $this->createQueryBuilder('box');
+
+        $qb->select('box.id AS id')
+            ->addSelect('box.number AS number')
+            ->addSelect('join_type.name AS type')
+            ->leftJoin('box.type', 'join_type')
+            ->leftJoin('box.boxPreparationLines', 'join_boxPreparationLines')
+            ->leftJoin('join_boxPreparationLines.preparation', 'join_preparation')
+            ->where('box.isBox = 0')
+            ->andWhere('join_preparation = :preparation')
+            ->setParameter('preparation', $preparation);
+
+        return $qb
+            ->getQuery()
+            ->execute();
+    }
+
+    public function getAvailableAndCleanedBoxByType(?array $boxTypes) {
+        $qb = $this->createQueryBuilder('box');
+
+        $qb->select('box')
+            ->leftJoin('box.quality', 'join_quality')
+            ->leftJoin('box.type', 'join_type')
+            ->where('box.isBox = 1')
+            ->andWhere('box.state = :state')
+            ->andWhere('join_type.id IN (:box_types)')
+            ->andWhere('join_quality.clean = 1')
+            ->setParameter('box_types', $boxTypes)
+            ->setParameter('state', BoxStateService::STATE_BOX_AVAILABLE);
+
+        return $qb
+            ->getQuery()
+            ->getResult();
     }
 
 }

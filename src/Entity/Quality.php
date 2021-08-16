@@ -36,6 +36,11 @@ class Quality {
      */
     private $records;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $clean = null;
+
     public function __construct() {
         $this->boxes = new ArrayCollection();
     }
@@ -104,6 +109,18 @@ class Quality {
                 $record->setQuality(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isClean(): ?bool
+    {
+        return $this->clean;
+    }
+
+    public function setClean(bool $clean): self
+    {
+        $this->clean = $clean;
 
         return $this;
     }

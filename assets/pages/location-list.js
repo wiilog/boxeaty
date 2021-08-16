@@ -1,5 +1,5 @@
 import {$document} from '../app';
-
+import "../styles/pages/location.scss";
 import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
@@ -30,10 +30,9 @@ $document.ready(() => {
             {data: `client_name`, title: `Nom du client`},
             {data: `active`, title: `Actif`},
             {data: `description`, title: `Description`},
-            {data: `boxes`, title: `Nombre de Box`, orderable: false},
             {data: `capacity`, title: `Capacité`},
             {data: `location_type`, title: `Type d'emplacement`},
-            {data: `container_amount`, title: `Nombre de contenants`},
+            {data: `container_amount`, title: `Nombre de contenants`, orderable: false},
             DATATABLE_ACTIONS,
         ],
         listeners: {

@@ -14,4 +14,13 @@
         <input type="radio" id="{{ quality.id ? 'edit' : 'new' }}-quality-inactive" name="active" class="data" value="0" {{ not quality.active ? 'checked' }}/>
         <label for="{{ quality.id ? 'edit' : 'new' }}-quality-inactive">Inactif</label>
     </div>
+    <div class="col-12 toggle">
+        <span class="label">Propre</span>
+
+        <input type="radio" id="{{ quality.id ? 'edit' : 'new' }}-clean-active" name="clean" class="data" value="1" {{ quality.clean ? 'checked' }}/>
+        <label for="{{ quality.id ? 'edit' : 'new' }}-clean-active">Oui</label>
+
+        <input type="radio" id="{{ quality.id ? 'edit' : 'new' }}-clean-inactive" name="clean" class="data" value="0" {{ not quality.clean ? 'checked' }}/>
+        <label for="{{ quality.id ? 'edit' : 'new' }}-clean-inactive">Non</label>
+    </div>
 </div>

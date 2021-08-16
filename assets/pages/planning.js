@@ -1,14 +1,17 @@
 import {$document} from "../app";
 
 import $ from "jquery";
-import Modal, {processForm} from "../modal";
+import Modal, {clearForm, processForm} from "../modal";
 import sortable from '../../node_modules/html5sortable/dist/html5sortable.es.js';
 import "../styles/pages/planning.scss";
 import AJAX from "../ajax";
 import {findCoordinates, Map} from "../maps";
+import {DateTools} from "../util";
 
 $(document).ready(() => {
     const $filters = $(`.filters`);
+
+    DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 20);
 
     $filters.find(`.filter`).click(function () {
         const params = processForm($filters).asObject();
@@ -93,6 +96,10 @@ $(document).ready(() => {
                     });
             }
         });
+    });
+
+    $(`.empty-filters`).click(function() {
+        clearForm($(this).parents(`.filters`))
     });
 
     $document.arrive(`[data-sortable]`, function () {

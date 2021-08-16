@@ -47,7 +47,7 @@ class ClientBoxType
         return $this->customUnitPrice;
     }
 
-    public function setCustomUnitPrice(float $customUnitPrice): self
+    public function setCustomUnitPrice(?float $customUnitPrice): self
     {
         $this->customUnitPrice = $customUnitPrice;
 

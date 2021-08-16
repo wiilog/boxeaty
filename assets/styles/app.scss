@@ -21,6 +21,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import "settings";
 @import "timeline";
 @import "icons";
+@import "indicators";
 
 html {
     height: 100%;
@@ -478,4 +479,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     font-size: 15px;
     font-weight: 200;
     color: $blue;
+}
+
+.green-text {
+    color: #76B39D;
+    font-family: Retroyal, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.italic-text {
+    font-weight: 500;
 }

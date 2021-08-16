@@ -43,9 +43,9 @@ class ExportService {
         "Nom du client",
         "Actif",
         "Description",
-        "Nombre de contenants",
         "Capacité",
         "Type d'emplacement",
+        "Nombre de contenants",
     ];
 
     public const MOVEMENT_HEADER = [
@@ -59,7 +59,7 @@ class ExportService {
     ];
 
     public const BOX_TYPE_HEADER = [
-        "Type de Box",
+        "Type de Box / Caisse",
         "Prix",
         "Actif",
         "Contenance",

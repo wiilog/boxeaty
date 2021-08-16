@@ -1,0 +1,93 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Tracabilité{% endblock %}
+{% block page %}Indicateurs{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block filter_header %}
+    {% include 'filters/filter_items/indicators_filters.html.twig' %}
+{% endblock %}
+
+{% block content %}
+
+    <div class="box first-box">
+        <div id="indicators">
+            <div class="row">
+                <div class="col-6">
+                    <div class="header-section header-section-rounded">
+                        <h2 class="header-section-label">Indicateurs d'impact</h2>
+                    </div>
+                    <div class="row justify-content-evenly text-center">
+                        <div class="col-3">
+
+                            <img class="indicator-img" src="{{ asset('images/trash.png') }}"
+                                 alt="Image de poubelle">
+                            <p class="indicator-value">
+                                <strong class="waste-avoided"></strong>
+                            </p>
+                            <p class="bigTxt">de déchets évités</p>
+                        </div>
+                        <div class="col-3">
+                            <img class="indicator-img" src="{{ asset('images/doubleBoxes.png') }}" alt="Image de Box">
+                            <p class="indicator-value">
+                                <strong class="total-boxes"></strong>
+                            </p>
+                            <p class="bigTxt">Contenants utilisés</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="header-section header-section-rounded">
+                        <h2 class="header-section-label">Indicateurs carbone</h2>
+                    </div>
+                    <div class="row justify-content-evenly text-center">
+                        <div class="col-3">
+                            <img class="indicator-img" src="{{ asset('images/delivery-bike.png') }}" alt="Image de vélo">
+                            <p class="indicator-value">
+                                <strong class="soft-mobility-total-distance"></strong>
+                            </p>
+                            <p class="bigTxt">En mobilité douce</p>
+                        </div>
+                        <div class="col-3">
+                            <img class="indicator-img" src="{{ asset('images/light-truck.png') }}"
+                                 alt="Image de camion">
+                            <p class="indicator-value">
+                                <strong class="motor-vehicles-total-distance"></strong>
+                            </p>
+                            <p class="bigTxt">En véhicule à moteur</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6 mb-3 pt-3 pb-3">
+                    <h3 class="bigTxt"> Historique des contenants</h3>
+                    {% include 'data_visualisation/chart.html.twig' %}
+                </div>
+                <div class="col-6">
+                    <div class="header-section header-section-rounded mb-5">
+                        <h2 class="header-section-label">Taux de retour</h2>
+                    </div>
+                    <div class="row justify-content-center text-center">
+                        <div class="col-3">
+                            <img class="indicator-img" src="{{ asset('images/return-rate.png') }} "
+                                 alt="Image taux de retour">
+                            <p class="indicator-value return-rate">
+                                <strong></strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="primary filter exportPDF float-end">Exporter PDF</button>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('indicators') }}
+{% endblock %}

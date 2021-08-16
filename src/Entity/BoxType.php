@@ -12,6 +12,9 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class BoxType {
 
+    public const DEFAULT_VOLUME = 0.0005;
+    public const STARTER_KIT = 'Kit de démarrage';
+
     use Active;
 
     /**
@@ -57,7 +60,7 @@ class BoxType {
     private Collection $clientOrderLines;
 
     /**
-     * @ORM\Column(type="decimal", precision=5, scale=2, nullable=true)
+     * @ORM\Column(type="decimal", precision=5, scale=4, nullable=true)
      */
     private ?float $volume = null;
 

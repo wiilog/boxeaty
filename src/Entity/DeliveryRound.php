@@ -145,11 +145,11 @@ class DeliveryRound {
         return $this;
     }
 
-    public function getDistance(): ?string {
+    public function getDistance(): ?float {
         return $this->distance;
     }
 
-    public function setDistance(string $distance): self {
+    public function setDistance(float $distance): self {
         $this->distance = $distance;
 
         return $this;

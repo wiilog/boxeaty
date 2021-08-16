@@ -64,6 +64,10 @@ export class URL {
     static pushState(title, url) {
         window.history.pushState({path: url}, title, url);
     }
+
+    static replaceState(title, url) {
+        window.history.replaceState({path: url}, title, url);
+    }
 }
 
 FormData.prototype.asObject = function() {
@@ -82,4 +86,29 @@ FormData.fromObject = function(object) {
     }
 
     return data;
+}
+
+export class DateTools {
+    static manageDateLimits(from, to, days) {
+        $(`${from}, ${to}`).on(`change`, function () {
+            const $to = $(this).parent().siblings(`.dates`).first().find(`${to}`);
+            const $from = $(this).parent().siblings(`.dates`).first().find(`${from}`);
+
+            if ($(this).hasClass(`from`)) {
+                let date = new Date($(this).val());
+                date.setDate(date.getDate() + days);
+                let max = date
+                    .getFullYear() + "-" + ('0' + (date
+                    .getMonth() + 1))
+                    .slice(-2) + "-" + ('0' + date
+                    .getDate())
+                    .slice(-2);
+
+                $to.attr('min', $(this).val());
+                $to.attr('max', max);
+            } else {
+                $from.attr('max', $(this).val());
+            }
+        });
+    }
 }
