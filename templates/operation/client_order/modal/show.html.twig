@@ -1,0 +1,48 @@
+<div id="modal-show-client-order" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Détails de la commande</h1>
+
+            <div class="body">
+                <div>
+                    <div class="header-section">
+                        <span class="header-section-label">Liste des Box</span>
+                    </div>
+
+                    {% include 'operation/client_order/modal/boxList.html.twig' %}
+
+                    <div class="row">
+                        <div class="col-auto">
+                            {% if clientOrder.deliveryPrice %}
+                                Livraison <b>{{ clientOrder.deliveryPrice|format_helper('price') }}</b>
+                            {% endif %}
+                        </div>
+                        <div class="col-auto ml-4">
+                            {% if clientOrder.servicePrice %}
+                                Service <b>{{ clientOrder.servicePrice|format_helper('price') }}</b>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="header-section">
+                    <span class="header-section-label">Évènement</span>
+                </div>
+                <div class="details-content body client-order-history"></div>
+                {% if clientOrder.editableStatusHistory is not empty %}
+                    <button class="primary edit-status-button mb-2">Modifier le statut</button>
+                {% endif %}
+            </div>
+            <div>
+                <div class="header-section">
+                    <span class="header-section-label">Preuve de livraison et collecte</span>
+                </div>
+                <div class="details-content body">
+                    {# TODO #}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

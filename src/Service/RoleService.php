@@ -16,20 +16,30 @@ class RoleService {
         if ($user && $user instanceof User && $user->isActive()) {
             $role = $user->getRole();
 
-            foreach ($permissions as $permission) {
-                if(in_array($permission, Role::ADDITIONAL_PERMISSIONS)) {
-                    if($permission === Role::ALLOW_EDIT_OWN_GROUP_ONLY && !$role->isAllowEditOwnGroupOnly()
-                        || $permission === Role::REDIRECT_NEW_COUNTER_ORDER && !$role->getRedirectNewCounterOrder()
-                        || $permission === Role::SHOW_INDICATORS_ON_HOME && !$role->getShowIndicatorsOnHome()
-                        || $permission === Role::RECEIVE_MAILS_NEW_ACCOUNTS && !$role->isReceiveMailsNewAccounts()) {
-                        return false;
-                    }
-                } else if(!in_array($permission, $role->getPermissions())) {
-                    return false;
-                }
+            $hasPermission = false;
+            $permissionCount = count($permissions);
+            $index = 0;
+
+            // if the user has at least one permission we return true
+            while (!$hasPermission
+                   && $index < $permissionCount) {
+                $permission = $permissions[$index];
+                $hasPermission = (
+                    (in_array($permission, $role->getPermissions()))
+                    || (
+                        in_array($permission, Role::ADDITIONAL_PERMISSIONS)
+                        && (
+                            $permission === Role::ALLOW_EDIT_OWN_GROUP_ONLY && $role->isAllowEditOwnGroupOnly()
+                            || $permission === Role::REDIRECT_NEW_COUNTER_ORDER && $role->getRedirectNewCounterOrder()
+                            || $permission === Role::SHOW_INDICATORS_ON_HOME && $role->getShowIndicatorsOnHome()
+                            || $permission === Role::RECEIVE_MAILS_NEW_ACCOUNTS && $role->isReceiveMailsNewAccounts()
+                        )
+                    )
+                );
+                $index++;
             }
 
-            return true;
+            return $hasPermission;
         } else {
             return false;
         }

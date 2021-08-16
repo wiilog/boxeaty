@@ -11,6 +11,7 @@ use App\Entity\BoxRecord;
 use App\Helper\FormatHelper;
 use App\Repository\CounterOrderRepository;
 use App\Service\BoxRecordService;
+use App\Service\BoxStateService;
 use App\Service\CounterOrderService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,7 +22,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/tracabilite/commande-comptoir")
+ * @Route("/operation/commande-comptoir")
  */
 class CounterOrderController extends AbstractController {
 
@@ -33,7 +34,7 @@ class CounterOrderController extends AbstractController {
      * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
-        return $this->render("tracking/counter_order/index.html.twig", [
+        return $this->render("operation/counter_order/index.html.twig", [
             "new_order" => new CounterOrder(),
             "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => CounterOrderRepository::DEFAULT_DATATABLE_ORDER,
@@ -92,7 +93,7 @@ class CounterOrderController extends AbstractController {
                 ]);
             }
 
-            if ($box->getState() !== Box::CLIENT) {
+            if ($box->getState() !== BoxStateService::STATE_BOX_CLIENT) {
                 return $this->json([
                     "success" => false,
                     "unique" => true,
@@ -182,7 +183,6 @@ class CounterOrderController extends AbstractController {
         } else {
             $modal = $this->service->renderPayment();
         }
-
         return $this->json([
             "success" => true,
             "modal" => $modal,
@@ -228,7 +228,7 @@ class CounterOrderController extends AbstractController {
             $oldState = $box->getState();
 
             $box->setLocation($client->getOutLocation());
-            $box->setState(Box::CONSUMER);
+            $box->setState(BoxStateService::STATE_BOX_CONSUMER);
 
             [$tracking, $record] = $boxRecordService->generateBoxRecords(
                 $box,
@@ -285,7 +285,7 @@ class CounterOrderController extends AbstractController {
 
                 $previousMovement = $manager->getRepository(BoxRecord::class)->findPreviousTrackingMovement($box);
 
-                $box->setState(Box::CLIENT)
+                $box->setState(BoxStateService::STATE_BOX_CLIENT)
                     ->setLocation($previousMovement ? $previousMovement->getLocation() : null);
 
                 [$tracking, $record] = $boxRecordService->generateBoxRecords(

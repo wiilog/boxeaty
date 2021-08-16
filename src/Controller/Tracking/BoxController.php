@@ -6,19 +6,20 @@ use App\Annotation\HasPermission;
 use App\Entity\Box;
 use App\Entity\BoxType;
 use App\Entity\Client;
+use App\Entity\ClientOrder;
 use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\BoxRecord;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
+use App\Service\BoxStateService;
 use WiiCommon\Helper\Stream;
 use App\Repository\BoxRepository;
 use App\Service\BoxRecordService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use DoctrineExtensions\Query\Mysql\Date;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -59,7 +60,7 @@ class BoxController extends AbstractController {
                 "creationDate" => FormatHelper::datetime($box->getCreationDate()),
                 "isBox" => $box->isBox() ? 'Oui' : 'Non',
                 "location" => FormatHelper::named($box->getLocation()),
-                "state" => Box::NAMES[$box->getState()] ?? "-",
+                "state" => BoxStateService::BOX_STATES[$box->getState()] ?? "-",
                 "quality" => FormatHelper::named($box->getQuality()),
                 "owner" => FormatHelper::named($box->getOwner()),
                 "type" => FormatHelper::named($box->getType()),
@@ -139,9 +140,14 @@ class BoxController extends AbstractController {
      * @Route("/voir/{box}", name="box_show", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function show(Box $box): Response {
+    public function show(Box $box,
+                         EntityManagerInterface $entityManager): Response {
+        $clientOrderRepository = $entityManager->getRepository(ClientOrder::class);
+        $clientOrderInProgress = $clientOrderRepository->findLastInProgressFor($box);
+
         return $this->render('tracking/box/show.html.twig', [
             "box" => $box,
+            "clientOrderInProgress" => $clientOrderInProgress
         ]);
     }
 
@@ -277,7 +283,7 @@ class BoxController extends AbstractController {
 
         return $exportService->export(function($output) use ($exportService, $boxes) {
             foreach ($boxes as $box) {
-                $box["state"] = Box::NAMES[$box["state"]];
+                $box["state"] = BoxStateService::BOX_STATES[$box["state"]];
                 $exportService->putLine($output, $box);
             }
         }, "export-box-$today.csv", ExportService::BOX_HEADER);
@@ -302,16 +308,139 @@ class BoxController extends AbstractController {
             'isTail' => ($start + $length) >= $boxMovementsResult['totalCount'],
             'data' => Stream::from($boxMovementsResult['data'])
                 ->map(fn(array $movement) => [
-                    'comment' => str_replace("Powered by Froala Editor", "", $movement['comment']),
-                    'color' => (isset($movement['state']) && isset(Box::LINKED_COLORS[$movement['state']]))
-                        ? Box::LINKED_COLORS[$movement['state']]
-                        : Box::DEFAULT_COLOR,
-                    'date' => isset($movement['date']) ? $movement['date']->format('d/m/Y à H:i:s') : 'Non définie',
-                    'state' => (isset($movement['state']) && isset(Box::NAMES[$movement['state']]))
-                        ? Box::NAMES[$movement['state']]
+                    'quality' => $movement['quality'] ?? "",
+                    'color' => (isset($movement['state']) && isset(BoxStateService::LINKED_COLORS[$movement['state']]))
+                        ? BoxStateService::LINKED_COLORS[$movement['state']]
+                        : BoxStateService::DEFAULT_COLOR,
+                    'date' => isset($movement['date'])
+                        ? ($movement['date']->format("d") . ' ' . FormatHelper::MONTHS[$movement['date']->format('n')] . ' ' . $movement['date']->format("Y"))
+                        : '',
+                    'time' => isset($movement['date']) ? $movement['date']->format('H:i') : 'Non définie',
+                    'state' => (isset($movement['state']) && isset(BoxStateService::RECORD_STATES[$movement['state']]))
+                        ? BoxStateService::RECORD_STATES[$movement['state']]
                         : '-',
+                    'crate' => !empty($movement['crateId'])
+                        ? [
+                            'number' => $movement['crateNumber'],
+                            'id' => $movement['crateId']
+                        ]
+                        : null,
+                    'operator' => $movement['operator'] ?? "",
+                    'location' => $movement['location'] ?? "",
+                    'depository' => $movement['depository'] ?? "",
                 ])
                 ->toArray(),
+        ]);
+    }
+
+    /**
+     * @Route("/add-box", name="add_box_in_crate", options={"expose": true}, methods={"GET"})
+     */
+    public function addBoxInCrate(Request $request,
+                                  EntityManagerInterface $entityManager,
+                                  BoxRecordService $boxRecordService){
+
+        $boxRepository = $entityManager->getRepository(Box::class);
+
+        $crate = $boxRepository->find($request->query->get("crate"));
+        $box = $boxRepository->find($request->query->get("box"));
+
+        if($box->getCrate()){
+            return $this->json([
+                "success" => false,
+                "template" => $this->renderView("tracking/box/box_in_crate.html.twig",["box" => $crate]),
+                "message" => "Box déjà présente dans cette caisse",
+            ]);
+        }
+        $box->setCrate($crate);
+
+        $tracking = $boxRecordService->createBoxRecord($box, true);
+
+        $tracking
+            ->setBox($box)
+            ->setUser($this->getUser())
+            ->setLocation($crate->getLocation())
+            ->setCrate($crate)
+            ->setState(BoxStateService::STATE_RECORD_PACKING);
+        $entityManager->persist($tracking);
+        $entityManager->flush();
+
+        return $this->json([
+            "success" => true,
+            "template" => $this->renderView("tracking/box/box_in_crate.html.twig",["box" => $crate]),
+            "message" => "Box ajoutée à la caisse avec succès",
+        ]);
+    }
+
+    /**
+     * @Route("/supprimer-box-in-crate/template/{box}", name="box_delete_in_crate_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_BOXES)
+     */
+    public function deleteBoxInCrateTemplate(Box $box): Response {
+        return $this->json([
+            "submit" => $this->generateUrl("box_delete_in_crate", ["box" => $box->getId()]),
+            "template" => $this->renderView("tracking/box/modal/delete_box_in_crate.html.twig", [
+                "box" => $box,
+            ])
+        ]);
+    }
+
+    /**
+     * @Route("/supprimer-box-in-crate", name="box_delete_in_crate", options={"expose": true})
+     * @HasPermission(Role::MANAGE_BOXES)
+     */
+    public function deleteBoxInCrate(Request $request,
+                                     EntityManagerInterface $entityManager,
+                                     BoxRecordService $boxRecordService): Response {
+
+        /** @var Box $box */
+        $box = $entityManager->getRepository(Box::class)->find($request->query->get("box"));
+
+        $oldCrate = $box->getCrate();
+
+        $tracking = $boxRecordService->createBoxRecord($box, true);
+
+        $tracking
+            ->setBox($box)
+            ->setUser($this->getUser())
+            ->setLocation($oldCrate->getLocation())
+            ->setCrate($oldCrate)
+            ->setState(BoxStateService::STATE_RECORD_UNPACKING);
+
+        $box->setCrate(null);
+        $entityManager->persist($tracking);
+        $entityManager->flush();
+
+        return $this->json([
+            "success" => true,
+            "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $oldCrate]),
+            "message" => "Box <strong>{$box->getNumber()}</strong> supprimée avec succès"
+        ]);
+    }
+
+    /**
+     * @Route("/box-in-crate-api", name="box_in_crate_api", options={"expose": true})
+     * @HasPermission(Role::MANAGE_BOXES)
+     */
+    public function boxInCrateApi(Request $request, EntityManagerInterface $manager) {
+        $id = $request->query->get('id');
+
+        $crate = $manager->getRepository(Box::class)->find($id);
+
+        return $this->json([
+            "success" => true,
+            "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $crate]),
+        ]);
+    }
+
+
+    /**
+     * @Route("/crate-average-volume", name="get_crate_average_volume", options={"expose": true})
+     */
+    public function getCrateAverageVolume(EntityManagerInterface $entityManager): JsonResponse {
+        $boxRepository = $entityManager->getRepository(Box::class);
+        return $this->json([
+            'average' => $boxRepository->getCrateAverageVolume()
         ]);
     }
 }

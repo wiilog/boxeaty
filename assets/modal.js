@@ -18,6 +18,7 @@ function deleteUpload(modal, name) {
 }
 
 export default class Modal {
+    static isTemplateLoading = false;
     id;
     element;
     config;
@@ -43,6 +44,10 @@ export default class Modal {
                 //close all select2 elements
                 $(this).select2('close');
             });
+
+            if(config.afterHidden) {
+                config.afterHidden(modal);
+            }
         });
 
         modal.element.on('shown.bs.modal', () => {
@@ -55,7 +60,7 @@ export default class Modal {
             const $button = $(this);
 
             $button.load(function() {
-                return config.submitter ? config.submitter() : modal.handleSubmit($button)
+                return config.submitter ? config.submitter($button) : modal.handleSubmit($button)
             });
         });
 
@@ -64,20 +69,31 @@ export default class Modal {
 
     static load(ajax, config = {}) {
         if(typeof ajax === 'string') {
-
             Modal.html({
                 ...config,
                 template: ajax,
             });
         } else {
-            ajax.json(response => {
-                delete response.success;
+            if(!Modal.isTemplateLoading){
+                Modal.isTemplateLoading = true;
+                ajax
+                    .json()
+                    .then((response) => {
+                        Modal.isTemplateLoading = false;
+                        delete response.success;
 
-                Modal.html({
-                    ...config,
-                    ...response,
-                });
-            });
+                        Modal.html({
+                            ...config,
+                            ...response,
+                        });
+                    })
+                    .catch(() => {
+                        Modal.isTemplateLoading = false;
+                        if (config.error) {
+                            config.error();
+                        }
+                    });
+            }
         }
     }
 
@@ -86,9 +102,24 @@ export default class Modal {
         $modal.appendTo(`body`);
         $modal.modal(`show`);
 
+        if(config.afterShown) {
+            $modal.on('shown.bs.modal', function() {
+                config.afterShown(modal);
+            });
+        }
+
         $modal.on('hidden.bs.modal', function() {
             $(this).remove();
-        })
+
+            modal.element.find('[data-s2-initialized]').each(function() {
+                //close all select2 elements
+                $(this).select2('close');
+            });
+
+            if(config.afterHidden) {
+                config.afterHidden(modal);
+            }
+        });
 
         const modal = new Modal();
         modal.id = Math.floor(Math.random() * 1000000);
@@ -104,10 +135,17 @@ export default class Modal {
             config.afterOpen(modal);
         }
 
-        $modal.find(`button[type="submit"]`).click(function() {
+        $modal.find(`button[type="submit"]`).on('click', function() {
             const $button = $(this);
             $button.load(() => modal.handleSubmit($button));
         });
+
+
+        if(config.onPrevious) {
+            $modal.find(`button[name="previous"]`).on('click', function () {
+                config.onPrevious(modal);
+            });
+        }
 
         return modal;
     }
@@ -115,7 +153,7 @@ export default class Modal {
     setupFileUploader() {
         const modal = this;
         const $dropframe = this.element.find(`.attachment-drop-frame`);
-        const $input = $dropframe.find(`input[name=attachment]`);
+        const $input = $dropframe.find(`input[type="file"]`);
 
         if($dropframe.exists()) {
             [`dragenter`, `dragover`, `dragleave`, `drop`].forEach(event => {
@@ -146,6 +184,16 @@ export default class Modal {
 
             $fileConfirmation.find('.file-delete-icon').on('click', function(e) {
                 $input.val('').trigger('change');
+                const $button = $(this);
+                const $fileInformation = $button.closest('.file-confirmation');
+                const $imageVisualisation = $fileInformation.find('.image-visualisation');
+                if ($imageVisualisation.exists()) {
+                    $imageVisualisation.attr('src', '');
+                }
+                const $fileDeleted = $fileInformation.find('[name="fileDeleted"]');
+                if ($fileDeleted.exists()) {
+                    $fileDeleted.val(1);
+                }
                 e.preventDefault();
             });
 
@@ -176,42 +224,44 @@ export default class Modal {
         }
 
         if(this.config.ajax) {
-            return this.config.ajax.json(data, result => {
-                if(!handleErrors(this.element, result)) {
-                    return;
-                }
-
-                //refresh the datatable
-                if(this.config && this.config.table) {
-                    if(this.config.table.ajax) {
-                        this.config.table.ajax.reload();
-                    } else {
-                        $(this.config.table).DataTable().ajax.reload();
+            return this.config.ajax
+                .json(data)
+                .then(result => {
+                    if(!handleErrors(this.element, result)) {
+                        return;
                     }
-                }
 
-                if(result.menu) {
-                    $(`#menu-dropdown`).replaceWith(result.menu);
-                }
+                    //refresh the datatable
+                    if(this.config && this.config.table) {
+                        if(this.config.table.ajax) {
+                            this.config.table.ajax.reload();
+                        } else {
+                            $(this.config.table).DataTable().ajax.reload();
+                        }
+                    }
 
-                if(result.modal) {
-                    delete result.success;
-                    delete result.menu;
+                    if(result.menu) {
+                        $(`#menu-dropdown`).replaceWith(result.menu);
+                    }
 
-                    Modal.html({
-                        ...this.config,
-                        ...result.modal,
-                    });
-                }
+                    if(result.modal) {
+                        delete result.success;
+                        delete result.menu;
 
-                if(!this.config.keepOpen) {
-                    this.close();
-                }
+                        Modal.html({
+                            ...this.config,
+                            ...result.modal,
+                        });
+                    }
 
-                if(result.success && this.config.success) {
-                    this.config.success(result);
-                }
-            });
+                    if(!this.config.keepOpen) {
+                        this.close();
+                    }
+
+                    if(result.success && this.config.success) {
+                        this.config.success(result, this);
+                    }
+                });
         } else {
             return new Promise((resolve) => {
                 if(!this.config.keepOpen) {
@@ -277,7 +327,12 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
         let $input = $(input);
 
         if($input.attr(`type`) === `radio`) {
-            $input = $parent.find(`input[type="radio"][name="${input.name}"]:checked`);
+            const $checked = $parent.find(`input[type="radio"][name="${input.name}"]:checked`);
+            if($checked.exists()) {
+                $input = $checked;
+            } else {
+                $input = $parent.find(`input[type="radio"][name="${input.name}"]`);
+            }
         } else if($input.attr(`type`) === `number`) {
             let val = parseInt($input.val());
             let min = parseInt($input.attr('min'));
@@ -323,12 +378,21 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
             }
         }
 
-        if($input.is(`[required]`) && !$input.val()) {
-            if(!(modal && $input.is(`[type="file"]`)) || !uploads[modal.id][$input.attr(`name`)]) {
+        if($input.is(`[required]`) || $input.is(`[data-required]`)) {
+            if(([`radio`, `checkbox`].includes($input.attr(`type`)) && !$input.is(`:checked`))) {
                 errors.push({
-                    elements: [$input],
-                    message: `Ce champ est requis`,
+                    global: true,
+                    message: `Vous devez sélectionner au moins un élément`,
                 });
+            } else if($input.is(`[data-wysiwyg]`) && !$input.find(`.ql-editor`).text() || !$input.is(`[data-wysiwyg]`) && !$input.val()) {
+                if (!(modal && $input.is(`[type="file"]`))
+                    || !uploads[modal.id]
+                    || !uploads[modal.id][$input.attr(`name`)]) {
+                    errors.push({
+                        elements: [$input],
+                        message: `Ce champ est requis`,
+                    });
+                }
             }
         }
 
@@ -345,7 +409,6 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
             if(typeof value === `string`) {
                 value = value.trim();
             }
-
             if(value !== null) {
                 data.append($input.attr(`name`) || $input.attr(`data-wysiwyg`), value);
             }
@@ -370,8 +433,13 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
     }
 
     // display errors under each field
+    $parent.find(`.global-error`).remove();
     for(const error of errors) {
-        error.elements.forEach($elem => showInvalid($elem, error.message));
+        if(error.global) {
+            showGlobalInvalid($parent, error.message);
+        } else {
+            error.elements.forEach($elem => showInvalid($elem, error.message));
+        }
     }
 
     return errors.length === 0 ? data : false;
@@ -419,14 +487,21 @@ export function handleErrors(element, result) {
 }
 
 function showInvalid($field, message) {
+    let $parent;
     if($field.is(`[data-s2-initialized]`)) {
         $field = $field.parent().find(`.select2-selection`);
     } else if($field.is(`[type="file"]`)) {
         $field = $field.parent();
     }
 
+    if($field.is(`[data-wysiwyg`)) {
+        $parent = $field.parent();
+    } else {
+        $parent = $field.parents(`label`);
+    }
+
     $field.addClass(`is-invalid`);
-    $field.parents(`label`).append(`<span class="invalid-feedback">${message}</span>`);
+    $parent.append(`<span class="invalid-feedback">${message}</span>`);
 }
 
 function showGlobalInvalid($modal, message) {
@@ -460,5 +535,21 @@ function proceedFileSaving($input, file, $fileEmpty, $fileConfirmation, modal) {
         $fileEmpty.addClass('d-none');
         $fileConfirmation.removeClass('d-none');
         $fileConfirmation.find('.file-name').text(file.name);
+
+        const $imageVisualisation = $fileConfirmation.find('.image-visualisation');
+        if ($imageVisualisation.exists()) {
+            showImage(file, $imageVisualisation);
+        }
+    }
+}
+
+function showImage(file, $image) {
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            $image
+                .attr('src', e.target.result);
+        };
+        reader.readAsDataURL(file);
     }
 }

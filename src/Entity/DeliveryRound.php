@@ -20,6 +20,11 @@ class DeliveryRound {
     private ?int $id = null;
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private ?string $number = null;
+
+    /**
      * @ORM\ManyToOne(targetEntity=Status::class)
      * @ORM\JoinColumn(nullable=false)
      */
@@ -69,6 +74,15 @@ class DeliveryRound {
 
     public function getId(): ?int {
         return $this->id;
+    }
+
+    public function getNumber(): ?string {
+        return $this->number;
+    }
+
+    public function setNumber(?string $number): self {
+        $this->number = $number;
+        return $this;
     }
 
     public function getStatus(): ?Status {
@@ -131,21 +145,21 @@ class DeliveryRound {
         return $this;
     }
 
-    public function getDistance(): ?string {
+    public function getDistance(): ?float {
         return $this->distance;
     }
 
-    public function setDistance(string $distance): self {
+    public function setDistance(float $distance): self {
         $this->distance = $distance;
 
         return $this;
     }
 
-    public function getOrder(): array {
+    public function getOrder(): ?array {
         return $this->order;
     }
 
-    public function setOrder(array $order): self {
+    public function setOrder(?array $order): self {
         $this->order = $order;
         return $this;
     }

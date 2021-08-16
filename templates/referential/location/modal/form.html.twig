@@ -2,11 +2,11 @@
     <div class="col-12 toggle location-type">
         <span class="label">Type</span>
 
-        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-kiosk" name="kiosk" class="data"
+        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-kiosk" name="kiosk" class="data location-type"
                value="1" {{ location.kiosk ? 'checked' }}/>
         <label for="{{ location.id ? 'edit' : 'new' }}-location-type-kiosk">Borne</label>
 
-        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-location" name="kiosk" class="data"
+        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-location" name="kiosk" class="data location-type"
                value="0" {{ not location.kiosk ? 'checked' }}/>
         <label for="{{ location.id ? 'edit' : 'new' }}-location-type-location">Emplacement</label>
     </div>
@@ -57,7 +57,7 @@
         <div class="d-flex justify-content-between align-items-center">
             {% for type, label in constant('App\\Entity\\Location::LOCATION_TYPES') %}
                 <label class="inline">
-                    <input type="radio" class="data" name="type" value="{{ type }}"
+                    <input type="radio" class="data no-clear" name="type" value="{{ type }}"
                             {{ location.type == type ? 'checked' }}>
                     {{ label }}
                 </label>
@@ -72,6 +72,12 @@
                     <option value="{{ location.depository.id }}" selected>{{ location.depository.name }}</option>
                 {% endif %}
             </select>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>
+            Description
+            <textarea type="text" name="description" class="data" placeholder="Votre description">{{ location.description }}</textarea>
         </label>
     </div>
 </div>

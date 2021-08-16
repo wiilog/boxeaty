@@ -1,7 +1,7 @@
 <div class="row justify-content-evenly">
     <div class="col-12 col-lg-6 col-xl-5 mb-sm-3">
-        <div class="header-section d-flex justify-content-center align-items-center">
-            <h3>Informations client</h3>
+        <div class="header-section header-section-rounded">
+            <h2 class="header-section-label">Informations client</h2>
         </div>
         <div class="d-sm-flex mt-3">
             <div class="col-6 pe-0 pe-sm-3">
@@ -16,11 +16,13 @@
                 <div class="d-flex">
                     <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-active" name="active" class="data"
                            value="1" {{ client.active ? 'checked' }}/>
-                    <label for="{{ client.id ? 'edit' : 'new' }}-client-active">Actif</label>
+                    <label for="{{ client.id ? 'edit' : 'new' }}-client-active"
+                           class="free-radio-button w-100">Actif</label>
 
                     <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-client-inactive" name="active" class="data"
                            value="0" {{ not client.active ? 'checked' }}/>
-                    <label for="{{ client.id ? 'edit' : 'new' }}-client-inactive">Inactif</label>
+                    <label for="{{ client.id ? 'edit' : 'new' }}-client-inactive"
+                           class="free-radio-button w-100">Inactif</label>
                 </div>
             </div>
         </div>
@@ -45,7 +47,7 @@
             </div>
         </div>
         <div class="d-sm-flex">
-            <div class="d-flex col-12 col-sm-6 align-items-center">
+            <div class="d-flex col-12 col-sm-6 align-items-center pe-sm-3">
                 <label class="mt-0 pe-2">Multi-site</label>
                 <div class="form-check form-switch">
                     <input class="form-check-input form-check-input-xl data mt-0" type="checkbox" name="isMultiSite"
@@ -54,7 +56,7 @@
                            for="{{ client.id ? 'edit' : 'new' }}-is-multi-site"></label>
                 </div>
             </div>
-            <div class="col-12 col-sm-6">
+            <div class="col-12 col-sm-6 ps-sm-3">
                 <label>
                     Client multi-site lié
                     <select class="data" name="linkedMultiSite" data-s2="multiSite"
@@ -117,6 +119,28 @@
                 </select>
             </div>
         </div>
+        <div class="d-sm-flex mt-3">
+            <div class="col-12 col-sm-6 pe-0 pe-sm-3 d-flex flex-column justify-content-between">
+                <label>
+                    Montant proratat (HT)
+                </label>
+                <input class="data" name="prorateAmount"
+                       placeholder="Renseignez un montant..." value="{{ client.prorateAmount }}"/>
+            </div>
+            <div class="col-12 col-sm-6 ps-0 ps-sm-3 d-flex flex-column justify-content-between">
+                <label>
+                    Moyen(s) de paiement préféré(s)
+                    <select class="data" name="paymentModes" data-s2 data-no-empty-option
+                            data-placeholder="Sélectionnez un ou plusieurs moyen(s) de paiement..." required multiple>
+                        {% for paymentMode in paymentModes %}
+                            <option value="{{ paymentMode }}"
+                                    {{ (paymentMode in client.paymentModes|split(',')) ? 'selected' }}>{{ paymentMode }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+        </div>
         <div class="col-12 d-flex align-items-center mt-3">
             <label class="mt-0 pe-2">Notification mail à la préparation de la commande</label>
             <div class="form-check form-switch">
@@ -129,8 +153,8 @@
         </div>
     </div>
     <div class="col-12 col-lg-6 col-xl-5">
-        <div class="header-section d-flex justify-content-center align-items-center">
-            <h3>Informations commande</h3>
+        <div class="header-section header-section-rounded">
+            <h2 class="header-section-label">Informations commande</h2>
         </div>
         <div class="d-sm-flex mt-3">
             <div class="col-12 col-sm-6 pe-0 pe-sm-3">
@@ -177,21 +201,32 @@
             </div>
         </div>
         <div class="col-12 toggle mt-4">
-            <span class="label">Type de commande disponible</span>
-            <div class="d-flex flex-column flex-xxl-row w-50">
-                <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-order-type-buy" name="orderType" class="data"
-                       value="1" {{ clientOrderInformation ? clientOrderInformation.orderType == 1 ? 'checked' }}/>
-                <label for="{{ client.id ? 'edit' : 'new' }}-order-type-buy">Achat / Négoce</label>
-
-                <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-order-type-manage" name="orderType"
-                       class="data"
-                       value="2" {{ clientOrderInformation ? clientOrderInformation.orderType == 2 ? 'checked' }}/>
-                <label for="{{ client.id ? 'edit' : 'new' }}-order-type-manage">Gestion autonome</label>
-
-                <input type="radio" id="{{ client.id ? 'edit' : 'new' }}-order-type-benefit" name="orderType"
-                       class="data"
-                       value="3" {{ clientOrderInformation ? clientOrderInformation.orderType == 3 ? 'checked' }}/>
-                <label for="{{ client.id ? 'edit' : 'new' }}-order-type-benefit">Prestation ponctuelle</label>
+            {% set orderTypes = clientOrderInformation and clientOrderInformation.orderTypes is not empty
+                ? clientOrderInformation.orderTypes
+                : null %}
+            <span class="label">Type(s) de commande disponible(s)</span>
+            <div class="d-flex">
+                <input class="data-array radio-like" type="checkbox" name="orderType"
+                       value="{{ constant('App\\Entity\\ClientOrderInformation::BUY') }}"
+                       id="{{ client.id ? 'edit' : 'new' }}-order-type-buy"
+                        {{ constant('App\\Entity\\ClientOrderInformation::BUY') in orderTypes ? 'checked' }}>
+                <label class="radio-like" for="{{ client.id ? 'edit' : 'new' }}-order-type-buy">
+                    Achat / Négoce
+                </label>
+                <input class="data-array radio-like" type="checkbox" name="orderType"
+                       value="{{ constant('App\\Entity\\ClientOrderInformation::MANAGE') }}"
+                       id="{{ client.id ? 'edit' : 'new' }}-order-type-manage"
+                        {{ constant('App\\Entity\\ClientOrderInformation::MANAGE') in orderTypes ? 'checked' }}>
+                <label class="radio-like" for="{{ client.id ? 'edit' : 'new' }}-order-type-manage">
+                    Gestion autonome
+                </label>
+                <input class="data-array radio-like" type="checkbox" name="orderType"
+                       value="{{ constant('App\\Entity\\ClientOrderInformation::BENEFIT') }}"
+                       id="{{ client.id ? 'edit' : 'new' }}-order-type-benefit"
+                        {{ constant('App\\Entity\\ClientOrderInformation::BENEFIT') in orderTypes ? 'checked' }}>
+                <label class="radio-like"
+                       for="{{ client.id ? 'edit' : 'new' }}-order-type-benefit">
+                    Prestation ponctuelle
             </div>
         </div>
         <div class="col-12 d-flex align-items-center mt-3">
@@ -232,6 +267,10 @@
             <label>Commentaire</label>
             <div class="data"
                  data-wysiwyg="comment">{{ clientOrderInformation ? clientOrderInformation.comment | raw }}</div>
+        </div>
+        <div class="col-12 mt-3 pe-3">
+            <i class="fas fa-info-circle"></i>
+            <span class="italic-text">Les frais de livraison (ouvrés et non ouvrés) et de service sont obligatoires pour sélectionner ce client sur une commande client</span>
         </div>
     </div>
 </div>

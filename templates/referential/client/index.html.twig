@@ -3,6 +3,10 @@
 {% block menu %}Référentiel{% endblock %}
 {% block page %}Client{% endblock %}
 
+{% block filter_header %}
+    {% include 'filters/client_filters.html.twig' %}
+{% endblock %}
+
 {% block content %}
     <div class="box first-box">
         <div class="content-menu">

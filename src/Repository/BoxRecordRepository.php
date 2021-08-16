@@ -6,6 +6,7 @@ use App\Entity\Box;
 use App\Entity\BoxRecord;
 use App\Entity\User;
 use App\Helper\QueryHelper;
+use App\Service\BoxStateService;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -127,25 +128,49 @@ class BoxRecordRepository extends EntityRepository {
     }
 
     public function getBoxRecords(Box $box, int $start, int $length, string $search = null): array {
-        $qb = $this->createQueryBuilder("record")
-            ->select("record.comment AS comment")
+        $queryBuilder = $this->createQueryBuilder("record");
+
+        $exprBuilder = $queryBuilder->expr();
+
+        $queryBuilder
+            ->select("join_quality.name AS quality")
             ->addSelect("record.date AS date")
             ->addSelect("record.state AS state")
+            ->addSelect("join_operator.username AS operator")
+            ->addSelect("join_location.name AS location")
+            ->addSelect("join_depository.name AS depository")
+            ->addSelect("join_crate.number AS crateNumber")
+            ->addSelect("join_crate.id AS crateId")
+            ->leftJoin("record.user", "join_operator")
+            ->leftJoin("record.quality", "join_quality")
+            ->leftJoin("record.location", "join_location")
+            ->leftJoin("join_location.depository", "join_depository")
+            ->leftJoin("record.crate", "join_crate")
             ->where("record.box = :box")
-            ->andWhere("record.trackingMovement = 0")
+            ->andWhere($exprBuilder->orX(
+                "record.trackingMovement = 0",
+                "record.state IN (:packingStates)"
+            ))
             ->orderBy("record.date", "DESC")
             ->addOrderBy("record.id", "DESC")
-            ->setParameter("box", $box);
+            ->setParameter("box", $box)
+            ->setParameter("packingStates", [BoxStateService::STATE_RECORD_PACKING, BoxStateService::STATE_RECORD_UNPACKING]);
 
         if($search) {
-            $qb
-                ->andWhere("record.comment LIKE :search")
+            $queryBuilder
+                ->andWhere($exprBuilder->orX(
+                    "join_quality.name LIKE :search",
+                    "join_location.name LIKE :search",
+                    "join_depository.name LIKE :search",
+                    "join_operator.username LIKE :search",
+                    "DATE(record.date) LIKE :search"
+                ))
                 ->setParameter("search", '%' . $search . '%');
         }
 
         return [
-            'totalCount' => QueryHelper::count($qb, 'record'),
-            'data' => $qb
+            'totalCount' => QueryHelper::count($queryBuilder, 'record'),
+            'data' => $queryBuilder
                 ->setMaxResults($length)
                 ->setFirstResult($start)
                 ->getQuery()

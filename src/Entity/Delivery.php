@@ -34,14 +34,24 @@ class Delivery {
     private ?int $tokens = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Attachment::class)
+     * @ORM\Column(type="decimal", precision=8, scale=2)
+     */
+    private ?string $distance = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
      */
     private ?Attachment $signature = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Attachment::class)
+     * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
      */
     private ?Attachment $photo = null;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $deliveredAt;
 
     public function getId(): ?int {
         return $this->id;
@@ -82,6 +92,15 @@ class Delivery {
         return $this;
     }
 
+    public function getDistance(): ?string {
+        return $this->distance;
+    }
+
+    public function setDistance(?string $distance): self {
+        $this->distance = $distance;
+        return $this;
+    }
+
     public function getSignature(): ?Attachment {
         return $this->signature;
     }
@@ -97,6 +116,18 @@ class Delivery {
 
     public function setPhoto(?Attachment $photo): self {
         $this->photo = $photo;
+        return $this;
+    }
+
+    public function getDeliveredAt(): ?\DateTimeInterface
+    {
+        return $this->deliveredAt;
+    }
+
+    public function setDeliveredAt(?\DateTimeInterface $deliveredAt): self
+    {
+        $this->deliveredAt = $deliveredAt;
+
         return $this;
     }
 

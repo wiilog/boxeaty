@@ -2,6 +2,8 @@
 
 namespace App\Repository;
 
+use App\Entity\Box;
+use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\Status;
 use DateTime;
@@ -41,6 +43,11 @@ class ClientOrderRepository extends EntityRepository {
                 ->setParameter("deliverer", $params["deliverer"]);
         }
 
+        if(isset($params["client"])) {
+            $qb ->andWhere("client_order.client = :client")
+                ->setParameter("client", $params["client"]);
+        }
+
         return $qb;
     }
 
@@ -49,6 +56,9 @@ class ClientOrderRepository extends EntityRepository {
      */
     public function findBetween(DateTime $from, DateTime $to, array $params): array {
         return $this->createBetween($from, $to, $params)
+            ->leftJoin("client_order.status", "status")
+            ->andWhere("status.code IN (:statuses)")
+            ->setParameter("statuses", [Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TRANSIT])
             ->getQuery()
             ->getResult();
     }
@@ -61,7 +71,7 @@ class ClientOrderRepository extends EntityRepository {
             ->leftJoin("client_order.delivery", "delivery")
             ->leftJoin("delivery.status", "delivery_status")
             ->andWhere("delivery_status.code IN (:statuses)")
-            ->setParameter("statuses", [Status::DELIVERY_PLANNED, Status::DELIVERY_PREPARING])
+            ->setParameter("statuses", [Status::CODE_DELIVERY_PLANNED, Status::CODE_DELIVERY_PREPARING])
             ->getQuery()
             ->getResult();
     }
@@ -122,6 +132,61 @@ class ClientOrderRepository extends EntityRepository {
             "total" => $total,
             "filtered" => $filtered,
         ];
+    }
+
+    public function findLastInProgressFor(Box $crateOrBox): ?ClientOrder {
+        $queryBuilder = $this->createQueryBuilder('clientOrder');
+
+        $exprBuilder = $queryBuilder->expr();
+
+        $queryBuilder
+            ->join('clientOrder.preparation', 'preparation')
+            ->join('preparation.lines', 'line')
+            ->leftJoin('line.crate', 'crate')
+            ->leftJoin('line.boxes', 'box')
+            ->join('clientOrder.status', 'status')
+            ->andWhere($exprBuilder->orX(
+                'crate = :crateOrBox',
+                'box = :crateOrBox'
+            ))
+            ->andWhere('status.code IN (:inProgressStatuses)')
+            ->setParameter(':crateOrBox', $crateOrBox)
+            ->setParameter(':inProgressStatuses', [Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_TRANSIT]);
+
+        $res = $queryBuilder
+            ->getQuery()
+            ->getResult();
+
+        return $res[0] ?? null;
+    }
+
+    public function getLastNumberByDate(string $date): ?string {
+        $result = $this->createQueryBuilder('clientOrder')
+            ->select('clientOrder.number')
+            ->where('clientOrder.number LIKE :value')
+            ->orderBy('clientOrder.createdAt', 'DESC')
+            ->addOrderBy('clientOrder.number', 'DESC')
+            ->setParameter('value', ClientOrder::PREFIX_NUMBER . $date . '%')
+            ->getQuery()
+            ->execute();
+        return $result ? $result[0]['number'] : null;
+    }
+
+    public function findQuantityDeliveredBetweenDateAndClient(DateTime $from,
+                                                              DateTime $to,
+                                                              Client $client): int {
+        $result = $this->createQueryBuilder("client_order")
+            ->select('SUM(lines.quantity)')
+            ->leftJoin("client_order.delivery", "delivery")
+            ->leftJoin('client_order.lines','lines')
+            ->andWhere("delivery.deliveredAt BETWEEN :from AND :to")
+            ->andWhere("client_order.client = :client")
+            ->setParameter("client", $client)
+            ->setParameter("from", $from)
+            ->setParameter("to", $to)
+            ->getQuery()
+            ->getSingleScalarResult();
+        return $result ? intval($result) : 0;
     }
 
 }

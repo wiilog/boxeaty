@@ -11,6 +11,7 @@ use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\LocationRepository;
+use App\Service\BoxStateService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,10 +30,20 @@ class LocationController extends AbstractController {
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
+        $boxRepository = $manager->getRepository(Box::class);
+        $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0);
+        $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0);
+        $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1);
+        $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1);
+
         return $this->render("referential/location/index.html.twig", [
             "new_location" => new Location(),
             "initial_locations" => $this->api($request, $manager)->getContent(),
             "locations_order" => LocationRepository::DEFAULT_DATATABLE_ORDER,
+            "crateUnavailable" => $crateUnavailable,
+            "crateAvailable" => $crateAvailable,
+            "boxUnavailable" => $boxUnavailable,
+            "boxAvailable" => $boxAvailable,
         ]);
     }
 
@@ -57,10 +68,9 @@ class LocationController extends AbstractController {
                 "active" => FormatHelper::bool($location->isActive()),
                 "client" => FormatHelper::named($location->getClient()),
                 "description" => $location->getDescription() ?: "-",
-                "boxes" => $boxRepository->count(["location" => $location]),
                 "capacity" => $location->getCapacity() ?? "-",
                 "location_type" => $location->getType() ? Location::LOCATION_TYPES[$location->getType()] : '-',
-                "container_amount" => !$location->getBoxes()->isEmpty() ? $location->getBoxes()->count() : '-',
+                "container_amount" => $boxRepository->count(["location" => $location]),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
@@ -176,7 +186,6 @@ class LocationController extends AbstractController {
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
         $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
         $capacity = $content->capacity ?? null;
-
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $location) {
             $form->addError("label", "Un autre emplacement avec ce nom existe déjà");
@@ -192,7 +201,7 @@ class LocationController extends AbstractController {
                 ->setClient($client)
                 ->setActive($content->active)
                 ->setDescription($content->description ?? null)
-                ->setType($content->type ?? null)
+                ->setType(isset($content->type) ? intval($content->type) : null)
                 ->setDepository($depository);
 
             if ((int)$content->kiosk === 1) {
@@ -202,7 +211,7 @@ class LocationController extends AbstractController {
                     ->setDepository(null);
             } else {
                 $location
-                    ->setType($content->type)
+                    ->setType(isset($content->type) ? intval($content->type) : null)
                     ->setDepository($depository)
                     ->setCapacity(null)
                     ->setMessage(null);

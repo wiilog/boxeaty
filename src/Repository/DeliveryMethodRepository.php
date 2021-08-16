@@ -22,6 +22,7 @@ class DeliveryMethodRepository extends EntityRepository {
         return $this->createQueryBuilder("delivery_method")
             ->select("delivery_method.id AS id, delivery_method.name AS text")
             ->where("delivery_method.name LIKE :search")
+            ->andWhere("delivery_method.deleted = 0")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()

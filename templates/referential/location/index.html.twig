@@ -1,7 +1,42 @@
 {% extends 'template.html.twig' %}
 
 {% block menu %}Référentiel{% endblock %}
-{% block page %}Emplacement{% endblock %}
+{% block page %}Emplacement et stock{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('location_list') }}
+{% endblock %}
+
+{% block indicator %}
+    <div class="box first-box indicator-container">
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="data-location row col-6">
+                <p class="body-text-semi-bold">Données en temps réel</p>
+                <div class="col-3">
+                    <i class="icon bxi bxi-crate"></i><br>
+                    <span class="green-text col-12">{{ crateAvailable }}<br></span>
+                    <span class="text-bold col-12">Caisse{{ crateAvailable > 1 ? 's' : '' }} en stock</span>
+                </div>
+                <div class="col-3">
+                    <i class="icon bxi bxi-box"></i><br>
+                    <span class="green-text">{{ boxAvailable }}<br></span>
+                    <span class="text-bold">Box en stock</span>
+                </div>
+                <div class="col-3">
+                    <i class="icon bxi bxi-grey-crate"></i><br>
+                    <span class="green-text">{{ crateUnavailable }}<br></span>
+                    <span class="text-bold">Caisse{{ crateUnavailable > 1 ? 's' : '' }} non disponible{{ crateUnavailable > 1 ? 's' : '' }}</span>
+                </div>
+                <div class="col-3">
+                    <i class="icon bxi bxi-grey-box"></i><br>
+                    <span class="green-text">{{ boxUnavailable }}<br></span>
+                    <span class="text-bold">Box non disponible{{ boxUnavailable > 1 ? 's' : '' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
 
 {% block filter_header %}
     {% include 'filters/location_filters.html.twig' %}
@@ -12,11 +47,11 @@
         <div class="content-menu">
             <div id="table-search-container"></div>
             <div class="right">
-                <a href="{{ path('locations_export') }}" class="outline"><i class="icon fas fa-download"></i> Export au format CSV</a>
+                <a href="{{ path('locations_export') }}" class="outline"><i class="icon fas fa-download"></i> Export au
+                    format CSV</a>
                 <button class="primary new-location"><i class="icon fas fa-plus"></i> Nouvel emplacement</button>
             </div>
         </div>
-
         <table id="table-locations"
                data-initial-data="{{ initial_locations }}"
                data-default-order="{{ locations_order | json_encode }}">

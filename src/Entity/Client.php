@@ -42,6 +42,16 @@ class Client {
     private ?string $address = null;
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private ?string $latitude = null;
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    private ?string $longitude = null;
+
+    /**
      * @ORM\Column(type="string", length=255)
      */
     private ?string $phoneNumber = null;
@@ -86,7 +96,7 @@ class Client {
     /**
      * @ORM\OneToMany(targetEntity=Location::class, mappedBy="client")
      */
-    private Collection $kiosks;
+    private Collection $locations;
 
     /**
      * @ORM\OneToMany(targetEntity=Client::class, mappedBy="linkedMultiSite")
@@ -115,9 +125,9 @@ class Client {
     private $mailNotificationOrderPreparation;
 
     /**
-     * @ORM\OneToOne(targetEntity=ClientOrderInformation::class, cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity=ClientOrderInformation::class, inversedBy="client", cascade={"persist", "remove"})
      */
-    private $clientOrderInformation;
+    private ?ClientOrderInformation $clientOrderInformation = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clients")
@@ -129,9 +139,19 @@ class Client {
      */
     private $clientBoxTypes;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $prorateAmount;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $paymentModes;
+
     public function __construct() {
         $this->users = new ArrayCollection();
-        $this->kiosks = new ArrayCollection();
+        $this->locations = new ArrayCollection();
         $this->clients = new ArrayCollection();
         $this->boxes = new ArrayCollection();
         $this->depositTicketsClients = new ArrayCollection();
@@ -159,6 +179,24 @@ class Client {
     public function setAddress(string $address): self {
         $this->address = $address;
 
+        return $this;
+    }
+
+    public function getLatitude(): ?string {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?string $latitude): self {
+        $this->latitude = $latitude;
+        return $this;
+    }
+
+    public function getLongitude(): ?string {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?string $longitude): self {
+        $this->longitude = $longitude;
         return $this;
     }
 
@@ -248,21 +286,21 @@ class Client {
     /**
      * @return Collection|Location[]
      */
-    public function getKiosks(): Collection {
-        return $this->kiosks;
+    public function getLocations(): Collection {
+        return $this->locations;
     }
 
-    public function addKiosk(Location $kiosk): self {
-        if (!$this->kiosks->contains($kiosk)) {
-            $this->kiosks[] = $kiosk;
+    public function addLocation(Location $kiosk): self {
+        if (!$this->locations->contains($kiosk)) {
+            $this->locations[] = $kiosk;
             $kiosk->setClient($this);
         }
 
         return $this;
     }
 
-    public function removeKiosk(Location $kiosk): self {
-        if ($this->kiosks->removeElement($kiosk)) {
+    public function removeLocation(Location $kiosk): self {
+        if ($this->locations->removeElement($kiosk)) {
             // set the owning side to null (unless already changed)
             if ($kiosk->getClient() === $this) {
                 $kiosk->setClient(null);
@@ -403,6 +441,10 @@ class Client {
 
     public function getClientOrderInformation(): ?ClientOrderInformation
     {
+        if(!$this->clientOrderInformation) {
+            $this->clientOrderInformation = new ClientOrderInformation();
+        }
+
         return $this->clientOrderInformation;
     }
 
@@ -449,6 +491,30 @@ class Client {
                 $clientBoxType->setClient(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getProrateAmount(): ?int
+    {
+        return $this->prorateAmount;
+    }
+
+    public function setProrateAmount(?int $prorateAmount): self
+    {
+        $this->prorateAmount = $prorateAmount;
+
+        return $this;
+    }
+
+    public function getPaymentModes(): ?string
+    {
+        return $this->paymentModes;
+    }
+
+    public function setPaymentModes(?string $paymentModes): self
+    {
+        $this->paymentModes = $paymentModes;
 
         return $this;
     }

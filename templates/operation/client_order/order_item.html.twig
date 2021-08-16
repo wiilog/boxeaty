@@ -1,6 +1,6 @@
-{% if item.status.code == 'ORDER_TRANSIT' %}
+{% if item.status.code == constant('App\\Entity\\Status::CODE_ORDER_TRANSIT') %}
     {% set statusIcon =  'transit' %}
-{% elseif  item.status.code == 'ORDER_FINISHED' %}
+{% elseif  item.status.code == constant('App\\Entity\\Status::CODE_ORDER_FINISHED') %}
     {% set statusIcon =  'end' %}
 {% else %}
     {% set statusIcon =  '' %}
@@ -19,22 +19,26 @@
                     <i class="icon bxi bxi-automatic"></i>
                 {% endif %}
                 <span>Commande <span class="no-wrap">N°{{ item.number }}</span></span>
-                <div data-listener="delete"><i class="bxi bxi-trash-circle"></i></div>
+                <div data-listener="delete" class="cursor-pointer"><i class="bxi bxi-trash-circle"></i></div>
             </div>
         </div>
         <div class="d-flex justify-content-between col-12">
             <p class="w-40"><strong>{{ item.location.name }}</strong><br> {{ item.location.address }}</p>
             <div class="delivery-method">
                 <i class="icon bxi bxi-{{ item.deliveryMethod.icon }}"></i>
-                {{ item.deliveryMethod.name }} qui va très vite
+                {{ item.deliveryMethod.name }}
             </div>
             <div class="expand"></div>
             <div class="w-30 right">
-                <strong>Montant Total {{ item.deliveryPrice + item.servicePrice }}€</strong>
+                <strong>Montant Total {{ (item.cartPrice + item.servicePrice + item.deliveryPrice)|format_helper('price') }}</strong>
                 <strong class="typeName">{{ item.type.name }}</strong>
             </div>
         </div>
         <span class="col-6 ordered-by">Commandé par : {{ item.requester.username }}</span>
-        <a class="col-6 detail" style="color:#EB611B"> Voir le détail</a>
+        <a class="col-6 show-detail cursor-pointer"
+           data-id="{{ item.id }}"
+           data-action="{{ item.linkAction }}">
+            {{item.linkLabel}}
+        </a>
     </div>
 </div>

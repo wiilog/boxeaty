@@ -13,13 +13,12 @@ use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\BoxRecord;
 use App\Entity\User;
+use App\Service\BoxStateService;
 use App\Service\ExportService;
-use DateTime;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class DefaultController extends AbstractController {
@@ -41,11 +40,11 @@ class DefaultController extends AbstractController {
         $spreadsheet->disconnectWorksheets();
 
         $exportService->createWorksheet($spreadsheet, "Box", Box::class, ExportService::BOX_HEADER, function(array $row) {
-            $row["state"] = isset($row["state"]) ? Box::NAMES[$row["state"]] : '';
+            $row["state"] = isset($row["state"]) ? BoxStateService::BOX_STATES[$row["state"]] : '';
             return $row;
         });
         $exportService->createWorksheet($spreadsheet, "Mouvements", BoxRecord::class, ExportService::MOVEMENT_HEADER, function(array $row) {
-            $row["state"] = isset($row["state"]) ? Box::NAMES[$row["state"]] : '';
+            $row["state"] = isset($row["state"]) ? BoxStateService::RECORD_STATES[$row["state"]] : '';
             return $row;
         });
         $exportService->createWorksheet($spreadsheet, "Tickets-consigne", DepositTicket::class, ExportService::DEPOSIT_TICKET_HEADER, function(array $row) {

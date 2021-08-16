@@ -29,9 +29,9 @@ class LocationRepository extends EntityRepository {
             ->addSelect("join_client.name AS client_name")
             ->addSelect("location.active AS active")
             ->addSelect("location.description AS description")
-            ->addSelect("COUNT(box) AS boxes")
             ->addSelect("location.capacity AS capacity")
             ->addSelect("location.type AS locationType")
+            ->addSelect("COUNT(box) AS boxes")
             ->leftJoin("location.client", "join_client")
             ->leftJoin("location.depository", "join_depository")
             ->leftJoin(Box::class, "box", Join::WITH, "box.location = location.id")
@@ -75,6 +75,13 @@ class LocationRepository extends EntityRepository {
                 if ($column === "client_name") {
                     $qb->leftJoin("location.client", "location_client")
                         ->addOrderBy("location_client.name", $order["dir"]);
+                } else if ($column === "container_amount") {
+                    $qb
+                        ->leftJoin('location.boxes', 'box')
+                        ->groupBy('location')
+                        ->addOrderBy("COUNT(box)", $order["dir"]);
+                } else if ($column === "location_type") {
+                    $qb->addOrderBy('location.type', $order["dir"]);
                 } else {
                     $qb->addOrderBy("location.$column", $order["dir"]);
                 }
@@ -159,6 +166,12 @@ class LocationRepository extends EntityRepository {
             ->where("kiosk.kiosk = 1")
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    public function getAll() {
+        return $this->createQueryBuilder("location")
+            ->getQuery()
+            ->getArrayResult();
     }
 
 }

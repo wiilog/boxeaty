@@ -1,5 +1,5 @@
 import {$document} from '../app';
-
+import "../styles/pages/location.scss";
 import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
@@ -30,10 +30,9 @@ $document.ready(() => {
             {data: `client_name`, title: `Nom du client`},
             {data: `active`, title: `Actif`},
             {data: `description`, title: `Description`},
-            {data: `boxes`, title: `Nombre de Box`, orderable: false},
             {data: `capacity`, title: `Capacité`},
             {data: `location_type`, title: `Type d'emplacement`},
-            {data: `container_amount`, title: `Nombre de contenants`},
+            {data: `container_amount`, title: `Nombre de contenants`, orderable: false},
             DATATABLE_ACTIONS,
         ],
         listeners: {
@@ -59,6 +58,7 @@ $document.ready(() => {
 $document.ready(() => fireTypeChangeEvent($('#modal-new-location').find('input[name="kiosk"]')))
     .arrive(`#modal-edit-location .location-type`, function() {
         fireTypeChangeEvent($(this).find('input[name="kiosk"]'));
+        toggleCapacityInput($(this).find('input[name="kiosk"]'));
     });
 
 function fireTypeChangeEvent($type) {
@@ -85,7 +85,7 @@ function toggleCapacityInput($typeRadio) {
 function toggleInputsIn($container, show) {
     if(show) {
         $container.removeClass(`d-none`);
-        $container.find(`input, select`).val(``);
+        $container.find(`input:not(.no-clear), select`).val(``);
         $container.find(`input[data-required], select[data-required]`).each(function() {
             $(this).prop(`required`, true);
         });

@@ -13,36 +13,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Box {
 
-    public const AVAILABLE = 1;
-    public const UNAVAILABLE = 2;
-    public const CONSUMER = 3;
-    public const CLIENT = 4;
-    public const OUT = 5;
-    public const PACKING = 6;
-    public const UNPACKING = 7;
-
-    public const NAMES = [
-        self::AVAILABLE => "Disponible",
-        self::UNAVAILABLE => "Indisponible",
-        self::CONSUMER => "Consommateur",
-        self::CLIENT => "Client",
-        self::OUT => "Sorti",
-        self::PACKING => "Conditionné",
-        self::UNPACKING => "Déconditionné",
-    ];
-
-    public const LINKED_COLORS = [
-        self::AVAILABLE => "success",
-        self::UNAVAILABLE => "danger",
-        self::CONSUMER => "primary",
-        self::CLIENT => "warning",
-        self::OUT => "secondary",
-        self::PACKING => "info",
-        self::UNPACKING => "dark",
-    ];
-
-    public const DEFAULT_COLOR = 'dark';
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -116,11 +86,6 @@ class Box {
     private Collection $counterOrders;
 
     /**
-     * @ORM\ManyToMany(targetEntity=ClientOrder::class, mappedBy="boxes")
-     */
-    private Collection $clientOrders;
-
-    /**
      * @ORM\Column(type="datetime", nullable=false)
      */
     private ?DateTime $creationDate;
@@ -130,11 +95,40 @@ class Box {
      */
     private Collection $collects;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Box::class, mappedBy="crate")
+     */
+    private Collection $containedBoxes;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Box::class, inversedBy="containedBoxes")
+     */
+    private ?Box $crate;
+
+    /**
+     * @ORM\OneToMany(targetEntity=PreparationLine::class, mappedBy="crate")
+     */
+    private ?Collection $cratePreparationLines;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=PreparationLine::class, mappedBy="boxes")
+     */
+    private ?Collection $boxPreparationLines;
+
+    /**
+     * @ORM\OneToMany(targetEntity=BoxRecord::class, mappedBy="crate")
+     */
+    private ?Collection $cratePackingRecords;
+
     public function __construct() {
         $this->boxRecords = new ArrayCollection();
         $this->counterOrders = new ArrayCollection();
         $this->creationDate = new DateTime("now");
         $this->collects = new ArrayCollection();
+        $this->containedBoxes = new ArrayCollection();
+        $this->cratePreparationLines = new ArrayCollection();
+        $this->boxPreparationLines = new ArrayCollection();
+        $this->cratePackingRecords = new ArrayCollection();
     }
 
     public function fromRecord(BoxRecord $record): self {
@@ -339,29 +333,6 @@ class Box {
         return $this;
     }
 
-    /**
-     * @return Collection|ClientOrder[]
-     */
-    public function getClientOrders(): Collection {
-        return $this->clientOrders;
-    }
-
-    public function addClientOrder(ClientOrder $order): self {
-        if (!$this->clientOrders->contains($order)) {
-            $this->clientOrders[] = $order;
-            $order->addBox($this);
-        }
-
-        return $this;
-    }
-
-    public function removeClientOrder(ClientOrder $order): self {
-        if ($this->clientOrders->removeElement($order)) {
-            $order->removeBox($this);
-        }
-
-        return $this;
-    }
 
     public function getCreationDate(): ?DateTime {
         return $this->creationDate;
@@ -416,6 +387,176 @@ class Box {
 
     public function setIsBox(?bool $isBox): self {
         $this->isBox = $isBox;
+
+        return $this;
+    }
+
+    public function getCrate(): ?Box{
+        return $this->crate;
+    }
+
+    public function setCrate(?Box $crate): self {
+        if($this->crate && $this->crate !== $crate) {
+            $this->crate->removeContainedBox($this);
+        }
+        $this->crate = $crate;
+        if($crate) {
+            $crate->addContainedBox($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Box[]
+     */
+    public function getContainedBoxes(): Collection {
+        return $this->containedBoxes;
+    }
+
+    public function addContainedBox(Box $containedBox): self {
+        if (!$this->containedBoxes->contains($containedBox)) {
+            $this->containedBoxes[] = $containedBox;
+            $containedBox->setCrate($this);
+        }
+
+        return $this;
+    }
+
+    public function removeContainedBox(Box $containedBox): self {
+        if ($this->containedBoxes->removeElement($containedBox)) {
+            if ($containedBox->getCrate() === $this) {
+                $containedBox->setCrate(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setContainedBoxes(?array $containedBoxes): self {
+        foreach($this->getContainedBoxes()->toArray() as $containedBox) {
+            $this->removeContainedBox($containedBox);
+        }
+
+        $this->containedBoxes = new ArrayCollection();
+        foreach($containedBoxes as $containedBox) {
+            $this->addContainedBox($containedBox);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|PreparationLine[]
+     */
+    public function getCratePreparationLines(): Collection {
+        return $this->cratePreparationLines;
+    }
+
+    public function addCratePreparationLine(PreparationLine $line): self {
+        if (!$this->cratePreparationLines->contains($line)) {
+            $this->cratePreparationLines[] = $line;
+            $line->setCrate($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCratePreparationLine(PreparationLine $line): self {
+        if ($this->cratePreparationLines->removeElement($line)) {
+            if ($line->getCrate() === $this) {
+                $line->setCrate(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setCratePreparationLines(?array $lines): self {
+        foreach($this->getCratePreparationLines()->toArray() as $line) {
+            $this->removeCratePreparationLine($line);
+        }
+
+        $this->cratePreparationLines = new ArrayCollection();
+        foreach($lines as $line) {
+            $this->addCratePreparationLine($line);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Box[]
+     */
+    public function getBoxPreparationLines(): Collection {
+        return $this->boxPreparationLines;
+    }
+
+    public function addBoxPreparationLine(PreparationLine $line): self {
+        if (!$this->boxPreparationLines->contains($line)) {
+            $this->boxPreparationLines[] = $line;
+            $line->addBox($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBoxPreparationLine(PreparationLine $line): self {
+        if ($this->boxPreparationLines->removeElement($line)) {
+            $line->removeBox($this);
+        }
+
+        return $this;
+    }
+
+    public function setBoxPreparationLines(?array $lines): self {
+        foreach($this->getBoxPreparationLines()->toArray() as $line) {
+            $this->removeBoxPreparationLine($line);
+        }
+
+        $this->boxPreparationLines = new ArrayCollection();
+        foreach($lines as $line) {
+            $this->addBoxPreparationLine($line);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|BoxRecord[]
+     */
+    public function getCratePackingRecords(): Collection {
+        return $this->cratePackingRecords;
+    }
+
+    public function addCratePackingRecord(BoxRecord $boxRecord): self {
+        if (!$this->cratePackingRecords->contains($boxRecord)) {
+            $this->cratePackingRecords[] = $boxRecord;
+            $boxRecord->setCrate($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCratePackingRecord(BoxRecord $boxRecord): self {
+        if ($this->cratePackingRecords->removeElement($boxRecord)) {
+            if ($boxRecord->getCrate() === $this) {
+                $boxRecord->setCrate(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setCratePackingRecords(?array $boxRecords): self {
+        foreach($this->getCratePackingRecords()->toArray() as $boxRecord) {
+            $this->removeCratePackingRecord($boxRecord);
+        }
+
+        $this->cratePackingRecords = new ArrayCollection();
+        foreach($boxRecords as $boxRecord) {
+            $this->addCratePackingRecord($boxRecord);
+        }
 
         return $this;
     }

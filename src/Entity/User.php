@@ -29,6 +29,48 @@ class User implements UserInterface {
     private ?string $username = null;
 
     /**
+     * @var string|null
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $phone;
+
+    /**
+     * @return bool|null
+     */
+    public function getActive(): ?bool
+    {
+        return $this->active;
+    }
+
+    /**
+     * @param bool|null $active
+     * @return self
+     */
+    public function setActive(?bool $active): self
+    {
+        $this->active = $active;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    /**
+     * @param string|null $phone
+     * @return self
+     */
+    public function setPhone(?string $phone): self
+    {
+        $this->phone = $phone;
+        return $this;
+    }
+
+    /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
     private ?string $email = null;
@@ -37,6 +79,11 @@ class User implements UserInterface {
      * @ORM\Column(type="string", length=255)
      */
     private ?string $password = null;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private ?string $apiKey = null;
 
     /**
      * @ORM\Column(type="datetime")
@@ -175,6 +222,15 @@ class User implements UserInterface {
     public function setPassword(string $password): self {
         $this->password = $password;
 
+        return $this;
+    }
+
+    public function getApiKey(): ?string {
+        return $this->apiKey;
+    }
+
+    public function setApiKey(?string $apiKey): self {
+        $this->apiKey = $apiKey;
         return $this;
     }
 

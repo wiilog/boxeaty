@@ -76,4 +76,10 @@ class QualityRepository extends EntityRepository
         ];
     }
 
+    public function getAll() {
+        return $this->createQueryBuilder("quality")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
 }

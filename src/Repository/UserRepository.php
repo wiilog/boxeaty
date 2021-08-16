@@ -139,4 +139,12 @@ class UserRepository extends EntityRepository {
             ->getResult();
     }
 
+    public function findByApiKey($search) {
+        return $this->createQueryBuilder("user")
+            ->where("user.apiKey = :search")
+            ->setParameter("search", $search)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 }

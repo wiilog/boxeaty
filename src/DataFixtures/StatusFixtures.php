@@ -11,32 +11,33 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 class StatusFixtures extends Fixture implements FixtureGroupInterface {
 
     private const STATUSES = [
-        Status::ORDER => [
-            Status::ORDER_TO_VALIDATE => "À valider",
-            Status::ORDER_PLANNED => "Planifiée",
-            Status::ORDER_TRANSIT => "En transit",
-            Status::ORDER_FINISHED => "Terminée",
+        Status::CATEGORY_ORDER => [
+            Status::CODE_ORDER_TO_VALIDATE_CLIENT => "À valider Client",
+            Status::CODE_ORDER_TO_VALIDATE_BOXEATY => "À valider BoxEaty",
+            Status::CODE_ORDER_PLANNED => "Planifiée",
+            Status::CODE_ORDER_TRANSIT => "En transit",
+            Status::CODE_ORDER_FINISHED => "Terminée",
         ],
-        Status::ROUND => [
-            Status::ROUND_CREATED => "Créé",
-            Status::ROUND_AWAITING_DELIVERER => "Attente livreur",
-            Status::ROUND_TAKEN_DELIVERER => "Enlevée par livreur",
-            Status::ROUND_FINISHED => "Créé",
+        Status::CATEGORY_ROUND => [
+            Status::CODE_ROUND_CREATED => "Créé",
+            Status::CODE_ROUND_AWAITING_DELIVERER => "Attente livreur",
+            Status::CODE_ROUND_TAKEN_DELIVERER => "Enlevée par livreur",
+            Status::CODE_ROUND_FINISHED => "Terminé",
         ],
-        Status::PREPARATION => [
-            Status::PREPARATION_PREPARING => "En préparation",
-            Status::PREPARATION_PREPARED => "Préparé",
+        Status::CATEGORY_PREPARATION => [
+            Status::CODE_PREPARATION_PREPARING => "En préparation",
+            Status::CODE_PREPARATION_PREPARED => "Préparé",
         ],
-        Status::DELIVERY => [
-            Status::DELIVERY_PLANNED => "Planifiée",
-            Status::DELIVERY_PREPARING => "En préparation",
-            Status::DELIVERY_AWAITING_DELIVERER => "Attente livreur",
-            Status::DELIVERY_TRANSIT => "En transit",
-            Status::DELIVERY_DELIVERED => "Livrée",
+        Status::CATEGORY_DELIVERY => [
+            Status::CODE_DELIVERY_PLANNED => "Planifiée",
+            Status::CODE_DELIVERY_PREPARING => "En préparation",
+            Status::CODE_DELIVERY_AWAITING_DELIVERER => "Attente livreur",
+            Status::CODE_DELIVERY_TRANSIT => "En transit",
+            Status::CODE_DELIVERY_DELIVERED => "Livrée",
         ],
-        Status::COLLECT => [
-            Status::COLLECT_TRANSIT => "En transit",
-            Status::COLLECT_FINISHED => "Finished",
+        Status::CATEGORY_COLLECT => [
+            Status::CODE_COLLECT_TRANSIT => "En transit",
+            Status::CODE_COLLECT_FINISHED => "Finished",
         ],
     ];
 

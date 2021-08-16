@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\CrateTypeRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -17,41 +15,41 @@ class ClientBoxType
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id = null;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
-    private $cost;
+    private ?float $customUnitPrice = null;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $quantity;
+    private ?int $quantity = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="clientBoxTypes")
      */
-    private $client;
+    private ?Client $client = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=BoxType::class, inversedBy="clientBoxTypes")
      */
-    private $boxType;
+    private ?BoxType $boxType = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCost(): ?float
+    public function getCustomUnitPrice(): ?float
     {
-        return $this->cost;
+        return $this->customUnitPrice;
     }
 
-    public function setCost(float $cost): self
+    public function setCustomUnitPrice(?float $customUnitPrice): self
     {
-        $this->cost = $cost;
+        $this->customUnitPrice = $customUnitPrice;
 
         return $this;
     }
@@ -85,10 +83,14 @@ class ClientBoxType
         return $this->boxType;
     }
 
-    public function setBoxType(?BoxType $boxType): self
-    {
+    public function setBoxType(?BoxType $boxType): self {
         $this->boxType = $boxType;
-
         return $this;
+    }
+
+    public function getUnitPrice(): ?float {
+        return $this->customUnitPrice
+            ?: ($this->boxType ? $this->boxType->getPrice() : null)
+            ?: null;
     }
 }

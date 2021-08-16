@@ -53,6 +53,12 @@ class CounterOrderRepository extends EntityRepository {
                         ->addOrderBy("order_client.name", $order["dir"]);
                 } else if ($column === "totalCost") {
                     $qb->addOrderBy("ord.boxPrice - ord.depositTicketPrice", $order["dir"]);
+                } else if($column === "boxes") {
+                    $qb->leftJoin("ord.boxes", "order_boxes")
+                        ->addOrderBy("order_boxes.number", $order["dir"]);
+                } else if($column === "depositTickets") {
+                    $qb->leftJoin("ord.depositTickets", "order_depositTickets")
+                        ->addOrderBy("order_depositTickets.number", $order["dir"]);
                 } else {
                     $qb->addOrderBy("ord.$column", $order["dir"]);
                 }

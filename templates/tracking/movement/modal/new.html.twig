@@ -5,7 +5,7 @@
             <h1>Nouveau mouvement</h1>
 
             <div class="body">
-                {% include 'tracking/movement/modal/form.html.twig' %}
+                {% include 'tracking/movement/modal/form.html.twig' with {movement: movement, qualities: qualities, states: states} %}
             </div>
 
             <div class="footer">

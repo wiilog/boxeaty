@@ -4,17 +4,15 @@ import Modal from "../modal";
 import AJAX, {GET} from "../ajax";
 import $ from "jquery";
 import Scan from "../scan";
-import {SECONDS, String, Time} from "../util";
+import {SECONDS, StringHelper, Time} from "../util";
 
-import "../styles/pages/order.scss";
+import "../styles/pages/counter-order.scss";
 import Flash from "../flash";
 
 $document.ready(() => {
     $(`#scan-box`).click(() => openBoxesModal());
     $(`#scan-deposit-ticket`).click(() => openDepositTicketModal());
-    $(`#new-counter-order`).click(() => window.location.href = Routing.generate(`home`, {
-        redirection: '1'
-    }));
+    $(`#new-counter-order`).click(() => window.location.href = Routing.generate(`home`, { redirection: '1' }));
 
     $document.arrive(`[data-manual]`, function() {
         $(this).on(`change`, _ => addInput(this, Number(this.value)));
@@ -69,25 +67,27 @@ function addInput(element, code) {
             number: code
         };
 
-        AJAX.route(GET, `counter_order_info`, params).json(response => {
-            if(!response.success) {
-                return;
-            }
+        AJAX.route(GET, `counter_order_info`, params)
+            .json()
+            .then(response => {
+                if(!response.success) {
+                    return;
+                }
 
-            const $totalPrice = $modal.find(`input[name="price"]`);
-            const modification = type === `box` ? response.price : -response.price;
+                const $totalPrice = $modal.find(`input[name="price"]`);
+                const modification = type === `box` ? response.price : -response.price;
 
-            updatePriceInput($totalPrice, Math.abs(modification));
+                updatePriceInput($totalPrice, Math.abs(modification));
 
-            $container.append(`
-                <div class="item">
-                    <input type="text" name="items" class="data-array mt-1" value="${code}" data-price="${modification}" readonly>
-                    <span class="floating-icon delete-item">
-                        <i class="fas fa-times"></i>
-                    </span>
-                </div>
-            `);
-        });
+                $container.append(`
+                    <div class="item">
+                        <input type="text" name="items" class="data-array mt-1" value="${code}" data-price="${modification}" readonly>
+                        <span class="floating-icon delete-item">
+                            <i class="fas fa-times"></i>
+                        </span>
+                    </div>
+                `);
+            });
     } else {
         if(type === `box`) {
             Flash.add(`danger`, `Cette Box a déjà été scannée`, true);
@@ -103,13 +103,13 @@ function addInput(element, code) {
 
 function openBoxesModal() {
     Modal.load(AJAX.route(`GET`, `counter_order_boxes_template`, {
-        session: String.random(16),
+        session: StringHelper.random(16),
     }));
 }
 
 function openDepositTicketModal() {
     Modal.load(AJAX.route(`GET`, `counter_order_deposit_tickets_template`, {
-        session: String.random(16),
+        session: StringHelper.random(16),
     }));
 }
 
@@ -117,5 +117,5 @@ function updatePriceInput($input, delta) {
     const priceValue = Number($input.data('raw-value')) || 0;
     const newPriceValue = priceValue + delta;
     $input.data('raw-value', newPriceValue);
-    $input.val(newPriceValue.toFixed(2).replace('.', ','));
+    $input.val(StringHelper.formatPrice(newPriceValue));
 }
