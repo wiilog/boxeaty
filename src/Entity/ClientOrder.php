@@ -142,11 +142,6 @@ class ClientOrder {
      */
     private bool $collectRequired = false;
 
-    /**
-     * @ORM\OneToOne(targetEntity=Collect::class, mappedBy="order", cascade={"persist", "remove"})
-     */
-    private ?Collect $collect = null;
-
     public function __construct(){
         $this->lines = new ArrayCollection();
         $this->orderStatusHistory = new ArrayCollection();
@@ -411,22 +406,6 @@ class ClientOrder {
         $this->delivery = $delivery;
         if ($delivery) {
             $delivery->setOrder($this);
-        }
-
-        return $this;
-    }
-
-    public function getCollect(): ?Collect {
-        return $this->collect;
-    }
-
-    public function setCollect(?Collect $collect): self {
-        if ($this->collect && $this->collect->getOrder() === $this) {
-            $this->collect->setOrder(null);
-        }
-        $this->collect = $collect;
-        if ($collect) {
-            $collect->setOrder($this);
         }
 
         return $this;

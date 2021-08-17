@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Collect;
+use App\Entity\Status;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -30,6 +32,34 @@ class CollectRepository extends EntityRepository {
             ->getQuery()
             ->getSingleScalarResult();
         return $result ? intval($result) : 0;
+    }
+
+    public function getPendingCollects() {
+
+        $qb = $this->createQueryBuilder('collect')
+            ->select('collect.id AS id')
+            ->addSelect('collect.number AS number')
+            ->addSelect('collect.tokens AS token_amount')
+            ->addSelect('join_depository.name AS depository')
+            ->addSelect('join_client.name AS client')
+            ->addSelect('join_client.address AS address')
+            ->addSelect('join_user.username AS main_contact')
+            ->addSelect('join_client.phoneNumber AS phone_number')
+            ->addSelect('COUNT(join_crates.id) AS crate_amount')
+            ->addSelect('join_pickLocation.name AS pick_location')
+            ->leftJoin('collect.client', 'join_client')
+            ->leftJoin('join_client.contact', 'join_user')
+            ->leftJoin('join_client.depository', 'join_depository')
+            ->leftJoin('collect.status', 'join_status')
+            ->leftJoin('collect.crates', 'join_crates')
+            ->leftJoin('collect.pickLocation', 'join_pickLocation')
+            ->where('join_status.code = :status')
+            ->groupBy('id')
+            ->setParameter('status', Status::CODE_COLLECT_TRANSIT);
+
+        return $qb
+            ->getQuery()
+            ->getArrayResult();
     }
 
 }

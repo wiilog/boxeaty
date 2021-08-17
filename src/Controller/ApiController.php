@@ -9,6 +9,7 @@ use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
+use App\Entity\Collect;
 use App\Entity\DeliveryRound;
 use App\Entity\Depository;
 use App\Entity\DepositTicket;
@@ -927,6 +928,97 @@ class ApiController extends AbstractController {
 
         $manager->flush();
         return $this->json([]);
+    }
+
+    /**
+     * @Route("/mobile/pending-collects", name="api_mobile_pending_collects")
+     * @Authenticated
+     */
+    public function collects(EntityManagerInterface $manager) {
+        $pendingCollects = $manager->getRepository(Collect::class)->getPendingCollects();
+
+        return $this->json($pendingCollects);
+    }
+
+    /**
+     * @Route("/mobile/collect-crates/{collect}", name="api_mobile_collect_crates")
+     * @Authenticated
+     */
+    public function collectCrates(Collect $collect) {
+        $collectCrates = Stream::from($collect->getCrates()->map(fn(Box $crate) => [
+            'number' => $crate->getNumber(),
+            'type' => $crate->getType()->getName()
+        ]));
+
+        return $this->json($collectCrates);
+    }
+
+    /**
+     * @Route("/mobile/collect-validate", name="api_mobile_collect_validate")
+     * @Authenticated
+     */
+    public function collectValidate(Request $request, EntityManagerInterface $manager,
+                                    AttachmentService $attachmentService, BoxRecordService $boxRecordService) {
+        $data = json_decode($request->getContent());
+
+        $collect = $manager->find(Collect::class, $data->collect);
+
+        if ($collect) {
+            $dropLocation = $manager->find(Location::class, $data->drop_location);
+            $crates = $collect->getCrates();
+
+            foreach ($crates as $crate) {
+                $user = $this->getUser();
+                $oldLocation = $crate->getLocation();
+                $oldState = $crate->getState();
+                $oldComment = $crate->getComment();
+
+                $crate
+                    ->setState(BoxStateService::STATE_RECORD_PACKING)
+                    ->setLocation($dropLocation);
+
+                [$tracking, $record] = $boxRecordService->generateBoxRecords(
+                    $crate,
+                    [
+                        'location' => $oldLocation,
+                        'state' => $oldState,
+                        'comment' => $oldComment
+                    ],
+                    $user instanceof User ? $user : null
+                );
+
+                if ($tracking) {
+                    $tracking->setBox($crate);
+                    $manager->persist($tracking);
+                }
+
+                if ($record) {
+                    $record->setBox($crate);
+                    $manager->persist($record);
+                }
+            }
+
+            $collectStatus = $manager->getRepository(Status::class)->findByCode(Status::CODE_COLLECT_FINISHED);
+            $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
+            $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
+            $comment = $data->data->comment;
+
+            $collect
+                ->setStatus($collectStatus)
+                ->setSignature($signature)
+                ->setPhoto($photo)
+                ->setComment($comment)
+                ->setTreatedAt(new DateTime('now'))
+                ->setTokens((int) $data->token_amount);
+
+            $manager->flush();
+
+            return $this->json([
+                "success" => true
+            ]);
+        }
+
+        throw new BadRequestHttpException();
     }
 
 }

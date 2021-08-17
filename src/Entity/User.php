@@ -176,6 +176,11 @@ class User implements UserInterface {
      */
     private Collection $counterOrders;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Collect::class, mappedBy="operator")
+     */
+    private $collects;
+
     public function __construct() {
         $this->clients = new ArrayCollection();
         $this->boxRecords = new ArrayCollection();
@@ -185,6 +190,7 @@ class User implements UserInterface {
         $this->orderStatusHistories = new ArrayCollection();
         $this->clientOrders = new ArrayCollection();
         $this->counterOrders = new ArrayCollection();
+        $this->collects = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -647,6 +653,45 @@ class User implements UserInterface {
         $this->counterOrders = new ArrayCollection();
         foreach ($counterOrders as $order) {
             $this->addCounterOrder($order);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Collect[]
+     */
+    public function getCollects(): Collection {
+        return $this->collects;
+    }
+
+    public function addCollect(Collect $collect): self {
+        if (!$this->collects->contains($collect)) {
+            $this->collects[] = $collect;
+            $collect->setOperator($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCollect(Collect $collect): self {
+        if ($this->collects->removeElement($collect)) {
+            if ($collect->getClient() === $this) {
+                $collect->setOperator(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setCollects(?array $collects): self {
+        foreach($this->getCollects()->toArray() as $collect) {
+            $this->removeCollect($collect);
+        }
+
+        $this->collects = new ArrayCollection();
+        foreach($collects as $collect) {
+            $this->addCollect($collect);
         }
 
         return $this;

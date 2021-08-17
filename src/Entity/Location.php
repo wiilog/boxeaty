@@ -92,9 +92,14 @@ class Location {
     private Collection $depositTickets;
 
     /**
-     * @ORM\OneToMany(targetEntity=Collect::class, mappedBy="location")
+     * @ORM\OneToMany(targetEntity=Collect::class, mappedBy="pickLocation")
      */
-    private Collection $collects;
+    private Collection $pickedCollects;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Collect::class, mappedBy="dropLocation")
+     */
+    private Collection $droppedCollects;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
@@ -109,7 +114,8 @@ class Location {
     public function __construct() {
         $this->boxes = new ArrayCollection();
         $this->boxRecords = new ArrayCollection();
-        $this->collects = new ArrayCollection();
+        $this->pickedCollects = new ArrayCollection();
+        $this->droppedCollects = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -292,38 +298,78 @@ class Location {
     /**
      * @return Collection|Collect[]
      */
-    public function getCollects(): Collection {
-        return $this->collects;
+    public function getPickedCollects(): Collection {
+        return $this->pickedCollects;
     }
 
-    public function addCollect(Collect $collect): self {
-        if (!$this->collects->contains($collect)) {
-            $this->collects[] = $collect;
-            $collect->setLocation($this);
+    public function addPickedCollect(Collect $pickedCollect): self {
+        if (!$this->pickedCollects->contains($pickedCollect)) {
+            $this->pickedCollects[] = $pickedCollect;
+            $pickedCollect->setPickLocation($this);
         }
 
         return $this;
     }
 
-    public function removeCollect(Collect $collect): self {
-        if ($this->collects->removeElement($collect)) {
+    public function removePickedCollect(Collect $pickedCollects): self {
+        if ($this->pickedCollects->removeElement($pickedCollects)) {
             // set the owning side to null (unless already changed)
-            if ($collect->getLocation() === $this) {
-                $collect->setLocation(null);
+            if ($pickedCollects->getPickLocation() === $this) {
+                $pickedCollects->setPickLocation(null);
             }
         }
 
         return $this;
     }
 
-    public function setCollect(?array $collects): self {
-        foreach ($this->getCollects()->toArray() as $collect) {
-            $this->removeCollect($collect);
+    public function setPickedCollect(?array $pickedCollects): self {
+        foreach ($this->getPickedCollects()->toArray() as $pickedCollect) {
+            $this->removePickedCollect($pickedCollect);
         }
 
-        $this->collects = new ArrayCollection();
-        foreach ($collects as $collect) {
-            $this->addCollect($collect);
+        $this->pickedCollects = new ArrayCollection();
+        foreach ($pickedCollects as $pickedCollect) {
+            $this->addPickedCollect($pickedCollect);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Collect[]
+     */
+    public function getDroppedCollects(): Collection {
+        return $this->droppedCollects;
+    }
+
+    public function addDroppedCollect(Collect $droppedCollect): self {
+        if (!$this->droppedCollects->contains($droppedCollect)) {
+            $this->droppedCollects[] = $droppedCollect;
+            $droppedCollect->setDropLocation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDroppedCollect(Collect $droppedCollect): self {
+        if ($this->droppedCollects->removeElement($droppedCollect)) {
+            // set the owning side to null (unless already changed)
+            if ($droppedCollect->getDropLocation() === $this) {
+                $droppedCollect->setDropLocation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setDroppedCollects(?array $droppedCollects): self {
+        foreach ($this->getDroppedCollects()->toArray() as $droppedCollect) {
+            $this->removeDroppedCollect($droppedCollect);
+        }
+
+        $this->droppedCollects = new ArrayCollection();
+        foreach ($droppedCollects as $droppedCollect) {
+            $this->addDroppedCollect($droppedCollect);
         }
 
         return $this;
