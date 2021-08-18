@@ -47,7 +47,7 @@ class UniqueNumberService
         $counterLen = strlen($counterFormat);
 
         $dateStr = $date->format(substr($format, 0, -1 * $counterLen));
-        $lastNumber = $entityRepository->getLastNumberByDate($dateStr, $prefix);
+        $lastNumber = $entityRepository->getLastNumberByDate($dateStr);
 
         $lastCounter = (
         (!empty($lastNumber) && $counterLen <= strlen($lastNumber))

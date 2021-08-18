@@ -14,6 +14,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Collect {
 
+    const PREFIX_NUMBER = 'C';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
