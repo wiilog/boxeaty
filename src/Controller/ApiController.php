@@ -1007,15 +1007,18 @@ class ApiController extends AbstractController {
             }
 
             $collectStatus = $manager->getRepository(Status::class)->findByCode(Status::CODE_COLLECT_FINISHED);
+
+            if($data->data->photo) {
+                $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
+            }
             $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
-            $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
             $comment = $data->data->comment;
 
             $collect
                 ->setStatus($collectStatus)
                 ->setSignature($signature)
-                ->setPhoto($photo)
-                ->setComment($comment)
+                ->setPhoto($photo ?? null)
+                ->setComment($comment ?? null)
                 ->setTreatedAt(new DateTime('now'))
                 ->setTokens((int)$data->token_amount);
 
@@ -1035,7 +1038,9 @@ class ApiController extends AbstractController {
      */
     public function location(Request $request, EntityManagerInterface $manager)
     {
-        $location = $manager->getRepository(Location::class)->findOneBy(['name' => $request->query->get('location')]);
+        $location = $manager->getRepository(Location::class)->findOneBy([
+            'name' => $request->query->get('location')
+        ]);
         $client = $location->getClient();
 
         return $this->json([
@@ -1052,7 +1057,7 @@ class ApiController extends AbstractController {
      * @Authenticated
      */
     public function collectNewValidate(Request $request, EntityManagerInterface $manager,
-                                       AttachmentService $attachmentService, BoxRecordService $boxRecordService,
+                                       AttachmentService $attachmentService,
                                        UniqueNumberService $uniqueNumberService): Response
     {
         $data = json_decode($request->getContent());
@@ -1063,8 +1068,10 @@ class ApiController extends AbstractController {
 
         $number = $uniqueNumberService->createUniqueNumber($manager, Collect::PREFIX_NUMBER, Collect::class);
 
+        if($data->data->photo) {
+            $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
+        }
         $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
-        $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
         $comment = $data->data->comment;
 
         $crateNumbers = Stream::from($data->crates)->map(fn($crate) => $crate->number)->toArray();
@@ -1077,9 +1084,9 @@ class ApiController extends AbstractController {
             ->setNumber($number)
             ->setPickLocation($pickLocation)
             ->setClient($client)
-            ->setComment($comment)
+            ->setComment($comment ?? null)
             ->setSignature($signature)
-            ->setPhoto($photo)
+            ->setPhoto($photo ?? null)
             ->setOperator($this->user)
             ->setCrates($crates);
 

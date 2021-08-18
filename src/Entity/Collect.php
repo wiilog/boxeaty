@@ -80,7 +80,7 @@ class Collect {
     private ?User $operator = null;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     private ?string $comment = null;
 
@@ -256,7 +256,7 @@ class Collect {
         return $this->comment;
     }
 
-    public function setComment(string $comment): self
+    public function setComment(?string $comment): self
     {
         $this->comment = $comment;
 
