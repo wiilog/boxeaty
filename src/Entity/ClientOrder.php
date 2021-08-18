@@ -494,6 +494,14 @@ class ClientOrder {
             );
     }
 
+    public function getBoxQuantity(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + $line->getQuantity(),
+                0
+            );
+    }
+
     public function getTotalWeight(): float {
         return Stream::from($this->lines)
             ->reduce(

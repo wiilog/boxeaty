@@ -9,7 +9,6 @@ use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
 use App\Entity\DeliveryMethod;
 use App\Entity\GlobalSetting;
-use App\Entity\OrderStatusHistory;
 use App\Entity\OrderType;
 use App\Entity\Role;
 use App\Entity\Status;
@@ -143,11 +142,30 @@ class ClientOrderController extends AbstractController {
 
         if ($clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)) {
             $statusRepository = $entityManager->getRepository(Status::class);
-            $validateBoxeatyStatus = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE_BOXEATY]);
+            $globalSettingRepository = $entityManager->getRepository(GlobalSetting::class);
 
-            $history = $clientOrderService->updateClientOrderStatus($clientOrder, $validateBoxeatyStatus, $this->getUser());
+            /** @var User $user */
+            $user = $this->getUser();
+
+            $numberDayLimit = $globalSettingRepository->getValue(GlobalSetting::AUTO_VALIDATION_DELAY);
+            $quantityLimit = $globalSettingRepository->getValue(GlobalSetting::AUTO_VALIDATION_BOX_QUANTITY);
+
+            if ($numberDayLimit && $quantityLimit) {
+                $dayLimit = new DateTime('now + ' . $numberDayLimit . ' days');
+                $autoValidationDelay = $clientOrder->getExpectedDelivery();
+                $autoValidationQuantity = $clientOrder->getBoxQuantity();
+
+                if ($autoValidationDelay > $dayLimit
+                    && $autoValidationQuantity <= $quantityLimit) {
+                    $statusCode = Status::CODE_ORDER_PLANNED;
+                    $clientOrder->setAutomatic(true);
+                }
+            }
+
+            $status = $statusRepository->findOneBy(['code' => $statusCode ?? Status::CODE_ORDER_TO_VALIDATE_BOXEATY]);
+            $history = $clientOrderService->updateClientOrderStatus($clientOrder, $status, $user);
+
             $entityManager->persist($history);
-
             $entityManager->flush();
         }
 
@@ -190,24 +208,6 @@ class ClientOrderController extends AbstractController {
             $entityManager->persist($history);
             $entityManager->persist($clientOrder);
             $entityManager->flush();
-
-
-            $clientOrderRepository = $entityManager->getRepository(ClientOrder::class);
-            $globalSettingRepository = $entityManager->getRepository(GlobalSetting::class);
-            $numberDayLimit = $globalSettingRepository->findOneBy(['name'=>GlobalSetting::AUTO_VALIDATION_DELAY])->getValue();
-            $now = date('Y-m-d');
-            $dayLimit = date('Y-m-d', strtotime($now . '+'.$numberDayLimit.' days'));
-
-            $quantityLimit = $entityManager->getRepository(GlobalSetting::class)->findOneBy(['name'=>GlobalSetting::AUTO_VALIDATION_BOX_QUANTITY])->getValue();
-
-
-            $autoValidationDelay =  date_format($clientOrder->getExpectedDelivery(),"Y-m-d" );
-            $autoValidationQuantity = $clientOrderRepository->getTotalBox($clientOrder->getId());
-
-            if($autoValidationDelay > $dayLimit && $autoValidationQuantity <= $quantityLimit){
-                $clientOrder->setStatus($entityManager->getRepository(Status::class)->findByCode(Status::CODE_ORDER_PLANNED));
-                $clientOrder->setAutomatic(true);
-            }
 
             return $this->json([
                 "success" => true,
