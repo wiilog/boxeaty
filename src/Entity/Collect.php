@@ -2,7 +2,9 @@
 
 namespace App\Entity;
 
+use App\Entity\Utils\StatusTrait;
 use App\Repository\CollectRepository;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -11,6 +13,8 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass=CollectRepository::class)
  */
 class Collect {
+
+    use StatusTrait;
 
     /**
      * @ORM\Id
@@ -28,11 +32,6 @@ class Collect {
      * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="collects")
      */
     private ?Location $location = null;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Status::class)
-     */
-    private ?Status $status = null;
 
     /**
      * @ORM\Column(type="integer")
@@ -57,7 +56,7 @@ class Collect {
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $collectedAt;
+    private ?DateTimeInterface $collectedAt = null;
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
@@ -90,15 +89,6 @@ class Collect {
             $location->addCollect($this);
         }
 
-        return $this;
-    }
-
-    public function getStatus(): ?Status {
-        return $this->status;
-    }
-
-    public function setStatus(?Status $status): self {
-        $this->status = $status;
         return $this;
     }
 
@@ -173,12 +163,12 @@ class Collect {
         return $this;
     }
 
-    public function getCollectedAt(): ?\DateTimeInterface
+    public function getCollectedAt(): ?DateTimeInterface
     {
         return $this->collectedAt;
     }
 
-    public function setCollectedAt(?\DateTimeInterface $collectedAt): self
+    public function setCollectedAt(?DateTimeInterface $collectedAt): self
     {
         $this->collectedAt = $collectedAt;
 

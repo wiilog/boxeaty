@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use WiiCommon\Helper\Stream;
+use App\Entity\Utils\ActiveTrait;
 use App\Repository\LocationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -13,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Location {
 
-    use Active;
+    use ActiveTrait;
 
     public const MIN_KIOSK_CAPACITY = 1;
 

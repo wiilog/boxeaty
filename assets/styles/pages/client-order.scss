@@ -4,6 +4,7 @@
     width: 30px;
     height: 30px;
     object-fit: cover;
+    display: block;
 }
 
 .type-box-input {
@@ -274,7 +275,7 @@ input{
     }
 }
 
-.crate-number-average {
+.crates-amount-label {
     font-size: 20px;
     font-weight: 700;
     color: $blue;

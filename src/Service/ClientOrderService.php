@@ -7,8 +7,10 @@ use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
+use App\Entity\CratePatternLine;
 use App\Entity\DeliveryMethod;
 use App\Entity\DepositTicket;
+use App\Entity\GlobalSetting;
 use App\Entity\OrderStatusHistory;
 use App\Entity\OrderType;
 use App\Entity\Status;
@@ -133,8 +135,10 @@ class ClientOrderService
                 $entityManager->remove($line);
             }
 
+            $cartVolume = 0;
             foreach ($handledCartLines as $cartLine) {
                 $boxType = $cartLine['boxType'];
+                $quantity = $cartLine['quantity'];
                 $clientOrderLine = new ClientOrderLine();
                 $clientOrderLine
                     ->setBoxType($boxType)
@@ -143,7 +147,21 @@ class ClientOrderService
                     ->setClientOrder($clientOrder);
 
                 $entityManager->persist($clientOrderLine);
+
+                if ($boxType && $boxType->getVolume()) {
+                    $cartVolume += $quantity * $boxType->getVolume();
+                }
             }
+
+            if (!$cartVolume) {
+                $form->addError('Le volume total du panier doit être supérieur à 0. Vous devez définir un volume pour les types de box renseignés.');
+            }
+            else {
+                $cratesAmount = $this->getCartSplitting($entityManager, $client, $handledCartLines);
+                $clientOrder->setCratesAmount(count($cratesAmount));
+            }
+
+            $this->updateCratesAmount($entityManager, $clientOrder, $cartVolume);
         }
     }
 
@@ -244,6 +262,135 @@ class ClientOrderService
         }
 
         return $this->token;
+    }
+
+    private function updateCratesAmount(EntityManagerInterface $entityManager,
+                                        ClientOrder $clientOrder,
+                                        float $cartVolume): void {
+        $boxTypeRepository = $entityManager->getRepository(BoxType::class);
+        $globalSettingRepository = $entityManager->getRepository(GlobalSetting::class);
+
+        $defaultCrateTypeId = $globalSettingRepository->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
+        $defaultCrateType = !empty($defaultCrateTypeId)
+            ? $boxTypeRepository->find($defaultCrateTypeId)
+            : null;
+        $defaultCrateVolume = isset($defaultCrateType) ? $defaultCrateType->getVolume() : null;
+        $cratesAmount = !empty($defaultCrateVolume)
+            ? ceil($cartVolume / $defaultCrateVolume)
+            : null;
+
+        $clientOrder->setCratesAmount($cratesAmount);
+    }
+
+    /**
+     * @param ['boxType' => BoxType, 'quantity' => int][] $cart
+     * @return
+     *     [
+                'type' => string,
+                'boxes' => [
+                    'type' => string,
+                    'quantity' => number
+                ][]
+            ][]
+     */
+    public function getCartSplitting(EntityManagerInterface $entityManager,
+                                     Client $client,
+                                     array $cart): array {
+
+        $boxTypeRepository = $entityManager->getRepository(BoxType::class);
+        $globalSettingRepository = $entityManager->getRepository(GlobalSetting::class);
+
+        $defaultCrateTypeId = $globalSettingRepository->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
+        $defaultCrateType = !empty($defaultCrateTypeId)
+            ? $boxTypeRepository->find($defaultCrateTypeId)
+            : null;
+
+        $cartSplitting = [];
+        $defaultCrateVolume = $defaultCrateType ? $defaultCrateType->getVolume() : null;
+
+        if ($defaultCrateType && $defaultCrateVolume) {
+            $serializeCrate = fn (BoxType $crateType, array $boxes = []) => [
+                'type' => $crateType->getName(),
+                'boxes' => $boxes
+            ];
+            $serializeBox = fn (BoxType $boxType, int $quantity) => [
+                'type' => $boxType->getName(),
+                'quantity' => $quantity
+            ];
+
+            $cartTypeToQuantities = Stream::from($cart)
+                ->keymap(fn(array $line) => [
+                    $line['boxType']->getId(),
+                    [
+                        'quantity' => (int)$line['quantity'],
+                        'boxType' => $line['boxType']
+                    ]
+                ])
+                ->toArray();
+
+            $cratePatternLines = $client->getCratePatternLines()
+                ->map(fn(CratePatternLine $line) => $serializeBox($line->getBoxType(), $line->getQuantity()))
+                ->getValues();
+
+            // first part: with client crate pattern
+            $cartPatternTakeIntoAccount = false;
+            if (!empty($cratePatternLines)) {
+                while (!$cartPatternTakeIntoAccount) {
+                    $cartContainsPattern = true;
+                    foreach ($cratePatternLines as $cratePatternLine) {
+                        $type = $cratePatternLine['type'];
+                        if (!isset($cartTypeToQuantities[$type])
+                            || $cartTypeToQuantities[$type]['quantity'] < $cratePatternLine['quantity']) {
+                            $cartContainsPattern = false;
+                            break;
+                        }
+                    }
+
+                    if ($cartContainsPattern) {
+                        foreach ($cratePatternLines as $cratePatternLine) {
+                            $type = $cratePatternLine['type'];
+                            $cartTypeToQuantities[$type]['quantity'] -= $cratePatternLine['quantity'];
+                            if (!$cartTypeToQuantities[$type]['quantity']) {
+                                unset($cartTypeToQuantities[$type]);
+                            }
+                        }
+                        $cartSplitting[] = $serializeCrate($defaultCrateType, $cratePatternLines);
+                    }
+                    else {
+                        $cartPatternTakeIntoAccount = true;
+                    }
+                }
+            }
+
+            // second part: remaining box in cart
+            $cartSplittingLine = $serializeCrate($defaultCrateType);
+
+            $splittingLineVolume = 0;
+
+            foreach ($cartTypeToQuantities as $cartLine) {
+                $quantity = $cartLine['quantity'];
+                if ($quantity > 0) {
+                    $boxType = $cartLine['boxType'];
+                    $currentBoxVolume = $boxType->getVolume();
+                    if ($splittingLineVolume + $currentBoxVolume > $defaultCrateVolume) {
+                        $cartSplitting[] = $cartSplittingLine;
+
+                        $cartSplittingLine = $serializeCrate($defaultCrateType);
+                        $splittingLineVolume = 0;
+                    }
+
+                    $splittingLineVolume += $currentBoxVolume;
+                    $cartSplittingLine['boxes'][] = $serializeBox($boxType, $quantity);
+                }
+            }
+
+            if (!empty($cartSplittingLine['boxes'])) {
+                $cartSplitting[] = $cartSplittingLine;
+                $cartSplittingLine = null;
+            }
+        }
+
+        return $cartSplitting;
     }
 
 }

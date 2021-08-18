@@ -9,7 +9,7 @@
                        class="data"
                        value="{{ orderType.id }}"
                        data-code="{{ orderType.code }}"
-                        {{ clientOrder.type == orderType ? 'checked' }}
+                       {{ clientOrder.type == orderType ? 'checked' }}
                        required/>
                 <label for="{{ inputId }}">
                     {{ orderType.name }}
@@ -43,7 +43,7 @@
                         </select>
                     </label>
                 </div>
-                <span id="clientAddress" class="smallTxt col-6 "></span>
+                <span class="smallTxt col-6 client-address"></span>
             </div>
             <div class="row form-switch autonomous-management d-none">
                 <label class="form-check-label bigTxt col-8" for="{{ clientOrder.id ? 'edit' : 'new' }}-collect">
@@ -114,7 +114,8 @@
             </div>
         </div>
 
-        <div class="crate-number-average d-none"></div>
+        <div class="crates-amount-label d-none">
+        </div>
 
         <div class="header-section">
             <h2 class="header-section-label">Livraison</h2>
@@ -147,8 +148,8 @@
                        min="{{ 'now + 1 days'|date('Y-m-d') }}T00:00"
                        required/>
             </div>
-            <span class="bigTxt col-12" id="deliveryPrice"></span>
-            <span class="bigTxt col-12" id="servicePrice"></span>
+            <span class="bigTxt col-12 deliveryPrice"></span>
+            <span class="bigTxt col-12 servicePrice"></span>
         </div>
         <label class="bigTxt">
             Commentaire sur la livraison

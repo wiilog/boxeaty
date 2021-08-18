@@ -204,25 +204,6 @@ class BoxRepository extends EntityRepository {
         ];
     }
 
-    public function getCrateAverageVolume(): float {
-        $queryBuilder = $this->createQueryBuilder('crate')
-            ->select('SUM(type.volume) AS volumeSum')
-            ->addSelect('COUNT(crate.id) AS boxNumber')
-            ->where('crate.isBox = 0')
-            ->andWhere('crate.isBox = 0')
-            ->andWhere('type.volume IS NOT NULL')
-            ->join('crate.type', 'type');
-        $res = $queryBuilder
-            ->getQuery()
-            ->getResult();
-        $volumeSum = $res[0]['volumeSum'] ?? 0;
-        $boxNumber = $res[0]['boxNumber'] ?? 0;
-
-        return $boxNumber > 0
-            ? ($volumeSum / $boxNumber)
-            : 0;
-    }
-
     public function getByDepository(Depository $depository)
     {
         return $this->createQueryBuilder('crate')
@@ -254,23 +235,6 @@ class BoxRepository extends EntityRepository {
             ->setParameter("number", $number)
             ->getQuery()
             ->getOneOrNullResult();
-    }
-
-    public function getByPreparation(Preparation $preparation) {
-        $qb = $this->createQueryBuilder('box');
-
-        $qb->select('box.number AS number')
-            ->addSelect('join_type.name AS type')
-            ->leftJoin('box.type', 'join_type')
-            ->leftJoin('box.boxPreparationLines', 'join_boxPreparationLines')
-            ->leftJoin('join_boxPreparationLines.preparation', 'join_preparation')
-            ->where('box.isBox = 0')
-            ->andWhere('join_preparation = :preparation')
-            ->setParameter('preparation', $preparation);
-
-        return $qb
-            ->getQuery()
-            ->execute();
     }
 
     public function getAvailableAndCleanedBoxByType(?array $boxTypes) {

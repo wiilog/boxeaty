@@ -4,10 +4,11 @@ namespace App\Controller\Operation;
 
 use App\Annotation\HasPermission;
 use App\Entity\BoxType;
+use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
 use App\Entity\DeliveryMethod;
-use App\Entity\OrderStatusHistory;
+use App\Entity\GlobalSetting;
 use App\Entity\OrderType;
 use App\Entity\Role;
 use App\Entity\Status;
@@ -25,6 +26,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Exception\InvalidParameterException;
 use WiiCommon\Helper\Stream;
 
 /**
@@ -366,6 +368,7 @@ class ClientOrderController extends AbstractController {
 
         return $form->errors();
     }
+
     /**
      * @Route("/client-order-history-api", name="client_order_history_api", options={"expose": true})
      */
@@ -381,4 +384,27 @@ class ClientOrderController extends AbstractController {
         ]);
     }
 
+    /**
+     * @Route("/crates-amount", name="get_crates_amount", options={"expose": true})
+     */
+    public function cartSplitting(Request                $request,
+                                  ClientOrderService     $clientOrderService,
+                                  EntityManagerInterface $entityManager): Response {
+
+        $clientRepository = $entityManager->getRepository(Client::class);
+
+        $clientId = $request->query->get('client');
+        $client = $clientRepository->find($clientId);
+        $cart = $request->query->get('cart') ?: [];
+
+        if (!empty($client) && !empty($cart)) {
+            $cartSplitting = $clientOrderService->getCartSplitting($entityManager, $client, $cart);
+            return $this->json([
+                'success' => true,
+                'cratesAmount' => count($cartSplitting)
+            ]);
+        }
+
+        throw new InvalidParameterException('Invalid params.');
+    }
 }

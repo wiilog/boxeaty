@@ -6,13 +6,14 @@ use App\Repository\DepositoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Utils\ActiveTrait;
 
 /**
  * @ORM\Entity(repositoryClass=DepositoryRepository::class)
  */
 class Depository {
 
-    use Active;
+    use ActiveTrait;
 
     /**
      * @ORM\Id

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Utils\StatusTrait;
 use App\Repository\PreparationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -12,6 +13,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Preparation {
 
+    use StatusTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -20,32 +23,26 @@ class Preparation {
     private ?int $id = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Status::class)
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private ?Status $status;
-
-    /**
      * @ORM\OneToOne(targetEntity=ClientOrder::class, inversedBy="preparation")
      * @ORM\JoinColumn(nullable=false)
      */
-    private ?ClientOrder $order;
+    private ?ClientOrder $order = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="preparations")
      * @ORM\JoinColumn(nullable=false)
      */
-    private ?Depository $depository;
+    private ?Depository $depository = null;
 
     /**
      * @ORM\OneToMany(targetEntity=PreparationLine::class, mappedBy="preparation")
      */
-    private Collection $lines;
+    private ?Collection $lines;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="preparations")
      */
-    private $operator;
+    private ?User $operator = null;
 
     public function __construct() {
         $this->lines = new ArrayCollection();
@@ -53,15 +50,6 @@ class Preparation {
 
     public function getId(): ?int {
         return $this->id;
-    }
-
-    public function getStatus(): ?Status {
-        return $this->status;
-    }
-
-    public function setStatus(?Status $status): self {
-        $this->status = $status;
-        return $this;
     }
 
     public function getOrder(): ?ClientOrder {
@@ -135,14 +123,20 @@ class Preparation {
         return $this;
     }
 
-    public function getOperator(): ?User
-    {
+    public function getOperator(): ?User {
         return $this->operator;
     }
 
-    public function setOperator(?User $operator): self
-    {
+    public function setOperator(?User $operator): self {
+        if($this->operator && $this->operator !== $operator) {
+            $this->operator->removePreparation($this);
+        }
+
         $this->operator = $operator;
+
+        if($operator) {
+            $operator->addPreparation($this);
+        }
 
         return $this;
     }

@@ -5,7 +5,9 @@ namespace App\Entity;
 use App\Repository\BoxTypeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Utils\ActiveTrait;
 
 /**
  * @ORM\Entity(repositoryClass=BoxTypeRepository::class)
@@ -15,7 +17,7 @@ class BoxType {
     public const DEFAULT_VOLUME = 0.0005;
     public const STARTER_KIT = 'Kit de démarrage';
 
-    use Active;
+    use ActiveTrait;
 
     /**
      * @ORM\Id
@@ -50,9 +52,9 @@ class BoxType {
     private Collection $boxes;
 
     /**
-     * @ORM\OneToMany(targetEntity=ClientBoxType::class, mappedBy="boxType")
+     * @ORM\OneToMany(targetEntity=CratePatternLine::class, mappedBy="boxType")
      */
-    private Collection $clientBoxTypes;
+    private Collection $cratePatternLines;
 
     /**
      * @ORM\OneToMany(targetEntity=ClientOrderLine::class, mappedBy="boxType", cascade={"persist", "remove"})
@@ -76,7 +78,7 @@ class BoxType {
 
     public function __construct() {
         $this->boxes = new ArrayCollection();
-        $this->clientBoxTypes = new ArrayCollection();
+        $this->cratePatternLines = new ArrayCollection();
         $this->clientOrderLines = new ArrayCollection();
     }
 
@@ -129,6 +131,16 @@ class BoxType {
         return $this->boxes;
     }
 
+    /**
+     * @return Collection|Box[]
+     */
+    public function getCrates(): Collection {
+        $criteria = Criteria::create();
+        return $this->boxes->matching(
+            $criteria->andWhere(Criteria::expr()->eq('isBox', false))
+        );
+    }
+
     public function addBox(Box $box): self {
         if (!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
@@ -150,29 +162,29 @@ class BoxType {
     }
 
     /**
-     * @return Collection|ClientBoxType[]
+     * @return Collection|CratePatternLine[]
      */
-    public function getClientBoxTypes(): Collection
+    public function getCratePatternLines(): Collection
     {
-        return $this->clientBoxTypes;
+        return $this->cratePatternLines;
     }
 
-    public function addClientBoxType(ClientBoxType $clientBoxType): self
+    public function addCratePatternLine(CratePatternLine $cratePatternLine): self
     {
-        if (!$this->clientBoxTypes->contains($clientBoxType)) {
-            $this->clientBoxTypes[] = $clientBoxType;
-            $clientBoxType->setBoxType($this);
+        if (!$this->cratePatternLines->contains($cratePatternLine)) {
+            $this->cratePatternLines[] = $cratePatternLine;
+            $cratePatternLine->setBoxType($this);
         }
 
         return $this;
     }
 
-    public function removeClientBoxType(ClientBoxType $clientBoxType): self
+    public function removeCratePatternLine(CratePatternLine $cratePatternLine): self
     {
-        if ($this->clientBoxTypes->removeElement($clientBoxType)) {
+        if ($this->cratePatternLines->removeElement($cratePatternLine)) {
             // set the owning side to null (unless already changed)
-            if ($clientBoxType->getBoxType() === $this) {
-                $clientBoxType->setBoxType(null);
+            if ($cratePatternLine->getBoxType() === $this) {
+                $cratePatternLine->setBoxType(null);
             }
         }
 

@@ -8,13 +8,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Entity\Utils\ActiveTrait;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  */
 class User implements UserInterface {
 
-    use Active;
+    use ActiveTrait;
 
     /**
      * @ORM\Id
@@ -179,7 +180,7 @@ class User implements UserInterface {
     /**
      * @ORM\OneToMany(targetEntity=Preparation::class, mappedBy="operator")
      */
-    private $preparations;
+    private ?Collection $preparations;
 
     public function __construct() {
         $this->clients = new ArrayCollection();
@@ -661,13 +662,11 @@ class User implements UserInterface {
     /**
      * @return Collection|Preparation[]
      */
-    public function getPreparations(): Collection
-    {
+    public function getPreparations(): Collection {
         return $this->preparations;
     }
 
-    public function addPreparation(Preparation $preparation): self
-    {
+    public function addPreparation(Preparation $preparation): self {
         if (!$this->preparations->contains($preparation)) {
             $this->preparations[] = $preparation;
             $preparation->setOperator($this);
@@ -676,13 +675,24 @@ class User implements UserInterface {
         return $this;
     }
 
-    public function removePreparation(Preparation $preparation): self
-    {
+    public function removePreparation(Preparation $preparation): self {
         if ($this->preparations->removeElement($preparation)) {
-            // set the owning side to null (unless already changed)
             if ($preparation->getOperator() === $this) {
                 $preparation->setOperator(null);
             }
+        }
+
+        return $this;
+    }
+
+    public function setPreparations(?array $preparations): self {
+        foreach($this->getPreparations()->toArray() as $preparation) {
+            $this->removePreparation($preparation);
+        }
+
+        $this->preparations = new ArrayCollection();
+        foreach($preparations as $preparation) {
+            $this->addPreparation($preparation);
         }
 
         return $this;
