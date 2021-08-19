@@ -37,16 +37,15 @@ class LocationController extends AbstractController
     {
         $params = json_decode($request->getContent(), true);
         $filters = $params['filters'] ?? [];
-        $depositoryRepository = $manager->getRepository(Depository::class);
 
-        if (!empty($filters)) {
+        if (isset($filters['depository'])) {
+            $depositoryId = $manager->find(Depository::class, $filters['depository'])->getId();
+            $boxRepository = $manager->getRepository(Box::class);
 
-        $depositoryId = $depositoryRepository->find($filters['depository'])->getId();
-        $boxRepository = $manager->getRepository(Box::class);
-        $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
-        $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0, $depositoryId);
-        $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1, $depositoryId);
-        $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1, $depositoryId);
+            $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
+            $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0, $depositoryId);
+            $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1, $depositoryId);
+            $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1, $depositoryId);
         }
 
         return $this->render("referential/location/index.html.twig", [
@@ -129,46 +128,40 @@ class LocationController extends AbstractController
             'type' => 'line',
             'data' => [
                 'labels' => $chartLabels,
+                'subtitle' => [
+                    'text' => 'Passage au statut :',
+                    'display' => true
+                ],
                 'datasets' => [
                     [
                         'label' => "Consommateur",
                         'data' => $dataCustomerState,
-                        'backgroundColor' => ['#32CD32'],
-                        'borderColor' => ['#32CD32'],
+                        'backgroundColor' => ['#1E1F44'],
+                        'borderColor' => ['#1E1F44'],
                     ],
                     [
                         'label' => "Sorti",
                         'data' => $dataOutState,
-                        'backgroundColor' => ['#006400'],
-                        'borderColor' => ['#006400'],
+                        'backgroundColor' => ['#EB611B'],
+                        'borderColor' => ['#EB611B'],
                     ],
                     [
                         'label' => "Indisponible",
                         'data' => $dataUnavailableState,
-                        'backgroundColor' => ['#9400D3'],
-                        'borderColor' => ['#9400D3'],
+                        'backgroundColor' => ['#890620'],
+                        'borderColor' => ['#890620'],
                     ],
                     [
                         'label' => "Disponible",
                         'data' => $dataAvailableState,
-                        'backgroundColor' => ['#FFA500'],
-                        'borderColor' => ['#FFA500'],
+                        'backgroundColor' => ['#76B39D'],
+                        'borderColor' => ['#76B39D'],
                     ],
                 ],
-                'scales' => [
-                    'y' => [
-                        'beginAtZero' => false,
-                    ]
-                ]
             ],
         ];
         $depositoryRepository = $manager->getRepository(Depository::class);
         $depository = isset($filters['depository']) ? $depositoryRepository->find($filters['depository']) : null;
-
-        $crateUnavailable = 0;
-        $crateAvailable = 0;
-        $boxUnavailable = 0;
-        $boxAvailable = 0;
 
         if ($depository) {
             $depositoryId = $depository->getId();
@@ -183,10 +176,10 @@ class LocationController extends AbstractController
             "data" => $data,
             "recordsTotal" => $locations["total"],
             "recordsFiltered" => $locations["filtered"],
-            "crateUnavailable" => $crateUnavailable ?? 0,
-            "crateAvailable" => $crateAvailable ?? 0,
-            "boxUnavailable" => $boxUnavailable ?? 0,
-            "boxAvailable" => $boxAvailable ?? 0,
+            "crateUnavailable" => $crateUnavailable ?? '--',
+            "crateAvailable" => $crateAvailable ?? '--',
+            "boxUnavailable" => $boxUnavailable ?? '--',
+            "boxAvailable" => $boxAvailable ?? '--',
         ]);
     }
 

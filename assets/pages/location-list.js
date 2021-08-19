@@ -55,6 +55,8 @@ $document.ready(() => {
             empty: data => emptyLocationModal.open(data),
         }
     });
+
+    drawChart();
 });
 
 $document.ready(() => fireTypeChangeEvent($('#modal-new-location').find('input[name="kiosk"]')))
@@ -100,16 +102,31 @@ function toggleInputsIn($container, show) {
         });
     }
 }
- function drawChart(config) {
-     let $container = $('#historyChart');
-     $container.replaceWith('<canvas id="historyChart" width="400" height="150"></canvas>');
-     ChartJS.line($('#historyChart'), JSON.parse(config));
- }
 
- function onFilter(data) {
-     drawChart(data.config);
-     $('.box-available').text(data.boxAvailable);
-     $('.crate-available').text(data.crateAvailable);
-     $('.box-unavailable').text(data.boxUnavailable);
-     $('.crate-unavailable').text(data.crateUnavailable);
+function onFilter(data) {
+    $('.box-available').text(data.boxAvailable);
+    $('.crate-available').text(data.crateAvailable);
+    $('.box-unavailable').text(data.boxUnavailable);
+    $('.crate-unavailable').text(data.crateUnavailable);
+
+    drawChart(data.config);
 }
+
+function drawChart(config = undefined) {
+    const $filters = $('.filters');
+    const $container = $('#historyChart');
+    const params = processForm($filters).asObject();
+
+    if(params.depository && params.from && params.to) {
+        $container.replaceWith('<canvas id="historyChart" width="400" height="150"></canvas>');
+        ChartJS.line($('#historyChart'), JSON.parse(config));
+    } else {
+        $container.replaceWith(`
+            <div id="historyChart" class="d-flex flex-column align-items-center">
+                <i class="fas fa-exclamation-circle fa-2x"></i>
+                <span>Un couple de filtres dépôt/dates est nécessaire afin d'afficher le graphique</span>
+            </div>
+        `);
+    }
+}
+

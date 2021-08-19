@@ -31,14 +31,18 @@ export default class ChartJS {
                 }
             },
             scales: {
-                yAxes: [{
+                y: {
                     display: true,
-                    ticks: {
-                        suggestedMin: 0,
-                    },
-                }]
+                    beginAtZero: true,
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
             }
         };
+
         return new Chart($canva, config);
     }
 }
