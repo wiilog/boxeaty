@@ -50,6 +50,8 @@
                                             <img src="{{ asset(line.boxType.image.path) }}"
                                                  class="box-type-image"
                                                  alt="image"/>
+                                        {% else %}
+                                            <span class="box-type-image"></span>
                                         {% endif %}
                                     </div>
                                     <div class="col">

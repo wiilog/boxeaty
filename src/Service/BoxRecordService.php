@@ -12,7 +12,7 @@ class BoxRecordService {
     /**
      * @return BoxRecord[]
      */
-    public function generateBoxRecords(Box $box, array $previousValues, ?User $loggedUser): array {
+    public function generateBoxRecords(Box $box, array $previousValues, ?User $loggedUser, ?DateTime $date = null): array {
         $oldLocationId = isset($previousValues["location"]) ? $previousValues["location"]->getId() : null;
         $oldState = $previousValues["state"] ?? null;
         $oldComment = $previousValues["comment"] ?? null;
@@ -22,21 +22,21 @@ class BoxRecordService {
         $newComment = $box->getComment();
 
         if ($newLocationId != $oldLocationId) {
-            $tracking = $this->createBoxRecord($box, true);
+            $tracking = $this->createBoxRecord($box, true, $date);
             $tracking->setUser($loggedUser);
         }
 
         if ($newState != $oldState || $newComment != $oldComment) {
-            $record = $this->createBoxRecord($box, false);
+            $record = $this->createBoxRecord($box, false, $date);
             $record->setUser($loggedUser);
         }
 
         return [$tracking ?? null, $record ?? null];
     }
 
-    public function createBoxRecord(Box $box, bool $trackingMovement): BoxRecord {
+    public function createBoxRecord(Box $box, bool $trackingMovement, ?DateTime $date = null): BoxRecord {
         return (new BoxRecord())
-            ->setDate(new DateTime())
+            ->setDate($date ?? new DateTime())
             ->setTrackingMovement($trackingMovement)
             ->copyBox($box);
     }

@@ -8,7 +8,7 @@
     padding-right: 0;
     margin-top: -30px;
 
-    .edit-client, .delete-client, .edit-client-box-type, .delete-client-box-type {
+    .edit-client, .delete-client, .edit-crate-pattern-line, .delete-crate-pattern-line {
         font-size: 2.5rem;
         display: flex;
         justify-content: center;
@@ -116,6 +116,7 @@
                 width: 30px;
                 height: 30px;
                 object-fit: cover;
+                display: block;
             }
         }
     }

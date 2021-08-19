@@ -30,7 +30,7 @@ class AnnotationListener {
     public EntityManagerInterface $manager;
 
     public function onRequest(ControllerArgumentsEvent $event) {
-        if (!$event->isMasterRequest() || !is_array($event->getController())) {
+        if (!$event->isMainRequest() || !is_array($event->getController())) {
             return;
         }
 

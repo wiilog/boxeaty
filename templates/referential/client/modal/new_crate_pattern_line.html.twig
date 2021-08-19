@@ -1,12 +1,13 @@
-<div id="modal-edit-client-box-type" class="modal fade">
+<div id="modal-add-crate-pattern-line" class="modal fade">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
-            <h1>Modifier une Box du modèle de caisse</h1>
+            <h1>Ajouter une Box au modèle de caisse</h1>
 
             <div class="body">
-                {% include 'referential/client/modal/form_client_box_type.html.twig' %}
+                {% include 'referential/client/modal/form_crate_pattern_line.html.twig' %}
             </div>
+            <input type="hidden" class="data" name="client" value="{{ clientId }}"/>
             <div class="footer">
                 <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
                 <button type="submit" class="primary">Enregistrer</button>

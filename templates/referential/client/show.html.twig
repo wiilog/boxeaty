@@ -156,7 +156,7 @@
                 </span>
                 <div class="box-type-card-wrapper"></div>
                 <div class="d-flex justify-content-end mt-3">
-                    <button class="primary filter add-client-box-type">Ajouter une Box</button>
+                    <button class="primary filter add-crate-pattern-line">Ajouter une Box</button>
                 </div>
             </div>
             <div class="order-recurrence-container mt-3">
@@ -170,7 +170,7 @@
     </div>
     <input type="hidden" value="{{ client.id }}" id="client-id">
 
-    {% include('referential/client/modal/new_client_box_type.html.twig') with {
+    {% include('referential/client/modal/new_crate_pattern_line.html.twig') with {
         clientId: client.id
     } %}
     {% include('referential/client/modal/add_order_recurrence.html.twig') with {

@@ -7,10 +7,12 @@
                     <img src="{{ asset(line.boxType.image.path) }}"
                          class="box-type-image"
                          alt="image"/>
+                {% else %}
+                    <span class="box-type-image"></span>
                 {% endif %}
             </div>
             <div class="col">
-                {{ line.quantity }}&nbsp;&times;&nbsp; Box de type <b>{{ line.boxType.name }}</b>
+                {{ line.quantity }}&nbsp;&times;&nbsp;Box de type <b>{{ line.boxType.name }}</b>
             </div>
             <div class="col-3">
                 T.U. {{ line.unitPrice|format_helper('price') }}
