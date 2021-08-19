@@ -19,7 +19,7 @@
                 <div class="col-3">
                     <i class="icon bxi bxi-crate"></i><br>
                     <div class="green-text col-12 crate-available">{{ crateAvailable }}</div>
-                    <div class="text-bold col-12">Caisse{{ crateAvailable > 1 ? 's' : '' }} en stock</div>
+                    <div class="text-bold col-12 plural">Caisse{{ crateAvailable > 1 ? 's' : '' }} en stock</div>
                 </div>
                 <div class="col-3">
                     <i class="icon bxi bxi-box"></i><br>
@@ -29,13 +29,13 @@
                 <div class="col-3">
                     <i class="icon bxi bxi-grey-crate"></i><br>
                     <div class="green-text crate-unavailable">{{ crateUnavailable }}</div>
-                    <div class="text-bold">Caisse{{ crateUnavailable > 1 ? 's' : '' }} non
+                    <div class="text-bold plural">Caisse{{ crateUnavailable > 1 ? 's' : '' }} non
                         disponible{{ crateUnavailable > 1 ? 's' : '' }}</div>
                 </div>
                 <div class="col-3">
                     <i class="icon bxi bxi-grey-box"></i><br>
                     <div class="green-text box-unavailable">{{ boxUnavailable }}</div>
-                    <div class="text-bold">Box non disponible{{ boxUnavailable > 1 ? 's' : '' }}</div>
+                    <div class="text-bold plural">Box non disponible{{ boxUnavailable > 1 ? 's' : '' }}</div>
                 </div>
             </div>
         </div>

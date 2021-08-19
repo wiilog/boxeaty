@@ -104,10 +104,27 @@ function toggleInputsIn($container, show) {
 }
 
 function onFilter(data) {
-    $('.box-available').text(data.boxAvailable);
-    $('.crate-available').text(data.crateAvailable);
-    $('.box-unavailable').text(data.boxUnavailable);
-    $('.crate-unavailable').text(data.crateUnavailable);
+    const $crateAvailable = $('.crate-available');
+    const $boxAvailable = $('.box-available');
+    const $crateUnavailable = $('.crate-unavailable');
+    const $boxUnavailable = $('.box-unavailable');
+
+    $crateAvailable.text(data.crateAvailable);
+    if(data.crateAvailable > 1) {
+        $crateAvailable.siblings('.plural').text('Caisses en stock');
+    }
+
+    $boxAvailable.text(data.boxAvailable);
+
+    $crateUnavailable.text(data.crateUnavailable);
+    if(data.crateUnavailable > 1) {
+        $crateUnavailable.siblings('.plural').text('Box non disponibles');
+    }
+
+    $boxUnavailable.text(data.boxUnavailable);
+    if(data.boxUnavailable > 1) {
+        $boxUnavailable.siblings('.plural').text('Caisses non disponibles');
+    }
 
     drawChart(data.config);
 }
