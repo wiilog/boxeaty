@@ -200,4 +200,18 @@ class BoxRecordRepository extends EntityRepository {
 
         return null;
     }
+
+    public function getNumberBoxByStateAndDate( \DateTime $startDate, \DateTime $endDate, int $state, array $clients) {
+        return $this->createQueryBuilder("record")
+            ->select("COUNT(DISTINCT record.id) AS result")
+            ->andWhere("record.date BETWEEN :dateMin AND :dateMax")
+            ->andWhere("record.state = :state")
+            ->andWhere("record.client in (:clients)")
+            ->setParameter("dateMin", $startDate)
+            ->setParameter("dateMax", $endDate)
+            ->setParameter("state", $state)
+            ->setParameter("clients", $clients)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

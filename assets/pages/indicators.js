@@ -39,10 +39,9 @@ $(function () {
     }
 
     function drawChart(config) {
-        let $container = $('.chart-container');
-        $container.empty();
-        $container.append('<canvas id="canvasChart" width="400" height="150"></canvas>');
-        ChartJS.new($container.find('canvas').first(), JSON.parse(config));
+       let $container = $('#indicatorsChart');
+       $container.replaceWith('<canvas id="indicatorsChart" width="400" height="10"></canvas>');
+       ChartJS.line($('#indicatorsChart'), JSON.parse(config));
     }
 })
 
