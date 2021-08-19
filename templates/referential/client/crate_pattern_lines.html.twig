@@ -1,0 +1,20 @@
+{% for cratePatternLine in client.cratePatternLines %}
+    {% set boxType = cratePatternLine.boxType %}
+    {% set totalPrice = cratePatternLine.quantity * cratePatternLine.unitPrice %}
+    <div class="box-type-card">
+        {% if boxType.image %}
+            <img src="{{ asset(boxType.image.path) }}"
+                 class="box-type-image"
+                 alt="image"/>
+        {% else %}
+            <span class="box-type-image"></span>
+        {% endif %}
+        <span class="body-text-semi-bold">{{ cratePatternLine.quantity }}&nbsp;&times;&nbsp;{{ boxType.name }}</span>
+        <span class="body-text">T.U. {{ cratePatternLine.unitPrice | format_helper('price') }}</span>
+        <span class="body-text-semi-bold">{{ totalPrice | format_helper('price') }}</span>
+        <div class="actions-wrapper">
+            <div class="edit-crate-pattern-line round cursor-pointer" data-id="{{ cratePatternLine.id }}"><i class="icon bxi bxi-edit-circle"></i></div>
+            <div class="delete-crate-pattern-line round cursor-pointer" data-id="{{ cratePatternLine.id }}"><i class="icon bxi bxi-trash-circle"></i></div>
+        </div>
+    </div>
+{% endfor %}

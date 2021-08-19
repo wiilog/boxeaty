@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\CrateTypeRepository;
+use App\Repository\CratePatternLineRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=CrateTypeRepository::class)
+ * @ORM\Entity(repositoryClass=CratePatternLineRepository::class)
  */
-class ClientBoxType
+class CratePatternLine
 {
     /**
      * @ORM\Id
@@ -28,12 +28,12 @@ class ClientBoxType
     private ?int $quantity = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="clientBoxTypes")
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="cratePatternLines")
      */
     private ?Client $client = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=BoxType::class, inversedBy="clientBoxTypes")
+     * @ORM\ManyToOne(targetEntity=BoxType::class, inversedBy="cratePatternLines")
      */
     private ?BoxType $boxType = null;
 
@@ -71,9 +71,14 @@ class ClientBoxType
         return $this->client;
     }
 
-    public function setClient(?Client $client): self
-    {
+    public function setClient(?Client $client): self {
+        if($this->client && $this->client !== $client) {
+            $this->client->removeCratePatternLine($this);
+        }
         $this->client = $client;
+        if($client) {
+            $client->addCratePatternLine($this);
+        }
 
         return $this;
     }

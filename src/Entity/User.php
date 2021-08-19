@@ -8,13 +8,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Entity\Utils\ActiveTrait;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  */
 class User implements UserInterface {
 
-    use Active;
+    use ActiveTrait;
 
     /**
      * @ORM\Id
@@ -176,6 +177,11 @@ class User implements UserInterface {
      */
     private Collection $counterOrders;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Preparation::class, mappedBy="operator")
+     */
+    private ?Collection $preparations;
+
     public function __construct() {
         $this->clients = new ArrayCollection();
         $this->boxRecords = new ArrayCollection();
@@ -185,6 +191,7 @@ class User implements UserInterface {
         $this->orderStatusHistories = new ArrayCollection();
         $this->clientOrders = new ArrayCollection();
         $this->counterOrders = new ArrayCollection();
+        $this->preparations = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -647,6 +654,45 @@ class User implements UserInterface {
         $this->counterOrders = new ArrayCollection();
         foreach ($counterOrders as $order) {
             $this->addCounterOrder($order);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Preparation[]
+     */
+    public function getPreparations(): Collection {
+        return $this->preparations;
+    }
+
+    public function addPreparation(Preparation $preparation): self {
+        if (!$this->preparations->contains($preparation)) {
+            $this->preparations[] = $preparation;
+            $preparation->setOperator($this);
+        }
+
+        return $this;
+    }
+
+    public function removePreparation(Preparation $preparation): self {
+        if ($this->preparations->removeElement($preparation)) {
+            if ($preparation->getOperator() === $this) {
+                $preparation->setOperator(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setPreparations(?array $preparations): self {
+        foreach($this->getPreparations()->toArray() as $preparation) {
+            $this->removePreparation($preparation);
+        }
+
+        $this->preparations = new ArrayCollection();
+        foreach($preparations as $preparation) {
+            $this->addPreparation($preparation);
         }
 
         return $this;

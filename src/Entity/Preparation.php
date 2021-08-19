@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Utils\StatusTrait;
 use App\Repository\PreparationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -12,18 +13,14 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Preparation {
 
+    use StatusTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private ?int $id = null;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Status::class)
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private ?Status $status;
 
     /**
      * @ORM\OneToOne(targetEntity=ClientOrder::class, inversedBy="preparation")
@@ -40,7 +37,12 @@ class Preparation {
     /**
      * @ORM\OneToMany(targetEntity=PreparationLine::class, mappedBy="preparation")
      */
-    private Collection $lines;
+    private ?Collection $lines;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="preparations")
+     */
+    private ?User $operator = null;
 
     public function __construct() {
         $this->lines = new ArrayCollection();
@@ -48,15 +50,6 @@ class Preparation {
 
     public function getId(): ?int {
         return $this->id;
-    }
-
-    public function getStatus(): ?Status {
-        return $this->status;
-    }
-
-    public function setStatus(?Status $status): self {
-        $this->status = $status;
-        return $this;
     }
 
     public function getOrder(): ?ClientOrder {
@@ -127,6 +120,24 @@ class Preparation {
         $this->lines = new ArrayCollection();
         foreach($lines as $line) {
             $this->addLine($line);
+        }
+
+        return $this;
+    }
+
+    public function getOperator(): ?User {
+        return $this->operator;
+    }
+
+    public function setOperator(?User $operator): self {
+        if($this->operator && $this->operator !== $operator) {
+            $this->operator->removePreparation($this);
+        }
+
+        $this->operator = $operator;
+
+        if($operator) {
+            $operator->addPreparation($this);
         }
 
         return $this;

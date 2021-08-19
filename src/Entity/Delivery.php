@@ -2,13 +2,17 @@
 
 namespace App\Entity;
 
+use App\Entity\Utils\StatusTrait;
 use App\Repository\DeliveryRepository;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=DeliveryRepository::class)
  */
 class Delivery {
+
+    use StatusTrait;
 
     /**
      * @ORM\Id
@@ -22,11 +26,6 @@ class Delivery {
      * @ORM\JoinColumn(nullable=false)
      */
     private ?ClientOrder $order = null;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Status::class)
-     */
-    private ?Status $status = null;
 
     /**
      * @ORM\Column(type="integer")
@@ -51,7 +50,7 @@ class Delivery {
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $deliveredAt;
+    private ?DateTimeInterface $deliveredAt = null;
 
     public function getId(): ?int {
         return $this->id;
@@ -72,15 +71,6 @@ class Delivery {
             $this->order->setDelivery($this);
         }
 
-        return $this;
-    }
-
-    public function getStatus(): ?Status {
-        return $this->status;
-    }
-
-    public function setStatus(Status $status): self {
-        $this->status = $status;
         return $this;
     }
 
@@ -121,12 +111,12 @@ class Delivery {
         return $this;
     }
 
-    public function getDeliveredAt(): ?\DateTimeInterface
+    public function getDeliveredAt(): ?DateTimeInterface
     {
         return $this->deliveredAt;
     }
 
-    public function setDeliveredAt(?\DateTimeInterface $deliveredAt): self
+    public function setDeliveredAt(?DateTimeInterface $deliveredAt): self
     {
         $this->deliveredAt = $deliveredAt;
 

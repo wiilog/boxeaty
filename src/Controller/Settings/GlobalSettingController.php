@@ -3,6 +3,7 @@
 namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
+use App\Entity\BoxType;
 use App\Entity\DeliveryMethod;
 use App\Entity\GlobalSetting;
 use App\Entity\Role;
@@ -25,11 +26,14 @@ class GlobalSettingController extends AbstractController {
      * @Route("/", name="settings")
      * @HasPermission(Role::MANAGE_SETTINGS)
      */
-    public function settings(Request $request, EntityManagerInterface $manager): Response {
-        $settings = $manager->getRepository(GlobalSetting::class)->getAll();
+    public function settings(Request                $request,
+                             EntityManagerInterface $entityManager): Response {
+        $settings = $entityManager->getRepository(GlobalSetting::class)->getAll();
+        $boxTypeRepository = $entityManager->getRepository(BoxType::class);
+        $crateTypeId = $settings[GlobalSetting::DEFAULT_CRATE_TYPE]->getValue();
 
         return $this->render("settings/global_settings/index.html.twig", [
-            "initial_work_free_days" => $this->workFreeDaysApi($request, $manager)->getContent(),
+            "initial_work_free_days" => $this->workFreeDaysApi($request, $entityManager)->getContent(),
             "work_free_days_order" => WorkFreeDayRepository::DEFAULT_DATATABLE_ORDER,
             "csv_encoding" => $settings[GlobalSetting::CSV_EXPORTS_ENCODING],
             "setting_code" => $settings[GlobalSetting::SETTING_CODE],
@@ -38,7 +42,7 @@ class GlobalSettingController extends AbstractController {
             "box_shapes" => $this->asArray($settings, GlobalSetting::BOX_SHAPES),
             "payment_modes" => $this->asArray($settings, GlobalSetting::PAYMENT_MODES),
             "icons" => DeliveryMethod::TRANSPORT_TYPES,
-            "initial_delivery_method" => $this->transportModeApi($request, $manager)->getContent(),
+            "initial_delivery_method" => $this->transportModeApi($request, $entityManager)->getContent(),
             "delivery_method_order" => DeliveryMethod::DEFAULT_DATATABLE_ORDER,
             "auto_validation_delay" => $settings[GlobalSetting::AUTO_VALIDATION_DELAY],
             "auto_validation_box_quantity" => $settings[GlobalSetting::AUTO_VALIDATION_BOX_QUANTITY],
@@ -50,6 +54,9 @@ class GlobalSettingController extends AbstractController {
                 "sender_email" => $settings[GlobalSetting::MAILER_SENDER_EMAIL],
                 "sender_name" => $settings[GlobalSetting::MAILER_SENDER_NAME],
             ],
+            'default_crate_type' => !empty($crateTypeId)
+                ? $boxTypeRepository->find($crateTypeId)
+                : null
         ]);
     }
 

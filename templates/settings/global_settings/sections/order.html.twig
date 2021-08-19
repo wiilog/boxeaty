@@ -18,6 +18,18 @@
         </select>
     </label>
 
+    <label class="w-35">
+        Type de caisse par défaut
+        <select class="data"
+                name="{{ constant('App\\Entity\\GlobalSetting::DEFAULT_CRATE_TYPE') }}"
+                data-s2="type"
+                data-placeholder="Sélectionnez un type de caisse par défaut...">
+            {% if default_crate_type is defined and default_crate_type %}
+                <option value="{{ default_crate_type.id }}" selected>{{ default_crate_type.name }}</option>
+            {% endif %}
+        </select>
+    </label>
+
     <div class="row">
         <label>Jours fériés ou non ouvrés (majoration sur livraison à cette date)</label>
         <div class="d-flex align-items-end justify-content-between work-free-day-form">

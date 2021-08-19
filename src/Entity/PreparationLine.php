@@ -39,12 +39,12 @@ class PreparationLine {
     /**
      * @ORM\Column(type="boolean", options={"default": 0})
      */
-    private bool $taken;
+    private bool $taken = false;
 
     /**
      * @ORM\Column(type="boolean", options={"default": 0})
      */
-    private bool $deposited;
+    private bool $deposited = false;
 
     public function __construct() {
         $this->boxes = new ArrayCollection();

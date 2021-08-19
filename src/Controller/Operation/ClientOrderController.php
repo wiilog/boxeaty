@@ -4,10 +4,11 @@ namespace App\Controller\Operation;
 
 use App\Annotation\HasPermission;
 use App\Entity\BoxType;
+use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
 use App\Entity\DeliveryMethod;
-use App\Entity\OrderStatusHistory;
+use App\Entity\GlobalSetting;
 use App\Entity\OrderType;
 use App\Entity\Role;
 use App\Entity\Status;
@@ -25,6 +26,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Exception\InvalidParameterException;
 use WiiCommon\Helper\Stream;
 
 /**
@@ -115,6 +117,14 @@ class ClientOrderController extends AbstractController {
      * @HasPermission(Role::CREATE_CLIENT_ORDERS)
      */
     public function validateTemplate(ClientOrder $clientOrder): Response {
+        /** @var User $requester */
+        $requester = $this->getUser();
+
+        if (!$clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
+            || $requester !== $clientOrder->getRequester()) {
+            throw new NotFoundHttpException('La commande client est introuvable.');
+        }
+
         return $this->json([
             'template' => $this->renderView("operation/client_order/modal/validation.html.twig", [
                 "clientOrder" => $clientOrder
@@ -132,11 +142,30 @@ class ClientOrderController extends AbstractController {
 
         if ($clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)) {
             $statusRepository = $entityManager->getRepository(Status::class);
-            $validateBoxeatyStatus = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE_BOXEATY]);
+            $globalSettingRepository = $entityManager->getRepository(GlobalSetting::class);
 
-            $history = $clientOrderService->updateClientOrderStatus($clientOrder, $validateBoxeatyStatus, $this->getUser());
+            /** @var User $user */
+            $user = $this->getUser();
+
+            $numberDayLimit = $globalSettingRepository->getValue(GlobalSetting::AUTO_VALIDATION_DELAY);
+            $quantityLimit = $globalSettingRepository->getValue(GlobalSetting::AUTO_VALIDATION_BOX_QUANTITY);
+
+            if ($numberDayLimit && $quantityLimit) {
+                $dayLimit = new DateTime('now + ' . $numberDayLimit . ' days');
+                $autoValidationDelay = $clientOrder->getExpectedDelivery();
+                $autoValidationQuantity = $clientOrder->getBoxQuantity();
+
+                if ($autoValidationDelay > $dayLimit
+                    && $autoValidationQuantity <= $quantityLimit) {
+                    $statusCode = Status::CODE_ORDER_PLANNED;
+                    $clientOrder->setAutomatic(true);
+                }
+            }
+
+            $status = $statusRepository->findOneBy(['code' => $statusCode ?? Status::CODE_ORDER_TO_VALIDATE_BOXEATY]);
+            $history = $clientOrderService->updateClientOrderStatus($clientOrder, $status, $user);
+
             $entityManager->persist($history);
-
             $entityManager->flush();
         }
 
@@ -329,7 +358,6 @@ class ClientOrderController extends AbstractController {
                          EntityManagerInterface $entityManager,
                          ClientOrderService $clientOrderService,
                          ClientOrder $clientOrder): JsonResponse {
-        $status = $clientOrder->getStatus();
         $form = Form::create();
 
         /** @var User $requester */
@@ -359,6 +387,7 @@ class ClientOrderController extends AbstractController {
 
         return $form->errors();
     }
+
     /**
      * @Route("/client-order-history-api", name="client_order_history_api", options={"expose": true})
      */
@@ -374,4 +403,27 @@ class ClientOrderController extends AbstractController {
         ]);
     }
 
+    /**
+     * @Route("/crates-amount", name="get_crates_amount", options={"expose": true})
+     */
+    public function cartSplitting(Request                $request,
+                                  ClientOrderService     $clientOrderService,
+                                  EntityManagerInterface $entityManager): Response {
+
+        $clientRepository = $entityManager->getRepository(Client::class);
+
+        $clientId = $request->query->get('client');
+        $client = $clientRepository->find($clientId);
+        $cart = $request->query->get('cart') ?: [];
+
+        if (!empty($client) && !empty($cart)) {
+            $cartSplitting = $clientOrderService->getCartSplitting($entityManager, $client, $cart);
+            return $this->json([
+                'success' => true,
+                'cratesAmount' => count($cartSplitting)
+            ]);
+        }
+
+        throw new InvalidParameterException('Invalid params.');
+    }
 }

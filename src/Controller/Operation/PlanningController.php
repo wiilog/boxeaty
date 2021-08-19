@@ -16,6 +16,7 @@ use App\Entity\Status;
 use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
+use App\Service\DeliveryRoundService;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -146,7 +147,9 @@ class PlanningController extends AbstractController {
      * @Route("/tournee", name="planning_delivery_round", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function deliveryRound(Request $request, EntityManagerInterface $manager): Response {
+    public function deliveryRound(Request $request,
+                                  DeliveryRoundService $deliveryRoundService,
+                                  EntityManagerInterface $manager): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
@@ -162,28 +165,23 @@ class PlanningController extends AbstractController {
         if ($form->isValid()) {
             $statusRepository = $manager->getRepository(Status::class);
 
-            $prepared = Stream::from($orders)
-                ->filter(fn(ClientOrder $order) => $order->getPreparation())
-                ->filter(fn(ClientOrder $order) => $order->getPreparation()->getStatus()->getCode() === Status::CODE_PREPARATION_PREPARED)
-                ->count();
+            $preparedDeliveryStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_PREPARED]);
+            $preparingDeliveryStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_PREPARING]);
 
-            if ($prepared === count($orders)) {
-                $status = $statusRepository->findOneBy(["code" => Status::CODE_ROUND_AWAITING_DELIVERER]);
-                $deliveryStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_AWAITING_DELIVERER]);
+            foreach ($orders as $order) {
+                $preparation = $order->getPreparation();
+                $deliveryStatus = ($preparation && $preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARED))
+                    ? $preparedDeliveryStatus
+                    : $preparingDeliveryStatus;
 
-                foreach ($orders as $order) {
-                    $delivery = (new Delivery())
-                        ->setOrder($order)
-                        ->setStatus($deliveryStatus);
+                $delivery = (new Delivery())
+                    ->setOrder($order)
+                    ->setStatus($deliveryStatus);
 
-                    $manager->persist($delivery);
-                }
-            } else {
-                $status = $statusRepository->findOneBy(["code" => Status::CODE_ROUND_CREATED]);
+                $manager->persist($delivery);
             }
 
             $round = (new DeliveryRound())
-                ->setStatus($status)
                 ->setDeliverer($deliverer)
                 ->setDeliveryMethod($method)
                 ->setDepository($depository)
@@ -193,6 +191,8 @@ class PlanningController extends AbstractController {
                     ->toArray())
                 ->setCost($content->cost)
                 ->setDistance($content->distance);
+
+            $deliveryRoundService->updateDeliveryRound($manager, $round);
 
             $manager->persist($round);
             $manager->flush();

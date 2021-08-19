@@ -27,7 +27,7 @@
   "scripts": {
     "generate-routes": "php bin/console fos:js-routing:dump --format=json --target=public/generated/routes.json",
     "dev": "yarn generate-routes && yarn encore dev",
-    "watch": "yarn generate-routes && yarn encore dev --watch",
+    "watch": "yarn dev --watch",
     "build": "yarn generate-routes && yarn encore production --progress",
     "production": "yarn encore production --progress"
   },
