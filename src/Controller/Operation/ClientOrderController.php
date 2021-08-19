@@ -278,11 +278,9 @@ class ClientOrderController extends AbstractController {
         $delivery = $entityManager->getRepository(Delivery::class)->findOneBy(['order' => $clientOrder->getId()]);
         $collect = $entityManager->getRepository(Collect::class)->findOneBy(['order' => $clientOrder->getId()]);
 
-        $signature = $delivery->getSignature()->getPath();
         return $this->json([
             "template" => $this->renderView("operation/client_order/modal/show.html.twig", [
                 "clientOrder" => $clientOrder,
-                "signature" => $signature,
                 "delivery" => $delivery,
                 "collect" => $collect,
                 "deliveryStatus" => Status:: CODE_DELIVERY_DELIVERED,
