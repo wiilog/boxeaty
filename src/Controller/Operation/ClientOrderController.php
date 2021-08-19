@@ -7,6 +7,8 @@ use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
+use App\Entity\Collect;
+use App\Entity\Delivery;
 use App\Entity\DeliveryMethod;
 use App\Entity\GlobalSetting;
 use App\Entity\OrderType;
@@ -299,12 +301,19 @@ class ClientOrderController extends AbstractController {
     /**
      * @Route("/voir/template/{clientOrder}", name="client_order_show_template", options={"expose": true})
      */
-    public function showTemplate(EntityManagerInterface $manager, ClientOrder $clientOrder): Response {
-        $roles = $manager->getRepository(Role::class)->findBy(["active" => true]);
+    public function showTemplate(EntityManagerInterface $entityManager, ClientOrder $clientOrder): Response {
+        $roles = $entityManager->getRepository(Role::class)->findBy(["active" => true]);
+
+        $delivery = $entityManager->getRepository(Delivery::class)->findOneBy(['order' => $clientOrder->getId()]);
+        $collect = $entityManager->getRepository(Collect::class)->findOneBy(['order' => $clientOrder->getId()]);
 
         return $this->json([
             "template" => $this->renderView("operation/client_order/modal/show.html.twig", [
                 "clientOrder" => $clientOrder,
+                "delivery" => $delivery,
+                "collect" => $collect,
+                "deliveryStatus" => Status:: CODE_DELIVERY_DELIVERED,
+                "collectStatus" => Status::CODE_COLLECT_FINISHED,
                 "roles" => $roles,
             ])
         ]);

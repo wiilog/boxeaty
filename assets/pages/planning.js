@@ -7,6 +7,7 @@ import "../styles/pages/planning.scss";
 import AJAX from "../ajax";
 import {findCoordinates, Map} from "../maps";
 import {DateTools} from "../util";
+import Flash from "../flash";
 
 $(document).ready(() => {
     const $filters = $(`.filters`);
@@ -28,37 +29,42 @@ $(document).ready(() => {
 
     $(`.new-delivery-round`).click(() => {
         const params = processForm($filters).asObject();
-        const ajax = AJAX.route(`POST`, `planning_delivery_round_template`, params);
 
-        Modal.load(ajax, {
-            processor: processSortables,
-            afterOpen: modal => {
-                const map = Map.create(`delivery-round-map`);
+        if(params.from && params.to) {
+            const ajax = AJAX.route(`POST`, `planning_delivery_round_template`, params);
 
-                setupSortables(map);
+            Modal.load(ajax, {
+                processor: processSortables,
+                afterOpen: modal => {
+                    const map = Map.create(`delivery-round-map`);
 
-                modal.element.find(`[name="method"]`).on(`change`, function() {
-                    const value = Number($(this).val());
+                    setupSortables(map);
 
-                    if(value) {
-                        for (const element of modal.element.find(`.order[data-id]`)) {
-                            const $element = $(element);
-                            if($element.data(`delivery-method`) === value) {
-                                $element.removeClass(`d-none`);
-                            } else {
-                                $element.addClass(`d-none`);
+                    modal.element.find(`[name="method"]`).on(`change`, function () {
+                        const value = Number($(this).val());
+
+                        if (value) {
+                            for (const element of modal.element.find(`.order[data-id]`)) {
+                                const $element = $(element);
+                                if ($element.data(`delivery-method`) === value) {
+                                    $element.removeClass(`d-none`);
+                                } else {
+                                    $element.addClass(`d-none`);
+                                }
                             }
+                        } else {
+                            modal.element.find(`.order[data-id]`).removeClass(`d-none`);
                         }
-                    } else {
-                        modal.element.find(`.order[data-id]`).removeClass(`d-none`);
-                    }
-                });
+                    });
 
-                modal.element.find(`[name="cost"], [name="distance"]`).on(`keyup`, function () {
-                    updateAverage($(this));
-                });
-            },
-        });
+                    modal.element.find(`[name="cost"], [name="distance"]`).on(`keyup`, function () {
+                        updateAverage($(this));
+                    });
+                },
+            });
+        } else {
+            Flash.add(`warning`, `Les dates sont obligatoires pour affecter une tournée`);
+        }
     });
 
     $(`.empty-filters`).click(function() {
