@@ -128,10 +128,6 @@ class LocationController extends AbstractController
             'type' => 'line',
             'data' => [
                 'labels' => $chartLabels,
-                'subtitle' => [
-                    'text' => 'Passage au statut :',
-                    'display' => true
-                ],
                 'datasets' => [
                     [
                         'label' => "Consommateur",
