@@ -169,4 +169,17 @@ class DepositTicketRepository extends EntityRepository {
             ->getResult();
     }
 
+    public function findByBoxAndStatus($box, $status){
+        return $this->createQueryBuilder("deposit_ticket")
+            ->select("COUNT(deposit_ticket.id)")
+            ->join("deposit_ticket.box", "box")
+            ->join("box.type", "type")
+            ->andWhere("box.id LIKE :boxId")
+            ->andWhere("deposit_ticket.state = :valid")
+            ->setParameter("valid", $status)
+            ->setParameter("boxId", $box)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
 }

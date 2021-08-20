@@ -42,8 +42,31 @@ class Quality {
      */
     private ?bool $clean = null;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $broken = null;
+
     public function __construct() {
         $this->boxes = new ArrayCollection();
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getBroken(): ?bool
+    {
+        return $this->broken;
+    }
+
+    /**
+     * @param bool|null $broken
+     * @return self
+     */
+    public function setBroken(?bool $broken): self
+    {
+        $this->broken = $broken;
+        return $this;
     }
 
     public function getId(): ?int {

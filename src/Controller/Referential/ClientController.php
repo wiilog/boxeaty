@@ -120,6 +120,12 @@ class ClientController extends AbstractController {
         }
 
         if ($form->isValid()) {
+            $totalCrateTypePrice = FormatHelper::price(
+                Stream::from($client->getCratePatternLines())
+                    ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
+                    ->sum()
+            );
+
             $client = $client->setName($content->name)
                 ->setAddress($content->address)
                 ->setPhoneNumber($content->phoneNumber)
@@ -132,7 +138,8 @@ class ClientController extends AbstractController {
                 ->setDepositTicketValidity($content->depositTicketValidity)
                 ->setMailNotificationOrderPreparation((bool)$content->mailNotificationOrderPreparation)
                 ->setProrateAmount($content->prorateAmount)
-                ->setPaymentModes($content->paymentModes);
+                ->setPaymentModes($content->paymentModes)
+                ->setTotalCrateTypePrice($totalCrateTypePrice);
 
             $clientOrderInformation = (new ClientOrderInformation())
                 ->setClient($client)
@@ -624,6 +631,10 @@ class ClientController extends AbstractController {
             $client = $manager->getRepository(Client::class)->find($content->client);
             $clientOrderInformation = $client->getClientOrderInformation();
 
+            $crateTypePrice = Stream::from($client->getCratePatternLines())
+                ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
+                ->sum();
+
             $orderRecurrence = (new OrderRecurrence())
                 ->setFrequency($content->frequency)
                 ->setCrateAmount($content->crateAmount)
@@ -631,7 +642,8 @@ class ClientController extends AbstractController {
                 ->setStart(new DateTime($content->start))
                 ->setEnd(new DateTime($content->end))
                 ->setDeliveryFlatRate($content->deliveryFlatRate)
-                ->setServiceFlatRate($content->serviceFlatRate);
+                ->setServiceFlatRate($content->serviceFlatRate)
+                ->setMonthlyPrice($crateTypePrice * (int)$content->frequency);
 
             $clientOrderInformation->setOrderRecurrence($orderRecurrence);
 

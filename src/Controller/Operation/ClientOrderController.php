@@ -195,7 +195,6 @@ class ClientOrderController extends AbstractController {
             $statusRepository = $entityManager->getRepository(Status::class);
             $status = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE_CLIENT]);
             $history = $clientOrderService->updateClientOrderStatus($clientOrder, $status, $requester);
-
             $clientOrder
                 ->setNumber($number)
                 ->setCreatedAt($now)

@@ -275,6 +275,28 @@ main:not(.login) {
     }
 }
 
+.filter-date {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    flex: 1 1 auto;
+    min-height: 65px;
+    padding: 16px;
+    margin-bottom: 40px;
+    z-index: 1;
+    width: 100%;
+    border-radius: 8px;
+
+    .dates {
+        display: flex;
+        margin-top: 0px;
+    }
+
+    .dates-filter {
+        display: flex;
+        max-width: 100px;
+    }
+}
+
 .alert-container {
     position: fixed;
     top: 0;
