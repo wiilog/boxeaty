@@ -35,33 +35,10 @@ export default class Modal {
             return null;
         }
 
-        modal.setupFileUploader();
-
-        modal.element.on('hidden.bs.modal', () => {
-            modal.clear();
-
-            modal.element.find('[data-s2-initialized]').each(function() {
-                //close all select2 elements
-                $(this).select2('close');
-            });
-
-            if(config.afterHidden) {
-                config.afterHidden(modal);
+        initializeModal(modal, {
+            clearModal: () => {
+                modal.clear();
             }
-        });
-
-        modal.element.on('shown.bs.modal', () => {
-            if(config.afterOpen) {
-                config.afterOpen(modal);
-            }
-        });
-
-        modal.element.find(`button[type="submit"]`).click(function() {
-            const $button = $(this);
-
-            $button.load(function() {
-                return config.submitter ? config.submitter($button) : modal.handleSubmit($button)
-            });
         });
 
         return modal;
@@ -100,26 +77,6 @@ export default class Modal {
     static html(config = {}) {
         const $modal = $(config.template);
         $modal.appendTo(`body`);
-        $modal.modal(`show`);
-
-        if(config.afterShown) {
-            $modal.on('shown.bs.modal', function() {
-                config.afterShown(modal);
-            });
-        }
-
-        $modal.on('hidden.bs.modal', function() {
-            $(this).remove();
-
-            modal.element.find('[data-s2-initialized]').each(function() {
-                //close all select2 elements
-                $(this).select2('close');
-            });
-
-            if(config.afterHidden) {
-                config.afterHidden(modal);
-            }
-        });
 
         const modal = new Modal();
         modal.id = Math.floor(Math.random() * 1000000);
@@ -129,23 +86,13 @@ export default class Modal {
             ajax: AJAX.url(`POST`, config.submit),
         };
 
-        modal.setupFileUploader();
-
-        if(config.afterOpen) {
-            config.afterOpen(modal);
-        }
-
-        $modal.find(`button[type="submit"]`).on('click', function() {
-            const $button = $(this);
-            $button.load(() => modal.handleSubmit($button));
+        initializeModal(modal, {
+            clearModal: ($modal) => {
+                $modal.remove();
+            }
         });
 
-
-        if(config.onPrevious) {
-            $modal.find(`button[name="previous"]`).on('click', function () {
-                config.onPrevious(modal);
-            });
-        }
+        modal.element.modal(`show`);
 
         return modal;
     }
@@ -551,5 +498,44 @@ function showImage(file, $image) {
                 .attr('src', e.target.result);
         };
         reader.readAsDataURL(file);
+    }
+}
+
+function initializeModal(modal, {clearModal}) {
+    const {config} = modal;
+
+    modal.setupFileUploader();
+
+    if(config.afterOpen) {
+        modal.element.on('shown.bs.modal', () => {
+            config.afterOpen(modal);
+        });
+    }
+
+    modal.element.on('hidden.bs.modal', () => {
+        modal.element.find('[data-s2-initialized]').each(function() {
+            //close all select2 elements
+            $(this).select2('close');
+        });
+
+        clearModal(modal.element);
+
+        if(config.afterHidden) {
+            config.afterHidden(modal);
+        }
+    });
+
+    modal.element.find(`button[type="submit"]`).click(function() {
+        const $button = $(this);
+
+        $button.load(function() {
+            return config.submitter ? config.submitter(modal, $button) : modal.handleSubmit($button)
+        });
+    });
+
+    if(config.onPrevious) {
+        modal.element.find(`button[name="previous"]`).on('click', function () {
+            config.onPrevious(modal);
+        });
     }
 }

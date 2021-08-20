@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Box;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
+use App\Entity\Depository;
 use App\Entity\Status;
 use DateTime;
 use App\Entity\User;
@@ -79,7 +80,7 @@ class ClientOrderRepository extends EntityRepository {
     /**
      * @return ClientOrder[]
      */
-    public function findOrders(array $params, DateTime $from, DateTime $to): array {
+    public function findOrders(array $params, Depository $depository, DateTime $from = null, DateTime $to = null): array {
         if($from == null && $to == null){
             $returnOrderBetween = $this->createQueryBuilder('client_order');
         } else {
@@ -87,8 +88,11 @@ class ClientOrderRepository extends EntityRepository {
         }
         return $returnOrderBetween
             ->leftJoin("client_order.status", "client_order_status")
+            ->leftJoin("client_order.client", "client_order_client")
+            ->where("client_order_client.depository = :depository ")
             ->andWhere("client_order_status.code IN (:status)")
             ->setParameter("status", [Status::CODE_ORDER_PLANNED])
+            ->setParameter("depository", $depository)
             ->getQuery()
             ->getResult();
     }

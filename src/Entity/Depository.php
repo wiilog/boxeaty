@@ -167,6 +167,9 @@ class Depository {
         return $this;
     }
 
+    /**
+     * @return Collection|Location[]
+     */
     public function getLocations(): Collection
     {
         return $this->locations;

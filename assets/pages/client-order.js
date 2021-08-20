@@ -180,7 +180,7 @@ function openOrderEditModal(clientOrderId) {
         success: (response) => {
             openOrderValidationModal(clientOrderId, response.validationTemplate);
         },
-        afterShown: (modal) => {
+        afterOpen: (modal) => {
             const cartContentStr = modal.element.find('[name="cart-content"]').val();
             const cartContent = cartContentStr && JSON.parse(cartContentStr);
 
@@ -212,7 +212,7 @@ function openOrderValidationModal(clientOrderId, modalContent = null) {
     Modal.load(content, {
         submit: Routing.generate(`client_order_validation`, {clientOrder: clientOrderId}),
         table: '#table-client-order',
-        afterShown: () => {
+        afterOpen: () => {
             const newUrl = URL.createRequestQuery({
                 action: 'validation',
                 'action-data': clientOrderId

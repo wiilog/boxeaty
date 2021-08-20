@@ -15,13 +15,7 @@ $(document).ready(() => {
 
     $filters.find(`.filter`).click(function () {
         const params = processForm($filters).asObject();
-
-        AJAX.route(`GET`, `planning_content`, params)
-            .json()
-            .then(data => {
-                $(`#planning`).html(data.planning);
-                initializePlanning();
-            });
+        reLoadPlanning(params);
     });
 
     initializePlanning();
@@ -66,34 +60,84 @@ $(document).ready(() => {
         const ajax = AJAX.route(`POST`, `planning_delivery_initialize_template`, params);
         Modal.load(ajax,{
             processor: processSortables,
-            afterOpen: modal => {
-                const available = sortable(`.available-order-for-start`, {
-                    acceptFrom: `.deliveries`,
-                })[0];
-                const assigned = sortable(`.orders-to-start`, {
-                    acceptFrom: `.deliveries`,
-                })[0];
-            },
-            success: (result)=> {
-                const ajax = AJAX.route(`POST`, `planning_delivery_start_template`, {params, assignedForStart: result.assignedForStart, depository: result.depository});
-                ajax.json()
-                    .then(() => {
-                        AJAX.route(`POST`, `planning_delivery_start_check_stock`, {assignedForStart: result.assignedForStart, depository: result.depository}).json();
-                        $(".loading").addClass('d-none');
-                        $(".containers").removeClass('d-none');
-                    });
+            afterOpen: modal =>
+                modal.element.find('.depository-filter').on('change', function (){
+                    AJAX.route(`POST`, `planning_depository_filter`, {
+                        params,
+                        depository: modal.element.find('.depository-filter').val()
+                    })
+                        .json()
+                        .then((response) => {
+                            modal.element.find('.deliveries-container').empty()
+                            modal.element.find('.deliveries-container').removeClass('d-none');
+                            modal.element.find('.deliveries-container').append(response.template);
+                            const [availableOrderToStart] = sortable(`.available-order-to-start`, {
+                                acceptFrom: `.orders-to-start`,
+                            });
+                            $(availableOrderToStart).on('sortupdate', () => {
+                                onOrdersDragAndDropDone(modal);
+                            })
+                            const [orderToStart] = sortable(`.orders-to-start`, {
+                                acceptFrom: `.available-order-to-start`,
+                            });
+                            $(orderToStart).on('sortupdate', () => {
+                                onOrdersDragAndDropDone(modal);
+                            })
+                        });
+                })
+            ,
+            submitter: (modal, $button) => {
+                const data = processForm(modal.element, $button);
 
-                Modal.load(ajax, {
-                        processor: processSortables,
-                        afterOpen: modal => {
-                            const available = sortable(`.available-order-for-start`, {
-                                acceptFrom: `.deliveries`,
-                            })[0];
-                            const assigned = sortable(`.orders-to-start`, {
-                                acceptFrom: `.deliveries`,
-                            })[0];
-                        }
+                const from = data.get('from'); // TODO romain utiliser ?
+                const to = data.get('to'); // TODO romain utiliser ?
+                const depository = data.get('depository');
+
+                const $ordersToStartContainer = modal.element.find('.orders-to-start');
+                const $ordersToStart = $ordersToStartContainer.find('.order');
+                if ($ordersToStart.exists()) {
+                    if ($ordersToStartContainer.attr('data-stock-checked') != 1) {
+                        return checkStock(modal, {
+                            depository,
+                            assignedForStart: $ordersToStart
+                                .map((_, order) => $(order).data('id'))
+                                .toArray()
+                        });
+                    }
+                    else {
+                        return AJAX.route(`POST`, `planning_delivery_launch`, {
+                                from: from,
+                                to: to,
+                                depository: depository,
+                                assignedForStart: $ordersToStart
+                                    .map((_, order) => $(order).data('id'))
+                                    .toArray()
+                            })
+                            .json()
+                            .then( () => {
+                                modal.close();
+                            });
+                    }
+                }
+                else {
+                    // TODO message d'erreur
+                    return new Promise((resolve) => {
+                        resolve();
                     });
+                }
+            }
+        });
+    });
+
+
+    $(document).on('click', `.validate`, function() {
+        const ajax = AJAX.route(`POST`, `planning_delivery_validate_template`, {
+            order: $(this).closest(`.order`).data("id")
+        });
+        Modal.load(ajax, {
+            success: () => {
+                const params = processForm($filters).asObject();
+                reLoadPlanning(params);
             }
         });
     });
@@ -185,4 +229,83 @@ async function changePlannedDate(detail) {
     $item.replaceWith(result.card);
 
     sortable(`.column-content`, `enable`);
+}
+
+function reLoadPlanning(params){
+    AJAX.route(`GET`, `planning_content`, params)
+        .json()
+        .then(data => {
+            $(`#planning`).html(data.planning);
+            initializePlanning();
+        });
+}
+
+function checkStock(modal, data) {
+    const $loading = modal.element.find('.modal-loading');
+    $loading
+        .addClass('d-flex')
+        .removeClass('d-none');
+
+    return AJAX
+        .route(`POST`, `planning_delivery_start_check_stock`, data)
+        .json()
+        .then((res) => {
+            const $quantitiesInformationContainer = modal.element.find('.quantities-information-container');
+            const $quantitiesInformation = $quantitiesInformationContainer.find('.quantities-information');
+            const $availableOrderToStartContainer = modal.element.find('.available-order-to-start');
+            const $orderToStartContainer = modal.element.find('.orders-to-start');
+
+            for (const unavailableOrder of res.unavailableOrders) {
+                modal.element.find(`.orders-to-start .order[data-id="${unavailableOrder}"]`).addClass('unavailable');
+            }
+            $availableOrderToStartContainer.find('.order')
+                .removeClass('available')
+                .removeClass('unavailable');
+            $orderToStartContainer.find('.order:not(.unavailable)').addClass('available');
+            $orderToStartContainer.attr('data-stock-checked', 1);
+            $quantitiesInformation.empty();
+
+            const quantityErrors = res.availableBoxTypeData.filter((boxTypeData) => (
+                boxTypeData.orderedQuantity > boxTypeData.availableQuantity
+            ));
+
+            if (quantityErrors.length > 0) {
+                $quantitiesInformationContainer.removeClass('d-none');
+            } else {
+                $quantitiesInformationContainer.addClass('d-none');
+            }
+
+            for (const boxTypeData of quantityErrors) {
+                $quantitiesInformation.append(`
+                    <label class="ml-2">
+                        Box Type ${boxTypeData.name} - Quantité commandée ${boxTypeData.orderedQuantity} - dispo en stock ${boxTypeData.availableQuantity} - propriété de ${boxTypeData.client}
+                    </label>
+                `);
+            }
+
+            updateSubmitButtonLabel(modal);
+
+            $loading
+                .addClass('d-none')
+                .removeClass('d-flex');
+
+        });
+}
+
+function onOrdersDragAndDropDone(modal){
+    modal.element.find('.orders-to-start').attr('data-stock-checked', 0);
+    updateSubmitButtonLabel(modal);
+}
+
+function updateSubmitButtonLabel(modal){
+    const $ordersToStartNotAvailable = modal.element.find('.orders-to-start .order:not(.available)');
+    const $ordersToStart = modal.element.find('.orders-to-start .order');
+    const stockChecked = modal.element.find('.orders-to-start').attr('data-stock-checked');
+    const $submitButton = modal.element.find('.submit-button');
+
+    if(!$ordersToStartNotAvailable.exists() && $ordersToStart.exists() && stockChecked == 1 ){
+        $submitButton.text("Valider le lancement");
+    } else {
+        $submitButton.text("Suivant");
+    }
 }

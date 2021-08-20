@@ -1,5 +1,3 @@
-{% import 'operation/planning/macros.html.twig' as macros %}
-
 <div id="modal-start-delivery" class="modal ade">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -7,33 +5,26 @@
             <h1>Lancement des livraisons</h1>
             <div class="inline-form">
                 <label class="inline">
-                    Période de lancement {% include('filters/filter_items/date_item.html.twig') with {
-                        from: from ,
-                        to: to
-                    } %}
+                    Période de lancement {% include('filters/filter_items/date_item.html.twig')%}
                 </label>
                 <label class="inline">
                     Dépôt
-                    <select name="depository" data-s2="depository" class="data"
+                    <select name="depository" data-s2="depository" class="data depository-filter"
                             data-placeholder="Sélectionnez la mobilité" required>
                     </select>
                 </label>
             </div>
+            <div class="justify-content-center modal-loading d-none">
+                <div class="spinner-border">
+                    <span class="sr-only">Calcul en cours...</span>
+                </div>
+            </div>
+            <div class="quantities-information-container d-none">
+                <label>Problèmes de stock sur les type suivants : </label>
+                <div class="quantities-information"></div>
+            </div>
             <div class="row deliveries-container mt-2">
-                <div class="col-md-6 col-12">
-                    <label>Livraisons disponibles au lancement</label>
-                    <div class="deliveries available-order-for-start">
-                        {% for order in orders %}
-                            {{ macros.order_card(order, false) }}
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="col-md-6 col-12">
-                    <label>Livraisons à lancer</label>
-                    <div class="deliveries orders-to-start">
 
-                    </div>
-                </div>
             </div>
             <div class="footer">
                 <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>

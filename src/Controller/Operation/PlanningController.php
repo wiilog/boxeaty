@@ -3,12 +3,15 @@
 
 namespace App\Controller\Operation;
 
+use App\Entity\Box;
+use App\Entity\BoxType;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
 use App\Entity\Delivery;
 use App\Entity\DeliveryMethod;
 use App\Entity\DeliveryRound;
 use App\Entity\Depository;
+use App\Entity\Location;
 use App\Entity\Preparation;
 use App\Entity\Role;
 use App\Annotation\HasPermission;
@@ -210,107 +213,77 @@ class PlanningController extends AbstractController {
      * @Route("/initialize_delivery/template", name="planning_delivery_initialize_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function initializeDeliveryTemplate(EntityManagerInterface $manager, Request $request): Response {
-        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
-
-        dump($request->query->all());
-
-        $from = DateTime::createFromFormat("Y-m-d", $request->query->get("from"));
-        $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"));
-
+    public function initializeDeliveryTemplate(): Response {
         return $this->json([
-            "submit" => $this->generateUrl("planning_delivery_initialize"),
-            "template" => $this->renderView("operation/planning/modal/start_delivery.html.twig", [
-                "from" => $from,
-                "to" => $to,
-                "orders" => $clientOrderRepository->findOrders($request->query->all(), $from, $to),
-            ])
+            "submit" => $this->generateUrl("planning_delivery_launch"),
+            "template" => $this->renderView("operation/planning/modal/start_delivery.html.twig")
         ]);
     }
 
     /**
-     * @Route("/initialize_delivery", name="planning_delivery_initialize", options={"expose": true})
+     * @Route("/depository_filter", name="planning_depository_filter", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function initializeDelivery(Request $request, EntityManagerInterface $manager): Response {
-        $from = DateTime::createFromFormat("Y-m-d", $request->request->get("from"));
-        $to = DateTime::createFromFormat("Y-m-d", $request->request->get("to"));
+    public function depositoryFilter(EntityManagerInterface $manager, Request $request){
+        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
+        $depositoryRepository = $manager->getRepository(Depository::class);
 
+        $depository = $depositoryRepository->find($request->query->get("depository"));
+        $from = DateTime::createFromFormat("Y-m-d", $request->query->get("from"));
+        $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"));
+
+        if($from == false){
+            $from = null;
+        }
+        if($to == false){
+            $to = null;
+        }
+        return $this->json([
+            "template" => $this->renderView('operation/planning/modal/deliveries_container.html.twig', [
+                "orders" => $clientOrderRepository->findOrders($request->query->all(), $depository, $from, $to),
+            ])
+        ]);
+    }
+    /**
+     * @Route("/launch_delivery", name="planning_delivery_launch", options={"expose": true})
+     * @HasPermission(Role::MANAGE_PLANNING)
+     */
+    public function launchDelivery(Request $request, EntityManagerInterface $manager): Response {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
         $statusRepository = $manager->getRepository(Status::class);
         $depositoryRepository = $manager->getRepository(Depository::class);
 
-        $ordersToStart = explode(",", $request->request->get('assignedForStart'));
+        $ordersToStart = $request->query->get('assignedForStart');
 
-        $statusDelivery = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_PLANNED]);
-        $statusPreparation = $statusRepository->findOneBy(["code" => Status::CODE_PREPARATION_PREPARING]);
-        $depository = $depositoryRepository->findOneBy(["id" => $request->request->get('depository')]);
+        $statusDelivery = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_PREPARING]);
+        $statusPreparation = $statusRepository->findOneBy(["code" => Status::CODE_PREPARATION_TO_PREPARE]);
+        $statusOrder = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_TRANSIT]);
+        $depository = $depositoryRepository->findOneBy(["id" => $request->query->get('depository')]);
 
         foreach($ordersToStart as $orderToStart){
-            /** @var ClientOrder $order */
             $order = $clientOrderRepository->find($orderToStart);
-
+            dump($order);
+            dump($orderToStart);
             $preparation = (new Preparation())
                 ->setStatus($statusPreparation)
                 ->setDepository($depository)
                 ->setOrder($order);
             $delivery = (new Delivery())
                 ->setStatus($statusDelivery)
-                ->setTokens(($order->getClient()->getClientOrderInformation() && $order->getClient()->getClientOrderInformation()->getTokenAmount()) ? $order->getClient()->getClientOrderInformation()->getTokenAmount() : 0)
-                ->setOrder($order);
+                ->setTokens((($order->getClient()->getClientOrderInformation() && $order->getClient()->getClientOrderInformation()->getTokenAmount()) ? $order->getClient()->getClientOrderInformation()->getTokenAmount() : 0))
+                ->setOrder($order)
+                ->setDistance(0.0);
 
             $manager->persist($preparation);
             $manager->persist($delivery);
+
+            $order->setStatus($statusOrder);
         }
-
-        //$manager->flush();
+        $manager->flush();
 
         return $this->json([
             "success" => true,
             "message" => "Lancement effectuée avec succès",
-            "assignedForStart" => $request->request->get('assignedForStart'),
-            "from" => $from,
-            "to" => $to,
-            "depository" => $request->request->get('depository'),
-        ]);
-    }
-
-    /**
-     * @Route("/start_delivery/template", name="planning_delivery_start_template", options={"expose": true})
-     * @HasPermission(Role::MANAGE_PLANNING)
-     */
-    public function startDeliveryTemplate(EntityManagerInterface $manager, Request $request){
-        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
-        $depositoryRepository = $manager->getRepository(Depository::class);
-        dump($request->query->all());
-        $params = $request->query->get("params");
-        $from = new DateTime($params["from"]);
-        $to = new DateTime($params["to"]);
-
-        $assignedForStart = explode(',', $request->query->get('assignedForStart'));
-        $depository = $depositoryRepository->find($request->query->get('depository'));
-
-        return $this->json([
-            "submit" => $this->generateUrl("planning_delivery_start"),
-            "template" => $this->renderView("operation/planning/modal/calculation.html.twig", [
-                "from" => $from,
-                "to" => $to,
-                "orders" => $clientOrderRepository->findOrders($request->query->all(), $from, $to),
-                "assignedForStart" => $clientOrderRepository->findBy(["id" => $assignedForStart]),
-                "depository" => $depository,
-            ])
-        ]);
-    }
-
-    /**
-     * @Route("/start_delivery", name="planning_delivery_start", options={"expose": true})
-     * @HasPermission(Role::MANAGE_PLANNING)
-     */
-    public function startDelivery(Request $request, EntityManagerInterface $manager): Response {
-        return $this->json([
-            "success" => true,
-            "message" => "Lancement effectuée avec succès",
-            "assignedForStart" => $request->query->get('assignedForStart'),
         ]);
     }
 
@@ -320,25 +293,103 @@ class PlanningController extends AbstractController {
      */
     public function checkStock(Request $request, EntityManagerInterface $manager){
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
+        $boxTypeRepository = $manager->getRepository(BoxType::class);
+        $depositoryRepository = $manager->getRepository(Depository::class);
 
-        $ordersToStart = explode(",", $request->query->get('assignedForStart'));
-        $depository = $request->query->get('depository');
+        $ordersToStart = $request->query->get('assignedForStart');
+        $depository = $depositoryRepository->find($request->query->get('depository'));
+
+        $orderedBoxTypes = [];
 
         foreach ($ordersToStart as $orderToStart){
-            /** @var ClientOrder $order */
             $order = $clientOrderRepository->find($orderToStart);
 
-            $calculatedQuantity = 0 ;
-
-            if($order->getLines() !== null){
-                $lines = $order->getLines();
-                foreach ($lines as $line){
-                    /** @var ClientOrderLine $line */
-                    $boxType = $line->getBoxType();
-                    $calculatedQuantity = $calculatedQuantity + $line->getQuantity();
+            $lines = $order->getLines();
+            foreach ($lines as $line){
+                $boxType = $line->getBoxType();
+                $boxTypeId = $boxType->getId();
+                $quantity = $line->getQuantity();
+                if(!isset($orderedBoxTypes[$boxTypeId])){
+                    $orderedBoxTypes[$boxTypeId] = [
+                        'quantity' => 0,
+                        'orders' => [],
+                        'name' => $boxType->getName(),
+                        'client' => $order->getClient()->getName()
+                    ];
+                }
+                $orderedBoxTypes[$boxTypeId]['quantity'] += $quantity;
+                if (!in_array($order->getId(), $orderedBoxTypes[$boxTypeId]['orders'])) {
+                    $orderedBoxTypes[$boxTypeId]['orders'][] = $order->getId();
                 }
             }
         }
+
+        $orderedBoxTypeIds = array_keys($orderedBoxTypes);
+
+        $availableBoxTypes = $boxTypeRepository->countAvailableByDepository($depository, $orderedBoxTypeIds);
+
+        $unavailableOrders = [];
+        $availableBoxTypeData = [];
+        foreach ($orderedBoxTypes as $boxTypeId => $ordered) {
+            $orderedQuantity = $ordered['quantity'];
+            $orders = $ordered['orders'];
+            $name = $ordered['name'];
+            $client = $ordered['client'];
+
+            $availableQuantity = $availableBoxTypes[$boxTypeId];
+
+            if($orderedQuantity > $availableQuantity){
+                foreach ($orders as $order){
+                    if(!in_array($order, $unavailableOrders)){
+                        $unavailableOrders[] = $order;
+                    }
+                }
+            }
+
+            $availableBoxTypeData[] = [
+                'name' => $name,
+                'orderedQuantity' => $orderedQuantity,
+                'availableQuantity' => $availableQuantity,
+                'client' => $client,
+            ];
+        }
+
+        return $this->json([
+            "success" => true,
+            "availableBoxTypeData" => $availableBoxTypeData,
+            "unavailableOrders" => $unavailableOrders,
+            "message" => "Lancement effectuée avec succès",
+        ]);
+    }
+
+    /**
+     * @Route("/delivery_validate_template", name="planning_delivery_validate_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_PLANNING)
+     */
+    public function validateDeliveryTemplate(Request $request, EntityManagerInterface $manager){
+        return $this->json([
+            "submit" => $this->generateUrl("planning_delivery_validate", [
+                "order" => $request->query->get('order')
+            ]),
+            "template" => $this->renderView("operation/planning/modal/validate_delivery.html.twig")
+        ]);
+    }
+
+    /**
+     * @Route("/delivery_validate", name="planning_delivery_validate", options={"expose": true})
+     * @HasPermission(Role::MANAGE_PLANNING)
+     */
+    public function validateDelivery(Request $request, EntityManagerInterface $manager){
+        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
+        $statusRepository = $manager->getRepository(Status::class);
+
+        $order = $clientOrderRepository->find($request->query->get('order'));
+        $status = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_PLANNED]);
+
+        $order->setStatus($status);
+
+        $manager->persist($order);
+        $manager->flush();
 
         return $this->json([
             "success" => true,

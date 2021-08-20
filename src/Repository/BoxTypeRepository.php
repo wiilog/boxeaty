@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\BoxType;
+use App\Entity\Depository;
 use App\Helper\FormatHelper;
 use App\Helper\QueryHelper;
+use App\Service\BoxStateService;
 use Doctrine\ORM\EntityRepository;
 use WiiCommon\Helper\Stream;
 
@@ -120,6 +122,37 @@ class BoxTypeRepository extends EntityRepository {
                 ? $boxType->getImage()->getPath()
                 : null,
         ];
+    }
+
+    public function countAvailableByDepository(Depository $depository, array $idFilter = []): array {
+        $queryBuilder = $this->createQueryBuilder("box_type")
+            ->select("box_type.id AS boxTypeId")
+            ->addSelect("COUNT(box.id) AS boxCounter")
+            ->innerJoin("box_type.boxes", "box")
+            ->innerJoin("box.location", "location")
+            ->innerJoin("location.depository", "depository")
+            ->where("box.state = :availableState")
+            ->andWhere("depository = :depository")
+            ->setParameter('availableState', BoxStateService::STATE_BOX_AVAILABLE)
+            ->setParameter('depository', $depository)
+            ->groupBy('box_type.id');
+
+        if(!empty($idFilter)) {
+            $queryBuilder
+                ->andWhere("box_type IN (:boxTypeIds)")
+                ->setParameter('boxTypeIds', $idFilter);
+        }
+
+        $res = $queryBuilder
+            ->getQuery()
+            ->getResult();
+
+        return Stream::from($res)
+            ->keymap(fn ($item) => [
+                $item['boxTypeId'],
+                $item['boxCounter']
+            ])
+            ->toArray();
     }
 
 }
