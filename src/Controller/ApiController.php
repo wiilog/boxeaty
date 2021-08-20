@@ -23,8 +23,12 @@ use App\Entity\User;
 use App\Helper\FormatHelper;
 use App\Service\AttachmentService;
 use App\Service\BoxStateService;
+use App\Service\ClientOrderService;
+use App\Service\DeliveryRoundService;
+use App\Service\PreparationService;
 use App\Service\UniqueNumberService;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use WiiCommon\Helper\Stream;
 use WiiCommon\Helper\StringHelper;
@@ -551,15 +555,19 @@ class ApiController extends AbstractController {
      * @Route("/mobile/deliveries/start", name="api_mobile_deliveries_start")
      * @Authenticated()
      */
-    public function deliveryStart(EntityManagerInterface $manager, Request $request): Response {
+    public function deliveryStart(EntityManagerInterface $manager, Request $request, ClientOrderService $clientOrderService): Response {
         $data = json_decode($request->getContent());
         $order = $manager->getRepository(ClientOrder::class)->find($data->order);
 
         if ($order) {
             $statusRepository = $manager->getRepository(Status::class);
 
-            $order->setStatus($statusRepository->findByCode(Status::CODE_ORDER_TRANSIT));
-            $order->getDelivery()->setStatus($statusRepository->findByCode(Status::CODE_DELIVERY_TRANSIT));
+            $orderTransitStatus = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TRANSIT]);
+            $history = $clientOrderService->updateClientOrderStatus($order, $orderTransitStatus, $this->getUser());
+            $manager->persist($history);
+
+            $order->getDelivery()->setStatus($statusRepository->findOneBy(['code' => Status::CODE_DELIVERY_TRANSIT]));
+
             $manager->flush();
 
             return $this->json([
@@ -665,7 +673,11 @@ class ApiController extends AbstractController {
      * @Route("/mobile/deliveries/finish", name="api_mobile_deliveries_finish")
      * @Authenticated
      */
-    public function finishDelivery(EntityManagerInterface $manager, Request $request, AttachmentService $attachmentService): Response {
+    public function finishDelivery(EntityManagerInterface $manager,
+                                   Request $request,
+                                   AttachmentService $attachmentService,
+                                   ClientOrderService $clientOrderService): Response {
+
         $data = json_decode($request->getContent());
         $order = $manager->getRepository(ClientOrder::class)->find($data->order);
 
@@ -673,13 +685,15 @@ class ApiController extends AbstractController {
             $deliveryRound = $order->getDeliveryRound();
             $delivery = $order->getDelivery();
 
-            $orderStatus = $manager->getRepository(Status::class)->findByCode(Status::CODE_ORDER_FINISHED);
-            $deliveryStatus = $manager->getRepository(Status::class)->findByCode(Status::CODE_DELIVERY_DELIVERED);
+            $orderStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_ORDER_FINISHED]);
+            $deliveryStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_DELIVERY_DELIVERED]);
             $signature = $attachmentService->createAttachment(Attachment::TYPE_DELIVERY_SIGNATURE, ["signature", $data->signature]);
             $photo = $attachmentService->createAttachment(Attachment::TYPE_DELIVERY_PHOTO, ["photo", $data->photo]);
 
-            $order->setStatus($orderStatus)
-                ->setComment($data->comment);
+            $history = $clientOrderService->updateClientOrderStatus($order, $orderStatus, $this->getUser());
+            $manager->persist($history);
+
+            $order->setComment($data->comment);
 
             $delivery->setDistance($data->distance)
                 ->setStatus($deliveryStatus)
@@ -691,7 +705,7 @@ class ApiController extends AbstractController {
                 ->count();
 
             if ($unfinishedDeliveries === 0) {
-                $status = $manager->getRepository(Status::class)->findByCode(Status::CODE_ROUND_FINISHED);
+                $status = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_ROUND_FINISHED]);
                 $distance = Stream::from($deliveryRound->getOrders())
                     ->map(fn(ClientOrder $order) => $order->getDelivery()->getDistance())
                     ->sum();
@@ -716,8 +730,27 @@ class ApiController extends AbstractController {
      * @Authenticated
      */
     public function preparations(EntityManagerInterface $manager, Request $request): Response {
-        $depository = $manager->getRepository(Depository::class)->find($request->query->get('depository'));
-        return $this->json($manager->getRepository(Preparation::class)->getByDepository($depository));
+        $depositoryRepository = $manager->getRepository(Depository::class);
+        $preparationRepository = $manager->getRepository(Preparation::class);
+
+        $depositoryId = $request->query->get('depository');
+        $depository = $depositoryId
+            ? $depositoryRepository->find($depositoryId)
+            : null;
+
+        $preparations = $preparationRepository->getByDepository($depository, $this->user);
+
+        $toPrepare = Stream::from($preparations)
+            ->filter(fn($preparation) => !isset($preparation['operator']))
+            ->values();
+        $preparing = Stream::from($preparations)
+            ->filter(fn($preparation) => isset($preparation['operator']))
+            ->values();
+
+        return $this->json([
+            'toPrepare' => $toPrepare,
+            'preparing' => $preparing
+        ]);
     }
 
     /**
@@ -792,21 +825,189 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/mobile/crates-to-prepare", name="api_mobile_crates_to_prepare")
+     * @Route("/mobile/preparations/{preparation}", name="api_mobile_get_preparation", methods={"GET"})
+     * @Authenticated
      */
-    public function cratesToPrepare(EntityManagerInterface $manager, Request $request): Response {
-        $preparation = $manager->getRepository(Preparation::class)->find($request->query->get('preparation'));
-        return $this->json($manager->getRepository(Box::class)->getByPreparation($preparation));
+    public function getPreparation(EntityManagerInterface $entityManager,
+                                   ClientOrderService     $clientOrderService,
+                                   Preparation            $preparation): Response {
+        if ((
+                !$preparation->isOnStatusCode(Status::CODE_PREPARATION_TO_PREPARE)
+                && !$preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+            )
+            || (
+                $preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+                && $preparation->getOperator()
+                && $this->user !== $preparation->getOperator()
+            )) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Préparation non trouvée'
+            ]);
+        }
+
+        $clientOrder = $preparation->getOrder();
+        $client = $clientOrder->getClient();
+
+        $cart = $clientOrder->getLines()
+            ->map(fn(ClientOrderLine $line) => [
+                'boxType' => $line->getBoxType(),
+                'quantity' => $line->getQuantity()
+            ])
+            ->toArray();
+
+        $crates = $clientOrderService->getCartSplitting($entityManager, $client, $cart);
+
+        return $this->json([
+            'success' => true,
+            'crates' => $crates
+        ]);
+    }
+
+    /**
+     * @Route("/mobile/preparations/{preparation}", name="api_mobile_patch_preparation", methods={"PATCH"})
+     * @Authenticated
+     */
+    public function patchPreparation(Request                $request,
+                                     Preparation            $preparation,
+                                     PreparationService     $preparationService,
+                                     DeliveryRoundService   $deliveryRoundService,
+                                     BoxRecordService       $boxRecordService,
+                                     EntityManagerInterface $entityManager,
+                                     Mailer                 $mailer): Response {
+
+        $content = json_decode($request->getContent(), true);
+
+        $preparing = $content['preparing'] ?? false;
+        $statusRepository = $entityManager->getRepository(Status::class);
+
+        if ($preparing) {
+            if ($preparation->isOnStatusCode(Status::CODE_PREPARATION_TO_PREPARE)) {
+                $status = $statusRepository->findOneBy(['code' => Status::CODE_PREPARATION_PREPARING]);
+
+                $preparation
+                    ->setStatus($status)
+                    ->setOperator($this->user);
+
+                $entityManager->flush();
+                return $this->json([
+                    'success' => true,
+                    'message' => 'La préparation a été réservée'
+                ]);
+            }
+            else if (!$preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+                || $this->user !== $preparation->getOperator()){
+                return $this->json([
+                    'success' => false,
+                    'message' => 'La préparation est en cours de préparation par un autre utilisateur'
+                ]);
+            }
+            else {
+                // $preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+                // AND $this->user === $preparation->getOperator()
+                return $this->json([
+                    'success' => true
+                ]);
+            }
+
+        }
+        else if ($preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+                 && $this->user === $preparation->getOperator()) {
+            $userRepository = $entityManager->getRepository(User::class);
+
+            $preparedStatus = $statusRepository->findOneBy(['code' => Status::CODE_PREPARATION_PREPARED]);
+            $preparedDeliveryStatus = $statusRepository->findOneBy(['code' => Status::CODE_DELIVERY_PREPARED]);
+
+            $crates = $content['crates'] ?? [];
+
+            $clientOrder = $preparation->getOrder();
+            $result = $preparationService->handlePreparedCrates($entityManager, $clientOrder, $crates);
+
+            $date = new DateTime();
+            $user = $this->user;
+
+            if ($result['success']) {
+                foreach ($result['entities'] as $crateData) {
+                    $preparationLine = new PreparationLine();
+                    $preparationLine
+                        ->setPreparation($preparation)
+                        ->setCrate($crateData['crate']);
+                    $entityManager->persist($preparationLine);
+
+                    foreach ($crateData['boxes'] as $box) {
+                        $olderValues = [
+                            'location' => $box->getLocation(),
+                            'state' => $box->getState(),
+                            'comment' => $box->getComment()
+                        ];
+
+                        $box
+                            ->setLocation($box->getLocation()->getDeporte())
+                            ->setState(BoxStateService::STATE_BOX_UNAVAILABLE);
+
+                        [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $olderValues, $user, $date);
+
+                        if ($tracking) {
+                            $tracking->setBox($box);
+                            $entityManager->persist($tracking);
+                        }
+
+                        if ($record) {
+                            $record->setBox($box);
+                            $entityManager->persist($record);
+                        }
+
+                        $preparationLine->addBox($box);
+                    }
+                }
+
+                $preparation->setStatus($preparedStatus);
+
+                $delivery = $clientOrder->getDelivery();
+                if(isset($delivery)) {
+                    $delivery->setStatus($preparedDeliveryStatus);
+                }
+
+                $deliveryRound = $clientOrder->getDeliveryRound();
+                if ($deliveryRound) {
+                    $deliveryRoundService->updateDeliveryRound($entityManager, $deliveryRound);
+                }
+
+                $entityManager->flush();
+
+                $users = $userRepository->findBy(['deliveryAssignmentPreparationMail' => 1]);
+                if(!empty($users)) {
+                    $mailer->send(
+                        $users,
+                        "BoxEaty - Affectation de tournée",
+                        $this->renderView("emails/delivery_round.html.twig", [
+                            "expectedDelivery" => $preparation->getOrder()->getExpectedDelivery(),
+                            "deliveryRound" => $preparation->getOrder()->getDeliveryRound()
+                        ])
+                    );
+                }
+                return $this->json([
+                    'success' => true,
+                ]);
+            }
+            else {
+                return $this->json([
+                    'success' => false,
+                    'message' => $result['message']
+                ]);
+            }
+        }
+
+        throw new NotFoundHttpException();
     }
 
     /**
      * @Route("/mobile/available-crates", name="api_mobile_available_crates")
+     * @Authenticated
      */
     public function availableCrates(EntityManagerInterface $manager, Request $request): Response {
         $crateType = $manager->getRepository(BoxType::class)->findOneBy(['name' => $request->query->get('type')]);
-        $crates = Stream::from($crateType->getBoxes())
-            ->filter(fn(Box $box) => !$box->isBox() && $box->getCrate() && $box->getType()->getId() === $crateType->getId())
-            ->toArray();
+        $crates = $crateType->getCrates();
 
         $availableCrates = [];
         /** @var Box $crate */
@@ -814,13 +1015,12 @@ class ApiController extends AbstractController {
             if ($crate->getLocation()) {
                 $location = $crate->getLocation()->getName();
                 $number = $crate->getNumber();
-                if (!isset($availableCrates[$location])) {
-                    $availableCrates[$location] = [
-                        $number
-                    ];
-                } else {
-                    array_push($availableCrates[$location], $number);
-                }
+                $availableCrates[] = [
+                    'number' => $number,
+                    'id' => $crate->getId(),
+                    'type' => $crate->getType()->getName(),
+                    'location' => $location
+                ];
             }
         }
 
@@ -828,7 +1028,8 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/mobile/available-boxes", name="api_mobile_available_boxes")
+     * @Route("/mobile/boxes", name="api_mobile_available_boxes")
+     * @Authenticated
      */
     public function availableBoxes(EntityManagerInterface $manager, Request $request): Response {
         $query = $request->query;
@@ -837,29 +1038,29 @@ class ApiController extends AbstractController {
         $boxTypes = Stream::from($preparation->getOrder()->getLines())
             ->map(fn(ClientOrderLine $line) => [
                 $line->getBoxType()->getId()
-            ])->toArray();
+            ])
+            ->toArray();
 
         $boxes = $manager->getRepository(Box::class)->getAvailableAndCleanedBoxByType($boxTypes);
 
         $availableBoxes = [];
         foreach ($boxes as $box) {
-            if ($box->getLocation()) {
+            if ($box->getLocation() && $box->getType()) {
                 $type = $box->getType()->getName();
                 $location = $box->getLocation()->getName();
                 $number = $box->getNumber();
-                if (!isset($availableBoxes[$type])) {
-                    $availableBoxes[$type] = [];
-                }
 
-                if (!isset($availableBoxes[$type][$location])) {
-                    $availableBoxes[$type][$location] = [];
-                }
-
-                $availableBoxes[$type][$location][] = $number;
+                $availableBoxes[] = [
+                    'type' => $type,
+                    'location' => $location,
+                    'number' => $number
+                ];
             }
         }
 
-        return $this->json($availableBoxes);
+        return $this->json([
+            'availableBoxes' => $availableBoxes,
+        ]);
     }
 
     /**

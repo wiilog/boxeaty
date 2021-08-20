@@ -270,6 +270,7 @@ button, a {
     text-align: center;
     line-height: 1.3rem;
     transition: background 200ms;
+    display: block;
 
     &:hover {
         background: $grey-dark;

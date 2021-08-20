@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Utils\StatusTrait;
 use App\Repository\ClientOrderRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -13,6 +14,8 @@ use WiiCommon\Helper\Stream;
  * @ORM\Entity(repositoryClass=ClientOrderRepository::class)
  */
 class ClientOrder {
+
+    use StatusTrait;
 
     public const PREFIX_NUMBER = 'CO';
 
@@ -33,12 +36,6 @@ class ClientOrder {
      * @ORM\JoinColumn(nullable=false)
      */
     private ?OrderType $type = null;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Status::class)
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private ?Status $status = null;
 
     /**
      * @ORM\OneToMany(targetEntity=OrderStatusHistory::class, mappedBy="order", cascade={"persist", "remove"})
@@ -187,22 +184,6 @@ class ClientOrder {
         return $this;
     }
 
-    public function getStatus(): ?Status {
-        return $this->status;
-    }
-
-    public function isOnStatusCode(string $code): bool {
-        return (
-            $this->getStatus()
-            && $this->getStatus()->getCode() === $code
-        );
-    }
-
-    public function setStatus(Status $status): self {
-        $this->status = $status;
-        return $this;
-    }
-
     /**
      * @return Collection|OrderStatusHistory[]
      */
@@ -295,11 +276,11 @@ class ClientOrder {
         return $this;
     }
 
-    public function getCratesAmount(): ?float {
+    public function getCratesAmount(): ?int {
         return $this->cratesAmount;
     }
 
-    public function setCratesAmount(float $cratesAmount): self {
+    public function setCratesAmount(int $cratesAmount): self {
         $this->cratesAmount = $cratesAmount;
 
         return $this;
@@ -488,6 +469,30 @@ class ClientOrder {
         return Stream::from($this->lines)
             ->reduce(
                 fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getPrice() ?: 0)),
+                0
+            );
+    }
+
+    public function getBoxQuantity(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + $line->getQuantity(),
+                0
+            );
+    }
+
+    public function getTotalWeight(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getWeight() ?: 0)),
+                0
+            );
+    }
+
+    public function getTotalVolume(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getVolume() ?: 0)),
                 0
             );
     }

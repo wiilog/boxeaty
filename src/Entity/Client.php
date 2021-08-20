@@ -6,13 +6,14 @@ use App\Repository\ClientRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Utils\ActiveTrait;
 
 /**
  * @ORM\Entity(repositoryClass=ClientRepository::class)
  */
 class Client {
 
-    use Active;
+    use ActiveTrait;
 
     public const INACTIVE = 0;
     public const ACTIVE = 1;
@@ -135,9 +136,9 @@ class Client {
     private ?Depository $depository = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=ClientBoxType::class, mappedBy="client")
+     * @ORM\OneToMany(targetEntity=CratePatternLine::class, mappedBy="client")
      */
-    private $clientBoxTypes;
+    private Collection $cratePatternLines;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
@@ -152,7 +153,7 @@ class Client {
     /**
      * @ORM\OneToMany(targetEntity=Collect::class, mappedBy="client")
      */
-    private $collects;
+    private Collection $collects;
 
     public function __construct() {
         $this->users = new ArrayCollection();
@@ -160,7 +161,7 @@ class Client {
         $this->clients = new ArrayCollection();
         $this->boxes = new ArrayCollection();
         $this->depositTicketsClients = new ArrayCollection();
-        $this->clientBoxTypes = new ArrayCollection();
+        $this->cratePatternLines = new ArrayCollection();
         $this->collects = new ArrayCollection();
     }
 
@@ -472,30 +473,39 @@ class Client {
     }
 
     /**
-     * @return Collection|ClientBoxType[]
+     * @return Collection|CratePatternLine[]
      */
-    public function getClientBoxTypes(): Collection
-    {
-        return $this->clientBoxTypes;
+    public function getCratePatternLines(): Collection {
+        return $this->cratePatternLines;
     }
 
-    public function addClientBoxType(ClientBoxType $clientBoxType): self
-    {
-        if (!$this->clientBoxTypes->contains($clientBoxType)) {
-            $this->clientBoxTypes[] = $clientBoxType;
-            $clientBoxType->setClient($this);
+    public function addCratePatternLine(CratePatternLine $cratePatternLine): self {
+        if (!$this->cratePatternLines->contains($cratePatternLine)) {
+            $this->cratePatternLines[] = $cratePatternLine;
+            $cratePatternLine->setClient($this);
         }
 
         return $this;
     }
 
-    public function removeClientBoxType(ClientBoxType $clientBoxType): self
-    {
-        if ($this->clientBoxTypes->removeElement($clientBoxType)) {
-            // set the owning side to null (unless already changed)
-            if ($clientBoxType->getClient() === $this) {
-                $clientBoxType->setClient(null);
+    public function removeCratePatternLine(CratePatternLine $cratePatternLine): self {
+        if ($this->cratePatternLines->removeElement($cratePatternLine)) {
+            if ($cratePatternLine->getClient() === $this) {
+                $cratePatternLine->setClient(null);
             }
+        }
+
+        return $this;
+    }
+
+    public function setCratePatternLines(?array $cratePatternLines): self {
+        foreach($this->getCratePatternLines()->toArray() as $cratePatternLine) {
+            $this->removeCratePatternLine($cratePatternLine);
+        }
+
+        $this->cratePatternLines = new ArrayCollection();
+        foreach($cratePatternLines as $cratePatternLine) {
+            $this->addCratePatternLine($cratePatternLine);
         }
 
         return $this;

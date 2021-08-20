@@ -24,13 +24,4 @@ class StatusRepository extends EntityRepository {
             ->getQuery()
             ->getArrayResult();
     }
-
-    public function findByCode(string $code): Status {
-        return $this->createQueryBuilder("status")
-            ->where("status.code = :code")
-            ->setParameter("code", $code)
-            ->getQuery()
-            ->getSingleResult();
-    }
-
 }

@@ -5,7 +5,7 @@ namespace App\Controller\Referential;
 use App\Annotation\HasPermission;
 use App\Entity\BoxType;
 use App\Entity\Client;
-use App\Entity\ClientBoxType;
+use App\Entity\CratePatternLine;
 use App\Entity\ClientOrderInformation;
 use App\Entity\DeliveryMethod;
 use App\Entity\Depository;
@@ -341,7 +341,7 @@ class ClientController extends AbstractController {
     }
 
     /**
-     * @Route("/box-types-api", name="client_box_types_api", options={"expose": true})
+     * @Route("/crate-pattern-lines-api", name="crate_pattern_lines_api", options={"expose": true})
      */
     public function boxTypesApi(Request $request, EntityManagerInterface $manager): Response {
         $id = $request->query->get('id');
@@ -349,31 +349,31 @@ class ClientController extends AbstractController {
 
         return $this->json([
             'success' => true,
-            'template' => $this->renderView('referential/client/box_types.html.twig', [
+            'template' => $this->renderView('referential/client/crate_pattern_lines.html.twig', [
                 'client' => $client,
             ]),
             'totalCrateTypePrice' => FormatHelper::price(
-                Stream::from($client->getClientBoxTypes())
-                    ->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float)$clientBoxType->getCustomUnitPrice())
+                Stream::from($client->getCratePatternLines())
+                    ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
                     ->sum()
             )
         ]);
     }
 
     /**
-     * @Route("/{client}/box-types", name="client_box_types", options={"expose": true})
+     * @Route("/{client}/crate-pattern-lines", name="crate_pattern_lines", options={"expose": true})
      */
     public function getBoxTypes(Client $client): Response {
         return $this->json([
-            'box-types' => $client->getClientBoxTypes()
-                ->map(fn(ClientBoxType $clientBoxType) => [
-                    'id' => $clientBoxType->getBoxType()->getId(),
-                    'unitPrice' => $clientBoxType->getUnitPrice(),
-                    'quantity' => $clientBoxType->getQuantity(),
-                    'name' => $clientBoxType->getBoxType()->getName(),
-                    'volume' => $clientBoxType->getBoxType()->getVolume(),
-                    'image' => $clientBoxType->getBoxType()->getImage()
-                        ? $clientBoxType->getBoxType()->getImage()->getPath()
+            'box-types' => $client->getCratePatternLines()
+                ->map(fn(CratePatternLine $cratePatternLine) => [
+                    'id' => $cratePatternLine->getBoxType()->getId(),
+                    'unitPrice' => $cratePatternLine->getUnitPrice(),
+                    'quantity' => $cratePatternLine->getQuantity(),
+                    'name' => $cratePatternLine->getBoxType()->getName(),
+                    'volume' => $cratePatternLine->getBoxType()->getVolume(),
+                    'image' => $cratePatternLine->getBoxType()->getImage()
+                        ? $cratePatternLine->getBoxType()->getImage()->getPath()
                         : null
                 ])
                 ->toArray()
@@ -381,17 +381,17 @@ class ClientController extends AbstractController {
     }
 
     /**
-     * @Route("/add-box-type", name="add_client_box_type", options={"expose": true})
+     * @Route("/add-crate-pattern-line", name="add_crate_pattern_line", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function addBoxType(Request $request, EntityManagerInterface $manager) {
+    public function addCratePatternLine(Request $request, EntityManagerInterface $manager) {
         $form = Form::create();
 
         $content = (object)$request->request->all();
 
         $client = $manager->getRepository(Client::class)->find($content->client);
         $boxType = $manager->getRepository(BoxType::class)->find($content->type);
-        $clientBoxTypes = $client->getClientBoxTypes();
+        $cratePatternLines = $client->getCratePatternLines();
 
         if ($content->quantity < 1) {
             $form->addError("quantity", "La quantité doit être supérieure ou égale à 1");
@@ -399,8 +399,8 @@ class ClientController extends AbstractController {
             $form->addError("customPrice", "Le tarif personnalisé doit être supérieur ou égal à 0");
         }
 
-        foreach ($clientBoxTypes as $clientBoxType) {
-            if ($clientBoxType->getBoxType()->getId() === $boxType->getId()) {
+        foreach ($cratePatternLines as $cratePatternLine) {
+            if ($cratePatternLine->getBoxType()->getId() === $boxType->getId()) {
                 $form->addError("type", 'Ce type de Box est déjà présent dans le modèle de caisse');
                 break;
             }
@@ -412,13 +412,13 @@ class ClientController extends AbstractController {
 
             $customPrice = isset($content->customPrice) ? (float)$content->customPrice : null;
 
-            $clientBoxType = (new ClientBoxType())
+            $cratePatternLine = (new CratePatternLine())
                 ->setClient($client)
                 ->setBoxType($boxType)
                 ->setQuantity((int)$content->quantity)
                 ->setCustomUnitPrice($customPrice);
 
-            $manager->persist($clientBoxType);
+            $manager->persist($cratePatternLine);
             $manager->flush();
 
             return $this->json([
@@ -431,21 +431,21 @@ class ClientController extends AbstractController {
     }
 
     /**
-     * @Route("/delete-client-box-type", name="delete_client_box_type", options={"expose": true})
+     * @Route("/delete-crate-pattern-line", name="delete_crate_pattern_line", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function deleteClientBoxType(Request $request, EntityManagerInterface $manager): Response {
+    public function deleteCratePatternLine(Request $request, EntityManagerInterface $manager): Response {
 
         $id = $request->query->get('id');
-        $clientBoxType = $manager->getRepository(ClientBoxType::class)->find($id);
+        $cratePatternLine = $manager->getRepository(CratePatternLine::class)->find($id);
 
-        if ($clientBoxType) {
-            $manager->remove($clientBoxType);
+        if ($cratePatternLine) {
+            $manager->remove($cratePatternLine);
             $manager->flush();
 
             return $this->json([
                 "success" => true,
-                "message" => "Le type de Box <strong>{$clientBoxType->getBoxType()->getName()}</strong> a été supprimé"
+                "message" => "Le type de Box <strong>{$cratePatternLine->getBoxType()->getName()}</strong> a été supprimé"
             ]);
         } else {
             return $this->json([
@@ -456,23 +456,25 @@ class ClientController extends AbstractController {
     }
 
     /**
-     * @Route("/modifier-client-box-type/template/{clientBoxType}", name="client_box_type_edit_template", options={"expose": true})
+     * @Route("/modifier-crate-pattern-line/template/{cratePatternLine}", name="crate_pattern_line_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function clientBoxTypeEditTemplate(ClientBoxType $clientBoxType): Response {
+    public function cratePatternLineEditTemplate(CratePatternLine $cratePatternLine): Response {
         return $this->json([
-            "submit" => $this->generateUrl("client_box_type_edit", ["clientBoxType" => $clientBoxType->getId()]),
-            "template" => $this->renderView("referential/client/modal/edit_client_box_type.html.twig", [
-                "clientBoxType" => $clientBoxType,
+            "submit" => $this->generateUrl("crate_pattern_line_edit", ["cratePatternLine" => $cratePatternLine->getId()]),
+            "template" => $this->renderView("referential/client/modal/edit_crate_pattern_line.html.twig", [
+                "cratePatternLine" => $cratePatternLine,
             ])
         ]);
     }
 
     /**
-     * @Route("/modifier-client-box-type/{clientBoxType}", name="client_box_type_edit", options={"expose": true})
+     * @Route("/modifier-crate-pattern-line/{cratePatternLine}", name="crate_pattern_line_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function clientBoxTypeEdit(Request $request, ClientBoxType $clientBoxType, EntityManagerInterface $manager): Response {
+    public function cratePatternLineEdit(Request $request,
+                                         CratePatternLine $cratePatternLine,
+                                         EntityManagerInterface $manager): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
@@ -484,11 +486,11 @@ class ClientController extends AbstractController {
         }
 
         if ($form->isValid()) {
-            $name = $clientBoxType->getBoxType()->getName();
+            $name = $cratePatternLine->getBoxType()->getName();
 
             $customPrice = isset($content->customPrice) ? (float)$content->customPrice : null;
 
-            $clientBoxType
+            $cratePatternLine
                 ->setQuantity((int)$content->quantity)
                 ->setCustomUnitPrice($customPrice);
 
@@ -513,8 +515,8 @@ class ClientController extends AbstractController {
         $clientOrderInformation = $client->getClientOrderInformation() ?? null;
         $orderRecurrence = $clientOrderInformation ? $clientOrderInformation->getOrderRecurrence() : null;
 
-        $crateTypePrice = Stream::from($client->getClientBoxTypes())
-            ->map(fn(ClientBoxType $clientBoxType) => $clientBoxType->getQuantity() * (float)$clientBoxType->getCustomUnitPrice())
+        $crateTypePrice = Stream::from($client->getCratePatternLines())
+            ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
             ->sum();
 
         return $this->json([
@@ -527,30 +529,30 @@ class ClientController extends AbstractController {
     }
 
     /**
-     * @Route("/client-box-type-delete/template/{clientBoxType}", name="client_box_type_delete_template", options={"expose": true})
+     * @Route("/crate-pattern-line-delete/template/{cratePatternLine}", name="crate_pattern_line_delete_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function clientBoxTypeDeleteTemplate(ClientBoxType $clientBoxType): Response {
+    public function cratePatternLineDeleteTemplate(CratePatternLine $cratePatternLine): Response {
         return $this->json([
-            "submit" => $this->generateUrl("client_box_type_delete", ["clientBoxType" => $clientBoxType->getId()]),
-            "template" => $this->renderView("referential/client/modal/delete_client_box_type.html.twig", [
-                "clientBoxType" => $clientBoxType,
+            "submit" => $this->generateUrl("crate_pattern_line_delete", ["cratePatternLine" => $cratePatternLine->getId()]),
+            "template" => $this->renderView("referential/client/modal/delete_crate_pattern_line.html.twig", [
+                "cratePatternLine" => $cratePatternLine,
             ])
         ]);
     }
 
     /**
-     * @Route("/client-box-type-delete/{clientBoxType}", name="client_box_type_delete", options={"expose": true})
+     * @Route("/crate-pattern-line-delete/{cratePatternLine}", name="crate_pattern_line_delete", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function clientBoxTypeDelete(EntityManagerInterface $manager, ClientBoxType $clientBoxType): Response {
+    public function cratePatternLineDelete(EntityManagerInterface $manager, CratePatternLine $cratePatternLine): Response {
 
-        $manager->remove($clientBoxType);
+        $manager->remove($cratePatternLine);
         $manager->flush();
 
         return $this->json([
             "success" => true,
-            "message" => "Le type de Box <strong>{$clientBoxType->getBoxType()->getName()}</strong> a été supprimé"
+            "message" => "Le type de Box <strong>{$cratePatternLine->getBoxType()->getName()}</strong> a été supprimé"
         ]);
     }
 

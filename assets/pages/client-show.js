@@ -8,7 +8,7 @@ import "../styles/pages/client-show.scss";
 import {StringHelper} from "../util";
 
 $(document).ready(() => {
-    getBoxTypes();
+    getCratePattern();
     getBoxRecurrence();
 
     $(`.edit-client`).click(() => {
@@ -32,40 +32,40 @@ $(document).ready(() => {
         })
     });
 
-    const addClientBoxTypeModal = Modal.static(`#modal-add-client-box-type`, {
-        ajax: AJAX.route(`POST`, `add_client_box_type`),
+    const addCratePatternLineModal = Modal.static(`#modal-add-crate-pattern-line`, {
+        ajax: AJAX.route(`POST`, `add_crate_pattern_line`),
         success: () => {
-            getBoxTypes();
+            getCratePattern();
             getBoxRecurrence();
         }
     });
 
-    $(`.add-client-box-type`).click(() => addClientBoxTypeModal.open());
+    $(`.add-crate-pattern-line`).click(() => addCratePatternLineModal.open());
 
-    $(document).arrive(`.delete-client-box-type`, function () {
+    $(document).arrive(`.delete-crate-pattern-line`, function () {
         $(this).click(() => {
-            const ajax = AJAX.route(`POST`, `client_box_type_delete_template`, {
-                clientBoxType: $(this).data('id'),
+            const ajax = AJAX.route(`POST`, `crate_pattern_line_delete_template`, {
+                cratePatternLine: $(this).data('id'),
             });
 
             Modal.load(ajax, {
                 success: () => {
-                    getBoxTypes();
+                    getCratePattern();
                     getBoxRecurrence();
                 }
             });
         });
     });
 
-    $(document).arrive(`.edit-client-box-type`, function () {
+    $(document).arrive(`.edit-crate-pattern-line`, function () {
         $(this).click(() => {
-            const ajax = AJAX.route(`POST`, `client_box_type_edit_template`, {
-                clientBoxType: $(this).data('id'),
+            const ajax = AJAX.route(`POST`, `crate_pattern_line_edit_template`, {
+                cratePatternLine: $(this).data('id'),
             });
 
             Modal.load(ajax, {
                 success: () => {
-                    getBoxTypes();
+                    getCratePattern();
                     getBoxRecurrence();
                 }
             });
@@ -75,7 +75,7 @@ $(document).ready(() => {
     const addOrderRecurrence = Modal.static(`#modal-add-order-recurrence`, {
         ajax: AJAX.route(`POST`, `add_order_recurrence`),
         success: () => {
-            getBoxTypes();
+            getCratePattern();
             getBoxRecurrence();
         }
     });
@@ -92,7 +92,7 @@ $(document).ready(() => {
 
             Modal.load(ajax, {
                 success: () => {
-                    getBoxTypes();
+                    getCratePattern();
                     getBoxRecurrence();
                 }
             });
@@ -113,8 +113,8 @@ $(document).ready(() => {
     });
 });
 
-function getBoxTypes() {
-    AJAX.route(`GET`, `client_box_types_api`, {id: $('#client-id').val()})
+function getCratePattern() {
+    AJAX.route(`GET`, `crate_pattern_lines_api`, {id: $('#client-id').val()})
         .json()
         .then((response) => {
             $('.box-type-card-wrapper').empty().append(response.template);

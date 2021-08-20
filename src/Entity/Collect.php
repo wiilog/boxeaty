@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Utils\StatusTrait;
 use App\Repository\CollectRepository;
 use DateTime;
 use DateTimeInterface;
@@ -14,7 +15,9 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Collect {
 
-    const PREFIX_NUMBER = 'C';
+    use StatusTrait;
+
+    public const PREFIX_NUMBER = 'C';
 
     /**
      * @ORM\Id
@@ -32,11 +35,6 @@ class Collect {
      * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="droppedCollects")
      */
     private ?Location $dropLocation = null;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Status::class)
-     */
-    private ?Status $status = null;
 
     /**
      * @ORM\Column(type="integer")
@@ -136,15 +134,6 @@ class Collect {
             $dropLocation->addDroppedCollect($this);
         }
 
-        return $this;
-    }
-
-    public function getStatus(): ?Status {
-        return $this->status;
-    }
-
-    public function setStatus(?Status $status): self {
-        $this->status = $status;
         return $this;
     }
 

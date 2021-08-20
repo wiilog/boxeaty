@@ -25,13 +25,14 @@ class StatusFixtures extends Fixture implements FixtureGroupInterface {
             Status::CODE_ROUND_FINISHED => "Terminé",
         ],
         Status::CATEGORY_PREPARATION => [
+            Status::CODE_PREPARATION_TO_PREPARE => "A préparer",
             Status::CODE_PREPARATION_PREPARING => "En préparation",
             Status::CODE_PREPARATION_PREPARED => "Préparé",
         ],
         Status::CATEGORY_DELIVERY => [
             Status::CODE_DELIVERY_PLANNED => "Planifiée",
             Status::CODE_DELIVERY_PREPARING => "En préparation",
-            Status::CODE_DELIVERY_AWAITING_DELIVERER => "Attente livreur",
+            Status::CODE_DELIVERY_PREPARED => "Préparée",
             Status::CODE_DELIVERY_TRANSIT => "En transit",
             Status::CODE_DELIVERY_DELIVERED => "Livrée",
         ],
