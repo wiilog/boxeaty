@@ -1116,25 +1116,24 @@ class ApiController extends AbstractController {
         $args = json_decode($request->getContent(), true);
         $scannedBoxesAndCrates = Stream::from($args['scannedBoxesAndCrates'])->map(fn($box) => $box['number'])->toArray();
 
-        $boxes = [];
-        foreach ($scannedBoxesAndCrates as $scannedBoxOrCrate) {
-            $boxes[] = $boxRepository->findOneBy(['number' => $scannedBoxOrCrate]);
-        }
-
         $chosenQuality = $qualityRepository->find($args['quality']);
         $chosenLocation = $locationRepository->find($args['location']);
-        foreach ($boxes as $box) {
-            $box
-                ->setLocation($chosenLocation)
-                ->setQuality($chosenQuality);
 
-            $record = $boxRecordService->createBoxRecord($box, true);
-            $record
-                ->setBox($box)
-                ->setState(BoxStateService::STATE_RECORD_IDENTIFIED)
-                ->setUser($this->user);
+        foreach ($scannedBoxesAndCrates as $scannedBoxOrCrate) {
+            $box = $boxRepository->findOneBy(['number' => $scannedBoxOrCrate]);
+            if ($box) {
+                $box
+                    ->setLocation($chosenLocation)
+                    ->setQuality($chosenQuality);
 
-            $manager->persist($record);
+                $record = $boxRecordService->createBoxRecord($box, true);
+                $record
+                    ->setBox($box)
+                    ->setState(BoxStateService::STATE_RECORD_IDENTIFIED)
+                    ->setUser($this->user);
+
+                $manager->persist($record);
+            }
         }
 
         $manager->flush();
