@@ -57,11 +57,17 @@ class Depository {
      */
     private Collection $clientOrderInformation;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ClientOrder::class, mappedBy="depository")
+     */
+    private Collection $clientOrders;
+
     public function __construct() {
         $this->preparations = new ArrayCollection();
         $this->deliveryRounds = new ArrayCollection();
         $this->locations = new ArrayCollection();
         $this->clientOrderInformation = new ArrayCollection();
+        $this->clientOrders = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -270,6 +276,45 @@ class Depository {
             if ($clientOrderInformation->getDepository() === $this) {
                 $clientOrderInformation->setDepository(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ClientOrder[]
+     */
+    public function getClientOrders(): Collection {
+        return $this->clientOrders;
+    }
+
+    public function addClientOrder(ClientOrder $clientOrder): self {
+        if (!$this->clientOrders->contains($clientOrder)) {
+            $this->clientOrders[] = $clientOrder;
+            $clientOrder->setDepository($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClientOrder(ClientOrder $clientOrder): self {
+        if ($this->clientOrders->removeElement($clientOrder)) {
+            if ($clientOrder->getDepository() === $this) {
+                $clientOrder->setDepository(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setClientOrders(?array $clientOrders): self {
+        foreach($this->getClientOrders()->toArray() as $clientOrder) {
+            $this->removeClientOrder($clientOrder);
+        }
+
+        $this->clientOrders = new ArrayCollection();
+        foreach($clientOrders as $clientOrder) {
+            $this->addClientOrder($clientOrder);
         }
 
         return $this;

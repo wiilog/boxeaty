@@ -4,7 +4,6 @@ namespace App\Repository;
 
 use App\Entity\Collect;
 use App\Entity\Status;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 
 /**

@@ -139,6 +139,16 @@ class ClientOrder {
      */
     private bool $collectRequired = false;
 
+    /**
+     * @ORM\OneToOne(targetEntity=Collect::class, mappedBy="clientOrder", cascade={"persist", "remove"})
+     */
+    private ?Collect $collect = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clientOrders")
+     */
+    private ?Depository $depository = null;
+
     public function __construct(){
         $this->lines = new ArrayCollection();
         $this->orderStatusHistory = new ArrayCollection();
@@ -495,5 +505,37 @@ class ClientOrder {
                 fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getVolume() ?: 0)),
                 0
             );
+    }
+
+    public function getCollect(): ?Collect {
+        return $this->collect;
+    }
+
+    public function setCollect(?Collect $collect): self {
+        if ($this->collect && $this->collect->getClientOrder() === $this) {
+            $this->collect->setClientOrder(null);
+        }
+        $this->collect = $collect;
+        if ($collect) {
+            $collect->setClientOrder($this);
+        }
+
+        return $this;
+    }
+
+    public function getDepository(): ?Depository {
+        return $this->depository;
+    }
+
+    public function setDepository(?Depository $depository): self {
+        if($this->depository && $this->depository !== $depository) {
+            $this->depository->removeClientOrder($this);
+        }
+        $this->depository = $depository;
+        if($depository) {
+            $depository->addClientOrder($this);
+        }
+
+        return $this;
     }
 }

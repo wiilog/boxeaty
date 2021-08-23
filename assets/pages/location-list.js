@@ -90,14 +90,17 @@ function toggleInputsIn($container, show) {
     if(show) {
         $container.removeClass(`d-none`);
         $container.find(`input:not(.no-clear), select`).val(``);
-        $container.find(`input[data-required], select[data-required]`).each(function() {
+        $container.find(`input[data-was-required], select[data-was-required]`).each(function() {
             $(this).prop(`required`, true);
         });
     } else {
         $container.addClass(`d-none`);
         $container.find(`input[required], select[required]`).each(function() {
             const $input = $(this);
-            $input.data(`required`, $input.is(`[required]`));
+            const wasRequired = $input.is(`[required]`)
+            $input
+                .data(`was-required`, wasRequired)
+                .attr('data-was-required', `${wasRequired}`);
             $input.prop(`required`, false);
         });
     }

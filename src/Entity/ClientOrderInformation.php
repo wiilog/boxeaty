@@ -74,7 +74,7 @@ class ClientOrderInformation {
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clientOrderInformation")
      */
-    private $depository;
+    private ?Depository $depository = null;
 
     /**
      * @ORM\OneToOne(targetEntity=Client::class, mappedBy="clientOrderInformation", cascade={"persist", "remove"})
@@ -199,14 +199,18 @@ class ClientOrderInformation {
         return $this;
     }
 
-    public function getDepository(): ?Depository
-    {
+    public function getDepository(): ?Depository {
         return $this->depository;
     }
 
-    public function setDepository(?Depository $depository): self
-    {
+    public function setDepository(?Depository $depository): self {
+        if($this->depository && $this->depository !== $depository) {
+            $this->depository->removeClientOrderInformation($this);
+        }
         $this->depository = $depository;
+        if($depository) {
+            $depository->addClientOrderInformation($this);
+        }
 
         return $this;
     }

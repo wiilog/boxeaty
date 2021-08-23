@@ -304,16 +304,9 @@ class ClientOrderController extends AbstractController {
     public function showTemplate(EntityManagerInterface $entityManager, ClientOrder $clientOrder): Response {
         $roles = $entityManager->getRepository(Role::class)->findBy(["active" => true]);
 
-        $delivery = $entityManager->getRepository(Delivery::class)->findOneBy(['order' => $clientOrder->getId()]);
-        $collect = $entityManager->getRepository(Collect::class)->findOneBy(['order' => $clientOrder->getId()]);
-
         return $this->json([
             "template" => $this->renderView("operation/client_order/modal/show.html.twig", [
                 "clientOrder" => $clientOrder,
-                "delivery" => $delivery,
-                "collect" => $collect,
-                "deliveryStatus" => Status:: CODE_DELIVERY_DELIVERED,
-                "collectStatus" => Status::CODE_COLLECT_FINISHED,
                 "roles" => $roles,
             ])
         ]);

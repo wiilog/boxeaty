@@ -27,6 +27,7 @@ use App\Service\ClientOrderService;
 use App\Service\DeliveryRoundService;
 use App\Service\PreparationService;
 use App\Service\UniqueNumberService;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -718,7 +719,7 @@ class ApiController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "message" => "Livraison terminée",
+                "message" => "Livraison terminée"
             ]);
         }
 
@@ -1028,18 +1029,20 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/mobile/boxes", name="api_mobile_available_boxes")
+     * @Route("/mobile/boxes", name="api_mobile_get_boxes")
      * @Authenticated
      */
-    public function availableBoxes(EntityManagerInterface $manager, Request $request): Response {
+    public function getBoxes(EntityManagerInterface $manager, Request $request): Response {
         $query = $request->query;
         $preparation = $manager->getRepository(Preparation::class)->find($query->get('preparation'));
 
-        $boxTypes = Stream::from($preparation->getOrder()->getLines())
-            ->map(fn(ClientOrderLine $line) => [
-                $line->getBoxType()->getId()
-            ])
-            ->toArray();
+        $boxTypes = $preparation
+            ? Stream::from($preparation->getOrder()->getLines())
+                ->map(fn(ClientOrderLine $line) => [
+                    $line->getBoxType()->getId()
+                ])
+                ->toArray()
+            : [];
 
         $boxes = $manager->getRepository(Box::class)->getAvailableAndCleanedBoxByType($boxTypes);
 
@@ -1139,10 +1142,10 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/mobile/pending-collects", name="api_mobile_pending_collects")
+     * @Route("/mobile/collects", name="api_mobile_get_collects", methods={"GET"})
      * @Authenticated
      */
-    public function collects(EntityManagerInterface $manager) {
+    public function getCollects(EntityManagerInterface $manager) {
         $pendingCollects = $manager->getRepository(Collect::class)->getPendingCollects();
 
         return $this->json($pendingCollects);
@@ -1162,17 +1165,19 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/mobile/collect-validate", name="api_mobile_collect_validate")
+     * @Route("/mobile/collects/{collect}", name="api_mobile_patch_collect", methods={"PATCH"})
      * @Authenticated
      */
-    public function collectValidate(Request $request, EntityManagerInterface $manager,
-                                    AttachmentService $attachmentService, BoxRecordService $boxRecordService)
-    {
+    public function patchCollect(Collect $collect,
+                                 Request $request,
+                                 EntityManagerInterface $manager,
+                                 AttachmentService $attachmentService,
+                                 BoxRecordService $boxRecordService): JsonResponse {
         $data = json_decode($request->getContent());
 
-        $collect = $manager->find(Collect::class, $data->collect);
+        $validate = $data->validate ?? false;
 
-        if ($collect) {
+        if ($validate) {
             $dropLocation = $manager->find(Location::class, $data->drop_location);
             $crates = $collect->getCrates();
 
@@ -1207,7 +1212,7 @@ class ApiController extends AbstractController {
                 }
             }
 
-            $collectStatus = $manager->getRepository(Status::class)->findByCode(Status::CODE_COLLECT_FINISHED);
+            $collectStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_COLLECT_FINISHED]);
 
             if($data->data->photo) {
                 $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
@@ -1217,9 +1222,9 @@ class ApiController extends AbstractController {
 
             $collect
                 ->setStatus($collectStatus)
-                ->setSignature($signature)
-                ->setPhoto($photo ?? null)
-                ->setComment($comment ?? null)
+                ->setDropSignature($signature)
+                ->setDropPhoto($photo ?? null)
+                ->setDropComment($comment ?? null)
                 ->setTreatedAt(new DateTime('now'))
                 ->setTokens((int)$data->token_amount);
 
@@ -1254,18 +1259,24 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/mobile/collect-new-validate", name="api_mobile_collect_new_validate")
+     * @Route("/mobile/collects", name="api_mobile_post_collect", methods={"POST"})
      * @Authenticated
      */
-    public function collectNewValidate(Request $request, EntityManagerInterface $manager,
-                                       AttachmentService $attachmentService,
-                                       UniqueNumberService $uniqueNumberService): Response
-    {
+    public function postCollect(Request $request,
+                                EntityManagerInterface $manager,
+                                AttachmentService $attachmentService,
+                                UniqueNumberService $uniqueNumberService): Response {
         $data = json_decode($request->getContent());
 
-        $pendingStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_COLLECT_TRANSIT]);
-        $pickLocation = $manager->getRepository(Location::class)->findOneBy(['name' => $data->location->name]);
-        $client = $manager->getRepository(Client::class)->findOneBy(['name' => $data->location->client]);
+        $statusRepository = $manager->getRepository(Status::class);
+        $locationRepository = $manager->getRepository(Location::class);
+        $clientRepository = $manager->getRepository(Client::class);
+        $boxRepository = $manager->getRepository(Box::class);
+        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
+
+        $pendingStatus = $statusRepository->findOneBy(['code' => Status::CODE_COLLECT_TRANSIT]);
+        $pickLocation = $locationRepository->findOneBy(['name' => $data->location->name]);
+        $client = $clientRepository->findOneBy(['name' => $data->location->client]);
 
         $number = $uniqueNumberService->createUniqueNumber($manager, Collect::PREFIX_NUMBER, Collect::class);
 
@@ -1276,7 +1287,9 @@ class ApiController extends AbstractController {
         $comment = $data->data->comment;
 
         $crateNumbers = Stream::from($data->crates)->map(fn($crate) => $crate->number)->toArray();
-        $crates = $manager->getRepository(Box::class)->findBy(['number' => $crateNumbers]);
+        $crates = $boxRepository->findBy(['number' => $crateNumbers]);
+
+        $clientOrderId = $data->clientOrder ?? null;
 
         $collect = (new Collect())
             ->setCreatedAt(new DateTime('now'))
@@ -1285,16 +1298,25 @@ class ApiController extends AbstractController {
             ->setNumber($number)
             ->setPickLocation($pickLocation)
             ->setClient($client)
-            ->setComment($comment ?? null)
-            ->setSignature($signature)
-            ->setPhoto($photo ?? null)
+            ->setPickComment($comment ?? null)
+            ->setPickSignature($signature)
+            ->setPickPhoto($photo ?? null)
             ->setOperator($this->user)
             ->setCrates($crates);
+
+
+        if ($clientOrderId) {
+            $clientOrder = $clientOrderRepository->find($clientOrderId);
+            $collect
+                ->setClientOrder($clientOrder);
+        }
 
         $manager->persist($collect);
         $manager->flush();
 
-        return $this->json([]);
+        return $this->json([
+            'success' => true
+        ]);
     }
 
 }

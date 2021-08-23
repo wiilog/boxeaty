@@ -50,12 +50,22 @@ class Collect {
     /**
      * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
      */
-    private ?Attachment $signature = null;
+    private ?Attachment $pickSignature = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
      */
-    private ?Attachment $photo = null;
+    private ?Attachment $dropSignature = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
+     */
+    private ?Attachment $pickPhoto = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
+     */
+    private ?Attachment $dropPhoto = null;
 
     /**
      * @ORM\Column(type="datetime", nullable=false)
@@ -80,12 +90,22 @@ class Collect {
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    private ?string $comment = null;
+    private ?string $pickComment = null;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private ?string $dropComment = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="collects")
      */
     private ?Client $client = null;
+
+    /**
+     * @ORM\OneToOne(targetEntity=ClientOrder::class, inversedBy="collect")
+     */
+    private ?ClientOrder $clientOrder = null;
 
     public function __construct() {
         $this->crates = new ArrayCollection();
@@ -174,21 +194,39 @@ class Collect {
         return $this;
     }
 
-    public function getSignature(): ?Attachment {
-        return $this->signature;
+    public function getPickSignature(): ?Attachment {
+        return $this->pickSignature;
     }
 
-    public function setSignature(?Attachment $signature): self {
-        $this->signature = $signature;
+    public function setPickSignature(?Attachment $signature): self {
+        $this->pickSignature = $signature;
         return $this;
     }
 
-    public function getPhoto(): ?Attachment {
-        return $this->photo;
+    public function getDropSignature(): ?Attachment {
+        return $this->dropSignature;
     }
 
-    public function setPhoto(?Attachment $photo): self {
-        $this->photo = $photo;
+    public function setDropSignature(?Attachment $signature): self {
+        $this->dropSignature = $signature;
+        return $this;
+    }
+
+    public function getPickPhoto(): ?Attachment {
+        return $this->pickPhoto;
+    }
+
+    public function setPickPhoto(?Attachment $photo): self {
+        $this->pickPhoto = $photo;
+        return $this;
+    }
+
+    public function getDropPhoto(): ?Attachment {
+        return $this->dropPhoto;
+    }
+
+    public function setDropPhoto(?Attachment $photo): self {
+        $this->dropPhoto = $photo;
         return $this;
     }
 
@@ -240,14 +278,22 @@ class Collect {
         return $this;
     }
 
-    public function getComment(): ?string
-    {
-        return $this->comment;
+    public function getPickComment(): ?string {
+        return $this->pickComment;
     }
 
-    public function setComment(?string $comment): self
-    {
-        $this->comment = $comment;
+    public function setPickComment(?string $comment): self {
+        $this->pickComment = $comment;
+
+        return $this;
+    }
+
+    public function getDropComment(): ?string {
+        return $this->dropComment;
+    }
+
+    public function setDropComment(?string $comment): self {
+        $this->dropComment = $comment;
 
         return $this;
     }
@@ -264,4 +310,19 @@ class Collect {
         return $this;
     }
 
+    public function getClientOrder(): ?ClientOrder {
+        return $this->clientOrder;
+    }
+
+    public function setClientOrder(?ClientOrder $clientOrder): self {
+        if ($this->clientOrder && $this->clientOrder->getCollect() === $this) {
+            $this->clientOrder->setCollect(null);
+        }
+        $this->clientOrder = $clientOrder;
+        if ($clientOrder) {
+            $clientOrder->setCollect($this);
+        }
+
+        return $this;
+    }
 }
