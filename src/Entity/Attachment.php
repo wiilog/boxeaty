@@ -21,7 +21,7 @@ class Attachment {
         self::TYPE_DELIVERY_SIGNATURE => "persistent/delivery_signatures",
         self::TYPE_DELIVERY_PHOTO => "persistent/delivery_photos",
         self::TYPE_COLLECT_SIGNATURE => "persistent/collect_signatures",
-        self::TYPE_COLLECT_PHOTO => "persistent/collect_photos"
+        self::TYPE_COLLECT_PHOTO => "persistent/collect_photos",
     ];
 
     /**

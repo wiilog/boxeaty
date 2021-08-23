@@ -36,12 +36,58 @@
                 {% endif %}
             </div>
             <div>
-                <div class="header-section">
-                    <span class="header-section-label">Preuve de livraison et collecte</span>
+                {% if delivery is not null or collect is not null %}
+                    {% if (delivery and delivery.status.code == deliveryStatus) or (collect and collect.status.code == collectStatus) %}
+                        <div class="header-section">
+                            <span class="header-section-label">Preuve de livraison et collecte</span>
+                        </div>
+                    {% endif %}
+                {% endif %}
+                <div class="details-content body row">
+                    {% if delivery is not null and delivery.status.code == deliveryStatus %}
+                        <div class="col-6">
+                            <span class="bigTxtOrange">Livré à</span>
+                            <div class="row ">
+                                <b>{{ delivery.order.client.name }}</b>
+                                <span class="subtitle">{{ delivery.order.client.address }}</span>
+                            </div>
+                            <p></p>
+                            <span class="bigTxtOrange">Contenu</span>
+                            <div class="row ">
+                                <b>{{ clientOrder.cratesAmount }} Caisses</b>
+                                <b>{{ delivery.tokens }} Jetons</b>
+                            </div>
+                            {% if delivery.signature is not null %}
+                                <img class="proof-img" src="{{ asset(delivery.signature.path) }}" alt="Box">
+                            {% endif %}
+                            {% if delivery.photo is not null %}
+                                <img class="proof-img" src="{{ asset(delivery.photo.path) }}" alt="Box">
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    {% if collect is not null and collect.status.code == collectStatus %}
+                        <div class="col-6">
+                            <span class="bigTxtOrange">Collecté à</span>
+                            <div class="row ">
+                                <b>{{ collect.order.client.name }}</b>
+                                <span class="subtitle">{{ collect.order.client.address }}</span>
+                            </div>
+                            <p></p>
+                            <span class="bigTxtOrange">Contenu</span>
+                            <div class="row ">
+                                <b>{{ clientOrder.cratesAmount }} Caisses</b>
+                                <b>{{ collect.tokens }} Jetons</b>
+                            </div>
+                            {% if collect.signature is not null %}
+                                <img class="proof-img" src="{{ asset(collect.signature.path) }}" alt="Box">
+                            {% endif %}
+                            {% if collect.photo is not null %}
+                                <img class="proof-img" src="{{ asset(collect.signature.path) }}" alt="Box">
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 </div>
-                <div class="details-content body">
-                    {# TODO #}
-                </div>
+                <input type="hidden" value="" name="clientOrderId">
             </div>
         </div>
     </div>
