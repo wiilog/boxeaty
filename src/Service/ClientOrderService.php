@@ -17,15 +17,14 @@ use App\Entity\Status;
 use App\Entity\User;
 use App\Helper\Form;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\RouterInterface;
-use WiiCommon\Helper\Stream;
-use Doctrine\ORM\EntityManagerInterface;
-
 use Twig\Environment;
+use WiiCommon\Helper\Stream;
 
 class ClientOrderService
 {
@@ -155,13 +154,12 @@ class ClientOrderService
 
             if (!$cartVolume) {
                 $form->addError('Le volume total du panier doit être supérieur à 0. Vous devez définir un volume pour les types de box renseignés.');
-            }
-            else {
+            } else {
                 $cratesAmount = $this->getCartSplitting($entityManager, $client, $handledCartLines);
                 $clientOrder->setCratesAmount(count($cratesAmount));
             }
 
-            $this->updateCratesAmount($entityManager, $clientOrder, $cartVolume);
+            $this->updateCratesAmount($entityManager, $clientOrder, $handledCartLines);
         }
     }
 
@@ -266,18 +264,9 @@ class ClientOrderService
 
     private function updateCratesAmount(EntityManagerInterface $entityManager,
                                         ClientOrder $clientOrder,
-                                        float $cartVolume): void {
-        $boxTypeRepository = $entityManager->getRepository(BoxType::class);
-        $globalSettingRepository = $entityManager->getRepository(GlobalSetting::class);
-
-        $defaultCrateTypeId = $globalSettingRepository->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
-        $defaultCrateType = !empty($defaultCrateTypeId)
-            ? $boxTypeRepository->find($defaultCrateTypeId)
-            : null;
-        $defaultCrateVolume = isset($defaultCrateType) ? $defaultCrateType->getVolume() : null;
-        $cratesAmount = !empty($defaultCrateVolume)
-            ? ceil($cartVolume / $defaultCrateVolume)
-            : null;
+                                        array $cart): void {
+        $splitting = $this->getCartSplitting($entityManager, $clientOrder->getClient(), $cart);
+        $cratesAmount = count($splitting) ?: 1;
 
         $clientOrder->setCratesAmount($cratesAmount);
     }
@@ -296,9 +285,14 @@ class ClientOrderService
     public function getCartSplitting(EntityManagerInterface $entityManager,
                                      Client $client,
                                      array $cart): array {
-
         $boxTypeRepository = $entityManager->getRepository(BoxType::class);
         $globalSettingRepository = $entityManager->getRepository(GlobalSetting::class);
+
+        foreach($cart as &$line) {
+            if(!($line['boxType'] instanceof BoxType)) {
+                $line['boxType'] = $boxTypeRepository->find($line['boxType']);
+            }
+        }
 
         $defaultCrateTypeId = $globalSettingRepository->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
         $defaultCrateType = !empty($defaultCrateTypeId)
@@ -369,7 +363,7 @@ class ClientOrderService
 
             foreach ($cartTypeToQuantities as $cartLine) {
                 $quantity = $cartLine['quantity'];
-                if ($quantity > 0) {
+                for($i = 0; $i < $quantity; $i++) {
                     $boxType = $cartLine['boxType'];
                     $currentBoxVolume = $boxType->getVolume();
                     if ($splittingLineVolume + $currentBoxVolume > $defaultCrateVolume) {
@@ -379,8 +373,8 @@ class ClientOrderService
                         $splittingLineVolume = 0;
                     }
 
-                    $splittingLineVolume += $currentBoxVolume;
-                    $cartSplittingLine['boxes'][] = $serializeBox($boxType, $quantity);
+                    $splittingLineVolume += $currentBoxVolume * $i;
+                    $cartSplittingLine['boxes'][] = $serializeBox($boxType, 1);
                 }
             }
 

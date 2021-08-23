@@ -30,17 +30,17 @@
         </select>
     </label>
 
-    <div class="row">
-        <label>Jours fériés ou non ouvrés (majoration sur livraison à cette date)</label>
+    <div class="row mt-4">
+        <label class="fw-bold">Jours fériés ou non ouvrés (majoration sur livraison à cette date)</label>
         <div class="d-flex align-items-end justify-content-between work-free-day-form">
             <div class="col-2 pe-5">
-                <label>
+                <label class="mt-0">
                     Jour
                     <input type="number" name="day" class="add-data" min="0" max="31" required>
                 </label>
             </div>
             <div class="col-2 pe-5">
-                <label>
+                <label class="mt-0">
                     Mois
                     <select name="month" class="add-data w-100" data-s2 data-no-empty-option required>
                         {% for number, month in constant('App\\Helper\\FormatHelper::MONTHS') %}
