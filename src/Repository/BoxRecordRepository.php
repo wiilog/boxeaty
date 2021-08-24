@@ -30,7 +30,7 @@ class BoxRecordRepository extends EntityRepository {
             ->addSelect("record.state AS state")
             ->addSelect("client.name AS client_name")
             ->addSelect("user.username AS user_username")
-            ->where("record.trackingMovement = 1")
+            ->andWhere("record.trackingMovement = 1")
             ->leftJoin("record.location", "location")
             ->leftJoin("record.box", "box")
             ->leftJoin("record.quality", "quality")
@@ -44,7 +44,7 @@ class BoxRecordRepository extends EntityRepository {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("record")
-            ->where('record.trackingMovement = 1');
+            ->andWhere('record.trackingMovement = 1');
 
         QueryHelper::withCurrentGroup($qb, "record.client.group", $user);
 
@@ -117,7 +117,7 @@ class BoxRecordRepository extends EntityRepository {
 
     public function findPreviousTrackingMovement(Box $box): ?BoxRecord {
         return $this->createQueryBuilder("record")
-            ->where("record.box = :box")
+            ->andWhere("record.box = :box")
             ->andWhere("record.location IS NOT NULL")
             ->andWhere("record.trackingMovement = 1")
             ->orderBy("record.id", "DESC")
@@ -146,7 +146,7 @@ class BoxRecordRepository extends EntityRepository {
             ->leftJoin("record.location", "join_location")
             ->leftJoin("join_location.depository", "join_depository")
             ->leftJoin("record.crate", "join_crate")
-            ->where("record.box = :box")
+            ->andWhere("record.box = :box")
             ->andWhere($exprBuilder->orX(
                 "record.trackingMovement = 0",
                 "record.state IN (:packingStates)"
@@ -184,7 +184,7 @@ class BoxRecordRepository extends EntityRepository {
             && $trackingMovement->getId()
             && $trackingMovement->getDate()) {
             return $this->createQueryBuilder("record")
-                ->where("record.box = :box")
+                ->andWhere("record.box = :box")
                 ->andWhere("record.id != :movement")
                 ->andWhere("record.date > :date")
                 ->andWhere("record.trackingMovement = 1")

@@ -7,8 +7,7 @@
 
 {% macro order_link(order, show_links) %}
     {% if show_links %}
-        {# TODO: redirect to the right page #}
-        <a href="{# {{ path('client_orders_list', {order: 1}) }} #}">Voir la commande</a>
+        <a href="{{ path('client_orders_list', {order: 1}) }}">Voir la commande</a>
     {% endif %}
 {% endmacro %}
 
@@ -21,9 +20,10 @@
 
             <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
 
-            {# TODO: open validation modal #}
             <span class="status"><i class="bxi bxi-validate"></i> A valider BoxEaty</span>
             <button class="primary validate">Valider</button>
+
+            <input type="hidden" id="current-order" value="{{ order.id }}">
 
             {{ _self.order_link(order, show_links) }}
         </div>
@@ -46,7 +46,7 @@
 
                 <span class="status"><i class="bxi bxi-preparing"></i> En préparation</span>
             {% else %}
-                <label class="inline">Validée par <strong>{{ order.validator }}</strong></label>
+                <span>Validée par <strong>{{ order.validator ? order.validator.username }}</strong></span>
                 <span class="status"><i class="bxi bxi-loading"></i> En préparation</span>
             {% endif %}
 

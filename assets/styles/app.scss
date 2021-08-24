@@ -211,21 +211,11 @@ main:not(.login) {
             align-items: center;
             flex-wrap: wrap;
 
-            .dates-filter {
-                display: flex;
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-
             & > * {
                 margin-right: 25px;
             }
 
             @media (max-width: $mobile-breakpoint) {
-                .dates-filter {
-                    flex-direction: column;
-                }
-
                 & > * {
                     width: 100%;
                     margin: 2px 0;
@@ -275,25 +265,21 @@ main:not(.login) {
     }
 }
 
-.filter-date {
+.dates-filter {
+    display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
-    justify-content: space-between;
-    flex: 1 1 auto;
-    min-height: 65px;
-    padding: 16px;
-    margin-bottom: 40px;
-    z-index: 1;
-    width: 100%;
-    border-radius: 8px;
 
-    .dates {
+    label {
         display: flex;
-        margin-top: 0px;
+        align-items: center;
+        margin-top: 0;
     }
+}
 
+@media (max-width: $mobile-breakpoint) {
     .dates-filter {
-        display: flex;
-        max-width: 100px;
+        flex-direction: column;
     }
 }
 

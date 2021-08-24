@@ -69,8 +69,7 @@ export default class AJAX {
                 return json;
             })
             .catch(error => {
-                console.error(error);
-                Flash.add("danger", `Une erreur est survenue lors du traitement de votre requête par le serveur`);
+                Flash.serverError(error);
                 throw error;
             });
     }
@@ -79,7 +78,7 @@ export default class AJAX {
 
 function treatFetchCallback(json) {
     if(json.status === 500) {
-        addFlashError(json);
+        Flash.serverError(json);
         return;
     }
 
@@ -96,7 +95,3 @@ function treatFetchCallback(json) {
     }
 }
 
-function addFlashError(json) {
-    console.error(json);
-    Flash.add(Flash.DANGER, `Une erreur est survenue lors du traitement de votre requête par le serveur`);
-}

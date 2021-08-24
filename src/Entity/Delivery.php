@@ -61,12 +61,14 @@ class Delivery {
     }
 
     public function setOrder(?ClientOrder $order): self {
-        if ($this->order && $this->order->getDelivery() === $this) {
-            $this->order->setDelivery(null);
+        if ($this->order && $this->order->getDelivery() !== $this) {
+            $oldPreparation = $this->order;
+            $this->order = null;
+            $oldPreparation->setDelivery(null);
         }
         $this->order = $order;
-        if ($order) {
-            $order->setDelivery($this);
+        if ($this->order && $this->order->getDelivery() !== $this) {
+            $this->order->setDelivery($this);
         }
 
         return $this;

@@ -12,7 +12,6 @@ import {DateTools} from "../util";
 $(function() {
     DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 20);
 
-    const $modal = $(`#modal-new-client-order`);
     initOrderDatatable();
 
     const params = URL.getRequestQuery()
@@ -46,7 +45,8 @@ $(function() {
     });
 
     let toggleCratesAmountToCollect = false;
-    $modal.find('[name="type"]').on('change', function(){
+    $document.on(`change`, `[name="type"]`, function(){
+        const $modal = $(this).closest(`.modal`);
         const type = $(this).data('code');
 
         $modal.find('.crates-amount-to-collect-container').hide();
@@ -72,24 +72,22 @@ $(function() {
         }
     });
 
-    $modal.find('[name="collectRequired"]').on('change', function(){
+    $document.on(`change`, `[name="collectRequired"]`, function(){
+        const $modal = $(this).closest(`.modal`);
+
         if (toggleCratesAmountToCollect) {
             $modal.find('.crates-amount-to-collect-container').toggle();
             $modal.find('[name="cratesAmountToCollect"]').prop('required', $(this).is(':checked'));
         }
     });
 
-    $(document).arrive(`.increase, .decrease`, function() {
-        $(this).on('click', function() {
-            updateInputValue($(this));
-        });
-    });
-
-    let clientData
-    $modal.find('[name="client"]').on('change', function(){
+    let clientData;
+    $document.on(`change`, `[name="client"]`, function(){
+        const $modal = $(this).closest(`.modal`);
         clientData = $(this).select2('data')[0];
         const $clientAddress = $modal.find(`.clientAddress`);
         const $servicePrice = $modal.find(`.servicePrice`);
+
         if(clientData) {
             $clientAddress.text(clientData.address);
             $servicePrice.text("Frais de service " + StringHelper.formatPrice(clientData.serviceCost));
@@ -104,24 +102,32 @@ $(function() {
         }
         updateDeliveryFee(clientData, $modal.find('[name="date"]'));
     });
-    $modal.find('[name="date"]').on('change', function(){
+
+    $document.on(`change`, `[name="date"]`, function(){
         updateDeliveryFee(clientData, $(this));
     });
 
-    $modal.find(".add-box-to-cart-button").on('click', function(){
-        addSelectedBoxTypeToCart($modal);
+    $document.on(`click`, `.add-box-to-cart-button`, function(){
+        addSelectedBoxTypeToCart($(this).closest(`.modal`));
     })
 
-    $modal.on('click','.increase, .decrease' , function(){
-        onBoxTypeQuantityChange($(this));
-        updateCrateNumberAverage($modal);
+    $document.on(`click`, `.cart-container .increase, .cart-container .decrease` , function(){
+        updateInputValue($(this));
     });
 
-    $modal.find('.add-box-type-model-button').on('click', function () {
-        addBoxTypeModel($modal);
+    $document.on(`change`, `.cart-container input[name=quantity]`, function() {
+        const $input = $(this);
+
+        onBoxTypeQuantityChange($input);
+        updateCrateNumberAverage($input.closest(`.modal`));
+    })
+
+    $document.on('click', `.add-box-type-model-button`, function () {
+        addBoxTypeModel($(this).closest(`.modal`));
     });
 
-    $modal.find('input[name=type]').on('click', function () {
+    $document.on('click', `input[name=type]`, function () {
+        const $modal = $(this).closest(`.modal`);
         $modal.find('.client-order-container').removeClass('d-none');
         $modal.find('.footer').removeClass('d-none');
     });
@@ -180,7 +186,7 @@ function openOrderEditModal(clientOrderId) {
         success: (response) => {
             openOrderValidationModal(clientOrderId, response.validationTemplate);
         },
-        afterShown: (modal) => {
+        afterOpen: (modal) => {
             const cartContentStr = modal.element.find('[name="cart-content"]').val();
             const cartContent = cartContentStr && JSON.parse(cartContentStr);
 
@@ -212,7 +218,7 @@ function openOrderValidationModal(clientOrderId, modalContent = null) {
     Modal.load(content, {
         submit: Routing.generate(`client_order_validation`, {clientOrder: clientOrderId}),
         table: '#table-client-order',
-        afterShown: () => {
+        afterOpen: () => {
             const newUrl = URL.createRequestQuery({
                 action: 'validation',
                 'action-data': clientOrderId
@@ -287,16 +293,15 @@ function removeActionRequestInURL() {
     }
 }
 
-function onBoxTypeQuantityChange($quantity) {
-    const $row = $quantity.closest('.cart-box');
+function onBoxTypeQuantityChange($input) {
+    const $row = $input.closest('.cart-box');
     const unitPrice = $row.find('[name="unitPrice"]').val();
-    const $input = $quantity.siblings('input').first();
     const quantity = $input.val() > 0 ? $input.val() : 1;
     const $totalPrice = $row.find('.totalPrice');
     const totalPrice = unitPrice * quantity;
     const totalPriceStr = StringHelper.formatPrice(totalPrice);
-    $totalPrice.text(totalPriceStr+" €");
 
+    $totalPrice.text(totalPriceStr+" €");
 }
 
 function addBoxTypeModel($modal) {
@@ -336,8 +341,7 @@ function getTimeLine($modal, $clientOrder) {
 function addSelectedBoxTypeToCart($modal) {
     const $select2 = $modal.find('[name="boxType"]');
     const [typeBoxData] = $select2.select2('data');
-    if (typeBoxData
-        && !$modal.find(`.cart-container > [data-id=${typeBoxData.id}]`).exists()) {
+    if (typeBoxData && !$modal.find(`.cart-container > [data-id=${typeBoxData.id}]`).exists()) {
         addBoxTypeToCart($modal, typeBoxData, true);
     }
     $select2.val(null).trigger("change");
@@ -421,6 +425,8 @@ function updateInputValue($button) {
     } else if($button.hasClass('decrease') && value !== 1) {
         $input.val(value-1);
     }
+
+    $input.trigger(`change`);
 }
 
 function updateDeliveryFee(clientData, $date) {
@@ -450,9 +456,9 @@ function updateCrateNumberAverage($modal) {
             }
         })
         .toArray();
+
     if (clientId && cart && cart.length > 0) {
-        AJAX
-            .route('GET', 'get_crates_amount', {client: clientId, cart})
+        AJAX.route('GET', 'get_crates_amount', {client: clientId, cart})
             .json()
             .then(({cratesAmount}) => {
                 const $crateAmountLabel = $modal.find('.crates-amount-label');

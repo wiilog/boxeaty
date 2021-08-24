@@ -123,7 +123,7 @@ class UserRepository extends EntityRepository {
         return $this->createQueryBuilder("user")
             ->join("user.role", "role")
             ->leftJoin("user.groups", "groups")
-            ->where("role.receiveMailsNewAccounts = 1")
+            ->andWhere("role.receiveMailsNewAccounts = 1")
             ->andWhere("role.allowEditOwnGroupOnly = 0 OR :group MEMBER OF user.groups")
             ->andWhere("user.active = 1")
             ->setParameter("group", $group)
@@ -133,7 +133,7 @@ class UserRepository extends EntityRepository {
 
     public function findByUsernameOrEmail($search) {
         return $this->createQueryBuilder("user")
-            ->where("user.email LIKE :search OR user.username LIKE :search")
+            ->andWhere("user.email LIKE :search OR user.username LIKE :search")
             ->setParameter("search", $search)
             ->getQuery()
             ->getResult();
@@ -141,7 +141,7 @@ class UserRepository extends EntityRepository {
 
     public function findByApiKey($search) {
         return $this->createQueryBuilder("user")
-            ->where("user.apiKey = :search")
+            ->andWhere("user.apiKey = :search")
             ->setParameter("search", $search)
             ->getQuery()
             ->getOneOrNullResult();

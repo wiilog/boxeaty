@@ -2,6 +2,7 @@
 
 {% block filters %}
     {% include('filters/filter_items/date_item.html.twig') with {
+        required: true,
         from: date(),
         to: date('+19 days')
     } %}
@@ -11,6 +12,6 @@
 
 {% block buttons %}
     {{ parent() }}
-    <button class="secondary"><i class="icon fas fa-play-circle"></i> Lancement</button>
+    <button class="secondary start-delivery"><i class="icon fas fa-play-circle"></i> Lancement</button>
     <button class="secondary new-delivery-round"><i class="icon fas fa-user-friends"></i> Affectation tournée</button>
 {% endblock %}

@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Box;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
+use App\Entity\Depository;
 use App\Entity\Status;
 use DateTime;
 use App\Entity\User;
@@ -61,9 +62,9 @@ class ClientOrderRepository extends EntityRepository {
             ->getResult();
     }
 
-    public function createBetween(DateTime $from, DateTime $to, array $params): QueryBuilder {
+    public function createBetween(DateTime $from, DateTime $to, array $params = []): QueryBuilder {
         $qb = $this->createQueryBuilder("client_order")
-            ->where("client_order.expectedDelivery BETWEEN :from AND :to")
+            ->andWhere("client_order.expectedDelivery BETWEEN :from AND :to")
             ->orderBy("client_order.expectedDelivery", "ASC")
             ->setParameter("from", $from)
             ->setParameter("to", $to);
@@ -109,6 +110,27 @@ class ClientOrderRepository extends EntityRepository {
             ->leftJoin("delivery.status", "delivery_status")
             ->andWhere("delivery_status.code IN (:statuses)")
             ->setParameter("statuses", [Status::CODE_DELIVERY_PLANNED, Status::CODE_DELIVERY_PREPARING])
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return ClientOrder[]
+     */
+    public function findLaunchableOrders(Depository $depository, DateTime $from = null, DateTime $to = null): array {
+        if($from == null && $to == null){
+            $returnOrderBetween = $this->createQueryBuilder('client_order');
+        } else {
+            $returnOrderBetween = $this->createBetween($from, $to);
+        }
+
+        return $returnOrderBetween
+            ->leftJoin("client_order.preparation", "preparation")
+            ->leftJoin("client_order.client", "client")
+            ->leftJoin("client.clientOrderInformation", "client_order_information")
+            ->andWhere("client_order_information.depository = :depository ")
+            ->andWhere("preparation.id IS NULL")
+            ->setParameter("depository", $depository)
             ->getQuery()
             ->getResult();
     }
@@ -200,7 +222,7 @@ class ClientOrderRepository extends EntityRepository {
     public function getLastNumberByDate(string $date): ?string {
         $result = $this->createQueryBuilder('clientOrder')
             ->select('clientOrder.number')
-            ->where('clientOrder.number LIKE :value')
+            ->andWhere('clientOrder.number LIKE :value')
             ->orderBy('clientOrder.createdAt', 'DESC')
             ->addOrderBy('clientOrder.number', 'DESC')
             ->setParameter('value', ClientOrder::PREFIX_NUMBER . $date . '%')

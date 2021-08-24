@@ -2,9 +2,14 @@
 
 namespace App\Repository;
 
+use App\Entity\Box;
 use App\Entity\BoxType;
+use App\Entity\ClientOrder;
+use App\Entity\Depository;
+use App\Entity\Status;
 use App\Helper\FormatHelper;
 use App\Helper\QueryHelper;
+use App\Service\BoxStateService;
 use Doctrine\ORM\EntityRepository;
 use WiiCommon\Helper\Stream;
 
@@ -38,7 +43,7 @@ class BoxTypeRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "box_type");
 
         if ($search) {
-            $qb->where($qb->expr()->orX(
+            $qb->andWhere($qb->expr()->orX(
                 "box_type.name LIKE :search",
                 "box_type.price LIKE :search",
                 "box_type.capacity LIKE :search",
@@ -73,7 +78,7 @@ class BoxTypeRepository extends EntityRepository {
 
     public function getForSelect(?string $search, $extended = false) {
         $boxTypes = $this->createQueryBuilder("box_type")
-            ->where("box_type.name LIKE :search")
+            ->andWhere("box_type.name LIKE :search")
             ->andWhere("box_type.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
@@ -99,7 +104,7 @@ class BoxTypeRepository extends EntityRepository {
     }
     public function findStarterKit() {
         $boxType = $this->createQueryBuilder("box_type")
-            ->where("box_type.name LIKE :kit")
+            ->andWhere("box_type.name LIKE :kit")
             ->setParameter("kit", BoxType::STARTER_KIT)
             ->getQuery()
             ->getSingleResult();
@@ -120,6 +125,64 @@ class BoxTypeRepository extends EntityRepository {
                 ? $boxType->getImage()->getPath()
                 : null,
         ];
+    }
+
+    public function countAvailableInDepository(Depository $depository, array $types = []): array {
+        $totalAvailableResult = $this->createQueryBuilder("box_type")
+            ->select("box_type.id AS id")
+            ->addSelect("COUNT(box.id) AS count")
+            ->addSelect("owner.id AS client")
+            ->innerJoin("box_type.boxes", "box")
+            ->innerJoin("box.owner", "owner")
+            ->innerJoin("box.location", "location")
+            ->innerJoin("box.quality", "quality")
+            ->innerJoin("location.depository", "depository")
+            ->andWhere("box.state = :availableState")
+            ->andWhere("depository = :depository")
+            ->andWhere("quality.clean = 1")
+            ->andWhere("box_type IN (:types)")
+            ->setParameter("types", $types)
+            ->setParameter("availableState", BoxStateService::STATE_BOX_AVAILABLE)
+            ->setParameter("depository", $depository)
+            ->groupBy("box_type.id, owner.id")
+            ->getQuery()
+            ->getResult();
+
+        $totalAvailable = [];
+        foreach($totalAvailableResult as $line) {
+            $totalAvailable[$line["id"]][$line["client"] ?: "any"] = $line["count"];
+        }
+
+        $inUnpreparedResult = $this->createQueryBuilder("box_type")
+            ->select("box_type.id AS id")
+            ->addSelect("SUM(order_lines.quantity) AS count")
+            ->addSelect("order_client.id AS client")
+            ->join("box_type.clientOrderLines", "order_lines")
+            ->join("order_lines.clientOrder", "order")
+            ->join("order.client", "order_client")
+            ->join("order.status", "status")
+            ->andWhere("status.name = :status")
+            ->andWhere("box_type IN (:types)")
+            ->setParameter("types", $types)
+            ->setParameter("status", Status::CODE_ORDER_PLANNED)
+            ->groupBy("box_type.id, order_client.id")
+            ->getQuery()
+            ->getResult();
+
+        $inUnprepared = [];
+        foreach($inUnpreparedResult as $line) {
+            $owner = $line["client"] ?: Box::OWNER_BOXEATY;
+            $inUnprepared[$line["id"]][$owner] = $line["count"];
+        }
+
+        foreach($totalAvailable as $type => $clients) {
+            foreach($clients as $client => $count) {
+                dump($inUnprepared[$type][$client] ?? 0);
+                $totalAvailable[$type][$client] = $count - ($inUnprepared[$type][$client] ?? 0);
+            }
+        }
+
+        return $totalAvailable;
     }
 
 }

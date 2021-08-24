@@ -57,6 +57,16 @@
         background: $grey;
         border-color: $grey-order-finished;
         max-height: 140px;
+
+        &.available {
+            background: $pale-green;
+            border-color: $green;
+        }
+
+        &.unavailable {
+            background: $pale-red;
+            border-color: $red;
+        }
     }
 
     &.preparing {
@@ -135,7 +145,7 @@
 }
 
 .deliveries-container {
-    .available-deliveries, .assigned-deliveries {
+    .available-deliveries, .assigned-deliveries, .available-order-to-start, .orders-to-start {
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
@@ -150,12 +160,12 @@
         }
     }
 
-    .available-deliveries {
+    .available-deliveries, .available-order-to-start {
         height: 200px;
         flex-direction: row;
     }
 
-    .assigned-deliveries {
+    .assigned-deliveries, .orders-to-start {
         height: 200px;
         flex-direction: column;
     }

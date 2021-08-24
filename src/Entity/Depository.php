@@ -23,11 +23,6 @@ class Depository {
     private ?int $id = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=Client::class, mappedBy="depository")
-     */
-    private Collection $clients;
-
-    /**
      * @ORM\Column(type="string")
      */
     private ?string $name = null;
@@ -173,6 +168,9 @@ class Depository {
         return $this;
     }
 
+    /**
+     * @return Collection|Location[]
+     */
     public function getLocations(): Collection
     {
         return $this->locations;
@@ -206,46 +204,6 @@ class Depository {
         $this->locations = new ArrayCollection();
         foreach($locations as $location) {
             $this->addLocation($location);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Client[]
-     */
-    public function getClients(): Collection {
-        return $this->clients;
-    }
-
-    public function addClient(Client $client): self {
-        if (!$this->clients->contains($client)) {
-            $this->clients[] = $client;
-            $client->setDepository($this);
-        }
-
-        return $this;
-    }
-
-    public function removeClient(Client $client): self {
-        if ($this->clients->removeElement($client)) {
-            // set the owning side to null (unless already changed)
-            if ($client->getDepository() === $this) {
-                $client->setDepository(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function setClients(?array $clients): self {
-        foreach ($this->getClients()->toArray() as $client) {
-            $this->removeClient($client);
-        }
-
-        $this->clients = new ArrayCollection();
-        foreach ($clients as $client) {
-            $this->addClient($client);
         }
 
         return $this;

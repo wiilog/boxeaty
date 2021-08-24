@@ -36,7 +36,7 @@ class DepositoryRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "depository");
 
         if ($search) {
-            $qb->where($qb->expr()->orX(
+            $qb->andWhere($qb->expr()->orX(
                 "depository.name LIKE :search",
                 "depository.description LIKE :search",
             ))->setParameter("search", "%$search%");
@@ -78,7 +78,7 @@ class DepositoryRepository extends EntityRepository {
 
     public function getAll(): array {
         return $this->createQueryBuilder("depository")
-            ->where("depository.active = 1")
+            ->andWhere("depository.active = 1")
             ->getQuery()
             ->getArrayResult();
     }

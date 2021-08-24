@@ -137,11 +137,6 @@ class Client {
     private ?ClientOrderInformation $clientOrderInformation = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clients")
-     */
-    private ?Depository $depository = null;
-
-    /**
      * @ORM\OneToMany(targetEntity=CratePatternLine::class, mappedBy="client")
      */
     private Collection $cratePatternLines;
@@ -464,16 +459,6 @@ class Client {
     public function setClientOrderInformation(?ClientOrderInformation $clientOrderInformation): self
     {
         $this->clientOrderInformation = $clientOrderInformation;
-
-        return $this;
-    }
-
-    public function getDepository(): ?Depository {
-        return $this->depository;
-    }
-
-    public function setDepository(?Depository $depository): Client {
-        $this->depository = $depository;
 
         return $this;
     }
