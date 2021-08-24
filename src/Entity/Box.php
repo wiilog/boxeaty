@@ -13,6 +13,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Box {
 
+    public const OWNER_BOXEATY = "boxeaty";
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

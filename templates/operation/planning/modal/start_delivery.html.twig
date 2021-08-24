@@ -3,14 +3,17 @@
         <div class="modal-content">
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
             <h1>Lancement des livraisons</h1>
-            <div class="inline-form">
-                <label class="inline">
-                    Période de lancement {% include('filters/filter_items/date_item.html.twig')%}
+            <div class="row delivery-launching-filters">
+                <label class="col-8">
+                    Période de lancement
+                    {% include 'filters/filter_items/date_item.html.twig' %}
                 </label>
-                <label class="inline">
+                <label class="col-4">
                     Dépôt
-                    <select name="depository" data-s2="depository" class="data depository-filter"
-                            data-placeholder="Sélectionnez la mobilité" required>
+                    <select name="depository" data-s2="depository" class="data" data-placeholder="Sélectionnez un dépôt">
+                        {% if depository %}
+                            <option value="{{ depository.id }}">{{ depository.name }}</option>
+                        {% endif %}
                     </select>
                 </label>
             </div>
@@ -28,7 +31,7 @@
             </div>
             <div class="footer">
                 <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="submit" class="primary submit-button">Suivant</button>
+                <button type="submit" class="primary submit-button" disabled>Suivant</button>
             </div>
         </div>
     </div>

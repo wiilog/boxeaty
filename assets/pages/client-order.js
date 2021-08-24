@@ -117,7 +117,7 @@ $(function() {
 
     $document.on(`change`, `.cart-container input[name=quantity]`, function() {
         const $input = $(this);
-console.log("hello!!");
+
         onBoxTypeQuantityChange($input);
         updateCrateNumberAverage($input.closest(`.modal`));
     })

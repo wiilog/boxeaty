@@ -3,18 +3,17 @@
 
 namespace App\Controller\Operation;
 
+use App\Annotation\HasPermission;
 use App\Entity\Box;
 use App\Entity\BoxType;
 use App\Entity\ClientOrder;
-use App\Entity\ClientOrderLine;
 use App\Entity\Delivery;
 use App\Entity\DeliveryMethod;
 use App\Entity\DeliveryRound;
 use App\Entity\Depository;
-use App\Entity\Location;
+use App\Entity\GlobalSetting;
 use App\Entity\Preparation;
 use App\Entity\Role;
-use App\Annotation\HasPermission;
 use App\Entity\Status;
 use App\Entity\User;
 use App\Helper\Form;
@@ -23,7 +22,6 @@ use App\Service\DeliveryRoundService;
 use DateInterval;
 use DatePeriod;
 use DateTime;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -150,8 +148,8 @@ class PlanningController extends AbstractController {
      * @Route("/tournee", name="planning_delivery_round", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function deliveryRound(Request $request,
-                                  DeliveryRoundService $deliveryRoundService,
+    public function deliveryRound(Request                $request,
+                                  DeliveryRoundService   $deliveryRoundService,
                                   EntityManagerInterface $manager): Response {
         $form = Form::create();
 
@@ -179,7 +177,9 @@ class PlanningController extends AbstractController {
 
                 $delivery = (new Delivery())
                     ->setOrder($order)
-                    ->setStatus($deliveryStatus);
+                    ->setStatus($deliveryStatus)
+                    ->setTokens($order->getClient()->getClientOrderInformation()->getTokenAmount() ?? 0)
+                    ->setDistance(0.0);
 
                 $manager->persist($delivery);
             }
@@ -210,42 +210,52 @@ class PlanningController extends AbstractController {
     }
 
     /**
-     * @Route("/initialize_delivery/template", name="planning_delivery_initialize_template", options={"expose": true})
+     * @Route("/lancement-livraison/template", name="planning_delivery_initialize_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function initializeDeliveryTemplate(): Response {
+    public function initializeDeliveryTemplate(Request $request, EntityManagerInterface $manager): Response {
+        if ($request->query->get("depository")) {
+            $depository = $manager->find(Depository::class, $request->query->get("depository"));
+        }
+
         return $this->json([
             "submit" => $this->generateUrl("planning_delivery_launch"),
-            "template" => $this->renderView("operation/planning/modal/start_delivery.html.twig")
-        ]);
-    }
-
-    /**
-     * @Route("/depository_filter", name="planning_depository_filter", options={"expose": true})
-     * @HasPermission(Role::MANAGE_PLANNING)
-     */
-    public function depositoryFilter(EntityManagerInterface $manager, Request $request){
-        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
-        $depositoryRepository = $manager->getRepository(Depository::class);
-
-        $depository = $depositoryRepository->find($request->query->get("depository"));
-        $from = DateTime::createFromFormat("Y-m-d", $request->query->get("from"));
-        $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"));
-
-        if($from == false){
-            $from = null;
-        }
-        if($to == false){
-            $to = null;
-        }
-        return $this->json([
-            "template" => $this->renderView('operation/planning/modal/deliveries_container.html.twig', [
-                "orders" => $clientOrderRepository->findOrders($request->query->all(), $depository, $from, $to),
+            "template" => $this->renderView("operation/planning/modal/start_delivery.html.twig", [
+                "from" => $request->query->get("from"),
+                "to" => $request->query->get("to"),
+                "depository" => $depository ?? null,
             ])
         ]);
     }
+
     /**
-     * @Route("/launch_delivery", name="planning_delivery_launch", options={"expose": true})
+     * @Route("/lancement-livraison/filtre", name="planning_delivery_launching_filter", options={"expose": true})
+     * @HasPermission(Role::MANAGE_PLANNING)
+     */
+    public function depositoryFilter(EntityManagerInterface $manager, Request $request) {
+        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
+        $depositoryRepository = $manager->getRepository(Depository::class);
+
+        $depository = $request->query->get("depository") ? $depositoryRepository->find($request->query->get("depository")) : null;
+        $from = DateTime::createFromFormat("Y-m-d", $request->query->get("from"));
+        $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"));
+
+        if (!$depository || !$from || !$to) {
+            return $this->json([
+                "success" => false,
+            ]);
+        } else {
+            return $this->json([
+                "success" => true,
+                "template" => $this->renderView('operation/planning/modal/deliveries_container.html.twig', [
+                    "orders" => $clientOrderRepository->findLaunchableOrders($depository, $from, $to),
+                ])
+            ]);
+        }
+    }
+
+    /**
+     * @Route("/launch-delivery", name="planning_delivery_launch", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
     public function launchDelivery(Request $request, EntityManagerInterface $manager): Response {
@@ -255,30 +265,22 @@ class PlanningController extends AbstractController {
 
         $ordersToStart = $request->query->get('assignedForStart');
 
-        $statusDelivery = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_PREPARING]);
         $statusPreparation = $statusRepository->findOneBy(["code" => Status::CODE_PREPARATION_TO_PREPARE]);
         $statusOrder = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_TRANSIT]);
         $depository = $depositoryRepository->findOneBy(["id" => $request->query->get('depository')]);
 
-        foreach($ordersToStart as $orderToStart){
+        foreach ($ordersToStart as $orderToStart) {
             $order = $clientOrderRepository->find($orderToStart);
-            dump($order);
-            dump($orderToStart);
+            $order->setStatus($statusOrder);
+
             $preparation = (new Preparation())
                 ->setStatus($statusPreparation)
                 ->setDepository($depository)
                 ->setOrder($order);
-            $delivery = (new Delivery())
-                ->setStatus($statusDelivery)
-                ->setTokens((($order->getClient()->getClientOrderInformation() && $order->getClient()->getClientOrderInformation()->getTokenAmount()) ? $order->getClient()->getClientOrderInformation()->getTokenAmount() : 0))
-                ->setOrder($order)
-                ->setDistance(0.0);
 
             $manager->persist($preparation);
-            $manager->persist($delivery);
-
-            $order->setStatus($statusOrder);
         }
+
         $manager->flush();
 
         return $this->json([
@@ -291,7 +293,7 @@ class PlanningController extends AbstractController {
      * @Route("/delivery_start_check_stock", name="planning_delivery_start_check_stock", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function checkStock(Request $request, EntityManagerInterface $manager){
+    public function checkStock(Request $request, EntityManagerInterface $manager) {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
         $boxTypeRepository = $manager->getRepository(BoxType::class);
         $depositoryRepository = $manager->getRepository(Depository::class);
@@ -299,66 +301,97 @@ class PlanningController extends AbstractController {
         $ordersToStart = $request->query->get('assignedForStart');
         $depository = $depositoryRepository->find($request->query->get('depository'));
 
-        $orderedBoxTypes = [];
+        $globalSettingRepository = $manager->getRepository(GlobalSetting::class);
+        $defaultCrateTypeId = $globalSettingRepository->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
+        $defaultCrateType = !empty($defaultCrateTypeId)
+            ? $boxTypeRepository->find($defaultCrateTypeId)
+            : null;
 
-        foreach ($ordersToStart as $orderToStart){
+        // add all the ordered boxes (and crates) to the array
+        // with the total quantity
+        $orderedBoxTypes = [];
+        foreach ($ordersToStart as $orderToStart) {
             $order = $clientOrderRepository->find($orderToStart);
+            $closed = $order->getClient()->getClientOrderInformation()->isClosedParkOrder();
+            $owner = $closed ? $order->getClient()->getId() : Box::OWNER_BOXEATY;
+
+            if (!isset($orderedBoxTypes[$defaultCrateType->getId()][$owner])) {
+                $closed = $order->getClient()->getClientOrderInformation()->isClosedParkOrder();
+
+                $orderedBoxTypes[$defaultCrateType->getId()][$owner] = [
+                    'quantity' => 0,
+                    'orders' => [],
+                    'name' => $defaultCrateType->getName(),
+                    'client' => $closed ? $order->getClient()->getName() : "BoxEaty",
+                    'clientId' => $order->getClient()->getId(),
+                    'clientClosed' => $closed,
+                ];
+            }
+
+            $orderedBoxTypes[$defaultCrateType->getId()][$owner]['quantity'] += $order->getCratesAmount();
 
             $lines = $order->getLines();
-            foreach ($lines as $line){
+            foreach ($lines as $line) {
                 $boxType = $line->getBoxType();
+                if ($boxType->getName() === BoxType::STARTER_KIT) {
+                    continue;
+                }
+
                 $boxTypeId = $boxType->getId();
                 $quantity = $line->getQuantity();
-                if(!isset($orderedBoxTypes[$boxTypeId])){
-                    $orderedBoxTypes[$boxTypeId] = [
+                if (!isset($orderedBoxTypes[$boxTypeId][$owner])) {
+                    $orderedBoxTypes[$boxTypeId][$owner] = [
                         'quantity' => 0,
                         'orders' => [],
                         'name' => $boxType->getName(),
-                        'client' => $order->getClient()->getName()
+                        'client' => $closed ? $order->getClient()->getName() : "BoxEaty",
+                        'clientId' => $order->getClient()->getId(),
+                        'clientClosed' => $closed,
                     ];
                 }
-                $orderedBoxTypes[$boxTypeId]['quantity'] += $quantity;
-                if (!in_array($order->getId(), $orderedBoxTypes[$boxTypeId]['orders'])) {
-                    $orderedBoxTypes[$boxTypeId]['orders'][] = $order->getId();
+
+                $orderedBoxTypes[$boxTypeId][$owner]['quantity'] += $quantity;
+
+                if (!in_array($order->getId(), $orderedBoxTypes[$boxTypeId][$owner]['orders'])) {
+                    $orderedBoxTypes[$boxTypeId][$owner]['orders'][] = $order->getId();
                 }
             }
         }
 
-        $orderedBoxTypeIds = array_keys($orderedBoxTypes);
-
-        $availableBoxTypes = $boxTypeRepository->countAvailableByDepository($depository, $orderedBoxTypeIds);
+        $availableInDepository = $boxTypeRepository->countAvailableInDepository($depository, array_keys($orderedBoxTypes));
+        dump(array_keys($orderedBoxTypes), $availableInDepository);
 
         $unavailableOrders = [];
-        $availableBoxTypeData = [];
-        foreach ($orderedBoxTypes as $boxTypeId => $ordered) {
-            $orderedQuantity = $ordered['quantity'];
-            $orders = $ordered['orders'];
-            $name = $ordered['name'];
-            $client = $ordered['client'];
+        $availableBoxTypes = [];
+        foreach ($orderedBoxTypes as $boxTypeId => $clients) {
+            foreach ($clients as $client => $ordered) {
+                $orderedQuantity = $ordered['quantity'];
+                $orders = $ordered['orders'];
+                $name = $ordered['name'];
 
-            $availableQuantity = $availableBoxTypes[$boxTypeId];
+                $availableQuantity = $availableInDepository[$boxTypeId][$client] ?? 0;
 
-            if($orderedQuantity > $availableQuantity){
-                foreach ($orders as $order){
-                    if(!in_array($order, $unavailableOrders)){
-                        $unavailableOrders[] = $order;
+                if ($orderedQuantity > $availableQuantity) {
+                    foreach ($orders as $order) {
+                        if (!in_array($order, $unavailableOrders)) {
+                            $unavailableOrders[] = $order;
+                        }
                     }
                 }
-            }
 
-            $availableBoxTypeData[] = [
-                'name' => $name,
-                'orderedQuantity' => $orderedQuantity,
-                'availableQuantity' => $availableQuantity,
-                'client' => $client,
-            ];
+                $availableBoxTypes[] = [
+                    "name" => $name,
+                    "orderedQuantity" => $orderedQuantity,
+                    "availableQuantity" => $availableQuantity,
+                    "client" => $ordered["client"],
+                ];
+            }
         }
 
         return $this->json([
             "success" => true,
-            "availableBoxTypeData" => $availableBoxTypeData,
+            "availableBoxTypeData" => $availableBoxTypes,
             "unavailableOrders" => $unavailableOrders,
-            "message" => "Lancement effectuée avec succès",
         ]);
     }
 
@@ -366,7 +399,7 @@ class PlanningController extends AbstractController {
      * @Route("/delivery_validate_template", name="planning_delivery_validate_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function validateDeliveryTemplate(Request $request, EntityManagerInterface $manager){
+    public function validateDeliveryTemplate(Request $request, EntityManagerInterface $manager) {
         return $this->json([
             "submit" => $this->generateUrl("planning_delivery_validate", [
                 "order" => $request->query->get('order')
@@ -379,14 +412,16 @@ class PlanningController extends AbstractController {
      * @Route("/delivery_validate", name="planning_delivery_validate", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function validateDelivery(Request $request, EntityManagerInterface $manager){
+    public function validateDelivery(Request $request, EntityManagerInterface $manager) {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
         $statusRepository = $manager->getRepository(Status::class);
 
         $order = $clientOrderRepository->find($request->query->get('order'));
         $status = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_PLANNED]);
 
-        $order->setStatus($status);
+        $order->setStatus($status)
+            ->setValidator($this->getUser())
+            ->setValidatedAt(new DateTime());
 
         $manager->persist($order);
         $manager->flush();

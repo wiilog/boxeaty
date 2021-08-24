@@ -55,8 +55,7 @@ jQuery.fn.load = function(callback, size = `small`) {
 
     if($element.hasClass(LOADING_CLASS)) {
         Flash.add(Flash.WARNING, `Opération en cours d'exécution`, true);
-    }
-    else {
+    } else {
         $element.pushLoader(size);
 
         const result = callback();

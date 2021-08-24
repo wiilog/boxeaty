@@ -25,9 +25,9 @@ class ClientOrderRepository extends EntityRepository {
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
-    public function createBetween(DateTime $from, DateTime $to, array $params): QueryBuilder {
+    public function createBetween(DateTime $from, DateTime $to, array $params = []): QueryBuilder {
         $qb = $this->createQueryBuilder("client_order")
-            ->where("client_order.expectedDelivery BETWEEN :from AND :to")
+            ->andWhere("client_order.expectedDelivery BETWEEN :from AND :to")
             ->orderBy("client_order.expectedDelivery", "ASC")
             ->setParameter("from", $from)
             ->setParameter("to", $to);
@@ -80,18 +80,19 @@ class ClientOrderRepository extends EntityRepository {
     /**
      * @return ClientOrder[]
      */
-    public function findOrders(array $params, Depository $depository, DateTime $from = null, DateTime $to = null): array {
+    public function findLaunchableOrders(Depository $depository, DateTime $from = null, DateTime $to = null): array {
         if($from == null && $to == null){
             $returnOrderBetween = $this->createQueryBuilder('client_order');
         } else {
-            $returnOrderBetween = $this->createBetween($from, $to, $params);
+            $returnOrderBetween = $this->createBetween($from, $to);
         }
+
         return $returnOrderBetween
-            ->leftJoin("client_order.status", "client_order_status")
-            ->leftJoin("client_order.client", "client_order_client")
-            ->where("client_order_client.depository = :depository ")
-            ->andWhere("client_order_status.code IN (:status)")
-            ->setParameter("status", [Status::CODE_ORDER_PLANNED])
+            ->leftJoin("client_order.preparation", "preparation")
+            ->leftJoin("client_order.client", "client")
+            ->leftJoin("client.clientOrderInformation", "client_order_information")
+            ->andWhere("client_order_information.depository = :depository ")
+            ->andWhere("preparation.id IS NULL")
             ->setParameter("depository", $depository)
             ->getQuery()
             ->getResult();
@@ -184,7 +185,7 @@ class ClientOrderRepository extends EntityRepository {
     public function getLastNumberByDate(string $date): ?string {
         $result = $this->createQueryBuilder('clientOrder')
             ->select('clientOrder.number')
-            ->where('clientOrder.number LIKE :value')
+            ->andWhere('clientOrder.number LIKE :value')
             ->orderBy('clientOrder.createdAt', 'DESC')
             ->addOrderBy('clientOrder.number', 'DESC')
             ->setParameter('value', ClientOrder::PREFIX_NUMBER . $date . '%')

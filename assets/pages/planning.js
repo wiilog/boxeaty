@@ -1,5 +1,4 @@
 import {$document} from "../app";
-
 import $ from "jquery";
 import Modal, {clearForm, processForm} from "../modal";
 import sortable from '../../node_modules/html5sortable/dist/html5sortable.es.js';
@@ -9,12 +8,12 @@ import {findCoordinates, Map} from "../maps";
 import {DateTools} from "../util";
 import Flash from "../flash";
 
-$(document).ready(() => {
+$document.ready(() => {
     const $filters = $(`.filters`);
 
     DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 20);
 
-    $filters.find(`.filter`).click(function () {
+    $filters.find(`.filter`).click(function() {
         const params = processForm($filters).asObject();
         reLoadPlanning(params);
     });
@@ -34,13 +33,13 @@ $(document).ready(() => {
 
                     setupSortables(map);
 
-                    modal.element.find(`[name="method"]`).on(`change`, function () {
+                    modal.element.find(`[name="method"]`).on(`change`, function() {
                         const value = Number($(this).val());
 
-                        if (value) {
-                            for (const element of modal.element.find(`.order[data-id]`)) {
+                        if(value) {
+                            for(const element of modal.element.find(`.order[data-id]`)) {
                                 const $element = $(element);
-                                if ($element.data(`delivery-method`) === value) {
+                                if($element.data(`delivery-method`) === value) {
                                     $element.removeClass(`d-none`);
                                 } else {
                                     $element.addClass(`d-none`);
@@ -51,7 +50,7 @@ $(document).ready(() => {
                         }
                     });
 
-                    modal.element.find(`[name="cost"], [name="distance"]`).on(`keyup`, function () {
+                    modal.element.find(`[name="cost"], [name="distance"]`).on(`keyup`, function() {
                         updateAverage($(this));
                     });
                 },
@@ -64,34 +63,18 @@ $(document).ready(() => {
     $(`.start-delivery`).click(() => {
         const params = processForm($filters).asObject();
         const ajax = AJAX.route(`POST`, `planning_delivery_initialize_template`, params);
-        Modal.load(ajax,{
+
+        Modal.load(ajax, {
             processor: processSortables,
-            afterOpen: modal =>
-                modal.element.find('.depository-filter').on('change', function (){
-                    AJAX.route(`POST`, `planning_depository_filter`, {
-                        params,
-                        depository: modal.element.find('.depository-filter').val()
-                    })
-                        .json()
-                        .then((response) => {
-                            modal.element.find('.deliveries-container').empty()
-                            modal.element.find('.deliveries-container').removeClass('d-none');
-                            modal.element.find('.deliveries-container').append(response.template);
-                            const [availableOrderToStart] = sortable(`.available-order-to-start`, {
-                                acceptFrom: `.orders-to-start`,
-                            });
-                            $(availableOrderToStart).on('sortupdate', () => {
-                                onOrdersDragAndDropDone(modal);
-                            })
-                            const [orderToStart] = sortable(`.orders-to-start`, {
-                                acceptFrom: `.available-order-to-start`,
-                            });
-                            $(orderToStart).on('sortupdate', () => {
-                                onOrdersDragAndDropDone(modal);
-                            })
-                        });
+            afterOpen: modal => {
+                if(params.from && params.to && params.depository) {
+                    loadDeliveryLaunching(modal);
+                }
+
+                modal.element.find(`.data`).on(`change`, function() {
+                    loadDeliveryLaunching(modal);
                 })
-            ,
+            },
             submitter: (modal, $button) => {
                 const data = processForm(modal.element, $button);
 
@@ -101,35 +84,26 @@ $(document).ready(() => {
 
                 const $ordersToStartContainer = modal.element.find('.orders-to-start');
                 const $ordersToStart = $ordersToStartContainer.find('.order');
-                if ($ordersToStart.exists()) {
-                    if ($ordersToStartContainer.attr('data-stock-checked') != 1) {
+                if($ordersToStart.exists()) {
+                    if(!isStockValid(modal)) {
                         return checkStock(modal, {
                             depository,
                             assignedForStart: $ordersToStart
                                 .map((_, order) => $(order).data('id'))
                                 .toArray()
                         });
-                    }
-                    else {
+                    } else {
                         return AJAX.route(`POST`, `planning_delivery_launch`, {
-                                from: from,
-                                to: to,
-                                depository: depository,
-                                assignedForStart: $ordersToStart
-                                    .map((_, order) => $(order).data('id'))
-                                    .toArray()
-                            })
+                            from: from,
+                            to: to,
+                            depository: depository,
+                            assignedForStart: $ordersToStart
+                                .map((_, order) => $(order).data('id'))
+                                .toArray()
+                        })
                             .json()
-                            .then( () => {
-                                modal.close();
-                            });
+                            .then(() => modal.close());
                     }
-                }
-                else {
-                    // TODO message d'erreur
-                    return new Promise((resolve) => {
-                        resolve();
-                    });
                 }
             }
         });
@@ -140,8 +114,9 @@ $(document).ready(() => {
         const ajax = AJAX.route(`POST`, `planning_delivery_validate_template`, {
             order: $(this).closest(`.order`).data("id")
         });
+
         Modal.load(ajax, {
-            success: () => {
+            success: result => {
                 const params = processForm($filters).asObject();
                 reLoadPlanning(params);
             }
@@ -150,14 +125,6 @@ $(document).ready(() => {
 
     $(`.empty-filters`).click(function() {
         clearForm($(this).parents(`.filters`))
-    });
-
-    $document.arrive(`[data-sortable]`, function () {
-        const $this = $(this);
-
-        sortable(this, {
-            acceptFrom: $this.data(`accept-from`),
-        });
     });
 });
 
@@ -173,7 +140,7 @@ function initializePlanning() {
 
 function updateAverage($element) {
     const count = $(`.assigned-deliveries .order[data-id]`).length;
-    if (count) {
+    if(count) {
         $element.siblings(`.data-divided`).val(Math.round($element.val() / count * 100) / 100);
     }
 }
@@ -187,12 +154,12 @@ function setupSortables(map) {
         acceptFrom: `.deliveries`,
     })[0];
 
-    assigned.addEventListener(`sortupdate`, async function () {
+    assigned.addEventListener(`sortupdate`, async function() {
         updateAverage($(`[name="cost"]`));
         updateAverage($(`[name="distance"]`));
 
         const locations = [];
-        for (const element of $(assigned).find(`.order[data-id]`)) {
+        for(const element of $(assigned).find(`.order[data-id]`)) {
             const address = $(element).data(`address`);
             const coordinates = await findCoordinates(address);
 
@@ -203,7 +170,7 @@ function setupSortables(map) {
             });
         }
 
-        if (locations.length) {
+        if(locations.length) {
             map.setMarkers(locations)
         }
     });
@@ -211,10 +178,10 @@ function setupSortables(map) {
 
 function processSortables(data, errors, modal) {
     const $modal = modal.element;
-    const assigned = $modal.find(`.assigned-deliveries .order[data-id]:not(.d-none)`).map(function () {
+    const assigned = $modal.find(`.assigned-deliveries .order[data-id]:not(.d-none)`).map(function() {
         return $(this).data(`id`);
     });
-    const ready = $modal.find(`.orders-to-start .order[data-id]:not(.d-none)`).map(function () {
+    const ready = $modal.find(`.orders-to-start .order[data-id]:not(.d-none)`).map(function() {
         return $(this).data(`id`);
     });
 
@@ -237,7 +204,7 @@ async function changePlannedDate(detail) {
     sortable(`.column-content`, `enable`);
 }
 
-function reLoadPlanning(params){
+function reLoadPlanning(params) {
     AJAX.route(`GET`, `planning_content`, params)
         .json()
         .then(data => {
@@ -248,8 +215,7 @@ function reLoadPlanning(params){
 
 function checkStock(modal, data) {
     const $loading = modal.element.find('.modal-loading');
-    $loading
-        .addClass('d-flex')
+    $loading.addClass('d-flex')
         .removeClass('d-none');
 
     return AJAX
@@ -261,7 +227,7 @@ function checkStock(modal, data) {
             const $availableOrderToStartContainer = modal.element.find('.available-order-to-start');
             const $orderToStartContainer = modal.element.find('.orders-to-start');
 
-            for (const unavailableOrder of res.unavailableOrders) {
+            for(const unavailableOrder of res.unavailableOrders) {
                 modal.element.find(`.orders-to-start .order[data-id="${unavailableOrder}"]`).addClass('unavailable');
             }
             $availableOrderToStartContainer.find('.order')
@@ -275,16 +241,16 @@ function checkStock(modal, data) {
                 boxTypeData.orderedQuantity > boxTypeData.availableQuantity
             ));
 
-            if (quantityErrors.length > 0) {
+            if(quantityErrors.length > 0) {
                 $quantitiesInformationContainer.removeClass('d-none');
             } else {
                 $quantitiesInformationContainer.addClass('d-none');
             }
 
-            for (const boxTypeData of quantityErrors) {
+            for(const boxTypeData of quantityErrors) {
                 $quantitiesInformation.append(`
                     <label class="ml-2">
-                        Box Type ${boxTypeData.name} - Quantité commandée ${boxTypeData.orderedQuantity} - dispo en stock ${boxTypeData.availableQuantity} - propriété de ${boxTypeData.client}
+                        Box Type ${boxTypeData.name} - Quantité commandée ${boxTypeData.orderedQuantity} - dispo en stock ${boxTypeData.availableQuantity} en propriété ${boxTypeData.client}
                     </label>
                 `);
             }
@@ -298,20 +264,51 @@ function checkStock(modal, data) {
         });
 }
 
-function onOrdersDragAndDropDone(modal){
+function onOrdersDragAndDropDone(modal) {
     modal.element.find('.orders-to-start').attr('data-stock-checked', 0);
     updateSubmitButtonLabel(modal);
 }
 
-function updateSubmitButtonLabel(modal){
+function isStockValid(modal) {
+    return !modal.element.find('.orders-to-start')
+        .map((_, element) => $(element))
+        .map((_, $elem) => $elem.data(`stock-checked`) === `0` || $elem.find(`.order.unavailable`).exists())
+        .filter(valid => !valid)
+        .exists();
+}
+
+
+function updateSubmitButtonLabel(modal) {
     const $ordersToStartNotAvailable = modal.element.find('.orders-to-start .order:not(.available)');
     const $ordersToStart = modal.element.find('.orders-to-start .order');
-    const stockChecked = modal.element.find('.orders-to-start').attr('data-stock-checked');
     const $submitButton = modal.element.find('.submit-button');
 
-    if(!$ordersToStartNotAvailable.exists() && $ordersToStart.exists() && stockChecked == 1 ){
+    $submitButton.attr(`disabled`, !$ordersToStart.exists());
+
+    if(!$ordersToStartNotAvailable.exists() && $ordersToStart.exists() && isStockValid(modal)) {
         $submitButton.text("Valider le lancement");
     } else {
-        $submitButton.text("Suivant");
+        $submitButton.text("Vérifier le stock");
     }
+}
+
+function loadDeliveryLaunching(modal) {
+    const params = processForm(modal.element.find(`.delivery-launching-filters`)).asObject();
+    AJAX.route(`POST`, `planning_delivery_launching_filter`, params)
+        .json()
+        .then((response) => {
+            modal.element.find('.deliveries-container').empty()
+            modal.element.find('.deliveries-container').addClass('d-none');
+
+            if(response.success) {
+                modal.element.find('.deliveries-container').removeClass('d-none');
+                modal.element.find('.deliveries-container').append(response.template);
+                const sortables = sortable(`.deliveries`, {
+                    acceptFrom: `.deliveries`,
+                });
+                $(sortables).on('sortupdate', () => {
+                    onOrdersDragAndDropDone(modal);
+                })
+            }
+        });
 }

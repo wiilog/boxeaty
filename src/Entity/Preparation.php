@@ -24,7 +24,7 @@ class Preparation {
 
     /**
      * @ORM\OneToOne(targetEntity=ClientOrder::class, inversedBy="preparation")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, unique=true)
      */
     private ?ClientOrder $order = null;
 

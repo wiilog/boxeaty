@@ -17,7 +17,7 @@ class DeliveryRepository extends EntityRepository
     {
         $qb = $this->createQueryBuilder('delivery')
             ->select('sum(lines.quantity)')
-            ->where('delivery.deliveredAt BETWEEN :dateMin AND :dateMax')
+            ->andWhere('delivery.deliveredAt BETWEEN :dateMin AND :dateMax')
             ->andWhere('clientOrder.client =:client')
             ->join('delivery.order', 'clientOrder')
             ->join('clientOrder.lines', 'lines')

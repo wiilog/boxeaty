@@ -34,7 +34,7 @@ class QualityRepository extends EntityRepository
 
         }
         return $qb->select("quality.id AS id, quality.name AS text")
-            ->where("quality.name LIKE :search")
+            ->andWhere("quality.name LIKE :search")
             ->andWhere("quality.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
@@ -49,7 +49,7 @@ class QualityRepository extends EntityRepository
         $total = QueryHelper::count($qb, "quality");
 
         if ($search) {
-            $qb->where("quality.name LIKE :search")
+            $qb->andWhere("quality.name LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 

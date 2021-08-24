@@ -87,7 +87,7 @@ class BoxRepository extends EntityRepository {
 
         return $qb->select("COUNT(box.id)")
             ->leftJoin("box.location","location")
-            ->where("box.state = :available")
+            ->andWhere("box.state = :available")
             ->andWhere("location.active = 1")
             ->andWhere("location.type = 3")
             ->andWhere("location.depository = :depository")
@@ -245,7 +245,7 @@ class BoxRepository extends EntityRepository {
         $qb->select('box')
             ->leftJoin('box.quality', 'join_quality')
             ->leftJoin('box.type', 'join_type')
-            ->where('box.isBox = 1')
+            ->andWhere('box.isBox = 1')
             ->andWhere('box.state = :state')
             ->andWhere('join_type.id IN (:box_types)')
             ->andWhere('join_quality.clean = 1')

@@ -8,16 +8,22 @@
         {{ not unique_date ? 'Du' }}
         <input {{ required }} type="date" name="{{ name }}" class="data from"
                 {% if now is defined and now %}
-            min="{{ now }}"
+                    min="{{ now }}"
+                {% endif %}
+                {% if from is defined and from %}
+            value="{{ from | date('Y-m-d') }}"
                 {% endif %}>
     </label>
     {% if not unique_date %}
-        <label class="dates">
-            au
-            <input {{ required }} type="date" name="to" class="data"
-                    {% if now is defined and now %}
-                min="{{ now }}"
-                    {% endif %}>
+    <label class="dates">
+        au
+        <input {{ required }} type="date" name="to" class="data"
+            {% if now is defined and now %}
+                              min="{{ now }}"
+            {% endif %}
+            {% if to is defined and to %}
+                              value="{{ to | date('Y-m-d') }}"
+                {% endif %}>
         </label>
     {% endif %}
 </div>

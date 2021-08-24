@@ -114,7 +114,7 @@ class LocationRepository extends EntityRepository {
         }
 
         return $qb->select("location.id AS id, location.name AS text")
-            ->where("location.kiosk = 0")
+            ->andWhere("location.kiosk = 0")
             ->andWhere("location.name LIKE :search")
             ->andWhere("location.active = 1")
             ->setMaxResults(15)
@@ -133,7 +133,7 @@ class LocationRepository extends EntityRepository {
         }
 
         return $qb->select("kiosk.id AS id, kiosk.name AS text")
-            ->where("kiosk.kiosk = 1")
+            ->andWhere("kiosk.kiosk = 1")
             ->andWhere("kiosk.name LIKE :search")
             ->andWhere("kiosk.active = 1")
             ->setMaxResults(15)
@@ -163,7 +163,7 @@ class LocationRepository extends EntityRepository {
     public function getTotalDeposits(): int {
         return $this->createQueryBuilder("kiosk")
             ->select("SUM(kiosk.deposits)")
-            ->where("kiosk.kiosk = 1")
+            ->andWhere("kiosk.kiosk = 1")
             ->getQuery()
             ->getSingleScalarResult();
     }

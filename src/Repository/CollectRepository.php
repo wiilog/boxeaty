@@ -18,7 +18,7 @@ class CollectRepository extends EntityRepository {
     {
         $qb = $this->createQueryBuilder('collecte')
             ->select('sum(lines.quantity)')
-            ->where('collecte.collectedAt BETWEEN :dateMin AND :dateMax')
+            ->andWhere('collecte.collectedAt BETWEEN :dateMin AND :dateMax')
             ->andWhere('clientOrder.client =:client')
             ->join('collecte.order', 'clientOrder')
             ->join('clientOrder.lines', 'lines')

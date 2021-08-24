@@ -25,7 +25,7 @@ class GlobalSettingRepository extends EntityRepository {
         try {
             return $this->createQueryBuilder("setting")
                 ->select("setting.value")
-                ->where("setting.name = '$key'")
+                ->andWhere("setting.name = '$key'")
                 ->getQuery()
                 ->getSingleResult()["value"];
         } catch (NoResultException $ignored) {
@@ -40,7 +40,7 @@ class GlobalSettingRepository extends EntityRepository {
         try {
             return $this->createQueryBuilder("setting")
                 ->select("setting.name")
-                ->where("setting.name = '$setting' OR setting.name = '$emptyKiosk'")
+                ->andWhere("setting.name = '$setting' OR setting.name = '$emptyKiosk'")
                 ->andWhere("setting.value = :code")
                 ->setParameter("code", $code)
                 ->getQuery()
@@ -53,7 +53,7 @@ class GlobalSettingRepository extends EntityRepository {
     public function getMailer(): array {
         $configs = $this->createQueryBuilder("setting")
             ->select("setting.name, setting.value")
-            ->where("setting.name LIKE 'MAILER_%'")
+            ->andWhere("setting.name LIKE 'MAILER_%'")
             ->getQuery()
             ->getArrayResult();
 
