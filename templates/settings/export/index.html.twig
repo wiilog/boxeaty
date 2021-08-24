@@ -1,0 +1,85 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Paramétrage{% endblock %}
+{% block page %}Exports{% endblock %}
+
+
+{% block content %}
+    <div class="box exports">
+        <h1>
+            Liste des exports disponibles
+        </h1>
+        <div class="row">
+            <div class="col-12 col-xl-2">
+                <span class="fs-5">Export général</span>
+            </div>
+            <div class="col">
+                <div class="d-flex">
+                    <a href="{{ path('global_export') }}" class="primary">
+                        <i class="icon fas fa-download"></i>
+                        Export général au format CSV
+                    </a>
+                    <span data-toggle="tooltip"
+                          class="d-flex align-items-center ms-3"
+                          title="Comprend Box, Mouvements, Tickets-consigne, Emplacements, Groupes, Types de Box, Utilisateurs, Rôles et Qualités.">
+                        <i class="fas fa-question-circle"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-12 col-xl-2">
+                <span class="fs-5">Export des commandes</span>
+            </div>
+            <div class="col">
+                <div class="row">
+                    <div class="col-12">
+                        {% include('filters/filter_items/date_item.html.twig') %}
+                        <span class="error" style="color:red"></span>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <div class="d-flex">
+                            <button class="primary export-autonomous-management">
+                                <i class="icon fas fa-download"></i>
+                                Récurrent, AEM et Évènement
+                            </button>
+                            <span data-toggle="tooltip" class="d-flex align-items-center ms-3"
+                                  title="Données commandes pour le type de commande Assiette en main">
+                                <i class="fas fa-question-circle"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <div class="d-flex">
+                            <button class="primary export-one-time-service">
+                                <i class="icon fas fa-download"></i>
+                                Commandes à la carte
+                            </button>
+                            <span data-toggle="tooltip" class="d-flex align-items-center ms-3"
+                                  title="Données commandes pour le type de commande à la carte">
+                                <i class="fas fa-question-circle"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <div class="d-flex">
+                            <button class="primary export-trade-service">
+                                <i class="icon fas fa-download"></i>
+                                Commandes Négoce
+                            </button>
+                            <span data-toggle="tooltip"
+                                  class="d-flex align-items-center ms-3"
+                                  title="Données commandes pour le type Négoce">
+                                <i class="fas fa-question-circle"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('export') }}
+{% endblock %}

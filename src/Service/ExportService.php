@@ -82,6 +82,41 @@ class ExportService {
         "Actif",
     ];
 
+    public const CLIENT_ORDER_HEADER_AUTONOMOUS_MANAGEMENT = [
+        "Commande client",
+        "Type de Box",
+        "Box livrées",
+        "Jeton livrés",
+        "Box cassées",
+        "Coût unitaire",
+        "Moyen de paiement",
+        "Prix total des boxes",
+        "Nombre de passage en caisse",
+        "Nombre de consigne utilisées",
+        "Commande automatique"
+    ];
+
+    public const CLIENT_ORDER_HEADER_ONE_TIME = [
+        "Numéros de commande",
+        "Cout abonnement mensuel",
+        "Frais de livraison",
+        "Moyen de paiement",
+        "Prorata client",
+        "Nombre de jetons livrés",
+        "Nombre de caisse",
+        "Montant de la caisse",
+        "Commande automatic"
+    ];
+
+    public const CLIENT_ORDER_TRADE = [
+        "Numéros de commande",
+        "Type de Box",
+        "Tarif unitaire",
+        "Nombre de box",
+        "Frais de livraison",
+        "Commande automatic"
+    ];
+
     public const DEPOSIT_TICKET_HEADER = [
         "Date de création",
         "Lieu de création",

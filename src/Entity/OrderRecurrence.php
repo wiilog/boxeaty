@@ -18,6 +18,11 @@ class OrderRecurrence
     private $id;
 
     /**
+     * @ORM\Column(type="float")
+     */
+    private $monthlyPrice;
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $frequency;
@@ -55,6 +60,24 @@ class OrderRecurrence
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    /**
+     * @return float
+     */
+    public function getMonthlyPrice()
+    {
+        return $this->monthlyPrice;
+    }
+
+    /**
+     * @param float $monthlyPrice
+     * @return self
+     */
+    public function setMonthlyPrice($monthlyPrice): self
+    {
+        $this->monthlyPrice = $monthlyPrice;
+        return $this;
     }
 
     public function getFrequency(): ?int

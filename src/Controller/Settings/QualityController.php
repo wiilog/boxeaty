@@ -77,7 +77,8 @@ class QualityController extends AbstractController {
             $quality
                 ->setName($content->name)
                 ->setActive($content->active)
-                ->setClean($content->clean);
+                ->setClean($content->clean)
+                ->setBroken($content->broken);
 
             $manager->persist($quality);
             $manager->flush();
@@ -121,7 +122,8 @@ class QualityController extends AbstractController {
             $quality
                 ->setName($content->name)
                 ->setActive($content->active)
-                ->setClean($content->clean);;
+                ->setClean($content->clean)
+                ->setBroken($content->broken);
 
             $manager->flush();
 

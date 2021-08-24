@@ -11,7 +11,7 @@ class BoxStateService {
     public const STATE_BOX_OUT = 5;
     public const STATE_RECORD_PACKING = 6;
     public const STATE_RECORD_UNPACKING = 7;
-    public const STATE_RECORD_IDENTIFIED = 8;
+    public const STATE_BOX_IDENTIFIED = 8;
 
     public const BOX_STATES = [
         self::STATE_BOX_AVAILABLE => "Disponible",
@@ -19,7 +19,7 @@ class BoxStateService {
         self::STATE_BOX_CONSUMER => "Consommateur",
         self::STATE_BOX_CLIENT => "Client",
         self::STATE_BOX_OUT => "Sorti",
-        self::STATE_RECORD_IDENTIFIED => "Identifié"
+        self::STATE_BOX_IDENTIFIED => "Identifié"
     ];
 
     public const RECORD_STATES = [
@@ -28,9 +28,9 @@ class BoxStateService {
         self::STATE_BOX_CONSUMER => "Consommateur",
         self::STATE_BOX_CLIENT => "Client",
         self::STATE_BOX_OUT => "Sorti",
+        self::STATE_BOX_IDENTIFIED => "Identifié",
         self::STATE_RECORD_PACKING => "Conditionné",
         self::STATE_RECORD_UNPACKING => "Déconditionné",
-        self::STATE_RECORD_IDENTIFIED => "Identifié",
     ];
 
     public const LINKED_COLORS = [

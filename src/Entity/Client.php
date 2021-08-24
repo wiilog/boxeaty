@@ -32,6 +32,12 @@ class Client {
      */
     private ?int $id = null;
 
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private ?float $totalCrateTypePrice = null;
+
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
@@ -517,6 +523,24 @@ class Client {
     {
         $this->paymentModes = $paymentModes;
 
+        return $this;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getTotalCrateTypePrice(): ?float
+    {
+        return $this->totalCrateTypePrice;
+    }
+
+    /**
+     * @param float|null $totalCrateTypePrice
+     * @return self
+     */
+    public function setTotalCrateTypePrice(?float $totalCrateTypePrice): self
+    {
+        $this->totalCrateTypePrice = $totalCrateTypePrice;
         return $this;
     }
 

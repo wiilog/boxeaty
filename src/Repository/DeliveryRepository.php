@@ -31,4 +31,5 @@ class DeliveryRepository extends EntityRepository
             ->getSingleScalarResult();
         return $result ? intval($result) : 0;
     }
+
 }

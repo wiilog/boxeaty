@@ -7,8 +7,6 @@ use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
-use App\Entity\Collect;
-use App\Entity\Delivery;
 use App\Entity\DeliveryMethod;
 use App\Entity\GlobalSetting;
 use App\Entity\OrderType;
@@ -197,7 +195,6 @@ class ClientOrderController extends AbstractController {
             $statusRepository = $entityManager->getRepository(Status::class);
             $status = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE_CLIENT]);
             $history = $clientOrderService->updateClientOrderStatus($clientOrder, $status, $requester);
-
             $clientOrder
                 ->setNumber($number)
                 ->setCreatedAt($now)
