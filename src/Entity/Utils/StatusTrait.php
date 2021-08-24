@@ -17,7 +17,7 @@ trait StatusTrait {
         return $this->status;
     }
 
-    public function isOnStatusCode(string $code): bool {
+    public function hasStatusCode(string $code): bool {
         return (
             $this->getStatus()
             && $this->getStatus()->getCode() === $code

@@ -511,7 +511,7 @@ class ApiController extends AbstractController {
                     ->sum(),
                 "orders" => $round->getOrders()->map(fn(ClientOrder $order) => [
                     "id" => $order->getId(),
-                    "delivered" => $order->isOnStatusCode(Status::CODE_ORDER_FINISHED),
+                    "delivered" => $order->hasStatusCode(Status::CODE_ORDER_FINISHED),
                     "crate_amount" => $order->getPreparation() ? $order->getPreparation()->getLines()->count() : -1,
                     "token_amount" => $order->getTokensAmount(),
                     "preparation" => $order->getPreparation() ? [
@@ -702,7 +702,7 @@ class ApiController extends AbstractController {
                 ->setPhoto($photo);
 
             $unfinishedDeliveries = $deliveryRound->getOrders()
-                ->filter(fn(ClientOrder $order) => !$order->isOnStatusCode(Status::CODE_ORDER_FINISHED))
+                ->filter(fn(ClientOrder $order) => !$order->hasStatusCode(Status::CODE_ORDER_FINISHED))
                 ->count();
 
             if ($unfinishedDeliveries === 0) {
@@ -833,11 +833,11 @@ class ApiController extends AbstractController {
                                    ClientOrderService     $clientOrderService,
                                    Preparation            $preparation): Response {
         if ((
-                !$preparation->isOnStatusCode(Status::CODE_PREPARATION_TO_PREPARE)
-                && !$preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+                !$preparation->hasStatusCode(Status::CODE_PREPARATION_TO_PREPARE)
+                && !$preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
             )
             || (
-                $preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+                $preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
                 && $preparation->getOperator()
                 && $this->user !== $preparation->getOperator()
             )) {
@@ -883,7 +883,7 @@ class ApiController extends AbstractController {
         $statusRepository = $entityManager->getRepository(Status::class);
 
         if ($preparing) {
-            if ($preparation->isOnStatusCode(Status::CODE_PREPARATION_TO_PREPARE)) {
+            if ($preparation->hasStatusCode(Status::CODE_PREPARATION_TO_PREPARE)) {
                 $status = $statusRepository->findOneBy(['code' => Status::CODE_PREPARATION_PREPARING]);
 
                 $preparation
@@ -896,7 +896,7 @@ class ApiController extends AbstractController {
                     'message' => 'La préparation a été réservée'
                 ]);
             }
-            else if (!$preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+            else if (!$preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
                 || $this->user !== $preparation->getOperator()){
                 return $this->json([
                     'success' => false,
@@ -904,7 +904,7 @@ class ApiController extends AbstractController {
                 ]);
             }
             else {
-                // $preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+                // $preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
                 // AND $this->user === $preparation->getOperator()
                 return $this->json([
                     'success' => true
@@ -912,7 +912,7 @@ class ApiController extends AbstractController {
             }
 
         }
-        else if ($preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+        else if ($preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
                  && $this->user === $preparation->getOperator()) {
             $userRepository = $entityManager->getRepository(User::class);
 

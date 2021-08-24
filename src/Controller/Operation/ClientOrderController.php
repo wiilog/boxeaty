@@ -80,8 +80,8 @@ class ClientOrderController extends AbstractController {
                 "cartPrice" => $order->getTotalAmount(),
                 "type" => $order->getType(),
                 "expectedDelivery" => FormatHelper::dateMonth($order->getExpectedDelivery()),
-                "linkAction" => $order->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? 'validation' : 'show',
-                "linkLabel" => $order->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? 'Enregistrer la commande' : 'Voir les détails'
+                "linkAction" => $order->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? 'validation' : 'show',
+                "linkLabel" => $order->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? 'Enregistrer la commande' : 'Voir les détails'
             ])
             ->toArray();
 
@@ -120,7 +120,7 @@ class ClientOrderController extends AbstractController {
         /** @var User $requester */
         $requester = $this->getUser();
 
-        if (!$clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
+        if (!$clientOrder->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
             || $requester !== $clientOrder->getRequester()) {
             throw new NotFoundHttpException('La commande client est introuvable.');
         }
@@ -140,7 +140,7 @@ class ClientOrderController extends AbstractController {
                              EntityManagerInterface $entityManager,
                              ClientOrderService $clientOrderService): Response {
 
-        if ($clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)) {
+        if ($clientOrder->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)) {
             $statusRepository = $entityManager->getRepository(Status::class);
             $globalSettingRepository = $entityManager->getRepository(GlobalSetting::class);
 
@@ -267,7 +267,7 @@ class ClientOrderController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                'hideEditStatusButton' => $clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
+                'hideEditStatusButton' => $clientOrder->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
             ]);
         } else {
             return $form->errors();
@@ -317,7 +317,7 @@ class ClientOrderController extends AbstractController {
         /** @var User $requester */
         $requester = $this->getUser();
 
-        if (!$clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
+        if (!$clientOrder->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
             || $requester !== $clientOrder->getRequester()) {
             throw new NotFoundHttpException('La commande client est introuvable.');
         }
@@ -362,7 +362,7 @@ class ClientOrderController extends AbstractController {
         /** @var User $requester */
         $requester = $this->getUser();
 
-        if (!$clientOrder->isOnStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
+        if (!$clientOrder->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
             || $requester !== $clientOrder->getRequester()) {
             $form->addError('La commande client ne peut pas être modifiée.');
         }

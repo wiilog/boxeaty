@@ -18,7 +18,7 @@ class DeliveryRoundService {
         $prepared = Stream::from($orders)
             ->filter(fn(ClientOrder $order) => (
                 $order->getPreparation()
-                && $order->getPreparation()->isOnStatusCode(Status::CODE_PREPARATION_PREPARED)
+                && $order->getPreparation()->hasStatusCode(Status::CODE_PREPARATION_PREPARED)
             ))
             ->count();
 
