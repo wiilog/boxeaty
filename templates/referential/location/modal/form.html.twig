@@ -42,7 +42,7 @@
         <label>
             Capacité
             <input type="number" name="capacity" class="data" placeholder="Saisissez la capacité de la borne"
-                   value="{{ location.capacity }}" {{ location.kiosk ? 'required' : 'data-required' }} min="1"/>
+                   value="{{ location.capacity }}" {{ location.kiosk ? 'required' : 'data-was-required' }} min="1"/>
         </label>
     </div>
     <div class="col-12 kiosk-fields {{ not location.kiosk ? 'd-none' }}">

@@ -150,6 +150,11 @@ class Client {
      */
     private $paymentModes;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Collect::class, mappedBy="client")
+     */
+    private Collection $collects;
+
     public function __construct() {
         $this->users = new ArrayCollection();
         $this->locations = new ArrayCollection();
@@ -157,6 +162,7 @@ class Client {
         $this->boxes = new ArrayCollection();
         $this->depositTicketsClients = new ArrayCollection();
         $this->cratePatternLines = new ArrayCollection();
+        $this->collects = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -525,6 +531,45 @@ class Client {
     public function setPaymentModes(?string $paymentModes): self
     {
         $this->paymentModes = $paymentModes;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Collect[]
+     */
+    public function getCollects(): Collection {
+        return $this->collects;
+    }
+
+    public function addCollect(Collect $collect): self {
+        if (!$this->collects->contains($collect)) {
+            $this->collects[] = $collect;
+            $collect->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCollect(Collect $collect): self {
+        if ($this->collects->removeElement($collect)) {
+            if ($collect->getClient() === $this) {
+                $collect->setClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setCollects(?array $collects): self {
+        foreach($this->getCollects()->toArray() as $collect) {
+            $this->removeCollect($collect);
+        }
+
+        $this->collects = new ArrayCollection();
+        foreach($collects as $collect) {
+            $this->addCollect($collect);
+        }
 
         return $this;
     }

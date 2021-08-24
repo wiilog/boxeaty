@@ -4,10 +4,12 @@ namespace App\Controller\Referential;
 
 use App\Annotation\HasPermission;
 use App\Entity\Box;
+use App\Entity\BoxRecord;
 use App\Entity\Client;
 use App\Entity\Depository;
 use App\Entity\Location;
 use App\Entity\Role;
+use App\Entity\Status;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\LocationRepository;
@@ -19,31 +21,41 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use WiiCommon\Helper\Stream;
 
 /**
  * @Route("/referentiel/emplacements")
  */
-class LocationController extends AbstractController {
+class LocationController extends AbstractController
+{
 
     /**
      * @Route("/liste", name="locations_list")
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function list(Request $request, EntityManagerInterface $manager): Response {
-        $boxRepository = $manager->getRepository(Box::class);
-        $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0);
-        $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0);
-        $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1);
-        $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1);
+    public function list(Request $request, EntityManagerInterface $manager): Response
+    {
+        $params = json_decode($request->getContent(), true);
+        $filters = $params['filters'] ?? [];
+
+        if (isset($filters['depository'])) {
+            $depositoryId = $manager->find(Depository::class, $filters['depository'])->getId();
+            $boxRepository = $manager->getRepository(Box::class);
+
+            $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
+            $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0, $depositoryId);
+            $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1, $depositoryId);
+            $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1, $depositoryId);
+        }
 
         return $this->render("referential/location/index.html.twig", [
             "new_location" => new Location(),
             "initial_locations" => $this->api($request, $manager)->getContent(),
             "locations_order" => LocationRepository::DEFAULT_DATATABLE_ORDER,
-            "crateUnavailable" => $crateUnavailable,
-            "crateAvailable" => $crateAvailable,
-            "boxUnavailable" => $boxUnavailable,
-            "boxAvailable" => $boxAvailable,
+            "crateUnavailable" => $crateUnavailable ?? "--",
+            "crateAvailable" => $crateAvailable ?? "--",
+            "boxUnavailable" => $boxUnavailable ?? "--",
+            "boxAvailable" => $boxAvailable ?? "--",
         ]);
     }
 
@@ -79,10 +91,91 @@ class LocationController extends AbstractController {
             ];
         }
 
+        $params = json_decode($request->getContent(), true);
+        $filters = $params['filters'] ?? [];
+        $chartLabels = [];
+        $dataCustomerState = [];
+        $dataAvailableState = [];
+        $dataUnavailableState = [];
+        $dataOutState = [];
+
+        if (!empty($filters) && count($filters) == 3) {
+
+            $depositoryRepository = $manager->getRepository(Depository::class);
+            $filters = $params['filters'];
+            $depository = $depositoryRepository->find($filters['depository']);
+            $locationsId = Stream::from($depository->getLocations())
+                ->map(fn(Location $location) => $location->getId())
+                ->toArray();
+            $startDate = DateTime::createFromFormat("Y-m-d", $filters["from"]);
+            $endDate = DateTime::createFromFormat("Y-m-d", $filters["to"]);
+            $boxRecordRepository = $manager->getRepository(BoxRecord::class);
+
+            for ($i = clone $startDate; $i <= $endDate; $i->modify("+1 day")) {
+                $dateMin = clone $i;
+                $dateMax = clone $i;
+                $dateMin->setTime(0, 0, 0);
+                $dateMax->setTime(23, 59, 59);
+                $chartLabels[] = $i->format("d/m/Y");
+                $dataCustomerState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxStateService::STATE_BOX_CONSUMER, $locationsId);
+                $dataOutState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxStateService::STATE_BOX_OUT, $locationsId);
+                $dataUnavailableState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxStateService::STATE_BOX_UNAVAILABLE, $locationsId);
+                $dataAvailableState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxStateService::STATE_BOX_AVAILABLE, $locationsId);
+            }
+        }
+
+        $config = [
+            'type' => 'line',
+            'data' => [
+                'labels' => $chartLabels,
+                'datasets' => [
+                    [
+                        'label' => "Consommateur",
+                        'data' => $dataCustomerState,
+                        'backgroundColor' => ['#1E1F44'],
+                        'borderColor' => ['#1E1F44'],
+                    ],
+                    [
+                        'label' => "Sorti",
+                        'data' => $dataOutState,
+                        'backgroundColor' => ['#EB611B'],
+                        'borderColor' => ['#EB611B'],
+                    ],
+                    [
+                        'label' => "Indisponible",
+                        'data' => $dataUnavailableState,
+                        'backgroundColor' => ['#890620'],
+                        'borderColor' => ['#890620'],
+                    ],
+                    [
+                        'label' => "Disponible",
+                        'data' => $dataAvailableState,
+                        'backgroundColor' => ['#76B39D'],
+                        'borderColor' => ['#76B39D'],
+                    ],
+                ],
+            ],
+        ];
+        $depositoryRepository = $manager->getRepository(Depository::class);
+        $depository = isset($filters['depository']) ? $depositoryRepository->find($filters['depository']) : null;
+
+        if ($depository) {
+            $depositoryId = $depository->getId();
+            $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
+            $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0, $depositoryId);
+            $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1, $depositoryId);
+            $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1, $depositoryId);
+        }
+
         return $this->json([
+            "config" => !empty($config) ? json_encode($config) : [],
             "data" => $data,
             "recordsTotal" => $locations["total"],
-            "recordsFiltered" => $locations["filtered"]
+            "recordsFiltered" => $locations["filtered"],
+            "crateUnavailable" => $crateUnavailable ?? '--',
+            "crateAvailable" => $crateAvailable ?? '--',
+            "boxUnavailable" => $boxUnavailable ?? '--',
+            "boxAvailable" => $boxAvailable ?? '--',
         ]);
     }
 

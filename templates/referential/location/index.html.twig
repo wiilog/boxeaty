@@ -10,28 +10,32 @@
 {% block indicator %}
     <div class="box first-box indicator-container">
         <div class="row">
-            <div class="col-6"></div>
+            <div class="col-6">
+                <p class="body-text-semi-bold">Historique de stock</p>
+                <div id="historyChart"></div>
+            </div>
             <div class="data-location row col-6">
                 <p class="body-text-semi-bold">Données en temps réel</p>
                 <div class="col-3">
                     <i class="icon bxi bxi-crate"></i><br>
-                    <span class="green-text col-12">{{ crateAvailable }}<br></span>
-                    <span class="text-bold col-12">Caisse{{ crateAvailable > 1 ? 's' : '' }} en stock</span>
+                    <div class="green-text col-12 crate-available">{{ crateAvailable }}</div>
+                    <div class="text-bold col-12 plural">Caisse{{ crateAvailable > 1 ? 's' : '' }} en stock</div>
                 </div>
                 <div class="col-3">
                     <i class="icon bxi bxi-box"></i><br>
-                    <span class="green-text">{{ boxAvailable }}<br></span>
-                    <span class="text-bold">Box en stock</span>
+                    <div class="green-text box-available">{{ boxAvailable }}</div>
+                    <div class="text-bold">Box en stock</div>
                 </div>
                 <div class="col-3">
                     <i class="icon bxi bxi-grey-crate"></i><br>
-                    <span class="green-text">{{ crateUnavailable }}<br></span>
-                    <span class="text-bold">Caisse{{ crateUnavailable > 1 ? 's' : '' }} non disponible{{ crateUnavailable > 1 ? 's' : '' }}</span>
+                    <div class="green-text crate-unavailable">{{ crateUnavailable }}</div>
+                    <div class="text-bold plural">Caisse{{ crateUnavailable > 1 ? 's' : '' }} non
+                        disponible{{ crateUnavailable > 1 ? 's' : '' }}</div>
                 </div>
                 <div class="col-3">
                     <i class="icon bxi bxi-grey-box"></i><br>
-                    <span class="green-text">{{ boxUnavailable }}<br></span>
-                    <span class="text-bold">Box non disponible{{ boxUnavailable > 1 ? 's' : '' }}</span>
+                    <div class="green-text box-unavailable">{{ boxUnavailable }}</div>
+                    <div class="text-bold plural">Box non disponible{{ boxUnavailable > 1 ? 's' : '' }}</div>
                 </div>
             </div>
         </div>

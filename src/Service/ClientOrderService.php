@@ -120,6 +120,7 @@ class ClientOrderService
             $clientOrder = $clientOrder
                 ->setExpectedDelivery($expectedDelivery)
                 ->setClient($client)
+                ->setDepository($clientOrderInformation ? $clientOrderInformation->getDepository() : null)
                 ->setCratesAmountToCollect($content->cratesAmountToCollect ?? null)
                 ->setCollectRequired($collectRequired ?? false)
                 ->setDeliveryPrice($deliveryRate)

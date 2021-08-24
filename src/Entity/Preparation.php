@@ -35,7 +35,7 @@ class Preparation {
     private ?Depository $depository = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=PreparationLine::class, mappedBy="preparation")
+     * @ORM\OneToMany(targetEntity=PreparationLine::class, mappedBy="preparation", cascade={"remove"})
      */
     private ?Collection $lines;
 

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Entity\Utils\StatusTrait;
 use App\Repository\CollectRepository;
+use DateTime;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -16,6 +17,8 @@ class Collect {
 
     use StatusTrait;
 
+    public const PREFIX_NUMBER = 'C';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -24,14 +27,14 @@ class Collect {
     private ?int $id = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=ClientOrder::class, inversedBy="collect")
+     * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="pickedCollects")
      */
-    private ?ClientOrder $order = null;
+    private ?Location $pickLocation = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="collects")
+     * @ORM\ManyToOne(targetEntity=Location::class, inversedBy="droppedCollects")
      */
-    private ?Location $location = null;
+    private ?Location $dropLocation = null;
 
     /**
      * @ORM\Column(type="integer")
@@ -40,26 +43,72 @@ class Collect {
 
     /**
      * @ORM\ManyToMany(targetEntity=Box::class, inversedBy="collects")
+     * @ORM\JoinTable(name="collect_crate")
      */
-    private Collection $boxes;
+    private Collection $crates;
 
     /**
      * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
      */
-    private ?Attachment $signature = null;
+    private ?Attachment $pickSignature = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
      */
-    private ?Attachment $photo = null;
+    private ?Attachment $dropSignature = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
+     */
+    private ?Attachment $pickPhoto = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Attachment::class, cascade={"persist", "remove"})
+     */
+    private ?Attachment $dropPhoto = null;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=false)
+     */
+    private ?DateTime $createdAt = null;
+
+    /**
+     * @ORM\Column(type="string", length=255, unique=true)
+     */
+    private ?string $number = null;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private ?DateTimeInterface $collectedAt = null;
+    private ?DateTime $treatedAt = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="collects")
+     */
+    private ?User $operator = null;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private ?string $pickComment = null;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private ?string $dropComment = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="collects")
+     */
+    private ?Client $client = null;
+
+    /**
+     * @ORM\OneToOne(targetEntity=ClientOrder::class, inversedBy="collect")
+     */
+    private ?ClientOrder $clientOrder = null;
 
     public function __construct() {
-        $this->boxes = new ArrayCollection();
+        $this->crates = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -76,33 +125,33 @@ class Collect {
         return $this;
     }
 
-    public function getLocation(): ?Location {
-        return $this->location;
+    public function getPickLocation(): ?Location {
+        return $this->pickLocation;
     }
 
-    public function setLocation(?Location $location): self {
-        if ($this->location && $this->location !== $location) {
-            $this->location->removeCollect($this);
+    public function setPickLocation(?Location $pickLocation): self {
+        if ($this->pickLocation && $this->pickLocation !== $pickLocation) {
+            $this->pickLocation->removePickedCollect($this);
         }
-        $this->location = $location;
-        if ($location) {
-            $location->addCollect($this);
+        $this->pickLocation = $pickLocation;
+        if ($pickLocation) {
+            $pickLocation->addPickedCollect($this);
         }
 
         return $this;
     }
 
-    public function getOrder(): ?ClientOrder {
-        return $this->order;
+    public function getDropLocation(): ?Location {
+        return $this->dropLocation;
     }
 
-    public function setOrder(?ClientOrder $order): self {
-        if ($this->order && $this->order->getCollect() === $this) {
-            $this->order->setCollect(null);
+    public function setDropLocation(?Location $dropLocation): self {
+        if ($this->dropLocation && $this->dropLocation !== $dropLocation) {
+            $this->dropLocation->removeDroppedCollect($this);
         }
-        $this->order = $order;
-        if ($order) {
-            $order->setCollect($this);
+        $this->dropLocation = $dropLocation;
+        if ($dropLocation) {
+            $dropLocation->addDroppedCollect($this);
         }
 
         return $this;
@@ -111,68 +160,169 @@ class Collect {
     /**
      * @return Collection|Box[]
      */
-    public function getBoxes(): Collection {
-        return $this->boxes;
+    public function getCrates(): Collection {
+        return $this->crates;
     }
 
-    public function addBox(Box $box): self {
-        if (!$this->boxes->contains($box)) {
-            $this->boxes[] = $box;
-            $box->addCollect($this);
+    public function addCrate(Box $crate): self {
+        if (!$this->crates->contains($crate)) {
+            $this->crates[] = $crate;
+            $crate->addCollect($this);
         }
 
         return $this;
     }
 
-    public function removeBox(Box $box): self {
-        if ($this->boxes->removeElement($box)) {
-            $box->removeCollect($this);
+    public function removeCrate(Box $crate): self {
+        if ($this->crates->removeElement($crate)) {
+            $crate->removeCollect($this);
         }
 
         return $this;
     }
 
-    public function setBoxes(?array $boxes): self {
-        foreach ($this->getBoxes()->toArray() as $box) {
-            $this->removeBox($box);
+    public function setCrates(?array $crates): self {
+        foreach ($this->getCrates()->toArray() as $crate) {
+            $this->removeCrate($crate);
         }
 
-        $this->boxes = new ArrayCollection();
-        foreach ($boxes as $box) {
-            $this->addBox($box);
+        $this->crates = new ArrayCollection();
+        foreach ($crates as $crate) {
+            $this->addCrate($crate);
         }
 
         return $this;
     }
 
-    public function getSignature(): ?Attachment {
-        return $this->signature;
+    public function getPickSignature(): ?Attachment {
+        return $this->pickSignature;
     }
 
-    public function setSignature(?Attachment $signature): self {
-        $this->signature = $signature;
+    public function setPickSignature(?Attachment $signature): self {
+        $this->pickSignature = $signature;
         return $this;
     }
 
-    public function getPhoto(): ?Attachment {
-        return $this->photo;
+    public function getDropSignature(): ?Attachment {
+        return $this->dropSignature;
     }
 
-    public function setPhoto(?Attachment $photo): self {
-        $this->photo = $photo;
+    public function setDropSignature(?Attachment $signature): self {
+        $this->dropSignature = $signature;
         return $this;
     }
 
-    public function getCollectedAt(): ?DateTimeInterface
+    public function getPickPhoto(): ?Attachment {
+        return $this->pickPhoto;
+    }
+
+    public function setPickPhoto(?Attachment $photo): self {
+        $this->pickPhoto = $photo;
+        return $this;
+    }
+
+    public function getDropPhoto(): ?Attachment {
+        return $this->dropPhoto;
+    }
+
+    public function setDropPhoto(?Attachment $photo): self {
+        $this->dropPhoto = $photo;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?DateTimeInterface
     {
-        return $this->collectedAt;
+        return $this->createdAt;
     }
 
-    public function setCollectedAt(?DateTimeInterface $collectedAt): self
+    public function setCreatedAt(?DateTimeInterface $createdAt): self
     {
-        $this->collectedAt = $collectedAt;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
+    public function getNumber(): ?string
+    {
+        return $this->number;
+    }
+
+    public function setNumber(string $number): self
+    {
+        $this->number = $number;
+
+        return $this;
+    }
+
+    public function getTreatedAt(): ?\DateTimeInterface
+    {
+        return $this->treatedAt;
+    }
+
+    public function setTreatedAt(?\DateTimeInterface $treatedAt): self
+    {
+        $this->treatedAt = $treatedAt;
+
+        return $this;
+    }
+
+    public function getOperator(): ?User
+    {
+        return $this->operator;
+    }
+
+    public function setOperator(?User $operator): self
+    {
+        $this->operator = $operator;
+
+        return $this;
+    }
+
+    public function getPickComment(): ?string {
+        return $this->pickComment;
+    }
+
+    public function setPickComment(?string $comment): self {
+        $this->pickComment = $comment;
+
+        return $this;
+    }
+
+    public function getDropComment(): ?string {
+        return $this->dropComment;
+    }
+
+    public function setDropComment(?string $comment): self {
+        $this->dropComment = $comment;
+
+        return $this;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
+    public function setClient(?Client $client): self
+    {
+        $this->client = $client;
+
+        return $this;
+    }
+
+    public function getClientOrder(): ?ClientOrder {
+        return $this->clientOrder;
+    }
+
+    public function setClientOrder(?ClientOrder $clientOrder): self {
+        if ($this->clientOrder && $this->clientOrder->getCollect() === $this) {
+            $this->clientOrder->setCollect(null);
+        }
+        $this->clientOrder = $clientOrder;
+        if ($clientOrder) {
+            $clientOrder->setCollect($this);
+        }
+
+        return $this;
+    }
 }
