@@ -19,6 +19,7 @@ use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Service\DeliveryRoundService;
+use App\Service\Mailer;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -258,7 +259,7 @@ class PlanningController extends AbstractController {
      * @Route("/launch-delivery", name="planning_delivery_launch", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function launchDelivery(Request $request, EntityManagerInterface $manager): Response {
+    public function launchDelivery(Request $request, EntityManagerInterface $manager, Mailer $mailer): Response {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
         $statusRepository = $manager->getRepository(Status::class);
         $depositoryRepository = $manager->getRepository(Depository::class);
@@ -269,8 +270,8 @@ class PlanningController extends AbstractController {
         $statusOrder = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_TRANSIT]);
         $depository = $depositoryRepository->findOneBy(["id" => $request->query->get('depository')]);
 
-        foreach ($ordersToStart as $orderToStart) {
-            $order = $clientOrderRepository->find($orderToStart);
+        foreach ($ordersToStart as $order) {
+            $order = $clientOrderRepository->find($order);
             $order->setStatus($statusOrder);
 
             $preparation = (new Preparation())
@@ -279,6 +280,14 @@ class PlanningController extends AbstractController {
                 ->setOrder($order);
 
             $manager->persist($preparation);
+
+            if($order->getClient()->isMailNotificationOrderPreparation()) {
+                $content = $this->renderView("emails/mail_delivery_order.html.twig", [
+                    "order" => $order,
+                ]);
+
+                $mailer->send($order->getClient()->getContact(), "Commande en préparation", $content);
+            }
         }
 
         $manager->flush();

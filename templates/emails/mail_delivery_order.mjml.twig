@@ -10,7 +10,7 @@
         </mj-attributes>
         <mj-style>
             a {
-                text-decoration: none;
+            text-decoration: none;
             }
         </mj-style>
     </mj-head>
@@ -25,12 +25,13 @@
         </mj-section>
         <mj-section>
             <mj-column width="100%">
-                <mj-text mj-class="title">M {{ clientOrder.client.contact.name }}
-                </mj-text>
-                <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">Votre
-                    commande n° {{ clientOrder.number }} vient de passer en préparation et sera livrée
-                    le {{ clientOrder.expectedDelivery | date('d/m/Y') }}
-                    par {{ clientOrder.deliveryRound.deliverer.name }} en {{ clientOrder.deliveryMethod.name }} .
+                <mj-text mj-class="title">{{ order.client.contact.username }}</mj-text>
+                <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    Votre commande n° {{ order.number }} vient de passer en préparation et sera livrée
+                    le {{ order.expectedDelivery | date('d/m/Y') }}
+                    {% if order.deliveryRound %}
+                        par {{ order.deliveryRound.deliverer.username }} en {{ order.deliveryMethod.name }}
+                    {% endif %}
                 </mj-text>
                 <mj-text mj-class="title">
                     Récapitulatif de la commande :
@@ -38,31 +39,32 @@
             </mj-column>
         </mj-section>
 
-        {% for line in deliveryOrder %}
+        <mj-raw>{% for line in order.lines %}</mj-raw>
             <mj-section mj-class="border">
                 <mj-column width="10%">
-                    <mj-image width="100px"
-                              src="https://www.arturia.com/images/newsletters/2016-02-ispark/youtube.png"
-                              href="http://www.youtube.com/arturiaweb" alt="" padding-top="15px"></mj-image>
+                    {% if line.boxType.image %}
+                    <mj-image width="100px" src="{{ base64(line.boxType.image.path) }}"
+                              alt="Image du type de Box" padding-top="15px"></mj-image>
+                    {% endif %}
                 </mj-column>
                 <mj-column width="20%">
                     <mj-text align="center" mj-class="my-auto">
-                        {{ line.quantity  }} x {{ line.boxtype  }}
+                        {{ line.quantity }}
                     </mj-text>
                 </mj-column>
                 <mj-column width="15%">
                     <mj-text align="center" mj-class="my-auto">
-                        {{ line.type1234 }}
+                        Box de type {{ line.boxType.name }}
                     </mj-text>
                 </mj-column>
                 <mj-column width="25%">
                     <mj-text align="center" mj-class="my-auto">
-                        TU {{ line.prixunitairebox }}
+                        T.U {{ line.boxType.price }} €
                     </mj-text>
                 </mj-column>
                 <mj-column width="15%">
                     <mj-text align="center" mj-class="my-auto">
-                        {{ line.total }}
+                        {{ line.quantity * line.boxType.price }} €
                     </mj-text>
                 </mj-column>
             </mj-section>
@@ -71,25 +73,26 @@
                     <mj-divider border-width="1px" border-style="none" border-color="black" padding-top="20px"/>
                 </mj-column>
             </mj-section>
-        {% endfor %}
+        <mj-raw>{% endfor %}</mj-raw>
+
         <mj-section>
             <mj-column width="100%" mj-class="my-auto">
                 <mj-text font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
                     Adresse de livraison :
                 </mj-text>
                 <mj-text line-height="3" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
-                    {{ clientOrder.client.address }}
+                    {{ order.client.address }}
                 </mj-text>
             </mj-column>
         </mj-section>
         <mj-section>
             <mj-column>
                 <mj-text font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
-                    Retrouvez le suivi en temps réel sur votre espace client sur app.boxeaty.fr
+                    Retrouvez le suivi en temps réel sur votre espace client sur <a href="https://app.boxeaty.fr">app.boxeaty.fr</a>
                 </mj-text>
                 <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
-                    Une question, un besoin particulier ? Nous restons disponible au 05.05.05.05 ou par email à
-                    mail@mail.fr
+                    Une question, un besoin particulier ? Nous restons disponible au <a href="tel:05.05.05.05">05.05.05.05</a>
+                    ou par email à <a href="mailto:contact@boxeaty.fr">contact@boxeaty.fr</a>
                 </mj-text>
                 <mj-text line-height="3" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
                     Cordialement

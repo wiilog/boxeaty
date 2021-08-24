@@ -7,7 +7,7 @@
 
 {% macro order_link(order, show_links) %}
     {% if show_links %}
-        <a href="{{ path('client_orders_list', {order: 1}) }}">Voir la commande</a>
+        <a href="{{ path('client_orders_list', {'action': 'show', 'action-data': order.id}) }}">Voir la commande</a>
     {% endif %}
 {% endmacro %}
 

@@ -155,10 +155,11 @@ class ClientOrderController extends AbstractController {
                 $autoValidationDelay = $clientOrder->getExpectedDelivery();
                 $autoValidationQuantity = $clientOrder->getBoxQuantity();
 
-                if ($autoValidationDelay > $dayLimit
-                    && $autoValidationQuantity <= $quantityLimit) {
+                if ($autoValidationDelay > $dayLimit && $autoValidationQuantity <= $quantityLimit) {
                     $statusCode = Status::CODE_ORDER_PLANNED;
                     $clientOrder->setAutomatic(true);
+                    $clientOrder->setValidatedAt(new DateTime());
+                    $clientOrder->setValidator($this->getUser());
                 }
             }
 
