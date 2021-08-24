@@ -227,14 +227,11 @@ function checkStock(modal, data) {
             const $availableOrderToStartContainer = modal.element.find('.available-order-to-start');
             const $orderToStartContainer = modal.element.find('.orders-to-start');
 
+            $availableOrderToStartContainer.find('.order').removeClass('available unavailable');
             for(const unavailableOrder of res.unavailableOrders) {
                 modal.element.find(`.orders-to-start .order[data-id="${unavailableOrder}"]`).addClass('unavailable');
             }
-            $availableOrderToStartContainer.find('.order')
-                .removeClass('available')
-                .removeClass('unavailable');
             $orderToStartContainer.find('.order:not(.unavailable)').addClass('available');
-            $orderToStartContainer.attr('data-stock-checked', 1);
             $quantitiesInformation.empty();
 
             const quantityErrors = res.availableBoxTypeData.filter((boxTypeData) => (
@@ -265,27 +262,23 @@ function checkStock(modal, data) {
 }
 
 function onOrdersDragAndDropDone(modal) {
-    modal.element.find('.orders-to-start').attr('data-stock-checked', 0);
     updateSubmitButtonLabel(modal);
 }
 
 function isStockValid(modal) {
-    return !modal.element.find('.orders-to-start')
-        .map((_, element) => $(element))
-        .map((_, $elem) => $elem.data(`stock-checked`) === `0` || $elem.find(`.order.unavailable`).exists())
-        .filter(valid => !valid)
-        .exists();
+    return modal.element.find(`.orders-to-start .order`).exists() &&
+        modal.element.find(`.orders-to-start .order.available`).count() ===
+        modal.element.find(`.orders-to-start .order`).count();
 }
 
 
 function updateSubmitButtonLabel(modal) {
-    const $ordersToStartNotAvailable = modal.element.find('.orders-to-start .order:not(.available)');
     const $ordersToStart = modal.element.find('.orders-to-start .order');
     const $submitButton = modal.element.find('.submit-button');
 
     $submitButton.attr(`disabled`, !$ordersToStart.exists());
-
-    if(!$ordersToStartNotAvailable.exists() && $ordersToStart.exists() && isStockValid(modal)) {
+    console.log(isStockValid(modal))
+    if($ordersToStart.exists() && isStockValid(modal)) {
         $submitButton.text("Valider le lancement");
     } else {
         $submitButton.text("Vérifier le stock");

@@ -57,8 +57,7 @@ class BoxTypeRepository extends EntityRepository {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("box_type.$column", $order["dir"]);
             }
-        }
-        else {
+        } else {
             foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("box_type.$column", $dir);
             }
@@ -86,7 +85,7 @@ class BoxTypeRepository extends EntityRepository {
             ->getResult();
 
         return Stream::from($boxTypes)
-            ->map(fn (BoxType $boxType) => [
+            ->map(fn(BoxType $boxType) => [
                 'id' => $boxType->getId(),
                 'text' => $extended
                     ? $boxType->getName() . ' - ' . ($boxType->getVolume()
@@ -102,6 +101,7 @@ class BoxTypeRepository extends EntityRepository {
             ])
             ->values();
     }
+
     public function findStarterKit() {
         $boxType = $this->createQueryBuilder("box_type")
             ->andWhere("box_type.name LIKE :kit")
@@ -110,9 +110,9 @@ class BoxTypeRepository extends EntityRepository {
             ->getSingleResult();
 
         $volumeLabel = (
-            $boxType->getVolume()
-                ? $boxType->getVolume() . 'm³'
-                : 'N/C'
+        $boxType->getVolume()
+            ? $boxType->getVolume() . 'm³'
+            : 'N/C'
         );
 
         return [
@@ -127,7 +127,7 @@ class BoxTypeRepository extends EntityRepository {
         ];
     }
 
-    public function countAvailableInDepository(Depository $depository, array $types = []): array {
+    public function countAvailableInDepository(Depository $depository, int $defaultCrateType, array $types = []): array {
         $totalAvailableResult = $this->createQueryBuilder("box_type")
             ->select("box_type.id AS id")
             ->addSelect("COUNT(box.id) AS count")
@@ -149,7 +149,7 @@ class BoxTypeRepository extends EntityRepository {
             ->getResult();
 
         $totalAvailable = [];
-        foreach($totalAvailableResult as $line) {
+        foreach ($totalAvailableResult as $line) {
             $totalAvailable[$line["id"]][$line["client"] ?: "any"] = $line["count"];
         }
 
@@ -161,7 +161,7 @@ class BoxTypeRepository extends EntityRepository {
             ->join("order_lines.clientOrder", "order")
             ->join("order.client", "order_client")
             ->join("order.status", "status")
-            ->andWhere("status.name = :status")
+            ->andWhere("status.code = :status")
             ->andWhere("box_type IN (:types)")
             ->setParameter("types", $types)
             ->setParameter("status", Status::CODE_ORDER_PLANNED)
@@ -169,15 +169,30 @@ class BoxTypeRepository extends EntityRepository {
             ->getQuery()
             ->getResult();
 
+        if (in_array($defaultCrateType, $types)) {
+            array_push($inUnpreparedResult, ...$this->getEntityManager()
+                ->createQueryBuilder()
+                ->from(ClientOrder::class, "client_order")
+                ->select("$defaultCrateType AS id")
+                ->addSelect("SUM(client_order.cratesAmount) AS count")
+                ->addSelect("client_order_client.id AS client")
+                ->join("client_order.client", "client_order_client")
+                ->join("client_order.status", "status")
+                ->andWhere("status.code = :status")
+                ->setParameter("status", Status::CODE_ORDER_PLANNED)
+                ->groupBy("client_order_client.id")
+                ->getQuery()
+                ->getResult());
+        }
+
         $inUnprepared = [];
-        foreach($inUnpreparedResult as $line) {
+        foreach ($inUnpreparedResult as $line) {
             $owner = $line["client"] ?: Box::OWNER_BOXEATY;
             $inUnprepared[$line["id"]][$owner] = $line["count"];
         }
-
-        foreach($totalAvailable as $type => $clients) {
-            foreach($clients as $client => $count) {
-                dump($inUnprepared[$type][$client] ?? 0);
+        dump($totalAvailable, $inUnprepared);
+        foreach ($totalAvailable as $type => $clients) {
+            foreach ($clients as $client => $count) {
                 $totalAvailable[$type][$client] = $count - ($inUnprepared[$type][$client] ?? 0);
             }
         }

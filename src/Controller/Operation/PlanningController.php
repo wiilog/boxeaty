@@ -314,7 +314,7 @@ class PlanningController extends AbstractController {
             $order = $clientOrderRepository->find($orderToStart);
             $closed = $order->getClient()->getClientOrderInformation()->isClosedParkOrder();
             $owner = $closed ? $order->getClient()->getId() : Box::OWNER_BOXEATY;
-
+dump($defaultCrateType->getId());
             if (!isset($orderedBoxTypes[$defaultCrateType->getId()][$owner])) {
                 $closed = $order->getClient()->getClientOrderInformation()->isClosedParkOrder();
 
@@ -358,8 +358,7 @@ class PlanningController extends AbstractController {
             }
         }
 
-        $availableInDepository = $boxTypeRepository->countAvailableInDepository($depository, array_keys($orderedBoxTypes));
-        dump(array_keys($orderedBoxTypes), $availableInDepository);
+        $availableInDepository = $boxTypeRepository->countAvailableInDepository($depository, $defaultCrateTypeId, array_keys($orderedBoxTypes));
 
         $unavailableOrders = [];
         $availableBoxTypes = [];

@@ -13,6 +13,15 @@ jQuery.fn.exists = function() {
     return this.length !== 0;
 }
 
+/**
+ * Count how many jQuery elements were found
+ *
+ * @returns number
+ */
+jQuery.fn.count = function() {
+    return this.length;
+}
+
 export const NO_GROUPING = 0;
 export const GROUP_EVERYTHING = 0;
 export const GROUP_WHEN_NEEDED = 0;
