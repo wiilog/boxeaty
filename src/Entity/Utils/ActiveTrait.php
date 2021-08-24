@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Utils;
 
 use Doctrine\ORM\Mapping as ORM;
 
-trait Active {
+trait ActiveTrait {
 
     /**
      * @ORM\Column(type="boolean")

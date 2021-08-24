@@ -1,15 +1,18 @@
 import Leaflet from "leaflet";
 import AJAX from "./ajax";
 
-const FIND_COORDINATES = `https://nominatim.openstreetmap.org/search?format=json&q=13%20rue%20du%208%20mai%201945`;
+const FIND_COORDINATES = `https://nominatim.openstreetmap.org/search`;
 
 export class Map {
+    id;
     map;
     locations = [];
 
-    static create(element) {
+    static create(id, options = this.DEFAULT_OPTIONS) {
         const map = new Map();
-        map.map = Leaflet.map(element).setView([46.467247, 2.960474], 5);
+        map.id = id;
+        map.map = Leaflet.map(id, options);
+        map.map.setView([46.467247, 2.960474], 5);
         Leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map.map);
 
         return map;
@@ -25,9 +28,7 @@ export class Map {
         this.map.addLayer(marker);
 
         if (location.title) {
-            location
-                .bindPopup(location.title)
-                .openPopup();
+            marker.bindPopup(location.title);
         }
 
         location.marker = marker;
@@ -63,9 +64,10 @@ export class Map {
             paddingTopLeft: [0, 30],
         });
     }
-}
 
-export async function createMap(element, markers) {
+    reinitialize() {
+        document.getElementById(this.id).innerHTML = `<div id="map"></div>`
+    }
 }
 
 export async function findCoordinates(address) {

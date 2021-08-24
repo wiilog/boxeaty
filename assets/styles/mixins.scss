@@ -59,7 +59,7 @@
             border-color: lighten($orange, 15);
         }
     } @else if $type == secondary {
-        background: $orange-lightest;
+        background: white;
         border-color: $orange-lightest;
         color: $orange;
 

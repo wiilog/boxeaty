@@ -51,6 +51,8 @@
     position: relative;
     min-height: 300px;
     margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
 
     img {
         position: absolute;

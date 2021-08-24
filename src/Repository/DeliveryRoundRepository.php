@@ -2,10 +2,12 @@
 
 namespace App\Repository;
 
+use App\Entity\Client;
 use App\Entity\DeliveryRound;
 use App\Entity\Status;
 use App\Entity\User;
 use Doctrine\ORM\EntityRepository;
+use DateTime;
 
 /**
  * @method DeliveryRound|null find($id, $lockMode = null, $lockVersion = null)
@@ -15,12 +17,11 @@ use Doctrine\ORM\EntityRepository;
  */
 class DeliveryRoundRepository extends EntityRepository {
 
-
     public function findAwaitingDeliverer(User $deliverer) {
         return $this->createQueryBuilder("delivery_round")
             ->join("delivery_round.status", "status")
             ->join("delivery_round.orders", "orders")
-            ->where("status.code IN (:status)")
+            ->andWhere("status.code IN (:status)")
             ->andWhere("orders.id IS NOT NULL")
             ->andWhere("delivery_round.deliverer = :deliverer")
             ->setParameter("status", [Status::CODE_ROUND_CREATED, Status::CODE_ROUND_AWAITING_DELIVERER])
@@ -29,5 +30,27 @@ class DeliveryRoundRepository extends EntityRepository {
             ->getResult();
     }
 
-
+    public function findDeliveryTotalDistance(
+        DateTime $from,
+        DateTime $to,
+        Client   $client,
+        array    $deliveryMethod)
+    {
+        return $this->createQueryBuilder("delivery_round")
+            ->select('delivery_round.distance')
+            ->leftJoin("delivery_round.orders", "client_orders")
+            ->leftJoin("client_orders.client", "client")
+            ->leftJoin("client_orders.delivery", "delivery")
+            ->leftJoin("delivery_round.deliveryMethod", "delivery_method")
+            ->andWhere("delivery.deliveredAt BETWEEN :from AND :to")
+            ->andWhere("client_orders.client = :client")
+            ->andWhere("delivery_method.type IN (:type)")
+            ->setParameter("from", $from)
+            ->setParameter("to", $to)
+            ->setParameter("client", $client)
+            ->setParameter("type", $deliveryMethod)
+            ->groupBy("delivery_round.id")
+            ->getQuery()
+            ->getResult();
+    }
 }

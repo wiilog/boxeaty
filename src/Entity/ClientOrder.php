@@ -2,16 +2,22 @@
 
 namespace App\Entity;
 
+use App\Entity\Utils\StatusTrait;
 use App\Repository\ClientOrderRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use WiiCommon\Helper\Stream;
 
 /**
  * @ORM\Entity(repositoryClass=ClientOrderRepository::class)
  */
 class ClientOrder {
+
+    use StatusTrait;
+
+    public const PREFIX_NUMBER = 'CO';
 
     /**
      * @ORM\Id
@@ -30,12 +36,6 @@ class ClientOrder {
      * @ORM\JoinColumn(nullable=false)
      */
     private ?OrderType $type = null;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Status::class)
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private ?Status $status = null;
 
     /**
      * @ORM\OneToMany(targetEntity=OrderStatusHistory::class, mappedBy="order", cascade={"persist", "remove"})
@@ -71,22 +71,17 @@ class ClientOrder {
     /**
      * @ORM\Column(type="boolean")
      */
-    private ?bool $shouldCreateCollect = null;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
     private ?bool $automatic = null;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private ?int $collectBoxNumber = null;
+    private ?int $cratesAmount = null;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="integer")
      */
-    private ?int $cratesAmount = null;
+    private ?int $tokensAmount = null;
 
     /**
      * @ORM\Column(type="decimal", precision=8, scale=2)
@@ -104,7 +99,7 @@ class ClientOrder {
     private ?User $validator = null;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private ?DateTime $validatedAt = null;
 
@@ -135,9 +130,24 @@ class ClientOrder {
     private ?Delivery $delivery = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=Collect::class, mappedBy="order", cascade={"persist", "remove"})
+     * @ORM\Column(type="integer", nullable="true")
+     */
+    private ?int $cratesAmountToCollect = null;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private bool $collectRequired = false;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Collect::class, mappedBy="clientOrder", cascade={"persist", "remove"})
      */
     private ?Collect $collect = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clientOrders")
+     */
+    private ?Depository $depository = null;
 
     public function __construct(){
         $this->lines = new ArrayCollection();
@@ -184,20 +194,36 @@ class ClientOrder {
         return $this;
     }
 
-    public function getStatus(): ?Status {
-        return $this->status;
-    }
-
-    public function setStatus(Status $status): self {
-        $this->status = $status;
-        return $this;
-    }
-
     /**
      * @return Collection|OrderStatusHistory[]
      */
     public function getOrderStatusHistory(): Collection {
         return $this->orderStatusHistory;
+    }
+
+    /**
+     * @return OrderStatusHistory[]
+     */
+    public function getEditableStatusHistory(): array {
+        $previousStatus = null;
+        $statuses = [];
+
+        $history = array_reverse($this->getOrderStatusHistory()->toArray());
+        foreach ($history as $status) {
+            $hierarchy = array_search($status->getStatus()->getCode(), Status::ORDER_STATUS_HIERARCHY);
+
+            if ($previousStatus !== null && $hierarchy > $previousStatus) {
+                break;
+            }
+
+            $statuses[] = $status;
+            $previousStatus = $hierarchy;
+        }
+
+        return Stream::from($statuses)
+            ->slice(1)
+            ->reverse()
+            ->toArray();
     }
 
     public function addOrderStatusHistory(OrderStatusHistory $orderStatusHistory): self {
@@ -250,16 +276,6 @@ class ClientOrder {
         return $this;
     }
 
-    public function getShouldCreateCollect(): ?bool {
-        return $this->shouldCreateCollect;
-    }
-
-    public function setShouldCreateCollect(bool $shouldCreateCollect): self {
-        $this->shouldCreateCollect = $shouldCreateCollect;
-
-        return $this;
-    }
-
     public function getAutomatic(): ?bool {
         return $this->automatic;
     }
@@ -270,22 +286,22 @@ class ClientOrder {
         return $this;
     }
 
-    public function getCollectBoxNumber(): ?int {
-        return $this->collectBoxNumber;
+    public function getCratesAmount(): ?int {
+        return $this->cratesAmount;
     }
 
-    public function setCollectBoxNumber(int $collectBoxNumber): self {
-        $this->collectBoxNumber = $collectBoxNumber;
+    public function setCratesAmount(int $cratesAmount): self {
+        $this->cratesAmount = $cratesAmount;
 
         return $this;
     }
 
-    public function getCratesAmount(): ?float {
-        return $this->cratesAmount;
+    public function getTokensAmount(): ?int {
+        return $this->tokensAmount;
     }
 
-    public function setCratesAmount(float $cratesAmount): self {
-        $this->cratesAmount = $cratesAmount;
+    public function setTokensAmount(int $tokensAmount): self {
+        $this->tokensAmount = $tokensAmount;
 
         return $this;
     }
@@ -348,7 +364,7 @@ class ClientOrder {
         return $this->comment;
     }
 
-    public function setComment(string $comment): self {
+    public function setComment(?string $comment): self {
         $this->comment = $comment;
 
         return $this;
@@ -381,22 +397,6 @@ class ClientOrder {
         $this->delivery = $delivery;
         if ($delivery) {
             $delivery->setOrder($this);
-        }
-
-        return $this;
-    }
-
-    public function getCollect(): ?Collect {
-        return $this->collect;
-    }
-
-    public function setCollect(?Collect $collect): self {
-        if ($this->collect && $this->collect->getOrder() === $this) {
-            $this->collect->setOrder(null);
-        }
-        $this->collect = $collect;
-        if ($collect) {
-            $collect->setOrder($this);
         }
 
         return $this;
@@ -452,6 +452,88 @@ class ClientOrder {
 
         foreach($lines as $clientOrderLine) {
             $this->addLine($clientOrderLine);
+        }
+
+        return $this;
+    }
+
+    public function getCratesAmountToCollect(): ?int {
+        return $this->cratesAmountToCollect;
+    }
+
+    public function setCratesAmountToCollect(?int $cratesAmountToCollect): self {
+        $this->cratesAmountToCollect = $cratesAmountToCollect;
+        return $this;
+    }
+
+    public function isCollectRequired(): bool {
+        return $this->collectRequired;
+    }
+
+    public function setCollectRequired(bool $collectRequired): self {
+        $this->collectRequired = $collectRequired;
+        return $this;
+    }
+
+    public function getTotalAmount(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getPrice() ?: 0)),
+                0
+            );
+    }
+
+    public function getBoxQuantity(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + $line->getQuantity(),
+                0
+            );
+    }
+
+    public function getTotalWeight(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getWeight() ?: 0)),
+                0
+            );
+    }
+
+    public function getTotalVolume(): float {
+        return Stream::from($this->lines)
+            ->reduce(
+                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getVolume() ?: 0)),
+                0
+            );
+    }
+
+    public function getCollect(): ?Collect {
+        return $this->collect;
+    }
+
+    public function setCollect(?Collect $collect): self {
+        if ($this->collect && $this->collect->getClientOrder() === $this) {
+            $this->collect->setClientOrder(null);
+        }
+        $this->collect = $collect;
+        if ($collect) {
+            $collect->setClientOrder($this);
+        }
+
+        return $this;
+    }
+
+    public function getDepository(): ?Depository {
+        return $this->depository;
+    }
+
+    public function setDepository(?Depository $depository): self {
+        if($this->depository && $this->depository !== $depository) {
+            $this->depository->removeClientOrder($this);
+        }
+        $this->depository = $depository;
+        if($depository) {
+            $depository->addClientOrder($this);
         }
 
         return $this;

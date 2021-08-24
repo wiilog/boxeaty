@@ -1,5 +1,5 @@
 parameters:
-  web_version: '0.4.3'
+  web_version: '1.0.2'
 
   permissions:
     Menu Paramétrage:
@@ -59,7 +59,7 @@ parameters:
           route: tracking_movements_list
         - name: Indicateurs
           permission: App\Entity\Role::VIEW_INDICATORS
-          #route: indicators
+          route: indicators_index
     - name: Opérations
       icon:
         type: custom
@@ -85,10 +85,10 @@ parameters:
         - name: Groupe
           route: groups_list
           permission: App\Entity\Role::MANAGE_GROUPS
-        - name: Emplacement
+        - name: Emplacement et stock
           route: locations_list
           permission: App\Entity\Role::MANAGE_LOCATIONS
-        - name: Type de Box
+        - name: Type de Box / Caisse
           route: box_types_list
           permission: App\Entity\Role::MANAGE_BOX_TYPES
         - name: Dépôt
@@ -114,5 +114,5 @@ parameters:
           route: imports_list
           permission: App\Entity\Role::MANAGE_IMPORTS
         - name: Exports
-          #route: exports
+          route: exports_index
           permission: App\Entity\Role::MANAGE_EXPORTS

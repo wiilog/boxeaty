@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Box;
+use App\Entity\Client;
 use App\Entity\ClientOrder;
+use App\Entity\Depository;
 use App\Entity\Status;
 use DateTime;
 use App\Entity\User;
@@ -23,9 +25,48 @@ class ClientOrderRepository extends EntityRepository {
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
-    public function createBetween(DateTime $from, DateTime $to, array $params): QueryBuilder {
+    public function findByType($type, $dateMin, $dateMax){
+        return $this->createQueryBuilder("client_order")
+            ->select('client_order.id as clientOrderId')
+            ->addSelect('client_order.automatic as automatic')
+            ->addSelect('client_order.number as clientOrderNumber')
+            ->addSelect('client_order.deliveryPrice as deliveryPrice')
+            ->addSelect('delivery.tokens as deliveryTokens')
+            ->addSelect('deliveryRound.cost as deliveryCost')
+            ->addSelect('lines.id as lineId')
+            ->addSelect('lines.customUnitPrice as customUnitPrice')
+            ->addSelect('lines.quantity as lineQuantity')
+            ->addSelect('boxType.id as boxTypeId')
+            ->addSelect('boxType.name as boxTypeName')
+            ->addSelect('boxType.price as boxTypePrice')
+            ->addSelect('client.id as clientId')
+            ->addSelect('client.prorateAmount as prorateAmount')
+            ->addSelect('client.paymentModes as paymentModes')
+            ->addSelect('client.totalCrateTypePrice as totalCrateTypePrice')
+            ->addSelect('orderRecurrence.monthlyPrice as monthlyPrice')
+            ->addSelect('orderRecurrence.crateAmount as crateAmount')
+            ->leftJoin('client_order.client', 'client')
+            ->leftJoin('client_order.deliveryRound', 'deliveryRound')
+            ->leftJoin('client_order.delivery', 'delivery')
+            ->leftJoin('client.clientOrderInformation', 'information')
+            ->leftJoin('information.orderRecurrence', 'orderRecurrence')
+            ->leftJoin('client_order.lines', 'lines')
+            ->leftJoin('client_order.type', 'type')
+            ->leftJoin('lines.boxType', 'boxType')
+            ->where('client_order.createdAt BETWEEN :dateMin AND :dateMax')
+            ->andWhere("type.code = :typeCode")
+            ->setParameters([
+                "typeCode" => $type,
+                'dateMin' => $dateMin,
+                'dateMax' => $dateMax,
+            ])
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function createBetween(DateTime $from, DateTime $to, array $params = []): QueryBuilder {
         $qb = $this->createQueryBuilder("client_order")
-            ->where("client_order.expectedDelivery BETWEEN :from AND :to")
+            ->andWhere("client_order.expectedDelivery BETWEEN :from AND :to")
             ->orderBy("client_order.expectedDelivery", "ASC")
             ->setParameter("from", $from)
             ->setParameter("to", $to);
@@ -42,6 +83,11 @@ class ClientOrderRepository extends EntityRepository {
                 ->setParameter("deliverer", $params["deliverer"]);
         }
 
+        if(isset($params["client"])) {
+            $qb ->andWhere("client_order.client = :client")
+                ->setParameter("client", $params["client"]);
+        }
+
         return $qb;
     }
 
@@ -52,7 +98,7 @@ class ClientOrderRepository extends EntityRepository {
         return $this->createBetween($from, $to, $params)
             ->leftJoin("client_order.status", "status")
             ->andWhere("status.code IN (:statuses)")
-            ->setParameter("statuses", [Status::ORDER_TO_VALIDATE, Status::ORDER_PLANNED, Status::ORDER_TRANSIT])
+            ->setParameter("statuses", [Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TRANSIT])
             ->getQuery()
             ->getResult();
     }
@@ -66,6 +112,27 @@ class ClientOrderRepository extends EntityRepository {
             ->leftJoin("delivery.status", "delivery_status")
             ->andWhere("delivery_status.code IN (:statuses)")
             ->setParameter("statuses", [Status::CODE_DELIVERY_PLANNED, Status::CODE_DELIVERY_PREPARING])
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return ClientOrder[]
+     */
+    public function findLaunchableOrders(Depository $depository, DateTime $from = null, DateTime $to = null): array {
+        if($from == null && $to == null){
+            $returnOrderBetween = $this->createQueryBuilder('client_order');
+        } else {
+            $returnOrderBetween = $this->createBetween($from, $to);
+        }
+
+        return $returnOrderBetween
+            ->leftJoin("client_order.preparation", "preparation")
+            ->leftJoin("client_order.client", "client")
+            ->leftJoin("client.clientOrderInformation", "client_order_information")
+            ->andWhere("client_order_information.depository = :depository ")
+            ->andWhere("preparation.id IS NULL")
+            ->setParameter("depository", $depository)
             ->getQuery()
             ->getResult();
     }
@@ -145,12 +212,52 @@ class ClientOrderRepository extends EntityRepository {
             ))
             ->andWhere('status.code IN (:inProgressStatuses)')
             ->setParameter(':crateOrBox', $crateOrBox)
-            ->setParameter(':inProgressStatuses', [Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TO_VALIDATE, Status::CODE_ORDER_TRANSIT]);
+            ->setParameter(':inProgressStatuses', [Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_TRANSIT]);
 
         $res = $queryBuilder
             ->getQuery()
             ->getResult();
 
         return $res[0] ?? null;
+    }
+
+    public function getLastNumberByDate(string $date): ?string {
+        $result = $this->createQueryBuilder('clientOrder')
+            ->select('clientOrder.number')
+            ->andWhere('clientOrder.number LIKE :value')
+            ->orderBy('clientOrder.createdAt', 'DESC')
+            ->addOrderBy('clientOrder.number', 'DESC')
+            ->setParameter('value', ClientOrder::PREFIX_NUMBER . $date . '%')
+            ->getQuery()
+            ->execute();
+        return $result ? $result[0]['number'] : null;
+    }
+
+    public function findQuantityDeliveredBetweenDateAndClient(DateTime $from,
+                                                              DateTime $to,
+                                                              Client $client): int {
+        $result = $this->createQueryBuilder("client_order")
+            ->select('SUM(lines.quantity)')
+            ->leftJoin("client_order.delivery", "delivery")
+            ->leftJoin('client_order.lines','lines')
+            ->andWhere("delivery.deliveredAt BETWEEN :from AND :to")
+            ->andWhere("client_order.client = :client")
+            ->setParameter("client", $client)
+            ->setParameter("from", $from)
+            ->setParameter("to", $to)
+            ->getQuery()
+            ->getSingleScalarResult();
+        return $result ? intval($result) : 0;
+    }
+
+    public function getTotalBox($clientOrder){
+        $result = $this->createQueryBuilder("clientOrder")
+            ->select('SUM(lines.quantity)')
+            ->leftJoin('clientOrder.lines','lines')
+            ->andWhere("clientOrder.id = :clientOrder")
+            ->setParameter("clientOrder", $clientOrder)
+            ->getQuery()
+            ->getSingleScalarResult();
+        return $result ? intval($result) : 0;
     }
 }

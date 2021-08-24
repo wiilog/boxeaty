@@ -31,6 +31,7 @@ class BoxTypeController extends AbstractController {
         $settingsRepository = $manager->getRepository(GlobalSetting::class);
         $capacities = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_CAPACITIES));
         $shapes = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_SHAPES));
+        $boxTypeRepository = $manager->getRepository(BoxType::class);
 
         return $this->render("referential/box_type/index.html.twig", [
             "new_box_type" => new BoxType(),
@@ -38,6 +39,7 @@ class BoxTypeController extends AbstractController {
             "box_types_order" => BoxTypeRepository::DEFAULT_DATATABLE_ORDER,
             "capacities" => $capacities ?: [],
             "shapes" => $shapes ?: [],
+            "starterKit" => $boxTypeRepository->findStarterKit(),
         ]);
     }
 
@@ -85,7 +87,7 @@ class BoxTypeController extends AbstractController {
 
         $existing = $entityManager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
-            $form->addError("name", "Ce type de Box existe déjà");
+            $form->addError("name", "Ce type de Box / Caisse existe déjà");
         }
 
         if ($content->price < 0) {
@@ -99,7 +101,7 @@ class BoxTypeController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "message" => "Type de Box créé avec succès",
+                "message" => "Type de Box / Caisse créé avec succès",
             ]);
         } else {
             return $form->errors();
@@ -114,12 +116,13 @@ class BoxTypeController extends AbstractController {
         $settingsRepository = $manager->getRepository(GlobalSetting::class);
         $capacities = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_CAPACITIES));
         $shapes = explode(",", $settingsRepository->getValue(GlobalSetting::BOX_SHAPES));
-
+        $boxTypeRepository = $manager->getRepository(BoxType::class);
         return $this->json([
             "submit" => $this->generateUrl("box_type_edit", ["boxType" => $boxType->getId()]),
             "template" => $this->renderView("referential/box_type/modal/edit.html.twig", [
                 "box_type" => $boxType,
                 "capacities" => $capacities ?: [],
+                "starterKit" => $boxTypeRepository->findStarterKit(),
                 "shapes" => $shapes ?: [],
             ])
         ]);
@@ -140,7 +143,7 @@ class BoxTypeController extends AbstractController {
 
         $existing = $entityManager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $boxType) {
-            $form->addError("name", "Un autre type de Box avec ce nom existe déjà");
+            $form->addError("name", "Un autre type de Box / Caisse avec ce nom existe déjà");
         }
 
         if ($form->isValid()) {
@@ -149,7 +152,7 @@ class BoxTypeController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "message" => "Type de Box modifié avec succès",
+                "message" => "Type de Box / Caisse modifié avec succès",
             ]);
         } else {
             return $form->errors();

@@ -12,6 +12,7 @@ Encore
     .setPublicPath("/build")
 
     .addEntry("app", "./assets/app.js")
+    .addEntry("home", "./assets/pages/home.js")
     .addEntry("security", "./assets/pages/security.js")
     .addEntry("box_list", "./assets/pages/box-list.js")
     .addEntry("depository_list", "./assets/pages/depository-list.js")
@@ -32,6 +33,8 @@ Encore
     .addEntry("counter_order", "./assets/pages/counter-order.js")
     .addEntry("planning", "./assets/pages/planning.js")
     .addEntry("client_order", "./assets/pages/client-order.js")
+    .addEntry("export", "./assets/pages/export-index.js")
+    .addEntry("indicators","./assets/pages/indicators.js")
     .autoProvidejQuery()
 
     .addPlugin(new CopyPlugin({
@@ -52,6 +55,14 @@ Encore
                 from: "node_modules/qr-scanner/qr-scanner-worker.min.js.map",
                 to: "vendor/qr-scanner-worker.min.js.map"
             }
+        ]
+    }))
+    .addPlugin(new CopyPlugin({
+        patterns : [
+            {
+                from: "node_modules/chart.js/dist/chart.min.js",
+                to: "vendor/chart.js/chart.min.js"
+            },
         ]
     }))
 

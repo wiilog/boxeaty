@@ -4,6 +4,14 @@ export default class Flash {
     static WARNING = `warning`;
     static DANGER = `danger`;
 
+    static serverError(error = null) {
+        if(error) {
+            console.error(`%cServer error : %c${error}`, `font-weight:bold;`, ``);
+        }
+
+        Flash.add(Flash.DANGER, `Une erreur est survenue lors du traitement de votre requête par le serveur`);
+    }
+
     static add(type, message, unique = false) {
         const $alert = $(`
             <div class="alert alert-${type} alert-dismissible fade show" role="alert">

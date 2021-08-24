@@ -18,6 +18,7 @@ function deleteUpload(modal, name) {
 }
 
 export default class Modal {
+    static isTemplateLoading = false;
     id;
     element;
     config;
@@ -34,29 +35,10 @@ export default class Modal {
             return null;
         }
 
-        modal.setupFileUploader();
-
-        modal.element.on('hidden.bs.modal', () => {
-            modal.clear();
-
-            modal.element.find('[data-s2-initialized]').each(function() {
-                //close all select2 elements
-                $(this).select2('close');
-            });
-        });
-
-        modal.element.on('shown.bs.modal', () => {
-            if(config.afterOpen) {
-                config.afterOpen(modal);
+        initializeModal(modal, {
+            clearModal: () => {
+                modal.clear();
             }
-        });
-
-        modal.element.find(`button[type="submit"]`).click(function() {
-            const $button = $(this);
-
-            $button.load(function() {
-                return config.submitter ? config.submitter() : modal.handleSubmit($button)
-            });
         });
 
         return modal;
@@ -69,36 +51,32 @@ export default class Modal {
                 template: ajax,
             });
         } else {
-            ajax
-                .json()
-                .then((response) => {
-                    delete response.success;
+            if(!Modal.isTemplateLoading){
+                Modal.isTemplateLoading = true;
+                ajax
+                    .json()
+                    .then((response) => {
+                        Modal.isTemplateLoading = false;
+                        delete response.success;
 
-                    Modal.html({
-                        ...config,
-                        ...response,
+                        Modal.html({
+                            ...config,
+                            ...response,
+                        });
+                    })
+                    .catch(() => {
+                        Modal.isTemplateLoading = false;
+                        if (config.error) {
+                            config.error();
+                        }
                     });
-                })
-                .catch(() => {
-                    if (config.error) {
-                        config.error();
-                    }
-                });
+            }
         }
     }
 
     static html(config = {}) {
         const $modal = $(config.template);
         $modal.appendTo(`body`);
-        $modal.modal(`show`);
-
-        $modal.on('hidden.bs.modal', function() {
-            $(this).remove();
-
-            if(config.afterHidden) {
-                config.afterHidden(modal);
-            }
-        })
 
         const modal = new Modal();
         modal.id = Math.floor(Math.random() * 1000000);
@@ -108,16 +86,13 @@ export default class Modal {
             ajax: AJAX.url(`POST`, config.submit),
         };
 
-        modal.setupFileUploader();
-
-        if(config.afterOpen) {
-            config.afterOpen(modal);
-        }
-
-        $modal.find(`button[type="submit"]`).click(function() {
-            const $button = $(this);
-            $button.load(() => modal.handleSubmit($button));
+        initializeModal(modal, {
+            clearModal: ($modal) => {
+                $modal.remove();
+            }
         });
+
+        modal.element.modal(`show`);
 
         return modal;
     }
@@ -231,7 +206,7 @@ export default class Modal {
                     }
 
                     if(result.success && this.config.success) {
-                        this.config.success(result);
+                        this.config.success(result, this);
                     }
                 });
         } else {
@@ -299,7 +274,12 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
         let $input = $(input);
 
         if($input.attr(`type`) === `radio`) {
-            $input = $parent.find(`input[type="radio"][name="${input.name}"]:checked`);
+            const $checked = $parent.find(`input[type="radio"][name="${input.name}"]:checked`);
+            if($checked.exists()) {
+                $input = $checked;
+            } else {
+                $input = $parent.find(`input[type="radio"][name="${input.name}"]`);
+            }
         } else if($input.attr(`type`) === `number`) {
             let val = parseInt($input.val());
             let min = parseInt($input.attr('min'));
@@ -345,14 +325,21 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
             }
         }
 
-        if($input.is(`[required]`) && !$input.val()) {
-            if(!(modal && $input.is(`[type="file"]`))
-                || !uploads[modal.id]
-                || !uploads[modal.id][$input.attr(`name`)]) {
+        if($input.is(`[required]`) || $input.is(`[data-required]`)) {
+            if(([`radio`, `checkbox`].includes($input.attr(`type`)) && !$input.is(`:checked`))) {
                 errors.push({
-                    elements: [$input],
-                    message: `Ce champ est requis`,
+                    global: true,
+                    message: `Vous devez sélectionner au moins un élément`,
                 });
+            } else if($input.is(`[data-wysiwyg]`) && !$input.find(`.ql-editor`).text() || !$input.is(`[data-wysiwyg]`) && !$input.val()) {
+                if (!(modal && $input.is(`[type="file"]`))
+                    || !uploads[modal.id]
+                    || !uploads[modal.id][$input.attr(`name`)]) {
+                    errors.push({
+                        elements: [$input],
+                        message: `Ce champ est requis`,
+                    });
+                }
             }
         }
 
@@ -393,8 +380,13 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
     }
 
     // display errors under each field
+    $parent.find(`.global-error`).remove();
     for(const error of errors) {
-        error.elements.forEach($elem => showInvalid($elem, error.message));
+        if(error.global) {
+            showGlobalInvalid($parent, error.message);
+        } else {
+            error.elements.forEach($elem => showInvalid($elem, error.message));
+        }
     }
 
     return errors.length === 0 ? data : false;
@@ -442,14 +434,21 @@ export function handleErrors(element, result) {
 }
 
 function showInvalid($field, message) {
+    let $parent;
     if($field.is(`[data-s2-initialized]`)) {
         $field = $field.parent().find(`.select2-selection`);
     } else if($field.is(`[type="file"]`)) {
         $field = $field.parent();
     }
 
+    if($field.is(`[data-wysiwyg`)) {
+        $parent = $field.parent();
+    } else {
+        $parent = $field.parents(`label`);
+    }
+
     $field.addClass(`is-invalid`);
-    $field.parents(`label`).append(`<span class="invalid-feedback">${message}</span>`);
+    $parent.append(`<span class="invalid-feedback">${message}</span>`);
 }
 
 function showGlobalInvalid($modal, message) {
@@ -499,5 +498,44 @@ function showImage(file, $image) {
                 .attr('src', e.target.result);
         };
         reader.readAsDataURL(file);
+    }
+}
+
+function initializeModal(modal, {clearModal}) {
+    const {config} = modal;
+
+    modal.setupFileUploader();
+
+    if(config.afterOpen) {
+        modal.element.on('shown.bs.modal', () => {
+            config.afterOpen(modal);
+        });
+    }
+
+    modal.element.on('hidden.bs.modal', () => {
+        modal.element.find('[data-s2-initialized]').each(function() {
+            //close all select2 elements
+            $(this).select2('close');
+        });
+
+        clearModal(modal.element);
+
+        if(config.afterHidden) {
+            config.afterHidden(modal);
+        }
+    });
+
+    modal.element.find(`button[type="submit"]`).click(function() {
+        const $button = $(this);
+
+        $button.load(function() {
+            return config.submitter ? config.submitter(modal, $button) : modal.handleSubmit($button)
+        });
+    });
+
+    if(config.onPrevious) {
+        modal.element.find(`button[name="previous"]`).on('click', function () {
+            config.onPrevious(modal);
+        });
     }
 }

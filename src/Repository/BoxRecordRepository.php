@@ -30,7 +30,7 @@ class BoxRecordRepository extends EntityRepository {
             ->addSelect("record.state AS state")
             ->addSelect("client.name AS client_name")
             ->addSelect("user.username AS user_username")
-            ->where("record.trackingMovement = 1")
+            ->andWhere("record.trackingMovement = 1")
             ->leftJoin("record.location", "location")
             ->leftJoin("record.box", "box")
             ->leftJoin("record.quality", "quality")
@@ -44,7 +44,7 @@ class BoxRecordRepository extends EntityRepository {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("record")
-            ->where('record.trackingMovement = 1');
+            ->andWhere('record.trackingMovement = 1');
 
         QueryHelper::withCurrentGroup($qb, "record.client.group", $user);
 
@@ -117,7 +117,7 @@ class BoxRecordRepository extends EntityRepository {
 
     public function findPreviousTrackingMovement(Box $box): ?BoxRecord {
         return $this->createQueryBuilder("record")
-            ->where("record.box = :box")
+            ->andWhere("record.box = :box")
             ->andWhere("record.location IS NOT NULL")
             ->andWhere("record.trackingMovement = 1")
             ->orderBy("record.id", "DESC")
@@ -133,7 +133,7 @@ class BoxRecordRepository extends EntityRepository {
         $exprBuilder = $queryBuilder->expr();
 
         $queryBuilder
-            ->select("record.comment AS comment")
+            ->select("join_quality.name AS quality")
             ->addSelect("record.date AS date")
             ->addSelect("record.state AS state")
             ->addSelect("join_operator.username AS operator")
@@ -142,10 +142,11 @@ class BoxRecordRepository extends EntityRepository {
             ->addSelect("join_crate.number AS crateNumber")
             ->addSelect("join_crate.id AS crateId")
             ->leftJoin("record.user", "join_operator")
+            ->leftJoin("record.quality", "join_quality")
             ->leftJoin("record.location", "join_location")
             ->leftJoin("join_location.depository", "join_depository")
             ->leftJoin("record.crate", "join_crate")
-            ->where("record.box = :box")
+            ->andWhere("record.box = :box")
             ->andWhere($exprBuilder->orX(
                 "record.trackingMovement = 0",
                 "record.state IN (:packingStates)"
@@ -157,7 +158,13 @@ class BoxRecordRepository extends EntityRepository {
 
         if($search) {
             $queryBuilder
-                ->andWhere("record.comment LIKE :search")
+                ->andWhere($exprBuilder->orX(
+                    "join_quality.name LIKE :search",
+                    "join_location.name LIKE :search",
+                    "join_depository.name LIKE :search",
+                    "join_operator.username LIKE :search",
+                    "DATE(record.date) LIKE :search"
+                ))
                 ->setParameter("search", '%' . $search . '%');
         }
 
@@ -177,7 +184,7 @@ class BoxRecordRepository extends EntityRepository {
             && $trackingMovement->getId()
             && $trackingMovement->getDate()) {
             return $this->createQueryBuilder("record")
-                ->where("record.box = :box")
+                ->andWhere("record.box = :box")
                 ->andWhere("record.id != :movement")
                 ->andWhere("record.date > :date")
                 ->andWhere("record.trackingMovement = 1")
@@ -192,5 +199,19 @@ class BoxRecordRepository extends EntityRepository {
         }
 
         return null;
+    }
+
+    public function getNumberBoxByStateAndDate( \DateTime $startDate, \DateTime $endDate, int $state, array $clients) {
+        return $this->createQueryBuilder("record")
+            ->select("COUNT(DISTINCT record.id) AS result")
+            ->andWhere("record.date BETWEEN :dateMin AND :dateMax")
+            ->andWhere("record.state = :state")
+            ->andWhere("record.client in (:clients)")
+            ->setParameter("dateMin", $startDate)
+            ->setParameter("dateMax", $endDate)
+            ->setParameter("state", $state)
+            ->setParameter("clients", $clients)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }

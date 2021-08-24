@@ -34,7 +34,7 @@ class GroupRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "g");
 
         if ($search) {
-            $qb->where("g.name LIKE :search")
+            $qb->andWhere("g.name LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 
@@ -73,7 +73,7 @@ class GroupRepository extends EntityRepository {
         } else {
             return $this->createQueryBuilder("g")
                 ->select("g.id AS id, g.name AS text")
-                ->where("g.name LIKE :search")
+                ->andWhere("g.name LIKE :search")
                 ->andWhere("g.active = 1")
                 ->setMaxResults(15)
                 ->setParameter("search", "%$search%")

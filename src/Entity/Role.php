@@ -6,6 +6,7 @@ use App\Repository\RoleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Utils\ActiveTrait;
 
 /**
  * @ORM\Entity(repositoryClass=RoleRepository::class)
@@ -56,7 +57,7 @@ class Role {
     public const SHOW_INDICATORS_ON_HOME = "SHOW_INDICATORS_ON_HOME";
     public const RECEIVE_MAILS_NEW_ACCOUNTS = "RECEIVE_MAILS_NEW_ACCOUNTS";
 
-    use Active;
+    use ActiveTrait;
 
     /**
      * @ORM\Id

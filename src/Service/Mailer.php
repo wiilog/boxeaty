@@ -47,7 +47,7 @@ class Mailer {
         return $this->mailer;
     }
 
-    public function send($recipients, string $subjet, string $content) {
+    public function send($recipients, string $subject, string $content) {
         if (empty($recipients)) {
             return;
         }
@@ -88,7 +88,7 @@ class Mailer {
         $email = (new Email())
             ->from($this->address)
             ->to(...$emails)
-            ->subject($subjet)
+            ->subject($subject)
             ->html($content);
 
         $mailer->send($email);

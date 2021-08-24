@@ -3,20 +3,33 @@
 namespace App\Controller;
 
 use App\Annotation\Authenticated;
+use App\Entity\Attachment;
 use App\Entity\Box;
+use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
+use App\Entity\Collect;
 use App\Entity\DeliveryRound;
 use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
+use App\Entity\PreparationLine;
 use App\Entity\Quality;
 use App\Entity\Preparation;
+use App\Entity\Status;
 use App\Entity\User;
 use App\Helper\FormatHelper;
+use App\Service\AttachmentService;
 use App\Service\BoxStateService;
+use App\Service\ClientOrderService;
+use App\Service\DeliveryRoundService;
+use App\Service\PreparationService;
+use App\Service\UniqueNumberService;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use WiiCommon\Helper\Stream;
 use WiiCommon\Helper\StringHelper;
@@ -43,9 +56,18 @@ class ApiController extends AbstractController {
     }
 
     /**
-     * @Route("/kiosk/ping", name="api_kiosk_ping")
+     * @Route("/ping", name="api_ping")
      */
     public function ping(): Response {
+        return $this->json([
+            "success" => true,
+        ]);
+    }
+
+    /**
+     * @Route("/kiosk/ping", name="api_kiosk_ping")
+     */
+    public function kioskPing(): Response {
         return $this->json([
             "success" => true,
         ]);
@@ -57,7 +79,6 @@ class ApiController extends AbstractController {
     public function config(Request $request, EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
-        $client = null;
         if (isset($content->id)) {
             $kiosk = $manager->getRepository(Location::class)->find($content->id);
 
@@ -490,14 +511,29 @@ class ApiController extends AbstractController {
                     ->sum(),
                 "orders" => $round->getOrders()->map(fn(ClientOrder $order) => [
                     "id" => $order->getId(),
-                    "client" => FormatHelper::named($order->getClient()),
-                    "lines" => $order->getLines()->map(fn(ClientOrderLine $line) => [
-                        "box_type" => [
-                            "id" => $line->getBoxType()->getId(),
-                            "name" => $line->getBoxType()->getName(),
-                        ],
-                        "quantity" => $line->getQuantity(),
-                    ])
+                    "delivered" => $order->isOnStatusCode(Status::CODE_ORDER_FINISHED),
+                    "crate_amount" => $order->getPreparation() ? $order->getPreparation()->getLines()->count() : -1,
+                    "token_amount" => $order->getTokensAmount(),
+                    "preparation" => $order->getPreparation() ? [
+                        "id" => $order->getPreparation()->getId(),
+                        "depository" => FormatHelper::named($order->getPreparation()->getDepository()),
+                        "lines" => $order->getPreparation()->getLines()->map(fn(PreparationLine $line) => [
+                            "crate" => $line->getCrate()->getNumber(),
+                            "type" => FormatHelper::named($line->getCrate()->getType()),
+                            "taken" => $line->isTaken(),
+                            "deposited" => $line->isDeposited(),
+                        ]),
+                    ] : null,
+                    "client" => [
+                        "id" => $order->getClient()->getId(),
+                        "name" => FormatHelper::named($order->getClient()),
+                        "address" => $order->getClient()->getAddress(),
+                        "contact" => FormatHelper::user($order->getClient()->getContact()),
+                        "phone" => $order->getClient()->getPhoneNumber(),
+                        "latitude" => $order->getClient()->getLatitude(),
+                        "longitude" => $order->getClient()->getLongitude(),
+                    ],
+                    "comment" => $order->getComment(),
                 ]),
                 "order" => $round->getOrder(),
             ])
@@ -506,7 +542,7 @@ class ApiController extends AbstractController {
 
         $result = [];
         foreach ($serialized as $round) {
-            if($round["expected_date"] < $now) {
+            if ($round["expected_date"] < $now) {
                 $result[$now->format("Y-m-d")][] = $round;
             } else {
                 $result[$round["expected_date"]->format("Y-m-d")][] = $round;
@@ -517,15 +553,210 @@ class ApiController extends AbstractController {
     }
 
     /**
+     * @Route("/mobile/deliveries/start", name="api_mobile_deliveries_start")
+     * @Authenticated()
+     */
+    public function deliveryStart(EntityManagerInterface $manager, Request $request, ClientOrderService $clientOrderService): Response {
+        $data = json_decode($request->getContent());
+        $order = $manager->getRepository(ClientOrder::class)->find($data->order);
+
+        if ($order) {
+            $statusRepository = $manager->getRepository(Status::class);
+
+            $orderTransitStatus = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TRANSIT]);
+            $history = $clientOrderService->updateClientOrderStatus($order, $orderTransitStatus, $this->getUser());
+            $manager->persist($history);
+
+            $order->getDelivery()->setStatus($statusRepository->findOneBy(['code' => Status::CODE_DELIVERY_TRANSIT]));
+
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+            ]);
+        }
+
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @Route("/mobile/deliveries/take", name="api_mobile_deliveries_take")
+     * @Authenticated()
+     */
+    public function deliveryTake(EntityManagerInterface $manager, Request $request, BoxRecordService $service): Response {
+        $data = json_decode($request->getContent());
+        $order = $manager->getRepository(ClientOrder::class)->find($data->order);
+        $crate = $manager->getRepository(Box::class)->findOneBy(["number" => $data->crate]);
+
+        if ($crate) {
+            $line = $order->getPreparation()
+                ->getLines()
+                ->filter(fn(PreparationLine $line) => $line->getCrate()->getNumber() === $crate->getNumber())
+                ->first();
+
+            $line->setTaken(true);
+
+            $previous = $crate->getLocation();
+            $location = $previous ? $previous->getDeporte() : null;
+
+            foreach (Stream::from([$crate], $crate->getContainedBoxes()) as $box) {
+                if ($location) {
+                    $box->setLocation($location);
+                }
+
+                [$tracking] = $service->generateBoxRecords($box, [
+                    "location" => $previous,
+                ], $this->user);
+
+                if ($tracking) {
+                    $manager->persist($tracking);
+                }
+            }
+
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+            ]);
+        }
+
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @Route("/mobile/deliveries/deposit", name="api_mobile_deliveries_deposit")
+     * @Authenticated()
+     */
+    public function deliveryDeposit(EntityManagerInterface $manager, Request $request, BoxRecordService $service): Response {
+        $data = json_decode($request->getContent());
+        $order = $manager->getRepository(ClientOrder::class)->find($data->order);
+        $crate = $manager->getRepository(Box::class)->findOneBy(["number" => $data->crate]);
+
+        if ($crate) {
+            $line = $order->getPreparation()
+                ->getLines()
+                ->filter(fn(PreparationLine $line) => $line->getCrate()->getNumber() === $crate->getNumber())
+                ->first();
+
+            $line->setDeposited(true);
+
+            $previous = $crate->getLocation();
+            $location = $order->getClient()->getLocations()
+                ->filter(fn(Location $location) => $location->getType() === Location::RECEPTION)
+                ->first();
+
+            foreach (Stream::from([$crate], $crate->getContainedBoxes()) as $box) {
+                if ($location) {
+                    $box->setLocation($location)
+                        ->setState(BoxStateService::STATE_BOX_CLIENT);
+                }
+
+                [$tracking] = $service->generateBoxRecords($box, [
+                    "location" => $previous,
+                ], $this->user);
+
+                if ($tracking) {
+                    $manager->persist($tracking);
+                }
+            }
+
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+            ]);
+        }
+
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @Route("/mobile/deliveries/finish", name="api_mobile_deliveries_finish")
+     * @Authenticated
+     */
+    public function finishDelivery(EntityManagerInterface $manager,
+                                   Request $request,
+                                   AttachmentService $attachmentService,
+                                   ClientOrderService $clientOrderService): Response {
+
+        $data = json_decode($request->getContent());
+        $order = $manager->getRepository(ClientOrder::class)->find($data->order);
+
+        if ($order) {
+            $deliveryRound = $order->getDeliveryRound();
+            $delivery = $order->getDelivery();
+
+            $orderStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_ORDER_FINISHED]);
+            $deliveryStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_DELIVERY_DELIVERED]);
+            $signature = $attachmentService->createAttachment(Attachment::TYPE_DELIVERY_SIGNATURE, ["signature", $data->signature]);
+            $photo = $attachmentService->createAttachment(Attachment::TYPE_DELIVERY_PHOTO, ["photo", $data->photo]);
+
+            $history = $clientOrderService->updateClientOrderStatus($order, $orderStatus, $this->getUser());
+            $manager->persist($history);
+
+            $order->setComment($data->comment);
+
+            $delivery->setDistance($data->distance)
+                ->setStatus($deliveryStatus)
+                ->setSignature($signature)
+                ->setPhoto($photo);
+
+            $unfinishedDeliveries = $deliveryRound->getOrders()
+                ->filter(fn(ClientOrder $order) => !$order->isOnStatusCode(Status::CODE_ORDER_FINISHED))
+                ->count();
+
+            if ($unfinishedDeliveries === 0) {
+                $status = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_ROUND_FINISHED]);
+                $distance = Stream::from($deliveryRound->getOrders())
+                    ->map(fn(ClientOrder $order) => $order->getDelivery()->getDistance())
+                    ->sum();
+
+                $deliveryRound->setStatus($status)
+                    ->setDistance($distance);
+            }
+
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+                "message" => "Livraison terminée"
+            ]);
+        }
+
+        throw new BadRequestHttpException();
+    }
+
+    /**
      * @Route("/mobile/preparations", name="api_mobile_preparations")
+     * @Authenticated
      */
     public function preparations(EntityManagerInterface $manager, Request $request): Response {
-        $depository = $manager->getRepository(Depository::class)->find($request->query->get('depository'));
-        return $this->json($manager->getRepository(Preparation::class)->getByDepository($depository));
+        $depositoryRepository = $manager->getRepository(Depository::class);
+        $preparationRepository = $manager->getRepository(Preparation::class);
+
+        $depositoryId = $request->query->get('depository');
+        $depository = $depositoryId
+            ? $depositoryRepository->find($depositoryId)
+            : null;
+
+        $preparations = $preparationRepository->getByDepository($depository, $this->user);
+
+        $toPrepare = Stream::from($preparations)
+            ->filter(fn($preparation) => !isset($preparation['operator']))
+            ->values();
+        $preparing = Stream::from($preparations)
+            ->filter(fn($preparation) => isset($preparation['operator']))
+            ->values();
+
+        return $this->json([
+            'toPrepare' => $toPrepare,
+            'preparing' => $preparing
+        ]);
     }
 
     /**
      * @Route("/mobile/locations", name="api_mobile_locations")
+     * @Authenticated
      */
     public function locations(EntityManagerInterface $manager): Response {
         return $this->json($manager->getRepository(Location::class)->getAll());
@@ -533,6 +764,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/mobile/qualities", name="api_mobile_qualities")
+     * @Authenticated
      */
     public function qualities(EntityManagerInterface $manager): Response {
         return $this->json($manager->getRepository(Quality::class)->getAll());
@@ -540,6 +772,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/mobile/crates", name="api_mobile_crates")
+     * @Authenticated
      */
     public function crates(EntityManagerInterface $manager, Request $request): Response {
         $depository = $manager->getRepository(Depository::class)->find($request->query->get('depository'));
@@ -548,6 +781,7 @@ class ApiController extends AbstractController {
 
     /**
      * @Route("/mobile/box", name="api_mobile_box")
+     * @Authenticated
      */
     public function box(EntityManagerInterface $manager, Request $request): Response {
         return $this->json($manager->getRepository(Box::class)->getByNumber($request->query->get('box')));
@@ -583,12 +817,505 @@ class ApiController extends AbstractController {
             $record = $boxRecordService->createBoxRecord($box, true);
             $record
                 ->setBox($box)
-                ->setState(BoxStateService::STATE_RECORD_IDENTIFIED)
+                ->setState(BoxStateService::STATE_BOX_IDENTIFIED)
                 ->setUser($this->user);
             $manager->persist($record);
         }
         $manager->flush();
         return $this->json([]);
+    }
+
+    /**
+     * @Route("/mobile/preparations/{preparation}", name="api_mobile_get_preparation", methods={"GET"})
+     * @Authenticated
+     */
+    public function getPreparation(EntityManagerInterface $entityManager,
+                                   ClientOrderService     $clientOrderService,
+                                   Preparation            $preparation): Response {
+        if ((
+                !$preparation->isOnStatusCode(Status::CODE_PREPARATION_TO_PREPARE)
+                && !$preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+            )
+            || (
+                $preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+                && $preparation->getOperator()
+                && $this->user !== $preparation->getOperator()
+            )) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Préparation non trouvée'
+            ]);
+        }
+
+        $clientOrder = $preparation->getOrder();
+        $client = $clientOrder->getClient();
+
+        $cart = $clientOrder->getLines()
+            ->map(fn(ClientOrderLine $line) => [
+                'boxType' => $line->getBoxType(),
+                'quantity' => $line->getQuantity()
+            ])
+            ->toArray();
+
+        $crates = $clientOrderService->getCartSplitting($entityManager, $client, $cart);
+
+        return $this->json([
+            'success' => true,
+            'crates' => $crates
+        ]);
+    }
+
+    /**
+     * @Route("/mobile/preparations/{preparation}", name="api_mobile_patch_preparation", methods={"PATCH"})
+     * @Authenticated
+     */
+    public function patchPreparation(Request                $request,
+                                     Preparation            $preparation,
+                                     PreparationService     $preparationService,
+                                     DeliveryRoundService   $deliveryRoundService,
+                                     BoxRecordService       $boxRecordService,
+                                     EntityManagerInterface $entityManager,
+                                     Mailer                 $mailer): Response {
+
+        $content = json_decode($request->getContent(), true);
+
+        $preparing = $content['preparing'] ?? false;
+        $statusRepository = $entityManager->getRepository(Status::class);
+
+        if ($preparing) {
+            if ($preparation->isOnStatusCode(Status::CODE_PREPARATION_TO_PREPARE)) {
+                $status = $statusRepository->findOneBy(['code' => Status::CODE_PREPARATION_PREPARING]);
+
+                $preparation
+                    ->setStatus($status)
+                    ->setOperator($this->user);
+
+                $entityManager->flush();
+                return $this->json([
+                    'success' => true,
+                    'message' => 'La préparation a été réservée'
+                ]);
+            }
+            else if (!$preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+                || $this->user !== $preparation->getOperator()){
+                return $this->json([
+                    'success' => false,
+                    'message' => 'La préparation est en cours de préparation par un autre utilisateur'
+                ]);
+            }
+            else {
+                // $preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+                // AND $this->user === $preparation->getOperator()
+                return $this->json([
+                    'success' => true
+                ]);
+            }
+
+        }
+        else if ($preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARING)
+                 && $this->user === $preparation->getOperator()) {
+            $userRepository = $entityManager->getRepository(User::class);
+
+            $preparedStatus = $statusRepository->findOneBy(['code' => Status::CODE_PREPARATION_PREPARED]);
+            $preparedDeliveryStatus = $statusRepository->findOneBy(['code' => Status::CODE_DELIVERY_PREPARED]);
+
+            $crates = $content['crates'] ?? [];
+
+            $clientOrder = $preparation->getOrder();
+            $result = $preparationService->handlePreparedCrates($entityManager, $clientOrder, $crates);
+
+            $date = new DateTime();
+            $user = $this->user;
+
+            if ($result['success']) {
+                foreach ($result['entities'] as $crateData) {
+                    $preparationLine = new PreparationLine();
+                    $preparationLine
+                        ->setPreparation($preparation)
+                        ->setCrate($crateData['crate']);
+                    $entityManager->persist($preparationLine);
+
+                    foreach ($crateData['boxes'] as $box) {
+                        $olderValues = [
+                            'location' => $box->getLocation(),
+                            'state' => $box->getState(),
+                            'comment' => $box->getComment()
+                        ];
+
+                        $box
+                            ->setLocation($box->getLocation()->getDeporte())
+                            ->setState(BoxStateService::STATE_BOX_UNAVAILABLE);
+
+                        [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $olderValues, $user, $date);
+
+                        if ($tracking) {
+                            $tracking->setBox($box);
+                            $entityManager->persist($tracking);
+                        }
+
+                        if ($record) {
+                            $record->setBox($box);
+                            $entityManager->persist($record);
+                        }
+
+                        $preparationLine->addBox($box);
+                    }
+                }
+
+                $preparation->setStatus($preparedStatus);
+
+                $delivery = $clientOrder->getDelivery();
+                if(isset($delivery)) {
+                    $delivery->setStatus($preparedDeliveryStatus);
+                }
+
+                $deliveryRound = $clientOrder->getDeliveryRound();
+                if ($deliveryRound) {
+                    $deliveryRoundService->updateDeliveryRound($entityManager, $deliveryRound);
+                }
+
+                $entityManager->flush();
+
+                $users = $userRepository->findBy(['deliveryAssignmentPreparationMail' => 1]);
+                if(!empty($users)) {
+                    $mailer->send(
+                        $users,
+                        "BoxEaty - Affectation de tournée",
+                        $this->renderView("emails/delivery_round.html.twig", [
+                            "expectedDelivery" => $preparation->getOrder()->getExpectedDelivery(),
+                            "deliveryRound" => $preparation->getOrder()->getDeliveryRound()
+                        ])
+                    );
+                }
+                return $this->json([
+                    'success' => true,
+                ]);
+            }
+            else {
+                return $this->json([
+                    'success' => false,
+                    'message' => $result['message']
+                ]);
+            }
+        }
+
+        throw new NotFoundHttpException();
+    }
+
+    /**
+     * @Route("/mobile/available-crates", name="api_mobile_available_crates")
+     * @Authenticated
+     */
+    public function availableCrates(EntityManagerInterface $manager, Request $request): Response {
+        $crateType = $manager->getRepository(BoxType::class)->findOneBy(['name' => $request->query->get('type')]);
+        $crates = $crateType->getCrates();
+
+        $availableCrates = [];
+        /** @var Box $crate */
+        foreach ($crates as $crate) {
+            if ($crate->getLocation()) {
+                $location = $crate->getLocation()->getName();
+                $number = $crate->getNumber();
+                $availableCrates[] = [
+                    'number' => $number,
+                    'id' => $crate->getId(),
+                    'type' => $crate->getType()->getName(),
+                    'location' => $location
+                ];
+            }
+        }
+
+        return $this->json($availableCrates);
+    }
+
+    /**
+     * @Route("/mobile/boxes", name="api_mobile_get_boxes")
+     * @Authenticated
+     */
+    public function getBoxes(EntityManagerInterface $manager, Request $request): Response {
+        $query = $request->query;
+        $preparation = $manager->getRepository(Preparation::class)->find($query->get('preparation'));
+
+        $boxTypes = $preparation
+            ? Stream::from($preparation->getOrder()->getLines())
+                ->map(fn(ClientOrderLine $line) => [
+                    $line->getBoxType()->getId()
+                ])
+                ->toArray()
+            : [];
+
+        $boxes = $manager->getRepository(Box::class)->getAvailableAndCleanedBoxByType($boxTypes);
+
+        $availableBoxes = [];
+        foreach ($boxes as $box) {
+            if ($box->getLocation() && $box->getType()) {
+                $type = $box->getType()->getName();
+                $location = $box->getLocation()->getName();
+                $number = $box->getNumber();
+
+                $availableBoxes[] = [
+                    'type' => $type,
+                    'location' => $location,
+                    'number' => $number
+                ];
+            }
+        }
+
+        return $this->json([
+            'availableBoxes' => $availableBoxes,
+        ]);
+    }
+
+    /**
+     * @Route("/mobile/box-informations", name="api_mobile_box_informations")
+     * @Authenticated
+     */
+    public function boxInformations(EntityManagerInterface $manager, Request $request): Response {
+        $box = $request->query->get('box');
+        $isCrate = $request->query->get('isCrate');
+        $crate = $request->query->get('crate');
+
+
+        $box = $manager->getRepository(Box::class)->findOneBy(['number' => $box, 'isBox' => $isCrate ? 0 : 1]);
+        if ($crate) {
+            $crate = $manager->getRepository(Box::class)->findOneBy(['number' => $crate]);
+        }
+
+        if ($box) {
+            $type = $box->getType()->getName();
+            $volume = $box->getType()->getVolume();
+            $number = $box->getNumber();
+
+            return $this->json([
+                'success' => true,
+                'data' => [
+                    'number' => $number,
+                    'type' => $type,
+                    'volume' => $volume,
+                    'crateVolume' => $crate ? $crate->getType()->getVolume() : 0
+                ]
+            ]);
+        }
+
+        return $this->json([
+            "success" => false,
+            "message" => "La box n'existe pas",
+        ]);
+    }
+
+    /**
+     * @Route("/mobile/moving", name="api_mobile_moving")
+     * @Authenticated
+     */
+    public function moving(EntityManagerInterface $manager, Request $request, BoxRecordService $boxRecordService): Response {
+
+        $boxRepository = $manager->getRepository(Box::class);
+        $locationRepository = $manager->getRepository(Location::class);
+        $qualityRepository = $manager->getRepository(Quality::class);
+
+        $args = json_decode($request->getContent(), true);
+        $scannedBoxesAndCrates = Stream::from($args['scannedBoxesAndCrates'])->map(fn($box) => $box['number'])->toArray();
+
+        $chosenQuality = $qualityRepository->find($args['quality']);
+        $chosenLocation = $locationRepository->find($args['location']);
+
+        foreach ($scannedBoxesAndCrates as $scannedBoxOrCrate) {
+            $box = $boxRepository->findOneBy(['number' => $scannedBoxOrCrate]);
+            if ($box) {
+                $box
+                    ->setLocation($chosenLocation)
+                    ->setQuality($chosenQuality);
+
+                $record = $boxRecordService->createBoxRecord($box, true);
+                $record
+                    ->setBox($box)
+                    ->setState(BoxStateService::STATE_BOX_IDENTIFIED)
+                    ->setUser($this->user);
+
+                $manager->persist($record);
+            }
+        }
+
+        $manager->flush();
+        return $this->json([]);
+    }
+
+    /**
+     * @Route("/mobile/collects", name="api_mobile_get_collects", methods={"GET"})
+     * @Authenticated
+     */
+    public function getCollects(EntityManagerInterface $manager) {
+        $pendingCollects = $manager->getRepository(Collect::class)->getPendingCollects();
+
+        return $this->json($pendingCollects);
+    }
+
+    /**
+     * @Route("/mobile/collect-crates/{collect}", name="api_mobile_collect_crates")
+     * @Authenticated
+     */
+    public function collectCrates(Collect $collect) {
+        $collectCrates = Stream::from($collect->getCrates()->map(fn(Box $crate) => [
+            'number' => $crate->getNumber(),
+            'type' => $crate->getType()->getName()
+        ]));
+
+        return $this->json($collectCrates);
+    }
+
+    /**
+     * @Route("/mobile/collects/{collect}", name="api_mobile_patch_collect", methods={"PATCH"})
+     * @Authenticated
+     */
+    public function patchCollect(Collect $collect,
+                                 Request $request,
+                                 EntityManagerInterface $manager,
+                                 AttachmentService $attachmentService,
+                                 BoxRecordService $boxRecordService): JsonResponse {
+        $data = json_decode($request->getContent());
+
+        $validate = $data->validate ?? false;
+
+        if ($validate) {
+            $dropLocation = $manager->find(Location::class, $data->drop_location);
+            $crates = $collect->getCrates();
+
+            foreach ($crates as $crate) {
+                $user = $this->getUser();
+                $oldLocation = $crate->getLocation();
+                $oldState = $crate->getState();
+                $oldComment = $crate->getComment();
+
+                $crate
+                    ->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
+                    ->setLocation($dropLocation);
+
+                [$tracking, $record] = $boxRecordService->generateBoxRecords(
+                    $crate,
+                    [
+                        'location' => $oldLocation,
+                        'state' => $oldState,
+                        'comment' => $oldComment
+                    ],
+                    $user instanceof User ? $user : null
+                );
+
+                if ($tracking) {
+                    $tracking->setBox($crate);
+                    $manager->persist($tracking);
+                }
+
+                if ($record) {
+                    $record->setBox($crate);
+                    $manager->persist($record);
+                }
+            }
+
+            $collectStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_COLLECT_FINISHED]);
+
+            if($data->data->photo) {
+                $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
+            }
+            $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
+            $comment = $data->data->comment;
+
+            $collect
+                ->setStatus($collectStatus)
+                ->setDropSignature($signature)
+                ->setDropPhoto($photo ?? null)
+                ->setDropComment($comment ?? null)
+                ->setTreatedAt(new DateTime('now'))
+                ->setTokens((int)$data->token_amount);
+
+            $manager->flush();
+
+            return $this->json([
+                "success" => true
+            ]);
+        }
+
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @Route("/mobile/location", name="api_mobile_location")
+     * @Authenticated
+     */
+    public function location(Request $request, EntityManagerInterface $manager)
+    {
+        $location = $manager->getRepository(Location::class)->findOneBy([
+            'name' => $request->query->get('location')
+        ]);
+        $client = $location->getClient();
+
+        return $this->json([
+            'name' => $location->getName(),
+            'client' => $client ? $client->getName() : '-',
+            'address' => $client ? $client->getAddress() : '-',
+            'main_contact' => $client ? $client->getContact()->getUsername() : '-',
+            'phone_number' => $client ? $client->getPhoneNumber() : '-',
+        ]);
+    }
+
+    /**
+     * @Route("/mobile/collects", name="api_mobile_post_collect", methods={"POST"})
+     * @Authenticated
+     */
+    public function postCollect(Request $request,
+                                EntityManagerInterface $manager,
+                                AttachmentService $attachmentService,
+                                UniqueNumberService $uniqueNumberService): Response {
+        $data = json_decode($request->getContent());
+
+        $statusRepository = $manager->getRepository(Status::class);
+        $locationRepository = $manager->getRepository(Location::class);
+        $clientRepository = $manager->getRepository(Client::class);
+        $boxRepository = $manager->getRepository(Box::class);
+        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
+
+        $pendingStatus = $statusRepository->findOneBy(['code' => Status::CODE_COLLECT_TRANSIT]);
+        $pickLocation = $locationRepository->findOneBy(['name' => $data->location->name]);
+        $client = $clientRepository->findOneBy(['name' => $data->location->client]);
+
+        $number = $uniqueNumberService->createUniqueNumber($manager, Collect::PREFIX_NUMBER, Collect::class);
+
+        if($data->data->photo) {
+            $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
+        }
+        $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
+        $comment = $data->data->comment;
+
+        $crateNumbers = Stream::from($data->crates)->map(fn($crate) => $crate->number)->toArray();
+        $crates = $boxRepository->findBy(['number' => $crateNumbers]);
+
+        $clientOrderId = $data->clientOrder ?? null;
+
+        $collect = (new Collect())
+            ->setCreatedAt(new DateTime('now'))
+            ->setStatus($pendingStatus)
+            ->setTokens((int) $data->token_amount)
+            ->setNumber($number)
+            ->setPickLocation($pickLocation)
+            ->setClient($client)
+            ->setPickComment($comment ?? null)
+            ->setPickSignature($signature)
+            ->setPickPhoto($photo ?? null)
+            ->setOperator($this->user)
+            ->setCrates($crates);
+
+
+        if ($clientOrderId) {
+            $clientOrder = $clientOrderRepository->find($clientOrderId);
+            $collect
+                ->setClientOrder($clientOrder);
+        }
+
+        $manager->persist($collect);
+        $manager->flush();
+
+        return $this->json([
+            'success' => true
+        ]);
     }
 
 }

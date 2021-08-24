@@ -74,8 +74,11 @@ class QualityController extends AbstractController {
 
         if ($form->isValid()) {
             $quality = new Quality();
-            $quality->setName($content->name)
-                ->setActive($content->active);
+            $quality
+                ->setName($content->name)
+                ->setActive($content->active)
+                ->setClean($content->clean)
+                ->setBroken($content->broken);
 
             $manager->persist($quality);
             $manager->flush();
@@ -116,8 +119,11 @@ class QualityController extends AbstractController {
         }
 
         if ($form->isValid()) {
-            $quality->setName($content->name)
-                ->setActive($content->active);
+            $quality
+                ->setName($content->name)
+                ->setActive($content->active)
+                ->setClean($content->clean)
+                ->setBroken($content->broken);
 
             $manager->flush();
 

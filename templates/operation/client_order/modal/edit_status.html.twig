@@ -1,0 +1,37 @@
+<div id="modal-edit-status-client-order" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Modifier le statut</h1>
+            <div class="body">
+                {% for history in clientOrder.editableStatusHistory %}
+                    <div class="row orange-toggle">
+                        {% if history.status %}
+                            <div class="edit-status">
+                                <input type="radio"
+                                       id="edit-status-{{ history.id }}"
+                                       name="status"
+                                       value="{{ history.status.id }}"
+                                       class="data"
+                                       required/>
+                                <label for="edit-status-{{ history.id }}">
+                                    {{ history.status.name }}
+                                </label>
+                            </div>
+                            <span class="d-flex align-items-center col">Le {{ history.changedAt|date('d/m/Y') }} à {{ history.changedAt|date('H:i') }} par {{ history.user.username }}</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="col-12 mt-3">
+                    <label>Justification du changement de statut</label>
+                    <div class="data" data-wysiwyg="justification" data-required></div>
+                </div>
+            </div>
+            <div class="footer">
+                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="primary">Valider</button>
+            </div>
+        </div>
+    </div>
+</div>

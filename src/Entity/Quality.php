@@ -6,13 +6,14 @@ use App\Repository\QualityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Utils\ActiveTrait;
 
 /**
  * @ORM\Entity(repositoryClass=QualityRepository::class)
  */
 class Quality {
 
-    use Active;
+    use ActiveTrait;
 
     /**
      * @ORM\Id
@@ -36,8 +37,36 @@ class Quality {
      */
     private $records;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $clean = null;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $broken = null;
+
     public function __construct() {
         $this->boxes = new ArrayCollection();
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getBroken(): ?bool
+    {
+        return $this->broken;
+    }
+
+    /**
+     * @param bool|null $broken
+     * @return self
+     */
+    public function setBroken(?bool $broken): self
+    {
+        $this->broken = $broken;
+        return $this;
     }
 
     public function getId(): ?int {
@@ -104,6 +133,18 @@ class Quality {
                 $record->setQuality(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isClean(): ?bool
+    {
+        return $this->clean;
+    }
+
+    public function setClean(bool $clean): self
+    {
+        $this->clean = $clean;
 
         return $this;
     }

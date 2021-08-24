@@ -16,7 +16,7 @@ class OrderTypeRepository extends EntityRepository {
     function getForSelect(?string $search){
         return $this->createQueryBuilder("order_type")
             ->select("order_type.id AS id, order_type.name AS text")
-            ->where("order_type.name LIKE :search")
+            ->andWhere("order_type.name LIKE :search")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()

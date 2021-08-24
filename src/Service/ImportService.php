@@ -40,7 +40,11 @@ class ImportService {
     private int $creations;
     private int $updates;
 
+    private array $boxStatesLower;
+
     public function execute(Import $import) {
+        $this->boxStatesLower = array_map("strtolower", BoxStateService::BOX_STATES);
+
         $this->import = $import;
         $import->setCreations(0)
             ->setUpdates(0)
@@ -103,12 +107,12 @@ class ImportService {
         }
 
         $stateValue = $this->value(Import::STATE);
-        $state = array_search($stateValue, BoxStateService::BOX_STATES);
+        $state = array_search(strtolower($stateValue), $this->boxStatesLower);
         if ($stateValue && $state === false) {
             $this->addError("Etat de Box inconnu \"$state\"");
         }
 
-        $ownerValue = $this->value(Import::OWNER, true);
+        $ownerValue = $this->value(Import::OWNER);
         $owner = $clientRepository->findOneBy(["name" => $ownerValue]);
         if ($ownerValue && !$owner) {
             $this->addError("Aucun client correspondant au propriétaire \"$ownerValue\"");

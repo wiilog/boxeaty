@@ -5,7 +5,9 @@ namespace App\Repository;
 use App\Entity\Depository;
 use App\Entity\Preparation;
 use App\Entity\Status;
+use App\Entity\User;
 use Doctrine\ORM\EntityRepository;
+use WiiCommon\Helper\Stream;
 
 /**
  * @method Preparation|null find($id, $lockMode = null, $lockVersion = null)
@@ -15,20 +17,22 @@ use Doctrine\ORM\EntityRepository;
  */
 class PreparationRepository extends EntityRepository {
 
-    public function getByDepository(?Depository $depository)
+    public function getByDepository(?Depository $depository, User $currentOperator)
     {
         $qb = $this->createQueryBuilder('preparation')
             ->select('preparation.id AS id')
             ->addSelect('join_client.name AS client')
-            ->addSelect('join_order.cratesAmount AS crate_amount')
-            ->addSelect('join_clientOrderInformation.tokenAmount AS token_amount')
-            ->addSelect('join_order.number AS order_number')
+            ->addSelect('join_order.cratesAmount AS crateAmount')
+            ->addSelect('join_order.tokensAmount AS tokenAmount')
+            ->addSelect('join_order.number AS orderNumber')
+            ->addSelect('join_operator.username AS operator')
             ->leftJoin('preparation.order', 'join_order')
             ->leftJoin('join_order.client', 'join_client')
             ->leftJoin('preparation.status', 'join_status')
             ->leftJoin('join_client.clientOrderInformation', 'join_clientOrderInformation')
-            ->andWhere("join_status.code = :status")
-            ->setParameter("status", Status::CODE_PREPARATION_PREPARING);
+            ->leftJoin('preparation.operator', 'join_operator')
+            ->andWhere("join_status.code IN (:status)")
+            ->setParameter("status", [Status::CODE_PREPARATION_TO_PREPARE, Status::CODE_PREPARATION_PREPARING]);
 
         if($depository) {
             $qb
@@ -36,8 +40,19 @@ class PreparationRepository extends EntityRepository {
                 ->setParameter("depository", $depository);
         }
 
-        return $qb
+        $res = $qb
             ->getQuery()
             ->execute();
+        return Stream::from($res)
+            ->map(fn (array $preparation) => array_merge(
+                $preparation,
+                [
+                    'editable' => (
+                        !isset($preparation['operator'])
+                        || $preparation['operator'] === $currentOperator->getUsername()
+                    )
+                ]
+            ))
+            ->toArray();
     }
 }

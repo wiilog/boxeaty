@@ -18,24 +18,43 @@
         </select>
     </label>
 
-    <div class="w-75">
-        <label>Jours fériés ou non ouvrés (majoration sur livraison à cette date)</label>
-        <div class="inline-form">
-            <label>
-                Jour
-                <input type="number" name="day" class="add-data" min="0" max="31" required>
-            </label>
-            <label>
-                Mois
-                <select name="month" class="add-data" data-s2 data-no-empty-option required>
-                    {% for number, month in constant('App\\Helper\\FormatHelper::MONTHS') %}
-                        <option value="{{ number }}">{{ month }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <button id="add-work-free-day" class="secondary"><i class="icon fas fa-plus"></i> Ajouter</button>
-        </div>
+    <label class="w-35">
+        Type de caisse par défaut
+        <select class="data"
+                name="{{ constant('App\\Entity\\GlobalSetting::DEFAULT_CRATE_TYPE') }}"
+                data-s2="type"
+                data-placeholder="Sélectionnez un type de caisse par défaut...">
+            {% if default_crate_type is defined and default_crate_type %}
+                <option value="{{ default_crate_type.id }}" selected>{{ default_crate_type.name }}</option>
+            {% endif %}
+        </select>
+    </label>
 
+    <div class="row mt-4">
+        <label class="fw-bold">Jours fériés ou non ouvrés (majoration sur livraison à cette date)</label>
+        <div class="d-flex align-items-end justify-content-between work-free-day-form">
+            <div class="col-2 pe-5">
+                <label class="mt-0">
+                    Jour
+                    <input type="number" name="day" class="add-data" min="0" max="31" required>
+                </label>
+            </div>
+            <div class="col-2 pe-5">
+                <label class="mt-0">
+                    Mois
+                    <select name="month" class="add-data w-100" data-s2 data-no-empty-option required>
+                        {% for number, month in constant('App\\Helper\\FormatHelper::MONTHS') %}
+                            <option value="{{ number }}">{{ month }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <div class="col-4">
+                <button id="add-work-free-day" class="secondary"><i class="icon fas fa-plus"></i> Ajouter</button>
+            </div>
+        </div>
+    </div>
+    <div class="w-75">
         <table id="table-work-free-days"
                data-initial-data="{{ initial_work_free_days }}"
                data-default-order="{{ work_free_days_order | json_encode }}">

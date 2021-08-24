@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Utils\StatusTrait;
 use App\Repository\PreparationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -12,6 +13,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Preparation {
 
+    use StatusTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -20,27 +23,26 @@ class Preparation {
     private ?int $id = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Status::class)
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private ?Status $status;
-
-    /**
      * @ORM\OneToOne(targetEntity=ClientOrder::class, inversedBy="preparation")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, unique=true)
      */
-    private ?ClientOrder $order;
+    private ?ClientOrder $order = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="preparations")
      * @ORM\JoinColumn(nullable=false)
      */
-    private ?Depository $depository;
+    private ?Depository $depository = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=PreparationLine::class, mappedBy="preparation")
+     * @ORM\OneToMany(targetEntity=PreparationLine::class, mappedBy="preparation", cascade={"remove"})
      */
-    private Collection $lines;
+    private ?Collection $lines;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="preparations")
+     */
+    private ?User $operator = null;
 
     public function __construct() {
         $this->lines = new ArrayCollection();
@@ -50,26 +52,19 @@ class Preparation {
         return $this->id;
     }
 
-    public function getStatus(): ?Status {
-        return $this->status;
-    }
-
-    public function setStatus(?Status $status): self {
-        $this->status = $status;
-        return $this;
-    }
-
     public function getOrder(): ?ClientOrder {
         return $this->order;
     }
 
     public function setOrder(?ClientOrder $order): self {
-        if ($this->order && $this->order->getPreparation() === $this) {
-            $this->order->setPreparation(null);
+        if ($this->order && $this->order->getPreparation() !== $this) {
+            $oldPreparation = $this->order;
+            $this->order = null;
+            $oldPreparation->setPreparation(null);
         }
         $this->order = $order;
-        if ($order) {
-            $order->setPreparation($this);
+        if ($this->order && $this->order->getPreparation() !== $this) {
+            $this->order->setPreparation($this);
         }
 
         return $this;
@@ -125,6 +120,24 @@ class Preparation {
         $this->lines = new ArrayCollection();
         foreach($lines as $line) {
             $this->addLine($line);
+        }
+
+        return $this;
+    }
+
+    public function getOperator(): ?User {
+        return $this->operator;
+    }
+
+    public function setOperator(?User $operator): self {
+        if($this->operator && $this->operator !== $operator) {
+            $this->operator->removePreparation($this);
+        }
+
+        $this->operator = $operator;
+
+        if($operator) {
+            $operator->addPreparation($this);
         }
 
         return $this;

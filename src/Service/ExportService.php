@@ -43,9 +43,9 @@ class ExportService {
         "Nom du client",
         "Actif",
         "Description",
-        "Nombre de contenants",
         "Capacité",
         "Type d'emplacement",
+        "Nombre de contenants",
     ];
 
     public const MOVEMENT_HEADER = [
@@ -59,7 +59,7 @@ class ExportService {
     ];
 
     public const BOX_TYPE_HEADER = [
-        "Type de Box",
+        "Type de Box / Caisse",
         "Prix",
         "Actif",
         "Contenance",
@@ -80,6 +80,41 @@ class ExportService {
     public const QUALITY_HEADER = [
         "Nom",
         "Actif",
+    ];
+
+    public const CLIENT_ORDER_HEADER_AUTONOMOUS_MANAGEMENT = [
+        "Commande client",
+        "Type de Box",
+        "Box livrées",
+        "Jeton livrés",
+        "Box cassées",
+        "Coût unitaire",
+        "Moyen de paiement",
+        "Prix total des boxes",
+        "Nombre de passage en caisse",
+        "Nombre de consigne utilisées",
+        "Commande automatique"
+    ];
+
+    public const CLIENT_ORDER_HEADER_ONE_TIME = [
+        "Numéros de commande",
+        "Cout abonnement mensuel",
+        "Frais de livraison",
+        "Moyen de paiement",
+        "Prorata client",
+        "Nombre de jetons livrés",
+        "Nombre de caisse",
+        "Montant de la caisse",
+        "Commande automatic"
+    ];
+
+    public const CLIENT_ORDER_TRADE = [
+        "Numéros de commande",
+        "Type de Box",
+        "Tarif unitaire",
+        "Nombre de box",
+        "Frais de livraison",
+        "Commande automatic"
     ];
 
     public const DEPOSIT_TICKET_HEADER = [

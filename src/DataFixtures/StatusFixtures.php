@@ -12,7 +12,8 @@ class StatusFixtures extends Fixture implements FixtureGroupInterface {
 
     private const STATUSES = [
         Status::CATEGORY_ORDER => [
-            Status::CODE_ORDER_TO_VALIDATE => "À valider",
+            Status::CODE_ORDER_TO_VALIDATE_CLIENT => "À valider Client",
+            Status::CODE_ORDER_TO_VALIDATE_BOXEATY => "À valider BoxEaty",
             Status::CODE_ORDER_PLANNED => "Planifiée",
             Status::CODE_ORDER_TRANSIT => "En transit",
             Status::CODE_ORDER_FINISHED => "Terminée",
@@ -24,13 +25,14 @@ class StatusFixtures extends Fixture implements FixtureGroupInterface {
             Status::CODE_ROUND_FINISHED => "Terminé",
         ],
         Status::CATEGORY_PREPARATION => [
+            Status::CODE_PREPARATION_TO_PREPARE => "A préparer",
             Status::CODE_PREPARATION_PREPARING => "En préparation",
             Status::CODE_PREPARATION_PREPARED => "Préparé",
         ],
         Status::CATEGORY_DELIVERY => [
             Status::CODE_DELIVERY_PLANNED => "Planifiée",
             Status::CODE_DELIVERY_PREPARING => "En préparation",
-            Status::CODE_DELIVERY_AWAITING_DELIVERER => "Attente livreur",
+            Status::CODE_DELIVERY_PREPARED => "Préparée",
             Status::CODE_DELIVERY_TRANSIT => "En transit",
             Status::CODE_DELIVERY_DELIVERED => "Livrée",
         ],

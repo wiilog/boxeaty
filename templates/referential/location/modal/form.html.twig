@@ -42,7 +42,7 @@
         <label>
             Capacité
             <input type="number" name="capacity" class="data" placeholder="Saisissez la capacité de la borne"
-                   value="{{ location.capacity }}" {{ location.kiosk ? 'required' : 'data-required' }} min="1"/>
+                   value="{{ location.capacity }}" {{ location.kiosk ? 'required' : 'data-was-required' }} min="1"/>
         </label>
     </div>
     <div class="col-12 kiosk-fields {{ not location.kiosk ? 'd-none' }}">
@@ -72,6 +72,12 @@
                     <option value="{{ location.depository.id }}" selected>{{ location.depository.name }}</option>
                 {% endif %}
             </select>
+        </label>
+    </div>
+    <div class="col-12">
+        <label>
+            Description
+            <textarea type="text" name="description" class="data" placeholder="Votre description">{{ location.description }}</textarea>
         </label>
     </div>
 </div>

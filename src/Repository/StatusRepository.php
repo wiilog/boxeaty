@@ -13,10 +13,10 @@ use Doctrine\ORM\EntityRepository;
  */
 class StatusRepository extends EntityRepository {
 
-    function getOrderStatusForSelect(?string $search) {
+    public function getOrderStatusForSelect(?string $search) {
         return $this->createQueryBuilder("status")
             ->select("status.id AS id, status.name AS text")
-            ->where("status.category = :category")
+            ->andWhere("status.category = :category")
             ->andWhere("status.name LIKE :search")
             ->setMaxResults(15)
             ->setParameter("category", Status::CATEGORY_ORDER)
@@ -24,5 +24,4 @@ class StatusRepository extends EntityRepository {
             ->getQuery()
             ->getArrayResult();
     }
-
 }

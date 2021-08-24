@@ -19,8 +19,9 @@ final class Version20210707085153 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE box ADD is_box TINYINT(1) NOT NULL DEFAULT 1 ;');
+        if (!$schema->getTable("box")->hasColumn("is_box")) {
+            $this->addSql('ALTER TABLE box ADD is_box TINYINT(1) NOT NULL DEFAULT 1 ;');
+        }
     }
 
 

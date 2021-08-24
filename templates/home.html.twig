@@ -48,16 +48,11 @@
             </div>
             <h1 class="mb-4">Bienvenue !</h1>
         {% endif %}
-
-        {% if display_export %}
-            <a class="outline" href="{{ path('export') }}">
-                <i class="icon fas fa-download"></i> Export général au format CSV
-            </a>
-        {% endif %}
     </div>
 {% endblock %}
 
 {% block javascripts %}
-    {{ encore_entry_script_tags('counter_order') }}
     {{ encore_entry_script_tags('app') }}
+    {{ encore_entry_script_tags('home') }}
+    {{ encore_entry_script_tags('counter_order') }}
 {% endblock %}

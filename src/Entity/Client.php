@@ -6,13 +6,14 @@ use App\Repository\ClientRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Utils\ActiveTrait;
 
 /**
  * @ORM\Entity(repositoryClass=ClientRepository::class)
  */
 class Client {
 
-    use Active;
+    use ActiveTrait;
 
     public const INACTIVE = 0;
     public const ACTIVE = 1;
@@ -31,6 +32,12 @@ class Client {
      */
     private ?int $id = null;
 
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private ?float $totalCrateTypePrice = null;
+
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
@@ -40,6 +47,16 @@ class Client {
      * @ORM\Column(type="text")
      */
     private ?string $address = null;
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    private ?string $latitude = null;
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    private ?string $longitude = null;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -86,7 +103,7 @@ class Client {
     /**
      * @ORM\OneToMany(targetEntity=Location::class, mappedBy="client")
      */
-    private Collection $kiosks;
+    private Collection $locations;
 
     /**
      * @ORM\OneToMany(targetEntity=Client::class, mappedBy="linkedMultiSite")
@@ -120,22 +137,33 @@ class Client {
     private ?ClientOrderInformation $clientOrderInformation = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clients")
+     * @ORM\OneToMany(targetEntity=CratePatternLine::class, mappedBy="client")
      */
-    private ?Depository $depository = null;
+    private Collection $cratePatternLines;
 
     /**
-     * @ORM\OneToMany(targetEntity=ClientBoxType::class, mappedBy="client")
+     * @ORM\Column(type="integer", nullable=true)
      */
-    private $clientBoxTypes;
+    private $prorateAmount;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $paymentModes;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Collect::class, mappedBy="client")
+     */
+    private Collection $collects;
 
     public function __construct() {
         $this->users = new ArrayCollection();
-        $this->kiosks = new ArrayCollection();
+        $this->locations = new ArrayCollection();
         $this->clients = new ArrayCollection();
         $this->boxes = new ArrayCollection();
         $this->depositTicketsClients = new ArrayCollection();
-        $this->clientBoxTypes = new ArrayCollection();
+        $this->cratePatternLines = new ArrayCollection();
+        $this->collects = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -159,6 +187,24 @@ class Client {
     public function setAddress(string $address): self {
         $this->address = $address;
 
+        return $this;
+    }
+
+    public function getLatitude(): ?string {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?string $latitude): self {
+        $this->latitude = $latitude;
+        return $this;
+    }
+
+    public function getLongitude(): ?string {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?string $longitude): self {
+        $this->longitude = $longitude;
         return $this;
     }
 
@@ -248,21 +294,21 @@ class Client {
     /**
      * @return Collection|Location[]
      */
-    public function getKiosks(): Collection {
-        return $this->kiosks;
+    public function getLocations(): Collection {
+        return $this->locations;
     }
 
-    public function addKiosk(Location $kiosk): self {
-        if (!$this->kiosks->contains($kiosk)) {
-            $this->kiosks[] = $kiosk;
+    public function addLocation(Location $kiosk): self {
+        if (!$this->locations->contains($kiosk)) {
+            $this->locations[] = $kiosk;
             $kiosk->setClient($this);
         }
 
         return $this;
     }
 
-    public function removeKiosk(Location $kiosk): self {
-        if ($this->kiosks->removeElement($kiosk)) {
+    public function removeLocation(Location $kiosk): self {
+        if ($this->locations->removeElement($kiosk)) {
             // set the owning side to null (unless already changed)
             if ($kiosk->getClient() === $this) {
                 $kiosk->setClient(null);
@@ -417,41 +463,121 @@ class Client {
         return $this;
     }
 
-    public function getDepository(): ?Depository {
-        return $this->depository;
-    }
-
-    public function setDepository(?Depository $depository): Client {
-        $this->depository = $depository;
-
-        return $this;
-    }
-
     /**
-     * @return Collection|ClientBoxType[]
+     * @return Collection|CratePatternLine[]
      */
-    public function getClientBoxTypes(): Collection
-    {
-        return $this->clientBoxTypes;
+    public function getCratePatternLines(): Collection {
+        return $this->cratePatternLines;
     }
 
-    public function addClientBoxType(ClientBoxType $clientBoxType): self
-    {
-        if (!$this->clientBoxTypes->contains($clientBoxType)) {
-            $this->clientBoxTypes[] = $clientBoxType;
-            $clientBoxType->setClient($this);
+    public function addCratePatternLine(CratePatternLine $cratePatternLine): self {
+        if (!$this->cratePatternLines->contains($cratePatternLine)) {
+            $this->cratePatternLines[] = $cratePatternLine;
+            $cratePatternLine->setClient($this);
         }
 
         return $this;
     }
 
-    public function removeClientBoxType(ClientBoxType $clientBoxType): self
-    {
-        if ($this->clientBoxTypes->removeElement($clientBoxType)) {
-            // set the owning side to null (unless already changed)
-            if ($clientBoxType->getClient() === $this) {
-                $clientBoxType->setClient(null);
+    public function removeCratePatternLine(CratePatternLine $cratePatternLine): self {
+        if ($this->cratePatternLines->removeElement($cratePatternLine)) {
+            if ($cratePatternLine->getClient() === $this) {
+                $cratePatternLine->setClient(null);
             }
+        }
+
+        return $this;
+    }
+
+    public function setCratePatternLines(?array $cratePatternLines): self {
+        foreach($this->getCratePatternLines()->toArray() as $cratePatternLine) {
+            $this->removeCratePatternLine($cratePatternLine);
+        }
+
+        $this->cratePatternLines = new ArrayCollection();
+        foreach($cratePatternLines as $cratePatternLine) {
+            $this->addCratePatternLine($cratePatternLine);
+        }
+
+        return $this;
+    }
+
+    public function getProrateAmount(): ?int
+    {
+        return $this->prorateAmount;
+    }
+
+    public function setProrateAmount(?int $prorateAmount): self
+    {
+        $this->prorateAmount = $prorateAmount;
+
+        return $this;
+    }
+
+    public function getPaymentModes(): ?string
+    {
+        return $this->paymentModes;
+    }
+
+    public function setPaymentModes(?string $paymentModes): self
+    {
+        $this->paymentModes = $paymentModes;
+
+        return $this;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getTotalCrateTypePrice(): ?float
+    {
+        return $this->totalCrateTypePrice;
+    }
+
+    /**
+     * @param float|null $totalCrateTypePrice
+     * @return self
+     */
+    public function setTotalCrateTypePrice(?float $totalCrateTypePrice): self
+    {
+        $this->totalCrateTypePrice = $totalCrateTypePrice;
+        return $this;
+    }
+
+    /**
+     * @return Collection|Collect[]
+     */
+    public function getCollects(): Collection {
+        return $this->collects;
+    }
+
+    public function addCollect(Collect $collect): self {
+        if (!$this->collects->contains($collect)) {
+            $this->collects[] = $collect;
+            $collect->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCollect(Collect $collect): self {
+        if ($this->collects->removeElement($collect)) {
+            if ($collect->getClient() === $this) {
+                $collect->setClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setCollects(?array $collects): self {
+        foreach($this->getCollects()->toArray() as $collect) {
+            $this->removeCollect($collect);
+        }
+
+        $this->collects = new ArrayCollection();
+        foreach($collects as $collect) {
+            $this->addCollect($collect);
         }
 
         return $this;

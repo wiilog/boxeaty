@@ -37,9 +37,9 @@ class ClientOrderInformation {
     private $tokenAmount;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="json", nullable=true)
      */
-    private $orderType;
+    private $orderTypes = [];
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
@@ -74,17 +74,12 @@ class ClientOrderInformation {
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clientOrderInformation")
      */
-    private $depository;
+    private ?Depository $depository = null;
 
     /**
      * @ORM\OneToOne(targetEntity=Client::class, mappedBy="clientOrderInformation", cascade={"persist", "remove"})
      */
     private $client;
-
-    /**
-     * @ORM\Column(type="json", nullable=true)
-     */
-    private $paymentModes = [];
 
     /**
      * @ORM\OneToOne(targetEntity=OrderRecurrence::class, cascade={"persist", "remove"})
@@ -120,14 +115,14 @@ class ClientOrderInformation {
         return $this;
     }
 
-    public function getOrderType(): ?int
+    public function getOrderTypes(): ?array
     {
-        return $this->orderType;
+        return $this->orderTypes;
     }
 
-    public function setOrderType(?int $orderType): self
+    public function setOrderTypes(?array $orderTypes): self
     {
-        $this->orderType = $orderType;
+        $this->orderTypes = $orderTypes;
 
         return $this;
     }
@@ -204,14 +199,18 @@ class ClientOrderInformation {
         return $this;
     }
 
-    public function getDepository(): ?Depository
-    {
+    public function getDepository(): ?Depository {
         return $this->depository;
     }
 
-    public function setDepository(?Depository $depository): self
-    {
+    public function setDepository(?Depository $depository): self {
+        if($this->depository && $this->depository !== $depository) {
+            $this->depository->removeClientOrderInformation($this);
+        }
         $this->depository = $depository;
+        if($depository) {
+            $depository->addClientOrderInformation($this);
+        }
 
         return $this;
     }
@@ -224,18 +223,6 @@ class ClientOrderInformation {
     public function setClient(?Client $client): self
     {
         $this->client = $client;
-
-        return $this;
-    }
-
-    public function getPaymentModes(): ?array
-    {
-        return $this->paymentModes;
-    }
-
-    public function setPaymentModes(?array $paymentModes): self
-    {
-        $this->paymentModes = $paymentModes;
 
         return $this;
     }

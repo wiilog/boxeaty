@@ -6,13 +6,14 @@ use App\Repository\DepositoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Utils\ActiveTrait;
 
 /**
  * @ORM\Entity(repositoryClass=DepositoryRepository::class)
  */
 class Depository {
 
-    use Active;
+    use ActiveTrait;
 
     /**
      * @ORM\Id
@@ -20,11 +21,6 @@ class Depository {
      * @ORM\Column(type="integer")
      */
     private ?int $id = null;
-
-    /**
-     * @ORM\OneToMany(targetEntity=Client::class, mappedBy="depository")
-     */
-    private Collection $clients;
 
     /**
      * @ORM\Column(type="string")
@@ -56,11 +52,17 @@ class Depository {
      */
     private Collection $clientOrderInformation;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ClientOrder::class, mappedBy="depository")
+     */
+    private Collection $clientOrders;
+
     public function __construct() {
         $this->preparations = new ArrayCollection();
         $this->deliveryRounds = new ArrayCollection();
         $this->locations = new ArrayCollection();
         $this->clientOrderInformation = new ArrayCollection();
+        $this->clientOrders = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -166,6 +168,9 @@ class Depository {
         return $this;
     }
 
+    /**
+     * @return Collection|Location[]
+     */
     public function getLocations(): Collection
     {
         return $this->locations;
@@ -205,46 +210,6 @@ class Depository {
     }
 
     /**
-     * @return Collection|Client[]
-     */
-    public function getClients(): Collection {
-        return $this->clients;
-    }
-
-    public function addClient(Client $client): self {
-        if (!$this->clients->contains($client)) {
-            $this->clients[] = $client;
-            $client->setDepository($this);
-        }
-
-        return $this;
-    }
-
-    public function removeClient(Client $client): self {
-        if ($this->clients->removeElement($client)) {
-            // set the owning side to null (unless already changed)
-            if ($client->getDepository() === $this) {
-                $client->setDepository(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function setClients(?array $clients): self {
-        foreach ($this->getClients()->toArray() as $client) {
-            $this->removeClient($client);
-        }
-
-        $this->clients = new ArrayCollection();
-        foreach ($clients as $client) {
-            $this->addClient($client);
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection|ClientOrderInformation[]
      */
     public function getClientOrderInformation(): Collection
@@ -269,6 +234,45 @@ class Depository {
             if ($clientOrderInformation->getDepository() === $this) {
                 $clientOrderInformation->setDepository(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ClientOrder[]
+     */
+    public function getClientOrders(): Collection {
+        return $this->clientOrders;
+    }
+
+    public function addClientOrder(ClientOrder $clientOrder): self {
+        if (!$this->clientOrders->contains($clientOrder)) {
+            $this->clientOrders[] = $clientOrder;
+            $clientOrder->setDepository($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClientOrder(ClientOrder $clientOrder): self {
+        if ($this->clientOrders->removeElement($clientOrder)) {
+            if ($clientOrder->getDepository() === $this) {
+                $clientOrder->setDepository(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setClientOrders(?array $clientOrders): self {
+        foreach($this->getClientOrders()->toArray() as $clientOrder) {
+            $this->removeClientOrder($clientOrder);
+        }
+
+        $this->clientOrders = new ArrayCollection();
+        foreach($clientOrders as $clientOrder) {
+            $this->addClientOrder($clientOrder);
         }
 
         return $this;

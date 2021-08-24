@@ -65,15 +65,21 @@ export function initDatatable(table, config) {
         content.filters = {};
 
         const $filters = $(`.filters`);
-        if($filters.exists()) {
-            processForm($filters).forEach((value, key) => {
-                content.filters[key] = value;
-            });
+        if ($filters.exists()) {
+            const data = processForm($filters);
+            if (data) {
+                data.forEach((value, key) => {
+                    content.filters[key] = value;
+                });
+            }
         }
 
         ajax.json(content)
             .then(data => {
                 callback(data);
+                if (config.onFilter) {
+                    config.onFilter(data);
+                }
             });
     };
 

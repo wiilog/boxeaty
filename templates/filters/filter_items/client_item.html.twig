@@ -1,2 +1,5 @@
-<select name="{{ name ?? 'client' }}" class="data" data-s2="client" data-placeholder="{{ placeholder ?? 'Client' }}">>
+{%  set required = required is defined and required ? "required" %}
+<select {{ required }} name="{{ name ?? 'client' }}"
+                       class="data" data-s2="client"
+                       data-placeholder="{{ placeholder ?? 'Client' }}">
 </select>

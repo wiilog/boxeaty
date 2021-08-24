@@ -29,9 +29,9 @@ class LocationRepository extends EntityRepository {
             ->addSelect("join_client.name AS client_name")
             ->addSelect("location.active AS active")
             ->addSelect("location.description AS description")
-            ->addSelect("COUNT(box) AS boxes")
             ->addSelect("location.capacity AS capacity")
             ->addSelect("location.type AS locationType")
+            ->addSelect("COUNT(box) AS boxes")
             ->leftJoin("location.client", "join_client")
             ->leftJoin("location.depository", "join_depository")
             ->leftJoin(Box::class, "box", Join::WITH, "box.location = location.id")
@@ -75,12 +75,14 @@ class LocationRepository extends EntityRepository {
                 if ($column === "client_name") {
                     $qb->leftJoin("location.client", "location_client")
                         ->addOrderBy("location_client.name", $order["dir"]);
-                } if ($column === "container_amount") {
+                } else if ($column === "container_amount") {
                     $qb
                         ->leftJoin('location.boxes', 'box')
                         ->groupBy('location')
                         ->addOrderBy("COUNT(box)", $order["dir"]);
-                }else {
+                } else if ($column === "location_type") {
+                    $qb->addOrderBy('location.type', $order["dir"]);
+                } else {
                     $qb->addOrderBy("location.$column", $order["dir"]);
                 }
             }
@@ -112,7 +114,7 @@ class LocationRepository extends EntityRepository {
         }
 
         return $qb->select("location.id AS id, location.name AS text")
-            ->where("location.kiosk = 0")
+            ->andWhere("location.kiosk = 0")
             ->andWhere("location.name LIKE :search")
             ->andWhere("location.active = 1")
             ->setMaxResults(15)
@@ -131,7 +133,7 @@ class LocationRepository extends EntityRepository {
         }
 
         return $qb->select("kiosk.id AS id, kiosk.name AS text")
-            ->where("kiosk.kiosk = 1")
+            ->andWhere("kiosk.kiosk = 1")
             ->andWhere("kiosk.name LIKE :search")
             ->andWhere("kiosk.active = 1")
             ->setMaxResults(15)
@@ -161,7 +163,7 @@ class LocationRepository extends EntityRepository {
     public function getTotalDeposits(): int {
         return $this->createQueryBuilder("kiosk")
             ->select("SUM(kiosk.deposits)")
-            ->where("kiosk.kiosk = 1")
+            ->andWhere("kiosk.kiosk = 1")
             ->getQuery()
             ->getSingleScalarResult();
     }

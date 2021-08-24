@@ -10,10 +10,18 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Attachment {
 
-    public const TYPE_BOX_TYPE_IMAGE = 'TYPE_BOX_TYPE_IMAGE';
+    public const TYPE_BOX_TYPE_IMAGE = "TYPE_BOX_TYPE_IMAGE";
+    public const TYPE_DELIVERY_SIGNATURE = "TYPE_DELIVERY_SIGNATURE";
+    public const TYPE_DELIVERY_PHOTO = "TYPE_DELIVERY_PHOTO";
+    public const TYPE_COLLECT_SIGNATURE = "TYPE_COLLECT_SIGNATURE";
+    public const TYPE_COLLECT_PHOTO = "TYPE_COLLECT_PHOTO";
 
-    public const ATTACHMENT_DIRECTORY_PATHS = [
-        self::TYPE_BOX_TYPE_IMAGE => 'persistent/box_type'
+    public const DIRECTORY_PATHS = [
+        self::TYPE_BOX_TYPE_IMAGE => "persistent/box_type",
+        self::TYPE_DELIVERY_SIGNATURE => "persistent/delivery_signatures",
+        self::TYPE_DELIVERY_PHOTO => "persistent/delivery_photos",
+        self::TYPE_COLLECT_SIGNATURE => "persistent/collect_signatures",
+        self::TYPE_COLLECT_PHOTO => "persistent/collect_photos",
     ];
 
     /**
@@ -73,7 +81,7 @@ class Attachment {
     }
 
     public function getPath(): string {
-        return Attachment::ATTACHMENT_DIRECTORY_PATHS[$this->type] . '/' . $this->serverName;
+        return Attachment::DIRECTORY_PATHS[$this->type] . '/' . $this->serverName;
     }
 
 }
