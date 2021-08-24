@@ -7,8 +7,6 @@ use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
-use App\Entity\Collect;
-use App\Entity\Delivery;
 use App\Entity\DeliveryMethod;
 use App\Entity\GlobalSetting;
 use App\Entity\OrderType;

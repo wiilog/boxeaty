@@ -4,23 +4,23 @@ namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
 use App\Entity\Box;
+use App\Entity\BoxRecord;
 use App\Entity\BoxType;
 use App\Entity\Client;
-use App\Entity\ClientBoxType;
 use App\Entity\ClientOrder;
-use App\Entity\ClientOrderLine;
-use App\Entity\Collect;
-use App\Entity\Delivery;
 use App\Entity\DepositTicket;
+use App\Entity\Group;
+use App\Entity\Location;
 use App\Entity\OrderType;
 use App\Entity\Quality;
 use App\Entity\Role;
-use App\Helper\Form;
-use App\Helper\FormatHelper;
-use App\Repository\QualityRepository;
+use App\Entity\User;
+use App\Service\BoxStateService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -48,8 +48,6 @@ class ExportController extends AbstractController
     public function exportAutonomous(EntityManagerInterface $manager, ExportService $exportService, Request $request): Response
     {
         $query = $request->query;
-        $deliveryRepository = $manager->getRepository(Delivery::class);
-        $collectRepository = $manager->getRepository(Collect::class);
         $depositTicketRepository = $manager->getRepository(DepositTicket::class);
         $boxRepository = $manager->getRepository(Box::class);
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
@@ -57,59 +55,30 @@ class ExportController extends AbstractController
         $clientOrderAutonomousManagementArray = [];
         $clientOrderLines = $clientOrderRepository->findByType(OrderType::AUTONOMOUS_MANAGEMENT, $query->get('from'), $query->get('to'));
 
+        $brokenBoxGroupedByType = $boxRepository->countBrokenGroupedByType();
+        $depositoryValidGroupedByType = $depositTicketRepository->countByStatusGroupedByType(DepositTicket::VALID);
+        $depositorySpentGroupedByType = $depositTicketRepository->countByStatusGroupedByType(DepositTicket::SPENT);
+
         foreach ($clientOrderLines as $clientOrderLine) {
-            $boxDelivered = count($deliveryRepository->findBy(['order'=>$clientOrderLine['clientOrderId']]));
-            $boxCollect = count($collectRepository->findBy(['order'=>$clientOrderLine['clientOrderId']]));
-
-            $tokenDelivered = $deliveryRepository->getDeliveredTokenByClientOrder($clientOrderLine['clientOrderId']);
-
             $boxType = $clientOrderLine['boxTypeId'];
-
-            if ($clientOrderLine['customUnitPrice']) {
-                $clientBoxTypePrice = $clientOrderLine['customUnitPrice'] / $clientOrderLine['lineQuantity'];
-            } else {
-                $clientBoxTypePrice = $clientOrderLine['boxTypePrice'];
-            }
-
             $clientOrder = $clientOrderRepository->findOneBy(['id' => $clientOrderLine['clientOrderId']]);
             $amount = $clientOrder->getTotalAmount();
 
-            $depositTicketValid = 0;
-            $depositTicketSpent = 0;
-
-            $broken = 0;
-            $boxes = $boxRepository->findBy(['type' => $boxType]);
-
-            foreach ($boxes as $box) {
-                $depositoryValid = $depositTicketRepository->findByBoxAndStatus($box->getId(), DepositTicket::VALID);
-                $depositTicketValid += $depositoryValid;
-                $depositorySpent = $depositTicketRepository->findByBoxAndStatus($box->getId(), DepositTicket::SPENT);
-                $depositTicketSpent += $depositorySpent;
-                $boxQuality = $box->getQuality();
-                if ($boxQuality) {
-                    if ($boxQuality->getBroken()) {
-                        $broken++;
-                    }
-                }
-            }
-
             $array = [
-                "clientOrder" => $clientOrderLine['clientOrderId'],
-                "boxDelivered" => $boxDelivered,
-                "boxCollect" => $boxCollect,
-                "tokenDelivered" => $tokenDelivered,
-                "brokenBoxes" => $broken,
+                "clientOrder" => $clientOrderLine['clientOrderNumber'],
                 "boxTypeName" => $clientOrderLine['boxTypeName'],
-                "clientBoxTypePrice" => round($clientBoxTypePrice, 1),
+                "boxDelivered" => $clientOrderLine['lineQuantity'],
+                "tokenDelivered" => $clientOrderLine['deliveryTokens'],
+                "brokenBoxes" => $brokenBoxGroupedByType[$boxType] ?? 0,
+                "unitPrice" => $clientOrderLine['customUnitPrice'] ?? $clientOrderLine['boxTypePrice'],
                 "paymentMode" => $clientOrderLine['paymentModes'],
                 "amount" => $amount,
-                "depositTicketValid" => $depositTicketValid,
-                "depositTicketSpent" => $depositTicketSpent,
+                "depositTicketValid" => $depositoryValidGroupedByType[$boxType] ?? 0,
+                "depositTicketSpent" => $depositorySpentGroupedByType[$boxType] ?? 0,
                 "automatic" => $clientOrderLine['automatic']
             ];
             $clientOrderAutonomousManagementArray[] = $array;
         }
-
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
@@ -128,28 +97,23 @@ class ExportController extends AbstractController
     public function exportOneTimeService(EntityManagerInterface $manager, ExportService $exportService, Request $request): Response
     {
         $query = $request->query;
-        $deliveryRepository = $manager->getRepository(Delivery::class);
+        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
 
+        $clientOrderLines = $clientOrderRepository->findByType(OrderType::ONE_TIME_SERVICE, $query->get('from'), $query->get('to'));
 
-        $clientOrderOneTimeServiceArray = [];
-        $clientOrderLines = $manager->getRepository(ClientOrder::class)->findByType(OrderType::ONE_TIME_SERVICE, $query->get('from'), $query->get('to'));
-        foreach ($clientOrderLines as $clientOrderLine) {
-
-            $tokenDelivered = $deliveryRepository->getDeliveredTokenByClientOrder($clientOrderLine['clientOrderId']);
-
-            $array = [
+        $clientOrderOneTimeServiceArray = Stream::from($clientOrderLines)
+            ->map(fn(array $clientOrderLine) => [
                 "clientOrder" => $clientOrderLine['clientOrderId'],
                 "monthlyPrice" => $clientOrderLine['monthlyPrice'],
                 "deliveryCost" => $clientOrderLine['deliveryCost'],
                 "paymentMode" => $clientOrderLine['paymentModes'],
                 "prorateAmount" => $clientOrderLine['prorateAmount'],
-                "tokenDelivered" => $tokenDelivered,
+                "tokenDelivered" => $clientOrderLine['deliveryTokens'],
                 "crateAmount" => $clientOrderLine['crateAmount'],
                 "cratePrice" => $clientOrderLine['totalCrateTypePrice'],
                 "automatic" => $clientOrderLine['automatic']
-            ];
-            $clientOrderOneTimeServiceArray[] = $array;
-        }
+            ])
+            ->toArray();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
@@ -167,31 +131,66 @@ class ExportController extends AbstractController
     public function exportPurchaseTradeService(EntityManagerInterface $manager, ExportService $exportService, Request $request): Response
     {
         $query = $request->query;
-        $starterKit = $manager->getRepository(BoxType::class)->findStarterKit();
-        $clientOrderOneTimeServiceArray = [];
-        $clientOrderLines = $manager->getRepository(ClientOrder::class)->findByType(OrderType::PURCHASE_TRADE, $query->get('from'), $query->get('to'));
+        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
 
-        foreach ($clientOrderLines as $clientOrderLine) {
-            $array = [
+        $clientOrderLines = $clientOrderRepository->findByType(OrderType::PURCHASE_TRADE, $query->get('from'), $query->get('to'));
+        $clientOrderLinesData = Stream::from($clientOrderLines)
+            ->map(fn(array $clientOrderLine) => [
                 "clientOrder" => $clientOrderLine['clientOrderId'],
-                "clientOrderPrice" => $clientOrderLine['lineQuantity'] * $clientOrderLine['boxTypePrice'],
+                "boxTypeName" => $clientOrderLine['boxTypeName'],
+                "unitPrice" => $clientOrderLine['customUnitPrice'] ?? $clientOrderLine['boxTypePrice'],
                 "boxAmount" => $clientOrderLine['lineQuantity'],
-                "starterKit" => $starterKit['price'],
                 "deliveryPrice" => $clientOrderLine['deliveryPrice'],
                 "automatic" => $clientOrderLine['automatic']
-            ];
-            $clientOrderOneTimeServiceArray[] = $array;
-        }
-
+            ])
+            ->toArray();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function ($output) use ($exportService, $clientOrderOneTimeServiceArray) {
-            foreach ($clientOrderOneTimeServiceArray as $array) {
+        return $exportService->export(function ($output) use ($exportService, $clientOrderLinesData) {
+            foreach ($clientOrderLinesData as $array) {
                 $exportService->putLine($output, $array);
             }
         }, "export-client-order-trade-$today.csv", ExportService::CLIENT_ORDER_TRADE);
+    }
+
+    /**
+     * @Route("/global", name="global_export")
+     * @HasPermission(Role::MANAGE_EXPORTS)
+     */
+    public function export(ExportService $exportService): Response {
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->disconnectWorksheets();
+
+        $exportService->createWorksheet($spreadsheet, "Box", Box::class, ExportService::BOX_HEADER, function(array $row) {
+            $row["state"] = isset($row["state"]) ? BoxStateService::BOX_STATES[$row["state"]] : '';
+            return $row;
+        });
+        $exportService->createWorksheet($spreadsheet, "Mouvements", BoxRecord::class, ExportService::MOVEMENT_HEADER, function(array $row) {
+            $row["state"] = isset($row["state"]) ? BoxStateService::RECORD_STATES[$row["state"]] : '';
+            return $row;
+        });
+        $exportService->createWorksheet($spreadsheet, "Tickets-consigne", DepositTicket::class, ExportService::DEPOSIT_TICKET_HEADER, function(array $row) {
+            $row["state"] = isset($row["state"]) ? DepositTicket::NAMES[$row["state"]] : '';
+            return $row;
+        });
+
+        $exportService->createWorksheet($spreadsheet, "Emplacements", Location::class, ExportService::LOCATION_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Clients", Client::class, ExportService::CLIENT_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Groupes", Group::class, ExportService::GROUP_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Types de Box", BoxType::class, ExportService::BOX_TYPE_HEADER);
+
+        $exportService->createWorksheet($spreadsheet, "Utilisateurs", User::class, ExportService::USER_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Rôles", Role::class, ExportService::ROLE_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Qualités", Quality::class, ExportService::QUALITY_HEADER);
+
+        $file = "exports/export-general-" . bin2hex(random_bytes(8)) . ".xlsx";
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($file);
+
+        return $this->redirect("/$file");
     }
 
 }

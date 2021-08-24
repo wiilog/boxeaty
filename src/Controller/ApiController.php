@@ -817,7 +817,7 @@ class ApiController extends AbstractController {
             $record = $boxRecordService->createBoxRecord($box, true);
             $record
                 ->setBox($box)
-                ->setState(BoxStateService::STATE_RECORD_IDENTIFIED)
+                ->setState(BoxStateService::STATE_BOX_IDENTIFIED)
                 ->setUser($this->user);
             $manager->persist($record);
         }
@@ -1129,7 +1129,7 @@ class ApiController extends AbstractController {
                 $record = $boxRecordService->createBoxRecord($box, true);
                 $record
                     ->setBox($box)
-                    ->setState(BoxStateService::STATE_RECORD_IDENTIFIED)
+                    ->setState(BoxStateService::STATE_BOX_IDENTIFIED)
                     ->setUser($this->user);
 
                 $manager->persist($record);
@@ -1187,7 +1187,7 @@ class ApiController extends AbstractController {
                 $oldComment = $crate->getComment();
 
                 $crate
-                    ->setState(BoxStateService::STATE_RECORD_PACKING)
+                    ->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
                     ->setLocation($dropLocation);
 
                 [$tracking, $record] = $boxRecordService->generateBoxRecords(

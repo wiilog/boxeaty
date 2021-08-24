@@ -212,30 +212,6 @@ class ClientOrderService
         return $handledCartLines ?? null;
     }
 
-    public function createClientOrderLine(ClientOrder $clientOrder,
-                                          EntityManagerInterface $entityManager,
-                                          Request $request): ?ClientOrderLine
-    {
-        $boxTypeRepository = $entityManager->getRepository(BoxType::class);
-        $form = Form::create();
-        $content = (object)$request->request->all();
-        $quantity = $content->quantity;
-        $boxType = $boxTypeRepository->findBy(["id" => $content->boxTypeId]);
-        if ($form->isValid()) {
-            for ($i = 0; $i < count($boxType); $i++) {
-                $clientOrderLine = (new ClientOrderLine())
-                    ->setClientOrder($clientOrder)
-                    ->setBoxType($boxType[$i])
-                    ->setQuantity($quantity[$i]);
-                $entityManager->persist($clientOrder);
-                $entityManager->flush();
-            }
-        }
-
-
-        return $clientOrderLine ?? null;
-    }
-
     /**
      * @return array|Box[]|DepositTicket[]
      */

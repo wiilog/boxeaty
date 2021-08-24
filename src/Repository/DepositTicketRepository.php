@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Helper\QueryHelper;
 use DateTime;
 use Doctrine\ORM\EntityRepository;
+use WiiCommon\Helper\Stream;
 
 /**
  * @method DepositTicket|null find($id, $lockMode = null, $lockVersion = null)
@@ -169,17 +170,21 @@ class DepositTicketRepository extends EntityRepository {
             ->getResult();
     }
 
-    public function findByBoxAndStatus($box, $status){
-        return $this->createQueryBuilder("deposit_ticket")
-            ->select("COUNT(deposit_ticket.id)")
-            ->join("deposit_ticket.box", "box")
-            ->join("box.type", "type")
-            ->andWhere("box.id LIKE :boxId")
-            ->andWhere("deposit_ticket.state = :valid")
-            ->setParameter("valid", $status)
-            ->setParameter("boxId", $box)
+    public function countByStatusGroupedByType(string $status): array {
+        $res = $this->createQueryBuilder("deposit_ticket")
+            ->select("COUNT(deposit_ticket.id) AS count")
+            ->addSelect('join_box_type.id AS type')
+            ->join("deposit_ticket.box", "join_box")
+            ->join("join_box.type", "join_box_type")
+            ->andWhere("deposit_ticket.state = :status")
+            ->groupBy('join_box_type.id')
+            ->setParameter("status", $status)
             ->getQuery()
-            ->getSingleScalarResult();
+            ->getResult();
+
+        return Stream::from($res)
+            ->keymap(fn (array $line) => [$line['type'], $line['count']])
+            ->toArray();
     }
 
 }

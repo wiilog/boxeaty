@@ -4,7 +4,6 @@ namespace App\Repository;
 
 use App\Entity\Box;
 use App\Entity\Depository;
-use App\Entity\Preparation;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use App\Service\BoxStateService;
@@ -257,4 +256,20 @@ class BoxRepository extends EntityRepository {
             ->getResult();
     }
 
+    public function countBrokenGroupedByType(): array {
+        $queryBuilder = $this->createQueryBuilder('box');
+        $res = $queryBuilder
+            ->select('COUNT(box.id) AS count')
+            ->addSelect('join_type.id AS type')
+            ->join('box.quality', 'join_quality')
+            ->join('box.type', 'join_type')
+            ->andWhere('join_quality.broken = true')
+            ->groupBy('join_type.id')
+            ->getQuery()
+            ->getResult();
+
+        return Stream::from($res)
+            ->keymap(fn (array $line) => [$line['type'], $line['count']])
+            ->toArray();
+    }
 }

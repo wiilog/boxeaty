@@ -1,5 +1,4 @@
 import '../app';
-
 import $ from "jquery";
 
 $(document).ready(() => {
@@ -10,10 +9,8 @@ $(document).ready(() => {
                 to: $("input[name=to]").val()
             });
             $('.error').text('');
-            $('.export-autonomous-management').removeClass('disabled');
         } else {
             $('.error').text('Veuillez renseigner une date de début et une date de fin');
-            $('.export-autonomous-management').addClass('disabled');
         }
     });
 
@@ -24,10 +21,8 @@ $(document).ready(() => {
                 to: $("input[name=to]").val()
             });
             $('.error').text('');
-            $('.export-one-time-service').removeClass('disabled');
         } else {
             $('.error').text('Veuillez renseigner une date de début et une date de fin');
-            $('.export-one-time-service').addClass('disabled');
         }
     });
 
@@ -38,10 +33,8 @@ $(document).ready(() => {
                 to: $("input[name=to]").val()
             });
             $('.error').text('');
-            $('.export-trade-service').removeClass('disabled');
         } else {
             $('.error').text('Veuillez renseigner une date de début et une date de fin');
-            $('.export-trade-service').addClass('disabled');
         }
     });
 });

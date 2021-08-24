@@ -32,18 +32,4 @@ class DeliveryRepository extends EntityRepository
         return $result ? intval($result) : 0;
     }
 
-    public function getDeliveredTokenByClientOrder($clientOrder)
-    {
-        $qb = $this->createQueryBuilder('delivery')
-            ->select('delivery.tokens')
-            ->where('delivery.order =:clientOrder')
-            ->setParameters([
-                'clientOrder' => $clientOrder,
-            ]);
-        $result = $qb
-            ->getQuery()
-            ->getResult();
-        return $result ? intval($result) : 0;
-    }
-
 }

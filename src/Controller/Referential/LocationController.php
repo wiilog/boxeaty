@@ -9,7 +9,6 @@ use App\Entity\Client;
 use App\Entity\Depository;
 use App\Entity\Location;
 use App\Entity\Role;
-use App\Entity\Status;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\LocationRepository;

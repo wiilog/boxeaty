@@ -31,6 +31,7 @@ class ClientOrderRepository extends EntityRepository {
             ->addSelect('client_order.automatic as automatic')
             ->addSelect('client_order.number as clientOrderNumber')
             ->addSelect('client_order.deliveryPrice as deliveryPrice')
+            ->addSelect('delivery.tokens as deliveryTokens')
             ->addSelect('deliveryRound.cost as deliveryCost')
             ->addSelect('lines.id as lineId')
             ->addSelect('lines.customUnitPrice as customUnitPrice')
@@ -46,6 +47,7 @@ class ClientOrderRepository extends EntityRepository {
             ->addSelect('orderRecurrence.crateAmount as crateAmount')
             ->leftJoin('client_order.client', 'client')
             ->leftJoin('client_order.deliveryRound', 'deliveryRound')
+            ->leftJoin('client_order.delivery', 'delivery')
             ->leftJoin('client.clientOrderInformation', 'information')
             ->leftJoin('information.orderRecurrence', 'orderRecurrence')
             ->leftJoin('client_order.lines', 'lines')
@@ -57,7 +59,7 @@ class ClientOrderRepository extends EntityRepository {
                 "typeCode" => $type,
                 'dateMin' => $dateMin,
                 'dateMax' => $dateMax,
-                ])
+            ])
             ->getQuery()
             ->getResult();
     }

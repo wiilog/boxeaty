@@ -84,12 +84,11 @@ class ExportService {
 
     public const CLIENT_ORDER_HEADER_AUTONOMOUS_MANAGEMENT = [
         "Commande client",
+        "Type de Box",
         "Box livrées",
-        "Box collectées",
         "Jeton livrés",
         "Box cassées",
-        "Type de Box",
-        "Cout unitaire",
+        "Coût unitaire",
         "Moyen de paiement",
         "Prix total des boxes",
         "Nombre de passage en caisse",
@@ -111,9 +110,9 @@ class ExportService {
 
     public const CLIENT_ORDER_TRADE = [
         "Numéros de commande",
+        "Type de Box",
+        "Tarif unitaire",
         "Nombre de box",
-        "Tarif de la commande",
-        "Montant kit de lancement",
         "Frais de livraison",
         "Commande automatic"
     ];
