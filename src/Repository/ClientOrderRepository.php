@@ -225,4 +225,15 @@ class ClientOrderRepository extends EntityRepository {
             ->getSingleScalarResult();
         return $result ? intval($result) : 0;
     }
+
+    public function getTotalBox($clientOrder){
+        $result = $this->createQueryBuilder("clientOrder")
+            ->select('SUM(lines.quantity)')
+            ->leftJoin('clientOrder.lines','lines')
+            ->andWhere("clientOrder.id = :clientOrder")
+            ->setParameter("clientOrder", $clientOrder)
+            ->getQuery()
+            ->getSingleScalarResult();
+        return $result ? intval($result) : 0;
+    }
 }

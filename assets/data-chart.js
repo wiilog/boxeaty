@@ -19,7 +19,7 @@ Chart.register(
     PointElement);
 
 export default class ChartJS {
-    static new($canva, config) {
+    static line($canva, config) {
         config.options = {
             elements: {
                 line: {
@@ -31,14 +31,18 @@ export default class ChartJS {
                 }
             },
             scales: {
-                yAxes: [{
+                y: {
                     display: true,
-                    ticks: {
-                        suggestedMin: 0,
-                    },
-                }]
+                    beginAtZero: true,
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
             }
         };
-        let chart = new Chart($canva, config);
+
+        return new Chart($canva, config);
     }
 }

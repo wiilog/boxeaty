@@ -91,7 +91,7 @@ class Box {
     private ?DateTime $creationDate;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Collect::class, mappedBy="boxes")
+     * @ORM\ManyToMany(targetEntity=Collect::class, mappedBy="crates")
      */
     private Collection $collects;
 
@@ -354,7 +354,7 @@ class Box {
     public function addCollect(Collect $collect): self {
         if (!$this->collects->contains($collect)) {
             $this->collects[] = $collect;
-            $collect->addBox($this);
+            $collect->addCrate($this);
         }
 
         return $this;
@@ -362,7 +362,7 @@ class Box {
 
     public function removeCollect(Collect $collect): self {
         if ($this->collects->removeElement($collect)) {
-            $collect->removeBox($this);
+            $collect->removeCrate($this);
         }
 
         return $this;
