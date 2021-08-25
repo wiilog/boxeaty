@@ -22,3 +22,5 @@ doctrine:
                 IF: DoctrineExtensions\Query\Mysql\IfElse
                 REPLACE: DoctrineExtensions\Query\Mysql\Replace
                 DATE_FORMAT: DoctrineExtensions\Query\Mysql\DateFormat
+                DAY: DoctrineExtensions\Query\Mysql\Day
+                MONTH: DoctrineExtensions\Query\Mysql\Month

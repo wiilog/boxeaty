@@ -9,67 +9,57 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ClientOrderInformation {
 
-    public const BUY = 0;
-    public const MANAGE = 1;
-    public const BENEFIT = 2;
-
-    public const ORDER_TYPES = [
-        self::BUY => 'Achat / Négoce',
-        self::MANAGE => 'Gestion autonome',
-        self::BENEFIT => 'Prestation ponctuelle',
-    ];
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id = null;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="decimal", precision=8, scale=2)
      */
-    private $depositoryDistance;
+    private ?string $depositoryDistance;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $tokenAmount;
+    private ?int $tokenAmount;
 
     /**
      * @ORM\Column(type="json", nullable=true)
      */
-    private $orderTypes = [];
+    private ?array $orderTypes = [];
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
      */
-    private $isClosedParkOrder;
+    private ?bool $isClosedParkOrder;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="decimal", precision=8, scale=2)
      */
-    private $workingDayDeliveryRate;
+    private ?string $workingDayDeliveryRate;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="decimal", precision=8, scale=2)
      */
-    private $nonWorkingDayDeliveryRate;
+    private ?string $nonWorkingDayDeliveryRate;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="decimal", precision=8, scale=2)
      */
-    private $serviceCost;
+    private ?string $serviceCost;
 
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    private $comment;
+    private ?string $comment;
 
     /**
      * @ORM\ManyToOne(targetEntity=DeliveryMethod::class, inversedBy="clientOrderInformation")
      */
-    private $deliveryMethod;
+    private ?DeliveryMethod $deliveryMethod;
 
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clientOrderInformation")
@@ -122,7 +112,11 @@ class ClientOrderInformation {
 
     public function setOrderTypes(?array $orderTypes): self
     {
-        $this->orderTypes = $orderTypes;
+        if(!$orderTypes || $orderTypes[0] == null) {
+            $this->orderTypes = [];
+        } else {
+            $this->orderTypes = $orderTypes;
+        }
 
         return $this;
     }

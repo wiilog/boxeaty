@@ -1277,7 +1277,7 @@ class ApiController extends AbstractController {
         $pickLocation = $locationRepository->findOneBy(['name' => $data->location->name]);
         $client = $clientRepository->findOneBy(['name' => $data->location->client]);
 
-        $number = $uniqueNumberService->createUniqueNumber($manager, Collect::PREFIX_NUMBER, Collect::class);
+        $number = $uniqueNumberService->createUniqueNumber(Collect::class);
 
         if($data->data->photo) {
             $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);

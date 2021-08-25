@@ -5,8 +5,8 @@ namespace App\Controller\Referential;
 use App\Annotation\HasPermission;
 use App\Entity\BoxType;
 use App\Entity\Client;
-use App\Entity\CratePatternLine;
 use App\Entity\ClientOrderInformation;
+use App\Entity\CratePatternLine;
 use App\Entity\DeliveryMethod;
 use App\Entity\Depository;
 use App\Entity\GlobalSetting;
@@ -479,8 +479,8 @@ class ClientController extends AbstractController {
      * @Route("/modifier-crate-pattern-line/{cratePatternLine}", name="crate_pattern_line_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function cratePatternLineEdit(Request $request,
-                                         CratePatternLine $cratePatternLine,
+    public function cratePatternLineEdit(Request                $request,
+                                         CratePatternLine       $cratePatternLine,
                                          EntityManagerInterface $manager): Response {
         $form = Form::create();
 
@@ -531,7 +531,7 @@ class ClientController extends AbstractController {
             'template' => $this->renderView('referential/client/order_recurrence.html.twig', [
                 'clientOrderInformation' => $client->getClientOrderInformation() ?? null,
             ]),
-            'orderRecurrencePrice' => $orderRecurrence ? $orderRecurrence->getFrequency() * $crateTypePrice : 0,
+            'orderRecurrencePrice' => $orderRecurrence ? $orderRecurrence->getPeriod() * $crateTypePrice : 0,
         ]);
     }
 
@@ -587,7 +587,7 @@ class ClientController extends AbstractController {
 
         if ($form->isValid()) {
             $orderRecurrence
-                ->setFrequency($content->frequency)
+                ->setPeriod($content->period)
                 ->setCrateAmount($content->crateAmount)
                 ->setDay($content->day)
                 ->setStart(new DateTime($content->start))
@@ -615,8 +615,8 @@ class ClientController extends AbstractController {
 
         $content = (object)$request->request->all();
 
-        if ($content->frequency < 0) {
-            $form->addError("frequency", "La fréquence doit être supérieure ou égale à 0");
+        if ($content->period < 0) {
+            $form->addError("period", "La période doit être supérieure ou égale à 0");
         } elseif ($content->crateAmount < 0) {
             $form->addError("crateAmount", "Le nombre de caisses doit être supérieur ou égal à 0");
         } elseif (new DateTime($content->end) < new DateTime($content->start)) {
@@ -635,19 +635,23 @@ class ClientController extends AbstractController {
                 ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
                 ->sum();
 
-            $orderRecurrence = (new OrderRecurrence())
-                ->setFrequency($content->frequency)
+            $recurrence = (new OrderRecurrence())
+                ->setPeriod($content->period)
                 ->setCrateAmount($content->crateAmount)
                 ->setDay($content->day)
                 ->setStart(new DateTime($content->start))
                 ->setEnd(new DateTime($content->end))
                 ->setDeliveryFlatRate($content->deliveryFlatRate)
                 ->setServiceFlatRate($content->serviceFlatRate)
-                ->setMonthlyPrice($crateTypePrice * (int)$content->frequency);
+                ->setLastEdit(new DateTime());
 
-            $clientOrderInformation->setOrderRecurrence($orderRecurrence);
+            $diff = $recurrence->getStart()->diff($recurrence->getEnd(), true);
+            $frequency = ($diff->days / 7) / $content->period;
+            $recurrence->setMonthlyPrice($crateTypePrice * $frequency);
 
-            $manager->persist($orderRecurrence);
+            $clientOrderInformation->setOrderRecurrence($recurrence);
+
+            $manager->persist($recurrence);
             $manager->flush();
 
             return $this->json([

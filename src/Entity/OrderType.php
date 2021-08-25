@@ -14,6 +14,12 @@ class OrderType {
     public const AUTONOMOUS_MANAGEMENT = "AUTONOMOUS_MANAGEMENT";
     public const ONE_TIME_SERVICE = "ONE_TIME_SERVICE";
 
+    public const LABELS = [
+        self::PURCHASE_TRADE => "Achat / Négoce",
+        self::AUTONOMOUS_MANAGEMENT => "Gestion autonome",
+        self::ONE_TIME_SERVICE => "Prestation ponctuelle",
+    ];
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

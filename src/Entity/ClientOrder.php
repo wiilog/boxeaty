@@ -17,7 +17,7 @@ class ClientOrder {
 
     use StatusTrait;
 
-    public const PREFIX_NUMBER = 'CO';
+    public const PREFIX_NUMBER = "CO";
 
     /**
      * @ORM\Id

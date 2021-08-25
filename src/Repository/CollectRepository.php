@@ -67,9 +67,11 @@ class CollectRepository extends EntityRepository {
             ->where('collect.number LIKE :value')
             ->orderBy('collect.createdAt', 'DESC')
             ->addOrderBy('collect.number', 'DESC')
+            ->setMaxResults(1)
             ->setParameter('value', Collect::PREFIX_NUMBER . $date . '%')
             ->getQuery()
             ->execute();
+
         return $result ? $result[0]['number'] : null;
     }
 

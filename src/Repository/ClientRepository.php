@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Client;
 use App\Entity\User;
 use App\Helper\QueryHelper;
+use DateTime;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -181,6 +182,25 @@ class ClientRepository extends EntityRepository {
             ->setParameter("search", "%$search%")
             ->getQuery()
             ->getArrayResult();
+    }
+
+    public function findActiveRecurrence(): array {
+        $now = new DateTime("today midnight");
+
+        return $this->createQueryBuilder("client")
+            ->join("client.clientOrderInformation", "client_order_information")
+            ->join("client.cratePatternLines", "crate_pattern_lines")
+            ->join("client_order_information.orderRecurrence", "recurrence")
+            ->andWhere("client.active = 1")
+            ->andWhere("recurrence.id IS NOT NULL")
+            ->andWhere("recurrence.start <= :now")
+            ->andWhere("recurrence.end >= :now")
+            ->andWhere("crate_pattern_lines.id IS NOT NULL")
+            ->andWhere("DAY(recurrence.lastEdit) = DAY(:now)")
+            ->andWhere("MONTH(recurrence.lastEdit) = MONTH(:now)")
+            ->setParameter("now", $now)
+            ->getQuery()
+            ->getResult();
     }
 
 }
