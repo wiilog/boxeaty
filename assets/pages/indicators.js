@@ -50,7 +50,7 @@ $(function () {
         } else {
             $container.replaceWith(`
             <div id="indicatorsChart" class="d-flex flex-column align-items-center h-100 justify-content-center">
-                <i class="fas fa-exclamation-circle fa-2x"></i>
+                <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
                 <span>Un couple de filtres client/dates est nécessaire afin d'afficher le graphique</span>
             </div>
         `);

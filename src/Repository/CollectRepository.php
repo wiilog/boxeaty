@@ -55,9 +55,7 @@ class CollectRepository extends EntityRepository {
             ->leftJoin('collect.pickLocation', 'join_pickLocation')
             ->where('join_status.code = :status')
             ->groupBy('id')
-            ->setParameter('status', Status::CODE_COLLECT_TRANSIT);
-
-        return $qb
+            ->setParameter('status', Status::CODE_COLLECT_TRANSIT)
             ->getQuery()
             ->getArrayResult();
     }

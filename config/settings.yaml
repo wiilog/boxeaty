@@ -3,13 +3,13 @@ parameters:
 
   permissions:
     Menu Paramétrage:
-      App\Entity\Role::MANAGE_USERS: Créer, modifier, supprimer les utilisateurs
+      App\Entity\Role::MANAGE_USERS: Gérer les utilisateurs
       App\Entity\Role::MANAGE_ROLES: Créer, modifier les rôles
       App\Entity\Role::MANAGE_IMPORTS: Accès à l'import des données
 
     Menu Traçabilité:
-      App\Entity\Role::MANAGE_BOXES: Créer, modifier, supprimer les Box
-      App\Entity\Role::MANAGE_MOVEMENTS: Créer, modifier, supprimer les mouvement
+      App\Entity\Role::MANAGE_BOXES: Gérer les Box
+      App\Entity\Role::MANAGE_MOVEMENTS: Gérer les mouvement
       App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer, supprimer les tickets‑consignes
 
     Menu Opérations:
@@ -21,9 +21,9 @@ parameters:
       App\Entity\Role::VIEW_INDICATORS: Voir les indicateurs
 
     Menu Référentiel:
-      App\Entity\Role::MANAGE_CLIENTS: Créer, modifier, supprimer les clients
+      App\Entity\Role::MANAGE_CLIENTS: Gérer les clients
       App\Entity\Role::MANAGE_GROUPS: Créer, modifier les groupes
-      App\Entity\Role::MANAGE_LOCATIONS: Créer, modifier, supprimer les emplacements
+      App\Entity\Role::MANAGE_LOCATIONS: Gérer les emplacements
       App\Entity\Role::MANAGE_BOX_TYPES: Créer, modifier les types de Box
       App\Entity\Role::MANAGE_DEPOSITORIES: Créer, modifier les dépôts
 
