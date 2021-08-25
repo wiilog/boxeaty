@@ -75,8 +75,7 @@ class CreateOrdersCommand extends Command {
             }
 
             if ($date <= $end) {
-                $type = $client->getClientOrderInformation()->getOrderTypes()[0] ?? OrderType::PURCHASE_TRADE;
-                $type = $this->manager->getRepository(OrderType::class)->findOneBy(["code" => $type]);
+                $type = $this->manager->getRepository(OrderType::class)->findOneByCode(OrderType::RECURRENT);
 
                 $order = (new ClientOrder())
                     ->setAutomatic(true)
