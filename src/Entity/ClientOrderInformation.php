@@ -17,14 +17,19 @@ class ClientOrderInformation {
     private ?int $id = null;
 
     /**
+     * @ORM\OneToOne(targetEntity=Client::class, mappedBy="clientOrderInformation", cascade={"persist", "remove"})
+     */
+    private ?Client $client = null;
+
+    /**
      * @ORM\Column(type="decimal", precision=8, scale=2)
      */
-    private ?string $depositoryDistance;
+    private ?string $depositoryDistance = null;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private ?int $tokenAmount;
+    private ?int $tokenAmount = null;
 
     /**
      * @ORM\Column(type="json", nullable=true)
@@ -34,32 +39,32 @@ class ClientOrderInformation {
     /**
      * @ORM\Column(type="boolean", nullable=true)
      */
-    private ?bool $isClosedParkOrder;
+    private ?bool $isClosedParkOrder = null;
 
     /**
      * @ORM\Column(type="decimal", precision=8, scale=2)
      */
-    private ?string $workingDayDeliveryRate;
+    private ?string $workingDayDeliveryRate = null;
 
     /**
      * @ORM\Column(type="decimal", precision=8, scale=2)
      */
-    private ?string $nonWorkingDayDeliveryRate;
+    private ?string $nonWorkingDayDeliveryRate = null;
 
     /**
      * @ORM\Column(type="decimal", precision=8, scale=2)
      */
-    private ?string $serviceCost;
+    private ?string $serviceCost = null;
 
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    private ?string $comment;
+    private ?string $comment = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=DeliveryMethod::class, inversedBy="clientOrderInformation")
      */
-    private ?DeliveryMethod $deliveryMethod;
+    private ?DeliveryMethod $deliveryMethod = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clientOrderInformation")
@@ -67,14 +72,9 @@ class ClientOrderInformation {
     private ?Depository $depository = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=Client::class, mappedBy="clientOrderInformation", cascade={"persist", "remove"})
-     */
-    private $client;
-
-    /**
      * @ORM\OneToOne(targetEntity=OrderRecurrence::class, cascade={"persist", "remove"})
      */
-    private $orderRecurrence;
+    private ?OrderRecurrence $orderRecurrence = null;
 
     public function getId(): ?int
     {
