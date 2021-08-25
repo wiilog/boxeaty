@@ -16,6 +16,8 @@
 {% block bodyclass %}home{% endblock %}
 {% block content %}
     <div class="box home first-box">
+        <h1 class="mb-5">Bienvenue !</h1>
+
         {% if redirection or display_new_command  %}
             <div class="instructions">
                 <div id="scan-box">
@@ -46,7 +48,6 @@
                     <span>Nouvelle commande client</span>
                 </div>
             </div>
-            <h1 class="mb-4">Bienvenue !</h1>
         {% endif %}
     </div>
 {% endblock %}

@@ -1,8 +1,10 @@
+<p>Pour que les les commandes récurrentes fonctionnent, un type de mobilité, un dépôt et un modèle de caisse doivent être définis pour ce client.</p>
+
 <div class="row">
     {% set orderRecurrence = orderRecurrence is defined and orderRecurrence ? orderRecurrence : null %}
     <div class="text-form-wrapper">
         Tous les
-            <input type="number" name="frequency" class="data" value="{{ orderRecurrence ? orderRecurrence.frequency }}" required> semaines, livrer
+            <input type="number" name="period" class="data" value="{{ orderRecurrence ? orderRecurrence.period }}" required> semaines, livrer
             <input type="number" name="crateAmount" class="data" value="{{ orderRecurrence ? orderRecurrence.crateAmount }}" required> caisses le
             <select name="day" class="data" required>
                 {% for index, day in constant('App\\Helper\\FormatHelper::WEEK_DAYS') | slice(0, -1) %}

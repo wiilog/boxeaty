@@ -44,22 +44,11 @@ $(function() {
         }
     });
 
-    let toggleCratesAmountToCollect = false;
     $document.on(`change`, `[name="type"]`, function(){
         const $modal = $(this).closest(`.modal`);
-        const type = $(this).data('code');
+        onTypeChange($modal);
 
-        $modal.find('.crates-amount-to-collect-container').hide();
-        $modal.find('[name="collectRequired"]').prop('checked', false);
-        $modal.find('[name="cratesAmountToCollect"]').prop('required', false);
-        const $autonomousManagement = $modal.find('.autonomous-management');
-        if(type === 'AUTONOMOUS_MANAGEMENT'){
-            toggleCratesAmountToCollect = true;
-            $autonomousManagement.removeClass('d-none');
-        } else{
-            toggleCratesAmountToCollect = false;
-            $autonomousManagement.addClass('d-none');
-        }
+        const type = $(this).data('code');
 
         const starterKit = JSON.parse($(`#starterKit`).val());
         if (starterKit) {
@@ -67,44 +56,30 @@ $(function() {
                 addBoxTypeToCart($modal, starterKit);
             } else {
                 $modal.find('.box-type-line[data-id=' + starterKit.id + ']').remove();
-                $modal.find(`.empty-cart`).removeClass(`d-none`);
             }
         }
     });
 
     $document.on(`change`, `[name="collectRequired"]`, function(){
         const $modal = $(this).closest(`.modal`);
-
-        if (toggleCratesAmountToCollect) {
+        const $type = $modal.find('[name="type"]:checked');
+        if ($type.data('code') === 'AUTONOMOUS_MANAGEMENT') {
             $modal.find('.crates-amount-to-collect-container').toggle();
             $modal.find('[name="cratesAmountToCollect"]').prop('required', $(this).is(':checked'));
         }
     });
 
-    let clientData;
     $document.on(`change`, `[name="client"]`, function(){
         const $modal = $(this).closest(`.modal`);
-        clientData = $(this).select2('data')[0];
-        const $clientAddress = $modal.find(`.clientAddress`);
-        const $servicePrice = $modal.find(`.servicePrice`);
-
-        if(clientData) {
-            $clientAddress.text(clientData.address);
-            $servicePrice.text("Frais de service " + StringHelper.formatPrice(clientData.serviceCost));
-            $('.transport').find('input[name=deliveryMethod]').each(function() {
-                if(parseInt($(this).val()) === parseInt(clientData.deliveryMethod)) {
-                    $(this).prop('checked', true);
-                }
-            });
-        } else {
-            $clientAddress.text("");
-            $servicePrice.text("");
-        }
-        updateDeliveryFee(clientData, $modal.find('[name="date"]'));
+        updateModalFees($modal);
     });
 
     $document.on(`change`, `[name="date"]`, function(){
-        updateDeliveryFee(clientData, $(this));
+        const $date = $(this);
+        const $modal = $date.closest(`.modal`);
+        const $client = $modal.find('[name="client"]');
+        const [clientData] = $client.select2('data');
+        updateDeliveryFee(clientData, $date);
     });
 
     $document.on(`click`, `.add-box-to-cart-button`, function(){
@@ -180,7 +155,6 @@ function openOrderShowModal(clientOrderId) {
 
 function openOrderEditModal(clientOrderId) {
     const ajax = AJAX.route(`GET`, `client_order_edit_template`, {clientOrder: clientOrderId});
-
     Modal.load(ajax, {
         table: '#table-client-order',
         success: (response) => {
@@ -193,6 +167,9 @@ function openOrderEditModal(clientOrderId) {
             for (const line of cartContent) {
                 addBoxTypeToCart(modal.element, line);
             }
+
+            updateModalFees(modal.element);
+            onTypeChange(modal.element);
 
             const newUrl = URL.createRequestQuery({
                 action: 'edit',
@@ -435,7 +412,14 @@ function updateDeliveryFee(clientData, $date) {
     if (clientData) {
         const date = new Date($date.val());
         // week-end
-        const deliveryFee = (date.getDay() === 6 || date.getDay() === 0)
+        const workFreeDays = JSON.parse($modal.find('[name="workFreeDay"]').val());
+        let isFreeDay = false;
+        workFreeDays.forEach(function (workFreeDay){
+            if(workFreeDay[0] === date.getDate() && workFreeDay[1] === date.getMonth()+1){
+                isFreeDay = true;
+            }
+        })
+        const deliveryFee = (date.getDay() === 6 || date.getDay() === 0 || isFreeDay)
             ? clientData.nonWorkingRate
             : clientData.workingRate;
         $deliveryPrice.text(`Frais de transport (HT) ${StringHelper.formatPrice(deliveryFee)}`);
@@ -472,5 +456,43 @@ function updateCrateNumberAverage($modal) {
                     $crateAmountLabel.addClass('d-none');
                 }
             });
+    }
+}
+
+function updateModalFees($modal) {
+    const $client = $modal.find('[name="client"]');
+    const [clientData] = $client.select2('data');
+    const $clientAddress = $modal.find(`.client-address`);
+    const $servicePrice = $modal.find(`.servicePrice`);
+
+    if(clientData) {
+        $clientAddress.text(clientData.address);
+        $servicePrice.text("Frais de service " + StringHelper.formatPrice(clientData.serviceCost));
+        $('.transport').find('input[name=deliveryMethod]').each(function() {
+            if(parseInt($(this).val()) === parseInt(clientData.deliveryMethod)) {
+                $(this).prop('checked', true);
+            }
+        });
+    } else {
+        $clientAddress.text("");
+        $servicePrice.text("");
+    }
+    updateDeliveryFee(clientData, $modal.find('[name="date"]'));
+}
+
+function onTypeChange($modal) {
+    const $type = $modal.find('[name="type"]:checked');
+    const type = $type.data('code');
+    const $autonomousManagement = $modal.find('.autonomous-management');
+    $modal.find('[name="cratesAmountToCollect"]').prop('required', false);
+    $autonomousManagement.addClass('d-none');
+    $modal.find('.cratesAmountToCollect').prop('required', false);
+    $modal.find('.crates-amount-to-collect-container').hide();
+    if(type === 'AUTONOMOUS_MANAGEMENT'){
+        $autonomousManagement.removeClass('d-none');
+        if($modal.find('[name="collect"]') && $modal.find('[name="collect"]').val() == 1){
+            $modal.find('[name="collectRequired"]').prop('checked', true);
+            $modal.find('.crates-amount-to-collect-container').show();
+        }
     }
 }

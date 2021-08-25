@@ -14,6 +14,18 @@ class OrderType {
     public const AUTONOMOUS_MANAGEMENT = "AUTONOMOUS_MANAGEMENT";
     public const ONE_TIME_SERVICE = "ONE_TIME_SERVICE";
 
+    public const SELECTABLE = [
+        self::PURCHASE_TRADE,
+        self::AUTONOMOUS_MANAGEMENT,
+        self::ONE_TIME_SERVICE
+    ];
+
+    public const LABELS = [
+        self::PURCHASE_TRADE => "Achat/négoce",
+        self::AUTONOMOUS_MANAGEMENT => "Gestion autonome",
+        self::ONE_TIME_SERVICE => "Prestation ponctuelle",
+    ];
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

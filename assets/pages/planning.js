@@ -277,7 +277,6 @@ function updateSubmitButtonLabel(modal) {
     const $submitButton = modal.element.find('.submit-button');
 
     $submitButton.attr(`disabled`, !$ordersToStart.exists());
-    console.log(isStockValid(modal))
     if($ordersToStart.exists() && isStockValid(modal)) {
         $submitButton.text("Valider le lancement");
     } else {

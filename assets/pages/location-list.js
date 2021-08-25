@@ -89,7 +89,6 @@ function toggleCapacityInput($typeRadio) {
 function toggleInputsIn($container, show) {
     if(show) {
         $container.removeClass(`d-none`);
-        $container.find(`input:not(.no-clear), select`).val(``);
         $container.find(`input[data-was-required], select[data-was-required]`).each(function() {
             $(this).prop(`required`, true);
         });
@@ -143,7 +142,7 @@ function drawChart(config = undefined) {
     } else {
         $container.replaceWith(`
             <div id="historyChart" class="d-flex flex-column align-items-center">
-                <i class="fas fa-exclamation-circle fa-2x"></i>
+                <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
                 <span>Un couple de filtres dépôt/dates est nécessaire afin d'afficher le graphique</span>
             </div>
         `);

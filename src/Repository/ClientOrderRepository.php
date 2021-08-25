@@ -53,7 +53,7 @@ class ClientOrderRepository extends EntityRepository {
             ->leftJoin('client_order.lines', 'lines')
             ->leftJoin('client_order.type', 'type')
             ->leftJoin('lines.boxType', 'boxType')
-            ->where('client_order.createdAt BETWEEN :dateMin AND :dateMax')
+            ->andWhere('client_order.createdAt BETWEEN :dateMin AND :dateMax')
             ->andWhere("type.code = :typeCode")
             ->setParameters([
                 "typeCode" => $type,
@@ -227,9 +227,11 @@ class ClientOrderRepository extends EntityRepository {
             ->andWhere('clientOrder.number LIKE :value')
             ->orderBy('clientOrder.createdAt', 'DESC')
             ->addOrderBy('clientOrder.number', 'DESC')
+            ->setMaxResults(1)
             ->setParameter('value', ClientOrder::PREFIX_NUMBER . $date . '%')
             ->getQuery()
             ->execute();
+
         return $result ? $result[0]['number'] : null;
     }
 

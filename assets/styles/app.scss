@@ -65,7 +65,7 @@ body.home {
 
     .instructions {
         display: flex;
-        justify-content: space-evenly;
+        justify-content: center;
         align-items: center;
         width: 100%;
 
@@ -82,7 +82,7 @@ body.home {
             align-items: center;
             width: 30%;
             padding: 32px;
-            margin: 8px;
+            margin: 8px 24px;
             border-radius: 12px;
             background-color: $grey-light;
             text-decoration: none;
@@ -95,7 +95,7 @@ body.home {
             }
 
             &:hover:not([disabled]), &:focus:not([disabled]) {
-                margin: 0;
+                margin: 0 16px;
                 padding: 40px;
                 width: calc(30% + 16px);
                 box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
@@ -119,9 +119,11 @@ body.home {
 
             & > div {
                 width: 100%;
+                margin: 8px;
 
                 &:hover:not([disabled]), &:focus:not([disabled]) {
                     width: 100%;
+                    margin: 0;
                 }
             }
         }

@@ -169,8 +169,8 @@ class BoxRecordRepository extends EntityRepository {
         }
 
         return [
-            'totalCount' => QueryHelper::count($queryBuilder, 'record'),
-            'data' => $queryBuilder
+            "totalCount" => QueryHelper::count($queryBuilder, "record"),
+            "data" => $queryBuilder
                 ->setMaxResults($length)
                 ->setFirstResult($start)
                 ->getQuery()

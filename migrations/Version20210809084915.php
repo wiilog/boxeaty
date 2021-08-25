@@ -11,23 +11,27 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20210809084915 extends AbstractMigration
-{
-    public function getDescription(): string
-    {
+final class Version20210809084915 extends AbstractMigration {
+
+    public function getDescription(): string {
         return '';
     }
 
-    public function up(Schema $schema): void
-    {
-        $this->addSql("
-            INSERT INTO box_type (name, price, active, capacity, shape, volume)
-            VALUES ('" . BoxType::STARTER_KIT . "', 0.00, 1, '500ml', 'Rectangle', '" . BoxType::DEFAULT_VOLUME . "')
-        ");
+    public function up(Schema $schema): void {
+        $name = BoxType::STARTER_KIT;
+        $volume = BoxType::DEFAULT_VOLUME;
+
+        $existing = $this->connection->executeQuery("SELECT id FROM box_type WHERE name = '$name'")->rowCount();
+        if (!$existing) {
+            $this->addSql("
+                INSERT INTO box_type (name, price, active, capacity, shape, volume)
+                VALUES ('$name', 0.00, 1, '500ml', 'Rectangle', '$volume')
+            ");
+        }
     }
 
-    public function down(Schema $schema): void
-    {
+    public function down(Schema $schema): void {
         // this down() migration is auto-generated, please modify it to your needs
     }
+
 }

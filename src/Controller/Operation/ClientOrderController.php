@@ -13,6 +13,7 @@ use App\Entity\OrderType;
 use App\Entity\Role;
 use App\Entity\Status;
 use App\Entity\User;
+use App\Entity\WorkFreeDay;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\ClientOrderRepository;
@@ -43,17 +44,23 @@ class ClientOrderController extends AbstractController {
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
         $deliveryMethod = $manager->getRepository(DeliveryMethod::class);
-        $orderTypes = $manager->getRepository(OrderType::class);
+        $orderTypeRepository = $manager->getRepository(OrderType::class);
         $boxTypeRepository = $manager->getRepository(BoxType::class);
 
         return $this->render("operation/client_order/index.html.twig", [
             "new_client_order" => new ClientOrder(),
             "requester" => $this->getUser(),
             "deliveryMethods" => $deliveryMethod->findBy(["deleted" => false], ["name" => "ASC"]),
-            "orderTypes" => $orderTypes->findBy([]),
+            "orderTypes" => $orderTypeRepository->findSelectable(),
             "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER,
-            "starterKit" => $boxTypeRepository->findStarterKit()
+            "starterKit" => $boxTypeRepository->findStarterKit(),
+            "workFreeDay" => Stream::from($manager->getRepository(WorkFreeDay::class)->findAll())
+                ->map(fn(WorkFreeDay $workFreeDay) => [
+                    $workFreeDay->getDay(),
+                    $workFreeDay->getMonth()
+                ])
+                ->toArray()
         ]);
     }
 
@@ -155,10 +162,11 @@ class ClientOrderController extends AbstractController {
                 $autoValidationDelay = $clientOrder->getExpectedDelivery();
                 $autoValidationQuantity = $clientOrder->getBoxQuantity();
 
-                if ($autoValidationDelay > $dayLimit
-                    && $autoValidationQuantity <= $quantityLimit) {
+                if ($autoValidationDelay > $dayLimit && $autoValidationQuantity <= $quantityLimit) {
                     $statusCode = Status::CODE_ORDER_PLANNED;
                     $clientOrder->setAutomatic(true);
+                    $clientOrder->setValidatedAt(new DateTime());
+                    $clientOrder->setValidator($this->getUser());
                 }
             }
 
@@ -182,7 +190,7 @@ class ClientOrderController extends AbstractController {
                         UniqueNumberService $uniqueNumberService,
                         EntityManagerInterface $entityManager,
                         ClientOrderService $clientOrderService): Response {
-        $number = $uniqueNumberService->createUniqueNumber($entityManager, ClientOrder::PREFIX_NUMBER, ClientOrder::class);
+        $number = $uniqueNumberService->createUniqueNumber(ClientOrder::class);
         $now = new DateTime('now');
 
         $clientOrder = new ClientOrder();
@@ -256,9 +264,11 @@ class ClientOrderController extends AbstractController {
                                ClientOrderService $clientOrderService): Response {
 
         $form = Form::create();
+
         $content = (object)$request->request->all();
         $statusRepository = $entityManager->getRepository(Status::class);
         $status = $statusRepository->findOneBy(['id' => $content->status]);
+
         if ($form->isValid()) {
             $history = $clientOrderService->updateClientOrderStatus($clientOrder, $status, $this->getUser());
             $history->setJustification($content->justification);
@@ -272,7 +282,6 @@ class ClientOrderController extends AbstractController {
         } else {
             return $form->errors();
         }
-        return $this->json($result);
     }
 
     /**
@@ -338,13 +347,41 @@ class ClientOrderController extends AbstractController {
             ])
             ->toArray();
 
+        $client = $clientOrder->getClient();
+        if ($client) {
+            $clientOrderInformation = $client->getClientOrderInformation();
+            if ($clientOrderInformation) {
+                $deliveryMethodId = $clientOrderInformation->getDeliveryMethod()
+                    ? $clientOrderInformation->getDeliveryMethod()->getId()
+                    : null;
+                $workingRate = $clientOrderInformation->getWorkingDayDeliveryRate();
+                $nonWorkingRate = $clientOrderInformation->getNonWorkingDayDeliveryRate();
+                $serviceCost = $clientOrderInformation->getServiceCost();
+            }
+            $initialClient = [
+                'id' => $client->getId(),
+                'text' => $client->getName(),
+                'address' => $client->getAddress(),
+                'deliveryMethod' => $deliveryMethodId ?? null,
+                'workingRate' => $workingRate ?? null,
+                'nonWorkingRate' => $nonWorkingRate ?? null,
+                'serviceCost' => $serviceCost ?? null
+            ];
+        }
         return $this->json([
             "submit" => $this->generateUrl("client_order_edit", ["clientOrder" => $clientOrder->getId()]),
             "template" => $this->renderView("operation/client_order/modal/new.html.twig", [
                 "clientOrder" => $clientOrder,
-                "orderTypes" => $orderTypeRepository->findBy([]),
+                "initialClient" => $initialClient ?? null,
+                "orderTypes" => $orderTypeRepository->findSelectable(),
                 "deliveryMethods" => $deliveryMethodRepository->findBy(["deleted" => false], ["name" => "ASC"]),
-                'cartContent' => $cartContent
+                'cartContent' => $cartContent,
+                "workFreeDay" => Stream::from($entityManager->getRepository(WorkFreeDay::class)->findAll())
+                    ->map(fn(WorkFreeDay $workFreeDay) => [
+                        $workFreeDay->getDay(),
+                        $workFreeDay->getMonth()
+                    ])
+                    ->toArray()
             ])
         ]);
     }

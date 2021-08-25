@@ -2,7 +2,7 @@
     <div class="row">
         <div class="clientOrderType orange-toggle">
             {% for orderType in orderTypes %}
-                {% set inputId = 'order-type-' ~ (clientOrder ? 'edit-') ~ orderType.id %}
+                {% set inputId = 'order-type-' ~ (clientOrder.id ? 'edit-': 'new-' ) ~ orderType.id %}
                 <input type="radio"
                        id="{{ inputId }}"
                        name="type"
@@ -33,13 +33,12 @@
                         <select name="client"
                                 class="data"
                                 data-s2="client"
+                                {% if (initialClient is defined and initialClient is not null) %}
+                                    data-init-data="{{ [initialClient]|json_encode }}"
+                                {% endif %}
                                 data-include-params="input[name=client-cost-information-needed]"
                                 data-placeholder="Sélectionnez un client"
                                 required>
-                            {% if clientOrder.client
-                                and clientOrder.client.clientOrderInformation.workingDayDeliveryRate is not null %}
-                                <option value="{{ clientOrder.client.id }}" selected>{{ clientOrder.client.name }}</option>
-                            {% endif %}
                         </select>
                     </label>
                 </div>
@@ -66,6 +65,9 @@
                                min="1">
                     </label>
                 </div>
+                {% if clientOrder.collectRequired is not null %}
+                    <input type="hidden" name="collect" value="{{ clientOrder.collectRequired }}">
+                {% endif %}
             </div>
         </div>
 
@@ -124,7 +126,7 @@
             <div class="orange-toggle transport col-md-7 col-12">
                 <p class="bigTxt col-12">Transport</p>
                 {% for deliveryMethod in deliveryMethods %}
-                    {% set inputId = 'delivery-method-' ~ (clientOrder ? 'edit-') ~ deliveryMethod.name %}
+                    {% set inputId = 'delivery-method-' ~ (clientOrder.id ? 'edit-' : 'new-') ~ deliveryMethod.name %}
                     <input type="radio"
                            id="{{ inputId }}"
                            name="deliveryMethod"
@@ -148,6 +150,9 @@
                        min="{{ 'now + 1 days'|date('Y-m-d') }}T00:00"
                        required/>
             </div>
+            <input name="workFreeDay"
+                   value="{{ workFreeDay|json_encode }}"
+                   type="hidden">
             <span class="bigTxt col-12 deliveryPrice"></span>
             <span class="bigTxt col-12 servicePrice"></span>
         </div>

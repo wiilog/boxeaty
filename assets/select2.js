@@ -77,6 +77,10 @@ export default class Select2 {
             config.minimumInputLength = 1;
         }
 
+        if ($element.data('init-data')) {
+            config.data = $element.data('init-data');
+        }
+
         $element.select2({
             placeholder: $element.data(`placeholder`),
             tags: $element.is('[data-editable]'),

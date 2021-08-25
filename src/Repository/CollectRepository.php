@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Collect;
+use App\Entity\Role;
 use App\Entity\Status;
+use App\Entity\User;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -14,13 +16,12 @@ use Doctrine\ORM\EntityRepository;
  */
 class CollectRepository extends EntityRepository {
 
-    public function getTotalQuantityByClientAndCollectedDate($client, $dateMin, $dateMax)
-    {
+    public function getTotalQuantityByClientAndCollectedDate($client, $dateMin, $dateMax) {
         $qb = $this->createQueryBuilder('collecte')
             ->select('sum(lines.quantity)')
             ->andWhere('collecte.collectedAt BETWEEN :dateMin AND :dateMax')
             ->andWhere('clientOrder.client =:client')
-            ->join('collecte.order', 'clientOrder')
+            ->join('collecte.clientOrder', 'clientOrder')
             ->join('clientOrder.lines', 'lines')
             ->setParameters([
                 'dateMin' => $dateMin,
@@ -33,10 +34,15 @@ class CollectRepository extends EntityRepository {
         return $result ? intval($result) : 0;
     }
 
-    public function getPendingCollects() {
+    public function getPendingCollects(?User $user) {
+        $qb = $this->createQueryBuilder("collect");
 
-        $qb = $this->createQueryBuilder('collect')
-            ->select('collect.id AS id')
+        if (!$user->hasRight(Role::TREAT_ALL_COLLECTS)) {
+            $qb->andWhere("collect.operator = :operator")
+                ->setParameter("operator", $user);
+        }
+
+        return $qb->select('collect.id AS id')
             ->addSelect('collect.number AS number')
             ->addSelect('collect.tokens AS token_amount')
             ->addSelect('join_depository.name AS depository')
@@ -48,15 +54,14 @@ class CollectRepository extends EntityRepository {
             ->addSelect('join_pickLocation.name AS pick_location')
             ->leftJoin('collect.client', 'join_client')
             ->leftJoin('join_client.contact', 'join_user')
-            ->leftJoin('join_client.depository', 'join_depository')
+            ->leftJoin('join_client.clientOrderInformation', 'join_client_order_information')
+            ->leftJoin('join_client_order_information.depository', 'join_depository')
             ->leftJoin('collect.status', 'join_status')
             ->leftJoin('collect.crates', 'join_crates')
             ->leftJoin('collect.pickLocation', 'join_pickLocation')
-            ->where('join_status.code = :status')
+            ->andWhere('join_status.code = :status')
             ->groupBy('id')
-            ->setParameter('status', Status::CODE_COLLECT_TRANSIT);
-
-        return $qb
+            ->setParameter('status', Status::CODE_COLLECT_TRANSIT)
             ->getQuery()
             ->getArrayResult();
     }
@@ -64,12 +69,14 @@ class CollectRepository extends EntityRepository {
     public function getLastNumberByDate(string $date): ?string {
         $result = $this->createQueryBuilder('collect')
             ->select('collect.number')
-            ->where('collect.number LIKE :value')
+            ->andWhere('collect.number LIKE :value')
             ->orderBy('collect.createdAt', 'DESC')
             ->addOrderBy('collect.number', 'DESC')
+            ->setMaxResults(1)
             ->setParameter('value', Collect::PREFIX_NUMBER . $date . '%')
             ->getQuery()
             ->execute();
+
         return $result ? $result[0]['number'] : null;
     }
 

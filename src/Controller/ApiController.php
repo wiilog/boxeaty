@@ -18,6 +18,7 @@ use App\Entity\Location;
 use App\Entity\PreparationLine;
 use App\Entity\Quality;
 use App\Entity\Preparation;
+use App\Entity\Role;
 use App\Entity\Status;
 use App\Entity\User;
 use App\Helper\FormatHelper;
@@ -50,6 +51,10 @@ use Symfony\Component\Routing\Annotation\Route;
 class ApiController extends AbstractController {
 
     private ?User $user = null;
+
+    public function getUser(): ?User {
+        return $this->user ?? parent::getUser();
+    }
 
     public function setUser(?User $user): void {
         $this->user = $user;
@@ -467,7 +472,16 @@ class ApiController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "token" => $user->getApiKey(),
+                "user" => [
+                    "username" => $user->getUsername(),
+                    "token" => $user->getApiKey(),
+                    "rights" => [
+                        "preparations" => $user->hasRight(Role::TREAT_PREPARATIONS),
+                        "deliveries" => $user->hasRight(Role::TREAT_DELIVERIES),
+                        "receptions" => $user->hasRight(Role::TREAT_RECEPTIONS),
+                        "all_collects" => $user->hasRight(Role::TREAT_ALL_COLLECTS),
+                    ],
+                ],
             ]);
         }
 
@@ -491,7 +505,7 @@ class ApiController extends AbstractController {
      */
     public function deliveryRounds(EntityManagerInterface $manager): Response {
         $now = new DateTime("today midnight");
-        $rounds = $manager->getRepository(DeliveryRound::class)->findAwaitingDeliverer($this->user);
+        $rounds = $manager->getRepository(DeliveryRound::class)->findAwaitingDeliverer($this->getUser());
 
         $serialized = Stream::from($rounds)
             ->map(fn(DeliveryRound $round) => [
@@ -606,7 +620,7 @@ class ApiController extends AbstractController {
 
                 [$tracking] = $service->generateBoxRecords($box, [
                     "location" => $previous,
-                ], $this->user);
+                ], $this->getUser());
 
                 if ($tracking) {
                     $manager->persist($tracking);
@@ -653,7 +667,7 @@ class ApiController extends AbstractController {
 
                 [$tracking] = $service->generateBoxRecords($box, [
                     "location" => $previous,
-                ], $this->user);
+                ], $this->getUser());
 
                 if ($tracking) {
                     $manager->persist($tracking);
@@ -739,7 +753,7 @@ class ApiController extends AbstractController {
             ? $depositoryRepository->find($depositoryId)
             : null;
 
-        $preparations = $preparationRepository->getByDepository($depository, $this->user);
+        $preparations = $preparationRepository->getByDepository($depository, $this->getUser());
 
         $toPrepare = Stream::from($preparations)
             ->filter(fn($preparation) => !isset($preparation['operator']))
@@ -818,7 +832,7 @@ class ApiController extends AbstractController {
             $record
                 ->setBox($box)
                 ->setState(BoxStateService::STATE_BOX_IDENTIFIED)
-                ->setUser($this->user);
+                ->setUser($this->getUser());
             $manager->persist($record);
         }
         $manager->flush();
@@ -839,7 +853,7 @@ class ApiController extends AbstractController {
             || (
                 $preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
                 && $preparation->getOperator()
-                && $this->user !== $preparation->getOperator()
+                && $this->getUser() !== $preparation->getOperator()
             )) {
             return $this->json([
                 'success' => false,
@@ -888,7 +902,7 @@ class ApiController extends AbstractController {
 
                 $preparation
                     ->setStatus($status)
-                    ->setOperator($this->user);
+                    ->setOperator($this->getUser());
 
                 $entityManager->flush();
                 return $this->json([
@@ -897,7 +911,7 @@ class ApiController extends AbstractController {
                 ]);
             }
             else if (!$preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
-                || $this->user !== $preparation->getOperator()){
+                || $this->getUser() !== $preparation->getOperator()){
                 return $this->json([
                     'success' => false,
                     'message' => 'La préparation est en cours de préparation par un autre utilisateur'
@@ -905,7 +919,7 @@ class ApiController extends AbstractController {
             }
             else {
                 // $preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
-                // AND $this->user === $preparation->getOperator()
+                // AND $this->getUser() === $preparation->getOperator()
                 return $this->json([
                     'success' => true
                 ]);
@@ -913,7 +927,7 @@ class ApiController extends AbstractController {
 
         }
         else if ($preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
-                 && $this->user === $preparation->getOperator()) {
+                 && $this->getUser() === $preparation->getOperator()) {
             $userRepository = $entityManager->getRepository(User::class);
 
             $preparedStatus = $statusRepository->findOneBy(['code' => Status::CODE_PREPARATION_PREPARED]);
@@ -925,7 +939,7 @@ class ApiController extends AbstractController {
             $result = $preparationService->handlePreparedCrates($entityManager, $clientOrder, $crates);
 
             $date = new DateTime();
-            $user = $this->user;
+            $user = $this->getUser();
 
             if ($result['success']) {
                 foreach ($result['entities'] as $crateData) {
@@ -1007,13 +1021,26 @@ class ApiController extends AbstractController {
      * @Authenticated
      */
     public function availableCrates(EntityManagerInterface $manager, Request $request): Response {
-        $crateType = $manager->getRepository(BoxType::class)->findOneBy(['name' => $request->query->get('type')]);
+        $boxTypeRepository = $manager->getRepository(BoxType::class);
+        $preparationRepository = $manager->getRepository(Preparation::class);
+
+        $preparationId = $request->query->get('preparation');
+        $clientFilter = null;
+        if ($preparationId) {
+            $preparation = $preparationRepository->find($preparationId);
+
+            $clientFilter = $preparation
+                ->getOrder()
+                ->getClientClosedPark();
+        }
+
+        $crateType = $boxTypeRepository->findOneBy(["name" => $request->query->get("type"),]);
         $crates = $crateType->getCrates();
 
         $availableCrates = [];
         /** @var Box $crate */
         foreach ($crates as $crate) {
-            if ($crate->getLocation()) {
+            if ($crate->getLocation() && (!$clientFilter || $clientFilter === $crate->getOwner())) {
                 $location = $crate->getLocation()->getName();
                 $number = $crate->getNumber();
                 $availableCrates[] = [
@@ -1034,7 +1061,10 @@ class ApiController extends AbstractController {
      */
     public function getBoxes(EntityManagerInterface $manager, Request $request): Response {
         $query = $request->query;
-        $preparation = $manager->getRepository(Preparation::class)->find($query->get('preparation'));
+        $preparationRepository = $manager->getRepository(Preparation::class);
+        $boxRepository = $manager->getRepository(Box::class);
+
+        $preparation = $preparationRepository->find($query->get('preparation'));
 
         $boxTypes = $preparation
             ? Stream::from($preparation->getOrder()->getLines())
@@ -1044,19 +1074,26 @@ class ApiController extends AbstractController {
                 ->toArray()
             : [];
 
-        $boxes = $manager->getRepository(Box::class)->getAvailableAndCleanedBoxByType($boxTypes);
+        $clientFilter = null;
+        if ($preparation) {
+            $clientFilter = $preparation
+                ->getOrder()
+                ->getClientClosedPark();
+        }
+
+        $boxes = $boxRepository->getAvailableAndCleanedBoxByType($boxTypes);
 
         $availableBoxes = [];
         foreach ($boxes as $box) {
-            if ($box->getLocation() && $box->getType()) {
+            if ($box->getLocation() && $box->getType() && (!$clientFilter || $clientFilter === $box->getOwner())) {
                 $type = $box->getType()->getName();
                 $location = $box->getLocation()->getName();
                 $number = $box->getNumber();
 
                 $availableBoxes[] = [
-                    'type' => $type,
-                    'location' => $location,
-                    'number' => $number
+                    "type" => $type,
+                    "location" => $location,
+                    "number" => $number
                 ];
             }
         }
@@ -1130,7 +1167,7 @@ class ApiController extends AbstractController {
                 $record
                     ->setBox($box)
                     ->setState(BoxStateService::STATE_BOX_IDENTIFIED)
-                    ->setUser($this->user);
+                    ->setUser($this->getUser());
 
                 $manager->persist($record);
             }
@@ -1145,9 +1182,7 @@ class ApiController extends AbstractController {
      * @Authenticated
      */
     public function getCollects(EntityManagerInterface $manager) {
-        $pendingCollects = $manager->getRepository(Collect::class)->getPendingCollects();
-
-        return $this->json($pendingCollects);
+        return $this->json($manager->getRepository(Collect::class)->getPendingCollects($this->getUser()));
     }
 
     /**
@@ -1277,7 +1312,7 @@ class ApiController extends AbstractController {
         $pickLocation = $locationRepository->findOneBy(['name' => $data->location->name]);
         $client = $clientRepository->findOneBy(['name' => $data->location->client]);
 
-        $number = $uniqueNumberService->createUniqueNumber($manager, Collect::PREFIX_NUMBER, Collect::class);
+        $number = $uniqueNumberService->createUniqueNumber(Collect::class);
 
         if($data->data->photo) {
             $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
@@ -1300,7 +1335,7 @@ class ApiController extends AbstractController {
             ->setPickComment($comment ?? null)
             ->setPickSignature($signature)
             ->setPickPhoto($photo ?? null)
-            ->setOperator($this->user)
+            ->setOperator($this->getUser())
             ->setCrates($crates);
 
 

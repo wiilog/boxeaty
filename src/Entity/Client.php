@@ -435,7 +435,7 @@ class Client {
         return $this;
     }
 
-    public function getMailNotificationOrderPreparation(): ?bool
+    public function isMailNotificationOrderPreparation(): ?bool
     {
         return $this->mailNotificationOrderPreparation;
     }

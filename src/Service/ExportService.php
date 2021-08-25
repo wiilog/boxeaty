@@ -136,7 +136,7 @@ class ExportService {
         "Emplacement",
         "Etat",
         "Qualité",
-        "Propriété",
+        "Propriétaire",
         "Type",
     ];
 

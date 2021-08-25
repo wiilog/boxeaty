@@ -17,7 +17,7 @@ class ClientOrder {
 
     use StatusTrait;
 
-    public const PREFIX_NUMBER = 'CO';
+    public const PREFIX_NUMBER = "CO";
 
     /**
      * @ORM\Id
@@ -537,5 +537,14 @@ class ClientOrder {
         }
 
         return $this;
+    }
+
+    public function getClientClosedPark(): ?Client {
+        $client = $this->getClient();
+        if($client && !$client->getClientOrderInformation()->isClosedParkOrder()) {
+            $client = null;
+        }
+
+        return $client;
     }
 }

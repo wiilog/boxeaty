@@ -20,6 +20,7 @@ use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Service\ClientOrderService;
 use App\Service\DeliveryRoundService;
+use App\Service\Mailer;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -260,6 +261,7 @@ class PlanningController extends AbstractController {
      * @HasPermission(Role::MANAGE_PLANNING)
      */
     public function launchDelivery(Request $request,
+                                   Mailer $mailer,
                                    ClientOrderService $clientOrderService,
                                    EntityManagerInterface $manager): Response {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
@@ -275,8 +277,8 @@ class PlanningController extends AbstractController {
         /** @var User $user */
         $user = $this->getUser();
 
-        foreach ($ordersToStart as $orderToStart) {
-            $order = $clientOrderRepository->find($orderToStart);
+        foreach ($ordersToStart as $order) {
+            $order = $clientOrderRepository->find($order);
 
             $clientOrderService->updateClientOrderStatus($order, $statusOrder, $user);
 
@@ -286,6 +288,14 @@ class PlanningController extends AbstractController {
                 ->setOrder($order);
 
             $manager->persist($preparation);
+
+            if($order->getClient()->isMailNotificationOrderPreparation()) {
+                $content = $this->renderView("emails/mail_delivery_order.html.twig", [
+                    "order" => $order,
+                ]);
+
+                $mailer->send($order->getClient()->getContact(), "Commande en préparation", $content);
+            }
         }
 
         $manager->flush();
@@ -321,7 +331,6 @@ class PlanningController extends AbstractController {
             $order = $clientOrderRepository->find($orderToStart);
             $closed = $order->getClient()->getClientOrderInformation()->isClosedParkOrder();
             $owner = $closed ? $order->getClient()->getId() : Box::OWNER_BOXEATY;
-dump($defaultCrateType->getId());
             if (!isset($orderedBoxTypes[$defaultCrateType->getId()][$owner])) {
                 $closed = $order->getClient()->getClientOrderInformation()->isClosedParkOrder();
 

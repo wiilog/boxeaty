@@ -48,7 +48,7 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
             Role::TREAT_PREPARATIONS,
             Role::TREAT_DELIVERIES,
             Role::TREAT_RECEPTIONS,
-            Role::TREAT_COLLECTS,
+            Role::TREAT_ALL_COLLECTS,
         ],
     ];
 

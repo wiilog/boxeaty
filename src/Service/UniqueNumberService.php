@@ -7,9 +7,13 @@ use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Entity;
 use Exception;
+use RuntimeException;
 
 class UniqueNumberService
 {
+
+    private const NUMBER_FORMAT = "YmdCCCC";
+
     private $entityManager;
 
     public function __construct(EntityManagerInterface $entityManager)
@@ -17,36 +21,24 @@ class UniqueNumberService
         $this->entityManager = $entityManager;
     }
 
-    /**
-     * getLastNumberByPrefixAndDate() function must be implemented in current entity repository with $prefix and $date params
-     * @param EntityManagerInterface $entityManager
-     * @param string $prefix - Prefix of the entity unique number => Available in chosen entity
-     * @param string $entity - Chosen entity to generate unique number => Format Entity::class
-     * @return string
-     * @throws Exception
-     */
-    public function createUniqueNumber(EntityManagerInterface $entityManager,
-                                       string $prefix,
-                                       string $entity): string {
-
-        $format = 'YmdCCCC';
+    public function createUniqueNumber(string $entity, ?EntityManagerInterface $manager = null): string {
         $date = new DateTime('now', new DateTimeZone('Europe/Paris'));
-        $entityRepository = $entityManager->getRepository($entity);
+        $entityRepository = ($manager ?? $this->entityManager)->getRepository($entity);
 
-        if (!method_exists($entityRepository, 'getLastNumberByDate')) {
-            throw new Exception("Undefined getLastNumberByDate for $entity " . "repository");
+        if (!method_exists($entityRepository, "getLastNumberByDate")) {
+            throw new RuntimeException("Undefined getLastNumberByDate for $entity " . "repository");
         }
 
-        preg_match('/([^C]*)(C+)/', $format, $matches);
+        preg_match("/([^C]*)(C+)/", self::NUMBER_FORMAT, $matches);
         if (empty($matches)) {
-            throw new Exception('Invalid number format');
+            throw new RuntimeException("Invalid number format");
         }
 
         $dateFormat = $matches[1];
         $counterFormat = $matches[2];
         $counterLen = strlen($counterFormat);
 
-        $dateStr = $date->format(substr($format, 0, -1 * $counterLen));
+        $dateStr = $date->format(substr(self::NUMBER_FORMAT, 0, -1 * $counterLen));
         $lastNumber = $entityRepository->getLastNumberByDate($dateStr);
 
         $lastCounter = (
@@ -56,8 +48,7 @@ class UniqueNumberService
         );
         $currentCounterStr = sprintf("%0{$counterLen}u", $lastCounter + 1);
         $dateStr = !empty($dateFormat) ? $date->format($dateFormat) : '';
-        $smartPrefix = !empty($prefix) ? $prefix : '';
 
-        return ($smartPrefix . $dateStr . $currentCounterStr);
+        return $entity::PREFIX_NUMBER . $dateStr . $currentCounterStr;
     }
 }
