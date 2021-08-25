@@ -15,6 +15,7 @@ use App\Entity\OrderStatusHistory;
 use App\Entity\OrderType;
 use App\Entity\Status;
 use App\Entity\User;
+use App\Entity\WorkFreeDay;
 use App\Helper\Form;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -65,6 +66,7 @@ class ClientOrderService
         $typeRepository = $entityManager->getRepository(OrderType::class);
         $clientRepository = $entityManager->getRepository(Client::class);
         $deliveryMethodRepository = $entityManager->getRepository(DeliveryMethod::class);
+        $worFreeDayRepository = $entityManager->getRepository(WorkFreeDay::class);
 
         $deliveryMethodId = $content->deliveryMethod ?? null;
         $deliveryMethod = $deliveryMethodId
@@ -92,10 +94,11 @@ class ClientOrderService
 
         $information = $client->getClientOrderInformation();
         $expectedDelivery = DateTime::createFromFormat('Y-m-d\TH:i', $content->date ?? null);
-
         if (isset($information)) {
+
+            $worFreeDay= $worFreeDayRepository->findDayAndMonth($expectedDelivery->format('j'), $expectedDelivery->format('n'));
             // check if it's the weekend
-            $deliveryRate = !in_array($expectedDelivery->format('N'), [6, 7])
+            $deliveryRate = ((!in_array($expectedDelivery->format('N'), [6, 7])) && !count($worFreeDay) != 0 )
                 ? $information->getWorkingDayDeliveryRate()
                 : $information->getNonWorkingDayDeliveryRate();
             $serviceCost = $information->getServiceCost();
@@ -244,8 +247,9 @@ class ClientOrderService
                                         array $cart): void {
         $splitting = $this->getCartSplitting($entityManager, $clientOrder->getClient(), $cart);
         $cratesAmount = count($splitting) ?: 1;
-
-        $clientOrder->setCratesAmount($cratesAmount);
+        if($cratesAmount){
+            $clientOrder->setCratesAmount($cratesAmount);
+        }
     }
 
     /**

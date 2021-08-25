@@ -23,7 +23,7 @@ $(document).ready(() => {
             {data: `location`, title: `Emplacement`},
             {data: `state`, title: `Etat`},
             {data: `quality`, title: `Qualité`},
-            {data: `owner`, title: `Propriété`},
+            {data: `owner`, title: `Propriétaire`},
             {data: `type`, title: `Type`},
         ],
         listeners: {

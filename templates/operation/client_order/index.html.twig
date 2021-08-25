@@ -24,7 +24,8 @@
     {% include 'operation/client_order/modal/new.html.twig' with {
         clientOrder: new_client_order,
         orderTypes: orderTypes,
-        deliveryMethods: deliveryMethods
+        deliveryMethods: deliveryMethods,
+        workFreeDay: workFreeDay
     } %}
 {% endblock %}
 

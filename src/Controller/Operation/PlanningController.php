@@ -331,7 +331,6 @@ class PlanningController extends AbstractController {
             $order = $clientOrderRepository->find($orderToStart);
             $closed = $order->getClient()->getClientOrderInformation()->isClosedParkOrder();
             $owner = $closed ? $order->getClient()->getId() : Box::OWNER_BOXEATY;
-dump($defaultCrateType->getId());
             if (!isset($orderedBoxTypes[$defaultCrateType->getId()][$owner])) {
                 $closed = $order->getClient()->getClientOrderInformation()->isClosedParkOrder();
 

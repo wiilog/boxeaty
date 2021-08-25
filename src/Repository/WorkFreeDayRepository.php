@@ -46,4 +46,18 @@ class WorkFreeDayRepository extends EntityRepository {
         ];
     }
 
+    public function findDayAndMonth($day, $month){
+        return $this->createQueryBuilder("work_free_day")
+            ->select('work_free_day.day')
+            ->addSelect('work_free_day.month')
+            ->where('work_free_day.day =:day')
+            ->andWhere('work_free_day.month =:month')
+            ->setParameters([
+                'day' => $day,
+                'month' => $month
+            ])
+            ->getQuery()
+            ->getResult();
+    }
+
 }

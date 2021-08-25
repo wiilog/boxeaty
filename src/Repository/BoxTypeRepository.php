@@ -190,7 +190,6 @@ class BoxTypeRepository extends EntityRepository {
             $owner = $line["client"] ?: Box::OWNER_BOXEATY;
             $inUnprepared[$line["id"]][$owner] = $line["count"];
         }
-        dump($totalAvailable, $inUnprepared);
         foreach ($totalAvailable as $type => $clients) {
             foreach ($clients as $client => $count) {
                 $totalAvailable[$type][$client] = $count - ($inUnprepared[$type][$client] ?? 0);

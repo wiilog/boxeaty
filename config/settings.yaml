@@ -17,7 +17,7 @@ parameters:
       App\Entity\Role::CREATE_CLIENT_ORDERS: Créer les commandes client
       App\Entity\Role::MANAGE_CLIENT_ORDERS: Gérer les commandes client
       App\Entity\Role::MANAGE_PLANNING: Gérer les planifications
-      App\Entity\Role::MANAGE_COUNTER_ORDERS: Créer, modifier, supprimer les commandes comptoir
+      App\Entity\Role::MANAGE_COUNTER_ORDERS: Gérer les commandes comptoir
       App\Entity\Role::VIEW_INDICATORS: Voir les indicateurs
 
     Menu Référentiel:
@@ -70,7 +70,7 @@ parameters:
           permission: App\Entity\Role::MANAGE_COUNTER_ORDERS
           route: counter_orders_list
         - name: Commande client
-          permission: [App\Entity\Role::CREATE_CLIENT_ORDERS, App\Entity\Role::MANAGE_CLIENT_ORDERS]
+          permission: App\Entity\Role::MANAGE_CLIENT_ORDERS
           route: client_orders_list
         - name: Planification
           permission: App\Entity\Role::MANAGE_PLANNING
