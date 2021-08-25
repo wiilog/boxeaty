@@ -340,19 +340,32 @@ class ClientOrderService
 
             foreach ($cartTypeToQuantities as $cartLine) {
                 $quantity = $cartLine['quantity'];
-                for($i = 0; $i < $quantity; $i++) {
-                    $boxType = $cartLine['boxType'];
-                    $currentBoxVolume = $boxType->getVolume();
-                    if ($splittingLineVolume + $currentBoxVolume > $defaultCrateVolume) {
+                $boxType = $cartLine['boxType'];
+                $currentBoxVolume = $boxType->getVolume();
+
+                do {
+                    $remainingVolumeInCurrentCrate = ($defaultCrateVolume - $splittingLineVolume);
+                    $availableQuantityOfCurrentBox = floor($remainingVolumeInCurrentCrate / $currentBoxVolume);
+
+                    // IF crate is full
+                    // OR we can't put any box of this type
+                    // THEN we get another crate
+                    if ($remainingVolumeInCurrentCrate <= 0
+                        || $availableQuantityOfCurrentBox <= 0) {
                         $cartSplitting[] = $cartSplittingLine;
 
                         $cartSplittingLine = $serializeCrate($defaultCrateType);
                         $splittingLineVolume = 0;
                     }
 
-                    $splittingLineVolume += $currentBoxVolume * $i;
-                    $cartSplittingLine['boxes'][] = $serializeBox($boxType, 1);
+                    // we put selected quantity of the current box into current crate
+                    $boxQuantitySelected = min($quantity, $availableQuantityOfCurrentBox);
+                    $splittingLineVolume += ($currentBoxVolume * $boxQuantitySelected);
+                    $cartSplittingLine['boxes'][] = $serializeBox($boxType, $boxQuantitySelected);
+
+                    $quantity -= $boxQuantitySelected;
                 }
+                while ($quantity > 0);
             }
 
             if (!empty($cartSplittingLine['boxes'])) {
