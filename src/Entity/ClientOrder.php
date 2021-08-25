@@ -538,4 +538,13 @@ class ClientOrder {
 
         return $this;
     }
+
+    public function getClientClosedPark(): ?Client {
+        $client = $this->getClient();
+        if($client && !$client->getClientOrderInformation()->isClosedParkOrder()) {
+            $client = null;
+        }
+
+        return $client;
+    }
 }

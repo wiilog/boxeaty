@@ -1017,13 +1017,26 @@ class ApiController extends AbstractController {
      * @Authenticated
      */
     public function availableCrates(EntityManagerInterface $manager, Request $request): Response {
-        $crateType = $manager->getRepository(BoxType::class)->findOneBy(['name' => $request->query->get('type')]);
+        $boxTypeRepository = $manager->getRepository(BoxType::class);
+        $preparationRepository = $manager->getRepository(Preparation::class);
+
+        $preparationId = $request->query->get('preparation');
+        $clientFilter = null;
+        if ($preparationId) {
+            $preparation = $preparationRepository->find($preparationId);
+
+            $clientFilter = $preparation
+                ->getOrder()
+                ->getClientClosedPark();
+        }
+
+        $crateType = $boxTypeRepository->findOneBy(["name" => $request->query->get("type"),]);
         $crates = $crateType->getCrates();
 
         $availableCrates = [];
         /** @var Box $crate */
         foreach ($crates as $crate) {
-            if ($crate->getLocation()) {
+            if ($crate->getLocation() && (!$clientFilter || $clientFilter === $crate->getOwner())) {
                 $location = $crate->getLocation()->getName();
                 $number = $crate->getNumber();
                 $availableCrates[] = [
@@ -1044,7 +1057,10 @@ class ApiController extends AbstractController {
      */
     public function getBoxes(EntityManagerInterface $manager, Request $request): Response {
         $query = $request->query;
-        $preparation = $manager->getRepository(Preparation::class)->find($query->get('preparation'));
+        $preparationRepository = $manager->getRepository(Preparation::class);
+        $boxRepository = $manager->getRepository(Box::class);
+
+        $preparation = $preparationRepository->find($query->get('preparation'));
 
         $boxTypes = $preparation
             ? Stream::from($preparation->getOrder()->getLines())
@@ -1054,19 +1070,26 @@ class ApiController extends AbstractController {
                 ->toArray()
             : [];
 
-        $boxes = $manager->getRepository(Box::class)->getAvailableAndCleanedBoxByType($boxTypes);
+        $clientFilter = null;
+        if ($preparation) {
+            $clientFilter = $preparation
+                ->getOrder()
+                ->getClientClosedPark();
+        }
+
+        $boxes = $boxRepository->getAvailableAndCleanedBoxByType($boxTypes);
 
         $availableBoxes = [];
         foreach ($boxes as $box) {
-            if ($box->getLocation() && $box->getType()) {
+            if ($box->getLocation() && $box->getType() && (!$clientFilter || $clientFilter === $box->getOwner())) {
                 $type = $box->getType()->getName();
                 $location = $box->getLocation()->getName();
                 $number = $box->getNumber();
 
                 $availableBoxes[] = [
-                    'type' => $type,
-                    'location' => $location,
-                    'number' => $number
+                    "type" => $type,
+                    "location" => $location,
+                    "number" => $number
                 ];
             }
         }
