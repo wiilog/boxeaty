@@ -43,7 +43,7 @@ class Role {
     public const TREAT_PREPARATIONS = "TREAT_PREPARATIONS";
     public const TREAT_DELIVERIES = "TREAT_DELIVERIES";
     public const TREAT_RECEPTIONS = "TREAT_RECEPTIONS";
-    public const TREAT_COLLECTS = "TREAT_COLLECTS";
+    public const TREAT_ALL_COLLECTS = "TREAT_ALL_COLLECTS";
 
     public const ADDITIONAL_PERMISSIONS = [
         self::ALLOW_EDIT_OWN_GROUP_ONLY,

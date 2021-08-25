@@ -18,6 +18,7 @@ use App\Entity\Location;
 use App\Entity\PreparationLine;
 use App\Entity\Quality;
 use App\Entity\Preparation;
+use App\Entity\Role;
 use App\Entity\Status;
 use App\Entity\User;
 use App\Helper\FormatHelper;
@@ -467,7 +468,16 @@ class ApiController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "token" => $user->getApiKey(),
+                "user" => [
+                    "username" => $user->getUsername(),
+                    "token" => $user->getApiKey(),
+                    "rights" => [
+                        "preparations" => $user->hasRight(Role::TREAT_PREPARATIONS),
+                        "deliveries" => $user->hasRight(Role::TREAT_DELIVERIES),
+                        "receptions" => $user->hasRight(Role::TREAT_RECEPTIONS),
+                        "all_collects" => $user->hasRight(Role::TREAT_ALL_COLLECTS),
+                    ],
+                ],
             ]);
         }
 

@@ -36,7 +36,7 @@ parameters:
       App\Entity\Role::TREAT_PREPARATIONS: Traiter des préparations
       App\Entity\Role::TREAT_DELIVERIES: Traiter des livraisons
       App\Entity\Role::TREAT_RECEPTIONS: Traiter des réceptions
-      App\Entity\Role::TREAT_COLLECTS: Traiter toutes les collectes
+      App\Entity\Role::TREAT_ALL_COLLECTS: Traiter toutes les collectes
 
 
   menu:
