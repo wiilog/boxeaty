@@ -22,7 +22,7 @@ class ClientOrderInformation {
     private ?Client $client = null;
 
     /**
-     * @ORM\Column(type="decimal", precision=8, scale=2)
+     * @ORM\Column(type="decimal", precision=8, scale=2, nullable=true)
      */
     private ?string $depositoryDistance = null;
 
@@ -42,17 +42,17 @@ class ClientOrderInformation {
     private ?bool $isClosedParkOrder = null;
 
     /**
-     * @ORM\Column(type="decimal", precision=8, scale=2)
+     * @ORM\Column(type="decimal", precision=8, scale=2, nullable=true)
      */
     private ?string $workingDayDeliveryRate = null;
 
     /**
-     * @ORM\Column(type="decimal", precision=8, scale=2)
+     * @ORM\Column(type="decimal", precision=8, scale=2, nullable=true)
      */
     private ?string $nonWorkingDayDeliveryRate = null;
 
     /**
-     * @ORM\Column(type="decimal", precision=8, scale=2)
+     * @ORM\Column(type="decimal", precision=8, scale=2, nullable=true)
      */
     private ?string $serviceCost = null;
 

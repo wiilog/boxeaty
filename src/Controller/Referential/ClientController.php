@@ -531,7 +531,7 @@ class ClientController extends AbstractController {
             'template' => $this->renderView('referential/client/order_recurrence.html.twig', [
                 'clientOrderInformation' => $client->getClientOrderInformation() ?? null,
             ]),
-            'orderRecurrencePrice' => $orderRecurrence ? $orderRecurrence->getPeriod() * $crateTypePrice : 0,
+            'orderRecurrencePrice' => $orderRecurrence ? $orderRecurrence->getMonthlyPrice() : 0,
         ]);
     }
 
@@ -582,10 +582,17 @@ class ClientController extends AbstractController {
      */
     public function orderRecurrenceEdit(Request $request, OrderRecurrence $orderRecurrence, EntityManagerInterface $manager): Response {
         $form = Form::create();
-
+        $clientOrderInformationRepository = $manager->getRepository(ClientOrderInformation::class);
         $content = (object)$request->request->all();
-
         if ($form->isValid()) {
+            $clientOrderInformation = $clientOrderInformationRepository->findOneBy([
+                'orderRecurrence' => $orderRecurrence
+            ]);
+            $client = $clientOrderInformation->getClient();
+
+            $crateTypePrice = Stream::from($client->getCratePatternLines())
+                ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
+                ->sum();
             $orderRecurrence
                 ->setPeriod($content->period)
                 ->setCrateAmount($content->crateAmount)
@@ -594,6 +601,10 @@ class ClientController extends AbstractController {
                 ->setEnd(new DateTime($content->end))
                 ->setDeliveryFlatRate($content->deliveryFlatRate)
                 ->setServiceFlatRate($content->serviceFlatRate);
+
+            $diff = $orderRecurrence->getStart()->diff($orderRecurrence->getEnd(), true);
+            $frequency = ($diff->days / 7) / $content->period;
+            $orderRecurrence->setMonthlyPrice(($crateTypePrice * $orderRecurrence->getCrateAmount() + $orderRecurrence->getDeliveryFlatRate() + $orderRecurrence->getServiceFlatRate()) * $frequency);
 
             $manager->flush();
 
@@ -634,7 +645,7 @@ class ClientController extends AbstractController {
             $crateTypePrice = Stream::from($client->getCratePatternLines())
                 ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
                 ->sum();
-
+            dump($crateTypePrice);
             $recurrence = (new OrderRecurrence())
                 ->setPeriod($content->period)
                 ->setCrateAmount($content->crateAmount)
@@ -647,8 +658,7 @@ class ClientController extends AbstractController {
 
             $diff = $recurrence->getStart()->diff($recurrence->getEnd(), true);
             $frequency = ($diff->days / 7) / $content->period;
-            $recurrence->setMonthlyPrice($crateTypePrice * $frequency);
-
+            $recurrence->setMonthlyPrice(($crateTypePrice * $recurrence->getCrateAmount() + $recurrence->getDeliveryFlatRate() + $recurrence->getServiceFlatRate()) * $frequency);
             $clientOrderInformation->setOrderRecurrence($recurrence);
 
             $manager->persist($recurrence);
