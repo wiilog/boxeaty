@@ -18,6 +18,7 @@ use App\Entity\Status;
 use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
+use App\Service\ClientOrderService;
 use App\Service\DeliveryRoundService;
 use App\Service\Mailer;
 use DateInterval;
@@ -172,7 +173,7 @@ class PlanningController extends AbstractController {
 
             foreach ($orders as $order) {
                 $preparation = $order->getPreparation();
-                $deliveryStatus = ($preparation && $preparation->isOnStatusCode(Status::CODE_PREPARATION_PREPARED))
+                $deliveryStatus = ($preparation && $preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARED))
                     ? $preparedDeliveryStatus
                     : $preparingDeliveryStatus;
 
@@ -259,7 +260,10 @@ class PlanningController extends AbstractController {
      * @Route("/launch-delivery", name="planning_delivery_launch", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function launchDelivery(Request $request, EntityManagerInterface $manager, Mailer $mailer): Response {
+    public function launchDelivery(Request $request,
+                                   Mailer $mailer,
+                                   ClientOrderService $clientOrderService,
+                                   EntityManagerInterface $manager): Response {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
         $statusRepository = $manager->getRepository(Status::class);
         $depositoryRepository = $manager->getRepository(Depository::class);
@@ -270,9 +274,13 @@ class PlanningController extends AbstractController {
         $statusOrder = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_TRANSIT]);
         $depository = $depositoryRepository->findOneBy(["id" => $request->query->get('depository')]);
 
+        /** @var User $user */
+        $user = $this->getUser();
+
         foreach ($ordersToStart as $order) {
             $order = $clientOrderRepository->find($order);
-            $order->setStatus($statusOrder);
+
+            $clientOrderService->updateClientOrderStatus($order, $statusOrder, $user);
 
             $preparation = (new Preparation())
                 ->setStatus($statusPreparation)
@@ -420,15 +428,22 @@ dump($defaultCrateType->getId());
      * @Route("/delivery_validate", name="planning_delivery_validate", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function validateDelivery(Request $request, EntityManagerInterface $manager) {
+    public function validateDelivery(Request $request,
+                                     ClientOrderService $clientOrderService,
+                                     EntityManagerInterface $manager) {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
         $statusRepository = $manager->getRepository(Status::class);
 
         $order = $clientOrderRepository->find($request->query->get('order'));
         $status = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_PLANNED]);
 
-        $order->setStatus($status)
-            ->setValidator($this->getUser())
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $clientOrderService->updateClientOrderStatus($order, $status, $user);
+
+        $order
+            ->setValidator($user)
             ->setValidatedAt(new DateTime());
 
         $manager->persist($order);
