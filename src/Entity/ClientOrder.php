@@ -541,9 +541,10 @@ class ClientOrder {
 
     public function getClientClosedPark(): ?Client {
         $client = $this->getClient();
-        $clientOrderInformation = $client ? $client->getClientOrderInformation() : null;
-        return ($clientOrderInformation && $clientOrderInformation->isClosedParkOrder())
-            ? $client
-            : null;
+        if($client && !$client->getClientOrderInformation()->isClosedParkOrder()) {
+            $client = null;
+        }
+
+        return $client;
     }
 }

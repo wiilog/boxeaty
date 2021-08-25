@@ -1011,29 +1011,22 @@ class ApiController extends AbstractController {
         $preparationRepository = $manager->getRepository(Preparation::class);
 
         $preparationId = $request->query->get('preparation');
+        $clientFilter = null;
         if ($preparationId) {
             $preparation = $preparationRepository->find($preparationId);
 
-            $clientPreparation = $preparation
+            $clientFilter = $preparation
                 ->getOrder()
                 ->getClientClosedPark();
         }
-        $clientFilter = $clientPreparation ?? null;
 
-        $crateType = $boxTypeRepository->findOneBy([
-            'name' => $request->query->get('type'),
-        ]);
-
+        $crateType = $boxTypeRepository->findOneBy(["name" => $request->query->get("type"),]);
         $crates = $crateType->getCrates();
 
         $availableCrates = [];
         /** @var Box $crate */
         foreach ($crates as $crate) {
-            if ($crate->getLocation()
-                && (
-                    !$clientFilter
-                    || $clientFilter === $crate->getOwner()
-                )) {
+            if ($crate->getLocation() && (!$clientFilter || $clientFilter === $crate->getOwner())) {
                 $location = $crate->getLocation()->getName();
                 $number = $crate->getNumber();
                 $availableCrates[] = [
@@ -1067,31 +1060,26 @@ class ApiController extends AbstractController {
                 ->toArray()
             : [];
 
+        $clientFilter = null;
         if ($preparation) {
-            $clientPreparation = $preparation
+            $clientFilter = $preparation
                 ->getOrder()
                 ->getClientClosedPark();
         }
-        $clientFilter = $clientPreparation ?? null;
 
         $boxes = $boxRepository->getAvailableAndCleanedBoxByType($boxTypes);
 
         $availableBoxes = [];
         foreach ($boxes as $box) {
-            if ($box->getLocation()
-                && $box->getType()
-                && (
-                    !$clientFilter
-                    || $clientFilter === $box->getOwner()
-                )) {
+            if ($box->getLocation() && $box->getType() && (!$clientFilter || $clientFilter === $box->getOwner())) {
                 $type = $box->getType()->getName();
                 $location = $box->getLocation()->getName();
                 $number = $box->getNumber();
 
                 $availableBoxes[] = [
-                    'type' => $type,
-                    'location' => $location,
-                    'number' => $number
+                    "type" => $type,
+                    "location" => $location,
+                    "number" => $number
                 ];
             }
         }
