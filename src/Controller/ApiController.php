@@ -52,6 +52,10 @@ class ApiController extends AbstractController {
 
     private ?User $user = null;
 
+    public function getUser(): ?User {
+        return $this->user ?? parent::getUser();
+    }
+
     public function setUser(?User $user): void {
         $this->user = $user;
     }
@@ -501,7 +505,7 @@ class ApiController extends AbstractController {
      */
     public function deliveryRounds(EntityManagerInterface $manager): Response {
         $now = new DateTime("today midnight");
-        $rounds = $manager->getRepository(DeliveryRound::class)->findAwaitingDeliverer($this->user);
+        $rounds = $manager->getRepository(DeliveryRound::class)->findAwaitingDeliverer($this->getUser());
 
         $serialized = Stream::from($rounds)
             ->map(fn(DeliveryRound $round) => [
@@ -616,7 +620,7 @@ class ApiController extends AbstractController {
 
                 [$tracking] = $service->generateBoxRecords($box, [
                     "location" => $previous,
-                ], $this->user);
+                ], $this->getUser());
 
                 if ($tracking) {
                     $manager->persist($tracking);
@@ -663,7 +667,7 @@ class ApiController extends AbstractController {
 
                 [$tracking] = $service->generateBoxRecords($box, [
                     "location" => $previous,
-                ], $this->user);
+                ], $this->getUser());
 
                 if ($tracking) {
                     $manager->persist($tracking);
@@ -749,7 +753,7 @@ class ApiController extends AbstractController {
             ? $depositoryRepository->find($depositoryId)
             : null;
 
-        $preparations = $preparationRepository->getByDepository($depository, $this->user);
+        $preparations = $preparationRepository->getByDepository($depository, $this->getUser());
 
         $toPrepare = Stream::from($preparations)
             ->filter(fn($preparation) => !isset($preparation['operator']))
@@ -828,7 +832,7 @@ class ApiController extends AbstractController {
             $record
                 ->setBox($box)
                 ->setState(BoxStateService::STATE_BOX_IDENTIFIED)
-                ->setUser($this->user);
+                ->setUser($this->getUser());
             $manager->persist($record);
         }
         $manager->flush();
@@ -849,7 +853,7 @@ class ApiController extends AbstractController {
             || (
                 $preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
                 && $preparation->getOperator()
-                && $this->user !== $preparation->getOperator()
+                && $this->getUser() !== $preparation->getOperator()
             )) {
             return $this->json([
                 'success' => false,
@@ -898,7 +902,7 @@ class ApiController extends AbstractController {
 
                 $preparation
                     ->setStatus($status)
-                    ->setOperator($this->user);
+                    ->setOperator($this->getUser());
 
                 $entityManager->flush();
                 return $this->json([
@@ -907,7 +911,7 @@ class ApiController extends AbstractController {
                 ]);
             }
             else if (!$preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
-                || $this->user !== $preparation->getOperator()){
+                || $this->getUser() !== $preparation->getOperator()){
                 return $this->json([
                     'success' => false,
                     'message' => 'La préparation est en cours de préparation par un autre utilisateur'
@@ -915,7 +919,7 @@ class ApiController extends AbstractController {
             }
             else {
                 // $preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
-                // AND $this->user === $preparation->getOperator()
+                // AND $this->getUser() === $preparation->getOperator()
                 return $this->json([
                     'success' => true
                 ]);
@@ -923,7 +927,7 @@ class ApiController extends AbstractController {
 
         }
         else if ($preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
-                 && $this->user === $preparation->getOperator()) {
+                 && $this->getUser() === $preparation->getOperator()) {
             $userRepository = $entityManager->getRepository(User::class);
 
             $preparedStatus = $statusRepository->findOneBy(['code' => Status::CODE_PREPARATION_PREPARED]);
@@ -935,7 +939,7 @@ class ApiController extends AbstractController {
             $result = $preparationService->handlePreparedCrates($entityManager, $clientOrder, $crates);
 
             $date = new DateTime();
-            $user = $this->user;
+            $user = $this->getUser();
 
             if ($result['success']) {
                 foreach ($result['entities'] as $crateData) {
@@ -1163,7 +1167,7 @@ class ApiController extends AbstractController {
                 $record
                     ->setBox($box)
                     ->setState(BoxStateService::STATE_BOX_IDENTIFIED)
-                    ->setUser($this->user);
+                    ->setUser($this->getUser());
 
                 $manager->persist($record);
             }
@@ -1178,9 +1182,7 @@ class ApiController extends AbstractController {
      * @Authenticated
      */
     public function getCollects(EntityManagerInterface $manager) {
-        $pendingCollects = $manager->getRepository(Collect::class)->getPendingCollects();
-
-        return $this->json($pendingCollects);
+        return $this->json($manager->getRepository(Collect::class)->getPendingCollects($this->getUser()));
     }
 
     /**
@@ -1333,7 +1335,7 @@ class ApiController extends AbstractController {
             ->setPickComment($comment ?? null)
             ->setPickSignature($signature)
             ->setPickPhoto($photo ?? null)
-            ->setOperator($this->user)
+            ->setOperator($this->getUser())
             ->setCrates($crates);
 
 

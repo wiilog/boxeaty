@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Collect;
+use App\Entity\Role;
 use App\Entity\Status;
+use App\Entity\User;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -14,8 +16,7 @@ use Doctrine\ORM\EntityRepository;
  */
 class CollectRepository extends EntityRepository {
 
-    public function getTotalQuantityByClientAndCollectedDate($client, $dateMin, $dateMax)
-    {
+    public function getTotalQuantityByClientAndCollectedDate($client, $dateMin, $dateMax) {
         $qb = $this->createQueryBuilder('collecte')
             ->select('sum(lines.quantity)')
             ->andWhere('collecte.collectedAt BETWEEN :dateMin AND :dateMax')
@@ -33,10 +34,15 @@ class CollectRepository extends EntityRepository {
         return $result ? intval($result) : 0;
     }
 
-    public function getPendingCollects() {
+    public function getPendingCollects(?User $user) {
+        $qb = $this->createQueryBuilder("collect");
 
-        $qb = $this->createQueryBuilder('collect')
-            ->select('collect.id AS id')
+        if (!$user->hasRight(Role::TREAT_ALL_COLLECTS)) {
+            $qb->andWhere("collect.operator = :operator")
+                ->setParameter("operator", $user);
+        }
+
+        return $qb->select('collect.id AS id')
             ->addSelect('collect.number AS number')
             ->addSelect('collect.tokens AS token_amount')
             ->addSelect('join_depository.name AS depository')
@@ -53,7 +59,7 @@ class CollectRepository extends EntityRepository {
             ->leftJoin('collect.status', 'join_status')
             ->leftJoin('collect.crates', 'join_crates')
             ->leftJoin('collect.pickLocation', 'join_pickLocation')
-            ->where('join_status.code = :status')
+            ->andWhere('join_status.code = :status')
             ->groupBy('id')
             ->setParameter('status', Status::CODE_COLLECT_TRANSIT)
             ->getQuery()
@@ -63,7 +69,7 @@ class CollectRepository extends EntityRepository {
     public function getLastNumberByDate(string $date): ?string {
         $result = $this->createQueryBuilder('collect')
             ->select('collect.number')
-            ->where('collect.number LIKE :value')
+            ->andWhere('collect.number LIKE :value')
             ->orderBy('collect.createdAt', 'DESC')
             ->addOrderBy('collect.number', 'DESC')
             ->setMaxResults(1)

@@ -15,7 +15,7 @@ class OrderTypeRepository extends EntityRepository {
 
     public function findSelectable() {
         return $this->createQueryBuilder("order_type")
-            ->where("order_type.code IN (:codes)")
+            ->andWhere("order_type.code IN (:codes)")
             ->setParameter("codes", OrderType::SELECTABLE)
             ->getQuery()
             ->getResult();
