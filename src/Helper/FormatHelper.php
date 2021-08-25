@@ -12,6 +12,16 @@ class FormatHelper {
     public const DATE_FORMAT = "d/m/Y";
     public const DATETIME_FORMAT = "d/m/Y H:i";
 
+    public const ENGLISH_WEEK_DAYS = [
+        1 => "Monday",
+        2 => "Tuesday",
+        3 => "Wednesday",
+        4 => "Thursday",
+        5 => "Friday",
+        6 => "Saturday",
+        7 => "Sunday",
+    ];
+
     public const WEEK_DAYS = [
         1 => "Lundi",
         2 => "Mardi",

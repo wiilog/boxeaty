@@ -190,7 +190,7 @@ class ClientOrderController extends AbstractController {
                         UniqueNumberService $uniqueNumberService,
                         EntityManagerInterface $entityManager,
                         ClientOrderService $clientOrderService): Response {
-        $number = $uniqueNumberService->createUniqueNumber($entityManager, ClientOrder::PREFIX_NUMBER, ClientOrder::class);
+        $number = $uniqueNumberService->createUniqueNumber(ClientOrder::class);
         $now = new DateTime('now');
 
         $clientOrder = new ClientOrder();

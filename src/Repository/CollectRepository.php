@@ -48,7 +48,8 @@ class CollectRepository extends EntityRepository {
             ->addSelect('join_pickLocation.name AS pick_location')
             ->leftJoin('collect.client', 'join_client')
             ->leftJoin('join_client.contact', 'join_user')
-            ->leftJoin('join_client.depository', 'join_depository')
+            ->leftJoin('join_client.clientOrderInformation', 'join_client_order_information')
+            ->leftJoin('join_client_order_information.depository', 'join_depository')
             ->leftJoin('collect.status', 'join_status')
             ->leftJoin('collect.crates', 'join_crates')
             ->leftJoin('collect.pickLocation', 'join_pickLocation')
@@ -67,9 +68,11 @@ class CollectRepository extends EntityRepository {
             ->where('collect.number LIKE :value')
             ->orderBy('collect.createdAt', 'DESC')
             ->addOrderBy('collect.number', 'DESC')
+            ->setMaxResults(1)
             ->setParameter('value', Collect::PREFIX_NUMBER . $date . '%')
             ->getQuery()
             ->execute();
+
         return $result ? $result[0]['number'] : null;
     }
 

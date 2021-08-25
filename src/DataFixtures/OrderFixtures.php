@@ -10,18 +10,12 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 class OrderFixtures extends Fixture implements FixtureGroupInterface {
 
-    private const TYPES = [
-        OrderType::PURCHASE_TRADE => "Achat/négoce",
-        OrderType::AUTONOMOUS_MANAGEMENT => "Gestion autonome",
-        OrderType::ONE_TIME_SERVICE => "Prestation ponctuelle",
-    ];
-
     public function load(ObjectManager $manager) {
         $output = new ConsoleOutput();
 
         $orderTypeRepository = $manager->getRepository(OrderType::class);
 
-        foreach (self::TYPES as $code => $name) {
+        foreach (OrderType::LABELS as $code => $name) {
             if ($orderTypeRepository->findOneBy(["code" => $code]) === null) {
                 $type = (new OrderType())
                     ->setCode($code)

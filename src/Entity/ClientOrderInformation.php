@@ -9,67 +9,62 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ClientOrderInformation {
 
-    public const BUY = 0;
-    public const MANAGE = 1;
-    public const BENEFIT = 2;
-
-    public const ORDER_TYPES = [
-        self::BUY => 'Achat / Négoce',
-        self::MANAGE => 'Gestion autonome',
-        self::BENEFIT => 'Prestation ponctuelle',
-    ];
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id = null;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\OneToOne(targetEntity=Client::class, mappedBy="clientOrderInformation", cascade={"persist", "remove"})
      */
-    private $depositoryDistance;
+    private ?Client $client = null;
+
+    /**
+     * @ORM\Column(type="decimal", precision=8, scale=2, nullable=true)
+     */
+    private ?string $depositoryDistance = null;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $tokenAmount;
+    private ?int $tokenAmount = null;
 
     /**
      * @ORM\Column(type="json", nullable=true)
      */
-    private $orderTypes = [];
+    private ?array $orderTypes = [];
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
      */
-    private $isClosedParkOrder;
+    private ?bool $isClosedParkOrder = null;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="decimal", precision=8, scale=2, nullable=true)
      */
-    private $workingDayDeliveryRate;
+    private ?string $workingDayDeliveryRate = null;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="decimal", precision=8, scale=2, nullable=true)
      */
-    private $nonWorkingDayDeliveryRate;
+    private ?string $nonWorkingDayDeliveryRate = null;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="decimal", precision=8, scale=2, nullable=true)
      */
-    private $serviceCost;
+    private ?string $serviceCost = null;
 
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    private $comment;
+    private ?string $comment = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=DeliveryMethod::class, inversedBy="clientOrderInformation")
      */
-    private $deliveryMethod;
+    private ?DeliveryMethod $deliveryMethod = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Depository::class, inversedBy="clientOrderInformation")
@@ -77,14 +72,9 @@ class ClientOrderInformation {
     private ?Depository $depository = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=Client::class, mappedBy="clientOrderInformation", cascade={"persist", "remove"})
-     */
-    private $client;
-
-    /**
      * @ORM\OneToOne(targetEntity=OrderRecurrence::class, cascade={"persist", "remove"})
      */
-    private $orderRecurrence;
+    private ?OrderRecurrence $orderRecurrence = null;
 
     public function getId(): ?int
     {
@@ -122,7 +112,11 @@ class ClientOrderInformation {
 
     public function setOrderTypes(?array $orderTypes): self
     {
-        $this->orderTypes = $orderTypes;
+        if(!$orderTypes || $orderTypes[0] == null) {
+            $this->orderTypes = [];
+        } else {
+            $this->orderTypes = $orderTypes;
+        }
 
         return $this;
     }

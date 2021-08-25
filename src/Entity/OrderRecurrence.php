@@ -3,70 +3,74 @@
 namespace App\Entity;
 
 use App\Repository\OrderRecurrenceRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=OrderRecurrenceRepository::class)
  */
-class OrderRecurrence
-{
+class OrderRecurrence {
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id = null;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="decimal", precision=8, scale=2)
      */
-    private $monthlyPrice;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $frequency;
+    private ?string $monthlyPrice = null;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $crateAmount;
+    private ?int $period = null;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private ?int $crateAmount = null;
 
     /**
      * @ORM\Column(type="date")
      */
-    private $start;
+    private ?DateTime $start = null;
 
     /**
      * @ORM\Column(type="date")
      */
-    private $end;
+    private ?DateTime $end = null;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="decimal", precision=8, scale=2)
      */
-    private $deliveryFlatRate;
+    private ?string $deliveryFlatRate = null;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="decimal", precision=8, scale=2)
      */
-    private $serviceFlatRate;
+    private ?string $serviceFlatRate = null;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $day;
+    private ?int $day = null;
 
-    public function getId(): ?int
-    {
+    /**
+     * @ORM\Column(type="date")
+     */
+    private ?DateTime $lastEdit = null;
+
+    public function getId(): ?int {
         return $this->id;
     }
 
     /**
      * @return float
      */
-    public function getMonthlyPrice()
-    {
+    public function getMonthlyPrice() {
         return $this->monthlyPrice;
     }
 
@@ -74,93 +78,88 @@ class OrderRecurrence
      * @param float $monthlyPrice
      * @return self
      */
-    public function setMonthlyPrice($monthlyPrice): self
-    {
+    public function setMonthlyPrice($monthlyPrice): self {
         $this->monthlyPrice = $monthlyPrice;
         return $this;
     }
 
-    public function getFrequency(): ?int
-    {
-        return $this->frequency;
+    public function getPeriod(): ?int {
+        return $this->period;
     }
 
-    public function setFrequency(int $frequency): self
-    {
-        $this->frequency = $frequency;
+    public function setPeriod(int $period): self {
+        $this->period = $period;
 
         return $this;
     }
 
-    public function getCrateAmount(): ?int
-    {
+    public function getCrateAmount(): ?int {
         return $this->crateAmount;
     }
 
-    public function setCrateAmount(int $crateAmount): self
-    {
+    public function setCrateAmount(int $crateAmount): self {
         $this->crateAmount = $crateAmount;
 
         return $this;
     }
 
-    public function getStart(): ?\DateTimeInterface
-    {
+    public function getStart(): ?DateTime {
         return $this->start;
     }
 
-    public function setStart(\DateTimeInterface $start): self
-    {
+    public function setStart(DateTime $start): self {
         $this->start = $start;
 
         return $this;
     }
 
-    public function getEnd(): ?\DateTimeInterface
-    {
+    public function getEnd(): ?DateTime {
         return $this->end;
     }
 
-    public function setEnd(\DateTimeInterface $end): self
-    {
+    public function setEnd(DateTime $end): self {
         $this->end = $end;
 
         return $this;
     }
 
-    public function getDeliveryFlatRate(): ?float
-    {
+    public function getDeliveryFlatRate(): ?float {
         return $this->deliveryFlatRate;
     }
 
-    public function setDeliveryFlatRate(float $deliveryFlatRate): self
-    {
+    public function setDeliveryFlatRate(float $deliveryFlatRate): self {
         $this->deliveryFlatRate = $deliveryFlatRate;
 
         return $this;
     }
 
-    public function getServiceFlatRate(): ?float
-    {
+    public function getServiceFlatRate(): ?float {
         return $this->serviceFlatRate;
     }
 
-    public function setServiceFlatRate(float $serviceFlatRate): self
-    {
+    public function setServiceFlatRate(float $serviceFlatRate): self {
         $this->serviceFlatRate = $serviceFlatRate;
 
         return $this;
     }
 
-    public function getDay(): ?int
-    {
+    public function getDay(): ?int {
         return $this->day;
     }
 
-    public function setDay(int $day): self
-    {
+    public function setDay(int $day): self {
         $this->day = $day;
 
         return $this;
     }
+
+    public function getLastEdit(): ?DateTime {
+        return $this->lastEdit;
+    }
+
+    public function setLastEdit(?DateTime $lastEdit): self {
+        $this->lastEdit = $lastEdit;
+        return $this;
+    }
+
 }

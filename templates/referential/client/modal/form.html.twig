@@ -207,26 +207,28 @@
             <span class="label">Type(s) de commande disponible(s)</span>
             <div class="d-flex">
                 <input class="data-array radio-like" type="checkbox" name="orderType"
-                       value="{{ constant('App\\Entity\\ClientOrderInformation::BUY') }}"
+                       value="{{ constant('App\\Entity\\OrderType::PURCHASE_TRADE') }}"
                        id="{{ client.id ? 'edit' : 'new' }}-order-type-buy"
-                        {{ constant('App\\Entity\\ClientOrderInformation::BUY') in orderTypes ? 'checked' }}>
+                        {{ constant('App\\Entity\\OrderType::PURCHASE_TRADE') in orderTypes ? 'checked' }}>
                 <label class="radio-like" for="{{ client.id ? 'edit' : 'new' }}-order-type-buy">
                     Achat / Négoce
                 </label>
+
                 <input class="data-array radio-like" type="checkbox" name="orderType"
-                       value="{{ constant('App\\Entity\\ClientOrderInformation::MANAGE') }}"
+                       value="{{ constant('App\\Entity\\OrderType::AUTONOMOUS_MANAGEMENT') }}"
                        id="{{ client.id ? 'edit' : 'new' }}-order-type-manage"
-                        {{ constant('App\\Entity\\ClientOrderInformation::MANAGE') in orderTypes ? 'checked' }}>
+                        {{ constant('App\\Entity\\OrderType::AUTONOMOUS_MANAGEMENT') in orderTypes ? 'checked' }}>
                 <label class="radio-like" for="{{ client.id ? 'edit' : 'new' }}-order-type-manage">
                     Gestion autonome
                 </label>
+
                 <input class="data-array radio-like" type="checkbox" name="orderType"
-                       value="{{ constant('App\\Entity\\ClientOrderInformation::BENEFIT') }}"
+                       value="{{ constant('App\\Entity\\OrderType::ONE_TIME_SERVICE') }}"
                        id="{{ client.id ? 'edit' : 'new' }}-order-type-benefit"
-                        {{ constant('App\\Entity\\ClientOrderInformation::BENEFIT') in orderTypes ? 'checked' }}>
-                <label class="radio-like"
-                       for="{{ client.id ? 'edit' : 'new' }}-order-type-benefit">
+                        {{ constant('App\\Entity\\OrderType::ONE_TIME_SERVICE') in orderTypes ? 'checked' }}>
+                <label class="radio-like" for="{{ client.id ? 'edit' : 'new' }}-order-type-benefit">
                     Prestation ponctuelle
+                </label>
             </div>
         </div>
         <div class="col-12 d-flex align-items-center mt-3">

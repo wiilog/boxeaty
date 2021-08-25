@@ -46,15 +46,16 @@ class ClientOrderService
 
     private ?string $token = null;
 
-    public function updateClientOrderStatus(ClientOrder $clientOrder, Status $status, User $user): OrderStatusHistory {
-        $now = new DateTime('now');
+    public function updateClientOrderStatus(ClientOrder $clientOrder, Status $status, ?User $user): OrderStatusHistory {
+        $now = new DateTime("now");
         $history = (new OrderStatusHistory())
             ->setOrder($clientOrder)
             ->setStatus($status)
             ->setUser($user)
             ->setChangedAt($now);
-        $clientOrder
-            ->setStatus($status);
+
+        $clientOrder->setStatus($status);
+
         return $history;
     }
 

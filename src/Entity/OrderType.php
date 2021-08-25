@@ -13,6 +13,14 @@ class OrderType {
     public const PURCHASE_TRADE = "PURCHASE_TRADE";
     public const AUTONOMOUS_MANAGEMENT = "AUTONOMOUS_MANAGEMENT";
     public const ONE_TIME_SERVICE = "ONE_TIME_SERVICE";
+    public const RECURRENT = "RECURRENT";
+
+    public const LABELS = [
+        self::PURCHASE_TRADE => "Achat/négoce",
+        self::AUTONOMOUS_MANAGEMENT => "Gestion autonome",
+        self::ONE_TIME_SERVICE => "Prestation ponctuelle",
+        self::RECURRENT => "Récurrent",
+    ];
 
     /**
      * @ORM\Id
