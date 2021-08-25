@@ -89,7 +89,6 @@ function toggleCapacityInput($typeRadio) {
 function toggleInputsIn($container, show) {
     if(show) {
         $container.removeClass(`d-none`);
-        $container.find(`input:not(.no-clear), select`).val(``);
         $container.find(`input[data-was-required], select[data-was-required]`).each(function() {
             $(this).prop(`required`, true);
         });
