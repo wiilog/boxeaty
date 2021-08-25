@@ -44,14 +44,14 @@ class ClientOrderController extends AbstractController {
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
         $deliveryMethod = $manager->getRepository(DeliveryMethod::class);
-        $orderTypes = $manager->getRepository(OrderType::class);
+        $orderTypeRepository = $manager->getRepository(OrderType::class);
         $boxTypeRepository = $manager->getRepository(BoxType::class);
 
         return $this->render("operation/client_order/index.html.twig", [
             "new_client_order" => new ClientOrder(),
             "requester" => $this->getUser(),
             "deliveryMethods" => $deliveryMethod->findBy(["deleted" => false], ["name" => "ASC"]),
-            "orderTypes" => $orderTypes->findBy([]),
+            "orderTypes" => $orderTypeRepository->findSelectable(),
             "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER,
             "starterKit" => $boxTypeRepository->findStarterKit(),
@@ -264,9 +264,11 @@ class ClientOrderController extends AbstractController {
                                ClientOrderService $clientOrderService): Response {
 
         $form = Form::create();
+
         $content = (object)$request->request->all();
         $statusRepository = $entityManager->getRepository(Status::class);
         $status = $statusRepository->findOneBy(['id' => $content->status]);
+
         if ($form->isValid()) {
             $history = $clientOrderService->updateClientOrderStatus($clientOrder, $status, $this->getUser());
             $history->setJustification($content->justification);
@@ -280,7 +282,6 @@ class ClientOrderController extends AbstractController {
         } else {
             return $form->errors();
         }
-        return $this->json($result);
     }
 
     /**
@@ -372,7 +373,7 @@ class ClientOrderController extends AbstractController {
             "template" => $this->renderView("operation/client_order/modal/new.html.twig", [
                 "clientOrder" => $clientOrder,
                 "initialClient" => $initialClient ?? null,
-                "orderTypes" => $orderTypeRepository->findBy([]),
+                "orderTypes" => $orderTypeRepository->findSelectable(),
                 "deliveryMethods" => $deliveryMethodRepository->findBy(["deleted" => false], ["name" => "ASC"]),
                 'cartContent' => $cartContent,
                 "workFreeDay" => Stream::from($entityManager->getRepository(WorkFreeDay::class)->findAll())

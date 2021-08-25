@@ -290,23 +290,20 @@ class BoxController extends AbstractController {
     }
 
     /**
-     * @Route("/{box}/mouvements", name="get_box_mouvements", options={"expose": true}, methods={"GET"})
+     * @Route("/{box}/mouvements", name="box_movements", options={"expose": true}, methods={"GET"})
      */
-    public function getTrackingMovements(Box $box,
-                                         Request $request,
-                                         EntityManagerInterface $manager): JsonResponse
-    {
+    public function trackingMovements(Box $box, Request $request, EntityManagerInterface $manager): Response {
         $boxRecordRepository = $manager->getRepository(BoxRecord::class);
-        $start = $request->query->getInt('start', 0);
-        $search = $request->query->has('search') ? $request->query->get('search') : null;
+        $start = $request->query->getInt("start");
+        $search = $request->query->get("search");
         $length = 10;
 
         $boxMovementsResult = $boxRecordRepository->getBoxRecords($box, $start, $length, $search);
 
         return $this->json([
-            'success' => true,
-            'isTail' => ($start + $length) >= $boxMovementsResult['totalCount'],
-            'data' => Stream::from($boxMovementsResult['data'])
+            "success" => true,
+            "isTail" => ($start + $length) >= $boxMovementsResult['totalCount'],
+            "data" => Stream::from($boxMovementsResult['data'])
                 ->map(fn(array $movement) => [
                     'quality' => $movement['quality'] ?? "",
                     'color' => (isset($movement['state']) && isset(BoxStateService::LINKED_COLORS[$movement['state']]))

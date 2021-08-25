@@ -8,6 +8,7 @@ use App\Entity\BoxRecord;
 use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
+use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\Group;
 use App\Entity\Location;
@@ -176,10 +177,11 @@ class ExportController extends AbstractController
             return $row;
         });
 
-        $exportService->createWorksheet($spreadsheet, "Emplacements", Location::class, ExportService::LOCATION_HEADER);
         $exportService->createWorksheet($spreadsheet, "Clients", Client::class, ExportService::CLIENT_HEADER);
         $exportService->createWorksheet($spreadsheet, "Groupes", Group::class, ExportService::GROUP_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Emplacements", Location::class, ExportService::LOCATION_HEADER);
         $exportService->createWorksheet($spreadsheet, "Types de Box", BoxType::class, ExportService::BOX_TYPE_HEADER);
+        $exportService->createWorksheet($spreadsheet, "Dépôt", Depository::class, ExportService::DEPOSITORY_HEADER);
 
         $exportService->createWorksheet($spreadsheet, "Utilisateurs", User::class, ExportService::USER_HEADER);
         $exportService->createWorksheet($spreadsheet, "Rôles", Role::class, ExportService::ROLE_HEADER);

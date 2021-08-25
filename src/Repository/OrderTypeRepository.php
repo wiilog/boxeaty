@@ -13,7 +13,15 @@ use Doctrine\ORM\EntityRepository;
  */
 class OrderTypeRepository extends EntityRepository {
 
-    function getForSelect(?string $search){
+    public function findSelectable() {
+        return $this->createQueryBuilder("order_type")
+            ->where("order_type.code IN (:codes)")
+            ->setParameter("codes", OrderType::SELECTABLE)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getForSelect(?string $search){
         return $this->createQueryBuilder("order_type")
             ->select("order_type.id AS id, order_type.name AS text")
             ->andWhere("order_type.name LIKE :search")

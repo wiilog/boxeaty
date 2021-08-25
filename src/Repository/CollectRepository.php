@@ -20,7 +20,7 @@ class CollectRepository extends EntityRepository {
             ->select('sum(lines.quantity)')
             ->andWhere('collecte.collectedAt BETWEEN :dateMin AND :dateMax')
             ->andWhere('clientOrder.client =:client')
-            ->join('collecte.order', 'clientOrder')
+            ->join('collecte.clientOrder', 'clientOrder')
             ->join('clientOrder.lines', 'lines')
             ->setParameters([
                 'dateMin' => $dateMin,

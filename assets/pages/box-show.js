@@ -92,7 +92,7 @@ function getBoxTrackingMovements(start = 0) {
 
     const search = $('.comment-search').val();
 
-    AJAX.route('GET', 'get_box_mouvements', {box: $('#box-id').val(), search, start})
+    AJAX.route('GET', 'box_movements', {box: $('#box-id').val(), search, start})
         .json()
         .then((result) => {
             if(result.success) {
