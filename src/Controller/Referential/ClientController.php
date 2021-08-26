@@ -645,7 +645,7 @@ class ClientController extends AbstractController {
             $crateTypePrice = Stream::from($client->getCratePatternLines())
                 ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
                 ->sum();
-            dump($crateTypePrice);
+
             $recurrence = (new OrderRecurrence())
                 ->setPeriod($content->period)
                 ->setCrateAmount($content->crateAmount)
