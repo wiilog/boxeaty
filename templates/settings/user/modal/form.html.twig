@@ -127,13 +127,11 @@
             </label>
         </div>
     </div>
-    <div class="col-md-6 col-12 d-none method">
+    <div class="col-md-6 col-12 {{ not user.deliverer ? 'd-none' }} delivery-method">
         <label>
             Mobilité
-            <select name="deliveryMethod"
-                    class="data"
-                    data-s2="deliveryMethod"
-                    data-placeholder="Sélectionnez une mobilité">
+            <select name="deliveryMethod" class="data"
+                    data-s2="deliveryMethod" data-placeholder="Sélectionnez une mobilité">
                 {% if user.deliveryMethod %}
                     <option value="{{ user.deliveryMethod.id }}" selected>{{ user.deliveryMethod.name }}</option>
                 {% endif %}
