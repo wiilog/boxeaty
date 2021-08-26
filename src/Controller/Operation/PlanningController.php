@@ -401,7 +401,6 @@ class PlanningController extends AbstractController {
                 $name = $ordered['name'];
 
                 $availableQuantity = $availableInDepository[$boxTypeId][$client] ?? 0;
-
                 if ($orderedQuantity > $availableQuantity) {
                     foreach ($orders as $order) {
                         if (!in_array($order, $unavailableOrders)) {

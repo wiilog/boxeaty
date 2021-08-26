@@ -133,7 +133,7 @@ class BoxTypeRepository extends EntityRepository {
             ->addSelect("COUNT(box.id) AS count")
             ->addSelect("owner.id AS client")
             ->innerJoin("box_type.boxes", "box")
-            ->innerJoin("box.owner", "owner")
+            ->leftJoin("box.owner", "owner")
             ->innerJoin("box.location", "location")
             ->innerJoin("box.quality", "quality")
             ->innerJoin("location.depository", "depository")
@@ -152,7 +152,6 @@ class BoxTypeRepository extends EntityRepository {
         foreach ($totalAvailableResult as $line) {
             $totalAvailable[$line["id"]][$line["client"] ?: Box::OWNER_BOXEATY] = $line["count"];
         }
-
         $inUnpreparedResult = $this->createQueryBuilder("box_type")
             ->select("box_type.id AS id")
             ->addSelect("SUM(order_lines.quantity) AS count")
@@ -184,7 +183,6 @@ class BoxTypeRepository extends EntityRepository {
                 ->getQuery()
                 ->getResult());
         }
-
         $inUnprepared = [];
         foreach ($inUnpreparedResult as $line) {
             $owner = $line["client"] ?: Box::OWNER_BOXEATY;
@@ -195,7 +193,6 @@ class BoxTypeRepository extends EntityRepository {
                 $totalAvailable[$type][$client] = $count - ($inUnprepared[$type][$client] ?? 0);
             }
         }
-
         return $totalAvailable;
     }
 
