@@ -6,6 +6,7 @@ use App\Entity\Box;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\Depository;
+use App\Entity\Role;
 use App\Entity\Status;
 use DateTime;
 use App\Entity\User;
@@ -144,12 +145,17 @@ class ClientOrderRepository extends EntityRepository {
     public function findForDatatable(array $params, ?User $user = null): array {
         $qb = $this->createQueryBuilder("clientOrder");
 
-        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
-            $qb->join("clientOrder.client", "client")
-                ->andWhere("client.group IN (:groups)")
-                ->andWhere("client IN (:clients)")
-                ->setParameter("groups", $user->getGroups())
-                ->setParameter("clients", $user->getClients());
+        if($user && !$user->hasRight(Role::VIEW_ALL_ORDERS)) {
+            if($user->getRole()->isAllowEditOwnGroupOnly()) {
+                $qb->join("clientOrder.client", "client")
+                    ->andWhere("client.group IN (:groups)")
+                    ->andWhere("client IN (:clients)")
+                    ->setParameter("groups", $user->getGroups())
+                    ->setParameter("clients", $user->getClients());
+            }
+
+            $qb->andWhere("clientOrder.requester = :permission_user")
+                ->setParameter("permission_user", $user);
         }
 
         $total = QueryHelper::count($qb, "clientOrder");

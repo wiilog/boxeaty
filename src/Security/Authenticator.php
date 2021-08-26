@@ -44,11 +44,11 @@ class Authenticator extends AbstractFormLoginAuthenticator {
     /** @Required */
     public UserPasswordEncoderInterface $encoder;
 
-    public function supports(Request $request) {
+    public function supports(Request $request): bool {
         return self::LOGIN_ROUTE === $request->attributes->get("_route") && $request->isMethod("POST");
     }
 
-    public function getCredentials(Request $request) {
+    public function getCredentials(Request $request): array {
         $credentials = [
             "email" => $request->request->get("email"),
             "password" => $request->request->get("password"),
@@ -60,7 +60,7 @@ class Authenticator extends AbstractFormLoginAuthenticator {
         return $credentials;
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider) {
+    public function getUser($credentials, UserProviderInterface $userProvider): ?User {
         $token = new CsrfToken("authenticate", $credentials["csrf_token"]);
         if (!$this->csrfTokenManager->isTokenValid($token)) {
             throw new InvalidCsrfTokenException();
@@ -74,12 +74,12 @@ class Authenticator extends AbstractFormLoginAuthenticator {
         return $user;
     }
 
-    public function checkCredentials($credentials, UserInterface $user) {
+    public function checkCredentials($credentials, UserInterface $user): bool {
         return $user instanceof User && $user->isActive() &&
             $this->encoder->isPasswordValid($user, $credentials["password"]);
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey) {
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey): RedirectResponse {
         if($token->getUser() instanceof User) {
             $token->getUser()->setLastLogin(new DateTime());
             $this->entityManager->flush();
@@ -98,7 +98,7 @@ class Authenticator extends AbstractFormLoginAuthenticator {
         return new RedirectResponse($this->urlGenerator->generate(self::HOME_ROUTE));
     }
 
-    protected function getLoginUrl() {
+    protected function getLoginUrl(): string {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
     }
 
