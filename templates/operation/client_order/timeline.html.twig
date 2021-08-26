@@ -9,7 +9,7 @@
                 <div class="title">{{ history.changedAt|date('d/m/Y') }}</div>
                 <div class="subtitle">{{ history.changedAt|date('H:i') }}</div>
             </div>
-            <div class="client-order-history-status {{ loop.first ? 'first' }}">
+            <div class="client-order-history-status {{ loop.last ? 'last' }}">
                 {% if history.status %}
                     <div class="title">{{ history.status.name }}</div>
                 {% endif %}
