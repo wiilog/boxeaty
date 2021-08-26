@@ -349,22 +349,28 @@ class ClientOrderService
                 $currentBoxVolume = $boxType->getVolume();
 
                 do {
-                    $remainingVolumeInCurrentCrate = ($defaultCrateVolume - $splittingLineVolume);
-                    $availableQuantityOfCurrentBox = floor($remainingVolumeInCurrentCrate / $currentBoxVolume);
+                    if ($currentBoxVolume) {
+                        $remainingVolumeInCurrentCrate = ($defaultCrateVolume - $splittingLineVolume);
+                        $availableQuantityOfCurrentBox = floor($remainingVolumeInCurrentCrate / $currentBoxVolume);
 
-                    // IF crate is full
-                    // OR we can't put any box of this type
-                    // THEN we get another crate
-                    if ($remainingVolumeInCurrentCrate <= 0
-                        || $availableQuantityOfCurrentBox <= 0) {
-                        $cartSplitting[] = $cartSplittingLine;
+                        // IF crate is full
+                        // OR we can't put any box of this type
+                        // THEN we get another crate
+                        if ($remainingVolumeInCurrentCrate <= 0
+                            || $availableQuantityOfCurrentBox <= 0) {
+                            $cartSplitting[] = $cartSplittingLine;
 
-                        $cartSplittingLine = $serializeCrate($defaultCrateType);
-                        $splittingLineVolume = 0;
+                            $cartSplittingLine = $serializeCrate($defaultCrateType);
+                            $splittingLineVolume = 0;
+                        }
+
+                        // we put selected quantity of the current box into current crate
+                        $boxQuantitySelected = min($quantity, $availableQuantityOfCurrentBox);
+                    }
+                    else {
+                        $boxQuantitySelected = $quantity;
                     }
 
-                    // we put selected quantity of the current box into current crate
-                    $boxQuantitySelected = min($quantity, $availableQuantityOfCurrentBox);
                     $splittingLineVolume += ($currentBoxVolume * $boxQuantitySelected);
                     $cartSplittingLine['boxes'][] = $serializeBox($boxType, $boxQuantitySelected);
 

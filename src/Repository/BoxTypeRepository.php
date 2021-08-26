@@ -150,7 +150,7 @@ class BoxTypeRepository extends EntityRepository {
 
         $totalAvailable = [];
         foreach ($totalAvailableResult as $line) {
-            $totalAvailable[$line["id"]][$line["client"] ?: "any"] = $line["count"];
+            $totalAvailable[$line["id"]][$line["client"] ?: Box::OWNER_BOXEATY] = $line["count"];
         }
 
         $inUnpreparedResult = $this->createQueryBuilder("box_type")
