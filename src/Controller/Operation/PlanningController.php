@@ -220,9 +220,11 @@ class PlanningController extends AbstractController {
             $depository = $manager->find(Depository::class, $request->query->get("depository"));
         }
 
+        $now = date('Y-m-d');
         return $this->json([
             "submit" => $this->generateUrl("planning_delivery_launch"),
             "template" => $this->renderView("operation/planning/modal/start_delivery.html.twig", [
+                "now" => date('Y-m-d', strtotime($now . '+ 1 days')),
                 "from" => $request->query->get("from"),
                 "to" => $request->query->get("to"),
                 "depository" => $depository ?? null,
@@ -320,10 +322,17 @@ class PlanningController extends AbstractController {
 
         $globalSettingRepository = $manager->getRepository(GlobalSetting::class);
         $defaultCrateTypeId = $globalSettingRepository->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
+
+        if (!isset($defaultCrateTypeId)) {
+            return $this->json([
+                "success" => false,
+                "message" => "Vous devez renseigner une caisse par défaut dans le paramétrage global",
+            ]);
+        }
+
         $defaultCrateType = !empty($defaultCrateTypeId)
             ? $boxTypeRepository->find($defaultCrateTypeId)
             : null;
-
         // add all the ordered boxes (and crates) to the array
         // with the total quantity
         $orderedBoxTypes = [];

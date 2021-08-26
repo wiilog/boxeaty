@@ -159,7 +159,7 @@ class DepositoryController extends AbstractController {
         if ($depository
             && (!$depository->getPreparations()->isEmpty()
                 || !$depository->getLocations()->isEmpty()
-                || !$depository->getClients()->isEmpty())
+                || !$depository->getClientOrderInformation()->isEmpty())
         ) {
             $depository->setActive(false);
             $manager->flush();

@@ -15,6 +15,12 @@
                     Vous ne pouvez pas le supprimer.<br>
                     Voulez-vous le désactiver ?
                 </p>
+            {% elseif depository.clientOrderInformation | length > 0 %}
+                <h1>Ce dépôt est lié à une ou plusieurs commande client</h1>
+                <p class="text-center">
+                    Vous ne pouvez pas le supprimer.<br>
+                    Voulez-vous le désactiver ?
+                </p>
             {% elseif depository.clients | length > 0 %}
                 <h1>Ce dépôt est lié à un ou plusieurs clients</h1>
                 <p class="text-center">

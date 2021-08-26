@@ -13,7 +13,7 @@ $document.ready(() => {
 
     DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 20);
 
-    $filters.find(`.filter`).click(function() {
+    $filters.find(`.filter`).click(function () {
         const params = processForm($filters).asObject();
         reLoadPlanning(params);
     });
@@ -23,7 +23,7 @@ $document.ready(() => {
     $(`.new-delivery-round`).click(() => {
         const params = processForm($filters).asObject();
 
-        if(params.from && params.to) {
+        if (params.from && params.to) {
             const ajax = AJAX.route(`POST`, `planning_delivery_round_template`, params);
 
             Modal.load(ajax, {
@@ -33,13 +33,13 @@ $document.ready(() => {
 
                     setupSortables(map);
 
-                    modal.element.find(`[name="method"]`).on(`change`, function() {
+                    modal.element.find(`[name="method"]`).on(`change`, function () {
                         const value = Number($(this).val());
 
-                        if(value) {
-                            for(const element of modal.element.find(`.order[data-id]`)) {
+                        if (value) {
+                            for (const element of modal.element.find(`.order[data-id]`)) {
                                 const $element = $(element);
-                                if($element.data(`delivery-method`) === value) {
+                                if ($element.data(`delivery-method`) === value) {
                                     $element.removeClass(`d-none`);
                                 } else {
                                     $element.addClass(`d-none`);
@@ -50,7 +50,7 @@ $document.ready(() => {
                         }
                     });
 
-                    modal.element.find(`[name="cost"], [name="distance"]`).on(`keyup`, function() {
+                    modal.element.find(`[name="cost"], [name="distance"]`).on(`keyup`, function () {
                         updateAverage($(this));
                     });
                 },
@@ -67,11 +67,11 @@ $document.ready(() => {
         Modal.load(ajax, {
             processor: processSortables,
             afterOpen: modal => {
-                if(params.from && params.to && params.depository) {
+                if (params.from && params.to && params.depository) {
                     loadDeliveryLaunching(modal);
                 }
 
-                modal.element.find(`.data`).on(`change`, function() {
+                modal.element.find(`.data`).on(`change`, function () {
                     loadDeliveryLaunching(modal);
                 })
             },
@@ -84,8 +84,8 @@ $document.ready(() => {
 
                 const $ordersToStartContainer = modal.element.find('.orders-to-start');
                 const $ordersToStart = $ordersToStartContainer.find('.order');
-                if($ordersToStart.exists()) {
-                    if(!isStockValid(modal)) {
+                if ($ordersToStart.exists()) {
+                    if (!isStockValid(modal)) {
                         return checkStock(modal, {
                             depository,
                             assignedForStart: $ordersToStart
@@ -110,7 +110,7 @@ $document.ready(() => {
     });
 
 
-    $(document).on('click', `.validate`, function() {
+    $(document).on('click', `.validate`, function () {
         const ajax = AJAX.route(`POST`, `planning_delivery_validate_template`, {
             order: $(this).closest(`.order`).data("id")
         });
@@ -123,7 +123,7 @@ $document.ready(() => {
         });
     });
 
-    $(`.empty-filters`).click(function() {
+    $(`.empty-filters`).click(function () {
         clearForm($(this).parents(`.filters`))
     });
 });
@@ -133,14 +133,14 @@ function initializePlanning() {
         acceptFrom: `.column-content`,
     });
 
-    for(const column of sortables) {
+    for (const column of sortables) {
         column.addEventListener(`sortupdate`, e => changePlannedDate(e.detail));
     }
 }
 
 function updateAverage($element) {
     const count = $(`.assigned-deliveries .order[data-id]`).length;
-    if(count) {
+    if (count) {
         $element.siblings(`.data-divided`).val(Math.round($element.val() / count * 100) / 100);
     }
 }
@@ -154,12 +154,12 @@ function setupSortables(map) {
         acceptFrom: `.deliveries`,
     })[0];
 
-    assigned.addEventListener(`sortupdate`, async function() {
+    assigned.addEventListener(`sortupdate`, async function () {
         updateAverage($(`[name="cost"]`));
         updateAverage($(`[name="distance"]`));
 
         const locations = [];
-        for(const element of $(assigned).find(`.order[data-id]`)) {
+        for (const element of $(assigned).find(`.order[data-id]`)) {
             const address = $(element).data(`address`);
             const coordinates = await findCoordinates(address);
 
@@ -170,7 +170,7 @@ function setupSortables(map) {
             });
         }
 
-        if(locations.length) {
+        if (locations.length) {
             map.setMarkers(locations)
         }
     });
@@ -178,10 +178,10 @@ function setupSortables(map) {
 
 function processSortables(data, errors, modal) {
     const $modal = modal.element;
-    const assigned = $modal.find(`.assigned-deliveries .order[data-id]:not(.d-none)`).map(function() {
+    const assigned = $modal.find(`.assigned-deliveries .order[data-id]:not(.d-none)`).map(function () {
         return $(this).data(`id`);
     });
-    const ready = $modal.find(`.orders-to-start .order[data-id]:not(.d-none)`).map(function() {
+    const ready = $modal.find(`.orders-to-start .order[data-id]:not(.d-none)`).map(function () {
         return $(this).data(`id`);
     });
 
@@ -191,7 +191,6 @@ function processSortables(data, errors, modal) {
 
 async function changePlannedDate(detail) {
     sortable(`.column-content`, `disable`);
-
     const $item = $(detail.item);
     const $destination = $(detail.destination.container).parent();
 
@@ -222,43 +221,45 @@ function checkStock(modal, data) {
         .route(`POST`, `planning_delivery_start_check_stock`, data)
         .json()
         .then((res) => {
-            const $quantitiesInformationContainer = modal.element.find('.quantities-information-container');
-            const $quantitiesInformation = $quantitiesInformationContainer.find('.quantities-information');
-            const $availableOrderToStartContainer = modal.element.find('.available-order-to-start');
-            const $orderToStartContainer = modal.element.find('.orders-to-start');
+            if (res.success) {
+                const $quantitiesInformationContainer = modal.element.find('.quantities-information-container');
+                const $quantitiesInformation = $quantitiesInformationContainer.find('.quantities-information');
+                const $availableOrderToStartContainer = modal.element.find('.available-order-to-start');
+                const $orderToStartContainer = modal.element.find('.orders-to-start');
 
-            $availableOrderToStartContainer.find('.order').removeClass('available unavailable');
-            for(const unavailableOrder of res.unavailableOrders) {
-                modal.element.find(`.orders-to-start .order[data-id="${unavailableOrder}"]`).addClass('unavailable');
-            }
-            $orderToStartContainer.find('.order:not(.unavailable)').addClass('available');
-            $quantitiesInformation.empty();
+                $availableOrderToStartContainer.find('.order').removeClass('available unavailable');
+                for (const unavailableOrder of res.unavailableOrders) {
+                    modal.element.find(`.orders-to-start .order[data-id="${unavailableOrder}"]`).addClass('unavailable');
+                }
+                $orderToStartContainer.find('.order:not(.unavailable)').addClass('available');
+                $quantitiesInformation.empty();
 
-            const quantityErrors = res.availableBoxTypeData.filter((boxTypeData) => (
-                boxTypeData.orderedQuantity > boxTypeData.availableQuantity
-            ));
+                const quantityErrors = res.availableBoxTypeData.filter((boxTypeData) => (
+                    boxTypeData.orderedQuantity > boxTypeData.availableQuantity
+                ));
 
-            if(quantityErrors.length > 0) {
-                $quantitiesInformationContainer.removeClass('d-none');
-            } else {
-                $quantitiesInformationContainer.addClass('d-none');
-            }
+                if (quantityErrors.length > 0) {
+                    $quantitiesInformationContainer.removeClass('d-none');
+                } else {
+                    $quantitiesInformationContainer.addClass('d-none');
+                }
 
-            for(const boxTypeData of quantityErrors) {
-                $quantitiesInformation.append(`
+                for (const boxTypeData of quantityErrors) {
+                    $quantitiesInformation.append(`
                     <label class="ml-2">
                         Box Type ${boxTypeData.name} - Quantité commandée ${boxTypeData.orderedQuantity} - dispo en stock ${boxTypeData.availableQuantity} en propriété ${boxTypeData.client}
                     </label>
                 `);
+                }
+
+                updateSubmitButtonLabel(modal);
+
+                $loading
+                    .addClass('d-none')
+                    .removeClass('d-flex');
             }
-
-            updateSubmitButtonLabel(modal);
-
-            $loading
-                .addClass('d-none')
-                .removeClass('d-flex');
-
         });
+
 }
 
 function onOrdersDragAndDropDone(modal) {
@@ -277,7 +278,7 @@ function updateSubmitButtonLabel(modal) {
     const $submitButton = modal.element.find('.submit-button');
 
     $submitButton.attr(`disabled`, !$ordersToStart.exists());
-    if($ordersToStart.exists() && isStockValid(modal)) {
+    if ($ordersToStart.exists() && isStockValid(modal)) {
         $submitButton.text("Valider le lancement");
     } else {
         $submitButton.text("Vérifier le stock");
@@ -292,7 +293,7 @@ function loadDeliveryLaunching(modal) {
             modal.element.find('.deliveries-container').empty()
             modal.element.find('.deliveries-container').addClass('d-none');
 
-            if(response.success) {
+            if (response.success) {
                 modal.element.find('.deliveries-container').removeClass('d-none');
                 modal.element.find('.deliveries-container').append(response.template);
                 const sortables = sortable(`.deliveries`, {

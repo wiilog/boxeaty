@@ -129,10 +129,13 @@ class ClientOrderRepository extends EntityRepository {
         return $returnOrderBetween
             ->leftJoin("client_order.preparation", "preparation")
             ->leftJoin("client_order.client", "client")
+            ->leftJoin("client_order.status", "status")
             ->leftJoin("client.clientOrderInformation", "client_order_information")
             ->andWhere("client_order_information.depository = :depository ")
             ->andWhere("preparation.id IS NULL")
+            ->andWhere("status.code NOT IN (:statusCodes) ")
             ->setParameter("depository", $depository)
+            ->setParameter("statusCode", [Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_TO_VALIDATE_CLIENT])
             ->getQuery()
             ->getResult();
     }
