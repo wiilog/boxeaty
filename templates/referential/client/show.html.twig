@@ -116,11 +116,11 @@
                         </div>
                     </div>
                     {% if clientOrderInformation and clientOrderInformation.orderTypes is not empty %}
-                        <div class="d-flex flex-wrap">
+                        <div class="d-flex flex-wrap pt-2">
                             {% for orderType in clientOrderInformation.orderTypes %}
                                 {% if orderType != "" %}
-                                    <div class="order-type mt-4 w-50">
-                                        <span>{{ constant('App\\Entity\\ClientOrderInformation::ORDER_TYPES')[orderType] }}</span>
+                                    <div class="order-type mt-1 me-1 w-50">
+                                        <span>{{ constant('App\\Entity\\OrderType::LABELS')[orderType] }}</span>
                                     </div>
                                 {% endif %}
                             {% endfor %}
