@@ -20,7 +20,6 @@
                data-default-order="{{ orders_order | json_encode }}"></table>
     </div>
 
-    {% include 'operation/client_order/modal/delete.html.twig' %}
     {% include 'operation/client_order/modal/new.html.twig' with {
         clientOrder: new_client_order,
         orderTypes: orderTypes,

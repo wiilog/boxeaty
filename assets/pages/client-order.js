@@ -236,9 +236,10 @@ function initOrderDatatable() {
             {data: `col`, orderable: false},
         ],
         listeners: {
-            delete: (data) => {
+            delete: (data, $button) => {
+                console.log(data.id, $button.data(`id`))
                 const ajax = AJAX.route(`POST`, `client_order_delete_template`, {
-                    clientOrder: data.id
+                    clientOrder: $button.data(`id`),
                 });
 
                 Modal.load(ajax, {table});

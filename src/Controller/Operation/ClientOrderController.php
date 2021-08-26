@@ -69,8 +69,9 @@ class ClientOrderController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
-        $orders = $manager->getRepository(ClientOrder::class)
-            ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
+        $params = json_decode($request->getContent(), true) ?? [];
+        $orders = $manager->getRepository(ClientOrder::class)->findForDatatable($params, $this->getUser());
+
         $data = Stream::from($orders["data"])
             ->map(fn (ClientOrder $order) => [
                 "id" => $order->getId(),
@@ -87,8 +88,8 @@ class ClientOrderController extends AbstractController {
                 "cartPrice" => $order->getTotalAmount(),
                 "type" => $order->getType(),
                 "expectedDelivery" => FormatHelper::dateMonth($order->getExpectedDelivery()),
-                "linkAction" => $order->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? 'validation' : 'show',
-                "linkLabel" => $order->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? 'Enregistrer la commande' : 'Voir les détails'
+                "linkAction" => $order->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? "validation" : "show",
+                "linkLabel" => $order->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT) ? "Enregistrer la commande" : "Voir les détails"
             ])
             ->toArray();
 
@@ -97,8 +98,11 @@ class ClientOrderController extends AbstractController {
         foreach ($data as $item) {
             if ($previousItem) {
                 $groupedData[] = [
-                    'id' => $item['id'],
-                    'col' => $this->renderView('operation/client_order/order_row.html.twig', ['item1' => $previousItem, 'item2' => $item])
+                    "id" => $item["id"],
+                    "col" => $this->renderView('operation/client_order/order_row.html.twig', [
+                        "item1" => $previousItem,
+                        "item2" => $item
+                    ])
                 ];
                 $previousItem = null;
             } else {
@@ -107,8 +111,10 @@ class ClientOrderController extends AbstractController {
         }
         if ($previousItem) {
             $groupedData[] = [
-                'id' => $previousItem['id'],
-                'col' => $this->renderView('operation/client_order/order_row.html.twig', ['item1' => $previousItem])
+                "id" => $previousItem["id"],
+                "col" => $this->renderView('operation/client_order/order_row.html.twig', [
+                    "item1" => $previousItem
+                ])
             ];
         }
 

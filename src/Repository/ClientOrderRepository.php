@@ -140,7 +140,7 @@ class ClientOrderRepository extends EntityRepository {
             ->getResult();
     }
 
-    public function findForDatatable(array $params, User $user): array {
+    public function findForDatatable(array $params, ?User $user = null): array {
         $qb = $this->createQueryBuilder("clientOrder");
 
         if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {

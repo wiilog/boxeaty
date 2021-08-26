@@ -123,7 +123,7 @@ export function initDatatable(table, config) {
             const callback = config.listeners[$(this).data(`listener`)];
 
             if(callback) {
-                callback(row.data())
+                callback(row.data(), $button)
             }
         });
 
