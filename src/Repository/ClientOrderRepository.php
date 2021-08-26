@@ -135,7 +135,7 @@ class ClientOrderRepository extends EntityRepository {
             ->andWhere("preparation.id IS NULL")
             ->andWhere("status.code NOT IN (:statusCodes) ")
             ->setParameter("depository", $depository)
-            ->setParameter("statusCode", [Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_TO_VALIDATE_CLIENT])
+            ->setParameter("statusCodes", [Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_TO_VALIDATE_CLIENT])
             ->getQuery()
             ->getResult();
     }
