@@ -69,7 +69,7 @@
         top: 4px;
     }
 
-    &:first-child {
+    &.current-timeline-line {
         .timeline-line-marker::after {
             background-color: $green !important;
         }

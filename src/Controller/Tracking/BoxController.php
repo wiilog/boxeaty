@@ -299,13 +299,14 @@ class BoxController extends AbstractController {
         $length = 10;
 
         $boxMovementsResult = $boxRecordRepository->getBoxRecords($box, $start, $length, $search);
-
+        $currentRecord = $box->getCurrentBoxRecord();
         return $this->json([
             "success" => true,
             "isTail" => ($start + $length) >= $boxMovementsResult['totalCount'],
             "data" => Stream::from($boxMovementsResult['data'])
                 ->map(fn(array $movement) => [
                     'quality' => $movement['quality'] ?? "",
+                    'isCurrentRecord' => $currentRecord && $currentRecord->getId() === $movement['id'],
                     'color' => (isset($movement['state']) && isset(BoxStateService::LINKED_COLORS[$movement['state']]))
                         ? BoxStateService::LINKED_COLORS[$movement['state']]
                         : BoxStateService::DEFAULT_COLOR,

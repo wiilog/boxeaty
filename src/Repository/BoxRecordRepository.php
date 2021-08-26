@@ -133,7 +133,8 @@ class BoxRecordRepository extends EntityRepository {
         $exprBuilder = $queryBuilder->expr();
 
         $queryBuilder
-            ->select("join_quality.name AS quality")
+²            ->select("record.id AS id")
+            ->addSelect("join_quality.name AS quality")
             ->addSelect("record.date AS date")
             ->addSelect("record.state AS state")
             ->addSelect("join_operator.username AS operator")
