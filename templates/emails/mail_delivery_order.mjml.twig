@@ -42,7 +42,7 @@
         <mj-raw>{% for line in order.lines %}</mj-raw>
             <mj-section mj-class="border">
                 <mj-column width="10%">
-                    {% if line.boxType.image %}
+                    {% if line.boxType.image and line.boxType.image.path %}
                     <mj-image width="100px" src="{{ base64(line.boxType.image.path) }}"
                               alt="Image du type de Box" padding-top="15px"></mj-image>
                     {% endif %}
