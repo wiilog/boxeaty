@@ -1,6 +1,9 @@
 {% extends 'template.html.twig' %}
 
-{% set display_new_command = has_permission(constant('App\\Entity\\Role::REDIRECT_NEW_COUNTER_ORDER')) %}
+{% set display_new_command = has_permission(
+    constant('App\\Entity\\Role::REDIRECT_NEW_COUNTER_ORDER'),
+    constant('App\\Entity\\Role::CREATE_CLIENT_ORDERS')
+) %}
 {% set display_export = has_permission(constant('App\\Entity\\Role::MANAGE_EXPORTS')) %}
 
 {% block menu %}{{ display_new_command and not display_export ? 'Traçabilité' : 'Accueil' }}{% endblock %}
@@ -15,6 +18,7 @@
 
 {% block bodyclass %}home{% endblock %}
 {% block content %}
+    {{ display_new_command ? 'OUIIIIIIIIIIIIIIIIIIIIIIIII' : 'NON' }}
     <div class="box home first-box">
         <h1 class="mb-5">Bienvenue !</h1>
 
