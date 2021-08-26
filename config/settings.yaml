@@ -1,5 +1,5 @@
 parameters:
-  web_version: "1.0.3"
+  web_version: "1.0.4"
 
   permissions:
     Menu Paramétrage:
