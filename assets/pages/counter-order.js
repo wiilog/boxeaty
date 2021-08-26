@@ -10,9 +10,8 @@ import "../styles/pages/counter-order.scss";
 import Flash from "../flash";
 
 $document.ready(() => {
-    $(`#scan-box`).click(() => openBoxesModal());
+    $(`#scan-box, #new-counter-order`).click(() => openBoxesModal());
     $(`#scan-deposit-ticket`).click(() => openDepositTicketModal());
-    $(`#new-counter-order`).click(() => window.location.href = Routing.generate(`home`, { redirection: '1' }));
 
     $document.arrive(`[data-manual]`, function() {
         $(this).on(`change`, _ => addInput(this, Number(this.value)));
