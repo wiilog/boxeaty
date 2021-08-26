@@ -22,12 +22,17 @@ class BoxTypeService {
                 ->setActive($content->active);
         }
 
-        $boxType
-            ->setPrice($content->price)
-            ->setCapacity($content->capacity)
-            ->setShape($content->shape)
-            ->setVolume($content->volume ?? null)
-            ->setWeight($content->weight ?? null);
+        if (isset($content->price)) {
+            $boxType->setPrice($content->price);
+        } if (isset($content->capacity)) {
+            $boxType->setPrice($content->capacity);
+        } if (isset($content->shape)) {
+            $boxType->setPrice($content->shape);
+        } if (isset($content->volume)) {
+            $boxType->setPrice($content->volume);
+        } if (isset($content->weight)) {
+            $boxType->setPrice($content->weight);
+        }
 
         if (isset($content->image)) {
             $imageAttachment = $this->attachmentService->createAttachment(Attachment::TYPE_BOX_TYPE_IMAGE, $content->image);
