@@ -67,6 +67,13 @@ class PlanningController extends AbstractController {
             $to = (clone $from)->modify("+20 days");
         }
 
+        if($from->diff($to, true)->days > 21) {
+            return $this->json([
+                "success" => false,
+                "message" => "La planification ne peut afficher que 20 jours maximum"
+            ]);
+        }
+
         //group orders by date
         $ordersByDate = [];
         foreach ($clientOrderRepository->findBetween($from, $to, $request->query->all()) as $order) {
