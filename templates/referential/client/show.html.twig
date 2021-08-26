@@ -28,8 +28,8 @@
                             {% endif %}
                         </div>
                         <span class="body-text-semi-bold">{{ client.address }}</span>
-                        <span class="body-text mt-2">{{ client.contact.username }} - {{ client.phoneNumber }}</span>
-                        <span class="font-italic">Droits indicateurs: {{ constant('App\\Entity\\Role::VIEW_INDICATORS') in client.contact.role.permissions ? 'oui' : 'non' }}</span>
+                        <span class="body-text mt-2">{{ client.contact ? client.contact.username : 'Aucun contact' }} - {{ client.phoneNumber }}</span>
+                        <span class="font-italic">Droits indicateurs: {{ client.contact and constant('App\\Entity\\Role::VIEW_INDICATORS') in client.contact.role.permissions ? 'oui' : 'non' }}</span>
                     </div>
                     <div class="col-4 p-0 d-flex justify-content-end">
                     <span class="edit-client round" data-id="{{ client.id }}">

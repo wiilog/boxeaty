@@ -7,8 +7,11 @@
             <div class="col-6 pe-0 pe-sm-3">
                 <label>
                     Nom
-                    <input type="text" name="name" class="data" placeholder="Nom du client" value="{{ client.name }}"
-                           required/>
+                    {% if client.name | lower == constant('App\\Entity\\Client::BOXEATY') | lower %}
+                        <input type="text" name="name" class="data" value="{{ client.name }}" readonly required/>
+                    {% else %}
+                        <input type="text" name="name" class="data" placeholder="Nom du client" value="{{ client.name }}" required/>
+                    {% endif %}
                 </label>
             </div>
             <div class="col-6 toggle ps-0 ps-sm-3">

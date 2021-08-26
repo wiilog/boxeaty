@@ -16,6 +16,8 @@ class Client {
 
     use ActiveTrait;
 
+    public const BOXEATY = "BoxEaty";
+
     public const INACTIVE = 0;
     public const ACTIVE = 1;
 
@@ -66,7 +68,6 @@ class Client {
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="contactOf")
-     * @ORM\JoinColumn(nullable=false)
      */
     private ?User $contact = null;
 
