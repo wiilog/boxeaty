@@ -14,12 +14,26 @@
             </div>
             <div class="status"><i class="icon bxi bxi-{{ statusIcon }}"></i> {{ item.status.name }}</div>
             <div class="expand"></div>
-            <div class="order-number-container w-30">
-                {% if item.automatic %}
-                    <i class="icon bxi bxi-automatic"></i>
-                {% endif %}
-                <span>Commande <span class="no-wrap">N°{{ item.number }}</span></span>
-                <div data-listener="delete" data-id="{{ item.id }}" class="cursor-pointer"><i class="bxi bxi-trash-circle"></i></div>
+            <div class="w-30">
+                <div class="row justify-content-end align-items-center gx-3">
+                    {% if item.automatic %}
+                        <div class="col-auto ml-auto">
+                            <i class="icon bxi bxi-automatic m-0"></i>
+                        </div>
+                    {% endif %}
+                    <div class="col-auto text-end">
+                        Commande
+                        <br/>
+                        <span class="no-wrap">N°{{ item.number }}</span>
+                    </div>
+                    <div class="col-auto">
+                        <div data-listener="delete"
+                             data-id="{{ item.id }}"
+                             class="cursor-pointer">
+                            <i class="bxi bxi-trash-circle m-0"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="d-flex justify-content-between col-12">

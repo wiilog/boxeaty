@@ -108,21 +108,6 @@ input{
         }
     }
 
-    .order-number-container {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-
-        span {
-            text-align: right;
-        }
-
-        .bxi-trash-circle {
-            margin-left: 12px;
-            height: 2rem;
-        }
-    }
-
     .fill {
         flex: 1 1 auto;
     }
