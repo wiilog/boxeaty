@@ -14,10 +14,12 @@ $(document).ready(() => {
 
     $(`.new-user`).click(() => newUserModal.open());
 
-    $(`input[name=deliverer]`).on('change', function() {
-        const $method = $('#modal-new-user').find('.method');
-        $method.toggleClass('d-none', !$(this).is(':checked'));
-        $method.find('select').prop('required',$(this).is(':checked'));
+    $document.on(`change`, `input[name=deliverer]`, function() {
+        const $field = $(this);
+        const $method = $field.closest(`.modal`).find(`.delivery-method`);
+
+        $method.toggleClass(`d-none`, !$field.is(':checked'));
+        $method.find('select').prop('required', $(this).is(':checked'));
     });
 
 

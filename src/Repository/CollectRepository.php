@@ -19,7 +19,7 @@ class CollectRepository extends EntityRepository {
     public function getTotalQuantityByClientAndCollectedDate($client, $dateMin, $dateMax) {
         $qb = $this->createQueryBuilder('collecte')
             ->select('sum(lines.quantity)')
-            ->andWhere('collecte.collectedAt BETWEEN :dateMin AND :dateMax')
+            ->andWhere('collecte.treatedAt BETWEEN :dateMin AND :dateMax')
             ->andWhere('clientOrder.client =:client')
             ->join('collecte.clientOrder', 'clientOrder')
             ->join('clientOrder.lines', 'lines')
