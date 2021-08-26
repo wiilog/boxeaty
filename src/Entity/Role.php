@@ -17,6 +17,8 @@ class Role {
     public const ROLE_ADMIN = "SUPER_ADMINISTRATEUR";
 
     public const MANAGE_BOXES = "MANAGE_BOXES";
+    public const EDIT_BOXES = "EDIT_BOXES";
+    public const DELETE_BOXES = "DELETE_BOXES";
     public const MANAGE_DEPOSIT_TICKETS = "MANAGE_DEPOSIT_TICKETS";
     public const MANAGE_MOVEMENTS = "MANAGE_MOVEMENTS";
     public const VIEW_INDICATORS = "VIEW_INDICATORS";

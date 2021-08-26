@@ -17,8 +17,12 @@
             <div class="d-flex justify-content-between">
                 <h3>{{ box.box ? "Code Box" : "Code Caisse" }} : {{ box.number }}</h3>
                 <div>
-                    <span class="primary edit-box"><i class="icon bxi bxi-edit-circle"></i></span>
-                    <span class="primary delete-box"><i class="icon bxi bxi-trash-circle"></i></span>
+                    {% if has_permission(constant('App\\Entity\\Role::EDIT_BOXES')) %}
+                        <span class="primary edit-box"><i class="icon bxi bxi-edit-circle"></i></span>
+                    {% endif %}
+                    {% if has_permission(constant('App\\Entity\\Role::DELETE_BOXES')) %}
+                        <span class="primary delete-box"><i class="icon bxi bxi-trash-circle"></i></span>
+                    {% endif %}
                 </div>
             </div>
             <p>Emplacement : <strong>{{ box.location ? box.location.name }}</strong></p>
