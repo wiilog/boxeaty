@@ -71,8 +71,10 @@ class ClientOrderRepository extends EntityRepository {
             ->setParameter("to", $to);
 
         if(isset($params["depository"])) {
-            $qb->leftJoin("client_order.deliveryRound", "_depository_delivery_round")
-                ->andWhere("_depository_delivery_round.depository = :depository")
+            $qb
+                ->join("client_order.client", "_depository_client")
+                ->join("_depository_client.clientOrderInformation", "_depository_client_information")
+                ->andWhere("_depository_client_information.depository = :depository")
                 ->setParameter("depository", $params["depository"]);
         }
 
