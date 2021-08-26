@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Helper\QueryHelper;
 use DateTime;
 use Doctrine\ORM\EntityRepository;
+use WiiCommon\Helper\Stream;
 
 /**
  * @method Client|null find($id, $lockMode = null, $lockVersion = null)
@@ -209,6 +210,17 @@ class ClientRepository extends EntityRepository {
             ->setParameter("now", $now)
             ->getQuery()
             ->getResult();
+    }
+
+    public function getCratePatternAmountGroupedByClient(): array {
+        $clients = $this->createQueryBuilder("client")
+            ->andWhere('client.cratePatternLines IS NOT EMPTY')
+            ->getQuery()
+            ->getResult();
+
+        return Stream::from($clients)
+            ->keymap(fn (Client $client) => [$client->getId(), $client->getCratePatternAmount()])
+            ->toArray();
     }
 
 }

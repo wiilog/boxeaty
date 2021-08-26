@@ -120,13 +120,8 @@ class ClientController extends AbstractController {
         }
 
         if ($form->isValid()) {
-            $totalCrateTypePrice = FormatHelper::price(
-                Stream::from($client->getCratePatternLines())
-                    ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
-                    ->sum()
-            );
-
-            $client = $client->setName($content->name)
+            $client = $client
+                ->setName($content->name)
                 ->setAddress($content->address)
                 ->setPhoneNumber($content->phoneNumber)
                 ->setActive($content->active)
@@ -137,9 +132,8 @@ class ClientController extends AbstractController {
                 ->setDepositTicketClients($depositTicketsClients)
                 ->setDepositTicketValidity($content->depositTicketValidity)
                 ->setMailNotificationOrderPreparation((bool)$content->mailNotificationOrderPreparation)
-                ->setProrateAmount($content->prorateAmount)
-                ->setPaymentModes($content->paymentModes)
-                ->setTotalCrateTypePrice($totalCrateTypePrice);
+                ->setProrateAmount($content->prorateAmount ?? null)
+                ->setPaymentModes($content->paymentModes ?? null);
 
             $clientOrderInformation = (new ClientOrderInformation())
                 ->setClient($client)
@@ -359,11 +353,7 @@ class ClientController extends AbstractController {
             'template' => $this->renderView('referential/client/crate_pattern_lines.html.twig', [
                 'client' => $client,
             ]),
-            'totalCrateTypePrice' => FormatHelper::price(
-                Stream::from($client->getCratePatternLines())
-                    ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
-                    ->sum()
-            )
+            'totalCrateTypePrice' => FormatHelper::price($client->getCratePatternAmount())
         ]);
     }
 

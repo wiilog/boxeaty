@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Utils\ActiveTrait;
+use WiiCommon\Helper\Stream;
 
 /**
  * @ORM\Entity(repositoryClass=ClientRepository::class)
@@ -31,12 +32,6 @@ class Client {
      * @ORM\Column(type="integer")
      */
     private ?int $id = null;
-
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    private ?float $totalCrateTypePrice = null;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
@@ -529,19 +524,14 @@ class Client {
     /**
      * @return float|null
      */
-    public function getTotalCrateTypePrice(): ?float
+    public function getCratePatternAmount(): ?float
     {
-        return $this->totalCrateTypePrice;
-    }
-
-    /**
-     * @param float|null $totalCrateTypePrice
-     * @return self
-     */
-    public function setTotalCrateTypePrice(?float $totalCrateTypePrice): self
-    {
-        $this->totalCrateTypePrice = $totalCrateTypePrice;
-        return $this;
+        return Stream::from($this->getCratePatternLines())
+            ->map(fn(CratePatternLine $cratePatternLine) => (
+                $cratePatternLine->getQuantity()
+                * (float) ($cratePatternLine->getCustomUnitPrice() ?: $cratePatternLine->getBoxType()->getPrice())
+            ))
+            ->sum();
     }
 
     /**

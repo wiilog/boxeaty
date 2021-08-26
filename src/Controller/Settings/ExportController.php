@@ -99,8 +99,10 @@ class ExportController extends AbstractController
     {
         $query = $request->query;
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
+        $clientRepository = $manager->getRepository(Client::class);
 
         $clientOrderLines = $clientOrderRepository->findByType(OrderType::ONE_TIME_SERVICE, $query->get('from'), $query->get('to'));
+        $cratePatternAmounts = $clientRepository->getCratePatternAmountGroupedByClient();
 
         $clientOrderOneTimeServiceArray = Stream::from($clientOrderLines)
             ->map(fn(array $clientOrderLine) => [
@@ -111,7 +113,7 @@ class ExportController extends AbstractController
                 "prorateAmount" => $clientOrderLine['prorateAmount'],
                 "tokenDelivered" => $clientOrderLine['deliveryTokens'],
                 "crateAmount" => $clientOrderLine['crateAmount'],
-                "cratePrice" => $clientOrderLine['totalCrateTypePrice'],
+                "cratePrice" => $cratePatternAmounts[$clientOrderLine['clientId']] ?? null,
                 "automatic" => $clientOrderLine['automatic']
             ])
             ->toArray();
