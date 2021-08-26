@@ -6,6 +6,7 @@ use App\Repository\BoxRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -105,22 +106,22 @@ class Box {
     /**
      * @ORM\ManyToOne(targetEntity=Box::class, inversedBy="containedBoxes")
      */
-    private ?Box $crate;
+    private ?Box $crate = null;
 
     /**
      * @ORM\OneToMany(targetEntity=PreparationLine::class, mappedBy="crate")
      */
-    private ?Collection $cratePreparationLines;
+    private Collection $cratePreparationLines;
 
     /**
      * @ORM\ManyToMany(targetEntity=PreparationLine::class, mappedBy="boxes")
      */
-    private ?Collection $boxPreparationLines;
+    private Collection $boxPreparationLines;
 
     /**
      * @ORM\OneToMany(targetEntity=BoxRecord::class, mappedBy="crate")
      */
-    private ?Collection $cratePackingRecords;
+    private Collection $cratePackingRecords;
 
     public function __construct() {
         $this->boxRecords = new ArrayCollection();
@@ -160,6 +161,13 @@ class Box {
      */
     public function getBoxRecords(): Collection {
         return $this->boxRecords;
+    }
+
+    public function getCurrentBoxRecord(): ?BoxRecord {
+        $criteria = Criteria::create()
+            ->setMaxResults(1);
+        $lastRecords = $this->boxRecords->matching($criteria);
+        return $lastRecords->first() ?: null;
     }
 
     public function addBoxRecord(BoxRecord $boxRecord): self {

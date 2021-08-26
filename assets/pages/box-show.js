@@ -7,7 +7,7 @@ import Flash from "../flash";
 import "../styles/pages/box-show.scss";
 import Modal from "../modal";
 
-$(document).ready(() => {
+$(() => {
     getBoxTrackingMovements();
     getBoxInCrate();
 
@@ -16,7 +16,7 @@ $(document).ready(() => {
             box: $('#box-id').val()
         });
         Modal.load(ajax, {
-            success : () =>{
+            success : () => {
                 window.location.href = Routing.generate(`box_show`, {
                     box: $('#box-id').val()
                 });
@@ -100,7 +100,7 @@ function getBoxTrackingMovements(start = 0) {
                     $('.history-wrapper').empty();
                 }
                 const data = (result.data || []);
-                const historyLines = data.map(({state, crate, quality, date, time, operator, location, depository}) => {
+                const historyLines = data.map(({isCurrentRecord, state, crate, quality, date, time, operator, location, depository}) => {
                     const $rawQuality = $($.parseHTML(quality));
                     const trimmedQuality = $rawQuality.text().trim();
 
@@ -127,7 +127,7 @@ function getBoxTrackingMovements(start = 0) {
                     }
 
                     return `
-                        <div class="timeline-line d-flex">
+                        <div class="timeline-line d-flex ${isCurrentRecord ? 'current-timeline-line' : ''}">
                             <span class="timeline-line-marker"><strong>${date}</strong><p>${time}</p></span>
                             <div class="timeline-line-title ml-3">
                                 <div class="d-flex"><strong>${state}</strong>${$quality}</div>
