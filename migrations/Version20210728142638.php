@@ -20,11 +20,14 @@ final class Version20210728142638 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql("
-            UPDATE box_type
-            SET box_type.volume = '" . BoxType::DEFAULT_VOLUME . "'
-            WHERE box_type.volume IS NULL
-        ");
+        $table = $schema->getTable('box_type');
+        if ($table->hasColumn('volume')) {
+            $this->addSql("
+                UPDATE box_type
+                SET box_type.volume = '" . BoxType::DEFAULT_VOLUME . "'
+                WHERE box_type.volume IS NULL
+            ");
+        }
     }
 
     public function down(Schema $schema): void
