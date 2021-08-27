@@ -20,7 +20,7 @@
 
             <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
 
-            <span class="status"><i class="bxi bxi-validate"></i> A valider BoxEaty</span>
+            <span class="status"><i class="bxi bxi-validate"></i> {{ order.status.name }}</span>
             <button class="primary validate">Valider</button>
 
             <input type="hidden" id="current-order" value="{{ order.id }}">
@@ -32,7 +32,7 @@
             <span class="title">{{ order.client.name }}</span>
             <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
 
-            <span class="status"><i class="bxi bxi-calendar"></i> Planifiée</span>
+            <span class="status"><i class="bxi bxi-calendar"></i> {{ order.status.name }}</span>
             {{ _self.order_link(order, show_links) }}
         </div>
     {% elseif order.preparation %}
@@ -44,10 +44,10 @@
                 <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
                 <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
 
-                <span class="status"><i class="bxi bxi-preparing"></i> En préparation</span>
+                <span class="status"><i class="bxi bxi-preparing"></i> {{ order.status.name }}</span>
             {% else %}
                 <span>Validée par <strong>{{ order.validator ? order.validator.username }}</strong></span>
-                <span class="status"><i class="bxi bxi-loading"></i> En préparation</span>
+                <span class="status"><i class="bxi bxi-loading"></i> {{ order.status.name }}</span>
             {% endif %}
 
             {{ _self.order_link(order, show_links) }}
@@ -73,7 +73,7 @@
                 <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
                 <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
 
-                <span class="status"><i class="bxi bxi-transit"></i> En transit</span>
+                <span class="status"><i class="bxi bxi-transit"></i> {{ order.status.name }}</span>
                 {{ _self.order_link(order, show_links) }}
             </div>
         {% endif %}
