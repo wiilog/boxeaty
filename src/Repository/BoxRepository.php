@@ -232,7 +232,7 @@ class BoxRepository extends EntityRepository {
             ->leftJoin("box.type", "type")
             ->andWhere('box.isBox = 1')
             ->andWhere('box.number = :number')
-            ->andWhere('box.state = 1')
+            ->andWhere('box.state = 1 OR box.state = 3')
             ->setParameter("number", $number)
             ->getQuery()
             ->getOneOrNullResult();
