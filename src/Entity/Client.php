@@ -87,7 +87,7 @@ class Client {
     private ?int $depositTicketValidity = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=Location::class)
+     * @ORM\OneToOne(targetEntity=Location::class, inversedBy="outClient")
      */
     private ?Location $outLocation = null;
 

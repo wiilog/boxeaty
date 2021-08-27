@@ -63,6 +63,11 @@ class Location {
     private ?Client $client = null;
 
     /**
+     * @ORM\OneToOne(targetEntity=Client::class, mappedBy="outLocation")
+     */
+    private ?Client $outClient = null;
+
+    /**
      * @ORM\Column(type="integer", nullable=true)
      */
     private ?int $capacity = null;
@@ -168,6 +173,15 @@ class Location {
     public function setClient(?Client $client): self {
         $this->client = $client;
 
+        return $this;
+    }
+
+    public function getOutClient(): ?Client {
+        return $this->outClient;
+    }
+
+    public function setOutClient(?Client $outClient): self {
+        $this->outClient = $outClient;
         return $this;
     }
 

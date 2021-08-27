@@ -338,7 +338,7 @@ class LocationController extends AbstractController
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
     public function delete(EntityManagerInterface $manager, Location $location): Response {
-        if ($location && (!$location->getBoxRecords()->isEmpty() || !$location->getBoxes()->isEmpty())) {
+        if ($location->getOutClient() || !$location->getBoxRecords()->isEmpty() || !$location->getBoxes()->isEmpty()) {
             $location->setActive(false);
             $manager->flush();
 
@@ -346,7 +346,7 @@ class LocationController extends AbstractController
                 "success" => true,
                 "message" => "Emplacement <strong>{$location->getName()}</strong> désactivé avec succès"
             ]);
-        } else if ($location) {
+        } else {
             $originalLocation = $manager->getRepository(Location::class)->findOneBy([
                 "deporte" => $location
             ]);
@@ -360,12 +360,6 @@ class LocationController extends AbstractController
             return $this->json([
                 "success" => true,
                 "message" => "Emplacement <strong>{$location->getName()}</strong> supprimé avec succès"
-            ]);
-        } else {
-            return $this->json([
-                "success" => false,
-                "reload" => true,
-                "message" => "L'emplacement n'existe pas"
             ]);
         }
     }
