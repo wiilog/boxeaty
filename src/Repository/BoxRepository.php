@@ -49,7 +49,6 @@ class BoxRepository extends EntityRepository {
                 ->setParameter("groups", $user->getGroups());
         }
 
-        dump($notInCrate);
         if($notInCrate) {
             $qb->andWhere("box.crate != :crate")
                 ->setParameter("crate", $notInCrate);
