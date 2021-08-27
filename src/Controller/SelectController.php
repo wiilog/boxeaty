@@ -30,7 +30,11 @@ class SelectController extends AbstractController {
      * @Route("/select/box", name="ajax_select_boxes", options={"expose": true})
      */
     public function boxes(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Box::class)->getForSelect($request->query->get("term"), $this->getUser());
+        $results = $manager->getRepository(Box::class)->getForSelect(
+            $request->query->get("term"),
+            $request->query->get("crate"),
+            $this->getUser()
+        );
 
         return $this->json([
             "results" => $results,

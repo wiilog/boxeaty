@@ -343,13 +343,22 @@ class BoxController extends AbstractController {
         $crate = $boxRepository->find($request->query->get("crate"));
         $box = $boxRepository->find($request->query->get("box"));
 
-        if($box->getCrate()){
+        if($box->getCrate()) {
             return $this->json([
                 "success" => false,
                 "template" => $this->renderView("tracking/box/box_in_crate.html.twig",["box" => $crate]),
-                "message" => "Box déjà présente dans cette caisse",
+                "message" => "Cette Box est déjà présente dans la caisse <b>{$box->getCrate()->getNumber()}</b>",
             ]);
         }
+
+        if($box->getCrate()->getId() === $crate->getId()){
+            return $this->json([
+                "success" => false,
+                "template" => $this->renderView("tracking/box/box_in_crate.html.twig",["box" => $crate]),
+                "message" => "Cette Box est déjà présente dans cette caisse",
+            ]);
+        }
+
         $box->setCrate($crate);
 
         $tracking = $boxRecordService->createBoxRecord($box, true);
