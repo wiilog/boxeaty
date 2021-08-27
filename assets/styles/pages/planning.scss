@@ -51,13 +51,11 @@
     &.to-validate {
         background: rgba($orange, 10%);
         border-color: $orange;
-        max-height: 250px;
     }
 
     &.planned {
         background: $grey;
         border-color: $grey-order-finished;
-        max-height: 140px;
 
         &.available {
             background: $pale-green;
@@ -71,7 +69,7 @@
     }
 
     &.preparing {
-        background: $grey;
+        background: rgba($blue, 10%);
         border-color: $blue;
     }
 
