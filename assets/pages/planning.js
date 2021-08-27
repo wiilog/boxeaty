@@ -13,7 +13,7 @@ $document.ready(() => {
 
     DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 20);
 
-    $filters.find(`.filter`).click(function () {
+    $filters.find(`.filter`).click(function() {
         reLoadPlanning();
     });
 
@@ -22,7 +22,7 @@ $document.ready(() => {
     $(`.new-delivery-round`).click(() => {
         const params = processForm($filters).asObject();
 
-        if (params.from && params.to) {
+        if(params.from && params.to) {
             const ajax = AJAX.route(`POST`, `planning_delivery_round_template`, params);
 
             Modal.load(ajax, {
@@ -32,15 +32,20 @@ $document.ready(() => {
 
                     setupSortables(map);
 
-                    modal.element.find(`[name="method"]`).on(`change`, function () {
+                    modal.element.find(`[name="method"]`).on(`change`, function() {
                         const value = Number($(this).val());
 
-                        if (value) {
-                            for (const element of modal.element.find(`.order[data-id]`)) {
+                        if(value) {
+                            for(const element of modal.element.find(`.order[data-id]`)) {
                                 const $element = $(element);
-                                if ($element.data(`delivery-method`) === value) {
+                                if($element.data(`delivery-method`) === value) {
                                     $element.removeClass(`d-none`);
                                 } else {
+                                    if($element.closest(`.assigned-deliveries`).exists()) {
+                                        $element.detach();
+                                        modal.element.find(`.available-deliveries`).append($element);
+                                    }
+
                                     $element.addClass(`d-none`);
                                 }
                             }
@@ -49,7 +54,7 @@ $document.ready(() => {
                         }
                     });
 
-                    modal.element.find(`[name="cost"], [name="distance"]`).on(`keyup`, function () {
+                    modal.element.find(`[name="cost"], [name="distance"]`).on(`keyup`, function() {
                         updateAverage($(this));
                     });
                 },
@@ -66,11 +71,11 @@ $document.ready(() => {
         Modal.load(ajax, {
             processor: processSortables,
             afterOpen: modal => {
-                if (params.from && params.to && params.depository) {
+                if(params.from && params.to && params.depository) {
                     loadDeliveryLaunching(modal);
                 }
 
-                modal.element.find(`.data`).on(`change`, function () {
+                modal.element.find(`.data`).on(`change`, function() {
                     loadDeliveryLaunching(modal);
                 })
             },
@@ -83,11 +88,11 @@ $document.ready(() => {
 
                 const $ordersToStartContainer = modal.element.find('.orders-to-start');
                 const $ordersToStart = $ordersToStartContainer.find('.order');
-                if ($ordersToStart.exists()) {
+                if($ordersToStart.exists()) {
                     const assignedForStart = $ordersToStart
                         .map((_, order) => $(order).data('id'))
                         .toArray();
-                    if (!isStockValid(modal)) {
+                    if(!isStockValid(modal)) {
                         return checkStock(modal, {
                             depository,
                             assignedForStart
@@ -111,7 +116,7 @@ $document.ready(() => {
     });
 
 
-    $(document).on('click', `.validate`, function () {
+    $(document).on('click', `.validate`, function() {
         const ajax = AJAX.route(`POST`, `planning_delivery_validate_template`, {
             order: $(this).closest(`.order`).data("id")
         });
@@ -123,7 +128,7 @@ $document.ready(() => {
         });
     });
 
-    $(`.empty-filters`).click(function () {
+    $(`.empty-filters`).click(function() {
         clearForm($(this).parents(`.filters`))
     });
 });
@@ -133,14 +138,14 @@ function initializePlanning() {
         acceptFrom: `.column-content`,
     });
 
-    for (const column of sortables) {
+    for(const column of sortables) {
         column.addEventListener(`sortupdate`, e => changePlannedDate(e.detail));
     }
 }
 
 function updateAverage($element) {
     const count = $(`.assigned-deliveries .order[data-id]`).length;
-    if (count) {
+    if(count) {
         $element.siblings(`.data-divided`).val(Math.round($element.val() / count * 100) / 100);
     }
 }
@@ -148,29 +153,33 @@ function updateAverage($element) {
 function setupSortables(map) {
     const available = sortable(`.available-deliveries`, {
         acceptFrom: `.deliveries`,
+        orientation:  `horizontal`,
     })[0];
 
     const assigned = sortable(`.assigned-deliveries`, {
         acceptFrom: `.deliveries`,
+        orientation:  `horizontal`,
     })[0];
 
-    assigned.addEventListener(`sortupdate`, async function () {
+    assigned.addEventListener(`sortupdate`, async function() {
         updateAverage($(`[name="cost"]`));
         updateAverage($(`[name="distance"]`));
 
         const locations = [];
-        for (const element of $(assigned).find(`.order[data-id]`)) {
+        for(const element of $(assigned).find(`.order[data-id]`)) {
             const address = $(element).data(`address`);
             const coordinates = await findCoordinates(address);
 
-            locations.push({
-                title: address,
-                latitude: coordinates[0].lat,
-                longitude: coordinates[0].lon,
-            });
+            if(coordinates[0]) {
+                locations.push({
+                    title: address,
+                    latitude: coordinates[0].lat,
+                    longitude: coordinates[0].lon,
+                });
+            }
         }
 
-        if (locations.length) {
+        if(locations.length) {
             map.setMarkers(locations)
         }
     });
@@ -178,10 +187,10 @@ function setupSortables(map) {
 
 function processSortables(data, errors, modal) {
     const $modal = modal.element;
-    const assigned = $modal.find(`.assigned-deliveries .order[data-id]:not(.d-none)`).map(function () {
+    const assigned = $modal.find(`.assigned-deliveries .order[data-id]:not(.d-none)`).map(function() {
         return $(this).data(`id`);
     });
-    const ready = $modal.find(`.orders-to-start .order[data-id]:not(.d-none)`).map(function () {
+    const ready = $modal.find(`.orders-to-start .order[data-id]:not(.d-none)`).map(function() {
         return $(this).data(`id`);
     });
 
@@ -220,7 +229,7 @@ function checkStock(modal, data) {
         .route(`POST`, `planning_delivery_start_check_stock`, data)
         .json()
         .then((res) => {
-            if (res.success) {
+            if(res.success) {
                 const $quantitiesInformationContainer = modal.element.find('.quantities-information-container');
                 const $quantitiesInformation = $quantitiesInformationContainer.find('.quantities-information');
                 const $orderToStartContainer = modal.element.find('.orders-to-start');
@@ -229,7 +238,7 @@ function checkStock(modal, data) {
                 $allOrdersContainer.find('.order')
                     .removeClass('available')
                     .removeClass('unavailable');
-                for (const unavailableOrder of res.unavailableOrders) {
+                for(const unavailableOrder of res.unavailableOrders) {
                     $orderToStartContainer.find(`.order[data-id="${unavailableOrder}"]`).addClass('unavailable');
                 }
                 $orderToStartContainer.find('.order:not(.unavailable)').addClass('available');
@@ -239,13 +248,13 @@ function checkStock(modal, data) {
                     boxTypeData.orderedQuantity > boxTypeData.availableQuantity
                 ));
 
-                if (quantityErrors.length > 0) {
+                if(quantityErrors.length > 0) {
                     $quantitiesInformationContainer.removeClass('d-none');
                 } else {
                     $quantitiesInformationContainer.addClass('d-none');
                 }
 
-                for (const boxTypeData of quantityErrors) {
+                for(const boxTypeData of quantityErrors) {
                     $quantitiesInformation.append(`
                     <label class="ml-2">
                         Box Type ${boxTypeData.name} - Quantité commandée ${boxTypeData.orderedQuantity} - dispo en stock ${boxTypeData.availableQuantity} en propriété ${boxTypeData.client}
@@ -275,7 +284,7 @@ function updateSubmitButtonLabel(modal) {
     const $submitButton = modal.element.find('.submit-button');
 
     $submitButton.attr(`disabled`, !$ordersToStart.exists());
-    if ($ordersToStart.exists() && isStockValid(modal)) {
+    if($ordersToStart.exists() && isStockValid(modal)) {
         $submitButton.text("Valider le lancement");
     } else {
         $submitButton.text("Vérifier le stock");
@@ -290,7 +299,7 @@ function loadDeliveryLaunching(modal) {
             modal.element.find('.deliveries-container').empty()
             modal.element.find('.deliveries-container').addClass('d-none');
 
-            if (response.success) {
+            if(response.success) {
                 modal.element.find('.deliveries-container').removeClass('d-none');
                 modal.element.find('.deliveries-container').append(response.template);
                 const sortables = sortable(`.deliveries`, {

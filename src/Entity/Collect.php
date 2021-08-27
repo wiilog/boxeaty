@@ -17,7 +17,7 @@ class Collect {
 
     use StatusTrait;
 
-    public const PREFIX_NUMBER = 'C';
+    public const PREFIX_NUMBER = "C";
 
     /**
      * @ORM\Id

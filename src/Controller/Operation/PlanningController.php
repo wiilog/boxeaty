@@ -22,6 +22,7 @@ use App\Helper\FormatHelper;
 use App\Service\ClientOrderService;
 use App\Service\DeliveryRoundService;
 use App\Service\Mailer;
+use App\Service\UniqueNumberService;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -158,8 +159,9 @@ class PlanningController extends AbstractController {
      * @Route("/tournee", name="planning_delivery_round", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function deliveryRound(Request                $request,
-                                  DeliveryRoundService   $deliveryRoundService,
+    public function deliveryRound(Request $request,
+                                  DeliveryRoundService $deliveryRoundService,
+                                  UniqueNumberService $uniqueNumberService,
                                   EntityManagerInterface $manager): Response {
         $form = Form::create();
 
@@ -195,6 +197,7 @@ class PlanningController extends AbstractController {
             }
 
             $round = (new DeliveryRound())
+                ->setNumber($uniqueNumberService->createUniqueNumber(DeliveryRound::class))
                 ->setDeliverer($deliverer)
                 ->setDeliveryMethod($method)
                 ->setDepository($depository)

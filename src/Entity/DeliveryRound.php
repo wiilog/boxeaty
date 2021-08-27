@@ -15,6 +15,8 @@ class DeliveryRound {
 
     use StatusTrait;
 
+    public const PREFIX_NUMBER = "T";
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -56,7 +58,7 @@ class DeliveryRound {
     private ?string $distance = null;
 
     /**
-     * @ORM\Column(type="json")
+     * @ORM\Column(name="`order`", type="json")
      */
     private ?array $order = [];
 

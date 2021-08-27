@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Client;
+use App\Entity\ClientOrder;
 use App\Entity\DeliveryRound;
 use App\Entity\Status;
 use App\Entity\User;
@@ -16,6 +17,20 @@ use DateTime;
  * @method DeliveryRound[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class DeliveryRoundRepository extends EntityRepository {
+
+    public function getLastNumberByDate(string $date): ?string {
+        $result = $this->createQueryBuilder("delivery_round")
+            ->select("delivery_round.number")
+            ->andWhere("delivery_round.number LIKE :value")
+            ->orderBy("delivery_round.id", "DESC")
+            ->addOrderBy("delivery_round.number", "DESC")
+            ->setMaxResults(1)
+            ->setParameter("value", ClientOrder::PREFIX_NUMBER . $date . "%")
+            ->getQuery()
+            ->execute();
+
+        return $result ? $result[0]["number"] : null;
+    }
 
     public function findAwaitingDeliverer(User $deliverer) {
         return $this->createQueryBuilder("delivery_round")
