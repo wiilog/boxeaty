@@ -14,8 +14,7 @@ $document.ready(() => {
     DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 20);
 
     $filters.find(`.filter`).click(function () {
-        const params = processForm($filters).asObject();
-        reLoadPlanning(params);
+        reLoadPlanning();
     });
 
     initializePlanning();
@@ -85,24 +84,26 @@ $document.ready(() => {
                 const $ordersToStartContainer = modal.element.find('.orders-to-start');
                 const $ordersToStart = $ordersToStartContainer.find('.order');
                 if ($ordersToStart.exists()) {
+                    const assignedForStart = $ordersToStart
+                        .map((_, order) => $(order).data('id'))
+                        .toArray();
                     if (!isStockValid(modal)) {
                         return checkStock(modal, {
                             depository,
-                            assignedForStart: $ordersToStart
-                                .map((_, order) => $(order).data('id'))
-                                .toArray()
+                            assignedForStart
                         });
                     } else {
                         return AJAX.route(`POST`, `planning_delivery_launch`, {
                             from: from,
                             to: to,
                             depository: depository,
-                            assignedForStart: $ordersToStart
-                                .map((_, order) => $(order).data('id'))
-                                .toArray()
+                            assignedForStart
                         })
                             .json()
-                            .then(() => modal.close());
+                            .then(() => {
+                                reLoadPlanning();
+                                modal.close();
+                            });
                     }
                 }
             }
@@ -116,9 +117,8 @@ $document.ready(() => {
         });
 
         Modal.load(ajax, {
-            success: result => {
-                const params = processForm($filters).asObject();
-                reLoadPlanning(params);
+            success: () => {
+                reLoadPlanning();
             }
         });
     });
@@ -203,7 +203,10 @@ async function changePlannedDate(detail) {
     sortable(`.column-content`, `enable`);
 }
 
-function reLoadPlanning(params) {
+function reLoadPlanning() {
+    const $filters = $('.filters');
+    const params = processForm($filters).asObject();
+
     AJAX.route(`GET`, `planning_content`, params)
         .json()
         .then(data => {
@@ -213,10 +216,6 @@ function reLoadPlanning(params) {
 }
 
 function checkStock(modal, data) {
-    const $loading = modal.element.find('.modal-loading');
-    $loading.addClass('d-flex')
-        .removeClass('d-none');
-
     return AJAX
         .route(`POST`, `planning_delivery_start_check_stock`, data)
         .json()
@@ -224,12 +223,14 @@ function checkStock(modal, data) {
             if (res.success) {
                 const $quantitiesInformationContainer = modal.element.find('.quantities-information-container');
                 const $quantitiesInformation = $quantitiesInformationContainer.find('.quantities-information');
-                const $availableOrderToStartContainer = modal.element.find('.available-order-to-start');
                 const $orderToStartContainer = modal.element.find('.orders-to-start');
+                const $allOrdersContainer = modal.element.find('.available-order-to-start, .orders-to-start');
 
-                $availableOrderToStartContainer.find('.order').removeClass('available unavailable');
+                $allOrdersContainer.find('.order')
+                    .removeClass('available')
+                    .removeClass('unavailable');
                 for (const unavailableOrder of res.unavailableOrders) {
-                    modal.element.find(`.orders-to-start .order[data-id="${unavailableOrder}"]`).addClass('unavailable');
+                    $orderToStartContainer.find(`.order[data-id="${unavailableOrder}"]`).addClass('unavailable');
                 }
                 $orderToStartContainer.find('.order:not(.unavailable)').addClass('available');
                 $quantitiesInformation.empty();
@@ -253,10 +254,6 @@ function checkStock(modal, data) {
                 }
 
                 updateSubmitButtonLabel(modal);
-
-                $loading
-                    .addClass('d-none')
-                    .removeClass('d-flex');
             }
         });
 

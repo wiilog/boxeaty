@@ -163,9 +163,16 @@ class Box {
         return $this->boxRecords;
     }
 
-    public function getCurrentBoxRecord(): ?BoxRecord {
+    public function getCurrentBoxRecord(bool $trackingMovement = false): ?BoxRecord {
+        $expr = Criteria::expr();
         $criteria = Criteria::create()
+            ->where($expr->eq('trackingMovement', $trackingMovement))
+            ->orderBy([
+                'date' => Criteria::DESC,
+                'id' => Criteria::DESC
+            ])
             ->setMaxResults(1);
+
         $lastRecords = $this->boxRecords->matching($criteria);
         return $lastRecords->first() ?: null;
     }

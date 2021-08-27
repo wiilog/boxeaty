@@ -14,13 +14,13 @@ class ClientFixtures extends Fixture implements FixtureGroupInterface {
     public function load(ObjectManager $manager) {
         $output = new ConsoleOutput();
 
-        $locationRepository = $manager->getRepository(Client::class);
+        $clientRepository = $manager->getRepository(Client::class);
 
-        if(!$locationRepository->findOneBy(["name" => Client::BOXEATY])) {
+        if(!$clientRepository->findOneBy(["name" => Client::BOXEATY])) {
             $group = $manager->getRepository(Group::class)->findOneBy(["name" => Client::BOXEATY]);
             if(!$group) {
                 $group = (new Group())
-                    ->setName("BoxEaty")
+                    ->setName(Client::BOXEATY)
                     ->setActive(true);
 
                 $manager->persist($group);
