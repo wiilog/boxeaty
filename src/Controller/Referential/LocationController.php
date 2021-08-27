@@ -40,11 +40,12 @@ class LocationController extends AbstractController
         if (isset($filters['depository'])) {
             $depositoryId = $manager->find(Depository::class, $filters['depository'])->getId();
             $boxRepository = $manager->getRepository(Box::class);
+            $stockLocationType = array_search(Location::STOCK, Location::LOCATION_TYPES);
 
             $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
-            $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0, $depositoryId);
+            $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0, $depositoryId, $stockLocationType);
             $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1, $depositoryId);
-            $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1, $depositoryId);
+            $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1, $depositoryId, $stockLocationType);
         }
 
         return $this->render("referential/location/index.html.twig", [
@@ -160,10 +161,11 @@ class LocationController extends AbstractController
 
         if ($depository) {
             $depositoryId = $depository->getId();
+            $stockLocationType = array_search(Location::STOCK, Location::LOCATION_TYPES);
             $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
-            $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0, $depositoryId);
+            $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0, $depositoryId, $stockLocationType);
             $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1, $depositoryId);
-            $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1, $depositoryId);
+            $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1, $depositoryId, $stockLocationType);
         }
 
         return $this->json([

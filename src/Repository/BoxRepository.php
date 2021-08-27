@@ -81,21 +81,31 @@ class BoxRepository extends EntityRepository {
             ->getArrayResult();
     }
 
-    public function getLocationData($available, $isBox, $depository) {
+    public function getLocationData($available, $isBox, $depository, $locationType = null) {
         $qb = $this->createQueryBuilder("box");
 
-        return $qb->select("COUNT(box.id)")
+        $query = $qb->select("COUNT(box.id)")
             ->leftJoin("box.location","location")
             ->andWhere("box.state = :available")
             ->andWhere("location.active = 1")
-            ->andWhere("location.type = 3")
             ->andWhere("location.depository = :depository")
             ->andWhere("box.isBox = :isBox")
-            ->setParameter("available", "$available")
-            ->setParameter("isBox", "$isBox")
-            ->setParameter("depository", $depository)
+            ->setParameters([
+                "available" => $available,
+                "depository" => $depository,
+                "isBox" => $isBox,
+            ]);
+
+        if ($locationType) {
+            $query
+                ->andWhere('location.type = :locationType')
+                ->setParameter('locationType', $locationType);
+        }
+
+        return $query
             ->getQuery()
             ->getSingleScalarResult();
+
     }
 
     public function findForDatatable(array $params, ?User $user): array {
