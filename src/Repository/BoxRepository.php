@@ -40,13 +40,19 @@ class BoxRepository extends EntityRepository {
             ->toIterable();
     }
 
-    public function getForSelect(?string $search, ?User $user) {
+    public function getForSelect(?string $search, ?int $notInCrate, ?User $user) {
         $qb = $this->createQueryBuilder("box");
 
         if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
             $qb->join("box.owner", "owner")
                 ->andWhere("owner.group IN (:groups)")
                 ->setParameter("groups", $user->getGroups());
+        }
+
+        dump($notInCrate);
+        if($notInCrate) {
+            $qb->andWhere("box.crate != :crate")
+                ->setParameter("crate", $notInCrate);
         }
 
         return $qb->select("box.id AS id, box.number AS text")

@@ -38,12 +38,17 @@
         </div>
         <div class="col-md-8 col-12 right-column">
             {% if not box.box %}
+                <input type="hidden" name="crate" class="data" value="{{ box.id }}">
+
                 <div class="owner box-details">
                     <div class="d-flex flex-md-row flex-column justify-content-between mb-3">
                         <h3>Contenu de la caisse en temps réel (Box)</h3>
                         <label class="d-flex align-items-center text-nowrap mt-0">
-                            Conditionnement rapide :
-                            <select name="box" class="data add-box-to-cart" data-s2="box" data-placeholder="Entrée pour valider">
+                            Conditionnement rapide
+                            <select name="box" class="data add-box-to-cart" data-s2="box"
+                                    data-include-params-parent=".right-column"
+                                    data-include-params="input[name=crate]"
+                                    data-placeholder="Entrée pour valider">
                             </select>
                         </label>
                     </div>
@@ -72,7 +77,8 @@
             </div>
         </div>
     </div>
-    <input type="hidden" value="{{ box.id }}" id="box-id">
+
+    <input type="hidden" name="box" value="{{ box.id }}" id="box-id">
 {% endblock %}
 
 {% block javascripts %}

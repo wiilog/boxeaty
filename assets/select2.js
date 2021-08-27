@@ -126,7 +126,7 @@ export default class Select2 {
     static includeParams($element, params) {
         if($element.is(`[data-include-params]`)) {
             const selector = $element.data(`include-params`);
-            const closest = $element.data(`[data-include-params-parent]`) || `.modal`;
+            const closest = $element.data(`include-params-parent`) || `.modal`;
             const $fields = $element
                     .closest(closest)
                     .find(selector);
