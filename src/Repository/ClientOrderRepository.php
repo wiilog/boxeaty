@@ -98,9 +98,6 @@ class ClientOrderRepository extends EntityRepository {
      */
     public function findBetween(DateTime $from, DateTime $to, array $params): array {
         return $this->createBetween($from, $to, $params)
-            ->leftJoin("client_order.status", "status")
-            ->andWhere("status.code IN (:statuses)")
-            ->setParameter("statuses", [Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TRANSIT])
             ->getQuery()
             ->getResult();
     }
