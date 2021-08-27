@@ -888,6 +888,7 @@ class ApiController extends AbstractController {
                                      PreparationService     $preparationService,
                                      DeliveryRoundService   $deliveryRoundService,
                                      BoxRecordService       $boxRecordService,
+                                     ClientOrderService     $clientOrderService,
                                      EntityManagerInterface $entityManager,
                                      Mailer                 $mailer): Response {
 
@@ -930,8 +931,10 @@ class ApiController extends AbstractController {
                  && $this->getUser() === $preparation->getOperator()) {
             $userRepository = $entityManager->getRepository(User::class);
 
-            $preparedStatus = $statusRepository->findOneBy(['code' => Status::CODE_PREPARATION_PREPARED]);
-            $preparedDeliveryStatus = $statusRepository->findOneBy(['code' => Status::CODE_DELIVERY_PREPARED]);
+            $preparedStatus = $statusRepository->findOneBy(["code" => Status::CODE_PREPARATION_PREPARED]);
+            $preparedDeliveryStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_PREPARED]);
+            $preparedOrderStatus = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_PREPARED]);
+            $awaitingDelivererStatus = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_AWAITING_DELIVERER]);
 
             $crates = $content['crates'] ?? [];
 
@@ -979,8 +982,12 @@ class ApiController extends AbstractController {
                 $preparation->setStatus($preparedStatus);
 
                 $delivery = $clientOrder->getDelivery();
-                if(isset($delivery)) {
+                if($delivery) {
                     $delivery->setStatus($preparedDeliveryStatus);
+
+                    $clientOrderService->updateClientOrderStatus($clientOrder, $awaitingDelivererStatus, $this->getUser());
+                } else {
+                    $clientOrderService->updateClientOrderStatus($clientOrder, $preparedOrderStatus, $this->getUser());
                 }
 
                 $deliveryRound = $clientOrder->getDeliveryRound();

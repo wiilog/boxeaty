@@ -15,6 +15,8 @@ class StatusFixtures extends Fixture implements FixtureGroupInterface {
             Status::CODE_ORDER_TO_VALIDATE_CLIENT => "À valider Client",
             Status::CODE_ORDER_TO_VALIDATE_BOXEATY => "À valider BoxEaty",
             Status::CODE_ORDER_PLANNED => "Planifiée",
+            Status::CODE_ORDER_PREPARED => "Préparée",
+            Status::CODE_ORDER_AWAITING_DELIVERER => "Attente livreur",
             Status::CODE_ORDER_TRANSIT => "En transit",
             Status::CODE_ORDER_FINISHED => "Terminée",
         ],

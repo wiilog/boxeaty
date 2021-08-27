@@ -17,8 +17,7 @@ use WiiCommon\Helper\Stream;
  */
 class PreparationRepository extends EntityRepository {
 
-    public function getByDepository(?Depository $depository, User $currentOperator)
-    {
+    public function getByDepository(?Depository $depository, User $currentOperator) {
         $qb = $this->createQueryBuilder('preparation')
             ->select('preparation.id AS id')
             ->addSelect('join_client.name AS client')
@@ -34,7 +33,7 @@ class PreparationRepository extends EntityRepository {
             ->andWhere("join_status.code IN (:status)")
             ->setParameter("status", [Status::CODE_PREPARATION_TO_PREPARE, Status::CODE_PREPARATION_PREPARING]);
 
-        if($depository) {
+        if ($depository) {
             $qb
                 ->andWhere("preparation.depository = :depository")
                 ->setParameter("depository", $depository);
@@ -44,15 +43,14 @@ class PreparationRepository extends EntityRepository {
             ->getQuery()
             ->execute();
         return Stream::from($res)
-            ->map(fn (array $preparation) => array_merge(
+            ->map(fn(array $preparation) => array_merge(
                 $preparation,
                 [
-                    'editable' => (
-                        !isset($preparation['operator'])
-                        || $preparation['operator'] === $currentOperator->getUsername()
-                    )
+                    'editable' => !isset($preparation['operator'])
+                        || $preparation['operator'] === $currentOperator->getUsername(),
                 ]
             ))
             ->toArray();
     }
+
 }
