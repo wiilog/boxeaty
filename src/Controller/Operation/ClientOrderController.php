@@ -236,7 +236,7 @@ class ClientOrderController extends AbstractController {
 
     /**
      * @Route("/supprimer/template/{clientOrder}", name="client_order_delete_template", options={"expose": true})
-     * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
+     * @HasPermission(Role::MANAGE_CLIENT_ORDERS, Role::DELETE_CLIENT_ORDERS)
      */
     public function deleteTemplate(ClientOrder $clientOrder): Response {
         return $this->json([
@@ -292,7 +292,7 @@ class ClientOrderController extends AbstractController {
 
     /**
      * @Route("/supprimer/{clientOrder}", name="client_order_delete", options={"expose": true})
-     * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
+     * @HasPermission(Role::MANAGE_CLIENT_ORDERS, Role::DELETE_CLIENT_ORDERS)
      */
     public function delete(EntityManagerInterface $entityManager, ClientOrder $clientOrder): Response {
         $lines = $clientOrder->getLines();

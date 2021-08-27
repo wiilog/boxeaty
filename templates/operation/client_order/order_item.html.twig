@@ -26,13 +26,15 @@
                         <br/>
                         <span class="no-wrap">N°{{ item.number }}</span>
                     </div>
-                    <div class="col-auto">
-                        <div data-listener="delete"
-                             data-id="{{ item.id }}"
-                             class="cursor-pointer">
-                            <i class="bxi bxi-trash-circle m-0"></i>
+                    {% if has_permission(constant('App\\Entity\\Role::DELETE_CLIENT_ORDERS')) %}
+                        <div class="col-auto">
+                            <div data-listener="delete"
+                                 data-id="{{ item.id }}"
+                                 class="cursor-pointer">
+                                <i class="bxi bxi-trash-circle m-0"></i>
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

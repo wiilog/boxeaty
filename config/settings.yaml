@@ -18,6 +18,7 @@ parameters:
     Menu Opérations:
       App\Entity\Role::VIEW_ALL_ORDERS: Voir toutes les commandes client
       App\Entity\Role::MANAGE_CLIENT_ORDERS: Gérer les commandes client
+      App\Entity\Role::DELETE_CLIENT_ORDERS: Supprimer les commandes client
       App\Entity\Role::MANAGE_COUNTER_ORDERS: Gérer les commandes comptoir
       App\Entity\Role::MANAGE_PLANNING: Gérer les planifications
 

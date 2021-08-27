@@ -44,6 +44,7 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
             Role::MANAGE_COUNTER_ORDERS,
             Role::VIEW_ALL_ORDERS,
             Role::MANAGE_CLIENT_ORDERS,
+            Role::DELETE_CLIENT_ORDERS,
             Role::VIEW_INDICATORS,
             Role::MANAGE_PLANNING,
             Role::TREAT_PREPARATIONS,
