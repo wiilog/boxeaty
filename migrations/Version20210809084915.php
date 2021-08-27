@@ -20,6 +20,12 @@ final class Version20210809084915 extends AbstractMigration {
     public function up(Schema $schema): void {
         $name = BoxType::STARTER_KIT;
         $volume = BoxType::DEFAULT_VOLUME;
+        $this->addSql('ALTER TABLE box_type ADD volume DECIMAL;');
+        $this->addSql("
+            UPDATE box_type
+            SET box_type.volume = '" . BoxType::DEFAULT_VOLUME . "'
+            WHERE box_type.volume IS NULL
+        ");
 
         $existing = $this->connection->executeQuery("SELECT id FROM box_type WHERE name = '$name'")->rowCount();
         if (!$existing) {
