@@ -15,8 +15,9 @@ class ClientFixtures extends Fixture implements FixtureGroupInterface {
         $output = new ConsoleOutput();
 
         $clientRepository = $manager->getRepository(Client::class);
+        $client = $clientRepository->findOneBy(["name" => Client::BOXEATY]);
 
-        if(!$clientRepository->findOneBy(["name" => Client::BOXEATY])) {
+        if(!$client) {
             $group = $manager->getRepository(Group::class)->findOneBy(["name" => Client::BOXEATY]);
             if(!$group) {
                 $group = (new Group())
@@ -43,8 +44,11 @@ class ClientFixtures extends Fixture implements FixtureGroupInterface {
             $output->writeln("Created client BoxEaty");
 
             $manager->persist($client);
-            $manager->flush();
+        } else {
+            $client->setActive(true);
         }
+
+        $manager->flush();
     }
 
     public static function getGroups(): array {

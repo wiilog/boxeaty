@@ -231,11 +231,17 @@ class ClientController extends AbstractController {
         }
 
         if ($form->isValid()) {
+            if ($client->getName() === Client::BOXEATY) {
+                $client->setActive(true);
+            } else {
+                $client->setName($content->name)
+                    ->setActive($content->active);
+            }
+
             $client
                 ->setName($content->name)
                 ->setAddress($content->address)
                 ->setPhoneNumber($content->phoneNumber)
-                ->setActive($content->active)
                 ->setContact($contact)
                 ->setIsMultiSite($content->isMultiSite)
                 ->setGroup($group)

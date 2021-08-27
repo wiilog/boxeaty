@@ -134,8 +134,8 @@ class BoxTypeController extends AbstractController {
      */
     public function edit(Request $request,
                          EntityManagerInterface $entityManager,
-                         BoxType $boxType,
-                         BoxTypeService $boxTypeService): Response {
+                         BoxTypeService $boxTypeService,
+                         BoxType $boxType): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
