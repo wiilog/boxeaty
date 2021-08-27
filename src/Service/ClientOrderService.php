@@ -362,6 +362,7 @@ class ClientOrderService
 
                             $cartSplittingLine = $serializeCrate($defaultCrateType);
                             $splittingLineVolume = 0;
+                            continue;
                         }
 
                         // we put selected quantity of the current box into current crate
