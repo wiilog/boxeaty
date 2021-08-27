@@ -6,6 +6,7 @@ namespace App\Controller\Operation;
 use App\Annotation\HasPermission;
 use App\Entity\Box;
 use App\Entity\BoxType;
+use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\Delivery;
 use App\Entity\DeliveryMethod;
@@ -320,6 +321,7 @@ class PlanningController extends AbstractController {
      * @HasPermission(Role::MANAGE_PLANNING)
      */
     public function checkStock(Request $request, EntityManagerInterface $manager) {
+        $clientRepository = $manager->getRepository(Client::class);
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
         $boxTypeRepository = $manager->getRepository(BoxType::class);
         $depositoryRepository = $manager->getRepository(Depository::class);
@@ -337,19 +339,18 @@ class PlanningController extends AbstractController {
             ]);
         }
 
-        $defaultCrateType = !empty($defaultCrateTypeId)
-            ? $boxTypeRepository->find($defaultCrateTypeId)
-            : null;
+        $boxeaty = $clientRepository->findOneBy(["name" => Client::BOXEATY]);
+        $defaultCrateType = !empty($defaultCrateTypeId) ? $boxTypeRepository->find($defaultCrateTypeId) : null;
+
         // add all the ordered boxes (and crates) to the array
         // with the total quantity
         $orderedBoxTypes = [];
         foreach ($ordersToStart as $orderToStart) {
             $order = $clientOrderRepository->find($orderToStart);
             $closed = $order->getClient()->getClientOrderInformation()->isClosedParkOrder();
-            $owner = $closed ? $order->getClient()->getId() : Box::OWNER_BOXEATY;
-            if (!isset($orderedBoxTypes[$defaultCrateType->getId()][$owner])) {
-                $closed = $order->getClient()->getClientOrderInformation()->isClosedParkOrder();
+            $owner = $closed ? $order->getClient()->getId() : $boxeaty->getId();
 
+            if (!isset($orderedBoxTypes[$defaultCrateType->getId()][$owner])) {
                 $orderedBoxTypes[$defaultCrateType->getId()][$owner] = [
                     'quantity' => 0,
                     'orders' => [],

@@ -1021,6 +1021,7 @@ class ApiController extends AbstractController {
      * @Authenticated
      */
     public function availableCrates(EntityManagerInterface $manager, Request $request): Response {
+        $clientRepository = $manager->getRepository(Client::class);
         $boxTypeRepository = $manager->getRepository(BoxType::class);
         $preparationRepository = $manager->getRepository(Preparation::class);
 
@@ -1032,6 +1033,10 @@ class ApiController extends AbstractController {
             $clientFilter = $preparation
                 ->getOrder()
                 ->getClientClosedPark();
+
+            if(!$clientFilter) {
+                $clientFilter = $clientRepository->findOneBy(["name" => Client::BOXEATY]);
+            }
         }
 
         $crateType = $boxTypeRepository->findOneBy(["name" => $request->query->get("type"),]);
@@ -1061,6 +1066,7 @@ class ApiController extends AbstractController {
      */
     public function getBoxes(EntityManagerInterface $manager, Request $request): Response {
         $query = $request->query;
+        $clientRepository = $manager->getRepository(Client::class);
         $preparationRepository = $manager->getRepository(Preparation::class);
         $boxRepository = $manager->getRepository(Box::class);
 
@@ -1079,6 +1085,10 @@ class ApiController extends AbstractController {
             $clientFilter = $preparation
                 ->getOrder()
                 ->getClientClosedPark();
+
+            if(!$clientFilter) {
+                $clientFilter = $clientRepository->findOneBy(["name" => Client::BOXEATY]);
+            }
         }
 
         $boxes = $boxRepository->getAvailableAndCleanedBoxByType($boxTypes);

@@ -142,13 +142,10 @@
             </div>
             <div class="col-md-5 col-12">
                 <p class="bigTxt">Date de livraison souhaitée</p>
-                <input type="datetime-local"
-                       name="date"
-                       class="data"
+                <input type="date" name="date" class="data"
                        placeholder="Date de livraison"
                        value="{{ clientOrder.expectedDelivery ? clientOrder.expectedDelivery|date('Y-m-d\\TH:i') }}"
-                       min="{{ 'now + 1 days'|date('Y-m-d') }}T00:00"
-                       required/>
+                       min="{{ 'now + 1 days' | date('Y-m-d') }}" required/>
             </div>
             <input name="workFreeDay"
                    value="{{ workFreeDay|json_encode }}"

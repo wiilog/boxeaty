@@ -40,7 +40,7 @@ class ClientOrderController extends AbstractController {
 
     /**
      * @Route("/liste", name="client_orders_list", options={"expose": true})
-     * @HasPermission(Role::MANAGE_CLIENT_ORDERS, ROLE::VIEW_ALL_ORDERS)
+     * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
         $deliveryMethod = $manager->getRepository(DeliveryMethod::class);
@@ -127,7 +127,7 @@ class ClientOrderController extends AbstractController {
 
     /**
      * @Route("/validate/template/{clientOrder}", name="client_order_validation_template", options={"expose": true})
-     * @HasPermission(Role::CREATE_CLIENT_ORDERS)
+     * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
      */
     public function validateTemplate(ClientOrder $clientOrder): Response {
         /** @var User $requester */
@@ -147,7 +147,7 @@ class ClientOrderController extends AbstractController {
 
     /**
      * @Route("/{clientOrder}/validate", name="client_order_validation", options={"expose": true})
-     * @HasPermission(Role::CREATE_CLIENT_ORDERS)
+     * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
      */
     public function validate(ClientOrder $clientOrder,
                              EntityManagerInterface $entityManager,
@@ -190,7 +190,7 @@ class ClientOrderController extends AbstractController {
 
     /**
      * @Route("/new", name="client_order_new", options={"expose": true})
-     * @HasPermission(Role::CREATE_CLIENT_ORDERS)
+     * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
      */
     public function new(Request $request,
                         UniqueNumberService $uniqueNumberService,
@@ -394,7 +394,7 @@ class ClientOrderController extends AbstractController {
 
     /**
      * @Route("/{clientOrder}/edit", name="client_order_edit", options={"expose": true})
-     * @HasPermission(Role::CREATE_CLIENT_ORDERS)
+     * @HasPermission(Role::MANAGE_CLIENT_ORDERS)
      */
     public function edit(Request $request,
                          EntityManagerInterface $entityManager,

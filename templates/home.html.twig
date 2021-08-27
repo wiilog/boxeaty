@@ -1,10 +1,9 @@
 {% extends 'template.html.twig' %}
 
-{% set display_new_client_order = has_permission(constant('App\\Entity\\Role::CREATE_CLIENT_ORDERS')) %}
+{% set display_new_client_order = has_permission(constant('App\\Entity\\Role::MANAGE_CLIENT_ORDERS')) %}
 {% set display_new_counter_order = not display_new_client_order and has_permission(
     constant('App\\Entity\\Role::REDIRECT_NEW_COUNTER_ORDER'),
-    constant('App\\Entity\\Role::MANAGE_CLIENT_ORDERS'),
-    constant('App\\Entity\\Role::CREATE_CLIENT_ORDERS')
+    constant('App\\Entity\\Role::MANAGE_COUNTER_ORDERS')
 ) %}
 
 {% block menu %}{{ display_new_counter_order ? 'Traçabilité' : 'Accueil' }}{% endblock %}

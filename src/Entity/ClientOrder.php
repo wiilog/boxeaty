@@ -58,7 +58,7 @@ class ClientOrder {
     private ?DateTime $createdAt = null;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date")
      */
     private ?DateTime $expectedDelivery = null;
 

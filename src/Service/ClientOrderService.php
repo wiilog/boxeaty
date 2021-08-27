@@ -94,7 +94,7 @@ class ClientOrderService
         }
 
         $information = $client->getClientOrderInformation();
-        $expectedDelivery = DateTime::createFromFormat('Y-m-d\TH:i', $content->date ?? null);
+        $expectedDelivery = DateTime::createFromFormat('Y-m-d', $content->date ?? null);
         if (isset($information)) {
 
             $worFreeDay= $worFreeDayRepository->findDayAndMonth($expectedDelivery->format('j'), $expectedDelivery->format('n'));
