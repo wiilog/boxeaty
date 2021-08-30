@@ -3,7 +3,11 @@
 namespace App\Repository;
 
 use App\Entity\Box;
+use App\Entity\BoxType;
+use App\Entity\Client;
 use App\Entity\Depository;
+use App\Entity\Preparation;
+use App\Entity\Status;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use App\Service\BoxStateService;
@@ -43,13 +47,13 @@ class BoxRepository extends EntityRepository {
     public function getForSelect(?string $search, ?int $notInCrate, ?User $user) {
         $qb = $this->createQueryBuilder("box");
 
-        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
             $qb->join("box.owner", "owner")
                 ->andWhere("owner.group IN (:groups)")
                 ->setParameter("groups", $user->getGroups());
         }
 
-        if($notInCrate) {
+        if ($notInCrate) {
             $qb->andWhere("box.crate != :crate")
                 ->setParameter("crate", $notInCrate);
         }
@@ -65,12 +69,12 @@ class BoxRepository extends EntityRepository {
     public function getForOrderSelect(?string $search, ?array $exclude, ?User $user) {
         $qb = $this->createQueryBuilder("box");
 
-        if($exclude) {
+        if ($exclude) {
             $qb->andWhere("box.number NOT IN (:excluded)")
                 ->setParameter("excluded", $exclude);
         }
 
-        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
             $qb->join("box.owner", "owner")
                 ->andWhere("owner.group IN (:groups)")
                 ->setParameter("groups", $user->getGroups());
@@ -90,7 +94,7 @@ class BoxRepository extends EntityRepository {
         $qb = $this->createQueryBuilder("box");
 
         $query = $qb->select("COUNT(box.id)")
-            ->leftJoin("box.location","location")
+            ->leftJoin("box.location", "location")
             ->andWhere("box.state = :available")
             ->andWhere("location.active = 1")
             ->andWhere("location.depository = :depository")
@@ -126,7 +130,7 @@ class BoxRepository extends EntityRepository {
                 ->filter(fn($value) => strpos($value, $search) > -1)
                 ->firstKey();
 
-            if(isset($state)) {
+            if (isset($state)) {
                 $qb
                     ->andWhere("box.state LIKE :state")
                     ->setParameter("state", $state + 1);
@@ -170,7 +174,7 @@ class BoxRepository extends EntityRepository {
                         ->setParameter("filter_depository", $value);
                     break;
                 case("box"):
-                    if($value !== null && $value !== "") {
+                    if ($value !== null && $value !== "") {
                         $qb->andWhere("box.isBox IN (:filter_isbox)")
                             ->setParameter("filter_isbox", explode(",", $value));
                     }
@@ -201,8 +205,7 @@ class BoxRepository extends EntityRepository {
                     $qb->addOrderBy("box.$column", $order["dir"]);
                 }
             }
-        }
-        else {
+        } else {
             foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("box.$column", $dir);
             }
@@ -220,8 +223,7 @@ class BoxRepository extends EntityRepository {
         ];
     }
 
-    public function getByDepository(Depository $depository)
-    {
+    public function getByDepository(Depository $depository) {
         return $this->createQueryBuilder('crate')
             ->select('crate.id AS crateId')
             ->addSelect('crate.number AS crateNumber')
@@ -237,8 +239,7 @@ class BoxRepository extends EntityRepository {
             ->execute();
     }
 
-    public function getByNumber(string $number)
-    {
+    public function getByNumber(string $number) {
         return $this->createQueryBuilder('box')
             ->select('box.id AS boxId')
             ->addSelect('box.number AS boxNumber')
@@ -251,24 +252,6 @@ class BoxRepository extends EntityRepository {
             ->setParameter("number", $number)
             ->getQuery()
             ->getOneOrNullResult();
-    }
-
-    public function getAvailableAndCleanedBoxByType(?array $boxTypes) {
-        $qb = $this->createQueryBuilder('box');
-
-        $qb->select('box')
-            ->leftJoin('box.quality', 'join_quality')
-            ->leftJoin('box.type', 'join_type')
-            ->andWhere('box.isBox = 1')
-            ->andWhere('box.state = :state')
-            ->andWhere('join_type.id IN (:box_types)')
-            ->andWhere('join_quality.clean = 1')
-            ->setParameter('box_types', $boxTypes)
-            ->setParameter('state', BoxStateService::STATE_BOX_AVAILABLE);
-
-        return $qb
-            ->getQuery()
-            ->getResult();
     }
 
     public function countBrokenGroupedByType(): array {
@@ -284,7 +267,75 @@ class BoxRepository extends EntityRepository {
             ->getResult();
 
         return Stream::from($res)
-            ->keymap(fn (array $line) => [$line['type'], $line['count']])
+            ->keymap(fn(array $line) => [$line['type'], $line['count']])
             ->toArray();
     }
+
+    public function getPreparableBoxes(Preparation $preparation, ?Client $client, ?array $boxTypes) {
+        $qb = $this->createQueryBuilder("box")
+            ->resetDQLPart("select")
+            ->addSelect("box.number AS number")
+            ->addSelect("box_type.name AS type")
+            ->addSelect("box_location.name AS location")
+            ->leftJoin("box.quality", "quality")
+            ->leftJoin("box.type", "box_type")
+            ->leftJoin("box.location", "box_location")
+            ->leftJoin("box.boxPreparationLines", "preparation_lines")
+            ->leftJoin("preparation_lines.preparation", "preparation")
+            ->leftJoin("preparation.order", "client_order")
+            ->leftJoin("client_order.status", "order_status")
+            ->andWhere("box.isBox = 1")
+            ->andWhere("box.state = :state")
+            ->andWhere("box_type.id IN (:box_types)")
+            ->andWhere("quality.clean = 1 AND quality.broken = 0")
+            ->andWhere("box_location.depository = :depository")
+            ->andWhere("order_status.id IS NULL OR order_status.code = :finished")
+            ->setParameter("box_types", $boxTypes)
+            ->setParameter("state", BoxStateService::STATE_BOX_AVAILABLE)
+            ->setParameter("depository", $preparation->getDepository())
+            ->setParameter("finished", Status::CODE_ORDER_FINISHED);
+
+        if ($client) {
+            $qb->andWhere("box.owner = :client")
+                ->setParameter("client", $client);
+        }
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getPreparableCrates(Preparation $preparation, ?Client $client, string $type) {
+        $qb = $this->createQueryBuilder("box")
+            ->resetDQLPart("select")
+            ->addSelect("box.id AS id")
+            ->addSelect("box.number AS number")
+            ->addSelect("box_type.name AS type")
+            ->addSelect("box_location.name AS location")
+            ->leftJoin("box.type", "box_type")
+            ->leftJoin("box.quality", "quality")
+            ->leftJoin("box.location", "box_location")
+            ->leftJoin("box.cratePreparationLines", "preparation_lines")
+            ->leftJoin("preparation_lines.preparation", "preparation")
+            ->leftJoin("preparation.order", "client_order")
+            ->leftJoin("client_order.status", "order_status")
+            ->andWhere("box.isBox = 0")
+            ->andWhere("box.state = :available")
+            ->andWhere("quality.clean = 1 AND quality.broken = 0")
+            ->andWhere("box_type.name LIKE :type")
+            ->andWhere("box_location.depository = :depository")
+            ->andWhere("order_status.id IS NULL OR order_status.code = :finished")
+            ->setParameter("available", BoxStateService::STATE_BOX_AVAILABLE)
+            ->setParameter("type", $type)
+            ->setParameter("depository", $preparation->getDepository())
+            ->setParameter("finished", Status::CODE_ORDER_FINISHED);
+
+        if ($client) {
+            $qb->andWhere("box.owner = :client")
+                ->setParameter("client", $client);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
 }
