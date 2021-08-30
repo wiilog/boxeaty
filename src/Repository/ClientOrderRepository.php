@@ -64,30 +64,34 @@ class ClientOrderRepository extends EntityRepository {
             ->getResult();
     }
 
-    public function createBetween(DateTime $from, DateTime $to, array $params = []): QueryBuilder {
+    public function createBetween(?User $user, DateTime $from, DateTime $to, array $params = []): QueryBuilder {
         $qb = $this->createQueryBuilder("client_order")
-            ->andWhere("client_order.expectedDelivery BETWEEN :from AND :to")
+            ->andWhere("client_order.expectedDelivery BETWEEN :_from AND :_to")
             ->orderBy("client_order.expectedDelivery", "ASC")
-            ->setParameter("from", $from)
-            ->setParameter("to", $to);
+            ->setParameter("_from", $from)
+            ->setParameter("_to", $to);
+
+        if($user && !$user->hasRight(Role::VIEW_ALL_ORDERS)) {
+            $qb->andWhere("client_order.requester = :_requester")
+                ->setParameter("_requester", $user);
+        }
 
         if(isset($params["depository"])) {
-            $qb
-                ->join("client_order.client", "_depository_client")
+            $qb->join("client_order.client", "_depository_client")
                 ->join("_depository_client.clientOrderInformation", "_depository_client_information")
-                ->andWhere("_depository_client_information.depository = :depository")
-                ->setParameter("depository", $params["depository"]);
+                ->andWhere("_depository_client_information.depository = :_depository")
+                ->setParameter("_depository", $params["depository"]);
         }
 
         if(isset($params["deliverer"])) {
             $qb->leftJoin("client_order.deliveryRound", "_deliverer_delivery_round")
-                ->andWhere("_deliverer_delivery_round.deliverer = :deliverer")
-                ->setParameter("deliverer", $params["deliverer"]);
+                ->andWhere("_deliverer_delivery_round.deliverer = :_deliverer")
+                ->setParameter("_deliverer", $params["deliverer"]);
         }
 
         if(isset($params["client"])) {
-            $qb ->andWhere("client_order.client = :client")
-                ->setParameter("client", $params["client"]);
+            $qb->andWhere("client_order.client = :_client")
+                ->setParameter("_client", $params["client"]);
         }
 
         return $qb;
@@ -96,8 +100,8 @@ class ClientOrderRepository extends EntityRepository {
     /**
      * @return ClientOrder[]
      */
-    public function findBetween(DateTime $from, DateTime $to, array $params): array {
-        return $this->createBetween($from, $to, $params)
+    public function findBetween(?User $user, DateTime $from, DateTime $to, array $params): array {
+        return $this->createBetween($user, $from, $to, $params)
             ->getQuery()
             ->getResult();
     }
@@ -105,8 +109,8 @@ class ClientOrderRepository extends EntityRepository {
     /**
      * @return ClientOrder[]
      */
-    public function findDeliveriesBetween(DateTime $from, DateTime $to, array $params): array {
-        return $this->createBetween($from, $to, $params)
+    public function findDeliveriesBetween(?User $user, DateTime $from, DateTime $to, array $params): array {
+        return $this->createBetween($user, $from, $to, $params)
             ->leftJoin("client_order.status", "status")
             ->leftJoin("client_order.deliveryRound", "delivery_round")
             ->andWhere("status.code NOT IN (:statuses)")
@@ -119,11 +123,11 @@ class ClientOrderRepository extends EntityRepository {
     /**
      * @return ClientOrder[]
      */
-    public function findLaunchableOrders(Depository $depository, DateTime $from = null, DateTime $to = null): array {
+    public function findLaunchableOrders(?User $user, Depository $depository, DateTime $from = null, DateTime $to = null): array {
         if($from == null && $to == null){
             $returnOrderBetween = $this->createQueryBuilder('client_order');
         } else {
-            $returnOrderBetween = $this->createBetween($from, $to);
+            $returnOrderBetween = $this->createBetween($user, $from, $to);
         }
 
         return $returnOrderBetween

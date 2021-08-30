@@ -78,7 +78,7 @@ class PlanningController extends AbstractController {
 
         //group orders by date
         $ordersByDate = [];
-        foreach ($clientOrderRepository->findBetween($from, $to, $request->query->all()) as $order) {
+        foreach ($clientOrderRepository->findBetween($this->getUser(), $from, $to, $request->query->all()) as $order) {
             $ordersByDate[FormatHelper::date($order->getExpectedDelivery(), "Ymd")][] = $order;
         }
 
@@ -146,7 +146,7 @@ class PlanningController extends AbstractController {
         return $this->json([
             "submit" => $this->generateUrl("planning_delivery_round"),
             "template" => $this->renderView("operation/planning/modal/new_delivery_round.html.twig", [
-                "orders" => $clientOrderRepository->findDeliveriesBetween($from, $to, $request->query->all()),
+                "orders" => $clientOrderRepository->findDeliveriesBetween($this->getUser(), $from, $to, $request->query->all()),
             ])
         ]);
     }
@@ -261,7 +261,7 @@ class PlanningController extends AbstractController {
             return $this->json([
                 "success" => true,
                 "template" => $this->renderView('operation/planning/modal/deliveries_container.html.twig', [
-                    "orders" => $clientOrderRepository->findLaunchableOrders($depository, $from, $to),
+                    "orders" => $clientOrderRepository->findLaunchableOrders($this->getUser(), $depository, $from, $to),
                 ])
             ]);
         }
