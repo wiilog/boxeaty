@@ -4,7 +4,7 @@
     <label>Livraisons disponibles au lancement</label>
     <div class="deliveries available-order-to-start">
         {% for order in orders %}
-            {{ macros.order_card(order, false) }}
+            {{ macros.order_card(order, true) }}
         {% endfor %}
     </div>
 </div>
