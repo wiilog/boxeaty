@@ -283,7 +283,7 @@ class BoxController extends AbstractController {
 
         return $exportService->export(function($output) use ($exportService, $boxes) {
             foreach ($boxes as $box) {
-                $box["state"] = BoxStateService::BOX_STATES[$box["state"]];
+                $box["state"] = BoxStateService::BOX_STATES[$box["state"]] ?? '';
                 $exportService->putLine($output, $box);
             }
         }, "export-box-$today.csv", ExportService::BOX_HEADER);
