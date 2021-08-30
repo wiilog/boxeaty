@@ -12,11 +12,21 @@
     </a>
 {% endmacro %}
 
+{% macro order_header(order) %}
+    <span class="title">
+        {{ order.client.name }}
+
+        {% if order.automatic %}
+            <i class="bxi bxi-automatic"></i>
+        {% endif %}
+    </span>
+    <label>Commande <strong>N°{{ order.number }}</strong></label>
+{% endmacro %}
+
 {% macro order_card(order, link_new_tab = false) %}
     {% if order.status.code != constant('App\\Entity\\Status::CODE_ORDER_FINISHED') and order.expectedDelivery < date() %}
         <div class="order late" {{ _self.order_data(order) }}>
-            <span class="title">{{ order.client.name }}</span>
-            <label>Commande <strong>N°{{ order.number }}</strong></label>
+            {{ _self.order_header(order) }}
 
             {% if order.deliveryRound %}
                 <label class="inline">Tournée <strong>N°{{ order.deliveryRound.number }}</strong></label>
@@ -33,9 +43,8 @@
         </div>
     {% elseif order.status.code == constant('App\\Entity\\Status::CODE_ORDER_TO_VALIDATE_BOXEATY') %}
         <div class="order to-validate" {{ _self.order_data(order) }}>
-            <span class="title">{{ order.client.name }}</span>
+            {{ _self.order_header(order) }}
             <label>Livraison souhaitée <strong>{{ order.expectedDelivery | date('d/m/Y') }}</strong></label>
-            <label>Commande <strong>N°{{ order.number }}</strong></label>
 
             <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
 
@@ -46,8 +55,7 @@
         </div>
     {% elseif order.status.code == constant('App\\Entity\\Status::CODE_ORDER_PLANNED') %}
         <div class="order planned" {{ _self.order_data(order) }}>
-            <span class="title">{{ order.client.name }}</span>
-            <label>Commande <strong>N°{{ order.number }}</strong></label>
+            {{ _self.order_header(order) }}
             <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
             <span>Validée par <strong>{{ order.validator ? order.validator.username }}</strong></span>
 
@@ -56,8 +64,7 @@
         </div>
     {% elseif order.preparation %}
         <div class="order preparing" {{ _self.order_data(order) }}>
-            <span class="title">{{ order.client.name }}</span>
-            <label>Commande <strong>N°{{ order.number }}</strong></label>
+            {{ _self.order_header(order) }}
 
             {% if order.deliveryRound %}
                 <label class="inline">Tournée <strong>N°238961</strong></label>
@@ -73,8 +80,7 @@
         </div>
     {% elseif order.delivery %}
         <div class="order delivering" {{ _self.order_data(order) }}>
-            <span class="title">{{ order.client.name }}</span>
-            <label>Commande <strong>N°{{ order.number }}</strong></label>
+            {{ _self.order_header(order) }}
             <label class="inline">Tournée <strong>N°654823</strong></label>
             <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
             <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
