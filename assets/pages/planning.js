@@ -1,12 +1,12 @@
 import {$document} from "../app";
 import $ from "jquery";
 import Modal, {clearForm, processForm} from "../modal";
-import sortable from '../../node_modules/html5sortable/dist/html5sortable.es.js';
 import "../styles/pages/planning.scss";
 import AJAX from "../ajax";
 import {findCoordinates, Map} from "../maps";
 import {DateTools} from "../util";
 import Flash from "../flash";
+import Sortable from "../sortable";
 
 $document.ready(() => {
     const $filters = $(`.filters`);
@@ -14,7 +14,7 @@ $document.ready(() => {
     DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 20);
 
     $filters.find(`.filter`).click(function() {
-        reLoadPlanning();
+        reloadPlanning();
     });
 
     initializePlanning();
@@ -30,7 +30,7 @@ $document.ready(() => {
                 afterOpen: modal => {
                     const map = Map.create(`delivery-round-map`);
 
-                    setupSortables(map);
+                    setupDeliveryRoundSortables(map);
 
                     modal.element.find(`[name="method"]`).on(`change`, function() {
                         const value = Number($(this).val());
@@ -58,6 +58,7 @@ $document.ready(() => {
                         updateAverage($(this));
                     });
                 },
+                success: () => reloadPlanning(),
             });
         } else {
             Flash.add(`warning`, `Les dates sont obligatoires pour affecter une tournée`);
@@ -98,15 +99,17 @@ $document.ready(() => {
                             assignedForStart
                         });
                     } else {
-                        return AJAX.route(`POST`, `planning_delivery_launch`, {
+                        const params = {
                             from: from,
                             to: to,
                             depository: depository,
                             assignedForStart
-                        })
+                        };
+
+                        return AJAX.route(`POST`, `planning_delivery_launch`, params)
                             .json()
                             .then(() => {
-                                reLoadPlanning();
+                                reloadPlanning();
                                 modal.close();
                             });
                     }
@@ -122,9 +125,7 @@ $document.ready(() => {
         });
 
         Modal.load(ajax, {
-            success: () => {
-                reLoadPlanning();
-            }
+            success: () => reloadPlanning()
         });
     });
 
@@ -134,7 +135,7 @@ $document.ready(() => {
 });
 
 function initializePlanning() {
-    const sortables = sortable(`.column-content`, {
+    const sortables = Sortable.create(`.column-content`, {
         acceptFrom: `.column-content`,
     });
 
@@ -150,13 +151,13 @@ function updateAverage($element) {
     }
 }
 
-function setupSortables(map) {
-    const available = sortable(`.available-deliveries`, {
+function setupDeliveryRoundSortables(map) {
+    const available = Sortable.create(`.available-deliveries`, {
         acceptFrom: `.deliveries`,
         orientation: `horizontal`,
     })[0];
 
-    const assigned = sortable(`.assigned-deliveries`, {
+    const assigned = Sortable.create(`.assigned-deliveries`, {
         acceptFrom: `.deliveries`,
         orientation: `horizontal`,
     })[0];
@@ -197,7 +198,7 @@ function processSortables(data, errors, modal) {
 }
 
 async function changePlannedDate(detail) {
-    sortable(`.column-content`, `disable`);
+    Sortable.create(`.column-content`, `disable`);
     const $item = $(detail.item);
     const $destination = $(detail.destination.container).parent();
 
@@ -207,10 +208,10 @@ async function changePlannedDate(detail) {
 
     $item.replaceWith(result.card);
 
-    sortable(`.column-content`, `enable`);
+    Sortable.create(`.column-content`, `enable`);
 }
 
-function reLoadPlanning() {
+function reloadPlanning() {
     const $filters = $('.filters');
     const params = processForm($filters).asObject();
 
@@ -300,11 +301,12 @@ function loadDeliveryLaunching(modal) {
             if(response.success) {
                 modal.element.find('.deliveries-container').removeClass('d-none');
                 modal.element.find('.deliveries-container').append(response.template);
-                const sortables = sortable(`.deliveries`, {
-                    acceptFrom: `.deliveries`,
+                const sortables = Sortable.create(`#modal-start-delivery .deliveries`, {
+                    acceptFrom: `#modal-start-delivery .deliveries`,
                 });
                 $(sortables).on('sortupdate', () => {
                     onOrdersDragAndDropDone(modal);
+                    console.error('fuck');
                 })
             }
         });
