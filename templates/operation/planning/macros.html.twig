@@ -71,9 +71,9 @@
                 <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
                 <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
 
-                <span class="status"><i class="bxi bxi-preparing"></i> {{ order.status.name }}</span>
+                <span class="status" title="Affecté à la tournée N°{{ order.deliveryRound.number }}"><i class="bxi bxi-preparing"></i> {{ order.status.name }}</span>
             {% else %}
-                <span class="status"><i class="bxi bxi-loading"></i> {{ order.status.name }}</span>
+                <span class="status" title="Aucune livraison affectée"><i class="bxi bxi-loading"></i> {{ order.status.name }}</span>
             {% endif %}
 
             {{ _self.order_link(order, link_new_tab) }}
