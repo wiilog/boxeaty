@@ -153,15 +153,15 @@ function updateAverage($element) {
 function setupSortables(map) {
     const available = sortable(`.available-deliveries`, {
         acceptFrom: `.deliveries`,
-        orientation:  `horizontal`,
+        orientation: `horizontal`,
     })[0];
 
     const assigned = sortable(`.assigned-deliveries`, {
         acceptFrom: `.deliveries`,
-        orientation:  `horizontal`,
+        orientation: `horizontal`,
     })[0];
 
-    assigned.addEventListener(`sortupdate`, async function() {
+    $(`.available-deliveries, .assigned-deliveries`).on(`sortupdate`, async function() {
         updateAverage($(`[name="cost"]`));
         updateAverage($(`[name="distance"]`));
 
@@ -179,9 +179,7 @@ function setupSortables(map) {
             }
         }
 
-        if(locations.length) {
-            map.setMarkers(locations)
-        }
+        map.setMarkers(locations);
     });
 }
 

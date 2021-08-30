@@ -18,6 +18,20 @@ export class Map {
         return map;
     }
 
+    setMarkers(locations, fit = true) {
+        for(const location of this.locations) {
+            this.removeMarker(location);
+        }
+
+        for(const location of locations) {
+            this.addMarker(location);
+        }
+
+        if(fit) {
+            this.fitBounds();
+        }
+    }
+
     addMarker(location) {
         const existing = this.locations.find(l => l.latitude === location.latitude && l.longitude === location.longitude);
         if(existing) {
@@ -27,26 +41,12 @@ export class Map {
         const marker = Leaflet.marker([location.latitude, location.longitude]);
         this.map.addLayer(marker);
 
-        if (location.title) {
+        if(location.title) {
             marker.bindPopup(location.title);
         }
 
         location.marker = marker;
         this.locations.push(location);
-    }
-
-    setMarkers(locations, fit = true) {
-        for (const location of this.locations) {
-            this.removeMarker(location);
-        }
-
-        for (const location of locations) {
-            this.addMarker(location);
-        }
-
-        if(fit) {
-            this.fitBounds();
-        }
     }
 
     removeMarker(location) {
@@ -55,14 +55,18 @@ export class Map {
     }
 
     fitBounds() {
-        const bounds = Leaflet.latLngBounds();
-        for (const location of this.locations) {
-            bounds.extend(Leaflet.latLng(location.latitude, location.longitude));
-        }
+        if(!this.locations.length) {
+            this.map.flyTo([46.467247, 2.960474], 5);
+        } else {
+            const bounds = Leaflet.latLngBounds();
+            for(const location of this.locations) {
+                bounds.extend(Leaflet.latLng(location.latitude, location.longitude));
+            }
 
-        this.map.flyToBounds(bounds, {
-            paddingTopLeft: [0, 30],
-        });
+            this.map.flyToBounds(bounds, {
+                paddingTopLeft: [0, 30],
+            });
+        }
     }
 
     reinitialize() {
