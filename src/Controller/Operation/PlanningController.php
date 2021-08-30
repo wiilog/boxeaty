@@ -82,11 +82,7 @@ class PlanningController extends AbstractController {
             $ordersByDate[FormatHelper::date($order->getExpectedDelivery(), "Ymd")][] = $order;
         }
 
-        $sort = [
-            Status::CODE_ORDER_TO_VALIDATE_BOXEATY => 1,
-            Status::CODE_ORDER_PLANNED => 2,
-            Status::CODE_ORDER_TRANSIT => 3,
-        ];
+        $sort = array_flip(Status::ORDER_STATUS_HIERARCHY);
 
         //generate cards configuration for twig
         $planning = [];
