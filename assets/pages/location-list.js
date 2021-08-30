@@ -10,9 +10,7 @@ $document.ready(() => {
     const newLocationModal = Modal.static(`#modal-new-location`, {
         ajax: AJAX.route(`POST`, `location_new`),
         table: `#table-locations`,
-        afterOpen: (modal) => {
-            toggleCapacityInput(modal.elem().find('[name="kiosk"]'));
-        }
+        afterOpen: modal => toggleKioskInputs(modal.elem().find('[name="kiosk"]')),
     });
 
     const emptyLocationModal = Modal.static(`#modal-empty-location`, {
@@ -62,16 +60,16 @@ $document.ready(() => {
 $document.ready(() => fireTypeChangeEvent($('#modal-new-location').find('input[name="kiosk"]')))
     .arrive(`#modal-edit-location .location-type`, function() {
         fireTypeChangeEvent($(this).find('input[name="kiosk"]'));
-        toggleCapacityInput($(this).find('input[name="kiosk"]'));
+        toggleKioskInputs($(this).find('input[name="kiosk"]'));
     });
 
 function fireTypeChangeEvent($type) {
     $type.on('change', function() {
-        toggleCapacityInput($(this));
+        toggleKioskInputs($(this));
     })
 }
 
-function toggleCapacityInput($typeRadio) {
+function toggleKioskInputs($typeRadio) {
     const $checkedRadio = $typeRadio.filter(`:checked`);
     const $modal = $typeRadio.closest(`.modal`);
     const $kioskFields = $modal.find(`.kiosk-fields`);

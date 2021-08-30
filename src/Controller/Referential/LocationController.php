@@ -14,6 +14,7 @@ use App\Helper\FormatHelper;
 use App\Repository\LocationRepository;
 use App\Service\BoxStateService;
 use App\Service\ExportService;
+use App\Service\LocationService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -35,9 +36,9 @@ class LocationController extends AbstractController
     public function list(Request $request, EntityManagerInterface $manager): Response
     {
         $params = json_decode($request->getContent(), true);
-        $filters = $params['filters'] ?? [];
+        $filters = $params["filters"] ?? [];
 
-        if (isset($filters['depository'])) {
+        if (isset($filters["depository"])) {
             $depositoryId = $manager->find(Depository::class, $filters['depository'])->getId();
             $boxRepository = $manager->getRepository(Box::class);
             $stockLocationType = array_search(Location::STOCK, Location::LOCATION_TYPES);
@@ -100,7 +101,6 @@ class LocationController extends AbstractController
         $dataOutState = [];
 
         if (!empty($filters) && count($filters) == 3) {
-
             $depositoryRepository = $manager->getRepository(Depository::class);
             $filters = $params['filters'];
             $depository = $depositoryRepository->find($filters['depository']);
@@ -184,66 +184,25 @@ class LocationController extends AbstractController
      * @Route("/nouveau", name="location_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function new(Request $request, EntityManagerInterface $manager): Response {
+    public function new(Request $request, EntityManagerInterface $manager, LocationService $service): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
-        $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
-        $capacity = $content->capacity ?? null;
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Un emplacement avec ce nom existe déjà");
         }
 
-        if ($content->kiosk && (!$capacity || $capacity < Location::MIN_KIOSK_CAPACITY)) {
+        if (!isset($content->client) && ($content->kiosk || $content->type ?? 0 == Location::CLIENT)) {
+            $form->addError("client", "Requis pour les emplacements de type borne ou client");
+        }
+        if ($content->kiosk && (!isset($content->capacity) || $content->capacity < Location::MIN_KIOSK_CAPACITY)) {
             $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
 
         if ($form->isValid()) {
-            $deporte = new Location();
-            $deporte
-                ->setKiosk($content->kiosk)
-                ->setName($content->name . "_deporte")
-                ->setActive($content->active)
-                ->setClient($client)
-                ->setDescription($content->description ?? null)
-                ->setDeposits(0)
-                ->setType($content->type ?? null)
-                ->setDepository($depository);
-
-            $location = new Location();
-            $location
-                ->setDeporte($deporte)
-                ->setKiosk($content->kiosk)
-                ->setName($content->name)
-                ->setActive($content->active)
-                ->setClient($client)
-                ->setDescription($content->description ?? null)
-                ->setDeposits(0)
-                ->setType($content->type ?? null)
-                ->setDepository($depository);
-
-            if ((int)$content->kiosk === 1) {
-                $location->setCapacity($capacity)
-                    ->setMessage($content->message ?? null)
-                    ->setType(null)
-                    ->setDepository(null);
-
-                $deporte->setCapacity($capacity)
-                    ->setMessage($content->message ?? null)
-                    ->setType(null)
-                    ->setDepository(null);
-            } else {
-                $location->setType($content->type)
-                    ->setDepository($depository)
-                    ->setCapacity(null)
-                    ->setMessage(null);
-            }
-
-            $manager->persist($location);
-            $manager->persist($deporte);
+            $service->updateLocation(new Location(), $content);
             $manager->flush();
 
             return $this->json([
@@ -273,44 +232,25 @@ class LocationController extends AbstractController
      * @Route("/modifier/{location}", name="location_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function edit(Request $request, EntityManagerInterface $manager, Location $location): Response {
+    public function edit(Request $request, EntityManagerInterface $manager, LocationService $service, Location $location): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
-        $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
-        $capacity = $content->capacity ?? null;
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $location) {
             $form->addError("label", "Un autre emplacement avec ce nom existe déjà");
         }
 
-        if ($content->kiosk && (!$capacity || $capacity < Location::MIN_KIOSK_CAPACITY)) {
+        if (!isset($content->client) && ($content->kiosk || $content->type ?? 0 == Location::CLIENT)) {
+            $form->addError("client", "Requis pour les emplacements de type borne ou client");
+        }
+
+        if ($content->kiosk && (!isset($content->capacity) || $content->capacity < Location::MIN_KIOSK_CAPACITY)) {
             $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
 
         if ($form->isValid()) {
-            $location->setKiosk($content->kiosk)
-                ->setName($content->name)
-                ->setClient($client)
-                ->setActive($content->active)
-                ->setDescription($content->description ?? null)
-                ->setType(isset($content->type) ? intval($content->type) : null)
-                ->setDepository($depository);
-
-            if ((int)$content->kiosk === 1) {
-                $location->setCapacity($capacity)
-                    ->setMessage($content->message ?? null)
-                    ->setType(null)
-                    ->setDepository(null);
-            } else {
-                $location
-                    ->setType(isset($content->type) ? intval($content->type) : null)
-                    ->setDepository($depository)
-                    ->setCapacity(null)
-                    ->setMessage(null);
-            }
-
+            $service->updateLocation(new Location(), $content);
             $manager->flush();
 
             return $this->json([
@@ -354,7 +294,7 @@ class LocationController extends AbstractController
             ]);
 
             if ($originalLocation) {
-                $originalLocation->setDeporte(null);
+                $originalLocation->setOffset(null);
             }
             $manager->remove($location);
             $manager->flush();

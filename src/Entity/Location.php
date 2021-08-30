@@ -22,12 +22,14 @@ class Location {
     const EXPEDITION = "Expedition";
     const STOCK = "Stock";
     const QUALITY = "Qualite";
+    const CLIENT = "Client";
 
     const LOCATION_TYPES = [
         1 => self::RECEPTION,
         2 => self::EXPEDITION,
         3 => self::STOCK,
-        4 => self::QUALITY
+        4 => self::QUALITY,
+        5 => self::CLIENT,
     ];
 
     /**
@@ -40,7 +42,7 @@ class Location {
     /**
      * @ORM\ManyToOne(targetEntity=Location::class)
      */
-    private ?Location $deporte = null;
+    private ?Location $offset = null;
 
     /**
      * @ORM\Column(type="boolean")
@@ -78,7 +80,7 @@ class Location {
     private ?string $message = null;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private ?int $deposits = null;
 
@@ -128,12 +130,12 @@ class Location {
         return $this->id;
     }
 
-    public function getDeporte(): ?Location {
-        return $this->deporte;
+    public function getOffset(): ?Location {
+        return $this->offset;
     }
 
-    public function setDeporte(?Location $deporte): self {
-        $this->deporte = $deporte;
+    public function setOffset(?Location $offset): self {
+        $this->offset = $offset;
         return $this;
     }
 

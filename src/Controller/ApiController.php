@@ -184,7 +184,7 @@ class ApiController extends AbstractController {
             $oldComment = $box->getComment();
 
             $box->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
-                ->setLocation($kiosk->getDeporte())
+                ->setLocation($kiosk->getOffset())
                 ->setComment($content->comment ?? null);
 
             [$tracking, $record] = $boxRecordService->generateBoxRecords(
@@ -611,7 +611,7 @@ class ApiController extends AbstractController {
             $line->setTaken(true);
 
             $previous = $crate->getLocation();
-            $location = $previous ? $previous->getDeporte() : null;
+            $location = $previous ? $previous->getOffset() : null;
 
             foreach (Stream::from([$crate], $crate->getContainedBoxes()) as $box) {
                 if ($location) {

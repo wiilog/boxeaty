@@ -155,7 +155,7 @@ class ClientController extends AbstractController {
                 ->setDescription("Emplacement de sortie du client {$client->getName()}")
                 ->setDeposits(0)
                 ->setKiosk(false)
-                ->setDeporte(null);
+                ->setOffset(null);
 
             $client->setOutLocation($out);
             $client->setClientOrderInformation($clientOrderInformation);
