@@ -33,6 +33,7 @@
             <span class="title">{{ order.client.name }}</span>
             <label>Commande <strong>N°{{ order.number }}</strong></label>
             <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
+            <span>Validée par <strong>{{ order.validator ? order.validator.username }}</strong></span>
 
             <span class="status"><i class="bxi bxi-calendar"></i> {{ order.status.name }}</span>
             {{ _self.order_link(order, link_new_tab) }}
@@ -49,7 +50,6 @@
 
                 <span class="status"><i class="bxi bxi-preparing"></i> {{ order.status.name }}</span>
             {% else %}
-                <span>Validée par <strong>{{ order.validator ? order.validator.username }}</strong></span>
                 <span class="status"><i class="bxi bxi-loading"></i> {{ order.status.name }}</span>
             {% endif %}
 

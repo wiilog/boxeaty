@@ -71,11 +71,6 @@ class User implements UserInterface {
     private Collection $boxRecords;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Client::class, inversedBy="users")
-     */
-    private Collection $clients;
-
-    /**
      * @ORM\OneToMany(targetEntity=Client::class, mappedBy="contact")
      */
     private Collection $contactOf;
@@ -84,6 +79,11 @@ class User implements UserInterface {
      * @ORM\ManyToMany(targetEntity=Group::class, inversedBy="users")
      */
     private Collection $groups;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Client::class, inversedBy="users")
+     */
+    private Collection $clients;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
