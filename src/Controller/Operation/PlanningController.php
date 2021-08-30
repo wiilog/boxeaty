@@ -174,20 +174,22 @@ class PlanningController extends AbstractController {
         if ($form->isValid()) {
             $statusRepository = $manager->getRepository(Status::class);
 
-            $preparedDeliveryStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_PREPARED]);
-            $preparingDeliveryStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_PREPARING]);
+            $orderAwaitingDeliverer = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_AWAITING_DELIVERER]);
+            $deliveryAwaitingDeliverer = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_AWAITING_DELIVERER]);
+            $deliveryPreparing = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_PREPARING]);
 
             foreach ($orders as $order) {
-                $preparation = $order->getPreparation();
-                $deliveryStatus = ($preparation && $preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARED))
-                    ? $preparedDeliveryStatus
-                    : $preparingDeliveryStatus;
-
                 $delivery = (new Delivery())
                     ->setOrder($order)
-                    ->setStatus($deliveryStatus)
                     ->setTokens($order->getClient()->getClientOrderInformation()->getTokenAmount() ?? 0)
                     ->setDistance(0.0);
+
+                if($order->hasStatusCode(Status::CODE_ORDER_PREPARED)) {
+                    $order->setStatus($orderAwaitingDeliverer);
+                    $delivery->setStatus($deliveryAwaitingDeliverer);
+                } else {
+                    $delivery->setStatus($deliveryPreparing);
+                }
 
                 $manager->persist($delivery);
             }
@@ -280,7 +282,7 @@ class PlanningController extends AbstractController {
         $ordersToStart = $request->query->get('assignedForStart');
 
         $statusPreparation = $statusRepository->findOneBy(["code" => Status::CODE_PREPARATION_TO_PREPARE]);
-        $statusOrder = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_TRANSIT]);
+        $statusOrder = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_PREPARING]);
         $depository = $depositoryRepository->findOneBy(["id" => $request->query->get('depository')]);
 
         /** @var User $user */

@@ -306,7 +306,6 @@ function loadDeliveryLaunching(modal) {
                 });
                 $(sortables).on('sortupdate', () => {
                     onOrdersDragAndDropDone(modal);
-                    console.error('fuck');
                 })
             }
         });

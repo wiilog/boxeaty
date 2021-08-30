@@ -108,8 +108,10 @@ class ClientOrderRepository extends EntityRepository {
     public function findDeliveriesBetween(DateTime $from, DateTime $to, array $params): array {
         return $this->createBetween($from, $to, $params)
             ->leftJoin("client_order.status", "status")
-            ->andWhere("status.code IN (:statuses)")
-            ->setParameter("statuses", [Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_PREPARED])
+            ->leftJoin("client_order.deliveryRound", "delivery_round")
+            ->andWhere("status.code NOT IN (:statuses)")
+            ->andWhere("delivery_round.id IS NULL")
+            ->setParameter("statuses", [Status::CODE_ORDER_TO_VALIDATE_CLIENT, Status::CODE_ORDER_TO_VALIDATE_BOXEATY])
             ->getQuery()
             ->getResult();
     }
@@ -216,9 +218,9 @@ class ClientOrderRepository extends EntityRepository {
                 'crate = :crateOrBox',
                 'box = :crateOrBox'
             ))
-            ->andWhere('status.code IN (:inProgressStatuses)')
+            ->andWhere('status.code != :finished')
             ->setParameter(':crateOrBox', $crateOrBox)
-            ->setParameter(':inProgressStatuses', [Status::CODE_ORDER_PLANNED, Status::CODE_ORDER_TO_VALIDATE_BOXEATY, Status::CODE_ORDER_TRANSIT]);
+            ->setParameter(':finished', Status::CODE_ORDER_FINISHED);
 
         $res = $queryBuilder
             ->getQuery()

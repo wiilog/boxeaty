@@ -237,7 +237,6 @@ function initOrderDatatable() {
         ],
         listeners: {
             delete: (data, $button) => {
-                console.log(data.id, $button.data(`id`))
                 const ajax = AJAX.route(`POST`, `client_order_delete_template`, {
                     clientOrder: $button.data(`id`),
                 });

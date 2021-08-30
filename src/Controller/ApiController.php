@@ -932,7 +932,7 @@ class ApiController extends AbstractController {
             $userRepository = $entityManager->getRepository(User::class);
 
             $preparedStatus = $statusRepository->findOneBy(["code" => Status::CODE_PREPARATION_PREPARED]);
-            $preparedDeliveryStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_PREPARED]);
+            $preparedDeliveryStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_AWAITING_DELIVERER]);
             $preparedOrderStatus = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_PREPARED]);
             $awaitingDelivererStatus = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_AWAITING_DELIVERER]);
 
