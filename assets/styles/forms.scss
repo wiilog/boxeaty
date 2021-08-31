@@ -341,10 +341,9 @@ button, a {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-top: 5px;
-    padding-bottom: 5px;
     background-color: $orange-lightest;
     border-radius: 10px;
+    padding: 4px;
 
     &:not(.header-section-rounded) {
         margin-right: -3rem;
@@ -355,18 +354,19 @@ button, a {
     .header-section-label {
         color: $orange;
         font-family: Retroyal, sans-serif;
+        text-transform: uppercase;
         font-weight: bolder;
-        font-size: 25px;
+        font-size: 1.4rem;
+        padding-top: 6px;
         margin: 0;
         display: inline-block;
     }
 
-    &:before,
-    &:after {
+    &:before, &:after {
         display: inline-block;
         content: '';
-        width: 20px;
-        height: 20px;
+        width: 16px;
+        height: 16px;
     }
 
     &:before {

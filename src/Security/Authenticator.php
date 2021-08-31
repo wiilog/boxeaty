@@ -75,12 +75,20 @@ class Authenticator extends AbstractFormLoginAuthenticator {
     }
 
     public function checkCredentials($credentials, UserInterface $user): bool {
-        return $user instanceof User && $user->isActive() &&
-            $this->encoder->isPasswordValid($user, $credentials["password"]);
+        if($user instanceof User) {
+            $valid = $this->encoder->isPasswordValid($user, $credentials["password"]);
+            if ($valid && !$user->isActive()) {
+                throw new CustomUserMessageAuthenticationException("Votre compte est inactif");
+            }
+
+            return $valid;
+        }
+
+        return false;
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey): RedirectResponse {
-        if($token->getUser() instanceof User) {
+        if ($token->getUser() instanceof User) {
             $token->getUser()->setLastLogin(new DateTime());
             $this->entityManager->flush();
 

@@ -15,6 +15,7 @@ class StatusFixtures extends Fixture implements FixtureGroupInterface {
             Status::CODE_ORDER_TO_VALIDATE_CLIENT => "À valider Client",
             Status::CODE_ORDER_TO_VALIDATE_BOXEATY => "À valider BoxEaty",
             Status::CODE_ORDER_PLANNED => "Planifiée",
+            Status::CODE_ORDER_PREPARING => "En préparation",
             Status::CODE_ORDER_PREPARED => "Préparée",
             Status::CODE_ORDER_AWAITING_DELIVERER => "Attente livreur",
             Status::CODE_ORDER_TRANSIT => "En transit",
@@ -34,7 +35,7 @@ class StatusFixtures extends Fixture implements FixtureGroupInterface {
         Status::CATEGORY_DELIVERY => [
             Status::CODE_DELIVERY_PLANNED => "Planifiée",
             Status::CODE_DELIVERY_PREPARING => "En préparation",
-            Status::CODE_DELIVERY_PREPARED => "Préparée",
+            Status::CODE_DELIVERY_AWAITING_DELIVERER => "Préparée",
             Status::CODE_DELIVERY_TRANSIT => "En transit",
             Status::CODE_DELIVERY_DELIVERED => "Livrée",
         ],

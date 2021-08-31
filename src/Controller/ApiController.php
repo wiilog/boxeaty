@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Annotation\Authenticated;
 use App\Entity\Attachment;
 use App\Entity\Box;
-use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
@@ -15,35 +14,35 @@ use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
+use App\Entity\Preparation;
 use App\Entity\PreparationLine;
 use App\Entity\Quality;
-use App\Entity\Preparation;
 use App\Entity\Role;
 use App\Entity\Status;
 use App\Entity\User;
 use App\Helper\FormatHelper;
 use App\Service\AttachmentService;
+use App\Service\BoxRecordService;
 use App\Service\BoxStateService;
 use App\Service\ClientOrderService;
 use App\Service\DeliveryRoundService;
+use App\Service\Mailer;
 use App\Service\PreparationService;
 use App\Service\UniqueNumberService;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use WiiCommon\Helper\Stream;
-use WiiCommon\Helper\StringHelper;
-use App\Service\BoxRecordService;
-use App\Service\Mailer;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Bundle\SnappyBundle\Snappy\Response\SnappyResponse;
 use Knp\Snappy\Image;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use WiiCommon\Helper\Stream;
+use WiiCommon\Helper\StringHelper;
 
 /**
  * @Route("/api")
@@ -256,17 +255,14 @@ class ApiController extends AbstractController {
             "state" => BoxStateService::STATE_BOX_CONSUMER,
         ]);
 
-        if ($box
-            && $box->getType()
-            && $box->getOwner()) {
+        if ($box && $box->getType() && $box->getOwner()) {
             $oldLocation = $box->getLocation();
             $oldState = $box->getState();
             $oldComment = $box->getComment();
 
             $kiosk->setDeposits($kiosk->getDeposits() + 1);;
 
-            $box
-                ->setCanGenerateDepositTicket(true)
+            $box->setCanGenerateDepositTicket(true)
                 ->setUses($box->getUses() + 1)
                 ->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
                 ->setLocation($kiosk)
@@ -932,7 +928,7 @@ class ApiController extends AbstractController {
             $userRepository = $entityManager->getRepository(User::class);
 
             $preparedStatus = $statusRepository->findOneBy(["code" => Status::CODE_PREPARATION_PREPARED]);
-            $preparedDeliveryStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_PREPARED]);
+            $preparedDeliveryStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_AWAITING_DELIVERER]);
             $preparedOrderStatus = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_PREPARED]);
             $awaitingDelivererStatus = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_AWAITING_DELIVERER]);
 
@@ -960,7 +956,7 @@ class ApiController extends AbstractController {
                         ];
 
                         $box
-                            ->setLocation($box->getLocation()->getDeporte())
+                            ->setLocation($box->getLocation()->getOffset())
                             ->setState(BoxStateService::STATE_BOX_UNAVAILABLE);
 
                         [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $olderValues, $user, $date);
@@ -1029,49 +1025,31 @@ class ApiController extends AbstractController {
      */
     public function availableCrates(EntityManagerInterface $manager, Request $request): Response {
         $clientRepository = $manager->getRepository(Client::class);
-        $boxTypeRepository = $manager->getRepository(BoxType::class);
+        $boxRepository = $manager->getRepository(Box::class);
         $preparationRepository = $manager->getRepository(Preparation::class);
 
-        $preparationId = $request->query->get('preparation');
-        $clientFilter = null;
-        if ($preparationId) {
-            $preparation = $preparationRepository->find($preparationId);
+        $preparation = $preparationRepository->find($request->query->get('preparation'));
 
-            $clientFilter = $preparation
-                ->getOrder()
-                ->getClientClosedPark();
+        $clientFilter = $preparation
+            ->getOrder()
+            ->getClientClosedPark();
 
-            if(!$clientFilter) {
-                $clientFilter = $clientRepository->findOneBy(["name" => Client::BOXEATY]);
-            }
+        if (!$clientFilter) {
+            $clientFilter = $clientRepository->findOneBy(["name" => Client::BOXEATY]);
         }
 
-        $crateType = $boxTypeRepository->findOneBy(["name" => $request->query->get("type"),]);
-        $crates = $crateType->getCrates();
-
-        $availableCrates = [];
-        /** @var Box $crate */
-        foreach ($crates as $crate) {
-            if ($crate->getLocation() && (!$clientFilter || $clientFilter === $crate->getOwner())) {
-                $location = $crate->getLocation()->getName();
-                $number = $crate->getNumber();
-                $availableCrates[] = [
-                    'number' => $number,
-                    'id' => $crate->getId(),
-                    'type' => $crate->getType()->getName(),
-                    'location' => $location
-                ];
-            }
-        }
-
-        return $this->json($availableCrates);
+        return $this->json($boxRepository->getPreparableCrates(
+            $preparation,
+            $clientFilter,
+            $request->query->get("type")
+        ));
     }
 
     /**
-     * @Route("/mobile/boxes", name="api_mobile_get_boxes")
+     * @Route("/mobile/available-boxes", name="api_mobile_get_boxes")
      * @Authenticated
      */
-    public function getBoxes(EntityManagerInterface $manager, Request $request): Response {
+    public function availableBoxes(EntityManagerInterface $manager, Request $request): Response {
         $query = $request->query;
         $clientRepository = $manager->getRepository(Client::class);
         $preparationRepository = $manager->getRepository(Preparation::class);
@@ -1087,36 +1065,16 @@ class ApiController extends AbstractController {
                 ->toArray()
             : [];
 
-        $clientFilter = null;
-        if ($preparation) {
-            $clientFilter = $preparation
-                ->getOrder()
-                ->getClientClosedPark();
+        $clientFilter = $preparation
+            ->getOrder()
+            ->getClientClosedPark();
 
-            if(!$clientFilter) {
-                $clientFilter = $clientRepository->findOneBy(["name" => Client::BOXEATY]);
-            }
-        }
-
-        $boxes = $boxRepository->getAvailableAndCleanedBoxByType($boxTypes);
-
-        $availableBoxes = [];
-        foreach ($boxes as $box) {
-            if ($box->getLocation() && $box->getType() && (!$clientFilter || $clientFilter === $box->getOwner())) {
-                $type = $box->getType()->getName();
-                $location = $box->getLocation()->getName();
-                $number = $box->getNumber();
-
-                $availableBoxes[] = [
-                    "type" => $type,
-                    "location" => $location,
-                    "number" => $number
-                ];
-            }
+        if(!$clientFilter) {
+            $clientFilter = $clientRepository->findOneBy(["name" => Client::BOXEATY]);
         }
 
         return $this->json([
-            'availableBoxes' => $availableBoxes,
+            "availableBoxes" => $boxRepository->getPreparableBoxes($preparation, $clientFilter, $boxTypes),
         ]);
     }
 

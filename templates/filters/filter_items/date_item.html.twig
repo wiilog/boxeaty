@@ -1,28 +1,28 @@
 {% set unique_date = unique_date is defined and unique_date %}
 {% set name = name is defined and name ? name : 'from' %}
-{% set now = now is defined and now ? now %}
+{% set min = min is defined and min ? min %}
 {% set required = required is defined and required ? "required" %}
 
 <div class="{{ not unique_date ? 'dates-filter' }}">
     <label class="dates">
         {{ not unique_date ? 'Du' }}
         <input {{ required }} type="date" name="{{ name }}" class="data from"
-                {% if now is defined and now %}
-                    min="{{ now }}"
-                {% endif %}
-                {% if from is defined and from %}
+            {% if min %}
+                min="{{ min }}"
+            {% endif %}
+            {% if from is defined and from %}
             value="{{ from | date('Y-m-d') }}"
-                {% endif %}>
+            {% endif %}>
     </label>
     {% if not unique_date %}
-    <label class="dates">
-        au
-        <input {{ required }} type="date" name="to" class="data"
-            {% if now is defined and now %}
-                              min="{{ now }}"
-            {% endif %}
-            {% if to is defined and to %}
-                              value="{{ to | date('Y-m-d') }}"
+        <label class="dates">
+            au
+            <input {{ required }} type="date" name="to" class="data"
+                {% if min %}
+                    min="{{ min }}"
+                {% endif %}
+                {% if to is defined and to %}
+                value="{{ to | date('Y-m-d') }}"
                 {% endif %}>
         </label>
     {% endif %}

@@ -32,7 +32,7 @@
             <p>Propriétaire : <strong>{{ box.owner ? box.owner.name }}</strong></p>
             {% if clientOrderInProgress %}
                 <p>Opération en cours :
-                    <a href="{{ url('client_orders_list', {order: clientOrderInProgress.id}) }}">Commande Client {{ clientOrderInProgress.number }} - {{ clientOrderInProgress.status.name }}</a>
+                    <a href="{{ url('client_orders_list', {'action': 'show', 'action-data': order: clientOrderInProgress.id}) }}">Commande Client {{ clientOrderInProgress.number }} - {{ clientOrderInProgress.status.name }}</a>
                 </p>
             {% endif %}
         </div>
