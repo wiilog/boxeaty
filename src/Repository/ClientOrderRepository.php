@@ -26,9 +26,9 @@ class ClientOrderRepository extends EntityRepository {
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
-    public function findByType($type, $dateMin, $dateMax){
+    public function findByType(string $type, DateTime $dateMin, DateTime $dateMax){
         return $this->createQueryBuilder("client_order")
-            ->select('client_order.id as clientOrderId')
+            ->select('client_order.number as number')
             ->addSelect('client_order.automatic as automatic')
             ->addSelect('client_order.number as clientOrderNumber')
             ->addSelect('client_order.deliveryPrice as deliveryPrice')

@@ -82,39 +82,40 @@ class ExportService {
         "Actif",
     ];
 
-    public const CLIENT_ORDER_HEADER_AUTONOMOUS_MANAGEMENT = [
-        "Commande client",
+    public const CLIENT_ORDER_HEADER_ONE_TIME = [
+        "Numéro de commande",
         "Type de Box",
-        "Box livrées",
-        "Jeton livrés",
-        "Box cassées",
+        "Nombre de Box livrées",
+        "Nombre de jetons livrés",
+        "Nombre de Box cassées",
         "Coût unitaire",
         "Moyen de paiement",
-        "Prix total des boxes",
-        "Nombre de passage en caisse",
-        "Nombre de consigne utilisées",
-        "Commande automatique"
+        "Montant facturé par livraison",
+        "Nombre de consignes utilisées",
+        "Commande automatique",
     ];
 
-    public const CLIENT_ORDER_HEADER_ONE_TIME = [
-        "Numéros de commande",
-        "Cout abonnement mensuel",
+    public const CLIENT_ORDER_HEADER_AUTONOMOUS_MANAGEMENT = [
+        "Numéro de commande",
+        "Nombre de Box mis à disposition",
+        "Coût abonnement mensuel",
         "Frais de livraison",
         "Moyen de paiement",
         "Prorata client",
         "Nombre de jetons livrés",
-        "Nombre de caisse",
+        "Nombre de caisses",
         "Montant de la caisse",
-        "Commande automatic"
+        "Commande automatique",
     ];
 
     public const CLIENT_ORDER_TRADE = [
-        "Numéros de commande",
+        "Numéro de commande",
         "Type de Box",
+        "Nombre de Box",
         "Tarif unitaire",
-        "Nombre de box",
+        "Montant kit de démarrage",
         "Frais de livraison",
-        "Commande automatic"
+        "Commande automatique",
     ];
 
     public const DEPOSIT_TICKET_HEADER = [
@@ -214,8 +215,6 @@ class ExportService {
                 return $cell->format("d/m/Y H:i:s");
             } else if (is_bool($cell)) {
                 return $cell ? 'oui' : 'non';
-            } else if(is_string($cell)) {
-                return str_replace("Powered by Froala Editor", "", strip_tags($cell));
             } else {
                 return $cell;
             }

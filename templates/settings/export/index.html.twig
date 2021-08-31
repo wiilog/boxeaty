@@ -7,7 +7,7 @@
 {% block content %}
     <div class="box exports">
         <h1>
-            Liste des exports disponibles
+            Liste des exports disponibles au format CSV
         </h1>
         <div class="row">
             <div class="col-12 col-xl-2">
@@ -15,10 +15,9 @@
             </div>
             <div class="col">
                 <div class="d-flex">
-                    <a href="{{ path('global_export') }}" class="primary">
-                        <i class="icon fas fa-download"></i>
-                        Export général au format CSV
-                    </a>
+                    <button class="primary global-export"><i class="icon fas fa-download"></i>
+                        Export général
+                    </button>
                     <span data-toggle="tooltip"
                           class="d-flex align-items-center ms-3"
                           title="Comprend Box, Mouvements, Tickets-consigne, Emplacements, Groupes, Types de Box, Utilisateurs, Rôles et Qualités.">
@@ -34,7 +33,14 @@
             <div class="col">
                 <div class="row">
                     <div class="col-12">
-                        {% include('filters/filter_items/date_item.html.twig') %}
+                        <div class="dates-filter d-flex align-items-start">
+                            <label class="dates d-flex align-items-center mt-0 pe-3">Du
+                                <input type="date" name="from" class="data from">
+                            </label>
+                                <label class="dates d-flex align-items-center mt-0">au
+                                    <input type="date" name="to" class="data">
+                                </label>
+                        </div>
                         <span class="error" style="color:red"></span>
                     </div>
                     <div class="col-12 mt-3">

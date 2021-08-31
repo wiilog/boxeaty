@@ -13,9 +13,11 @@ use App\Entity\DepositTicket;
 use App\Entity\Group;
 use App\Entity\Location;
 use App\Entity\OrderType;
+use App\Entity\PreparationLine;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\User;
+use App\Helper\FormatHelper;
 use App\Service\BoxStateService;
 use App\Service\ExportService;
 use DateTime;
@@ -44,17 +46,20 @@ class ExportController extends AbstractController
     }
 
     /**
-     * @Route("/client-order-autonomous-management", name="client_order_export_autonomous_management", options={"expose": true})
+     * @Route("/client-order-one-time", name="client_order_export_one_time", options={"expose": true})
      */
-    public function exportAutonomous(EntityManagerInterface $manager, ExportService $exportService, Request $request): Response
+    public function exportOneTimeService(EntityManagerInterface $manager, ExportService $exportService, Request $request): Response
     {
         $query = $request->query;
         $depositTicketRepository = $manager->getRepository(DepositTicket::class);
         $boxRepository = $manager->getRepository(Box::class);
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
 
-        $clientOrderAutonomousManagementArray = [];
-        $clientOrderLines = $clientOrderRepository->findByType(OrderType::AUTONOMOUS_MANAGEMENT, $query->get('from'), $query->get('to'));
+        $from = new DateTime($query->get('from'));
+        $to = new DateTime($query->get('to'));
+
+        $clientOrderOneTimeServiceArray = [];
+        $clientOrderLines = $clientOrderRepository->findByType(OrderType::ONE_TIME_SERVICE, $from, $to);
 
         $brokenBoxGroupedByType = $boxRepository->countBrokenGroupedByType();
         $depositoryValidGroupedByType = $depositTicketRepository->countByStatusGroupedByType(DepositTicket::VALID);
@@ -62,51 +67,54 @@ class ExportController extends AbstractController
 
         foreach ($clientOrderLines as $clientOrderLine) {
             $boxType = $clientOrderLine['boxTypeId'];
-            $clientOrder = $clientOrderRepository->findOneBy(['id' => $clientOrderLine['clientOrderId']]);
-            $amount = $clientOrder->getTotalAmount();
 
             $array = [
-                "clientOrder" => $clientOrderLine['clientOrderNumber'],
+                "clientOrder" => $clientOrderLine['number'],
                 "boxTypeName" => $clientOrderLine['boxTypeName'],
                 "boxDelivered" => $clientOrderLine['lineQuantity'],
                 "tokenDelivered" => $clientOrderLine['deliveryTokens'],
                 "brokenBoxes" => $brokenBoxGroupedByType[$boxType] ?? 0,
                 "unitPrice" => $clientOrderLine['customUnitPrice'] ?? $clientOrderLine['boxTypePrice'],
                 "paymentMode" => $clientOrderLine['paymentModes'],
-                "amount" => $amount,
-                "depositTicketValid" => $depositoryValidGroupedByType[$boxType] ?? 0,
-                "depositTicketSpent" => $depositorySpentGroupedByType[$boxType] ?? 0,
+                "deliveryPrice" => intval($clientOrderLine['lineQuantity']) * floatval($clientOrderLine['boxTypePrice']),
+                "depositTicketUsed" => ($depositoryValidGroupedByType[$boxType] ?? 0) - ($depositorySpentGroupedByType[$boxType] ?? 0),
                 "automatic" => $clientOrderLine['automatic']
             ];
-            $clientOrderAutonomousManagementArray[] = $array;
+            $clientOrderOneTimeServiceArray[] = $array;
         }
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function ($output) use ($exportService, $clientOrderAutonomousManagementArray) {
-            foreach ($clientOrderAutonomousManagementArray as $array) {
+        return $exportService->export(function ($output) use ($exportService, $clientOrderOneTimeServiceArray) {
+            foreach ($clientOrderOneTimeServiceArray as $array) {
                 $exportService->putLine($output, $array);
             }
-        }, "export-client-order-autonomous-management-$today.csv", ExportService::CLIENT_ORDER_HEADER_AUTONOMOUS_MANAGEMENT);
+        }, "export-commandes-prestation-ponctuelle-$today.csv", ExportService::CLIENT_ORDER_HEADER_ONE_TIME);
     }
 
-
     /**
-     * @Route("/client-order-one-time", name="client_order_export_one_time_service", options={"expose": true})
+     * @Route("/client-order-autonomous-management", name="client_order_export_autonomous_management", options={"expose": true})
      */
-    public function exportOneTimeService(EntityManagerInterface $manager, ExportService $exportService, Request $request): Response
+    public function exportAutonomous(EntityManagerInterface $manager, ExportService $exportService, Request $request): Response
     {
         $query = $request->query;
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
         $clientRepository = $manager->getRepository(Client::class);
+        $preparationLineRepository = $manager->getRepository(PreparationLine::class);
 
-        $clientOrderLines = $clientOrderRepository->findByType(OrderType::ONE_TIME_SERVICE, $query->get('from'), $query->get('to'));
+        $from = new DateTime($query->get('from'));
+        $to = new DateTime($query->get('to'));
+
+        $clientOrderLines = $clientOrderRepository->findByType(OrderType::AUTONOMOUS_MANAGEMENT, $from, $to);
         $cratePatternAmounts = $clientRepository->getCratePatternAmountGroupedByClient();
 
-        $clientOrderOneTimeServiceArray = Stream::from($clientOrderLines)
+        $preparationLines = $preparationLineRepository->countDeliveredByType($from, $to);
+
+        $clientOrderAutonomousManagementArray = Stream::from($clientOrderLines)
             ->map(fn(array $clientOrderLine) => [
-                "clientOrder" => $clientOrderLine['clientOrderId'],
+                "clientOrder" => $clientOrderLine['number'],
+                "deliveredBoxes" => $preparationLines[$clientOrderLine['boxTypeId']] ?? 0,
                 "monthlyPrice" => $clientOrderLine['monthlyPrice'],
                 "deliveryCost" => $clientOrderLine['deliveryCost'],
                 "paymentMode" => $clientOrderLine['paymentModes'],
@@ -121,30 +129,36 @@ class ExportController extends AbstractController
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function ($output) use ($exportService, $clientOrderOneTimeServiceArray) {
-            foreach ($clientOrderOneTimeServiceArray as $array) {
+        return $exportService->export(function ($output) use ($exportService, $clientOrderAutonomousManagementArray) {
+            foreach ($clientOrderAutonomousManagementArray as $array) {
                 $exportService->putLine($output, $array);
             }
-        }, "export-client-order-one-time-$today.csv", ExportService::CLIENT_ORDER_HEADER_ONE_TIME);
+        }, "export-gestion-autonome-$today.csv", ExportService::CLIENT_ORDER_HEADER_AUTONOMOUS_MANAGEMENT);
     }
 
     /**
-     * @Route("/client-order-purchase-trade", name="client_order_export_purchase_trade_service", options={"expose": true})
+     * @Route("/client-commandes-order-purchase-trade", name="client_order_export_purchase_trade", options={"expose": true})
      */
     public function exportPurchaseTradeService(EntityManagerInterface $manager, ExportService $exportService, Request $request): Response
     {
         $query = $request->query;
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
 
-        $clientOrderLines = $clientOrderRepository->findByType(OrderType::PURCHASE_TRADE, $query->get('from'), $query->get('to'));
+        $from = new DateTime($query->get('from'));
+        $to = new DateTime($query->get('to'));
+
+        $clientOrderLines = $clientOrderRepository->findByType(OrderType::PURCHASE_TRADE, $from, $to);
+        $starterKit = $manager->getRepository(BoxType::class)->findOneBy(['name' => BoxType::STARTER_KIT]);
+
         $clientOrderLinesData = Stream::from($clientOrderLines)
             ->map(fn(array $clientOrderLine) => [
-                "clientOrder" => $clientOrderLine['clientOrderId'],
+                "clientOrder" => $clientOrderLine['number'],
                 "boxTypeName" => $clientOrderLine['boxTypeName'],
-                "unitPrice" => $clientOrderLine['customUnitPrice'] ?? $clientOrderLine['boxTypePrice'],
                 "boxAmount" => $clientOrderLine['lineQuantity'],
+                "unitPrice" => $clientOrderLine['customUnitPrice'] ?? $clientOrderLine['boxTypePrice'],
+                "starterKitAmount" => FormatHelper::price($starterKit->getPrice()),
                 "deliveryPrice" => $clientOrderLine['deliveryPrice'],
-                "automatic" => $clientOrderLine['automatic']
+                "automatic" => $clientOrderLine['automatic'],
             ])
             ->toArray();
 
@@ -155,11 +169,11 @@ class ExportController extends AbstractController
             foreach ($clientOrderLinesData as $array) {
                 $exportService->putLine($output, $array);
             }
-        }, "export-client-order-trade-$today.csv", ExportService::CLIENT_ORDER_TRADE);
+        }, "export-commandes-achat-negoce-$today.csv", ExportService::CLIENT_ORDER_TRADE);
     }
 
     /**
-     * @Route("/global", name="global_export")
+     * @Route("/global", name="global_export", options={"expose": true})
      * @HasPermission(Role::MANAGE_EXPORTS)
      */
     public function export(ExportService $exportService): Response {
@@ -167,15 +181,15 @@ class ExportController extends AbstractController
         $spreadsheet->disconnectWorksheets();
 
         $exportService->createWorksheet($spreadsheet, "Box", Box::class, ExportService::BOX_HEADER, function(array $row) {
-            $row["state"] = isset($row["state"]) ? BoxStateService::BOX_STATES[$row["state"]] : '';
+            $row["state"] = isset($row["state"]) ? (BoxStateService::BOX_STATES[$row["state"]] ?? '') : '';
             return $row;
         });
         $exportService->createWorksheet($spreadsheet, "Mouvements", BoxRecord::class, ExportService::MOVEMENT_HEADER, function(array $row) {
-            $row["state"] = isset($row["state"]) ? BoxStateService::RECORD_STATES[$row["state"]] : '';
+            $row["state"] = isset($row["state"]) ? (BoxStateService::RECORD_STATES[$row["state"]] ?? '') : '';
             return $row;
         });
         $exportService->createWorksheet($spreadsheet, "Tickets-consigne", DepositTicket::class, ExportService::DEPOSIT_TICKET_HEADER, function(array $row) {
-            $row["state"] = isset($row["state"]) ? DepositTicket::NAMES[$row["state"]] : '';
+            $row["state"] = isset($row["state"]) ? (DepositTicket::NAMES[$row["state"]] ?? '') : '';
             return $row;
         });
 
