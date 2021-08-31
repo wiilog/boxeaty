@@ -509,6 +509,10 @@ class ApiController extends AbstractController {
                 "number" => $round->getNumber(),
                 "status" => $round->getStatus()->getCode(),
                 "depository" => FormatHelper::named($round->getDepository()),
+                "joined_clients" => Stream::from($round->getOrders())
+                    ->map(fn(ClientOrder $order) => $order->getClient()->getName())
+                    ->unique()
+                    ->join(", "),
                 "expected_date" => Stream::from($round->getOrders())
                     ->map(fn(ClientOrder $order) => $order->getExpectedDelivery())
                     ->sort()
@@ -524,15 +528,18 @@ class ApiController extends AbstractController {
                     "delivered" => $order->hasStatusCode(Status::CODE_ORDER_FINISHED),
                     "crate_amount" => $order->getPreparation() ? $order->getPreparation()->getLines()->count() : -1,
                     "token_amount" => $order->getTokensAmount(),
+                    "collect_required" => $order->isCollectRequired(),
                     "preparation" => $order->getPreparation() ? [
                         "id" => $order->getPreparation()->getId(),
                         "depository" => FormatHelper::named($order->getPreparation()->getDepository()),
-                        "lines" => $order->getPreparation()->getLines()->map(fn(PreparationLine $line) => [
-                            "crate" => $line->getCrate()->getNumber(),
-                            "type" => FormatHelper::named($line->getCrate()->getType()),
-                            "taken" => $line->isTaken(),
-                            "deposited" => $line->isDeposited(),
-                        ]),
+                        "lines" => $order->getPreparation()->getLines()
+                            ->map(fn(PreparationLine $line) => [
+                                "crate" => $line->getCrate()->getNumber(),
+                                "type" => FormatHelper::named($line->getCrate()->getType()),
+                                "taken" => $line->isTaken(),
+                                "deposited" => $line->isDeposited(),
+                            ])
+                            ->toArray(),
                     ] : null,
                     "client" => [
                         "id" => $order->getClient()->getId(),
@@ -577,8 +584,10 @@ class ApiController extends AbstractController {
             $deliveryTransitStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_TRANSIT]);
 
             foreach ($order->getDeliveryRound()->getOrders() as $o) {
-                $clientOrderService->updateClientOrderStatus($o, $orderTransitStatus, $this->getUser());
-                $o->getDelivery()->setStatus($deliveryTransitStatus);
+                if($o->hasStatusCode(Status::CODE_ORDER_AWAITING_DELIVERER)) {
+                    $clientOrderService->updateClientOrderStatus($o, $orderTransitStatus, $this->getUser());
+                    $o->getDelivery()->setStatus($deliveryTransitStatus);
+                }
             }
 
             $manager->flush();
@@ -703,8 +712,7 @@ class ApiController extends AbstractController {
             $signature = $attachmentService->createAttachment(Attachment::TYPE_DELIVERY_SIGNATURE, ["signature", $data->signature]);
             $photo = $attachmentService->createAttachment(Attachment::TYPE_DELIVERY_PHOTO, ["photo", $data->photo]);
 
-            $history = $clientOrderService->updateClientOrderStatus($order, $orderStatus, $this->getUser());
-            $manager->persist($history);
+            $clientOrderService->updateClientOrderStatus($order, $orderStatus, $this->getUser());
 
             $order->setComment($data->comment);
 
@@ -731,7 +739,8 @@ class ApiController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "message" => "Livraison terminée"
+                "message" => "Livraison terminée",
+                "round_finished" => $unfinishedDeliveries === 0,
             ]);
         }
 
@@ -897,16 +906,17 @@ class ApiController extends AbstractController {
 
         if ($preparing) {
             if ($preparation->hasStatusCode(Status::CODE_PREPARATION_TO_PREPARE)) {
-                $status = $statusRepository->findOneBy(['code' => Status::CODE_PREPARATION_PREPARING]);
+                $preparationStatus = $statusRepository->findOneBy(['code' => Status::CODE_PREPARATION_PREPARING]);
+                $orderStatus = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_PREPARING]);
 
-                $preparation
-                    ->setStatus($status)
+                $clientOrderService->updateClientOrderStatus($preparation->getOrder(), $orderStatus, $this->getUser());
+                $preparation->setStatus($preparationStatus)
                     ->setOperator($this->getUser());
 
                 $entityManager->flush();
+
                 return $this->json([
-                    'success' => true,
-                    'message' => 'La préparation a été réservée'
+                    "success" => true,
                 ]);
             } else if (!$preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
                 || $this->getUser() !== $preparation->getOperator()) {
