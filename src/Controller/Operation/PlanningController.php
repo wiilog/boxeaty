@@ -4,7 +4,6 @@
 namespace App\Controller\Operation;
 
 use App\Annotation\HasPermission;
-use App\Entity\Box;
 use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
@@ -69,7 +68,7 @@ class PlanningController extends AbstractController {
             $to = (clone $from)->modify("+20 days");
         }
 
-        if($from->diff($to, true)->days > 21) {
+        if ($from->diff($to, true)->days > 21) {
             return $this->json([
                 "success" => false,
                 "message" => "La planification ne peut afficher que 20 jours maximum"
@@ -155,9 +154,9 @@ class PlanningController extends AbstractController {
      * @Route("/tournee", name="planning_delivery_round", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function deliveryRound(Request $request,
-                                  DeliveryRoundService $deliveryRoundService,
-                                  UniqueNumberService $uniqueNumberService,
+    public function deliveryRound(Request                $request,
+                                  DeliveryRoundService   $deliveryRoundService,
+                                  UniqueNumberService    $uniqueNumberService,
                                   EntityManagerInterface $manager): Response {
         $form = Form::create();
 
@@ -165,7 +164,7 @@ class PlanningController extends AbstractController {
         $deliverer = isset($content->deliverer) ? $manager->getRepository(User::class)->find($content->deliverer) : null;
         $method = isset($content->method) ? $manager->getRepository(DeliveryMethod::class)->find($content->method) : null;
         $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
-        $orders = $manager->getRepository(ClientOrder::class)->findBy(["id" => $content->assignedForRound]);
+        $orders = $manager->getRepository(ClientOrder::class)->findBy(["id" => explode(",", $content->assignedForRound)]);
 
         if (count($orders) === 0) {
             $form->addError("Vous devez sélectionner au moins une livraison");
@@ -184,7 +183,7 @@ class PlanningController extends AbstractController {
                     ->setTokens($order->getClient()->getClientOrderInformation()->getTokenAmount() ?? 0)
                     ->setDistance(0.0);
 
-                if($order->hasStatusCode(Status::CODE_ORDER_PREPARED)) {
+                if ($order->hasStatusCode(Status::CODE_ORDER_PREPARED)) {
                     $order->setStatus($orderAwaitingDeliverer);
                     $delivery->setStatus($deliveryAwaitingDeliverer);
                 } else {
@@ -204,7 +203,8 @@ class PlanningController extends AbstractController {
                     ->keymap(fn(ClientOrder $order, int $i) => [$order->getId(), $i])
                     ->toArray())
                 ->setCost($content->cost)
-                ->setDistance($content->distance);
+                ->setDistance($content->distance)
+                ->setCreated(new DateTime());
 
             $deliveryRoundService->updateDeliveryRound($manager, $round);
 
@@ -271,9 +271,9 @@ class PlanningController extends AbstractController {
      * @Route("/launch-delivery", name="planning_delivery_launch", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function launchDelivery(Request $request,
-                                   Mailer $mailer,
-                                   ClientOrderService $clientOrderService,
+    public function launchDelivery(Request                $request,
+                                   Mailer                 $mailer,
+                                   ClientOrderService     $clientOrderService,
                                    EntityManagerInterface $manager): Response {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
         $statusRepository = $manager->getRepository(Status::class);
@@ -300,7 +300,7 @@ class PlanningController extends AbstractController {
 
             $manager->persist($preparation);
 
-            if($order->getClient()->isMailNotificationOrderPreparation()) {
+            if ($order->getClient()->isMailNotificationOrderPreparation()) {
                 $content = $this->renderView("emails/mail_delivery_order.html.twig", [
                     "order" => $order,
                 ]);
@@ -444,8 +444,8 @@ class PlanningController extends AbstractController {
      * @Route("/delivery_validate", name="planning_delivery_validate", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function validateDelivery(Request $request,
-                                     ClientOrderService $clientOrderService,
+    public function validateDelivery(Request                $request,
+                                     ClientOrderService     $clientOrderService,
                                      EntityManagerInterface $manager) {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
         $statusRepository = $manager->getRepository(Status::class);
