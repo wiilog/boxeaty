@@ -126,7 +126,7 @@ class BoxRepository extends EntityRepository {
 
         if ($search) {
             $state = Stream::from(BoxStateService::BOX_STATES)
-                ->filter(fn($value) => strpos($value, $search) > -1)
+                ->filter(fn($value) => strpos(strtolower($value), strtolower($search)) > -1)
                 ->firstKey();
 
             if (isset($state)) {
