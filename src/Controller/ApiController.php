@@ -169,8 +169,8 @@ class ApiController extends AbstractController {
     /**
      * @Route("/kiosk/kiosks/empty", name="api_kiosk_empty_kiosk", options={"expose": true})
      */
-    public function emptyKiosk(Request $request,
-                               BoxRecordService $boxRecordService,
+    public function emptyKiosk(Request                $request,
+                               BoxRecordService       $boxRecordService,
                                EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
@@ -244,8 +244,8 @@ class ApiController extends AbstractController {
     /**
      * @Route("/kiosk/box/drop", name="api_kiosk_drop_box")
      */
-    public function dropBox(Request $request,
-                            BoxRecordService $boxRecordService,
+    public function dropBox(Request                $request,
+                            BoxRecordService       $boxRecordService,
                             EntityManagerInterface $manager): Response {
         $content = json_decode($request->getContent());
 
@@ -573,11 +573,13 @@ class ApiController extends AbstractController {
         if ($order) {
             $statusRepository = $manager->getRepository(Status::class);
 
-            $orderTransitStatus = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TRANSIT]);
-            $history = $clientOrderService->updateClientOrderStatus($order, $orderTransitStatus, $this->getUser());
-            $manager->persist($history);
+            $orderTransitStatus = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_TRANSIT]);
+            $deliveryTransitStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_TRANSIT]);
 
-            $order->getDelivery()->setStatus($statusRepository->findOneBy(['code' => Status::CODE_DELIVERY_TRANSIT]));
+            foreach ($order->getDeliveryRound()->getOrders() as $o) {
+                $clientOrderService->updateClientOrderStatus($o, $orderTransitStatus, $this->getUser());
+                $o->getDelivery()->setStatus($deliveryTransitStatus);
+            }
 
             $manager->flush();
 
@@ -685,9 +687,9 @@ class ApiController extends AbstractController {
      * @Authenticated
      */
     public function finishDelivery(EntityManagerInterface $manager,
-                                   Request $request,
-                                   AttachmentService $attachmentService,
-                                   ClientOrderService $clientOrderService): Response {
+                                   Request                $request,
+                                   AttachmentService      $attachmentService,
+                                   ClientOrderService     $clientOrderService): Response {
 
         $data = json_decode($request->getContent());
         $order = $manager->getRepository(ClientOrder::class)->find($data->order);
@@ -716,7 +718,7 @@ class ApiController extends AbstractController {
                 ->count();
 
             if ($unfinishedDeliveries === 0) {
-                $status = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_ROUND_FINISHED]);
+                $status = $manager->getRepository(Status::class)->findOneBy(["code" => Status::CODE_ROUND_FINISHED]);
                 $distance = Stream::from($deliveryRound->getOrders())
                     ->map(fn(ClientOrder $order) => $order->getDelivery()->getDistance())
                     ->sum();
@@ -906,15 +908,13 @@ class ApiController extends AbstractController {
                     'success' => true,
                     'message' => 'La préparation a été réservée'
                 ]);
-            }
-            else if (!$preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
-                || $this->getUser() !== $preparation->getOperator()){
+            } else if (!$preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
+                || $this->getUser() !== $preparation->getOperator()) {
                 return $this->json([
                     'success' => false,
                     'message' => 'La préparation est en cours de préparation par un autre utilisateur'
                 ]);
-            }
-            else {
+            } else {
                 // $preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
                 // AND $this->getUser() === $preparation->getOperator()
                 return $this->json([
@@ -922,9 +922,8 @@ class ApiController extends AbstractController {
                 ]);
             }
 
-        }
-        else if ($preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
-                 && $this->getUser() === $preparation->getOperator()) {
+        } else if ($preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
+            && $this->getUser() === $preparation->getOperator()) {
             $userRepository = $entityManager->getRepository(User::class);
 
             $preparedStatus = $statusRepository->findOneBy(["code" => Status::CODE_PREPARATION_PREPARED]);
@@ -978,7 +977,7 @@ class ApiController extends AbstractController {
                 $preparation->setStatus($preparedStatus);
 
                 $delivery = $clientOrder->getDelivery();
-                if($delivery) {
+                if ($delivery) {
                     $delivery->setStatus($preparedDeliveryStatus);
 
                     $clientOrderService->updateClientOrderStatus($clientOrder, $awaitingDelivererStatus, $this->getUser());
@@ -994,7 +993,7 @@ class ApiController extends AbstractController {
                 $entityManager->flush();
 
                 $users = $userRepository->findBy(['deliveryAssignmentPreparationMail' => 1]);
-                if(!empty($users)) {
+                if (!empty($users)) {
                     $mailer->send(
                         $users,
                         "BoxEaty - Affectation de tournée",
@@ -1007,8 +1006,7 @@ class ApiController extends AbstractController {
                 return $this->json([
                     'success' => true,
                 ]);
-            }
-            else {
+            } else {
                 return $this->json([
                     'success' => false,
                     'message' => $result['message']
@@ -1069,7 +1067,7 @@ class ApiController extends AbstractController {
             ->getOrder()
             ->getClientClosedPark();
 
-        if(!$clientFilter) {
+        if (!$clientFilter) {
             $clientFilter = $clientRepository->findOneBy(["name" => Client::BOXEATY]);
         }
 
@@ -1178,11 +1176,11 @@ class ApiController extends AbstractController {
      * @Route("/mobile/collects/{collect}", name="api_mobile_patch_collect", methods={"PATCH"})
      * @Authenticated
      */
-    public function patchCollect(Collect $collect,
-                                 Request $request,
+    public function patchCollect(Collect                $collect,
+                                 Request                $request,
                                  EntityManagerInterface $manager,
-                                 AttachmentService $attachmentService,
-                                 BoxRecordService $boxRecordService): JsonResponse {
+                                 AttachmentService      $attachmentService,
+                                 BoxRecordService       $boxRecordService): JsonResponse {
         $data = json_decode($request->getContent());
 
         $validate = $data->validate ?? false;
@@ -1224,7 +1222,7 @@ class ApiController extends AbstractController {
 
             $collectStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_COLLECT_FINISHED]);
 
-            if($data->data->photo) {
+            if ($data->data->photo) {
                 $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
             }
             $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
@@ -1252,8 +1250,7 @@ class ApiController extends AbstractController {
      * @Route("/mobile/location", name="api_mobile_location")
      * @Authenticated
      */
-    public function location(Request $request, EntityManagerInterface $manager)
-    {
+    public function location(Request $request, EntityManagerInterface $manager) {
         $location = $manager->getRepository(Location::class)->findOneBy([
             'name' => $request->query->get('location')
         ]);
@@ -1272,10 +1269,10 @@ class ApiController extends AbstractController {
      * @Route("/mobile/collects", name="api_mobile_post_collect", methods={"POST"})
      * @Authenticated
      */
-    public function postCollect(Request $request,
+    public function postCollect(Request                $request,
                                 EntityManagerInterface $manager,
-                                AttachmentService $attachmentService,
-                                UniqueNumberService $uniqueNumberService): Response {
+                                AttachmentService      $attachmentService,
+                                UniqueNumberService    $uniqueNumberService): Response {
         $data = json_decode($request->getContent());
 
         $statusRepository = $manager->getRepository(Status::class);
@@ -1290,7 +1287,7 @@ class ApiController extends AbstractController {
 
         $number = $uniqueNumberService->createUniqueNumber(Collect::class);
 
-        if($data->data->photo) {
+        if ($data->data->photo) {
             $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
         }
         $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
@@ -1304,7 +1301,7 @@ class ApiController extends AbstractController {
         $collect = (new Collect())
             ->setCreatedAt(new DateTime('now'))
             ->setStatus($pendingStatus)
-            ->setTokens((int) $data->token_amount)
+            ->setTokens((int)$data->token_amount)
             ->setNumber($number)
             ->setPickLocation($pickLocation)
             ->setClient($client)

@@ -180,6 +180,12 @@ function setupDeliveryRoundSortables(map) {
             }
         }
 
+        let i = 1;
+        $(`.assigned-deliveries .order`).map(function() {
+            $(this).find(`.number`).text(`${i}.`);
+            i += 1;
+        });
+
         map.setMarkers(locations);
     });
 }

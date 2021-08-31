@@ -14,13 +14,15 @@
 
 {% macro order_header(order) %}
     <span class="title">
-        {{ order.client.name }}
+        <span>
+            <span class="number"></span>
+            {{ order.client.name }}
+        </span>
 
         {% if order.automatic %}
             <i class="bxi bxi-automatic"></i>
         {% endif %}
     </span>
-    <label>Commande <strong>N°{{ order.number }}</strong></label>
 {% endmacro %}
 
 {% macro order_card(order, link_new_tab = false) %}
@@ -44,6 +46,7 @@
     {% elseif order.status.code == constant('App\\Entity\\Status::CODE_ORDER_TO_VALIDATE_BOXEATY') %}
         <div class="order to-validate" {{ _self.order_data(order) }}>
             {{ _self.order_header(order) }}
+            <label>Commande <strong>N°{{ order.number }}</strong></label>
             <label>Livraison souhaitée <strong>{{ order.expectedDelivery | date('d/m/Y') }}</strong></label>
 
             <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
@@ -62,6 +65,16 @@
             <span class="status"><i class="bxi bxi-calendar"></i> {{ order.status.name }}</span>
             {{ _self.order_link(order, link_new_tab) }}
         </div>
+    {% elseif order.deliveryRound and order.status.code == constant('App\\Entity\\Status::CODE_ORDER_TRANSIT') %}
+        <div class="order delivering" {{ _self.order_data(order) }}>
+            {{ _self.order_header(order) }}
+            <label class="inline">Tournée <strong>N°{{ order.deliveryRound.number }}</strong></label>
+            <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
+            <span class="muted">Livraison {{ order.deliveryRound.deliveryMethod.name | lower }}</span>
+
+            <span class="status"><i class="bxi bxi-transit"></i> {{ order.status.name }}</span>
+            {{ _self.order_link(order, link_new_tab) }}
+        </div>
     {% elseif order.preparation %}
         <div class="order preparing" {{ _self.order_data(order) }}>
             {{ _self.order_header(order) }}
@@ -71,21 +84,14 @@
                 <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
                 <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
 
-                <span class="status" title="Affecté à la tournée N°{{ order.deliveryRound.number }}"><i class="bxi bxi-preparing"></i> {{ order.status.name }}</span>
+                <span class="status" title="Affecté à la tournée N°{{ order.deliveryRound.number }}">
+                    <i class="bxi bxi-preparing"></i> {{ order.status.name }}
+                </span>
             {% else %}
-                <span class="status" title="Aucune livraison affectée"><i class="bxi bxi-loading"></i> {{ order.status.name }}</span>
+                <span class="status" title="Aucune livraison affectée"><i
+                        class="bxi bxi-loading"></i> {{ order.status.name }}</span>
             {% endif %}
 
-            {{ _self.order_link(order, link_new_tab) }}
-        </div>
-    {% elseif order.delivery %}
-        <div class="order delivering" {{ _self.order_data(order) }}>
-            {{ _self.order_header(order) }}
-            <label class="inline">Tournée <strong>N°654823</strong></label>
-            <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
-            <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
-
-            <span class="status"><i class="bxi bxi-transit"></i> {{ order.status.name }}</span>
             {{ _self.order_link(order, link_new_tab) }}
         </div>
     {% endif %}
