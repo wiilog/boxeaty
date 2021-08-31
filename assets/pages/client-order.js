@@ -10,7 +10,7 @@ import {DateTools} from "../util";
 
 
 $(function() {
-    DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 20);
+    DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 30);
 
     initOrderDatatable();
 
