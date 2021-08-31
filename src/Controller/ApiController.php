@@ -1087,10 +1087,14 @@ class ApiController extends AbstractController {
         $isCrate = $request->query->get('isCrate');
         $crate = $request->query->get('crate');
 
+        if($isCrate) {
+            $box = $manager->getRepository(Box::class)->findOneBy(['number' => $box, 'isBox' => 0]);
+        } else {
+            $box = $manager->getRepository(Box::class)->findOneBy(['number' => $box]);
+        }
 
-        $box = $manager->getRepository(Box::class)->findOneBy(['number' => $box, 'isBox' => $isCrate ? 0 : 1]);
         if ($crate) {
-            $crate = $manager->getRepository(Box::class)->findOneBy(['number' => $crate]);
+            $crate = $manager->getRepository(Box::class)->findOneBy(['number' => $crate, 'isBox' => 0]);
         }
 
         if ($box) {
@@ -1109,10 +1113,7 @@ class ApiController extends AbstractController {
             ]);
         }
 
-        return $this->json([
-            "success" => false,
-            "message" => "La box n'existe pas",
-        ]);
+        return $this->json(false);
     }
 
     /**
