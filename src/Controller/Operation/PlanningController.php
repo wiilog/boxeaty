@@ -68,6 +68,9 @@ class PlanningController extends AbstractController {
             $to = (clone $from)->modify("+20 days");
         }
 
+        $from->setTime(0, 0);
+        $to->setTime(23, 59);
+
         if ($from->diff($to, true)->days > 21) {
             return $this->json([
                 "success" => false,

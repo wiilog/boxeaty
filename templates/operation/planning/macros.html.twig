@@ -26,7 +26,7 @@
 {% endmacro %}
 
 {% macro order_card(order, link_new_tab = false) %}
-    {% if order.status.code != constant('App\\Entity\\Status::CODE_ORDER_FINISHED') and order.expectedDelivery < date() %}
+    {% if order.expectedDelivery < date() %}
         <div class="order late" {{ _self.order_data(order) }}>
             {{ _self.order_header(order) }}
 
@@ -65,17 +65,21 @@
             <span class="status"><i class="bxi bxi-calendar"></i> {{ order.status.name }}</span>
             {{ _self.order_link(order, link_new_tab) }}
         </div>
-    {% elseif order.deliveryRound and order.status.code == constant('App\\Entity\\Status::CODE_ORDER_TRANSIT') %}
+    {% elseif order.deliveryRound and order.status.code in [constant('App\\Entity\\Status::CODE_ORDER_AWAITING_DELIVERER'), constant('App\\Entity\\Status::CODE_ORDER_TRANSIT')] %}
         <div class="order delivering" {{ _self.order_data(order) }}>
             {{ _self.order_header(order) }}
             <label class="inline">Tournée <strong>N°{{ order.deliveryRound.number }}</strong></label>
             <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
             <span class="muted">Livraison {{ order.deliveryRound.deliveryMethod.name | lower }}</span>
 
-            <span class="status"><i class="bxi bxi-transit"></i> {{ order.status.name }}</span>
+            {% if order.status.code == constant('App\\Entity\\Status::CODE_ORDER_AWAITING_DELIVERER') %}
+                <span class="status"><i class="bxi bxi-awaiting-deliverer"></i> {{ order.status.name }}</span>
+            {% else %}
+                <span class="status"><i class="bxi bxi-transit"></i> {{ order.status.name }}</span>
+            {% endif %}
             {{ _self.order_link(order, link_new_tab) }}
         </div>
-    {% elseif order.preparation %}
+    {% elseif order.preparation and order.status.code in [constant('App\\Entity\\Status::CODE_ORDER_PREPARING'), constant('App\\Entity\\Status::CODE_ORDER_PREPARED')] %}
         <div class="order preparing" {{ _self.order_data(order) }}>
             {{ _self.order_header(order) }}
 
