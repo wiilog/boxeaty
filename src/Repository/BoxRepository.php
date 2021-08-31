@@ -44,7 +44,7 @@ class BoxRepository extends EntityRepository {
             ->toIterable();
     }
 
-    public function getForSelect(?string $search, ?int $notInCrate, ?User $user) {
+    public function getForSelect(?string $search, ?bool $notInCrate, ?User $user) {
         $qb = $this->createQueryBuilder("box");
 
         if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
@@ -54,8 +54,7 @@ class BoxRepository extends EntityRepository {
         }
 
         if ($notInCrate) {
-            $qb->andWhere("box.crate != :crate")
-                ->setParameter("crate", $notInCrate);
+            $qb->andWhere("box.crate IS NULL");
         }
 
         return $qb->select("box.id AS id, box.number AS text")

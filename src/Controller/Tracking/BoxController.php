@@ -4,27 +4,26 @@ namespace App\Controller\Tracking;
 
 use App\Annotation\HasPermission;
 use App\Entity\Box;
+use App\Entity\BoxRecord;
 use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
-use App\Entity\BoxRecord;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
-use App\Service\BoxStateService;
-use WiiCommon\Helper\Stream;
 use App\Repository\BoxRepository;
 use App\Service\BoxRecordService;
+use App\Service\BoxStateService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use WiiCommon\Helper\Stream;
 
 /**
  * @Route("/tracabilite/box")
@@ -78,8 +77,8 @@ class BoxController extends AbstractController {
      * @Route("/nouveau", name="box_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
      */
-    public function new(Request $request,
-                        BoxRecordService $boxRecordService,
+    public function new(Request                $request,
+                        BoxRecordService       $boxRecordService,
                         EntityManagerInterface $manager): Response {
         $form = Form::create();
 
@@ -95,7 +94,7 @@ class BoxController extends AbstractController {
             $form->addError("number", "Ce numéro de Box existe déjà");
         } else if (strlen($content->number) > 50) {
             $form->addError("number", "Le numéro de Box ne peut excéder 50 caractères");
-        } else if(!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
+        } else if (!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
             $form->addError("number", "Le numéro de Box ne peut contenir que des lettres, chiffres, tirets et underscores");
         }
 
@@ -140,7 +139,7 @@ class BoxController extends AbstractController {
      * @Route("/voir/{box}", name="box_show", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function show(Box $box,
+    public function show(Box                    $box,
                          EntityManagerInterface $entityManager): Response {
         $clientOrderRepository = $entityManager->getRepository(ClientOrder::class);
         $clientOrderInProgress = $clientOrderRepository->findLastInProgressFor($box);
@@ -168,10 +167,10 @@ class BoxController extends AbstractController {
      * @Route("/modifier/{box}", name="box_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function edit(Request $request,
-                         BoxRecordService $boxRecordService,
+    public function edit(Request                $request,
+                         BoxRecordService       $boxRecordService,
                          EntityManagerInterface $manager,
-                         Box $box): Response {
+                         Box                    $box): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
@@ -181,7 +180,7 @@ class BoxController extends AbstractController {
             $form->addError("name", "Une autre Box avec ce numéro existe déjà");
         } else if (strlen($content->number) > 50) {
             $form->addError("number", "Le numéro de Box ne peut excéder 50 caractères");
-        } else if(!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
+        } else if (!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
             $form->addError("number", "Le numéro de Box ne peut contenir que des lettres, chiffres, tirets et underscores");
         }
 
@@ -275,13 +274,13 @@ class BoxController extends AbstractController {
      * @HasPermission(Role::MANAGE_BOXES)
      */
     public function export(EntityManagerInterface $manager,
-                           ExportService $exportService): Response {
+                           ExportService          $exportService): Response {
         $boxes = $manager->getRepository(Box::class)->iterateAll();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function($output) use ($exportService, $boxes) {
+        return $exportService->export(function ($output) use ($exportService, $boxes) {
             foreach ($boxes as $box) {
                 $box["state"] = BoxStateService::BOX_STATES[$box["state"]] ?? '';
                 $exportService->putLine($output, $box);
@@ -334,28 +333,20 @@ class BoxController extends AbstractController {
     /**
      * @Route("/add-box", name="add_box_in_crate", options={"expose": true}, methods={"GET"})
      */
-    public function addBoxInCrate(Request $request,
+    public function addBoxInCrate(Request                $request,
                                   EntityManagerInterface $entityManager,
-                                  BoxRecordService $boxRecordService){
+                                  BoxRecordService       $boxRecordService) {
 
         $boxRepository = $entityManager->getRepository(Box::class);
 
         $crate = $boxRepository->find($request->query->get("crate"));
         $box = $boxRepository->find($request->query->get("box"));
 
-        if($box->getCrate()) {
+        if ($box->getCrate()) {
             return $this->json([
                 "success" => false,
-                "template" => $this->renderView("tracking/box/box_in_crate.html.twig",["box" => $crate]),
+                "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $crate]),
                 "message" => "Cette Box est déjà présente dans la caisse <b>{$box->getCrate()->getNumber()}</b>",
-            ]);
-        }
-
-        if($box->getCrate()->getId() === $crate->getId()){
-            return $this->json([
-                "success" => false,
-                "template" => $this->renderView("tracking/box/box_in_crate.html.twig",["box" => $crate]),
-                "message" => "Cette Box est déjà présente dans cette caisse",
             ]);
         }
 
@@ -374,7 +365,7 @@ class BoxController extends AbstractController {
 
         return $this->json([
             "success" => true,
-            "template" => $this->renderView("tracking/box/box_in_crate.html.twig",["box" => $crate]),
+            "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $crate]),
             "message" => "Box ajoutée à la caisse avec succès",
         ]);
     }
@@ -396,9 +387,9 @@ class BoxController extends AbstractController {
      * @Route("/supprimer-box-in-crate", name="box_delete_in_crate", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function deleteBoxInCrate(Request $request,
+    public function deleteBoxInCrate(Request                $request,
                                      EntityManagerInterface $entityManager,
-                                     BoxRecordService $boxRecordService): Response {
+                                     BoxRecordService       $boxRecordService): Response {
 
         /** @var Box $box */
         $box = $entityManager->getRepository(Box::class)->find($request->query->get("box"));
@@ -439,4 +430,5 @@ class BoxController extends AbstractController {
             "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $crate]),
         ]);
     }
+
 }
