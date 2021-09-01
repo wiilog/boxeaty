@@ -721,7 +721,7 @@ class MobileController extends AbstractController {
      * @Route("/collects", name="api_mobile_get_collects", methods={"GET"})
      * @Authenticated
      */
-    public function getCollects(EntityManagerInterface $manager): JsonResponse {
+    public function collects(EntityManagerInterface $manager): JsonResponse {
         return $this->json($manager->getRepository(Collect::class)->getPendingCollects($this->getUser()));
     }
 
@@ -731,8 +731,8 @@ class MobileController extends AbstractController {
      */
     public function collectCrates(Collect $collect): JsonResponse {
         $collectCrates = Stream::from($collect->getCrates()->map(fn(Box $crate) => [
-            'number' => $crate->getNumber(),
-            'type' => $crate->getType()->getName()
+            "number" => $crate->getNumber(),
+            "type" => $crate->getType()->getName()
         ]));
 
         return $this->json($collectCrates);
@@ -764,7 +764,7 @@ class MobileController extends AbstractController {
                 $boxRecordService->generateBoxRecords($crate, $previous, $this->getUser());
             }
 
-            $collectStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_COLLECT_FINISHED]);
+            $collectStatus = $manager->getRepository(Status::class)->findOneBy(["code" => Status::CODE_COLLECT_FINISHED]);
 
             if ($data->data->photo) {
                 $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
@@ -777,7 +777,7 @@ class MobileController extends AbstractController {
                 ->setDropSignature($signature)
                 ->setDropPhoto($photo ?? null)
                 ->setDropComment($comment ?? null)
-                ->setTreatedAt(new DateTime('now'))
+                ->setTreatedAt(new DateTime())
                 ->setTokens((int)$data->token_amount);
 
             $manager->flush();
@@ -840,8 +840,6 @@ class MobileController extends AbstractController {
         $crateNumbers = Stream::from($data->crates)->map(fn($crate) => $crate->number)->toArray();
         $crates = $boxRepository->findBy(['number' => $crateNumbers]);
 
-        $clientOrderId = $data->clientOrder ?? null;
-
         $collect = (new Collect())
             ->setCreatedAt(new DateTime('now'))
             ->setStatus($pendingStatus)
@@ -855,11 +853,8 @@ class MobileController extends AbstractController {
             ->setOperator($this->getUser())
             ->setCrates($crates);
 
-
-        if ($clientOrderId) {
-            $clientOrder = $clientOrderRepository->find($clientOrderId);
-            $collect
-                ->setClientOrder($clientOrder);
+        if (isset($data->clientOrder)) {
+            $collect->setClientOrder($clientOrderRepository->find($data->clientOrder));
         }
 
         $manager->persist($collect);
