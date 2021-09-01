@@ -916,7 +916,8 @@ class ApiController extends AbstractController {
 
                     foreach ($crateData['boxes'] as $box) {
                         $previous = clone $box;
-                        $box->setLocation($box->getLocation()->getOffset())
+                        $box->setCrate($crateData['crate'])
+                            ->setLocation($box->getLocation()->getOffset())
                             ->setState(BoxStateService::STATE_BOX_UNAVAILABLE);
 
                         [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $user, $date);

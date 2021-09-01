@@ -19,7 +19,6 @@ class BoxStateService {
         self::STATE_BOX_CONSUMER => "Consommateur",
         self::STATE_BOX_CLIENT => "Client",
         self::STATE_BOX_OUT => "Sorti",
-        self::STATE_RECORD_IDENTIFIED => "Identifié"
     ];
 
     public const RECORD_STATES = [

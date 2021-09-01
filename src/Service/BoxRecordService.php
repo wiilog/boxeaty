@@ -36,18 +36,18 @@ class BoxRecordService {
         return [$tracking ?? null, $record ?? null];
     }
 
-    public function createBoxRecord(Box $box, bool $trackingMovement, ?DateTime $date = null): BoxRecord {
-        return (new BoxRecord())
-            ->setDate($date ?? new DateTime())
-            ->setTrackingMovement($trackingMovement)
-            ->copyBox($box);
-    }
-
     public function persist(Box $box, ?BoxRecord $record, EntityManagerInterface $manager = null) {
         if ($record) {
             $record->setBox($box);
             ($manager ?? $this->manager)->persist($record);
         }
+    }
+
+    private function createBoxRecord(Box $box, bool $trackingMovement, ?DateTime $date = null): BoxRecord {
+        return (new BoxRecord())
+            ->setDate($date ?? new DateTime())
+            ->setTrackingMovement($trackingMovement)
+            ->copyBox($box);
     }
 
     private function extract(?Box $box): array {

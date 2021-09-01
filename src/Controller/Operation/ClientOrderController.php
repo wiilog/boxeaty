@@ -431,16 +431,13 @@ class ClientOrderController extends AbstractController {
     }
 
     /**
-     * @Route("/client-order-history-api", name="client_order_history_api", options={"expose": true})
+     * @Route("/{clientOrder}/client-order-history-api", name="client_order_history_api", options={"expose": true})
      */
-    public function historyApi(Request $request, EntityManagerInterface $manager): Response {
-        $id = $request->query->get('id');
-        $clientOrder = $manager->getRepository(ClientOrder::class)->find($id);
-
+    public function historyApi(ClientOrder $clientOrder): Response {
         return $this->json([
-            'success' => true,
-            'template' => $this->renderView('operation/client_order/timeline.html.twig', [
-                'clientOrder' => $clientOrder,
+            "success" => true,
+            "template" => $this->renderView('operation/client_order/timeline.html.twig', [
+                "clientOrder" => $clientOrder,
             ]),
         ]);
     }

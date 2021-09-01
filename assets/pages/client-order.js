@@ -306,13 +306,10 @@ function addBoxTypeModel($modal) {
     }
 }
 
-function getTimeLine($modal, $clientOrder) {
-    AJAX
-        .route(`GET`, `client_order_history_api`, {id: $clientOrder})
+function getTimeLine($modal, clientOrder) {
+    AJAX.route(`GET`, `client_order_history_api`, {clientOrder})
         .json()
-        .then((res) => {
-            $modal.find(`.client-order-history`).empty().append(res.template);
-        });
+        .then(res => $modal.find(`.client-order-history`).empty().append(res.template));
 }
 
 function addSelectedBoxTypeToCart($modal) {
