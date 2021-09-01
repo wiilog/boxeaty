@@ -3,6 +3,7 @@
 namespace App\Controller\Operation;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
@@ -21,7 +22,6 @@ use App\Service\ClientOrderService;
 use App\Service\UniqueNumberService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

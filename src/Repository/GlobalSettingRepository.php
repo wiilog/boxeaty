@@ -3,9 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\GlobalSetting;
-use WiiCommon\Helper\Stream;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
+use WiiCommon\Helper\Stream;
 
 /**
  * @method GlobalSetting|null find($id, $lockMode = null, $lockVersion = null)

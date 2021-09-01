@@ -3,12 +3,11 @@
 namespace App\Repository;
 
 use App\Entity\Client;
-use App\Entity\ClientOrder;
 use App\Entity\DeliveryRound;
 use App\Entity\Status;
 use App\Entity\User;
-use Doctrine\ORM\EntityRepository;
 use DateTime;
+use Doctrine\ORM\EntityRepository;
 
 /**
  * @method DeliveryRound|null find($id, $lockMode = null, $lockVersion = null)

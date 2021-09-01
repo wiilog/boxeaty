@@ -3,9 +3,9 @@
 namespace App\Controller\Referential;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\Box;
 use App\Entity\BoxRecord;
-use App\Entity\Client;
 use App\Entity\Depository;
 use App\Entity\Location;
 use App\Entity\Role;
@@ -17,7 +17,6 @@ use App\Service\ExportService;
 use App\Service\LocationService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;

@@ -3,6 +3,7 @@
 namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\Box;
 use App\Entity\BoxRecord;
 use App\Entity\BoxType;
@@ -24,7 +25,6 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;

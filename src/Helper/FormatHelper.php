@@ -2,9 +2,9 @@
 
 namespace App\Helper;
 
-use WiiCommon\Helper\Stream;
 use App\Entity\User;
 use DateTimeInterface;
+use WiiCommon\Helper\Stream;
 
 class FormatHelper {
 

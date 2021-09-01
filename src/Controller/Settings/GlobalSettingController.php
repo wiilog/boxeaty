@@ -3,6 +3,7 @@
 namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\BoxType;
 use App\Entity\DeliveryMethod;
 use App\Entity\GlobalSetting;
@@ -12,7 +13,6 @@ use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\WorkFreeDayRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;

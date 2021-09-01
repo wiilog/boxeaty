@@ -4,7 +4,6 @@ namespace App\Command;
 
 use App\Entity\Client;
 use App\Entity\ClientOrder;
-use App\Entity\ClientOrderInformation;
 use App\Entity\ClientOrderLine;
 use App\Entity\OrderType;
 use App\Entity\Status;

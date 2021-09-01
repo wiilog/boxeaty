@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
+use App\Entity\Utils\ActiveTrait;
 use App\Repository\ClientRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Utils\ActiveTrait;
 use WiiCommon\Helper\Stream;
 
 /**

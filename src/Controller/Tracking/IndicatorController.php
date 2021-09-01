@@ -4,20 +4,20 @@
 namespace App\Controller\Tracking;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\Collect;
 use App\Entity\Delivery;
 use App\Entity\DeliveryMethod;
 use App\Entity\DeliveryRound;
-use DateTime;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Response;
-use Doctrine\ORM\EntityManagerInterface;
-use WiiCommon\Helper\Stream;
 use App\Entity\Role;
+use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use WiiCommon\Helper\Stream;
 
 /**
  * @Route("/tracabilite/indicateurs")

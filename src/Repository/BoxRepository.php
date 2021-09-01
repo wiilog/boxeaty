@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Box;
-use App\Entity\BoxType;
 use App\Entity\Client;
 use App\Entity\Depository;
 use App\Entity\Preparation;

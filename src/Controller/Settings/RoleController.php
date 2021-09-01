@@ -3,19 +3,19 @@
 namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
-use WiiCommon\Helper\StringHelper;
 use App\Repository\RoleRepository;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use WiiCommon\Helper\StringHelper;
 
 /**
  * @Route("/parametrage/roles")

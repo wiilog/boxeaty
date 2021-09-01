@@ -5,8 +5,6 @@ namespace App\Service;
 use DateTime;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Entity;
-use Exception;
 use RuntimeException;
 
 class UniqueNumberService

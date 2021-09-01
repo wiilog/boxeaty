@@ -4,14 +4,14 @@ namespace App\Service;
 
 use App\Entity\GlobalSetting;
 use App\Entity\User;
-use WiiCommon\Helper\Stream;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport;
-use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use WiiCommon\Helper\Stream;
 
 class Mailer {
 

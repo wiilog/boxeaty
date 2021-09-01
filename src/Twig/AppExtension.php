@@ -3,7 +3,6 @@
 namespace App\Twig;
 
 use App\Helper\FormatHelper;
-use WiiCommon\Helper\Stream;
 use App\Service\RoleService;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -12,6 +11,7 @@ use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
+use WiiCommon\Helper\Stream;
 
 class AppExtension extends AbstractExtension {
 

@@ -2,12 +2,12 @@
 
 namespace App\Entity;
 
-use WiiCommon\Helper\Stream;
 use App\Entity\Utils\ActiveTrait;
 use App\Repository\LocationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use WiiCommon\Helper\Stream;
 
 /**
  * @ORM\Entity(repositoryClass=LocationRepository::class)

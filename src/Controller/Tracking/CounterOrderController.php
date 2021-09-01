@@ -3,11 +3,12 @@
 namespace App\Controller\Tracking;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\Box;
-use App\Entity\DepositTicket;
-use App\Entity\CounterOrder;
-use App\Entity\Role;
 use App\Entity\BoxRecord;
+use App\Entity\CounterOrder;
+use App\Entity\DepositTicket;
+use App\Entity\Role;
 use App\Helper\FormatHelper;
 use App\Repository\CounterOrderRepository;
 use App\Service\BoxRecordService;
@@ -15,7 +16,6 @@ use App\Service\BoxStateService;
 use App\Service\CounterOrderService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;

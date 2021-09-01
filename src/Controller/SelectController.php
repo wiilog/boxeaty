@@ -15,16 +15,11 @@ use App\Entity\Quality;
 use App\Entity\Status;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class SelectController extends AbstractController {
-
-    protected function getUser(): ?User {
-        return parent::getUser();
-    }
 
     /**
      * @Route("/select/box", name="ajax_select_boxes", options={"expose": true})

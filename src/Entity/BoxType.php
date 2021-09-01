@@ -2,12 +2,12 @@
 
 namespace App\Entity;
 
+use App\Entity\Utils\ActiveTrait;
 use App\Repository\BoxTypeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Utils\ActiveTrait;
 
 /**
  * @ORM\Entity(repositoryClass=BoxTypeRepository::class)
