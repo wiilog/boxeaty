@@ -908,15 +908,14 @@ class ApiController extends AbstractController {
 
             if ($result['success']) {
                 foreach ($result['entities'] as $crateData) {
-                    $preparationLine = new PreparationLine();
-                    $preparationLine
+                    $preparationLine = (new PreparationLine())
                         ->setPreparation($preparation)
                         ->setCrate($crateData['crate']);
                     $entityManager->persist($preparationLine);
 
-                    foreach ($crateData['boxes'] as $box) {
+                    foreach (Stream::from([$crateData['crate']], $crateData['boxes']) as $box) {
                         $previous = clone $box;
-                        $box->setCrate($crateData['crate'])
+                        $box->setCrate($crateData['crate']->getId() !== $box->getId() ? $crateData['crate'] : null)
                             ->setLocation($box->getLocation()->getOffset())
                             ->setState(BoxStateService::STATE_BOX_UNAVAILABLE);
 
