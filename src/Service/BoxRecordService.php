@@ -16,9 +16,9 @@ class BoxRecordService {
     /**
      * @return BoxRecord[]
      */
-    public function generateBoxRecords(Box $box, Box $previous, ?User $user = null, ?DateTime $date = null): array {
-        $previousValues = $this->extract($previous);
+    public function generateBoxRecords(Box $box, ?Box $previous, ?User $user = null, ?DateTime $date = null): array {
         $currentValues = $this->extract($box);
+        $previousValues = $this->extract($previous);
 
         if ($previousValues["location"] != $currentValues["location"]) {
             $tracking = $this->createBoxRecord($box, true, $date);
