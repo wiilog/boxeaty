@@ -168,9 +168,7 @@ class ImportService {
                 ->setOwner($owner)
                 ->setComment($this->value(Import::COMMENT));
 
-            [$tracking, $record] = $this->boxRecordService->generateBoxRecords($box, null, $import->getUser());
-            $this->boxRecordService->persist($box, $tracking);
-            $this->boxRecordService->persist($box, $record);
+            $this->boxRecordService->generateBoxRecords($box, null, $import->getUser());
 
             if (!$box->getId()) {
                 $this->manager->persist($box);

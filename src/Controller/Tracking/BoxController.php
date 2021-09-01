@@ -112,9 +112,7 @@ class BoxController extends AbstractController {
                 ->setIsBox($content->box);
             $manager->persist($box);
 
-            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, null, $this->getUser());
-            $boxRecordService->persist($box, $tracking);
-            $boxRecordService->persist($box, $record);
+            $boxRecordService->generateBoxRecords($box, null, $this->getUser());
 
             $manager->flush();
 
@@ -192,9 +190,7 @@ class BoxController extends AbstractController {
                 ->setComment($content->comment ?? null)
                 ->setIsBox($content->box);
 
-            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-            $boxRecordService->persist($box, $tracking);
-            $boxRecordService->persist($box, $record);
+            $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
 
             $manager->flush();
 
@@ -329,8 +325,8 @@ class BoxController extends AbstractController {
             ->setLocation($crate->getLocation());
 
         [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-        $boxRecordService->persist($box, $tracking->setState(BoxStateService::STATE_RECORD_PACKING));
-        $boxRecordService->persist($box, $record->setState(BoxStateService::STATE_RECORD_PACKING));
+        $tracking->setState(BoxStateService::STATE_RECORD_PACKING);
+        $record->setState(BoxStateService::STATE_RECORD_PACKING);
 
         $entityManager->flush();
 
@@ -370,8 +366,8 @@ class BoxController extends AbstractController {
         $box->setCrate(null);
 
         [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-        $boxRecordService->persist($box, $tracking->setState(BoxStateService::STATE_RECORD_UNPACKING));
-        $boxRecordService->persist($box, $record->setState(BoxStateService::STATE_RECORD_UNPACKING));
+        $tracking->setState(BoxStateService::STATE_RECORD_UNPACKING);
+        $record->setState(BoxStateService::STATE_RECORD_UNPACKING);
 
         $entityManager->flush();
 

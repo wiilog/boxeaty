@@ -117,6 +117,19 @@ class PlanningController extends AbstractController {
     }
 
     /**
+     * @Route("/{order}/mail-commande-retard", name="planning_send_late_order_mail", options={"expose": true})
+     * @HasPermission(Role::MANAGE_PLANNING)
+     */
+    public function lateOrderEmail(ClientOrder $order): Response {
+        //TODO: envoyer le mail, en attente des retours de benoit??
+
+        return $this->json([
+            "success" => false,
+            "message" => "Aucun mail envoyé : non développé",
+        ]);
+    }
+
+    /**
      * @Route("/changer-date/{order}", name="planning_change_date", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */

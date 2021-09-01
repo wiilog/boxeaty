@@ -180,11 +180,9 @@ class BoxRecordRepository extends EntityRepository {
         ];
     }
 
-    public function findNewerTrackingMovement(BoxRecord $trackingMovement): ?BoxRecord {
-        $box = $trackingMovement->getBox();
-        if ($box
-            && $trackingMovement->getId()
-            && $trackingMovement->getDate()) {
+    public function findNewerTrackingMovement(BoxRecord $record): ?BoxRecord {
+        $box = $record->getBox();
+        if ($box && $record->getId() && $record->getDate()) {
             return $this->createQueryBuilder("record")
                 ->andWhere("record.box = :box")
                 ->andWhere("record.id != :movement")
@@ -193,8 +191,8 @@ class BoxRecordRepository extends EntityRepository {
                 ->addOrderBy("record.date", "DESC")
                 ->addOrderBy("record.id", "DESC")
                 ->setParameter("box", $box)
-                ->setParameter("movement", $trackingMovement->getId())
-                ->setParameter("date", $trackingMovement->getDate())
+                ->setParameter("movement", $record->getId())
+                ->setParameter("date", $record->getDate())
                 ->setMaxResults(1)
                 ->getQuery()
                 ->getOneOrNullResult();

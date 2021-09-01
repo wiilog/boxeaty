@@ -121,12 +121,18 @@ $document.ready(() => {
 
     $(document).on('click', `.validate`, function() {
         const ajax = AJAX.route(`POST`, `planning_delivery_validate_template`, {
-            order: $(this).closest(`.order`).data("id")
+            order: $(this).closest(`.order`).data(`id`)
         });
 
         Modal.load(ajax, {
             success: () => reloadPlanning()
         });
+    });
+
+    $(document).on(`click`, `.late-order-send-mail`, function() {
+        AJAX.route(`POST`, `planning_send_late_order_mail`, {
+            order: $(this).closest(`.order`).data(`id`)
+        }).json();
     });
 
     $(`.empty-filters`).click(function() {
@@ -152,22 +158,22 @@ function updateAverage($element) {
 }
 
 function setupDeliveryRoundSortables(map) {
-    const available = Sortable.create(`.available-deliveries`, {
+    Sortable.create(`.available-deliveries`, {
         acceptFrom: `.deliveries`,
         orientation: `horizontal`,
-    })[0];
+    });
 
-    const assigned = Sortable.create(`.assigned-deliveries`, {
+    Sortable.create(`.assigned-deliveries`, {
         acceptFrom: `.deliveries`,
         orientation: `horizontal`,
-    })[0];
+    });
 
     $(`.available-deliveries, .assigned-deliveries`).on(`sortupdate`, async function() {
         updateAverage($(`[name="cost"]`));
         updateAverage($(`[name="distance"]`));
 
         const locations = [];
-        for(const element of $(assigned).find(`.order[data-id]`)) {
+        for(const element of $(`.assigned-deliveries`).find(`.order[data-id]`)) {
             const address = $(element).data(`address`);
             const coordinates = await findCoordinates(address);
 

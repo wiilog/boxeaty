@@ -126,8 +126,8 @@ class TrackingMovementController extends AbstractController {
                 $previous = clone $box;
                 $box->fromRecord($movement);
 
-                [, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-                $boxRecordService->persist($box, $record);
+                [$tracking] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+                $boxRecordService->remove($tracking);
 
                 $manager->flush();
             }
@@ -195,8 +195,8 @@ class TrackingMovementController extends AbstractController {
                 $previous = clone $box;
                 $box->fromRecord($movement);
 
-                [, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-                $boxRecordService->persist($box, $record);
+                [$tracking] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+                $boxRecordService->remove($tracking);
 
                 $manager->flush();
             }

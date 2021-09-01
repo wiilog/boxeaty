@@ -228,9 +228,7 @@ class CounterOrderController extends AbstractController {
             $box->setLocation($client->getOutLocation())
                 ->setState(BoxStateService::STATE_BOX_CONSUMER);
 
-            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-            $boxRecordService->persist($box, $tracking);
-            $boxRecordService->persist($box, $record);
+            $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
         }
 
         foreach ($tickets as $ticket) {
@@ -268,9 +266,7 @@ class CounterOrderController extends AbstractController {
                 $box->setState(BoxStateService::STATE_BOX_CLIENT)
                     ->setLocation($previousMovement ? $previousMovement->getLocation() : null);
 
-                [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-                $boxRecordService->persist($box, $tracking);
-                $boxRecordService->persist($box, $record);
+                $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
             }
 
             foreach ($order->getDepositTickets() as $depositTicket) {

@@ -183,12 +183,7 @@ class ApiController extends AbstractController {
                 ->setLocation($kiosk->getOffset())
                 ->setComment($content->comment ?? null);
 
-            [$tracking, $record] = $boxRecordService->generateBoxRecords(
-                $box, $previous, $this->getUser()
-            );
-
-            $boxRecordService->persist($box, $tracking);
-            $boxRecordService->persist($box, $record);
+            $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
         }
 
         $manager->flush();
@@ -250,9 +245,7 @@ class ApiController extends AbstractController {
                 ->setLocation($kiosk)
                 ->setComment($content->comment ?? null);
 
-            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous);
-            $boxRecordService->persist($box, $tracking);
-            $boxRecordService->persist($box, $record);
+            $boxRecordService->generateBoxRecords($box, $previous);
 
             $manager->flush();
 
@@ -589,9 +582,7 @@ class ApiController extends AbstractController {
                 $previous = clone $box;
                 $box->setLocation($offset);
 
-                [$tracking, $record] = $service->generateBoxRecords($box, $previous, $this->getUser());
-                $service->persist($box, $tracking);
-                $service->persist($box, $record);
+                $service->generateBoxRecords($box, $previous, $this->getUser());
             }
 
             $manager->flush();
@@ -630,9 +621,7 @@ class ApiController extends AbstractController {
                 $box->setLocation($location)
                     ->setState(BoxStateService::STATE_BOX_CLIENT);
 
-                [$tracking, $record] = $service->generateBoxRecords($box, $previous, $this->getUser());
-                $service->persist($box, $tracking);
-                $service->persist($box, $record);
+                $service->generateBoxRecords($box, $previous, $this->getUser());
             }
 
             $manager->flush();
@@ -792,8 +781,8 @@ class ApiController extends AbstractController {
                 ->setQuality($chosenQuality);
 
             [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-            $boxRecordService->persist($box, $tracking->setState(BoxStateService::STATE_RECORD_IDENTIFIED));
-            $boxRecordService->persist($box, $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED));
+            $tracking->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
+            $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
         }
 
         $manager->flush();
@@ -919,9 +908,7 @@ class ApiController extends AbstractController {
                             ->setLocation($box->getLocation()->getOffset())
                             ->setState(BoxStateService::STATE_BOX_UNAVAILABLE);
 
-                        [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $user, $date);
-                        $boxRecordService->persist($box, $tracking);
-                        $boxRecordService->persist($box, $record);
+                        $boxRecordService->generateBoxRecords($box, $previous, $user, $date);
 
                         $preparationLine->addBox($box);
                     }
@@ -1090,8 +1077,8 @@ class ApiController extends AbstractController {
                     ->setQuality($chosenQuality);
 
                 [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-                $boxRecordService->persist($box, $tracking->setState(BoxStateService::STATE_RECORD_IDENTIFIED));
-                $boxRecordService->persist($box, $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED));
+                $tracking->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
+                $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
             }
         }
 
@@ -1143,9 +1130,7 @@ class ApiController extends AbstractController {
                     ->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
                     ->setLocation($dropLocation);
 
-                [$tracking, $record] = $boxRecordService->generateBoxRecords($crate, $previous, $this->getUser());
-                $boxRecordService->persist($crate, $tracking);
-                $boxRecordService->persist($crate, $record);
+                $boxRecordService->generateBoxRecords($crate, $previous, $this->getUser());
             }
 
             $collectStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_COLLECT_FINISHED]);

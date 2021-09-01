@@ -89,13 +89,13 @@ class BoxRecord {
     }
 
     public function setBox(?Box $box): self {
-        $previous = $this->getBox();
-        if ($previous) {
-            $previous->removeBoxRecord($this);
+        if($this->box && $this->box !== $box) {
+            $this->box->removeBoxRecord($this);
         }
-
         $this->box = $box;
-        $box->addBoxRecord($this);
+        if($box) {
+            $box->addBoxRecord($this);
+        }
 
         return $this;
     }

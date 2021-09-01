@@ -10,6 +10,9 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class BoxRecordService {
 
+    private const TRACKING_MOVEMENT_FIELDS = ["location"];
+    private const BOX_HISTORY_FIELDS = ["state", "crate", "quality", "comment"];
+
     /** @Required */
     public EntityManagerInterface $manager;
 
@@ -20,17 +23,14 @@ class BoxRecordService {
         $currentValues = $this->extract($box);
         $previousValues = $this->extract($previous);
 
-        if ($previousValues["location"] != $currentValues["location"]) {
-            $tracking = $this->createBoxRecord($box, true, $date);
-            $tracking->setUser($user);
+        if ($this->isDifferent($currentValues, $previousValues, self::TRACKING_MOVEMENT_FIELDS)) {
+            $tracking = $this->createBoxRecord($box, true, $user, $date);
+            $this->persist($box, $tracking);
         }
 
-        if ($previousValues["state"] != $currentValues["state"] ||
-            $previousValues["crate"] != $currentValues["crate"] ||
-            $previousValues["quality"] != $currentValues["quality"] ||
-            $previousValues["comment"] != $currentValues["comment"]) {
-            $record = $this->createBoxRecord($box, false, $date);
-            $record->setUser($user);
+        if ($this->isDifferent($currentValues, $previousValues, self::BOX_HISTORY_FIELDS)) {
+            $record = $this->createBoxRecord($box, false, $user, $date);
+            $this->persist($box, $record);
         }
 
         return [$tracking ?? null, $record ?? null];
@@ -43,9 +43,17 @@ class BoxRecordService {
         }
     }
 
-    private function createBoxRecord(Box $box, bool $trackingMovement, ?DateTime $date = null): BoxRecord {
+    public function remove(?BoxRecord $record, EntityManagerInterface $manager = null) {
+        if ($record) {
+            $record->setBox(null);
+            ($manager ?? $this->manager)->remove($record);
+        }
+    }
+
+    private function createBoxRecord(Box $box, bool $trackingMovement, ?User $user, ?DateTime $date = null): BoxRecord {
         return (new BoxRecord())
             ->setDate($date ?? new DateTime())
+            ->setUser($user)
             ->setTrackingMovement($trackingMovement)
             ->copyBox($box);
     }
@@ -58,6 +66,16 @@ class BoxRecordService {
             "quality" => $box && $box->getQuality() ? $box->getQuality()->getId() : null,
             "comment" => $box ? $box->getComment() : null,
         ];
+    }
+
+    private function isDifferent(array $a, array $b, array $fields): bool {
+        foreach($fields as $field) {
+            if($a[$field] != $b[$field]) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }
