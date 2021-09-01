@@ -272,3 +272,11 @@ input{
     color: $blue;
     margin: 10px 0 25px;
 }
+
+.comment-container {
+    background: $grey;
+    width: 50%;
+    padding: 5px;
+    border-radius: 5px;
+    overflow-wrap: break-word;
+}

@@ -6,7 +6,7 @@
             <input type="hidden" name="clientOrder" value="{{ clientOrder.id }}"/>
             <div class="body">
                 <div class="validationClientOrder">
-                    <div class="header-section">
+                    <div class="header-section mt-2 mb-4">
                         <h2 class="header-section-label">Information</h2>
                     </div>
                     <div class="row justify-content-between">
@@ -34,9 +34,9 @@
                     </div>
 
                     <span class="bigTxt">Commentaire pour le livreur <br></span>
-                    <span class="recap">{{ clientOrder.comment|raw }}</span>
+                    <div class="comment-container">{{ clientOrder.comment|raw }}</div>
 
-                    <div class="header-section">
+                    <div class="header-section mt-4 mb-4">
                         <h2 class="header-section-label">Livraison</h2>
                     </div>
                     <span class="bigTxt"> Date de livraison : {{ clientOrder.expectedDelivery|format_helper('dateMonth') }}</span>
@@ -71,7 +71,7 @@
                                 <div class="col-12 text-center">Aucune Box à afficher</div>
                             </div>
                         {% endif %}
-                        <div class="header-section">
+                        <div class="header-section mt-4 mb-4">
                             <h2 class="header-section-label">Montant de la commande</h2>
                         </div>
 
