@@ -268,7 +268,7 @@ function checkStock(modal, data) {
                 for(const boxTypeData of quantityErrors) {
                     $quantitiesInformation.append(`
                     <label class="ml-2">
-                        Box Type ${boxTypeData.name} - Quantité commandée ${boxTypeData.orderedQuantity} - dispo en stock ${boxTypeData.availableQuantity} en propriété ${boxTypeData.client}
+                        <strong>${boxTypeData.name}</strong> : Quantité commandée <strong>${boxTypeData.orderedQuantity}</strong> - disponible en stock <strong>${boxTypeData.availableQuantity}</strong> en propriété <strong>${boxTypeData.client}</strong>
                     </label>
                 `);
                 }

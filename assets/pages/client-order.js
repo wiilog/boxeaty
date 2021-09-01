@@ -315,8 +315,13 @@ function getTimeLine($modal, clientOrder) {
 function addSelectedBoxTypeToCart($modal) {
     const $select2 = $modal.find('[name="boxType"]');
     const [typeBoxData] = $select2.select2('data');
-    if (typeBoxData && !$modal.find(`.cart-container > [data-id=${typeBoxData.id}]`).exists()) {
-        addBoxTypeToCart($modal, typeBoxData, true);
+    const defaultCrateType = $('[name=defaultCrateType]').val();
+    if(typeBoxData.volume > defaultCrateType) {
+        Flash.add(`warning`, `Le volume du type de Box <strong>${typeBoxData.name}</strong> est supérieur à celui du type de caisse par défaut`)
+    } else {
+        if (typeBoxData && !$modal.find(`.cart-container > [data-id=${typeBoxData.id}]`).exists()) {
+            addBoxTypeToCart($modal, typeBoxData, true);
+        }
     }
     $select2.val(null).trigger("change");
 }

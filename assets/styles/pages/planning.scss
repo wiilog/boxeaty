@@ -165,8 +165,8 @@
         background-color: $grey;
         border-radius: 8px;
         padding: 4px;
-        min-height: 50px;
-        overflow-x: scroll;
+        min-height: 180px;
+        overflow-x: auto;
         flex: 1 1 auto;
 
         .order {
