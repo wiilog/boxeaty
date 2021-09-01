@@ -316,13 +316,13 @@ class PlanningController extends AbstractController {
 
             $manager->persist($preparation);
 
-            if ($order->getClient()->isMailNotificationOrderPreparation()) {
-                $content = $this->renderView("emails/mail_delivery_order.html.twig", [
-                    "order" => $order,
-                ]);
+            $deliverer = $order->getDeliveryRound()->getDeliverer();
+            $content = $this->renderView("emails/delivery_round.html.twig", [
+                "expectedDelivery" => $order->getExpectedDelivery(),
+                "deliveryRound" => $order->getDeliveryRound()
+            ]);
 
-                $mailer->send($order->getClient()->getContact(), "Commande en préparation", $content);
-            }
+            $mailer->send($deliverer, "BoxEaty - Affectation de tournée", $content);
         }
 
         $manager->flush();

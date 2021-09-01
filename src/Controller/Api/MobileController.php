@@ -559,22 +559,21 @@ class MobileController extends AbstractController {
 
                 $entityManager->flush();
 
-                $mailer->send(
-                    $clientOrder->getDeliveryRound()->getDeliverer(),
-                    "BoxEaty - Affectation de tournée",
-                    $this->renderView("emails/delivery_round.html.twig", [
-                        "expectedDelivery" => $clientOrder->getExpectedDelivery(),
-                        "deliveryRound" => $clientOrder->getDeliveryRound()
-                    ])
-                );
+                if ($clientOrder->getClient()->isMailNotificationOrderPreparation()) {
+                    $content = $this->renderView("emails/mail_delivery_order.html.twig", [
+                        "order" => $clientOrder,
+                    ]);
+
+                    $mailer->send($clientOrder->getClient()->getContact(), "Commande en préparation", $content);
+                }
 
                 return $this->json([
-                    'success' => true,
+                    "success" => true,
                 ]);
             } else {
                 return $this->json([
-                    'success' => false,
-                    'message' => $result['message']
+                    "success" => false,
+                    "message" => $result["message"]
                 ]);
             }
         }
