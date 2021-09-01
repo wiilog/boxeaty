@@ -7,6 +7,7 @@ use App\Entity\BoxRecord;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use App\Service\BoxStateService;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -215,4 +216,21 @@ class BoxRecordRepository extends EntityRepository {
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    public function findCurrentBoxRecord(Box $box): ?BoxRecord {
+        return $this->createQueryBuilder("record")
+            ->andWhere("record.box = :box")
+            ->andWhere("record.trackingMovement = 0 OR record.state IN (:packingStates)")
+            ->orderBy("record.date", Criteria::DESC)
+            ->addOrderBy("record.id", Criteria::DESC)
+            ->setMaxResults(1)
+            ->setParameter("box", $box)
+            ->setParameter("packingStates", [
+                BoxStateService::STATE_RECORD_PACKING,
+                BoxStateService::STATE_RECORD_UNPACKING
+            ])
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 }

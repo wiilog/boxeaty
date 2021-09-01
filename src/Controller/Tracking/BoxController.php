@@ -112,17 +112,9 @@ class BoxController extends AbstractController {
                 ->setIsBox($content->box);
             $manager->persist($box);
 
-            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, [], $this->getUser());
-
-            if ($tracking) {
-                $tracking->setBox($box);
-                $manager->persist($tracking);
-            }
-
-            if ($record) {
-                $record->setBox($box);
-                $manager->persist($record);
-            }
+            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, null, $this->getUser());
+            $boxRecordService->persist($box, $tracking);
+            $boxRecordService->persist($box, $record);
 
             $manager->flush();
 
@@ -185,15 +177,12 @@ class BoxController extends AbstractController {
         }
 
         if ($form->isValid()) {
-            $oldLocation = $box->getLocation();
-            $oldState = $box->getState();
-            $oldComment = $box->getComment();
-
             $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
             $owner = isset($content->owner) ? $manager->getRepository(Client::class)->find($content->owner) : null;
             $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
             $type = isset($content->type) ? $manager->getRepository(BoxType::class)->find($content->type) : null;
 
+            $previous = clone $box;
             $box->setNumber($content->number)
                 ->setType($type)
                 ->setLocation($location)
@@ -203,25 +192,9 @@ class BoxController extends AbstractController {
                 ->setComment($content->comment ?? null)
                 ->setIsBox($content->box);
 
-            [$tracking, $record] = $boxRecordService->generateBoxRecords(
-                $box,
-                [
-                    'location' => $oldLocation,
-                    'state' => $oldState,
-                    'comment' => $oldComment,
-                ],
-                $this->getUser()
-            );
-
-            if ($tracking) {
-                $tracking->setBox($box);
-                $manager->persist($tracking);
-            }
-
-            if ($record) {
-                $record->setBox($box);
-                $manager->persist($record);
-            }
+            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+            $boxRecordService->persist($box, $tracking);
+            $boxRecordService->persist($box, $record);
 
             $manager->flush();
 
@@ -298,7 +271,8 @@ class BoxController extends AbstractController {
         $length = 10;
 
         $boxMovementsResult = $boxRecordRepository->getBoxRecords($box, $start, $length, $search);
-        $currentRecord = $box->getCurrentBoxRecord();
+        $currentRecord = $boxRecordRepository->findCurrentBoxRecord($box);
+
         return $this->json([
             "success" => true,
             "isTail" => ($start + $length) >= $boxMovementsResult['totalCount'],
@@ -331,9 +305,9 @@ class BoxController extends AbstractController {
     }
 
     /**
-     * @Route("/add-box", name="add_box_in_crate", options={"expose": true}, methods={"GET"})
+     * @Route("/add-box", name="box_add_crate", options={"expose": true}, methods={"GET"})
      */
-    public function addBoxInCrate(Request                $request,
+    public function addBoxToCrate(Request                $request,
                                   EntityManagerInterface $entityManager,
                                   BoxRecordService       $boxRecordService) {
 
@@ -350,17 +324,14 @@ class BoxController extends AbstractController {
             ]);
         }
 
-        $box->setCrate($crate);
+        $previous = clone $box;
+        $box->setCrate($crate)
+            ->setLocation($crate->getLocation());
 
-        $tracking = $boxRecordService->createBoxRecord($box, true);
+        [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+        $boxRecordService->persist($box, $tracking->setState(BoxStateService::STATE_RECORD_PACKING));
+        $boxRecordService->persist($box, $record->setState(BoxStateService::STATE_RECORD_PACKING));
 
-        $tracking
-            ->setBox($box)
-            ->setUser($this->getUser())
-            ->setLocation($crate->getLocation())
-            ->setCrate($crate)
-            ->setState(BoxStateService::STATE_RECORD_PACKING);
-        $entityManager->persist($tracking);
         $entityManager->flush();
 
         return $this->json([
@@ -371,12 +342,12 @@ class BoxController extends AbstractController {
     }
 
     /**
-     * @Route("/supprimer-box-in-crate/template/{box}", name="box_delete_in_crate_template", options={"expose": true})
+     * @Route("/supprimer-box-in-crate/template/{box}", name="box_remove_crate_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
     public function deleteBoxInCrateTemplate(Box $box): Response {
         return $this->json([
-            "submit" => $this->generateUrl("box_delete_in_crate", ["box" => $box->getId()]),
+            "submit" => $this->generateUrl("box_remove_crate", ["box" => $box->getId()]),
             "template" => $this->renderView("tracking/box/modal/delete_box_in_crate.html.twig", [
                 "box" => $box,
             ])
@@ -384,29 +355,24 @@ class BoxController extends AbstractController {
     }
 
     /**
-     * @Route("/supprimer-box-in-crate", name="box_delete_in_crate", options={"expose": true})
+     * @Route("/supprimer-box-in-crate", name="box_remove_crate", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function deleteBoxInCrate(Request                $request,
-                                     EntityManagerInterface $entityManager,
-                                     BoxRecordService       $boxRecordService): Response {
+    public function removeBoxFromCrate(Request                $request,
+                                       EntityManagerInterface $entityManager,
+                                       BoxRecordService       $boxRecordService): Response {
 
         /** @var Box $box */
         $box = $entityManager->getRepository(Box::class)->find($request->query->get("box"));
 
         $oldCrate = $box->getCrate();
-
-        $tracking = $boxRecordService->createBoxRecord($box, true);
-
-        $tracking
-            ->setBox($box)
-            ->setUser($this->getUser())
-            ->setLocation($oldCrate->getLocation())
-            ->setCrate($oldCrate)
-            ->setState(BoxStateService::STATE_RECORD_UNPACKING);
-
+        $previous = clone $box;
         $box->setCrate(null);
-        $entityManager->persist($tracking);
+
+        [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+        $boxRecordService->persist($box, $tracking->setState(BoxStateService::STATE_RECORD_UNPACKING));
+        $boxRecordService->persist($box, $record->setState(BoxStateService::STATE_RECORD_UNPACKING));
+
         $entityManager->flush();
 
         return $this->json([

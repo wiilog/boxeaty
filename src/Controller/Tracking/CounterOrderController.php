@@ -224,30 +224,13 @@ class CounterOrderController extends AbstractController {
             ->setDepositTicketPrice($this->service->getTicketsPrice());
 
         foreach ($boxes as $box) {
-            $oldLocation = $box->getLocation();
-            $oldState = $box->getState();
+            $previous = clone $box;
+            $box->setLocation($client->getOutLocation())
+                ->setState(BoxStateService::STATE_BOX_CONSUMER);
 
-            $box->setLocation($client->getOutLocation());
-            $box->setState(BoxStateService::STATE_BOX_CONSUMER);
-
-            [$tracking, $record] = $boxRecordService->generateBoxRecords(
-                $box,
-                [
-                    'location' => $oldLocation,
-                    'state' => $oldState,
-                ],
-                $this->getUser()
-            );
-
-            if ($tracking) {
-                $tracking->setBox($box);
-                $manager->persist($tracking);
-            }
-
-            if ($record) {
-                $record->setBox($box);
-                $manager->persist($record);
-            }
+            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+            $boxRecordService->persist($box, $tracking);
+            $boxRecordService->persist($box, $record);
         }
 
         foreach ($tickets as $ticket) {
@@ -279,34 +262,15 @@ class CounterOrderController extends AbstractController {
 
         if ($order) {
             foreach ($order->getBoxes() as $box) {
-                $oldLocation = $box->getLocation();
-                $oldState = $box->getState();
-                $oldComment = $box->getComment();
-
                 $previousMovement = $manager->getRepository(BoxRecord::class)->findPreviousTrackingMovement($box);
 
+                $previous = clone $box;
                 $box->setState(BoxStateService::STATE_BOX_CLIENT)
                     ->setLocation($previousMovement ? $previousMovement->getLocation() : null);
 
-                [$tracking, $record] = $boxRecordService->generateBoxRecords(
-                    $box,
-                    [
-                        'location' => $oldLocation,
-                        'state' => $oldState,
-                        'comment' => $oldComment
-                    ],
-                    $this->getUser()
-                );
-
-                if ($tracking) {
-                    $tracking->setBox($box);
-                    $manager->persist($tracking);
-                }
-
-                if ($record) {
-                    $record->setBox($box);
-                    $manager->persist($record);
-                }
+                [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+                $boxRecordService->persist($box, $tracking);
+                $boxRecordService->persist($box, $record);
             }
 
             foreach ($order->getDepositTickets() as $depositTicket) {

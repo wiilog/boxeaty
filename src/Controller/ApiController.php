@@ -177,34 +177,18 @@ class ApiController extends AbstractController {
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk ?? $request->request->get("id"));
 
         foreach ($kiosk->getBoxes() as $box) {
-            $user = $this->getUser();
-            $oldLocation = $box->getLocation();
-            $oldState = $box->getState();
-            $oldComment = $box->getComment();
+            $previous = clone $box;
 
             $box->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
                 ->setLocation($kiosk->getOffset())
                 ->setComment($content->comment ?? null);
 
             [$tracking, $record] = $boxRecordService->generateBoxRecords(
-                $box,
-                [
-                    'location' => $oldLocation,
-                    'state' => $oldState,
-                    'comment' => $oldComment
-                ],
-                $user instanceof User ? $user : null
+                $box, $previous, $this->getUser()
             );
 
-            if ($tracking) {
-                $tracking->setBox($box);
-                $manager->persist($tracking);
-            }
-
-            if ($record) {
-                $record->setBox($box);
-                $manager->persist($record);
-            }
+            $boxRecordService->persist($box, $tracking);
+            $boxRecordService->persist($box, $record);
         }
 
         $manager->flush();
@@ -256,9 +240,7 @@ class ApiController extends AbstractController {
         ]);
 
         if ($box && $box->getType() && $box->getOwner()) {
-            $oldLocation = $box->getLocation();
-            $oldState = $box->getState();
-            $oldComment = $box->getComment();
+            $previous = clone $box;
 
             $kiosk->setDeposits($kiosk->getDeposits() + 1);;
 
@@ -268,25 +250,9 @@ class ApiController extends AbstractController {
                 ->setLocation($kiosk)
                 ->setComment($content->comment ?? null);
 
-            [$tracking, $record] = $boxRecordService->generateBoxRecords(
-                $box,
-                [
-                    'location' => $oldLocation,
-                    'state' => $oldState,
-                    'comment' => $oldComment
-                ],
-                null
-            );
-
-            if ($tracking) {
-                $tracking->setBox($box);
-                $manager->persist($tracking);
-            }
-
-            if ($record) {
-                $record->setBox($box);
-                $manager->persist($record);
-            }
+            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous);
+            $boxRecordService->persist($box, $tracking);
+            $boxRecordService->persist($box, $record);
 
             $manager->flush();
 
@@ -617,21 +583,15 @@ class ApiController extends AbstractController {
 
             $line->setTaken(true);
 
-            $previous = $crate->getLocation();
-            $location = $previous ? $previous->getOffset() : null;
+            $offset = $crate->getLocation() ? $crate->getLocation()->getOffset() : null;
 
             foreach (Stream::from([$crate], $crate->getContainedBoxes()) as $box) {
-                if ($location) {
-                    $box->setLocation($location);
-                }
+                $previous = clone $box;
+                $box->setLocation($offset);
 
-                [$tracking] = $service->generateBoxRecords($box, [
-                    "location" => $previous,
-                ], $this->getUser());
-
-                if ($tracking) {
-                    $manager->persist($tracking);
-                }
+                [$tracking, $record] = $service->generateBoxRecords($box, $previous, $this->getUser());
+                $service->persist($box, $tracking);
+                $service->persist($box, $record);
             }
 
             $manager->flush();
@@ -661,24 +621,18 @@ class ApiController extends AbstractController {
 
             $line->setDeposited(true);
 
-            $previous = $crate->getLocation();
             $location = $order->getClient()->getLocations()
                 ->filter(fn(Location $location) => $location->getType() === Location::RECEPTION)
                 ->first();
 
             foreach (Stream::from([$crate], $crate->getContainedBoxes()) as $box) {
-                if ($location) {
-                    $box->setLocation($location)
-                        ->setState(BoxStateService::STATE_BOX_CLIENT);
-                }
+                $previous = clone $box;
+                $box->setLocation($location)
+                    ->setState(BoxStateService::STATE_BOX_CLIENT);
 
-                [$tracking] = $service->generateBoxRecords($box, [
-                    "location" => $previous,
-                ], $this->getUser());
-
-                if ($tracking) {
-                    $manager->persist($tracking);
-                }
+                [$tracking, $record] = $service->generateBoxRecords($box, $previous, $this->getUser());
+                $service->persist($box, $tracking);
+                $service->persist($box, $record);
             }
 
             $manager->flush();
@@ -813,37 +767,40 @@ class ApiController extends AbstractController {
      * @Authenticated
      */
     public function reverseTracking(EntityManagerInterface $manager, Request $request, BoxRecordService $boxRecordService): Response {
-
         $boxRepository = $manager->getRepository(Box::class);
         $locationRepository = $manager->getRepository(Location::class);
         $qualityRepository = $manager->getRepository(Quality::class);
 
-        $args = json_decode($request->getContent(), true);
-        $args['boxes'] = explode(',', $args['boxes']);
+        $content = json_decode($request->getContent());
+        $content->boxes = explode(",", $content->boxes);
+
         /**
          * @var $boxes Box[]
          */
         $boxes = [];
 
-        foreach ($args['boxes'] as $box) {
+        $boxes[] = $boxRepository->findOneBy(["number" => $content->crate]);
+        foreach ($content->boxes as $box) {
             $boxes[] = $boxRepository->find($box);
         }
-        $boxes[] = $boxRepository->findOneBy(['number' => $args['crate']]);
-        $chosenQuality = $qualityRepository->find($args['quality']);
-        $chosenLocation = $locationRepository->find($args['location']);
+
+        $chosenQuality = $qualityRepository->find($content->quality);
+        $chosenLocation = $locationRepository->find($content->location);
         foreach ($boxes as $box) {
-            $box
-                ->setLocation($chosenLocation)
+            $previous = clone $box;
+            $box->setLocation($chosenLocation)
                 ->setQuality($chosenQuality);
-            $record = $boxRecordService->createBoxRecord($box, true);
-            $record
-                ->setBox($box)
-                ->setState(BoxStateService::STATE_BOX_IDENTIFIED)
-                ->setUser($this->getUser());
-            $manager->persist($record);
+
+            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+            $boxRecordService->persist($box, $tracking->setState(BoxStateService::STATE_RECORD_IDENTIFIED));
+            $boxRecordService->persist($box, $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED));
         }
+
         $manager->flush();
-        return $this->json([]);
+
+        return $this->json([
+            "success" => true,
+        ]);
     }
 
     /**
@@ -958,27 +915,13 @@ class ApiController extends AbstractController {
                     $entityManager->persist($preparationLine);
 
                     foreach ($crateData['boxes'] as $box) {
-                        $olderValues = [
-                            'location' => $box->getLocation(),
-                            'state' => $box->getState(),
-                            'comment' => $box->getComment()
-                        ];
-
-                        $box
-                            ->setLocation($box->getLocation()->getOffset())
+                        $previous = clone $box;
+                        $box->setLocation($box->getLocation()->getOffset())
                             ->setState(BoxStateService::STATE_BOX_UNAVAILABLE);
 
-                        [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $olderValues, $user, $date);
-
-                        if ($tracking) {
-                            $tracking->setBox($box);
-                            $entityManager->persist($tracking);
-                        }
-
-                        if ($record) {
-                            $record->setBox($box);
-                            $entityManager->persist($record);
-                        }
+                        [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $user, $date);
+                        $boxRecordService->persist($box, $tracking);
+                        $boxRecordService->persist($box, $record);
 
                         $preparationLine->addBox($box);
                     }
@@ -1129,31 +1072,28 @@ class ApiController extends AbstractController {
      * @Authenticated
      */
     public function moving(EntityManagerInterface $manager, Request $request, BoxRecordService $boxRecordService): Response {
-
         $boxRepository = $manager->getRepository(Box::class);
         $locationRepository = $manager->getRepository(Location::class);
         $qualityRepository = $manager->getRepository(Quality::class);
 
-        $args = json_decode($request->getContent(), true);
-        $scannedBoxesAndCrates = Stream::from($args['scannedBoxesAndCrates'])->map(fn($box) => $box['number'])->toArray();
+        $content = json_decode($request->getContent());
+        $scannedBoxesAndCrates = Stream::from($content->scannedBoxesAndCrates)
+            ->map(fn($box) => $box["number"])
+            ->toArray();
 
-        $chosenQuality = $qualityRepository->find($args['quality']);
-        $chosenLocation = $locationRepository->find($args['location']);
+        $chosenQuality = $qualityRepository->find($content->quality);
+        $chosenLocation = $locationRepository->find($content->location);
 
         foreach ($scannedBoxesAndCrates as $scannedBoxOrCrate) {
             $box = $boxRepository->findOneBy(['number' => $scannedBoxOrCrate]);
             if ($box) {
-                $box
-                    ->setLocation($chosenLocation)
+                $previous = clone $box;
+                $box->setLocation($chosenLocation)
                     ->setQuality($chosenQuality);
 
-                $record = $boxRecordService->createBoxRecord($box, true);
-                $record
-                    ->setBox($box)
-                    ->setState(BoxStateService::STATE_BOX_IDENTIFIED)
-                    ->setUser($this->getUser());
-
-                $manager->persist($record);
+                [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+                $boxRecordService->persist($box, $tracking->setState(BoxStateService::STATE_RECORD_IDENTIFIED));
+                $boxRecordService->persist($box, $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED));
             }
         }
 
@@ -1200,34 +1140,14 @@ class ApiController extends AbstractController {
             $crates = $collect->getCrates();
 
             foreach ($crates as $crate) {
-                $user = $this->getUser();
-                $oldLocation = $crate->getLocation();
-                $oldState = $crate->getState();
-                $oldComment = $crate->getComment();
-
+                $previous = clone $crate;
                 $crate
                     ->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
                     ->setLocation($dropLocation);
 
-                [$tracking, $record] = $boxRecordService->generateBoxRecords(
-                    $crate,
-                    [
-                        'location' => $oldLocation,
-                        'state' => $oldState,
-                        'comment' => $oldComment
-                    ],
-                    $user instanceof User ? $user : null
-                );
-
-                if ($tracking) {
-                    $tracking->setBox($crate);
-                    $manager->persist($tracking);
-                }
-
-                if ($record) {
-                    $record->setBox($crate);
-                    $manager->persist($record);
-                }
+                [$tracking, $record] = $boxRecordService->generateBoxRecords($crate, $previous, $this->getUser());
+                $boxRecordService->persist($crate, $tracking);
+                $boxRecordService->persist($crate, $record);
             }
 
             $collectStatus = $manager->getRepository(Status::class)->findOneBy(['code' => Status::CODE_COLLECT_FINISHED]);

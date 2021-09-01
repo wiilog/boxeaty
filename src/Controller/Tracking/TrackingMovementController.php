@@ -123,17 +123,12 @@ class TrackingMovementController extends AbstractController {
 
             $newerMovement = $trackingMovementRepository->findNewerTrackingMovement($movement);
             if (!$newerMovement) {
+                $previous = clone $box;
                 $box->fromRecord($movement);
-                /** @noinspection PhpUnusedLocalVariableInspection */
-                [$ignored, $record] = $boxRecordService->generateBoxRecords(
-                    $box,
-                    ['state' => $oldState, 'comment' => $oldComment],
-                    $this->getUser()
-                );
-                if ($record) {
-                    $record->setBox($box);
-                    $manager->persist($record);
-                }
+
+                [, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+                $boxRecordService->persist($box, $record);
+
                 $manager->flush();
             }
 
@@ -186,11 +181,7 @@ class TrackingMovementController extends AbstractController {
         $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
 
         if ($form->isValid()) {
-            $oldState = $box->getState();
-            $oldComment = $box->getComment();
-
-            $movement
-                ->setDate(new DateTime($content->date))
+            $movement->setDate(new DateTime($content->date))
                 ->setQuality($quality)
                 ->setState($content->state ?? null)
                 ->setClient($client)
@@ -201,17 +192,12 @@ class TrackingMovementController extends AbstractController {
 
             $newerMovement = $trackingMovementRepository->findNewerTrackingMovement($movement);
             if (!$newerMovement) {
+                $previous = clone $box;
                 $box->fromRecord($movement);
-                /** @noinspection PhpUnusedLocalVariableInspection */
-                [$ignored, $record] = $boxRecordService->generateBoxRecords(
-                    $box,
-                    ['state' => $oldState, 'comment' => $oldComment],
-                    $this->getUser()
-                );
-                if ($record) {
-                    $record->setBox($box);
-                    $manager->persist($record);
-                }
+
+                [, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+                $boxRecordService->persist($box, $record);
+
                 $manager->flush();
             }
 

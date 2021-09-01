@@ -168,17 +168,9 @@ class ImportService {
                 ->setOwner($owner)
                 ->setComment($this->value(Import::COMMENT));
 
-            [$tracking, $record] = $this->boxRecordService->generateBoxRecords($box, [], $import->getUser());
-
-            if ($tracking) {
-                $tracking->setBox($box);
-                $this->manager->persist($tracking);
-            }
-
-            if ($record) {
-                $record->setBox($box);
-                $this->manager->persist($record);
-            }
+            [$tracking, $record] = $this->boxRecordService->generateBoxRecords($box, null, $import->getUser());
+            $this->boxRecordService->persist($box, $tracking);
+            $this->boxRecordService->persist($box, $record);
 
             if (!$box->getId()) {
                 $this->manager->persist($box);
@@ -296,7 +288,7 @@ class ImportService {
 
     private function value(string $column, bool $required = false, $default = self::NOT_SELECTED): ?string {
         if (!isset($this->import->getFieldsAssociation()[$column]) && !$required) {
-            return $default !== self::NOT_SELECTED ? $default : self::NOT_SELECTED;
+            return $default !== self::NOT_SELECTED ? $default : null;
         }
 
         $value = $this->data[$this->import->getFieldsAssociation()[$column] ?? null] ?? null;

@@ -37,7 +37,7 @@ $(() => {
 
     $(document).arrive('.delete-box-in-crate', function() {
         $(this).click(function() {
-            const ajax = AJAX.route(`POST`, `box_delete_in_crate_template`, {
+            const ajax = AJAX.route(`POST`, `box_remove_crate_template`, {
                 box: $(this).data('id'),
                 crate: $('#box-id').val()
             });
@@ -72,7 +72,7 @@ $(() => {
     $('.add-box-to-cart').on(`change`, function (){
         const box = $(this).val();
 
-        const ajax = AJAX.route(`GET`, `add_box_in_crate`, {
+        const ajax = AJAX.route(`GET`, `box_add_crate`, {
             box: box,
             crate: $('#box-id').val()
         });

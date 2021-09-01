@@ -6,29 +6,31 @@ use App\Entity\Box;
 use App\Entity\BoxRecord;
 use App\Entity\User;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 
 class BoxRecordService {
+
+    /** @Required */
+    public EntityManagerInterface $manager;
 
     /**
      * @return BoxRecord[]
      */
-    public function generateBoxRecords(Box $box, array $previousValues, ?User $loggedUser, ?DateTime $date = null): array {
-        $oldLocationId = isset($previousValues["location"]) ? $previousValues["location"]->getId() : null;
-        $oldState = $previousValues["state"] ?? null;
-        $oldComment = $previousValues["comment"] ?? null;
+    public function generateBoxRecords(Box $box, Box $previous, ?User $user = null, ?DateTime $date = null): array {
+        $previousValues = $this->extract($previous);
+        $currentValues = $this->extract($box);
 
-        $newLocationId = $box->getLocation() ? $box->getLocation()->getId() : null;
-        $newState = $box->getState();
-        $newComment = $box->getComment();
-
-        if ($newLocationId != $oldLocationId) {
+        if ($previousValues["location"] != $currentValues["location"]) {
             $tracking = $this->createBoxRecord($box, true, $date);
-            $tracking->setUser($loggedUser);
+            $tracking->setUser($user);
         }
 
-        if ($newState != $oldState || $newComment != $oldComment) {
+        if ($previousValues["state"] != $currentValues["state"] ||
+            $previousValues["crate"] != $currentValues["crate"] ||
+            $previousValues["quality"] != $currentValues["quality"] ||
+            $previousValues["comment"] != $currentValues["comment"]) {
             $record = $this->createBoxRecord($box, false, $date);
-            $record->setUser($loggedUser);
+            $record->setUser($user);
         }
 
         return [$tracking ?? null, $record ?? null];
@@ -39,6 +41,23 @@ class BoxRecordService {
             ->setDate($date ?? new DateTime())
             ->setTrackingMovement($trackingMovement)
             ->copyBox($box);
+    }
+
+    public function persist(Box $box, ?BoxRecord $record, EntityManagerInterface $manager = null) {
+        if ($record) {
+            $record->setBox($box);
+            ($manager ?? $this->manager)->persist($record);
+        }
+    }
+
+    private function extract(?Box $box): array {
+        return [
+            "crate" => $box && $box->getCrate() ? $box->getCrate()->getId() : null,
+            "location" => $box && $box->getLocation() ? $box->getLocation()->getId() : null,
+            "state" => $box ? $box->getState() : null,
+            "quality" => $box && $box->getQuality() ? $box->getQuality()->getId() : null,
+            "comment" => $box ? $box->getComment() : null,
+        ];
     }
 
 }
