@@ -22,11 +22,11 @@ class UniqueNumberService
     }
 
     public function createUniqueNumber(string $entity, ?EntityManagerInterface $manager = null): string {
-        $date = new DateTime('now', new DateTimeZone('Europe/Paris'));
+        $date = new DateTime("now", new DateTimeZone("Europe/Paris"));
         $entityRepository = ($manager ?? $this->entityManager)->getRepository($entity);
 
         if (!method_exists($entityRepository, "getLastNumberByDate")) {
-            throw new RuntimeException("Undefined getLastNumberByDate for $entity " . "repository");
+            throw new RuntimeException("Undefined getLastNumberByDate for $entity repository");
         }
 
         preg_match("/([^C]*)(C+)/", self::NUMBER_FORMAT, $matches);
@@ -38,8 +38,8 @@ class UniqueNumberService
         $counterFormat = $matches[2];
         $counterLen = strlen($counterFormat);
 
-        $dateStr = $date->format(substr(self::NUMBER_FORMAT, 0, -1 * $counterLen));
-        $lastNumber = $entityRepository->getLastNumberByDate($dateStr);
+        $dateStr = $date->format($dateFormat);
+        $lastNumber = $entityRepository->getLastNumberByDate($entity::PREFIX_NUMBER, $dateStr);
 
         $lastCounter = (
         (!empty($lastNumber) && $counterLen <= strlen($lastNumber))

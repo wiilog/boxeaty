@@ -945,17 +945,15 @@ class ApiController extends AbstractController {
 
                 $entityManager->flush();
 
-                $users = $userRepository->findBy(['deliveryAssignmentPreparationMail' => 1]);
-                if (!empty($users)) {
-                    $mailer->send(
-                        $users,
-                        "BoxEaty - Affectation de tournée",
-                        $this->renderView("emails/delivery_round.html.twig", [
-                            "expectedDelivery" => $preparation->getOrder()->getExpectedDelivery(),
-                            "deliveryRound" => $preparation->getOrder()->getDeliveryRound()
-                        ])
-                    );
-                }
+                $mailer->send(
+                    $clientOrder->getDeliveryRound()->getDeliverer(),
+                    "BoxEaty - Affectation de tournée",
+                    $this->renderView("emails/delivery_round.html.twig", [
+                        "expectedDelivery" => $clientOrder->getExpectedDelivery(),
+                        "deliveryRound" => $clientOrder->getDeliveryRound()
+                    ])
+                );
+
                 return $this->json([
                     'success' => true,
                 ]);

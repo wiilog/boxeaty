@@ -18,14 +18,14 @@ use DateTime;
  */
 class DeliveryRoundRepository extends EntityRepository {
 
-    public function getLastNumberByDate(string $date): ?string {
+    public function getLastNumberByDate(string $prefix, string $date): ?string {
         $result = $this->createQueryBuilder("delivery_round")
             ->select("delivery_round.number")
             ->andWhere("delivery_round.number LIKE :value")
             ->orderBy("delivery_round.id", "DESC")
             ->addOrderBy("delivery_round.number", "DESC")
             ->setMaxResults(1)
-            ->setParameter("value", ClientOrder::PREFIX_NUMBER . $date . "%")
+            ->setParameter("value", "$prefix$date%")
             ->getQuery()
             ->execute();
 

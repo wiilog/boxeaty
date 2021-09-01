@@ -66,14 +66,14 @@ class CollectRepository extends EntityRepository {
             ->getArrayResult();
     }
 
-    public function getLastNumberByDate(string $date): ?string {
+    public function getLastNumberByDate(string $prefix, string $date): ?string {
         $result = $this->createQueryBuilder('collect')
             ->select('collect.number')
             ->andWhere('collect.number LIKE :value')
             ->orderBy('collect.createdAt', 'DESC')
             ->addOrderBy('collect.number', 'DESC')
             ->setMaxResults(1)
-            ->setParameter('value', Collect::PREFIX_NUMBER . $date . '%')
+            ->setParameter('value', "$prefix$date%")
             ->getQuery()
             ->execute();
 
