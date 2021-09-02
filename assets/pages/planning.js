@@ -64,7 +64,7 @@ $document.ready(() => {
 
     $(`.start-delivery`).click(() => {
         const params = processForm($filters).asObject();
-        const ajax = AJAX.route(`POST`, `planning_delivery_initialize_template`, params);
+        const ajax = AJAX.route(`POST`, `planning_preparation_launch_initialize_template`, params);
 
         Modal.load(ajax, {
             processor: processSortables,
@@ -103,7 +103,7 @@ $document.ready(() => {
                             assignedForStart
                         };
 
-                        return AJAX.route(`POST`, `planning_delivery_launch`, params)
+                        return AJAX.route(`POST`, `planning_preparation_launch`, params)
                             .json()
                             .then(() => {
                                 reloadPlanning();
@@ -117,7 +117,7 @@ $document.ready(() => {
 
 
     $(document).on('click', `.validate`, function() {
-        const ajax = AJAX.route(`POST`, `planning_delivery_validate_template`, {
+        const ajax = AJAX.route(`POST`, `planning_preparation_launch_validate_template`, {
             order: $(this).closest(`.order`).data(`id`)
         });
 
@@ -234,7 +234,7 @@ function reloadPlanning() {
 
 function checkStock(modal, data) {
     return AJAX
-        .route(`POST`, `planning_delivery_start_check_stock`, data)
+        .route(`POST`, `planning_preparation_launch_check_stock`, data)
         .json()
         .then((res) => {
             if(res.success) {
@@ -301,7 +301,7 @@ function updateSubmitButtonLabel(modal) {
 
 function loadDeliveryLaunching(modal) {
     const params = processForm(modal.element.find(`.delivery-launching-filters`)).asObject();
-    AJAX.route(`POST`, `planning_delivery_launching_filter`, params)
+    AJAX.route(`POST`, `planning_preparation_launching_filter`, params)
         .json()
         .then((response) => {
             modal.element.find('.deliveries-container').empty()
