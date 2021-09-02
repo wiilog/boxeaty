@@ -173,7 +173,7 @@ class MobileController extends AbstractController {
             $deliveryTransitStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_TRANSIT]);
 
             foreach ($order->getDeliveryRound()->getOrders() as $o) {
-                if($o->hasStatusCode(Status::CODE_ORDER_AWAITING_DELIVERER)) {
+                if ($o->hasStatusCode(Status::CODE_ORDER_AWAITING_DELIVERER)) {
                     $clientOrderService->updateClientOrderStatus($o, $orderTransitStatus, $this->getUser());
                     $o->getDelivery()->setStatus($deliveryTransitStatus);
                 }
@@ -409,7 +409,7 @@ class MobileController extends AbstractController {
             $box->setLocation($chosenLocation)
                 ->setQuality($chosenQuality);
 
-            $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function(BoxRecord $record) {
+            $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function (BoxRecord $record) {
                 $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
             });
         }
@@ -648,7 +648,7 @@ class MobileController extends AbstractController {
         $isCrate = $request->query->get('isCrate');
         $crate = $request->query->get('crate');
 
-        if($isCrate) {
+        if ($isCrate) {
             $box = $manager->getRepository(Box::class)->findOneBy(['number' => $box, 'isBox' => 0]);
         } else {
             $box = $manager->getRepository(Box::class)->findOneBy(['number' => $box]);
@@ -738,58 +738,6 @@ class MobileController extends AbstractController {
     }
 
     /**
-     * @Route("/collects/{collect}", name="api_mobile_patch_collect", methods={"PATCH"})
-     * @Authenticated(Authenticated::MOBILE)
-     */
-    public function patchCollect(Collect                $collect,
-                                 Request                $request,
-                                 EntityManagerInterface $manager,
-                                 AttachmentService      $attachmentService,
-                                 BoxRecordService       $boxRecordService): JsonResponse {
-        $data = json_decode($request->getContent());
-
-        $validate = $data->validate ?? false;
-
-        if ($validate) {
-            $dropLocation = $manager->find(Location::class, $data->drop_location);
-            $crates = $collect->getCrates();
-
-            foreach ($crates as $crate) {
-                $previous = clone $crate;
-                $crate
-                    ->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
-                    ->setLocation($dropLocation);
-
-                $boxRecordService->generateBoxRecords($crate, $previous, $this->getUser());
-            }
-
-            $collectStatus = $manager->getRepository(Status::class)->findOneBy(["code" => Status::CODE_COLLECT_FINISHED]);
-
-            if ($data->data->photo) {
-                $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
-            }
-            $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
-            $comment = $data->data->comment;
-
-            $collect
-                ->setStatus($collectStatus)
-                ->setDropSignature($signature)
-                ->setDropPhoto($photo ?? null)
-                ->setDropComment($comment ?? null)
-                ->setTreatedAt(new DateTime())
-                ->setTokens((int)$data->token_amount);
-
-            $manager->flush();
-
-            return $this->json([
-                "success" => true
-            ]);
-        }
-
-        throw new BadRequestHttpException();
-    }
-
-    /**
      * @Route("/location", name="api_mobile_location")
      * @Authenticated(Authenticated::MOBILE)
      */
@@ -809,13 +757,13 @@ class MobileController extends AbstractController {
     }
 
     /**
-     * @Route("/collects", name="api_mobile_post_collect", methods={"POST"})
+     * @Route("/collects", name="api_mobile_create_collect", methods={"POST"})
      * @Authenticated(Authenticated::MOBILE)
      */
-    public function postCollect(Request                $request,
-                                EntityManagerInterface $manager,
-                                AttachmentService      $attachmentService,
-                                UniqueNumberService    $uniqueNumberService): JsonResponse {
+    public function createCollect(Request                $request,
+                                  EntityManagerInterface $manager,
+                                  AttachmentService      $attachmentService,
+                                  UniqueNumberService    $uniqueNumberService): JsonResponse {
         $data = json_decode($request->getContent());
 
         $statusRepository = $manager->getRepository(Status::class);
@@ -830,23 +778,22 @@ class MobileController extends AbstractController {
 
         $number = $uniqueNumberService->createUniqueNumber(Collect::class);
 
+        $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
         if ($data->data->photo) {
             $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
         }
-        $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
-        $comment = $data->data->comment;
 
         $crateNumbers = Stream::from($data->crates)->map(fn($crate) => $crate->number)->toArray();
         $crates = $boxRepository->findBy(['number' => $crateNumbers]);
 
         $collect = (new Collect())
-            ->setCreatedAt(new DateTime('now'))
+            ->setCreatedAt(new DateTime())
             ->setStatus($pendingStatus)
             ->setTokens((int)$data->token_amount)
             ->setNumber($number)
             ->setPickLocation($pickLocation)
             ->setClient($client)
-            ->setPickComment($comment ?? null)
+            ->setPickComment($data->data->comment ?? null)
             ->setPickSignature($signature)
             ->setPickPhoto($photo ?? null)
             ->setOperator($this->getUser())
@@ -860,7 +807,50 @@ class MobileController extends AbstractController {
         $manager->flush();
 
         return $this->json([
-            'success' => true
+            "success" => true
+        ]);
+    }
+
+    /**
+     * @Route("/collects/{collect}", name="api_mobile_validate_collect", methods={"PATCH"})
+     * @Authenticated(Authenticated::MOBILE)
+     */
+    public function validateCollect(Request                $request,
+                                    EntityManagerInterface $manager,
+                                    AttachmentService      $attachmentService,
+                                    BoxRecordService       $boxRecordService,
+                                    Collect                $collect): JsonResponse {
+        $data = json_decode($request->getContent());
+
+        $dropLocation = $manager->find(Location::class, $data->drop_location);
+        $crates = $collect->getCrates();
+
+        foreach ($crates as $crate) {
+            $previous = clone $crate;
+            $crate->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
+                ->setLocation($dropLocation);
+
+            $boxRecordService->generateBoxRecords($crate, $previous, $this->getUser());
+        }
+
+        $collectStatus = $manager->getRepository(Status::class)->findOneBy(["code" => Status::CODE_COLLECT_FINISHED]);
+
+        $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
+        if ($data->data->photo) {
+            $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
+        }
+
+        $collect->setStatus($collectStatus)
+            ->setDropSignature($signature)
+            ->setDropPhoto($photo ?? null)
+            ->setDropComment($data->data->comment ?? null)
+            ->setTreatedAt(new DateTime())
+            ->setTokens((int)$data->token_amount);
+
+        $manager->flush();
+
+        return $this->json([
+            "success" => true
         ]);
     }
 

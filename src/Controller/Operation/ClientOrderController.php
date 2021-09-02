@@ -176,7 +176,7 @@ class ClientOrderController extends AbstractController {
             $quantityLimit = $globalSettingRepository->getValue(GlobalSetting::AUTO_VALIDATION_BOX_QUANTITY);
 
             if ($numberDayLimit && $quantityLimit) {
-                $dayLimit = new DateTime('now + ' . $numberDayLimit . ' days');
+                $dayLimit = new DateTime("+$numberDayLimit days");
                 $autoValidationDelay = $clientOrder->getExpectedDelivery();
                 $autoValidationQuantity = $clientOrder->getBoxQuantity();
 
@@ -214,7 +214,7 @@ class ClientOrderController extends AbstractController {
                         EntityManagerInterface $entityManager,
                         ClientOrderService $clientOrderService): Response {
         $number = $uniqueNumberService->createUniqueNumber(ClientOrder::class);
-        $now = new DateTime('now');
+        $now = new DateTime();
 
         $clientOrder = new ClientOrder();
         $form = Form::create();
@@ -224,7 +224,7 @@ class ClientOrderController extends AbstractController {
             /** @var User $requester */
             $requester = $this->getUser();
             $statusRepository = $entityManager->getRepository(Status::class);
-            $status = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_TO_VALIDATE_CLIENT]);
+            $status = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_TO_VALIDATE_CLIENT]);
             $history = $clientOrderService->updateClientOrderStatus($clientOrder, $status, $requester);
             $clientOrder
                 ->setNumber($number)
