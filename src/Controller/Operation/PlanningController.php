@@ -56,22 +56,12 @@ class PlanningController extends AbstractController {
     public function content(Request $request, EntityManagerInterface $manager, bool $json = true): Response {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
 
-        if ($request->query->has("from")) {
-            $from = DateTime::createFromFormat("Y-m-d", $request->query->get("from"));
-        } else {
-            $from = new DateTime();
-        }
-
-        if ($request->query->has("to")) {
-            $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"))->modify("+1 day");
-        } else {
-            $to = (clone $from)->modify("+20 days");
-        }
-
+        $from = new DateTime($request->query->get("from") ?? "now");
+        $to = new DateTime($request->query->get("to") ?? "+20 days");
         $from->setTime(0, 0);
-        $to->setTime(23, 59);
+        $to->setTime(0, 0);
 
-        if ($from->diff($to, true)->days > 21) {
+        if ($from->diff($to, true)->days > 20) {
             return $this->json([
                 "success" => false,
                 "message" => "La planification ne peut afficher que 20 jours maximum"

@@ -4,14 +4,11 @@ import Modal, {clearForm, processForm} from "../modal";
 import "../styles/pages/planning.scss";
 import AJAX from "../ajax";
 import {findCoordinates, Map} from "../maps";
-import {DateTools} from "../util";
 import Flash from "../flash";
 import Sortable from "../sortable";
 
 $document.ready(() => {
     const $filters = $(`.filters`);
-
-    DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 20);
 
     $filters.find(`.filter`).click(function() {
         reloadPlanning();

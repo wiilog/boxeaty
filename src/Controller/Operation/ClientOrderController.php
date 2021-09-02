@@ -53,17 +53,14 @@ class ClientOrderController extends AbstractController {
         return $this->render("operation/client_order/index.html.twig", [
             "new_client_order" => new ClientOrder(),
             "requester" => $this->getUser(),
-            "deliveryMethods" => $deliveryMethod->findBy(["deleted" => false], ["name" => "ASC"]),
-            "orderTypes" => $orderTypeRepository->findSelectable(),
+            "delivery_methods" => $deliveryMethod->findBy(["deleted" => false], ["name" => "ASC"]),
+            "order_types" => $orderTypeRepository->findSelectable(),
             "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER,
-            "starterKit" => $boxTypeRepository->findStarterKit(),
-            "defaultCrateType" => $defaultCrateType->getVolume(),
-            "workFreeDay" => Stream::from($manager->getRepository(WorkFreeDay::class)->findAll())
-                ->map(fn(WorkFreeDay $workFreeDay) => [
-                    $workFreeDay->getDay(),
-                    $workFreeDay->getMonth()
-                ])
+            "starter_kit" => $boxTypeRepository->findStarterKit(),
+            "default_crate_type" => $defaultCrateType->getVolume(),
+            "work_free_day" => Stream::from($manager->getRepository(WorkFreeDay::class)->findAll())
+                ->map(fn(WorkFreeDay $workFreeDay) => [$workFreeDay->getDay(), $workFreeDay->getMonth()])
                 ->toArray()
         ]);
     }
@@ -73,6 +70,16 @@ class ClientOrderController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $params = json_decode($request->getContent(), true) ?? [];
+
+        $from = new DateTime($params["filters"]["from"] ?? "now");
+        $to = new DateTime($params["filters"]["to"] ?? "+30 days");
+        if($from->diff($to, true)->days > 30) {
+            return $this->json([
+                "success" => false,
+                "message" => "Le filtre sur les dates ne doit pas dépasser 30 jours",
+            ]);
+        }
+
         $orders = $manager->getRepository(ClientOrder::class)->findForDatatable($params, $this->getUser());
 
         $data = Stream::from($orders["data"])

@@ -6,12 +6,8 @@ import Modal from "../modal";
 import {StringHelper, URL} from "../util";
 import $ from "jquery";
 import Flash from "../flash";
-import {DateTools} from "../util";
-
 
 $(function() {
-    DateTools.manageDateLimits(`input[name=from]`, `input[name=to]`, 30);
-
     initOrderDatatable();
 
     const params = URL.getRequestQuery()
