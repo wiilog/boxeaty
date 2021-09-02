@@ -191,7 +191,7 @@ class ClientOrderController extends AbstractController {
             $entityManager->flush();
 
             return $this->json([
-                "success" => false,
+                "success" => true,
                 "message" => "La commande a été validée"
             ]);
         }
