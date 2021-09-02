@@ -42,9 +42,7 @@ class PlanningController extends AbstractController {
      * @HasPermission(Role::MANAGE_PLANNING)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
-        $now = date('Y-m-d');
         return $this->render("operation/planning/index.html.twig", [
-            "now" => date('Y-m-d', strtotime($now . '+ 1 days')),
             "content" => $this->content($request, $manager, false)->getContent(),
         ]);
     }
