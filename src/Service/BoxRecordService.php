@@ -19,18 +19,27 @@ class BoxRecordService {
     /**
      * @return BoxRecord[]
      */
-    public function generateBoxRecords(Box $box, ?Box $previous, ?User $user = null, ?DateTime $date = null): array {
+    public function generateBoxRecords(Box $box, ?Box $previous, ?User $user = null, ?callable $callback = null): array {
+        $date = new DateTime();
         $currentValues = $this->extract($box);
         $previousValues = $this->extract($previous);
 
         if ($this->isDifferent($currentValues, $previousValues, self::TRACKING_MOVEMENT_FIELDS)) {
             $tracking = $this->createBoxRecord($box, true, $user, $date);
             $this->persist($box, $tracking);
+
+            if($callback) {
+                $callback($tracking);
+            }
         }
 
         if ($this->isDifferent($currentValues, $previousValues, self::BOX_HISTORY_FIELDS)) {
             $record = $this->createBoxRecord($box, false, $user, $date);
             $this->persist($box, $record);
+
+            if($callback) {
+                $callback($record);
+            }
         }
 
         return [$tracking ?? null, $record ?? null];

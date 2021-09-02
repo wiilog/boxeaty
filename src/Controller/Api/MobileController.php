@@ -6,6 +6,7 @@ use App\Annotation\Authenticated;
 use App\Controller\AbstractController;
 use App\Entity\Attachment;
 use App\Entity\Box;
+use App\Entity\BoxRecord;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
 use App\Entity\ClientOrderLine;
@@ -409,9 +410,9 @@ class MobileController extends AbstractController {
             $box->setLocation($chosenLocation)
                 ->setQuality($chosenQuality);
 
-            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-            $tracking->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
-            $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
+            $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function(BoxRecord $record) {
+                $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
+            });
         }
 
         $manager->flush();
@@ -519,7 +520,6 @@ class MobileController extends AbstractController {
             $clientOrder = $preparation->getOrder();
             $result = $preparationService->handlePreparedCrates($entityManager, $clientOrder, $crates);
 
-            $date = new DateTime();
             $user = $this->getUser();
 
             if ($result['success']) {
@@ -535,7 +535,7 @@ class MobileController extends AbstractController {
                             ->setLocation($box->getLocation()->getOffset())
                             ->setState(BoxStateService::STATE_BOX_UNAVAILABLE);
 
-                        $boxRecordService->generateBoxRecords($box, $previous, $user, $date);
+                        $boxRecordService->generateBoxRecords($box, $previous, $user);
 
                         $preparationLine->addBox($box);
                     }
@@ -704,9 +704,9 @@ class MobileController extends AbstractController {
                 $box->setLocation($chosenLocation)
                     ->setQuality($chosenQuality);
 
-                [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-                $tracking->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
-                $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
+                $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function (BoxRecord $record) {
+                    $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
+                });
             }
         }
 
