@@ -68,19 +68,18 @@ class ExportController extends AbstractController
         foreach ($clientOrderLines as $clientOrderLine) {
             $boxType = $clientOrderLine['boxTypeId'];
 
-            $array = [
+            $clientOrderOneTimeServiceArray[] = [
                 "clientOrder" => $clientOrderLine['number'],
                 "boxTypeName" => $clientOrderLine['boxTypeName'],
                 "boxDelivered" => $clientOrderLine['lineQuantity'],
                 "tokenDelivered" => $clientOrderLine['deliveryTokens'],
                 "brokenBoxes" => $brokenBoxGroupedByType[$boxType] ?? 0,
-                "unitPrice" => $clientOrderLine['customUnitPrice'] ?? $clientOrderLine['boxTypePrice'],
+                "unitPrice" => $clientOrderLine['unitPrice'],
                 "paymentMode" => $clientOrderLine['paymentModes'],
-                "deliveryPrice" => intval($clientOrderLine['lineQuantity']) * floatval($clientOrderLine['boxTypePrice']),
+                "deliveryPrice" => intval($clientOrderLine['lineQuantity']) * floatval($clientOrderLine['unitPrice']),
                 "depositTicketUsed" => ($depositoryValidGroupedByType[$boxType] ?? 0) - ($depositorySpentGroupedByType[$boxType] ?? 0),
                 "automatic" => $clientOrderLine['automatic']
             ];
-            $clientOrderOneTimeServiceArray[] = $array;
         }
 
         $today = new DateTime();
@@ -155,7 +154,7 @@ class ExportController extends AbstractController
                 "clientOrder" => $clientOrderLine['number'],
                 "boxTypeName" => $clientOrderLine['boxTypeName'],
                 "boxAmount" => $clientOrderLine['lineQuantity'],
-                "unitPrice" => $clientOrderLine['customUnitPrice'] ?? $clientOrderLine['boxTypePrice'],
+                "unitPrice" => $clientOrderLine['unitPrice'],
                 "starterKitAmount" => FormatHelper::price($starterKit->getPrice()),
                 "deliveryPrice" => $clientOrderLine['deliveryPrice'],
                 "automatic" => $clientOrderLine['automatic'],

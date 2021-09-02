@@ -144,7 +144,11 @@ class ClientOrderController extends AbstractController {
 
         if (!$clientOrder->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
             || $requester !== $clientOrder->getRequester()) {
-            throw new NotFoundHttpException("La commande client est introuvable.");
+            return $this->json([
+                "success" => false,
+                "message" => "Vous ne pouvez pas valider cette commande",
+                "reload" => true,
+            ]);
         }
 
         return $this->json([
@@ -347,7 +351,11 @@ class ClientOrderController extends AbstractController {
 
         if (!$clientOrder->hasStatusCode(Status::CODE_ORDER_TO_VALIDATE_CLIENT)
             || $requester !== $clientOrder->getRequester()) {
-            throw new NotFoundHttpException('La commande client est introuvable.');
+            return $this->json([
+                "success" => false,
+                "message" => "Vous ne pouvez pas modifier cette commande",
+                "reload" => true,
+            ]);
         }
 
         $orderTypeRepository = $entityManager->getRepository(OrderType::class);

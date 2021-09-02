@@ -23,9 +23,9 @@ class ClientOrderLine {
     private ?int $quantity = null;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="decimal", precision=8, scale=2)
      */
-    private ?float $customUnitPrice = null;
+    private ?float $unitPrice = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=BoxType::class, inversedBy="clientOrderLines")
@@ -85,19 +85,14 @@ class ClientOrderLine {
         return $this;
     }
 
-    public function getCustomUnitPrice(): ?float {
-        return $this->customUnitPrice;
+    public function getUnitPrice(): ?float {
+        return $this->unitPrice;
     }
 
-    public function setCustomUnitPrice(float $customUnitPrice): self {
-        $this->customUnitPrice = $customUnitPrice;
+    public function setUnitPrice(float $unitPrice): self {
+        $this->unitPrice = $unitPrice;
 
         return $this;
     }
 
-    public function getUnitPrice(): ?float {
-        return $this->customUnitPrice
-            ?: ($this->boxType ? $this->boxType->getPrice() : null)
-                ?: null;
-    }
 }

@@ -94,8 +94,6 @@ class CratePatternLine
     }
 
     public function getUnitPrice(): ?float {
-        return $this->customUnitPrice
-            ?: ($this->boxType ? $this->boxType->getPrice() : null)
-            ?: null;
+        return $this->getCustomUnitPrice() ?: ($this->getBoxType() ? $this->getBoxType()->getPrice() : null);
     }
 }
