@@ -235,14 +235,13 @@ class MobileController extends AbstractController {
         $crate = $manager->getRepository(Box::class)->findOneBy(["number" => $data->crate]);
 
         if ($crate) {
-            $line = $order->getPreparation()
-                ->getLines()
+            $line = Stream::from($order->getPreparation()->getLines())
                 ->filter(fn(PreparationLine $line) => $line->getCrate()->getNumber() === $crate->getNumber())
                 ->first();
 
             $line->setDeposited(true);
 
-            $location = $order->getClient()->getLocations()
+            $location = Stream::from($order->getClient()->getLocations())
                 ->filter(fn(Location $location) => $location->getType() === Location::RECEPTION)
                 ->first();
 
