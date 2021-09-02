@@ -37,8 +37,4 @@ $(document).ready(() => {
             },
         }
     });
-
-    $(document).on(`change`, `input[name=redirectNewCounterOrder], input[name=showIndicatorsOnHome]`, function() {
-        $(this).parent().parent().find('.unique-choice').not(this).prop('checked', $(this).is('checked'));
-    });
 });

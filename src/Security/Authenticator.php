@@ -27,7 +27,6 @@ class Authenticator extends AbstractFormLoginAuthenticator {
     public const LOGIN_ERROR = "Identifiants incorrects";
     public const LOGIN_ROUTE = "login";
     public const HOME_ROUTE = "home";
-    public const ORDERS_LIST_ROUTE = "counter_orders_list";
     public const INDICATORS_ROUTE = "indicators_index";
 
     public const PASSWORD_ERROR = "Le mot de passe doit contenir au moins un chiffre, une majuscule et une minuscule. Il doit faire au moins 8 caractères.";
@@ -92,9 +91,7 @@ class Authenticator extends AbstractFormLoginAuthenticator {
             $token->getUser()->setLastLogin(new DateTime());
             $this->entityManager->flush();
 
-            if ($token->getUser()->getRole()->getRedirectNewCounterOrder()) {
-                return new RedirectResponse($this->urlGenerator->generate(self::ORDERS_LIST_ROUTE));
-            } else if ($token->getUser()->getRole()->getShowIndicatorsOnHome()) {
+            if ($token->getUser()->getRole()->isRedirectIndicators()) {
                 return new RedirectResponse($this->urlGenerator->generate(self::INDICATORS_ROUTE));
             }
         }

@@ -35,30 +35,33 @@
                 <div class="form-check form-switch">
                     <input class="form-check-input data" type="checkbox" name="allowEditOwnGroupOnly"
                            id="allow-edit-own-group-only" {{ role.allowEditOwnGroupOnly ? 'checked' }}>
-                    <label class="form-check-label" for="allow-edit-own-group-only">Autoriser uniquement pour son
-                        groupe</label>
-                </div>
-
-                <div class="form-check form-switch">
-                    <input class="form-check-input data unique-choice" type="checkbox" name="redirectNewCounterOrder"
-                           id="redirect-new-order-on-home" {{ role.redirectNewCounterOrder ? 'checked' }}>
-                    <label class="form-check-label" for="redirect-new-order-on-home">
-                        Rediriger vers nouvelle commande comptoir
+                    <label class="form-check-label" for="allow-edit-own-group-only">
+                        Autoriser uniquement pour son groupe
                     </label>
                 </div>
 
                 <div class="form-check form-switch">
-                    <input class="form-check-input data unique-choice" type="checkbox" name="showIndicatorsOnHome"
-                           id="show-indicators-on-home" {{ role.showIndicatorsOnHome ? 'checked' }}>
-                    <label class="form-check-label" for="show-indicators-on-home">Rediriger l'utilisateur vers la page
-                        des indicateurs</label>
+                    <input class="form-check-input data" type="checkbox" name="showCounterOrderScreen"
+                           id="redirect-new-order-on-home" {{ role.showCounterOrderScreen ? 'checked' }}>
+                    <label class="form-check-label" for="redirect-new-order-on-home">
+                        Ecran de nouvelle commande comptoir sur l'accueil
+                    </label>
+                </div>
+
+                <div class="form-check form-switch">
+                    <input class="form-check-input data unique-choice" type="checkbox" name="redirectIndicators"
+                           id="show-indicators-on-home" {{ role.redirectIndicators ? 'checked' }}>
+                    <label class="form-check-label" for="show-indicators-on-home">
+                        Rediriger l'utilisateur vers la page des indicateurs
+                    </label>
                 </div>
 
                 <div class="form-check form-switch">
                     <input class="form-check-input data" type="checkbox" name="receiveMailsNewAccounts"
                            id="receive-mails-new-accounts" {{ role.receiveMailsNewAccounts ? 'checked' }}>
-                    <label class="form-check-label" for="receive-mails-new-accounts">Réception mail création
-                        compte</label>
+                    <label class="form-check-label" for="receive-mails-new-accounts">
+                        Réception mail création compte
+                    </label>
                 </div>
             {% endif %}
         </div>
