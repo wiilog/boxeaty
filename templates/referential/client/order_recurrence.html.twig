@@ -1,0 +1,18 @@
+{% set orderRecurrence = clientOrderInformation.orderRecurrence is defined and clientOrderInformation ? clientOrderInformation.orderRecurrence : null %}
+{% set period = orderRecurrence is defined and orderRecurrence ? orderRecurrence.period : null %}
+<span class="body-text">
+    {% if orderRecurrence %}
+    <strong>{{ orderRecurrence ? orderRecurrence.crateAmount : '0' }} caisse{{ orderRecurrence and orderRecurrence.crateAmount > 1 ? 's' : '' }}</strong>{{ (period and period > 1) ? ', toutes les' : ' chaque' }}
+    <strong>{{ period and period > 1 ? orderRecurrence.period }} {{ (period and period > 1) ? 'semaines' : 'semaine' }}</strong> jusqu'au
+    <strong>{{ orderRecurrence ? orderRecurrence.end | format_helper('date') : '-' }}</strong>
+    {% else %}
+        <strong>Pas de récurrence</strong>
+    {% endif %}
+</span>
+<div class="d-flex justify-content-end mt-3">
+    {% if orderRecurrence %}
+        <button class="secondary delete-recurrence" data-id="{{ orderRecurrence ? orderRecurrence.id }}">Supprimer la récurrence</button>
+    {% endif %}
+    <button class="primary {{ orderRecurrence ? 'edit-order-recurrence' : 'add-order-recurrence' }}"
+            data-id="{{ orderRecurrence ? orderRecurrence.id }}">{{ orderRecurrence ? 'Modifier la récurrence' : 'Ajouter une récurrence' }}</button>
+</div>

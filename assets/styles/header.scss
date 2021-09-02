@@ -24,12 +24,32 @@ header {
         display: flex;
         flex-wrap: nowrap;
 
-        .current-user {
+        .user-container {
             display: flex;
             align-items: center;
             margin-right: 50px;
             font-size: 1.1rem;
             cursor: pointer;
+            position: relative;
+
+            button {
+                background-color: $blue;
+                border: none;
+                color: white;
+            }
+
+            .dropdown-menu {
+                inset: 2px auto auto 0 !important;
+                border-radius: 16px !important;
+
+                .dropdown-item {
+                    transition: color 200ms;
+
+                    &:hover {
+                        color: $orange;
+                    }
+                }
+            }
 
             img {
                 margin-right: 10px;
@@ -90,11 +110,6 @@ header {
 
                 .chevron {
                     width: 35px;
-                }
-
-                .icon {
-                    width: 15px;
-                    margin-right: 3px;
                 }
 
                 &:not(:last-child) {

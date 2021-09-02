@@ -7,14 +7,16 @@
     } %}
     {% include('filters/filter_items/client_item.html.twig') with {
         name: 'client',
-        placeholder: 'Propriété'
+        placeholder: 'Propriétaire'
     } %}
     {% include('filters/filter_items/any_location_item.html.twig') %}
     {% include('filters/filter_items/list_item.html.twig') with {
-        elements: constant('App\\Entity\\Box::NAMES'),
+        elements: constant('App\\Service\\BoxStateService::BOX_STATES'),
         name: 'state',
         placeholder: 'Etat'
     } %}
     {% include('filters/filter_items/quality_item.html.twig') %}
     {% include('filters/filter_items/group_item.html.twig') %}
+    {% include('filters/filter_items/depository_item.html.twig') %}
+    {% include('filters/filter_items/category_item.html.twig') %}
 {% endblock %}

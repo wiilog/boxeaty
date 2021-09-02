@@ -25,12 +25,15 @@ class LocationRepository extends EntityRepository {
         return $this->createQueryBuilder("location")
             ->select("IF(location.kiosk = 0, 'Emplacement', 'Borne') AS type")
             ->addSelect("location.name AS name")
-            ->addSelect("client.name AS client_name")
+            ->addSelect("join_depository.name AS depository")
+            ->addSelect("join_client.name AS client_name")
             ->addSelect("location.active AS active")
             ->addSelect("location.description AS description")
-            ->addSelect("COUNT(box) AS boxes")
             ->addSelect("location.capacity AS capacity")
-            ->leftJoin("location.client", "client")
+            ->addSelect("location.type AS locationType")
+            ->addSelect("COUNT(box) AS boxes")
+            ->leftJoin("location.client", "join_client")
+            ->leftJoin("location.depository", "join_depository")
             ->leftJoin(Box::class, "box", Join::WITH, "box.location = location.id")
             ->groupBy("location")
             ->getQuery()
@@ -46,7 +49,7 @@ class LocationRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "location");
 
         if ($search) {
-            $qb->join("location.client", "client")
+            $qb->leftJoin("location.client", "client")
                 ->andWhere($qb->expr()->orX(
                     "location.name LIKE :search",
                     "location.description LIKE :search",
@@ -57,12 +60,28 @@ class LocationRepository extends EntityRepository {
                 ->setParameter("exact_search", $search);
         }
 
-        if (!empty($params['order'])) {
+        foreach ($params["filters"] ?? [] as $name => $value) {
+            switch ($name) {
+                case "depository":
+                    $qb->andWhere("location.depository = :raw_value")
+                        ->setParameter("raw_value", $value);
+                    break;
+            }
+        }
+
+        if (!empty($params["order"])) {
             foreach ($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 if ($column === "client_name") {
                     $qb->leftJoin("location.client", "location_client")
                         ->addOrderBy("location_client.name", $order["dir"]);
+                } else if ($column === "container_amount") {
+                    $qb
+                        ->leftJoin('location.boxes', 'box')
+                        ->groupBy('location')
+                        ->addOrderBy("COUNT(box)", $order["dir"]);
+                } else if ($column === "location_type") {
+                    $qb->addOrderBy('location.type', $order["dir"]);
                 } else {
                     $qb->addOrderBy("location.$column", $order["dir"]);
                 }
@@ -95,7 +114,7 @@ class LocationRepository extends EntityRepository {
         }
 
         return $qb->select("location.id AS id, location.name AS text")
-            ->where("location.kiosk = 0")
+            ->andWhere("location.kiosk = 0")
             ->andWhere("location.name LIKE :search")
             ->andWhere("location.active = 1")
             ->setMaxResults(15)
@@ -114,7 +133,7 @@ class LocationRepository extends EntityRepository {
         }
 
         return $qb->select("kiosk.id AS id, kiosk.name AS text")
-            ->where("kiosk.kiosk = 1")
+            ->andWhere("kiosk.kiosk = 1")
             ->andWhere("kiosk.name LIKE :search")
             ->andWhere("kiosk.active = 1")
             ->setMaxResults(15)
@@ -133,7 +152,7 @@ class LocationRepository extends EntityRepository {
         }
 
         return $qb->select("location.id AS id, location.name AS text")
-            ->where("location.name LIKE :search")
+            ->andWhere("location.name LIKE :search")
             ->andWhere("location.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
@@ -144,9 +163,15 @@ class LocationRepository extends EntityRepository {
     public function getTotalDeposits(): int {
         return $this->createQueryBuilder("kiosk")
             ->select("SUM(kiosk.deposits)")
-            ->where("kiosk.kiosk = 1")
+            ->andWhere("kiosk.kiosk = 1")
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    public function getAll() {
+        return $this->createQueryBuilder("location")
+            ->getQuery()
+            ->getArrayResult();
     }
 
 }

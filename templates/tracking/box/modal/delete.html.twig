@@ -4,10 +4,15 @@
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
 
             <div class="delete-image"></div>
-            {% if box.depositTickets | length > 0 or box.orders | length > 0 %}
+            {% set cantDelete = (
+                box.depositTickets|length == 0
+                and box.boxPreparationLines|length == 0
+                and box.cratePreparationLines|length == 0
+            ) %}
+            {% if not cantDelete %}
                 <h1>Vous ne pouvez pas supprimer cette Box</h1>
                 <p class="text-center">
-                    Cette Box est liée à un ou plusieurs tickets-dépose ou commandes.<br>
+                    Cette Box / caisse est liée à un ou plusieurs tickets-dépose, commandes comptoir ou client.<br>
                     Vous ne pouvez pas la supprimer.
                 </p>
             {% else %}
@@ -16,7 +21,7 @@
             {% endif %}
             <input type="hidden" name="id" class="data">
 
-            {% if box.depositTickets | length == 0 and box.orders | length == 0 %}
+            {% if cantDelete %}
                 <div class="footer">
                     <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
                     <button type="submit" class="primary">Supprimer</button>

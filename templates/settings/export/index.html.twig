@@ -1,0 +1,91 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Paramétrage{% endblock %}
+{% block page %}Exports{% endblock %}
+
+
+{% block content %}
+    <div class="box exports">
+        <h1>
+            Liste des exports disponibles au format CSV
+        </h1>
+        <div class="row">
+            <div class="col-12 col-xl-2">
+                <span class="fs-5">Export général</span>
+            </div>
+            <div class="col">
+                <div class="d-flex">
+                    <button class="primary global-export"><i class="icon fas fa-download"></i>
+                        Export général
+                    </button>
+                    <span data-toggle="tooltip"
+                          class="d-flex align-items-center ms-3"
+                          title="Comprend Box, Mouvements, Tickets-consigne, Emplacements, Groupes, Types de Box, Utilisateurs, Rôles et Qualités.">
+                        <i class="fas fa-question-circle"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-12 col-xl-2">
+                <span class="fs-5">Export des commandes</span>
+            </div>
+            <div class="col">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="dates-filter d-flex align-items-start">
+                            <label class="dates d-flex align-items-center mt-0 pe-3">Du
+                                <input type="date" name="from" class="data from">
+                            </label>
+                                <label class="dates d-flex align-items-center mt-0">au
+                                    <input type="date" name="to" class="data">
+                                </label>
+                        </div>
+                        <span class="error" style="color:red"></span>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <div class="d-flex">
+                            <button class="primary export-one-time-service">
+                                <i class="icon fas fa-download"></i>
+                                 Prestation ponctuelle
+                            </button>
+                            <span data-toggle="tooltip" class="d-flex align-items-center ms-3"
+                                  title="Données commandes pour le type de Prestation ponctuelle">
+                                <i class="fas fa-question-circle"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <div class="d-flex">
+                            <button class="primary export-autonomous-management">
+                                <i class="icon fas fa-download"></i>
+                                Gestion autonome
+                            </button>
+                            <span data-toggle="tooltip" class="d-flex align-items-center ms-3"
+                                  title="Données commandes pour le type de commande à la carte">
+                                <i class="fas fa-question-circle"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <div class="d-flex">
+                            <button class="primary export-trade-service">
+                                <i class="icon fas fa-download"></i>
+                                Achat Négoce
+                            </button>
+                            <span data-toggle="tooltip"
+                                  class="d-flex align-items-center ms-3"
+                                  title="Données commandes pour le type  Achat Négoce">
+                                <i class="fas fa-question-circle"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('export') }}
+{% endblock %}

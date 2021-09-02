@@ -1,0 +1,17 @@
+{% extends 'filters/template.html.twig' %}
+
+{% block filters %}
+    {% include('filters/filter_items/date_item.html.twig') with {
+        required: true,
+        from: date(),
+        to: date('+19 days')
+    } %}
+    {% include('filters/filter_items/depository_item.html.twig') %}
+    {% include('filters/filter_items/deliverer_item.html.twig') %}
+{% endblock %}
+
+{% block buttons %}
+    {{ parent() }}
+    <button class="secondary start-delivery"><i class="icon fas fa-play-circle"></i> Lancement</button>
+    <button class="secondary new-delivery-round"><i class="icon fas fa-user-friends"></i> Affectation tournée</button>
+{% endblock %}

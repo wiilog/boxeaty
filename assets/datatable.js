@@ -65,15 +65,22 @@ export function initDatatable(table, config) {
         content.filters = {};
 
         const $filters = $(`.filters`);
-        if($filters.exists()) {
-            processForm($filters).forEach((value, key) => {
-                content.filters[key] = value;
-            });
+        if ($filters.exists()) {
+            const data = processForm($filters);
+            if (data) {
+                data.forEach((value, key) => {
+                    content.filters[key] = value;
+                });
+            }
         }
 
-        ajax.json(content, data => {
-            callback(data);
-        });
+        ajax.json(content)
+            .then(data => {
+                callback(data);
+                if (config.onFilter) {
+                    config.onFilter(data);
+                }
+            });
     };
 
     const initial = $table.data(`initial-data`);
@@ -110,13 +117,13 @@ export function initDatatable(table, config) {
                 $(this).load(() => config.listeners.action($datatable.row(this).data()));
             }
         })
-        .on(`click`, `.datatable-action [data-listener]`, function() {
+        .on(`click`, `[data-listener]`, function() {
             const $button = $(this);
             const row = $datatable.row($button.parents(`tr`));
             const callback = config.listeners[$(this).data(`listener`)];
 
             if(callback) {
-                callback(row.data())
+                callback(row.data(), $button)
             }
         });
 

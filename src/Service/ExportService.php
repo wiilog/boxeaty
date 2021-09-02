@@ -3,13 +3,13 @@
 namespace App\Service;
 
 use App\Entity\GlobalSetting;
-use WiiCommon\Helper\Stream;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use WiiCommon\Helper\Stream;
 
 class ExportService {
 
@@ -39,11 +39,13 @@ class ExportService {
     public const LOCATION_HEADER = [
         "Type",
         "Nom de l'emplacement",
+        "Dépôt",
         "Nom du client",
         "Actif",
         "Description",
-        "Nombre de Box",
         "Capacité",
+        "Type d'emplacement",
+        "Nombre de contenants",
     ];
 
     public const MOVEMENT_HEADER = [
@@ -57,11 +59,17 @@ class ExportService {
     ];
 
     public const BOX_TYPE_HEADER = [
-        "Type de Box",
+        "Type de Box / Caisse",
         "Prix",
         "Actif",
         "Contenance",
         "Forme",
+    ];
+
+    public const DEPOSITORY_HEADER = [
+        "Nom du dépôt",
+        "Statut",
+        "Description",
     ];
 
     public const ROLE_HEADER = [
@@ -72,6 +80,42 @@ class ExportService {
     public const QUALITY_HEADER = [
         "Nom",
         "Actif",
+    ];
+
+    public const CLIENT_ORDER_HEADER_ONE_TIME = [
+        "Numéro de commande",
+        "Type de Box",
+        "Nombre de Box livrées",
+        "Nombre de jetons livrés",
+        "Nombre de Box cassées",
+        "Coût unitaire",
+        "Moyen de paiement",
+        "Montant facturé par livraison",
+        "Nombre de consignes utilisées",
+        "Commande automatique",
+    ];
+
+    public const CLIENT_ORDER_HEADER_AUTONOMOUS_MANAGEMENT = [
+        "Numéro de commande",
+        "Nombre de Box mis à disposition",
+        "Coût abonnement mensuel",
+        "Frais de livraison",
+        "Moyen de paiement",
+        "Prorata client",
+        "Nombre de jetons livrés",
+        "Nombre de caisses",
+        "Montant de la caisse",
+        "Commande automatique",
+    ];
+
+    public const CLIENT_ORDER_TRADE = [
+        "Numéro de commande",
+        "Type de Box",
+        "Nombre de Box",
+        "Tarif unitaire",
+        "Montant kit de démarrage",
+        "Frais de livraison",
+        "Commande automatique",
     ];
 
     public const DEPOSIT_TICKET_HEADER = [
@@ -87,11 +131,13 @@ class ExportService {
     ];
 
     public const BOX_HEADER = [
-        "Numéro Box",
+        "Code",
+        "Date de création",
+        "Box",
         "Emplacement",
         "Etat",
         "Qualité",
-        "Propriété",
+        "Propriétaire",
         "Type",
     ];
 
@@ -169,8 +215,6 @@ class ExportService {
                 return $cell->format("d/m/Y H:i:s");
             } else if (is_bool($cell)) {
                 return $cell ? 'oui' : 'non';
-            } else if(is_string($cell)) {
-                return str_replace("Powered by Froala Editor", "", strip_tags($cell));
             } else {
                 return $cell;
             }

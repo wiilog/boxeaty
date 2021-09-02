@@ -1,0 +1,157 @@
+<div id="modal-show-client-order" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Détails de la commande</h1>
+
+            <div class="body">
+                <div>
+                    <div class="header-section">
+                        <span class="header-section-label">Liste des Box</span>
+                    </div>
+
+                    {% include 'operation/client_order/modal/boxList.html.twig' %}
+
+                    <div class="row">
+                        <div class="col-auto">
+                            {% if clientOrder.deliveryPrice %}
+                                Livraison <b>{{ clientOrder.deliveryPrice|format_helper('price') }}</b>
+                            {% endif %}
+                        </div>
+                        <div class="col-auto ml-4">
+                            {% if clientOrder.servicePrice %}
+                                Service <b>{{ clientOrder.servicePrice|format_helper('price') }}</b>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="header-section">
+                    <span class="header-section-label">Évènements</span>
+                </div>
+                <div class="details-content body client-order-history"></div>
+                {% if clientOrder.editableStatusHistory is not empty %}
+                    <button class="primary edit-status-button mb-2">Modifier le statut</button>
+                {% endif %}
+            </div>
+            {% set isDeliveryFinished = (clientOrder.delivery and clientOrder.delivery.status.code == constant('App\\Entity\\Status::CODE_DELIVERY_DELIVERED')) %}
+            {% if isDeliveryFinished %}
+                <div>
+                    <div class="header-section">
+                        <span class="header-section-label">Preuve de livraison</span>
+                    </div>
+                    <div class="details-content body row">
+                        <div class="col-12">
+                            <span class="bigTxtOrange">Livré à</span>
+                            <div class="row ">
+                                <div class="col-12">
+                                    <b>{{ clientOrder.client.name }}</b>
+                                </div>
+                                <div class="col-12">
+                                    <span class="subtitle">{{ clientOrder.client.address }}</span>
+                                </div>
+                            </div>
+                            <p></p>
+                            <span class="bigTxtOrange mt-3">Contenu</span>
+                            <div class="row">
+                                <div class="col-12">
+                                    <b>{{ clientOrder.cratesAmount }} Caisse{{ clientOrder.cratesAmount > 1 ? 's' }}</b>
+                                </div>
+                                <div class="col-12">
+                                    <b>{{ clientOrder.delivery.tokens }} Jeton{{ clientOrder.delivery.tokens > 1 ? 's' }}</b>
+                                </div>
+                            </div>
+                            {% if clientOrder.delivery.signature is not null or clientOrder.delivery.signature is not null %}
+                                <span class="bigTxtOrange mt-3">Pièce(s) jointe(s)</span>
+                            {% endif %}
+                            <div class="row">
+                                {% if clientOrder.delivery.signature is not null %}
+                                    <div class="col-auto">
+                                        <img class="proof-img" src="{{ asset(clientOrder.delivery.signature.path) }}" alt="Signature livraison"/>
+                                    </div>
+                                {% endif %}
+                                {% if clientOrder.delivery.photo is not null %}
+                                    <div class="col-auto">
+                                        <img class="proof-img" src="{{ asset(clientOrder.delivery.photo.path) }}" alt="Photo livraison"/>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% set isCollectBegun = clientOrder.collect is not null %}
+            {% set isCollectDropped = (isCollectBegun and clientOrder.collect.status.code == constant('App\\Entity\\Status::CODE_COLLECT_FINISHED')) %}
+            {% if isCollectBegun %}
+                <div>
+                    <div class="header-section">
+                        <span class="header-section-label">Preuve de collecte</span>
+                    </div>
+                    <div class="details-content body row">
+                        <div class="col-6 mt-3">
+                            <span class="bigTxtOrange">Collecté à</span>
+                            <div class="row">
+                                <div class="col-12">
+                                    <b>{{ clientOrder.client.name }}</b>
+                                </div>
+                                <div class="col-12">
+                                    <span class="subtitle">{{ clientOrder.client.address }}</span>
+                                </div>
+                            </div>
+                            <span class="bigTxtOrange mt-3">Contenu</span>
+                            <div class="row">
+                                <div class="col-12">
+                                    {% set cratesCollectedLength = clientOrder.collect.crates|length %}
+                                    <b>{{ cratesCollectedLength }} Caisse{{ cratesCollectedLength > 1 ? 's' }}</b>
+                                </div>
+                                <div class="col-12">
+                                    <b>{{ clientOrder.collect.tokens }} Jeton{{ clientOrder.collect.tokens > 1 ? 's' }}</b>
+                                </div>
+                            </div>
+                            {% if clientOrder.collect.pickSignature is not null or clientOrder.collect.pickPhoto is not null %}
+                                <span class="bigTxtOrange mt-3">Pièce(s) jointe(s)</span>
+                            {% endif %}
+                            <div class="row">
+                                {% if clientOrder.collect.pickSignature is not null %}
+                                    <div class="col-auto">
+                                        <img class="proof-img" src="{{ asset(clientOrder.collect.pickSignature.path) }}" alt="Signature collecte">
+                                    </div>
+                                {% endif %}
+                                {% if clientOrder.collect.pickPhoto is not null %}
+                                    <div class="col-auto">
+                                        <img class="proof-img" src="{{ asset(clientOrder.collect.pickPhoto.path) }}" alt="Photo collecte">
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if isCollectDropped %}
+                            <div class="col-6 mt-3">
+                                <span class="bigTxtOrange">Collecte déposée à</span>
+                                <div class="row">
+                                    <b>{{ clientOrder.depository ? clientOrder.depository.name : '-'  }}</b>
+                                </div>
+                                {% if clientOrder.collect.dropSignature is not null or clientOrder.collect.dropPhoto is not null %}
+                                    <span class="bigTxtOrange mt-3">Pièce(s) jointe(s)</span>
+                                {% endif %}
+                                <div class="row">
+                                    {% if clientOrder.collect.dropSignature is not null %}
+                                        <div class="col-auto">
+                                            <img class="proof-img" src="{{ asset(clientOrder.collect.dropSignature.path) }}" alt="Signature dépose collecte">
+                                        </div>
+                                    {% endif %}
+                                    {% if clientOrder.collect.dropPhoto is not null %}
+                                        <div class="col-auto">
+                                            <img class="proof-img" src="{{ asset(clientOrder.collect.dropPhoto.path) }}" alt="Photo dépose collecte">
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

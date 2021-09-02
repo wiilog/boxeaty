@@ -3,27 +3,27 @@
 namespace App\Controller\Tracking;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\Box;
+use App\Entity\BoxRecord;
 use App\Entity\BoxType;
 use App\Entity\Client;
+use App\Entity\ClientOrder;
 use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
-use App\Entity\BoxRecord;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
-use WiiCommon\Helper\Stream;
 use App\Repository\BoxRepository;
 use App\Service\BoxRecordService;
+use App\Service\BoxStateService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use DoctrineExtensions\Query\Mysql\Date;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use WiiCommon\Helper\Stream;
 
 /**
  * @Route("/tracabilite/box")
@@ -31,7 +31,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class BoxController extends AbstractController {
 
     /**
-     * @Route("/liste", name="boxes_list")
+     * @Route("/liste", name="boxes_list", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
@@ -51,20 +51,18 @@ class BoxController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
+        /** @var Box $box */
         foreach ($boxes["data"] as $box) {
             $data[] = [
                 "id" => $box->getId(),
                 "number" => $box->getNumber(),
                 "creationDate" => FormatHelper::datetime($box->getCreationDate()),
+                "isBox" => $box->isBox() ? 'Oui' : 'Non',
                 "location" => FormatHelper::named($box->getLocation()),
-                "state" => Box::NAMES[$box->getState()] ?? "-",
+                "state" => BoxStateService::BOX_STATES[$box->getState()] ?? "-",
                 "quality" => FormatHelper::named($box->getQuality()),
                 "owner" => FormatHelper::named($box->getOwner()),
                 "type" => FormatHelper::named($box->getType()),
-                "actions" => $this->renderView("datatable_actions.html.twig", [
-                    "editable" => true,
-                    "deletable" => true,
-                ]),
             ];
         }
 
@@ -79,12 +77,13 @@ class BoxController extends AbstractController {
      * @Route("/nouveau", name="box_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_DEPOSIT_TICKETS)
      */
-    public function new(Request $request,
-                        BoxRecordService $boxRecordService,
+    public function new(Request                $request,
+                        BoxRecordService       $boxRecordService,
                         EntityManagerInterface $manager): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
+
         $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
         $owner = isset($content->owner) ? $manager->getRepository(Client::class)->find($content->owner) : null;
         $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
@@ -95,7 +94,7 @@ class BoxController extends AbstractController {
             $form->addError("number", "Ce numéro de Box existe déjà");
         } else if (strlen($content->number) > 50) {
             $form->addError("number", "Le numéro de Box ne peut excéder 50 caractères");
-        } else if(!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
+        } else if (!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
             $form->addError("number", "Le numéro de Box ne peut contenir que des lettres, chiffres, tirets et underscores");
         }
 
@@ -109,20 +108,11 @@ class BoxController extends AbstractController {
                 ->setQuality($quality)
                 ->setOwner($owner)
                 ->setState($content->state ?? null)
-                ->setComment($content->comment ?? null);
+                ->setComment($content->comment ?? null)
+                ->setIsBox($content->box);
             $manager->persist($box);
 
-            [$tracking, $record] = $boxRecordService->generateBoxRecords($box, [], $this->getUser());
-
-            if ($tracking) {
-                $tracking->setBox($box);
-                $manager->persist($tracking);
-            }
-
-            if ($record) {
-                $record->setBox($box);
-                $manager->persist($record);
-            }
+            $boxRecordService->generateBoxRecords($box, null, $this->getUser());
 
             $manager->flush();
 
@@ -139,9 +129,14 @@ class BoxController extends AbstractController {
      * @Route("/voir/{box}", name="box_show", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function show(Box $box): Response {
+    public function show(Box                    $box,
+                         EntityManagerInterface $entityManager): Response {
+        $clientOrderRepository = $entityManager->getRepository(ClientOrder::class);
+        $clientOrderInProgress = $clientOrderRepository->findLastInProgressFor($box);
+
         return $this->render('tracking/box/show.html.twig', [
             "box" => $box,
+            "clientOrderInProgress" => $clientOrderInProgress
         ]);
     }
 
@@ -162,10 +157,10 @@ class BoxController extends AbstractController {
      * @Route("/modifier/{box}", name="box_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOXES)
      */
-    public function edit(Request $request,
-                         BoxRecordService $boxRecordService,
+    public function edit(Request                $request,
+                         BoxRecordService       $boxRecordService,
                          EntityManagerInterface $manager,
-                         Box $box): Response {
+                         Box                    $box): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
@@ -175,47 +170,27 @@ class BoxController extends AbstractController {
             $form->addError("name", "Une autre Box avec ce numéro existe déjà");
         } else if (strlen($content->number) > 50) {
             $form->addError("number", "Le numéro de Box ne peut excéder 50 caractères");
-        } else if(!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
+        } else if (!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
             $form->addError("number", "Le numéro de Box ne peut contenir que des lettres, chiffres, tirets et underscores");
         }
 
         if ($form->isValid()) {
-            $oldLocation = $box->getLocation();
-            $oldState = $box->getState();
-            $oldComment = $box->getComment();
-
             $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
             $owner = isset($content->owner) ? $manager->getRepository(Client::class)->find($content->owner) : null;
             $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
             $type = isset($content->type) ? $manager->getRepository(BoxType::class)->find($content->type) : null;
 
+            $previous = clone $box;
             $box->setNumber($content->number)
                 ->setType($type)
                 ->setLocation($location)
                 ->setQuality($quality)
                 ->setOwner($owner)
                 ->setState($content->state ?? null)
-                ->setComment($content->comment ?? null);
+                ->setComment($content->comment ?? null)
+                ->setIsBox($content->box);
 
-            [$tracking, $record] = $boxRecordService->generateBoxRecords(
-                $box,
-                [
-                    'location' => $oldLocation,
-                    'state' => $oldState,
-                    'comment' => $oldComment,
-                ],
-                $this->getUser()
-            );
-
-            if ($tracking) {
-                $tracking->setBox($box);
-                $manager->persist($tracking);
-            }
-
-            if ($record) {
-                $record->setBox($box);
-                $manager->persist($record);
-            }
+            $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
 
             $manager->flush();
 
@@ -268,49 +243,154 @@ class BoxController extends AbstractController {
      * @HasPermission(Role::MANAGE_BOXES)
      */
     public function export(EntityManagerInterface $manager,
-                           ExportService $exportService): Response {
+                           ExportService          $exportService): Response {
         $boxes = $manager->getRepository(Box::class)->iterateAll();
 
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function($output) use ($exportService, $boxes) {
+        return $exportService->export(function ($output) use ($exportService, $boxes) {
             foreach ($boxes as $box) {
-                $box["state"] = Box::NAMES[$box["state"]];
+                $box["state"] = BoxStateService::BOX_STATES[$box["state"]] ?? '';
                 $exportService->putLine($output, $box);
             }
         }, "export-box-$today.csv", ExportService::BOX_HEADER);
     }
 
     /**
-     * @Route("/{box}/mouvements", name="get_box_mouvements", options={"expose": true}, methods={"GET"})
+     * @Route("/{box}/mouvements", name="box_movements", options={"expose": true}, methods={"GET"})
      */
-    public function getTrackingMovements(Box $box,
-                                         Request $request,
-                                         EntityManagerInterface $manager): JsonResponse
-    {
+    public function trackingMovements(Box $box, Request $request, EntityManagerInterface $manager): Response {
         $boxRecordRepository = $manager->getRepository(BoxRecord::class);
-        $start = $request->query->getInt('start', 0);
-        $search = $request->query->has('search') ? $request->query->get('search') : null;
+        $start = $request->query->getInt("start");
+        $search = $request->query->get("search");
         $length = 10;
 
         $boxMovementsResult = $boxRecordRepository->getBoxRecords($box, $start, $length, $search);
+        $currentRecord = $boxRecordRepository->findCurrentBoxRecord($box);
 
         return $this->json([
-            'success' => true,
-            'isTail' => ($start + $length) >= $boxMovementsResult['totalCount'],
-            'data' => Stream::from($boxMovementsResult['data'])
+            "success" => true,
+            "isTail" => ($start + $length) >= $boxMovementsResult['totalCount'],
+            "data" => Stream::from($boxMovementsResult['data'])
                 ->map(fn(array $movement) => [
-                    'comment' => str_replace("Powered by Froala Editor", "", $movement['comment']),
-                    'color' => (isset($movement['state']) && isset(Box::LINKED_COLORS[$movement['state']]))
-                        ? Box::LINKED_COLORS[$movement['state']]
-                        : Box::DEFAULT_COLOR,
-                    'date' => isset($movement['date']) ? $movement['date']->format('d/m/Y à H:i:s') : 'Non définie',
-                    'state' => (isset($movement['state']) && isset(Box::NAMES[$movement['state']]))
-                        ? Box::NAMES[$movement['state']]
+                    'quality' => $movement['quality'] ?? "",
+                    'isCurrentRecord' => $currentRecord && $currentRecord->getId() === $movement['id'],
+                    'color' => (isset($movement['state']) && isset(BoxStateService::LINKED_COLORS[$movement['state']]))
+                        ? BoxStateService::LINKED_COLORS[$movement['state']]
+                        : BoxStateService::DEFAULT_COLOR,
+                    'date' => isset($movement['date'])
+                        ? ($movement['date']->format("d") . ' ' . FormatHelper::MONTHS[$movement['date']->format('n')] . ' ' . $movement['date']->format("Y"))
+                        : '',
+                    'time' => isset($movement['date']) ? $movement['date']->format('H:i') : 'Non définie',
+                    'state' => (isset($movement['state']) && isset(BoxStateService::RECORD_STATES[$movement['state']]))
+                        ? BoxStateService::RECORD_STATES[$movement['state']]
                         : '-',
+                    'crate' => !empty($movement['crateId'])
+                        ? [
+                            'number' => $movement['crateNumber'],
+                            'id' => $movement['crateId']
+                        ]
+                        : null,
+                    'operator' => $movement['operator'] ?? "",
+                    'location' => $movement['location'] ?? "",
+                    'depository' => $movement['depository'] ?? "",
                 ])
                 ->toArray(),
         ]);
     }
+
+    /**
+     * @Route("/add-box", name="box_add_crate", options={"expose": true}, methods={"GET"})
+     */
+    public function addBoxToCrate(Request                $request,
+                                  EntityManagerInterface $entityManager,
+                                  BoxRecordService       $boxRecordService) {
+
+        $boxRepository = $entityManager->getRepository(Box::class);
+
+        $crate = $boxRepository->find($request->query->get("crate"));
+        $box = $boxRepository->find($request->query->get("box"));
+
+        if ($box->getCrate()) {
+            return $this->json([
+                "success" => false,
+                "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $crate]),
+                "message" => "Cette Box est déjà présente dans la caisse <b>{$box->getCrate()->getNumber()}</b>",
+            ]);
+        }
+
+        $previous = clone $box;
+        $box->setCrate($crate)
+            ->setLocation($crate->getLocation());
+
+        [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+        $tracking->setState(BoxStateService::STATE_RECORD_PACKING);
+        $record->setState(BoxStateService::STATE_RECORD_PACKING);
+
+        $entityManager->flush();
+
+        return $this->json([
+            "success" => true,
+            "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $crate]),
+            "message" => "Box ajoutée à la caisse avec succès",
+        ]);
+    }
+
+    /**
+     * @Route("/supprimer-box-in-crate/template/{box}", name="box_remove_crate_template", options={"expose": true})
+     * @HasPermission(Role::MANAGE_BOXES)
+     */
+    public function deleteBoxInCrateTemplate(Box $box): Response {
+        return $this->json([
+            "submit" => $this->generateUrl("box_remove_crate", ["box" => $box->getId()]),
+            "template" => $this->renderView("tracking/box/modal/delete_box_in_crate.html.twig", [
+                "box" => $box,
+            ])
+        ]);
+    }
+
+    /**
+     * @Route("/supprimer-box-in-crate", name="box_remove_crate", options={"expose": true})
+     * @HasPermission(Role::MANAGE_BOXES)
+     */
+    public function removeBoxFromCrate(Request                $request,
+                                       EntityManagerInterface $entityManager,
+                                       BoxRecordService       $boxRecordService): Response {
+
+        /** @var Box $box */
+        $box = $entityManager->getRepository(Box::class)->find($request->query->get("box"));
+
+        $oldCrate = $box->getCrate();
+        $previous = clone $box;
+        $box->setCrate(null);
+
+        [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+        $tracking->setState(BoxStateService::STATE_RECORD_UNPACKING);
+        $record->setState(BoxStateService::STATE_RECORD_UNPACKING);
+
+        $entityManager->flush();
+
+        return $this->json([
+            "success" => true,
+            "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $oldCrate]),
+            "message" => "Box <strong>{$box->getNumber()}</strong> supprimée avec succès"
+        ]);
+    }
+
+    /**
+     * @Route("/box-in-crate-api", name="box_in_crate_api", options={"expose": true})
+     * @HasPermission(Role::MANAGE_BOXES)
+     */
+    public function boxInCrateApi(Request $request, EntityManagerInterface $manager) {
+        $id = $request->query->get('id');
+
+        $crate = $manager->getRepository(Box::class)->find($id);
+
+        return $this->json([
+            "success" => true,
+            "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $crate]),
+        ]);
+    }
+
 }

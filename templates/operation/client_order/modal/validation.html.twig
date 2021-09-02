@@ -1,0 +1,112 @@
+<div id="modal-validation-client-order" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Validation de votre commande</h1>
+            <input type="hidden" name="clientOrder" value="{{ clientOrder.id }}"/>
+            <div class="body">
+                <div class="validationClientOrder">
+                    <div class="header-section mt-2 mb-4">
+                        <h2 class="header-section-label">Information</h2>
+                    </div>
+                    <div class="row justify-content-between">
+                        <span class="bigTxt col-md-8 col-12">{{ clientOrder.client.name }}</span>
+                        <span class="col-md-4 col-12 text-end">{{ clientOrder.requester.username }}</span>
+                    </div>
+                    <div class="row justify-content-between">
+                        <span class="col-md-8 col-12">{{ clientOrder.client.address }}</span>
+                        <span class="col-md-4 col-12 text-end">{{ clientOrder.requester.phone }}</span>
+                    </div>
+                    <div class="row justify-content-between align-items-center">
+                        {% if clientOrder.collectRequired %}
+                            <div class="col-md-8 col-12">
+                                <span class="bigTxt">Collecte</span> (Box à nettoyer)&nbsp;:
+                                {{ clientOrder.cratesAmountToCollect }}
+                                caisse{{ clientOrder.cratesAmountToCollect > 1 ? 's' }}
+                            </div>
+                        {% endif %}
+                        <span class="delivery-method-selected col-auto">
+                            <label>
+                                <i class="icon ico bxi bxi-{{ clientOrder.deliveryMethod.icon }}"></i>
+                                {{ clientOrder.deliveryMethod.name }}
+                            </label>
+                        </span>
+                    </div>
+
+                    <span class="bigTxt">Commentaire pour le livreur <br></span>
+                    <div class="comment-container">{{ clientOrder.comment|raw }}</div>
+
+                    <div class="header-section mt-4 mb-4">
+                        <h2 class="header-section-label">Livraison</h2>
+                    </div>
+                    <span class="bigTxt"> Date de livraison : {{ clientOrder.expectedDelivery|format_helper('dateMonth') }}</span>
+
+                    <div class="details-content body">
+                        {% if clientOrder.lines|length > 0 %}
+                            {% for line in clientOrder.lines %}
+                                <div class="row client-order-line">
+                                    <div class="col-auto">
+                                        {% if line.boxType.image %}
+                                            <img src="{{ asset(line.boxType.image.path) }}"
+                                                 class="box-type-image"
+                                                 alt="image"/>
+                                        {% else %}
+                                            <span class="box-type-image"></span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col">
+                                        {{ line.quantity }}&nbsp;&times;&nbsp; Box de type
+                                        <b>{{ line.boxType.name }}</b>
+                                    </div>
+                                    <div class="col-3">
+                                        T.U. {{ line.boxType.price|format_helper('price') }}
+                                    </div>
+                                    <div class="col-3">
+                                        {{ (line.quantity * line.boxType.price)|format_helper('price') }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="row empty-client-order">
+                                <div class="col-12 text-center">Aucune Box à afficher</div>
+                            </div>
+                        {% endif %}
+                        <div class="header-section mt-4 mb-4">
+                            <h2 class="header-section-label">Montant de la commande</h2>
+                        </div>
+
+                        <span class="bigTxt">Récapitulatif de commande</span>
+                        <div class="row justify-content-between align-items-center">
+                            <span class="col-auto">Box</span>
+                            <div class="col dotted mt-1"></div>
+                            <span class="col-auto text-end">{{ clientOrder.totalAmount|format_helper('price') }} </span>
+                        </div>
+                        <div class="row justify-content-between align-items-center">
+                            <span class="col-auto">Livraison</span>
+                            <div class="col dotted mt-1"></div>
+                            <span class="col-auto text-end">{{ clientOrder.deliveryPrice|format_helper('price') }} </span>
+                        </div>
+                        <div class="row justify-content-between align-items-center">
+                            <span class="col-auto">Service</span>
+                            <div class="col dotted mt-1"></div>
+                            <span class="col-auto text-end">{{ clientOrder.servicePrice|format_helper('price') }} </span>
+                        </div>
+                        <div class="row justify-content-between align-items-center">
+                            <span class="col-auto">Collecte</span>
+                            <div class="col dotted mt-1"></div>
+                            <span class="col-auto text-end">Inclus</span>
+                        </div>
+                        <div class="row justify-content-between align-items-center">
+                            <span class="secondary bigTxtOrange col-auto">MONTANT TOTAL (HT)</span>
+                            <span class="col-auto text-end">{{ (clientOrder.totalAmount + clientOrder.servicePrice + clientOrder.deliveryPrice)|format_helper('price') }} </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer">
+                    <button type="button" class="secondary" value="1" name="previous" data-bs-dismiss="modal">Retour à l'étape précédente</button>
+                    <button type="submit" class="primary submit-button">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

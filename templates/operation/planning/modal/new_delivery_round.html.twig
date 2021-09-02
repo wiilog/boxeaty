@@ -1,0 +1,76 @@
+{% import 'operation/planning/macros.html.twig' as macros %}
+
+<div id="modal-new-delivery-round" class="modal ade">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Création et modification de tournée</h1>
+
+            <div class="body">
+                <div class="inline-form">
+                    <label class="inline">
+                        Livreur
+                        <select name="deliverer" data-s2="deliverer" class="data"
+                                data-placeholder="Sélectionnez le livreur" required>
+                        </select>
+                    </label>
+                    <label class="inline">
+                        Mobilité
+                        <select name="method" data-s2="deliveryMethod" class="data"
+                                data-placeholder="Sélectionnez la mobilité" required>
+                        </select>
+                    </label>
+                    <label class="inline">
+                        Dépôt
+                        <select name="depository" data-s2="depository" class="data"
+                                data-placeholder="Sélectionnez la mobilité" required>
+                        </select>
+                    </label>
+                </div>
+
+                <div id="delivery-round-map" style="height: 300px"></div>
+
+                <div class="row deliveries-container mt-2">
+                    <div class="col-md-6 col-12">
+                        <label>Livraisons disponibles</label>
+                        <div class="deliveries available-deliveries">
+                            {% for order in orders %}
+                                {{ macros.order_card(order, true) }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <label>Livraisons affectées</label>
+                        <div class="deliveries assigned-deliveries">
+
+                        </div>
+                    </div>
+                </div>
+
+                <label>
+                    Frais de livraison transporteur
+                    <span class="text-form-wrapper">
+                        <input type="number" name="cost" class="data euros" min="0" placeholder="6€" required/>
+                        <span>HT pour la tournée soit</span>
+                        <input type="number" class="data-divided euros" readonly/>
+                        <span>HT par livraison</span>
+                    </span>
+                </label>
+                <label>
+                    Distance du parcours (km)
+                    <span class="text-form-wrapper">
+                        <input type="number" name="distance" class="data" min="0" placeholder="160km" required/>
+                        <span>km, soit</span>
+                        <input type="number" class="data-divided" readonly/>
+                        <span>km par livraison</span>
+                    </span>
+                </label>
+            </div>
+
+            <div class="footer">
+                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="primary">Valider la tournée</button>
+            </div>
+        </div>
+    </div>
+</div>

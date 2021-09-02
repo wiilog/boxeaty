@@ -43,7 +43,7 @@ class UserRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        if (!empty($params['order'])) {
+        if (!empty($params["order"])) {
             foreach ($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 if ($column === "role") {
@@ -95,11 +95,35 @@ class UserRepository extends EntityRepository {
             ->getArrayResult();
     }
 
+    public function getDelivererForSelect(?string $search, ?User $user): array {
+        $qb = $this->createQueryBuilder("user");
+
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+            $or = $qb->expr()->orX();
+
+            foreach($user->getGroups() as $group) {
+                $or->add(":group_{$group->getId()} MEMBER OF user.groups");
+                $qb->setParameter("group_{$group->getId()}", $group);
+            }
+
+            $qb->andWhere($or);
+        }
+
+        return $qb->select("user.id AS id, user.username AS text")
+            ->andWhere("user.username LIKE :search")
+            ->andWhere("user.active = 1")
+            ->andWhere("user.deliverer = 1")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
+    }
+
     public function findNewUserRecipients($group) {
         return $this->createQueryBuilder("user")
             ->join("user.role", "role")
             ->leftJoin("user.groups", "groups")
-            ->where("role.receiveMailsNewAccounts = 1")
+            ->andWhere("role.receiveMailsNewAccounts = 1")
             ->andWhere("role.allowEditOwnGroupOnly = 0 OR :group MEMBER OF user.groups")
             ->andWhere("user.active = 1")
             ->setParameter("group", $group)
@@ -109,10 +133,18 @@ class UserRepository extends EntityRepository {
 
     public function findByUsernameOrEmail($search) {
         return $this->createQueryBuilder("user")
-            ->where("user.email LIKE :search OR user.username LIKE :search")
+            ->andWhere("user.email LIKE :search OR user.username LIKE :search")
             ->setParameter("search", $search)
             ->getQuery()
             ->getResult();
+    }
+
+    public function findByApiKey($search) {
+        return $this->createQueryBuilder("user")
+            ->andWhere("user.apiKey = :search")
+            ->setParameter("search", $search)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
 }

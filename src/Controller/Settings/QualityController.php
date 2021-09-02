@@ -3,6 +3,7 @@
 namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\Quality;
 use App\Entity\Role;
 use App\Helper\Form;
@@ -10,7 +11,6 @@ use App\Repository\QualityRepository;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -74,8 +74,11 @@ class QualityController extends AbstractController {
 
         if ($form->isValid()) {
             $quality = new Quality();
-            $quality->setName($content->name)
-                ->setActive($content->active);
+            $quality
+                ->setName($content->name)
+                ->setActive($content->active)
+                ->setClean($content->clean)
+                ->setBroken($content->broken);
 
             $manager->persist($quality);
             $manager->flush();
@@ -116,8 +119,11 @@ class QualityController extends AbstractController {
         }
 
         if ($form->isValid()) {
-            $quality->setName($content->name)
-                ->setActive($content->active);
+            $quality
+                ->setName($content->name)
+                ->setActive($content->active)
+                ->setClean($content->clean)
+                ->setBroken($content->broken);
 
             $manager->flush();
 

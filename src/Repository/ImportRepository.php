@@ -25,7 +25,7 @@ class ImportRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "import");
 
         if ($search) {
-            $qb->where("import.name LIKE :search")
+            $qb->andWhere("import.name LIKE :search")
                 ->orWhere("search_user.username LIKE :search")
                 ->join("import.user", "search_user")
                 ->setParameter("search", "%$search%");
@@ -48,7 +48,7 @@ class ImportRepository extends EntityRepository {
             }
         }
 
-        if (!empty($params['order'])) {
+        if (!empty($params["order"])) {
             foreach ($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 if ($column === "user") {
@@ -78,7 +78,7 @@ class ImportRepository extends EntityRepository {
 
     public function findUpcoming() {
         return $this->createQueryBuilder("import")
-            ->where("import.status = " . Import::UPCOMING)
+            ->andWhere("import.status = " . Import::UPCOMING)
             ->getQuery()
             ->getResult();
     }

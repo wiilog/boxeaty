@@ -23,10 +23,22 @@
                 {% endif %}
             </div>
             <div class="filler"></div>
-            <div class="header-right">
-                <div class="current-user">
-                    <img src="{{ asset('images/user.svg') }}" alt="Icone utilisateur"/>
-                    {{ app.user.username }}
+            <div class="header-right align-items-center">
+                <div class="user-container dropdown">
+                    <button class="btn btn-secondary dropdown-toggle display-profile" type="button" id="dropdownMenuButton"
+                            data-toggle="dropdown" data-placement="bottom" aria-haspopup="true" aria-expanded="false">
+                        <img src="{{ asset('images/user.svg') }}" alt="Icone utilisateur"/>
+                        {{ app.user.username }}
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <a class="dropdown-item current-user" href="#">
+                            <i class="bxi bxi-user icon"></i>
+                            Profil
+                        </a>
+                        <a class="dropdown-item" href="{{ path('logout') }}" >
+                            <i class="bxi bxi-logout icon"></i>
+                            Déconnexion</a>
+                    </div>
                 </div>
                 <div class="menu-container">
                     <img class="display-menu" src="{{ asset('images/menu.svg') }}" alt="Menu"/>
@@ -37,6 +49,7 @@
     </header>
     <main>
         {% block filter_header %}{% endblock %}
+        {% block indicator %}{% endblock %}
         {% block content %}{% endblock %}
     </main>
 {% endblock %}

@@ -1,0 +1,109 @@
+<mjml>
+    <mj-head>
+        <mj-attributes>
+            <mj-all padding="0"></mj-all>
+            <mj-body background-color="#F9F9EC"></mj-body>
+            <mj-text font-family="helvetica"></mj-text>
+            <mj-class name="title" line-height="300%" font-size="20px" align="left" font-family="helvetica"></mj-class>
+            <mj-class name="border" background-color="white" border-radius="10px"></mj-class>
+            <mj-class name="my-auto" padding-bottom="20px" padding-top="20px"></mj-class>
+        </mj-attributes>
+        <mj-style>
+            a {
+            text-decoration: none;
+            }
+        </mj-style>
+    </mj-head>
+
+    <mj-body>
+
+        <mj-section full-width="full-width" padding-bottom="20px" padding-top="30px">
+            <mj-column>
+                <mj-image width="300px" height="150px" src="{{ base64('images/email/logo.png') }}">
+                </mj-image>
+            </mj-column>
+        </mj-section>
+        <mj-section>
+            <mj-column width="100%">
+                <mj-text mj-class="title">{{ order.client.contact.username }}</mj-text>
+                <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    Votre commande n° {{ order.number }} vient de passer en préparation et sera livrée
+                    le {{ order.expectedDelivery | date('d/m/Y') }}
+                    {% if order.deliveryRound %}
+                        par {{ order.deliveryRound.deliverer.username }} en {{ order.deliveryMethod.name }}
+                    {% endif %}
+                </mj-text>
+                <mj-text mj-class="title">
+                    Récapitulatif de la commande :
+                </mj-text>
+            </mj-column>
+        </mj-section>
+
+        <mj-raw>{% for line in order.lines %}</mj-raw>
+            <mj-section mj-class="border">
+                <mj-column width="10%">
+                    <mj-raw>{% if line.boxType.image and line.boxType.image.path %}</mj-raw>
+                        <mj-image width="100px" src="{{ base64(line.boxType.image.path) }}"
+                                  alt="Image du type de Box" padding-top="15px"></mj-image>
+                    <mj-raw>{% endif %}</mj-raw>
+                </mj-column>
+                <mj-column width="20%">
+                    <mj-text align="center" mj-class="my-auto">
+                        {{ line.quantity }}
+                    </mj-text>
+                </mj-column>
+                <mj-column width="15%">
+                    <mj-text align="center" mj-class="my-auto">
+                        Box de type {{ line.boxType.name }}
+                    </mj-text>
+                </mj-column>
+                <mj-column width="25%">
+                    <mj-text align="center" mj-class="my-auto">
+                        T.U {{ line.boxType.price }} €
+                    </mj-text>
+                </mj-column>
+                <mj-column width="15%">
+                    <mj-text align="center" mj-class="my-auto">
+                        {{ line.quantity * line.boxType.price }} €
+                    </mj-text>
+                </mj-column>
+            </mj-section>
+            <mj-section>
+                <mj-column>
+                    <mj-divider border-width="1px" border-style="none" border-color="black" padding-top="20px"/>
+                </mj-column>
+            </mj-section>
+        <mj-raw>{% endfor %}</mj-raw>
+
+        <mj-section>
+            <mj-column width="100%" mj-class="my-auto">
+                <mj-text font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    Adresse de livraison :
+                </mj-text>
+                <mj-text line-height="3" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    {{ order.client.address }}
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-section>
+            <mj-column>
+                <mj-text font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    Retrouvez le suivi en temps réel sur votre espace client sur <a href="https://app.boxeaty.fr">app.boxeaty.fr</a>
+                </mj-text>
+                <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    Une question, un besoin particulier ? Nous restons disponible au <a href="tel:05.05.05.05">05.05.05.05</a>
+                    ou par email à <a href="mailto:contact@boxeaty.fr">contact@boxeaty.fr</a>
+                </mj-text>
+                <mj-text line-height="3" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    Cordialement
+                </mj-text>
+                <mj-text font-size="20px" align="left" color="#1E1F44" line-height="2" font-family="helvetica">
+                    L'équipe BoxEaty
+                </mj-text>
+                <mj-image align="left" width="200px" src="{{ base64('images/email/eat-consigned.png') }}">
+                </mj-image>
+            </mj-column>
+        </mj-section>
+
+    </mj-body>
+</mjml>

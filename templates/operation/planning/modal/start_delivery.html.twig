@@ -1,0 +1,33 @@
+<div id="modal-start-delivery" class="modal ade">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Lancement des livraisons</h1>
+            <div class="row delivery-launching-filters">
+                <label class="col-8">
+                    Période de lancement
+                    {% include 'filters/filter_items/date_item.html.twig' %}
+                </label>
+                <label class="col-4">
+                    Dépôt
+                    <select name="depository" data-s2="depository" class="data" data-placeholder="Sélectionnez un dépôt">
+                        {% if depository %}
+                            <option value="{{ depository.id }}">{{ depository.name }}</option>
+                        {% endif %}
+                    </select>
+                </label>
+            </div>
+            <div class="quantities-information-container d-none">
+                <label><i class="fas fa-exclamation-circle"></i><span class="ps-2">Problèmes de stock sur les types suivants : </span></label>
+                <div class="quantities-information"></div>
+            </div>
+            <div class="row deliveries-container mt-2">
+
+            </div>
+            <div class="footer">
+                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="primary submit-button" disabled>Suivant</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -24,6 +24,12 @@ class BoxRecord {
     private ?DateTime $date = null;
 
     /**
+     * @ORM\ManyToOne(targetEntity=Box::class, inversedBy="cratePackingRecords")
+     * @ORM\JoinColumn(nullable=true)
+     */
+    private ?Box $crate = null;
+
+    /**
      * @ORM\ManyToOne(targetEntity=Box::class, inversedBy="boxRecords")
      * @ORM\JoinColumn(nullable=false)
      */
@@ -83,13 +89,13 @@ class BoxRecord {
     }
 
     public function setBox(?Box $box): self {
-        $previous = $this->getBox();
-        if ($previous) {
-            $previous->removeBoxRecord($this);
+        if($this->box && $this->box !== $box) {
+            $this->box->removeBoxRecord($this);
         }
-
         $this->box = $box;
-        $box->addBoxRecord($this);
+        if($box) {
+            $box->addBoxRecord($this);
+        }
 
         return $this;
     }
@@ -134,13 +140,11 @@ class BoxRecord {
         return $this;
     }
 
-    public function getUser(): ?User
-    {
+    public function getUser(): ?User {
         return $this->user;
     }
 
-    public function setUser(?User $user): self
-    {
+    public function setUser(?User $user): self {
         $this->user = $user;
 
         return $this;
@@ -165,10 +169,27 @@ class BoxRecord {
         return $this;
     }
 
+    public function getCrate(): ?Box {
+        return $this->crate;
+    }
+
+    public function setCrate(?Box $crate): self {
+        if($this->crate && $this->crate !== $crate) {
+            $this->crate->removeCratePackingRecord($this);
+        }
+        $this->crate = $crate;
+        if($crate) {
+            $crate->addCratePackingRecord($this);
+        }
+
+        return $this;
+    }
+
     public function copyBox(?Box $from = null): self {
         $box = $from ?? $this->box ?? null;
         if ($box) {
-            $this->setLocation($box->getLocation())
+            $this->setCrate($box->getCrate())
+                ->setLocation($box->getLocation())
                 ->setClient($box->getOwner())
                 ->setQuality($box->getQuality())
                 ->setState($box->getState())

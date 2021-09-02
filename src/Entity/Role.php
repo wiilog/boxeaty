@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Utils\ActiveTrait;
 use App\Repository\RoleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -15,34 +16,50 @@ class Role {
     public const ROLE_NO_ACCESS = "AUCUN_ACCES";
     public const ROLE_ADMIN = "SUPER_ADMINISTRATEUR";
 
-    public const GENERAL_EXPORT = "GENERAL_EXPORT";
+    public const MANAGE_BOXES = "MANAGE_BOXES";
+    public const EDIT_BOXES = "EDIT_BOXES";
+    public const DELETE_BOXES = "DELETE_BOXES";
+    public const MANAGE_DEPOSIT_TICKETS = "MANAGE_DEPOSIT_TICKETS";
+    public const MANAGE_MOVEMENTS = "MANAGE_MOVEMENTS";
+    public const VIEW_INDICATORS = "VIEW_INDICATORS";
+
+    public const VIEW_ALL_ORDERS = "VIEW_ALL_ORDERS";
+    public const MANAGE_COUNTER_ORDERS = "MANAGE_COUNTER_ORDERS";
+    public const MANAGE_CLIENT_ORDERS = "MANAGE_CLIENT_ORDERS";
+    public const DELETE_CLIENT_ORDERS = "DELETE_CLIENT_ORDERS";
+    public const MANAGE_PLANNING = "MANAGE_PLANNING";
+
+    public const MANAGE_CLIENTS = "MANAGE_CLIENTS";
+    public const MANAGE_LOCATIONS = "MANAGE_LOCATIONS";
+    public const MANAGE_GROUPS = "MANAGE_GROUPS";
+    public const MANAGE_BOX_TYPES = "MANAGE_BOX_TYPES";
+    public const MANAGE_DEPOSITORIES = "MANAGE_DEPOSITORIES";
+
+    public const MANAGE_EXPORTS = "MANAGE_EXPORTS";
     public const MANAGE_SETTINGS = "MANAGE_SETTINGS";
     public const MANAGE_USERS = "MANAGE_USERS";
     public const MANAGE_ROLES = "MANAGE_ROLES";
     public const MANAGE_QUALITIES = "MANAGE_QUALITIES";
     public const MANAGE_IMPORTS = "MANAGE_IMPORTS";
 
-    public const MANAGE_CLIENTS = "MANAGE_CLIENTS";
-    public const MANAGE_LOCATIONS = "MANAGE_LOCATIONS";
-    public const MANAGE_GROUPS = "MANAGE_GROUPS";
-    public const MANAGE_BOX_TYPES = "MANAGE_BOX_TYPES";
+    public const TREAT_PREPARATIONS = "TREAT_PREPARATIONS";
+    public const TREAT_DELIVERIES = "TREAT_DELIVERIES";
+    public const TREAT_RECEPTIONS = "TREAT_RECEPTIONS";
+    public const TREAT_ALL_COLLECTS = "TREAT_ALL_COLLECTS";
 
-    public const MANAGE_BOXES = "MANAGE_BOXES";
-    public const MANAGE_MOVEMENTS = "MANAGE_MOVEMENTS";
-    public const MANAGE_DEPOSIT_TICKETS = "MANAGE_DEPOSIT_TICKETS";
-    public const MANAGE_ORDERS = "MANAGE_ORDERS";
+    public const ALLOW_EDIT_OWN_GROUP_ONLY = "ALLOW_EDIT_OWN_GROUP_ONLY";
+    public const REDIRECT_NEW_COUNTER_ORDER = "REDIRECT_NEW_COUNTER_ORDER";
+    public const SHOW_INDICATORS_ON_HOME = "SHOW_INDICATORS_ON_HOME";
+    public const RECEIVE_MAILS_NEW_ACCOUNTS = "RECEIVE_MAILS_NEW_ACCOUNTS";
 
     public const ADDITIONAL_PERMISSIONS = [
         self::ALLOW_EDIT_OWN_GROUP_ONLY,
-        self::SHOW_NEW_ORDER_ON_HOME,
+        self::REDIRECT_NEW_COUNTER_ORDER,
+        self::SHOW_INDICATORS_ON_HOME,
         self::RECEIVE_MAILS_NEW_ACCOUNTS,
     ];
 
-    public const ALLOW_EDIT_OWN_GROUP_ONLY = "ALLOW_EDIT_OWN_GROUP_ONLY";
-    public const SHOW_NEW_ORDER_ON_HOME = "SHOW_NEW_ORDER_ON_HOME";
-    public const RECEIVE_MAILS_NEW_ACCOUNTS = "RECEIVE_MAILS_NEW_ACCOUNTS";
-
-    use Active;
+    use ActiveTrait;
 
     /**
      * @ORM\Id
@@ -74,7 +91,12 @@ class Role {
     /**
      * @ORM\Column(type="boolean")
      */
-    private ?bool $showNewOrderOnHome = null;
+    private ?bool $redirectNewCounterOrder = null;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private ?bool $showIndicatorsOnHome = null;
 
     /**
      * @ORM\Column(type="boolean")
@@ -133,12 +155,21 @@ class Role {
         return $this;
     }
 
-    public function getShowNewOrderOnHome(): ?bool {
-        return $this->showNewOrderOnHome;
+    public function getRedirectNewCounterOrder(): ?bool {
+        return $this->redirectNewCounterOrder;
     }
 
-    public function setShowNewOrderOnHome(?bool $showNewOrderOnHome): self {
-        $this->showNewOrderOnHome = $showNewOrderOnHome;
+    public function setRedirectNewCounterOrder(?bool $redirectNewCounterOrder): self {
+        $this->redirectNewCounterOrder = $redirectNewCounterOrder;
+        return $this;
+    }
+
+    public function getShowIndicatorsOnHome(): ?bool {
+        return $this->showIndicatorsOnHome;
+    }
+
+    public function setShowIndicatorsOnHome(?bool $showIndicatorsOnHome): self {
+        $this->showIndicatorsOnHome = $showIndicatorsOnHome;
         return $this;
     }
 

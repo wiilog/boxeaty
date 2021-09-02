@@ -1,0 +1,19 @@
+{% extends 'filters/template.html.twig' %}
+
+{% block filters %}
+
+    {% include 'filters/filter_items/date_item.html.twig' %}
+    {% include('filters/filter_items/status_item.html.twig') with {
+        name: 'status',
+        dataType: 'orderStatus',
+        placeholder: 'Statuts',
+    } %}
+    {% include('filters/filter_items/client_item.html.twig') with {
+        name: 'client',
+        placeholder: 'Site',
+    } %}
+    {% include('filters/filter_items/order_type_item.html.twig') with {
+        name: 'type',
+        placeholder: 'Type de commande',
+    } %}
+{% endblock %}

@@ -1,0 +1,43 @@
+<div id="modal-delete-depository" class="modal fade delete">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="delete-image"></div>
+            {% if depository.preparations | length > 0 %}
+                <h1>Ce dépôt est lié à une ou plusieurs préparations</h1>
+                <p class="text-center">
+                    Vous ne pouvez pas le supprimer.<br>
+                    Voulez-vous le désactiver ?
+                </p>
+            {% elseif depository.locations | length > 0 %}
+                <h1>Ce dépôt est lié à un ou plusieurs emplacements</h1>
+                <p class="text-center">
+                    Vous ne pouvez pas le supprimer.<br>
+                    Voulez-vous le désactiver ?
+                </p>
+            {% elseif depository.clientOrderInformation | length > 0 %}
+                <h1>Ce dépôt est lié à une ou plusieurs commande client</h1>
+                <p class="text-center">
+                    Vous ne pouvez pas le supprimer.<br>
+                    Voulez-vous le désactiver ?
+                </p>
+            {% elseif depository.clients | length > 0 %}
+                <h1>Ce dépôt est lié à un ou plusieurs clients</h1>
+                <p class="text-center">
+                    Vous ne pouvez pas le supprimer.<br>
+                    Voulez-vous le désactiver ?
+                </p>
+            {% else %}
+                <h1>Voulez-vous vraiment supprimer ce dépôt ?</h1>
+            {% endif %}
+
+            <input type="hidden" name="id" class="data">
+
+            <div class="footer">
+                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit"
+                        class="primary">{{ (depository.preparations | length > 0 or depository.locations | length > 0 or depository.clients | length > 0) ? 'Désactiver' : 'Supprimer' }}</button>
+            </div>
+        </div>
+    </div>
+</div>

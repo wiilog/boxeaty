@@ -4,14 +4,14 @@ namespace App\Service;
 
 use App\Entity\GlobalSetting;
 use App\Entity\User;
-use WiiCommon\Helper\Stream;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport;
-use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use WiiCommon\Helper\Stream;
 
 class Mailer {
 
@@ -47,7 +47,7 @@ class Mailer {
         return $this->mailer;
     }
 
-    public function send($recipients, string $subjet, string $content) {
+    public function send($recipients, string $subject, string $content) {
         if (empty($recipients)) {
             return;
         }
@@ -88,7 +88,7 @@ class Mailer {
         $email = (new Email())
             ->from($this->address)
             ->to(...$emails)
-            ->subject($subjet)
+            ->subject($subject)
             ->html($content);
 
         $mailer->send($email);

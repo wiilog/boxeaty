@@ -1,0 +1,34 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Traçabilité{% endblock %}
+{% block page %}Commandes client{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('client_order') }}
+{% endblock %}
+
+{% block filter_header %}
+    {% include 'filters/client_order_filters.html.twig' %}
+{% endblock %}
+
+{% block content %}
+    <div class="box first-box row client-order-container">
+        <input id="starterKit" type="hidden" value="{{ starterKit | json_encode }}">
+        <table id="table-client-order" class="orderRow"
+               data-initial-data="{{ initial_orders }}"
+               data-default-order="{{ orders_order | json_encode }}"></table>
+    </div>
+
+    {% include 'operation/client_order/modal/new.html.twig' with {
+        clientOrder: new_client_order,
+        orderTypes: orderTypes,
+        deliveryMethods: deliveryMethods,
+        workFreeDay: workFreeDay,
+        defaultCrateType: defaultCrateType
+    } %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('client_order') }}
+{% endblock %}

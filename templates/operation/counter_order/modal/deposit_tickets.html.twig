@@ -1,0 +1,71 @@
+<div id="modal-order-deposit-tickets" class="modal fade no-header">
+    <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="body">
+                <div class="row">
+                    <div class="col-12 col-md-4 left-pane">
+                        <h2 class="mb-3">Tickets-consignes scannés</h2>
+                        <div class="scanned-tickets">
+                            <span class="placeholder">Aucun ticket‑consigne scanné</span>
+
+                            {% for ticket in tickets %}
+                                <div class="item">
+                                    <input type="text" name="items" class="data-array mt-1" readonly
+                                           value="{{ ticket.number }}" data-price="-{{ ticket.box.type.price }}">
+                                    <span class="floating-icon">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <label>
+                            Total
+                            <input type="text"
+                                   name="price"
+                                   class="euros"
+                                   data-raw-value="{{ price }}"
+                                   value="{{ price | format_helper('price', false) }}"
+                                   readonly/>
+                        </label>
+                    </div>
+                    <div class="col-12 col-md-8">
+                        <h2 class="deposit-ticket-header mb-3">
+                            Etape 2 : Scan ticket‑consigne
+
+                            <span class="deposit-ticket-tooltip"
+                                 data-toggle="tooltip"
+                                 title="Si vous n'avez pas de ticket‑consigne veuillez passer à l'étape suivante">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </span>
+                        </h2>
+                        <div class="scan-container">
+                            <img src="{{ asset('images/barcode-mask.svg') }}" alt="Masque QR code">
+                            <video data-scan="ticket" data-items=".scanned-tickets"></video>
+                        </div>
+                        <label>
+                            Numéro ticket‑consigne
+                            <select data-s2="orderDepositTicket"
+                                    data-no-empty-option
+                                    data-placeholder="Sélectionner un ticket‑consigne à ajouter manuellement"
+                                    required
+                                    data-manual="ticket"
+                                    data-items=".scanned-tickets"
+                                    data-include-params="input[name=items]">
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
+                <input type="hidden" name="session" class="data" value="{{ session }}">
+            </div>
+
+            <div class="footer">
+                <a href="{{ path('home') }}" class="secondary">Annuler</a>
+                <div class="spacer"></div>
+                <button type="submit" class="primary" name="previous" value="1">Etape précédente</button>
+                <button type="submit" class="primary">Etape suivante</button>
+            </div>
+        </div>
+    </div>
+</div>

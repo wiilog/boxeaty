@@ -23,9 +23,9 @@ yarn-error.log
 ###< symfony/webpack-encore-bundle ###
 
 /.idea/
+/.run
 /public/exports/
-/public/persistent/imports
-/public/persistent/traces
+/public/persistent/
 
 ###> assoconnect/mjml-bundle ###
 /templates/emails/*.html.twig

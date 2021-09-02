@@ -2,25 +2,30 @@
     <div class="col-12 toggle location-type">
         <span class="label">Type</span>
 
-        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-kiosk" name="type" class="data" value="1" {{ location.kiosk ? 'checked' }}/>
+        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-kiosk" name="kiosk" class="data location-type"
+               value="1" {{ location.kiosk ? 'checked' }}/>
         <label for="{{ location.id ? 'edit' : 'new' }}-location-type-kiosk">Borne</label>
 
-        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-location" name="type" class="data" value="0" {{ not location.kiosk ? 'checked' }}/>
+        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-location" name="kiosk" class="data location-type"
+               value="0" {{ not location.kiosk ? 'checked' }}/>
         <label for="{{ location.id ? 'edit' : 'new' }}-location-type-location">Emplacement</label>
     </div>
     <div class="col-12">
         <label>
             Nom
-            <input type="text" name="name" class="data" placeholder="Nom de votre emplacement" value="{{ location.name }}" required/>
+            <input type="text" name="name" class="data" placeholder="Nom de votre emplacement"
+                   value="{{ location.name }}" required/>
         </label>
     </div>
     <div class="col-12 toggle">
         <span class="label">Statut</span>
 
-        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-active" name="active" class="data" value="1" {{ location.active ? 'checked' }}/>
+        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-active" name="active" class="data"
+               value="1" {{ location.active ? 'checked' }}/>
         <label for="{{ location.id ? 'edit' : 'new' }}-location-active">Actif</label>
 
-        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-inactive" name="active" class="data" value="0" {{ not location.active ? 'checked' }}/>
+        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-inactive" name="active" class="data"
+               value="0" {{ not location.active ? 'checked' }}/>
         <label for="{{ location.id ? 'edit' : 'new' }}-location-inactive">Inactif</label>
     </div>
     <div class="col-12">
@@ -37,7 +42,7 @@
         <label>
             Capacité
             <input type="number" name="capacity" class="data" placeholder="Saisissez la capacité de la borne"
-                   value="{{ location.capacity }}" {{ location.kiosk ? 'required' : 'data-required' }} min="1"/>
+                   value="{{ location.capacity }}" {{ location.kiosk ? 'required' : 'data-was-required' }} min="1"/>
         </label>
     </div>
     <div class="col-12 kiosk-fields {{ not location.kiosk ? 'd-none' }}">
@@ -45,6 +50,28 @@
             Message de la borne
             <input type="text" name="message" class="data" placeholder="Saisissez le message de la borne"
                    value="{{ location.message }}"/>
+        </label>
+    </div>
+    <div class="col-12 location-fields">
+        <label>Type d'emplacement</label>
+        <div class="d-flex justify-content-between align-items-center">
+            {% for type, label in constant('App\\Entity\\Location::LOCATION_TYPES') %}
+                <label class="inline">
+                    <input type="radio" class="data no-clear" name="type" value="{{ type }}"
+                            {{ location.type == type ? 'checked' }}>
+                    {{ label }}
+                </label>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-12 location-fields">
+        <label>
+            Dépôt
+            <select name="depository" class="data" data-s2="depository" data-placeholder="Sélectionnez un depot" required>
+                {% if location.depository %}
+                    <option value="{{ location.depository.id }}" selected>{{ location.depository.name }}</option>
+                {% endif %}
+            </select>
         </label>
     </div>
     <div class="col-12">

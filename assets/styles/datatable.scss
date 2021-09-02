@@ -2,184 +2,201 @@
 @import "mixins";
 
 .dataTables_paginate {
-    text-align: right;
+  text-align: right;
+}
+
+.orderRow {
+  tr:hover {
+    background-color: transparent !important;
+  }
+
+  thead {
+    display: none;
+  }
+  td {
+    border-bottom: none !important;
+  }
 }
 
 .paging_simple_numbers {
-    .paginate_button {
-        @include button();
+  .paginate_button {
+    @include button();
 
-        margin: 0 2px;
+    margin: 0 2px;
 
-        &:not(.previous):not(.next) {
-            background: $grey;
-            border-color: $grey;
-            color: $blue;
+    &:not(.previous):not(.next) {
+      background: $grey;
+      border-color: $grey;
+      color: $blue;
 
-            &.current {
-                background: $orange;
-                border-color: $orange;
-                color: white;
-            }
-        }
-
-        &.previous, &.next {
-            background: white;
-            border: white;
-            color: $blue;
-        }
+      &.current {
+        background: $orange;
+        border-color: $orange;
+        color: white;
+      }
     }
 
-    .ellipsis {
-        @include button();
-
-        background: $grey;
-        border: $grey;
-        color: $blue;
-        margin: 0 2px;
-
-        &:hover {
-            background: $grey;
-        }
+    &.previous, &.next {
+      background: white;
+      border: white;
+      color: $blue;
     }
+  }
+
+  .ellipsis {
+    @include button();
+
+    background: $grey;
+    border: $grey;
+    color: $blue;
+    margin: 0 2px;
+
+    &:hover {
+      background: $grey;
+    }
+  }
 }
 
 .dataTables_wrapper {
-    position: relative;
+  position: relative;
 
-    thead {
-        background: $grey;
+  thead {
+    background: $grey;
 
-        th {
-            padding: 10px;
+    th {
+      padding: 10px;
 
-            &:first-child {
-                border-bottom-left-radius: 4px;
-                border-top-left-radius: 4px;
-            }
+      &:first-child {
+        border-bottom-left-radius: 4px;
+        border-top-left-radius: 4px;
+      }
 
-            &:last-child {
-                border-bottom-right-radius: 4px;
-                border-top-right-radius: 4px;
-            }
+      &:last-child {
+        border-bottom-right-radius: 4px;
+        border-top-right-radius: 4px;
+      }
 
-            @mixin order-icon($url) {
-                background-image: url($url);
-                background-repeat: no-repeat;
-                background-position: center right 15px;
-                background-size: 15px;
-                padding-right: 30px;
-            }
+      @mixin order-icon($url) {
+        background-image: url($url);
+        background-repeat: no-repeat;
+        background-position: center right 15px;
+        background-size: 15px;
+        padding-right: 30px;
+      }
 
-            &.sorting {
-                @include order-icon("../images/sort.svg");
-            }
+      &.sorting {
+        @include order-icon("../images/sort.svg");
+      }
 
-            &.sorting_asc {
-                @include order-icon("../images/sort_ascending.svg");
-            }
+      &.sorting_asc {
+        @include order-icon("../images/sort_ascending.svg");
+      }
 
-            &.sorting_desc {
-                @include order-icon("../images/sort_descending.svg");
-            }
-        }
+      &.sorting_desc {
+        @include order-icon("../images/sort_descending.svg");
+      }
     }
+  }
 
-    td {
-        padding: 10px;
-        border-bottom: 1px solid $grey;
+  td {
+    padding: 10px;
+    border-bottom: 1px solid $grey;
+  }
+
+  tr {
+    transition: background 400ms;
+    cursor: default !important;
+
+    &:hover {
+      background: $grey;
     }
+  }
 
-    tr {
-        transition: background 400ms;
-        cursor: default !important;
+  label {
+    font-weight: normal;
+  }
 
-        &:hover {
-            background: $grey;
-        }
+  .dataTables_processing {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-align: center;
+    backdrop-filter: blur(2px);
+
+    .content {
+      position: absolute;
+      top: calc(50% - 1.4rem / 2);
+      left: 0;
+      width: 100%;
+      text-align: center;
+      background: transparent;
     }
+  }
 
-    label {
-        font-weight: normal;
+  .dataTables_length {
+    select {
+      display: inline-block;
+      min-width: initial;
+      width: initial;
+      border: 1px solid $grey-dark;
+      padding: 6px;
+      border-radius: 4px;
     }
+  }
 
-   .dataTables_processing {
-       position: absolute;
-       top: 0;
-       left: 0;
-       width: 100%;
-       height: 100%;
-       font-size: 1.4rem;
-       font-weight: bold;
-       text-align: center;
-       backdrop-filter: blur(2px);
+  .footer {
+    @include content-apart();
+    margin-top: 1rem;
 
-       .content {
-           position: absolute;
-           top: calc(50% - 1.4rem / 2);
-           left: 0;
-           width: 100%;
-           text-align: center;
-           background: transparent;
-       }
+    .left {
+      display: flex;
+      align-items: center;
+
+      .dataTables_info {
+        margin-left: 0.5rem;
+      }
+
+      label {
+        margin-top: initial;
+      }
     }
-
-    .dataTables_length {
-        select {
-            display: inline-block;
-            min-width: initial;
-            width: initial;
-            border: 1px solid $grey-dark;
-            padding: 6px;
-            border-radius: 4px;
-        }
-    }
-
-    .footer {
-        @include content-apart();
-        margin-top: 1rem;
-
-        .left {
-            display: flex;
-            align-items: center;
-
-            .dataTables_info {
-                margin-left: 0.5rem;
-            }
-
-            label {
-                margin-top: initial;
-            }
-        }
-    }
+  }
 
 }
 
 .datatable-action {
-    display: block;
-    width: 100%;
-    text-align: center;
+  display: block;
+  width: 100%;
+  text-align: center;
 
-    [data-toggle="dropdown"] {
-        display: block;
-    }
+  [data-toggle="dropdown"] {
+    display: block;
+  }
 }
 
 .dropdown .dropdown-menu {
-    border: none;
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  border: none;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
 
-    button, a {
-        padding: 4px 10px;
-        border-radius: 4px;
-        text-decoration: none;
-    }
+  button, a {
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+  }
 }
 
 .dataTables_empty {
-    text-align: center;
+  text-align: center;
 }
 
 .dataTables_wrapper thead th:not(.sorting_disabled) {
-    cursor: pointer;
+  cursor: pointer;
+}
+
+div.dataTables_scrollBody {
+    position: initial !important;
 }

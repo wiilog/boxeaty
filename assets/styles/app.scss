@@ -9,6 +9,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import "~select2/src/scss/core";
 @import "~quill/dist/quill.core.css";
 @import "~quill/dist/quill.snow.css";
+@import "~leaflet/dist/leaflet.css";
 
 @import "mixins";
 @import "fonts";
@@ -19,6 +20,8 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 @import "datatable";
 @import "settings";
 @import "timeline";
+@import "icons";
+@import "indicators";
 
 html {
     height: 100%;
@@ -40,6 +43,11 @@ body {
 
 body.full-height main {
     flex: 1 1 auto;
+
+    .box {
+        flex: 1 1 100%;
+        max-height: calc(100vh - 320px);
+    }
 }
 
 body.home {
@@ -57,7 +65,7 @@ body.home {
 
     .instructions {
         display: flex;
-        justify-content: space-evenly;
+        justify-content: center;
         align-items: center;
         width: 100%;
 
@@ -74,7 +82,7 @@ body.home {
             align-items: center;
             width: 30%;
             padding: 32px;
-            margin: 8px;
+            margin: 8px 24px;
             border-radius: 12px;
             background-color: $grey-light;
             text-decoration: none;
@@ -87,7 +95,7 @@ body.home {
             }
 
             &:hover:not([disabled]), &:focus:not([disabled]) {
-                margin: 0;
+                margin: 0 16px;
                 padding: 40px;
                 width: calc(30% + 16px);
                 box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
@@ -111,9 +119,11 @@ body.home {
 
             & > div {
                 width: 100%;
+                margin: 8px;
 
                 &:hover:not([disabled]), &:focus:not([disabled]) {
                     width: 100%;
+                    margin: 0;
                 }
             }
         }
@@ -160,12 +170,12 @@ main:not(.login) {
         margin-left: 0;
         margin-right: 0;
 
-        .box, .filters.first-box {
+        .box, .filters {
             border-radius: 8px;
         }
     }
 
-    .box.first-box, .filters.first-box {
+    .box.first-box, .filters {
         margin-top: -30px;
     }
 
@@ -203,21 +213,11 @@ main:not(.login) {
             align-items: center;
             flex-wrap: wrap;
 
-            .dates-filter {
-                display: flex;
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-
             & > * {
                 margin-right: 25px;
             }
 
             @media (max-width: $mobile-breakpoint) {
-                .dates-filter {
-                    flex-direction: column;
-                }
-
                 & > * {
                     width: 100%;
                     margin: 2px 0;
@@ -264,6 +264,24 @@ main:not(.login) {
                 margin-bottom: 5px;
             }
         }
+    }
+}
+
+.dates-filter {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    label {
+        display: flex;
+        align-items: center;
+        margin-top: 0;
+    }
+}
+
+@media (max-width: $mobile-breakpoint) {
+    .dates-filter {
+        flex-direction: column;
     }
 }
 
@@ -425,4 +443,78 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         font-size: 1.6rem;
         text-align: center;
     }
+}
+
+.bxi {
+    display: inline-block;
+    height: 1em;
+    vertical-align: -.125em;
+    margin-right: 3px;
+}
+
+.ico {
+    height: 20px;
+}
+
+.contact-information .subtitle {
+    font-family: Retroyal, sans-serif;
+    font-weight: bolder;
+    font-size: 25px;
+    color: $orange;
+}
+
+.big-text {
+    font-family: Retroyal, sans-serif;
+    font-size: 25px;
+    font-weight: 700;
+    color: $blue;
+}
+
+.body-text-semi-bold {
+    font-family: Retroyal, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: $blue;
+}
+
+.body-text {
+    font-family: Retroyal, sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: $blue;
+}
+
+.small-text {
+    font-family: Retroyal, sans-serif;
+    font-size: 15px;
+    font-weight: 200;
+    color: $blue;
+}
+
+.exports {
+    h1 {
+        font-family: 'Retroyal', sans-serif;
+        font-weight: bold;
+        font-size: 28px;
+        margin-bottom: 24px;
+    }
+
+    button {
+        min-width: 250px;
+    }
+}
+
+.green-text {
+    color: #76B39D;
+    font-family: Retroyal, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.orange-text {
+    color: $orange;
+}
+
+.italic-text {
+    font-weight: 500;
 }

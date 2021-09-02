@@ -34,7 +34,7 @@ class QualityRepository extends EntityRepository
 
         }
         return $qb->select("quality.id AS id, quality.name AS text")
-            ->where("quality.name LIKE :search")
+            ->andWhere("quality.name LIKE :search")
             ->andWhere("quality.active = 1")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
@@ -49,11 +49,11 @@ class QualityRepository extends EntityRepository
         $total = QueryHelper::count($qb, "quality");
 
         if ($search) {
-            $qb->where("quality.name LIKE :search")
+            $qb->andWhere("quality.name LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 
-        if (!empty($params['order'])) {
+        if (!empty($params["order"])) {
             foreach ($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("quality.$column", $order["dir"]);
@@ -74,6 +74,12 @@ class QualityRepository extends EntityRepository
             "total" => $total,
             "filtered" => $filtered,
         ];
+    }
+
+    public function getAll() {
+        return $this->createQueryBuilder("quality")
+            ->getQuery()
+            ->getArrayResult();
     }
 
 }

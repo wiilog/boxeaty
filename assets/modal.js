@@ -18,6 +18,7 @@ function deleteUpload(modal, name) {
 }
 
 export default class Modal {
+    static isTemplateLoading = false;
     id;
     element;
     config;
@@ -34,29 +35,10 @@ export default class Modal {
             return null;
         }
 
-        modal.setupFileUploader();
-
-        modal.element.on('hidden.bs.modal', () => {
-            modal.clear();
-
-            modal.element.find('[data-s2-initialized]').each(function() {
-                //close all select2 elements
-                $(this).select2('close');
-            });
-        });
-
-        modal.element.on('shown.bs.modal', () => {
-            if(config.afterOpen) {
-                config.afterOpen(modal);
+        initializeModal(modal, {
+            clearModal: () => {
+                modal.clear();
             }
-        });
-
-        modal.element.find(`button[type="submit"]`).click(function() {
-            const $button = $(this);
-
-            $button.load(function() {
-                return config.submitter ? config.submitter() : modal.handleSubmit($button)
-            });
         });
 
         return modal;
@@ -69,25 +51,32 @@ export default class Modal {
                 template: ajax,
             });
         } else {
-            ajax.json(response => {
-                delete response.success;
+            if(!Modal.isTemplateLoading){
+                Modal.isTemplateLoading = true;
+                ajax
+                    .json()
+                    .then((response) => {
+                        Modal.isTemplateLoading = false;
+                        delete response.success;
 
-                Modal.html({
-                    ...config,
-                    ...response,
-                });
-            });
+                        Modal.html({
+                            ...config,
+                            ...response,
+                        });
+                    })
+                    .catch(() => {
+                        Modal.isTemplateLoading = false;
+                        if (config.error) {
+                            config.error();
+                        }
+                    });
+            }
         }
     }
 
     static html(config = {}) {
         const $modal = $(config.template);
         $modal.appendTo(`body`);
-        $modal.modal(`show`);
-
-        $modal.on('hidden.bs.modal', function() {
-            $(this).remove();
-        })
 
         const modal = new Modal();
         modal.id = Math.floor(Math.random() * 1000000);
@@ -97,16 +86,13 @@ export default class Modal {
             ajax: AJAX.url(`POST`, config.submit),
         };
 
-        modal.setupFileUploader();
-
-        if(config.afterOpen) {
-            config.afterOpen(modal);
-        }
-
-        $modal.find(`button[type="submit"]`).click(function() {
-            const $button = $(this);
-            $button.load(() => modal.handleSubmit($button));
+        initializeModal(modal, {
+            clearModal: ($modal) => {
+                $modal.remove();
+            }
         });
+
+        modal.element.modal(`show`);
 
         return modal;
     }
@@ -114,7 +100,7 @@ export default class Modal {
     setupFileUploader() {
         const modal = this;
         const $dropframe = this.element.find(`.attachment-drop-frame`);
-        const $input = $dropframe.find(`input[name=attachment]`);
+        const $input = $dropframe.find(`input[type="file"]`);
 
         if($dropframe.exists()) {
             [`dragenter`, `dragover`, `dragleave`, `drop`].forEach(event => {
@@ -145,6 +131,16 @@ export default class Modal {
 
             $fileConfirmation.find('.file-delete-icon').on('click', function(e) {
                 $input.val('').trigger('change');
+                const $button = $(this);
+                const $fileInformation = $button.closest('.file-confirmation');
+                const $imageVisualisation = $fileInformation.find('.image-visualisation');
+                if ($imageVisualisation.exists()) {
+                    $imageVisualisation.attr('src', '');
+                }
+                const $fileDeleted = $fileInformation.find('[name="fileDeleted"]');
+                if ($fileDeleted.exists()) {
+                    $fileDeleted.val(1);
+                }
                 e.preventDefault();
             });
 
@@ -175,50 +171,44 @@ export default class Modal {
         }
 
         if(this.config.ajax) {
-            return this.config.ajax.json(data, result => {
-                if(!result.success && result.errors !== undefined) {
-                    for(const error of result.errors.fields) {
-                        if(error.global) {
-                            showGlobalInvalid(this.element, error.message);
+            return this.config.ajax
+                .json(data)
+                .then(result => {
+                    if(!handleErrors(this.element, result)) {
+                        return;
+                    }
+
+                    //refresh the datatable
+                    if(this.config && this.config.table) {
+                        if(this.config.table.ajax) {
+                            this.config.table.ajax.reload();
                         } else {
-                            showInvalid(this.element.find(`[name="${error.field}"]`), error.message);
+                            $(this.config.table).DataTable().ajax.reload();
                         }
                     }
 
-                    return;
-                }
-
-                //refresh the datatable
-                if(this.config && this.config.table) {
-                    if(this.config.table.ajax) {
-                        this.config.table.ajax.reload();
-                    } else {
-                        $(this.config.table).DataTable().ajax.reload();
+                    if(result.menu) {
+                        $(`#menu-dropdown`).replaceWith(result.menu);
                     }
-                }
 
-                if(result.menu) {
-                    $(`#menu-dropdown`).replaceWith(result.menu);
-                }
+                    if(result.modal) {
+                        delete result.success;
+                        delete result.menu;
 
-                if(result.modal) {
-                    delete result.success;
-                    delete result.menu;
+                        Modal.html({
+                            ...this.config,
+                            ...result.modal,
+                        });
+                    }
 
-                    Modal.html({
-                        ...this.config,
-                        ...result.modal,
-                    });
-                }
+                    if(!this.config.keepOpen) {
+                        this.close();
+                    }
 
-                if(!this.config.keepOpen) {
-                    this.close();
-                }
-
-                if(result.success && this.config.success) {
-                    this.config.success(result);
-                }
-            });
+                    if(result.success && this.config.success) {
+                        this.config.success(result, this);
+                    }
+                });
         } else {
             return new Promise((resolve) => {
                 if(!this.config.keepOpen) {
@@ -253,7 +243,7 @@ export default class Modal {
 }
 
 export function clearForm($elem) {
-    $elem.find(`input.data:not([type=checkbox]):not([type=radio]), select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
+    $elem.find(`input.data:not([type=checkbox]):not([type=radio]):not([type=hidden]), select.data, input[data-repeat], textarea.data`).val(null).trigger(`change`);
     $elem.find(`input[type=checkbox]:checked, input[type=radio]:checked`).prop(`checked`, false);
 
     for(const check of $elem.find(`input[type=checkbox][checked], input[type=radio][checked]`)) {
@@ -265,7 +255,7 @@ export function clearForm($elem) {
     $elem.find(`[contenteditable="true"]`).html(``);
 }
 
-export function processForm($parent, $button = null) {
+export function processForm($parent, $button = null, classes = {data: `data`, array: `data-array`}) {
     let modal = null;
     if($parent instanceof Modal) {
         modal = $parent;
@@ -274,7 +264,7 @@ export function processForm($parent, $button = null) {
 
     const errors = [];
     const data = new FormData();
-    const $inputs = $parent.find(`select.data, input.data, input[data-repeat], textarea.data, .data[data-wysiwyg]`);
+    const $inputs = $parent.find(`select.${classes.data}, input.${classes.data}, input[data-repeat], textarea.${classes.data}, .data[data-wysiwyg]`);
 
     //clear previous errors
     $parent.find(`.is-invalid`).removeClass(`is-invalid`);
@@ -284,7 +274,12 @@ export function processForm($parent, $button = null) {
         let $input = $(input);
 
         if($input.attr(`type`) === `radio`) {
-            $input = $parent.find(`input[type="radio"][name="${input.name}"]:checked`);
+            const $checked = $parent.find(`input[type="radio"][name="${input.name}"]:checked`);
+            if($checked.exists()) {
+                $input = $checked;
+            } else {
+                $input = $parent.find(`input[type="radio"][name="${input.name}"]`);
+            }
         } else if($input.attr(`type`) === `number`) {
             let val = parseInt($input.val());
             let min = parseInt($input.attr('min'));
@@ -330,12 +325,21 @@ export function processForm($parent, $button = null) {
             }
         }
 
-        if($input.is(`[required]`) && !$input.val()) {
-            if(!(modal && $input.is(`[type="file"]`)) || !uploads[modal.id][$input.attr(`name`)]) {
+        if($input.is(`[required]`) || $input.is(`[data-required]`)) {
+            if(([`radio`, `checkbox`].includes($input.attr(`type`)) && !$input.is(`:checked`))) {
                 errors.push({
-                    elements: [$input],
-                    message: `Ce champ est requis`,
+                    global: true,
+                    message: `Vous devez sélectionner au moins un élément`,
                 });
+            } else if($input.is(`[data-wysiwyg]`) && !$input.find(`.ql-editor`).text() || !$input.is(`[data-wysiwyg]`) && !$input.val()) {
+                if (!(modal && $input.is(`[type="file"]`))
+                    || !uploads[modal.id]
+                    || !uploads[modal.id][$input.attr(`name`)]) {
+                    errors.push({
+                        elements: [$input],
+                        message: `Ce champ est requis`,
+                    });
+                }
             }
         }
 
@@ -345,19 +349,51 @@ export function processForm($parent, $button = null) {
                 value = $input.find(`.ql-editor`).html();
             } else if($input.attr(`type`) === `checkbox`) {
                 value = $input.is(`:checked`) ? `1` : `0`;
-            } else if(typeof value === 'string') {
-                value = $input.val().trim();
             } else {
                 value = $input.val() || null;
             }
 
+            if(typeof value === `string`) {
+                value = value.trim();
+            }
             if(value !== null) {
                 data.append($input.attr(`name`) || $input.attr(`data-wysiwyg`), value);
             }
         }
     }
 
-    const $arrays = $parent.find(`select.data-array, input.data-array`);
+    addDataArray($parent, data, classes);
+
+    if($button && $button.attr(`name`)) {
+        data.append($button.attr(`name`), $button.val());
+    }
+
+    // add uploads
+    if(modal && uploads[modal.id]) {
+        for(const [name, file] of Object.entries(uploads[modal.id])) {
+            data.append(name, file)
+        }
+    }
+
+    if(modal && modal.config.processor) {
+        modal.config.processor(data, errors, modal);
+    }
+
+    // display errors under each field
+    $parent.find(`.global-error`).remove();
+    for(const error of errors) {
+        if(error.global) {
+            showGlobalInvalid($parent, error.message);
+        } else {
+            error.elements.forEach($elem => showInvalid($elem, error.message));
+        }
+    }
+
+    return errors.length === 0 ? data : false;
+}
+
+function addDataArray($parent, data, classes) {
+    const $arrays = $parent.find(`select.${classes.array}, input.${classes.array}`);
     const grouped = {};
     for(const element of $arrays) {
         if(grouped[element.name] === undefined) {
@@ -379,33 +415,40 @@ export function processForm($parent, $button = null) {
             })
             .filter(val => val !== null));
     }
+}
 
-    if($button && $button.attr(`name`)) {
-        data.append($button.attr(`name`), $button.val());
-    }
-
-    if(modal && uploads[modal.id]) {
-        for(const [name, file] of Object.entries(uploads[modal.id])) {
-            data.append(name, file)
+export function handleErrors(element, result) {
+    if(!result.success && result.errors !== undefined) {
+        for(const error of result.errors.fields) {
+            if(error.global) {
+                showGlobalInvalid(element, error.message);
+            } else {
+                showInvalid(element.find(`[name="${error.field}"]`), error.message);
+            }
         }
+
+        return false;
     }
 
-    for(const error of errors) {
-        error.elements.forEach($elem => showInvalid($elem, error.message));
-    }
-
-    return errors.length === 0 ? data : false;
+    return true;
 }
 
 function showInvalid($field, message) {
+    let $parent;
     if($field.is(`[data-s2-initialized]`)) {
         $field = $field.parent().find(`.select2-selection`);
     } else if($field.is(`[type="file"]`)) {
         $field = $field.parent();
     }
 
+    if($field.is(`[data-wysiwyg`)) {
+        $parent = $field.parent();
+    } else {
+        $parent = $field.parents(`label`);
+    }
+
     $field.addClass(`is-invalid`);
-    $field.parents(`label`).append(`<span class="invalid-feedback">${message}</span>`);
+    $parent.append(`<span class="invalid-feedback">${message}</span>`);
 }
 
 function showGlobalInvalid($modal, message) {
@@ -439,5 +482,60 @@ function proceedFileSaving($input, file, $fileEmpty, $fileConfirmation, modal) {
         $fileEmpty.addClass('d-none');
         $fileConfirmation.removeClass('d-none');
         $fileConfirmation.find('.file-name').text(file.name);
+
+        const $imageVisualisation = $fileConfirmation.find('.image-visualisation');
+        if ($imageVisualisation.exists()) {
+            showImage(file, $imageVisualisation);
+        }
+    }
+}
+
+function showImage(file, $image) {
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            $image
+                .attr('src', e.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function initializeModal(modal, {clearModal}) {
+    const {config} = modal;
+
+    modal.setupFileUploader();
+
+    if(config.afterOpen) {
+        modal.element.on('shown.bs.modal', () => {
+            config.afterOpen(modal);
+        });
+    }
+
+    modal.element.on('hidden.bs.modal', () => {
+        modal.element.find('[data-s2-initialized]').each(function() {
+            //close all select2 elements
+            $(this).select2('close');
+        });
+
+        clearModal(modal.element);
+
+        if(config.afterHidden) {
+            config.afterHidden(modal);
+        }
+    });
+
+    modal.element.find(`button[type="submit"]`).click(function() {
+        const $button = $(this);
+
+        $button.load(function() {
+            return config.submitter ? config.submitter(modal, $button) : modal.handleSubmit($button)
+        });
+    });
+
+    if(config.onPrevious) {
+        modal.element.find(`button[name="previous"]`).on('click', function () {
+            config.onPrevious(modal);
+        });
     }
 }

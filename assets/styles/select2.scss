@@ -8,6 +8,7 @@
 
 .select2-container {
     width: 100% !important;
+    min-width: 75px;
 }
 
 .filters .select2-container:not(.select2-container--open) {

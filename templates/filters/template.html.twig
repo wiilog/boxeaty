@@ -1,9 +1,11 @@
-<div class="filters first-box row">
+<div class="filters row">
     <div class="filter-items col">
         {% block filters %}{% endblock %}
     </div>
     <div class="col-auto my-2">
-        <button class="primary filter">Filtrer</button>
-        <button class="silent empty-filters"><i class="icon fas fa-redo"></i>Réinitialiser les filtres</button>
+        {% block buttons %}
+            <button class="primary filter">Filtrer</button>
+            <button class="silent empty-filters"><i class="icon fas fa-redo"></i>Réinitialiser les filtres</button>
+        {% endblock %}
     </div>
 </div>

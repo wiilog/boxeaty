@@ -1,0 +1,32 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Traçabilité{% endblock %}
+{% block page %}Commandes comptoir{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('counter_order') }}
+{% endblock %}
+
+{% block content %}
+    <div class="box first-box">
+        <div class="new-order">
+            <button id="scan-box" class="primary"><i class="icon fas fa-plus"></i></button>
+        </div>
+
+        <div class="content-menu">
+            <div id="table-search-container"></div>
+        </div>
+
+        <table id="table-orders"
+               data-initial-data="{{ initial_orders }}"
+               data-default-order="{{ orders_order | json_encode }}">
+        </table>
+    </div>
+
+    {% include 'operation/counter_order/modal/delete.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('counter_order_list') }}
+{% endblock %}

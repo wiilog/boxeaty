@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Import {
 
     public const TYPE_BOX = "box";
+    public const TYPE_LOCATION = "location";
 
     public const UPCOMING = 1;
     public const INSTANT = 2;
@@ -27,15 +28,32 @@ class Import {
         self::CANCELLED => "Annulé",
     ];
 
+    public const BOX_OR_CRATE = "box_crate";
     public const NUMBER = "number";
+    public const NAME = "name";
     public const LOCATION = "location";
     public const STATE = "state";
     public const QUALITY = "quality";
     public const OWNER = "owner";
     public const TYPE = "type";
     public const COMMENT = "comment";
+    public const LOCATION_OR_KIOSK = "location_kiosk";
+    public const ACTIVE = "active";
+    public const DESCRIPTION = "description";
+    public const CLIENT = "client";
+    public const DEPOSITORY = "depository";
+    public const CAPACITY = "capacity";
+    public const MESSAGE = "message";
 
     public const FIELDS = [
+        self::TYPE_BOX => self::BOX_FIELDS,
+        self::TYPE_LOCATION => self::LOCATION_FIELDS,
+    ];
+
+    public const BOX_FIELDS = [
+        self::BOX_OR_CRATE => [
+            "name" => "Box ou caisse",
+        ],
         self::NUMBER => [
             "name" => "Numéro",
             "unique" => true,
@@ -54,10 +72,42 @@ class Import {
             "name" => "Propriétaire",
         ],
         self::TYPE => [
-            "name" => "Type de Box",
+            "name" => "Type de Box / Caisse",
         ],
         self::COMMENT => [
             "name" => "Commentaire",
+        ],
+    ];
+
+    public const LOCATION_FIELDS = [
+        self::LOCATION_OR_KIOSK => [
+            "name" => "Emplacement ou borne",
+        ],
+        self::NAME => [
+            "name" => "Nom",
+            "unique" => true,
+            "required" => true,
+        ],
+        self::DESCRIPTION => [
+            "name" => "Description",
+        ],
+        self::ACTIVE => [
+            "name" => "Actif/Inactif",
+        ],
+        self::CLIENT => [
+            "name" => "Client",
+        ],
+        self::TYPE => [
+            "name" => "Type",
+        ],
+        self::DEPOSITORY => [
+            "name" => "Dépôt",
+        ],
+        self::CAPACITY => [
+            "name" => "Capacité",
+        ],
+        self::MESSAGE => [
+            "name" => "Message borne",
         ],
     ];
 

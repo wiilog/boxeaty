@@ -4,6 +4,7 @@ import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
 import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
+import {$document} from "../app";
 
 $(document).ready(() => {
     const newUserModal = Modal.static(`#modal-new-user`, {
@@ -12,6 +13,16 @@ $(document).ready(() => {
     });
 
     $(`.new-user`).click(() => newUserModal.open());
+
+    $document.on(`change`, `input[name=deliverer]`, function() {
+        const $field = $(this);
+        const $method = $field.closest(`.modal`).find(`.delivery-method`);
+
+        $method.toggleClass(`d-none`, !$field.is(':checked'));
+        $method.find('select').prop('required', $(this).is(':checked'));
+    });
+
+
     $(document).on(`click`, `button.change-password`, function() {
         $(this).parents(`.modal`).find(`div.change-password`).slideToggle();
     });
@@ -27,7 +38,7 @@ $(document).ready(() => {
             DATATABLE_ACTIONS,
         ],
         listeners: {
-            edit: data => {
+            edit: (data) => {
                 const ajax = AJAX.route(`POST`, `user_edit_template`, {
                     user: data.id
                 });

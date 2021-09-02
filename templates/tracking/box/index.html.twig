@@ -1,7 +1,7 @@
 {% extends 'template.html.twig' %}
 
 {% block menu %}Traçabilité{% endblock %}
-{% block page %}Box{% endblock %}
+{% block page %}Box - Caisses{% endblock %}
 
 {% block filter_header %}
     {% include 'filters/box_filters.html.twig' %}
@@ -13,7 +13,7 @@
             <div id="table-search-container"></div>
             <div class="right">
                 <a href="{{ path('boxes_export') }}" class="outline"><i class="icon fas fa-download"></i> Export au format CSV</a>
-                <button class="primary new-box"><i class="icon fas fa-plus"></i> Nouvelle Box</button>
+                <button class="primary new-box"><i class="icon fas fa-plus"></i> Nouvelle Box / Caisse</button>
             </div>
         </div>
 

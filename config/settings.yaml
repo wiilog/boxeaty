@@ -1,28 +1,44 @@
 parameters:
-  web_version: '0.4.3'
+  web_version: "1.0.8"
 
   permissions:
     Menu Paramétrage:
-      App\Entity\Role::MANAGE_USERS: Créer, modifier, supprimer les utilisateurs
+      App\Entity\Role::MANAGE_USERS: Gérer les utilisateurs
       App\Entity\Role::MANAGE_ROLES: Créer, modifier les rôles
       App\Entity\Role::MANAGE_IMPORTS: Accès à l'import des données
 
     Menu Traçabilité:
-      App\Entity\Role::MANAGE_BOXES: Créer, modifier, supprimer les Box
-      App\Entity\Role::MANAGE_MOVEMENTS: Créer, modifier, supprimer les mouvement
-      App\Entity\Role::MANAGE_ORDERS: Créer, modifier, supprimer les commandes
+      App\Entity\Role::MANAGE_BOXES: Gérer les Box
+      App\Entity\Role::EDIT_BOXES: Modifier les Box
+      App\Entity\Role::DELETE_BOXES: Supprimer les Box
+      App\Entity\Role::MANAGE_MOVEMENTS: Gérer les mouvement
       App\Entity\Role::MANAGE_DEPOSIT_TICKETS: Créer, supprimer les tickets‑consignes
+      App\Entity\Role::VIEW_INDICATORS: Voir les indicateurs
+
+    Menu Opérations:
+      App\Entity\Role::VIEW_ALL_ORDERS: Voir toutes les commandes client
+      App\Entity\Role::DELETE_CLIENT_ORDERS: Supprimer les commandes client
+      App\Entity\Role::MANAGE_CLIENT_ORDERS: Modifier le statut d'une commande
+      App\Entity\Role::MANAGE_COUNTER_ORDERS: Gérer les commandes comptoir
+      App\Entity\Role::MANAGE_PLANNING: Gérer les planifications
 
     Menu Référentiel:
-      App\Entity\Role::MANAGE_CLIENTS: Créer, modifier, supprimer les clients
+      App\Entity\Role::MANAGE_CLIENTS: Gérer les clients
       App\Entity\Role::MANAGE_GROUPS: Créer, modifier les groupes
-      App\Entity\Role::MANAGE_LOCATIONS: Créer, modifier, supprimer les emplacements
+      App\Entity\Role::MANAGE_LOCATIONS: Gérer les emplacements
       App\Entity\Role::MANAGE_BOX_TYPES: Créer, modifier les types de Box
+      App\Entity\Role::MANAGE_DEPOSITORIES: Créer, modifier les dépôts
 
     Autre:
       App\Entity\Role::MANAGE_SETTINGS: Paramétrage global
-      App\Entity\Role::GENERAL_EXPORT: Export général
+      App\Entity\Role::MANAGE_EXPORTS: Exports de données
       App\Entity\Role::MANAGE_QUALITIES: Créer, modifier les qualités
+
+    Application mobile:
+      App\Entity\Role::TREAT_PREPARATIONS: Traiter des préparations
+      App\Entity\Role::TREAT_DELIVERIES: Traiter des livraisons
+      App\Entity\Role::TREAT_RECEPTIONS: Traiter des réceptions
+      App\Entity\Role::TREAT_ALL_COLLECTS: Traiter toutes les collectes
 
 
   menu:
@@ -34,7 +50,7 @@ parameters:
       icon: bullseye
       type: category
       items:
-        - name: Box
+        - name: Box / Caisse
           permission: App\Entity\Role::MANAGE_BOXES
           route: boxes_list
         - name: Suivi ticket‑consigne
@@ -43,9 +59,24 @@ parameters:
         - name: Mouvements
           permission: App\Entity\Role::MANAGE_MOVEMENTS
           route: tracking_movements_list
-        - name: Commandes
-          permission: App\Entity\Role::MANAGE_ORDERS
-          route: orders_list
+        - name: Indicateurs
+          permission: App\Entity\Role::VIEW_INDICATORS
+          route: indicators_index
+    - name: Opérations
+      icon:
+        type: custom
+        name: operation
+      type: category
+      items:
+        - name: Commande comptoir
+          permission: App\Entity\Role::MANAGE_COUNTER_ORDERS
+          route: counter_orders_list
+        - name: Commande client
+          permission: App\Entity\Role::MANAGE_CLIENT_ORDERS
+          route: client_orders_list
+        - name: Planification
+          permission: App\Entity\Role::MANAGE_PLANNING
+          route: planning
     - name: Référentiel
       icon: address-card
       type: category
@@ -56,12 +87,15 @@ parameters:
         - name: Groupe
           route: groups_list
           permission: App\Entity\Role::MANAGE_GROUPS
-        - name: Emplacement
+        - name: Emplacement et stock
           route: locations_list
           permission: App\Entity\Role::MANAGE_LOCATIONS
-        - name: Type de Box
+        - name: Type de Box / Caisse
           route: box_types_list
           permission: App\Entity\Role::MANAGE_BOX_TYPES
+        - name: Dépôt
+          route: depositories_list
+          permission: App\Entity\Role::MANAGE_DEPOSITORIES
     - name: Paramétrage
       icon: cog
       type: category
@@ -81,7 +115,6 @@ parameters:
         - name: Imports et mises à jour
           route: imports_list
           permission: App\Entity\Role::MANAGE_IMPORTS
-    - name: Déconnexion
-      icon: sign-out-alt
-      type: link
-      route: logout
+        - name: Exports
+          route: exports_index
+          permission: App\Entity\Role::MANAGE_EXPORTS

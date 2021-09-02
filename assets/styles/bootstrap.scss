@@ -33,9 +33,15 @@
 
 @import "~bootstrap/scss/utilities/api";
 
-.dropdown {
-    position: relative;
+@for $i from 1 through 100 / 5 {
+    $value: $i * 5;
 
+    .w-#{$value} {
+        width: #{$value * 1%} !important;
+    }
+}
+
+.dropdown {
     .dropdown-menu {
         position: absolute;
         top: 100%;
@@ -59,6 +65,11 @@
             border: none;
             background: none;
             color: $blue;
+
+            .icon {
+                width: 15px;
+                margin-right: 3px;
+            }
 
             &:hover {
                 background: $grey;
@@ -174,4 +185,17 @@ body.modal-open {
 .modal.no-header .body {
     margin-top: -20px;
     padding-top: 0;
+}
+
+.modal-xxl {
+    max-width: 1800px !important;
+}
+
+.form-check-input-xl {
+    width: 4em !important;
+    height: 2em !important;
+}
+
+.font-italic {
+    font-weight: 500;
 }

@@ -3,21 +3,22 @@
 namespace App\Controller\Tracking;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\Box;
+use App\Entity\BoxRecord;
 use App\Entity\Client;
 use App\Entity\Location;
 use App\Entity\Quality;
 use App\Entity\Role;
-use App\Entity\BoxRecord;
+use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\BoxRecordRepository;
 use App\Service\BoxRecordService;
+use App\Service\BoxStateService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Helper\Form;
 use Exception;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -39,7 +40,7 @@ class TrackingMovementController extends AbstractController {
             "initial_movements" => $this->api($request, $manager)->getContent(),
             "movements_order" => BoxRecordRepository::DEFAULT_DATATABLE_ORDER,
             "qualities" => $qualities,
-            "states" => Box::NAMES,
+            "states" => BoxStateService::RECORD_STATES
         ]);
     }
 
@@ -65,7 +66,7 @@ class TrackingMovementController extends AbstractController {
                 "location" => FormatHelper::named($movement->getLocation()),
                 "box" => $movement->getBox()->getNumber(),
                 "quality" => FormatHelper::named($movement->getQuality()),
-                "state" => Box::NAMES[$movement->getState()] ?? "-",
+                "state" => BoxStateService::RECORD_STATES[$movement->getState()] ?? "-",
                 "client" => FormatHelper::named($movement->getClient()),
                 "user" => FormatHelper::user($movement->getUser()),
                 "actions" => $actions,
@@ -122,17 +123,12 @@ class TrackingMovementController extends AbstractController {
 
             $newerMovement = $trackingMovementRepository->findNewerTrackingMovement($movement);
             if (!$newerMovement) {
+                $previous = clone $box;
                 $box->fromRecord($movement);
-                /** @noinspection PhpUnusedLocalVariableInspection */
-                [$ignored, $record] = $boxRecordService->generateBoxRecords(
-                    $box,
-                    ['state' => $oldState, 'comment' => $oldComment],
-                    $this->getUser()
-                );
-                if ($record) {
-                    $record->setBox($box);
-                    $manager->persist($record);
-                }
+
+                [$tracking] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+                $boxRecordService->remove($tracking);
+
                 $manager->flush();
             }
 
@@ -158,7 +154,7 @@ class TrackingMovementController extends AbstractController {
             "template" => $this->renderView("tracking/movement/modal/edit.html.twig", [
                 "movement" => $movement,
                 "qualities" => $qualities,
-                "states" => Box::NAMES,
+                "states" => BoxStateService::RECORD_STATES,
             ])
         ]);
     }
@@ -185,11 +181,7 @@ class TrackingMovementController extends AbstractController {
         $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
 
         if ($form->isValid()) {
-            $oldState = $box->getState();
-            $oldComment = $box->getComment();
-
-            $movement
-                ->setDate(new DateTime($content->date))
+            $movement->setDate(new DateTime($content->date))
                 ->setQuality($quality)
                 ->setState($content->state ?? null)
                 ->setClient($client)
@@ -200,17 +192,12 @@ class TrackingMovementController extends AbstractController {
 
             $newerMovement = $trackingMovementRepository->findNewerTrackingMovement($movement);
             if (!$newerMovement) {
+                $previous = clone $box;
                 $box->fromRecord($movement);
-                /** @noinspection PhpUnusedLocalVariableInspection */
-                [$ignored, $record] = $boxRecordService->generateBoxRecords(
-                    $box,
-                    ['state' => $oldState, 'comment' => $oldComment],
-                    $this->getUser()
-                );
-                if ($record) {
-                    $record->setBox($box);
-                    $manager->persist($record);
-                }
+
+                [$tracking] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
+                $boxRecordService->remove($tracking);
+
                 $manager->flush();
             }
 
@@ -259,7 +246,7 @@ class TrackingMovementController extends AbstractController {
 
         return $exportService->export(function($output) use ($exportService, $movements) {
             foreach ($movements as $movement) {
-                $movement["state"] = Box::NAMES[$movement["state"]] ?? "Inconnu";
+                $movement["state"] = BoxStateService::RECORD_STATES[$movement["state"]] ?? "Inconnu";
                 $exportService->putLine($output, $movement);
             }
         }, "export-tracabilite-$today.csv", ExportService::MOVEMENT_HEADER);

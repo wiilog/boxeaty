@@ -3,6 +3,7 @@
 namespace App\Controller\Tracking;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\Box;
 use App\Entity\Client;
 use App\Entity\DepositTicket;
@@ -10,16 +11,15 @@ use App\Entity\Location;
 use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
-use WiiCommon\Helper\StringHelper;
 use App\Repository\DepositTicketRepository;
 use App\Service\ExportService;
 use App\Service\Mailer;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use WiiCommon\Helper\StringHelper;
 
 /**
  * @Route("/tracabilite/tickets-consigne")

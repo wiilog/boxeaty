@@ -30,15 +30,27 @@ export default class AJAX {
         return ajax;
     }
 
-    json(body, callback) {
-        if(typeof body === 'function') {
-            callback = body;
-            body = undefined;
-        } else if(!(body instanceof FormData) && (typeof body === `object` || Array.isArray(body))) {
+    json(body) {
+        if(!(body instanceof FormData) && (typeof body === `object` || Array.isArray(body))) {
             body = JSON.stringify(body);
         }
 
-        const url = this.route ? Routing.generate(this.route, this.params) : this.url;
+        let url;
+        if(this.route) {
+            url = Routing.generate(this.route, this.params);
+        } else if(this.method === `GET` || this.method === `DELETE`) {
+            url = new URL(this.url);
+            for(let [key, value] of Object.entries(this.params)) {
+                if(Array.isArray(value) || typeof value === 'object') {
+                    value = JSON.stringify(value);
+                }
+
+                url.searchParams.set(key, value);
+            }
+        } else {
+            url = this.url;
+        }
+
         const config = {
             method: this.method,
             body
@@ -54,21 +66,19 @@ export default class AJAX {
             })
             .then((json) => {
                 treatFetchCallback(json);
-
-                if(callback) {
-                    callback(json);
-                }
+                return json;
             })
             .catch(error => {
-                console.error(error);
-                Flash.add("danger", `Une erreur est survenue lors du traitement de votre requête par le serveur`);
+                Flash.serverError(error);
+                throw error;
             });
     }
+
 }
 
 function treatFetchCallback(json) {
     if(json.status === 500) {
-        addFlashError(json);
+        Flash.serverError(json);
         return;
     }
 
@@ -85,7 +95,3 @@ function treatFetchCallback(json) {
     }
 }
 
-function addFlashError(json) {
-    console.error(json);
-    Flash.add(Flash.DANGER, `Une erreur est survenue lors du traitement de votre requête par le serveur`);
-}

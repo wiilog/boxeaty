@@ -2,7 +2,7 @@
 
 {% block menu %}Traçabilité{% endblock %}
 {% block page %}
-    <a href="{{ path('boxes_list') }}" class="text-white text-decoration-none">Box</a> | Détails
+    <a href="{{ path('boxes_list') }}" class="text-white text-decoration-none">Box-Caisse</a> | Détails
 {% endblock %}
 
 {% block stylesheets %}
@@ -14,21 +14,55 @@
 {% block content %}
     <div class="row box-show">
         <div class="col-md-4 col-12 details box-details">
-            <h3>Détails de la Box</h3>
-            <p>Code : <strong>{{ box.number }}</strong></p>
+            <div class="d-flex justify-content-between">
+                <h3>{{ box.box ? "Code Box" : "Code Caisse" }} : {{ box.number }}</h3>
+                <div>
+                    {% if has_permission(constant('App\\Entity\\Role::EDIT_BOXES')) %}
+                        <span class="primary edit-box"><i class="icon bxi bxi-edit-circle"></i></span>
+                    {% endif %}
+                    {% if has_permission(constant('App\\Entity\\Role::DELETE_BOXES')) %}
+                        <span class="primary delete-box"><i class="icon bxi bxi-trash-circle"></i></span>
+                    {% endif %}
+                </div>
+            </div>
             <p>Emplacement : <strong>{{ box.location ? box.location.name }}</strong></p>
             <p>Qualité : <strong>{{ box.quality ? box.quality.name }}</strong></p>
-            <p>Etat : <strong>{{ box.state ? constant('App\\Entity\\Box::NAMES')[box.state] }}</strong></p>
+            <p>Etat : <strong>{{ box.state ? constant('App\\Service\\BoxStateService::BOX_STATES')[box.state] }}</strong></p>
             <p>Prix : <strong>{{ box.type ? box.type.price|format_helper('price') }}</strong></p>
+            <p>Propriétaire : <strong>{{ box.owner ? box.owner.name }}</strong></p>
+            {% if clientOrderInProgress %}
+                <p>Opération en cours :
+                    <a href="{{ url('client_orders_list', {'action': 'show', 'action-data': clientOrderInProgress.id}) }}">Commande Client {{ clientOrderInProgress.number }} - {{ clientOrderInProgress.status.name }}</a>
+                </p>
+            {% endif %}
         </div>
         <div class="col-md-8 col-12 right-column">
-            <div class="owner box-details">
-                <h3>Propriétaire</h3>
-                <p class="fs-5 mb-0">{{ box.owner ? box.owner.name }}</p>
-            </div>
-            <div class="history box-details">
+            {% if not box.box %}
+                <input type="hidden" name="crate" class="data" value="{{ box.id }}">
+
+                <div class="owner box-details">
+                    <div class="d-flex flex-md-row flex-column justify-content-between mb-3">
+                        <h3>Contenu de la caisse en temps réel (Box)</h3>
+                        <label class="d-flex align-items-center text-nowrap mt-0">
+                            Conditionnement rapide
+                            <select name="box" class="data add-box-to-cart" data-s2="box"
+                                    data-include-params-parent=".right-column"
+                                    data-include-params="input[name=crate]"
+                                    data-placeholder="Entrée pour valider">
+                            </select>
+                        </label>
+                    </div>
+                    <div class="d-flex refresh-after-add">
+                    </div>
+                </div>
+            {% endif %}
+            <div class="history box-details {{ box.box ? 'mt-0' }}">
                 <div class="d-flex flex-md-row flex-column justify-content-between mb-3">
-                    <h3 class="mb-0">Historique de la Box</h3>
+                    {% if not box.box %}
+                        <h3 class="mb-0">Historique de la Caisse</h3>
+                    {% else %}
+                        <h3 class="mb-0">Historique de la Box</h3>
+                    {% endif %}
                     <label class="d-flex align-items-center text-nowrap mt-0">
                         Rechercher :
                         <input type="text" class="comment-search data" placeholder="Entrée pour valider">
@@ -43,7 +77,8 @@
             </div>
         </div>
     </div>
-    <input type="hidden" value="{{ box.id }}" id="box-id">
+
+    <input type="hidden" name="box" value="{{ box.id }}" id="box-id">
 {% endblock %}
 
 {% block javascripts %}

@@ -1,0 +1,183 @@
+{% extends 'template.html.twig' %}
+
+{% block menu %}Référentiel{% endblock %}
+{% block page %}
+    <a href="{{ path('clients_list') }}" class="text-white text-decoration-none">Client</a> | Détails
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('client_show') }}
+{% endblock %}
+
+{% block bodyclass %}full-height{% endblock %}
+{% block content %}
+    <div class="row client-show">
+        {% set clientOrderInformation = client.clientOrderInformation is defined and client.clientOrderInformation
+            ? client.clientOrderInformation
+            : null %}
+        <div class="col-6">
+            <div class="row w-100">
+                <div class="row contact-information p-3">
+                    <div class="row col-8">
+                        <div class="d-flex">
+                            <span class="subtitle text-uppercase pe-3">{{ client.name }}</span>
+                            {% if client.multiSite %}
+                                <img src="{{ asset('images/multi-site.svg') }}" alt="Icône client multi-site"
+                                     width="30px" data-toggle="tooltip" title="Client multi-site">
+                            {% endif %}
+                        </div>
+                        <span class="body-text-semi-bold">{{ client.address }}</span>
+                        <span class="body-text mt-2">{{ client.contact ? client.contact.username : 'Aucun contact' }} - {{ client.phoneNumber }}</span>
+                        <span class="font-italic">Droits indicateurs: {{ client.contact and constant('App\\Entity\\Role::VIEW_INDICATORS') in client.contact.role.permissions ? 'oui' : 'non' }}</span>
+                    </div>
+                    <div class="col-4 p-0 d-flex justify-content-end">
+                    <span class="edit-client round" data-id="{{ client.id }}">
+                        <i class="icon bxi bxi-edit-circle cursor-pointer"></i>
+                    </span>
+                        <span class="delete-client round" data-id="{{ client.id }}">
+                        <i class="icon bxi bxi-trash-circle cursor-pointer"></i>
+                    </span>
+                    </div>
+                </div>
+                <div class="col-8">
+                    <div class="d-flex align-items-end mt-3">
+                        <span class="big-text pe-2">Groupe</span><span class="body-text">{{ client.group.name }}</span>
+                    </div>
+                    <div class="row deposit-ticket mt-4">
+                        <span class="big-text">Tickets valable dans la bornes :</span>
+                        <div class="d-flex flex-wrap">
+                            {% for depositTicketClient in client.depositTicketsClients %}
+                                <div class="card-item col-4 mt-2">{{ depositTicketClient.name }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <span class="body-text">Tickets valable: <strong>{{ client.depositTicketValidity }} mois</strong></span>
+                    </div>
+                    <div class="row mt-4">
+                        <span class="big-text">Multi site lié</span>
+                        <div class="d-flex">
+                            {% if client.linkedMultiSite %}
+                                <div class="card-item">{{ client.linkedMultiSite.name }}</div>
+                            {% elseif client.clients is not empty %}
+                                {% for client in client.clients %}
+                                    <div class="card-item">{{ client.name }}</div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="card-item">-</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <span class="big-text">Moyen(s) de paiement préféré(s)</span>
+                        <div class="d-flex">
+                            {% if client.paymentModes is not empty %}
+                                {% for paymentMode in client.paymentModes|split(',') %}
+                                    <div class="card-item">{{ paymentMode }}</div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="card-item">-</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <span class="body-text">Montant prorata (HT): <strong>{{ client.prorateAmount|format_helper('price') }}</strong></span>
+                    </div>
+                    <div class="d-flex mt-4">
+                        <div class="circle {{ client.mailNotificationOrderPreparation ? 'checked' }} pe-2"></div>
+                        <span class="body-text-semi-bold ps-2">Notification mail à la préparation de la commande</span>
+                    </div>
+                </div>
+                <div class="col-4 order-information-container">
+                    <div class="row mt-4">
+                        <span class="big-text">Informations commande</span>
+                        <div class="d-flex">
+                            {% set deliveryMethod = clientOrderInformation.deliveryMethod is defined and clientOrderInformation.deliveryMethod ? clientOrderInformation.deliveryMethod : null %}
+                            {% if deliveryMethod %}
+                                <div class="card-item delivery-method">
+                                    <i class="icon bxi bxi-{{ deliveryMethod.icon }}"></i>
+                                    {{ deliveryMethod.name }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <span class="big-text">Dépôt au départ</span>
+                        <div class="d-flex">
+                            {% set depository = clientOrderInformation.depository is defined and clientOrderInformation.depository
+                                ? clientOrderInformation.depository
+                                : null %}
+                            {% if depository %}
+                                <span class="body-text">{{ depository.name }} à {{ clientOrderInformation.depositoryDistance ~ 'km' }}</span>
+                            {% else %}
+                                <span class="body-text">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if clientOrderInformation and clientOrderInformation.orderTypes is not empty %}
+                        <div class="d-flex flex-wrap pt-2">
+                            {% for orderType in clientOrderInformation.orderTypes %}
+                                {% if orderType != "" %}
+                                    <div class="order-type mt-1 me-1 w-50">
+                                        <span>{{ constant('App\\Entity\\OrderType::LABELS')[orderType] }}</span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="row mt-4">
+                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.tokenAmount ? clientOrderInformation.tokenAmount : 'aucun ' }}</strong> jeton{{ clientOrderInformation and clientOrderInformation.tokenAmount > 1 ? 's' : '' }} par commande</span>
+                    </div>
+                    <div class="row mt-4">
+                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.workingDayDeliveryRate ? clientOrderInformation.workingDayDeliveryRate|format_helper('price') : '- €' }}</strong> en forfait livraison jour ouvré</span>
+                    </div>
+                    <div class="row mt-4">
+                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.nonWorkingDayDeliveryRate ? clientOrderInformation.nonWorkingDayDeliveryRate|format_helper('price') : '- €' }}</strong> en forfait livraison jour non ouvré</span>
+                    </div>
+                    <div class="row mt-4">
+                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.serviceCost ? clientOrderInformation.serviceCost|format_helper('price') : '- €' }}</strong> en frais de service</span>
+                    </div>
+                    {% if clientOrderInformation and clientOrderInformation.comment %}
+                        <div class="row mt-4">
+                            <span class="big-text">Commentaire</span>
+                            <div class="comment-container">
+                                {{ clientOrderInformation.comment | raw }}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="crate-type-container">
+                <span class="big-text">Modèle de caisse
+                    <span class="orange-text total-crate-type-price"></span>
+                </span>
+                <div class="box-type-card-wrapper"></div>
+                <div class="d-flex justify-content-end mt-3">
+                    <button class="primary filter add-crate-pattern-line">Ajouter une Box</button>
+                </div>
+            </div>
+            <div class="order-recurrence-container mt-3">
+                <span class="big-text">Commande récurrente
+                    <span class="orange-text"><span class="order-recurrence-price"></span></span>
+                </span>
+                <div class="order-recurrence-wrapper">
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" value="{{ client.id }}" id="client-id">
+
+    {% include('referential/client/modal/new_crate_pattern_line.html.twig') with {
+        clientId: client.id
+    } %}
+    {% include('referential/client/modal/add_order_recurrence.html.twig') with {
+        clientId: client.id
+    } %}
+{% endblock %}
+
+    {% block javascripts %}
+        {{ encore_entry_script_tags('client_show') }}
+    {% endblock %}

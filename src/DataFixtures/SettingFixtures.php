@@ -17,12 +17,16 @@ class SettingFixtures extends Fixture implements FixtureGroupInterface {
         GlobalSetting::EMPTY_KIOSK_CODE => "4578",
         GlobalSetting::BOX_CAPACITIES => null,
         GlobalSetting::BOX_SHAPES => null,
+        GlobalSetting::PAYMENT_MODES => null,
         GlobalSetting::MAILER_HOST => null,
         GlobalSetting::MAILER_PORT => null,
         GlobalSetting::MAILER_USER => null,
         GlobalSetting::MAILER_PASSWORD => null,
         GlobalSetting::MAILER_SENDER_EMAIL => null,
         GlobalSetting::MAILER_SENDER_NAME => null,
+        GlobalSetting::AUTO_VALIDATION_DELAY => null,
+        GlobalSetting::AUTO_VALIDATION_BOX_QUANTITY => null,
+        GlobalSetting::DEFAULT_CRATE_TYPE => null,
     ];
 
     private const DELETED_SETTINGS = [

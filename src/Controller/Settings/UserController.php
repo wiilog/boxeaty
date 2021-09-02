@@ -3,7 +3,9 @@
 namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\Client;
+use App\Entity\DeliveryMethod;
 use App\Entity\Group;
 use App\Entity\Role;
 use App\Entity\User;
@@ -14,7 +16,6 @@ use App\Security\Authenticator;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -100,6 +101,11 @@ class UserController extends AbstractController {
         $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(",", $content->clients)]);
         $groups = $manager->getRepository(Group::class)->findBy(["id" => explode(",", $content->groups)]);
 
+        $deliveryMethod = null;
+        if(isset($content->deliveryMethod)){
+            $deliveryMethod = $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod);
+        }
+
         if ($form->isValid()) {
             $user = new User();
             $user->setUsername($content->username)
@@ -109,6 +115,10 @@ class UserController extends AbstractController {
                 ->setPassword($encoder->encodePassword($user, $content->password))
                 ->setGroups($groups)
                 ->setClients($clients)
+                ->setDeliverer($content->deliverer)
+                ->setDeliveryAssignmentMail($content->deliveryAssignmentMail)
+                ->setDeliveryAssignmentPreparationMail($content->deliveryAssignmentPreparationMail)
+                ->setDeliveryMethod($deliveryMethod)
                 ->setCreationDate(new DateTime());
 
             $manager->persist($user);
@@ -185,12 +195,22 @@ class UserController extends AbstractController {
             $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(",", $content->clients)]);
             $groups = $manager->getRepository(Group::class)->findBy(["id" => explode(",", $content->groups)]);
 
+                if (isset($content->deliveryMethod)) {
+                    $deliveryMethod = $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod);
+                } else {
+                    $deliveryMethod = null;
+                }
+
             $user->setUsername($content->username)
                 ->setEmail($content->email)
                 ->setRole($role)
                 ->setActive($content->active)
                 ->setGroups($groups)
                 ->setClients($clients)
+                ->setDeliverer($content->deliverer)
+                ->setDeliveryAssignmentMail($content->deliveryAssignmentMail)
+                ->setDeliveryAssignmentPreparationMail($content->deliveryAssignmentPreparationMail)
+                ->setDeliveryMethod($deliveryMethod)
                 ->setCreationDate(new DateTime());
 
             if (isset($content->password)) {

@@ -15,6 +15,8 @@ class GlobalSetting {
     public const EMPTY_KIOSK_CODE = "EMPTY_KIOSK_CODE";
     public const BOX_CAPACITIES = "BOX_CAPACITIES";
     public const BOX_SHAPES = "BOX_SHAPES";
+    public const PAYMENT_MODES = "PAYMENT_MODES";
+    public const DEFAULT_CRATE_TYPE = "DEFAULT_CRATE_TYPE";
 
     public const MAILER_HOST = "MAILER_HOST";
     public const MAILER_PORT = "MAILER_PORT";
@@ -22,6 +24,9 @@ class GlobalSetting {
     public const MAILER_PASSWORD = "MAILER_PASSWORD";
     public const MAILER_SENDER_NAME = "MAILER_SENDER_NAME";
     public const MAILER_SENDER_EMAIL = "MAILER_SENDER_EMAIL";
+
+    public const AUTO_VALIDATION_DELAY = "AUTO_VALIDATION_DELAY";
+    public const AUTO_VALIDATION_BOX_QUANTITY = "AUTO_VALIDATION_BOX_QUANTITY";
 
     /**
      * @ORM\Id

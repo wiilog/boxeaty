@@ -27,7 +27,8 @@ class Authenticator extends AbstractFormLoginAuthenticator {
     public const LOGIN_ERROR = "Identifiants incorrects";
     public const LOGIN_ROUTE = "login";
     public const HOME_ROUTE = "home";
-    public const ORDERS_LIST_ROUTE = "orders_list";
+    public const ORDERS_LIST_ROUTE = "counter_orders_list";
+    public const INDICATORS_ROUTE = "indicators_index";
 
     public const PASSWORD_ERROR = "Le mot de passe doit contenir au moins un chiffre, une majuscule et une minuscule. Il doit faire au moins 8 caractères.";
 
@@ -43,11 +44,11 @@ class Authenticator extends AbstractFormLoginAuthenticator {
     /** @Required */
     public UserPasswordEncoderInterface $encoder;
 
-    public function supports(Request $request) {
+    public function supports(Request $request): bool {
         return self::LOGIN_ROUTE === $request->attributes->get("_route") && $request->isMethod("POST");
     }
 
-    public function getCredentials(Request $request) {
+    public function getCredentials(Request $request): array {
         $credentials = [
             "email" => $request->request->get("email"),
             "password" => $request->request->get("password"),
@@ -59,7 +60,7 @@ class Authenticator extends AbstractFormLoginAuthenticator {
         return $credentials;
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider) {
+    public function getUser($credentials, UserProviderInterface $userProvider): ?User {
         $token = new CsrfToken("authenticate", $credentials["csrf_token"]);
         if (!$this->csrfTokenManager->isTokenValid($token)) {
             throw new InvalidCsrfTokenException();
@@ -73,18 +74,28 @@ class Authenticator extends AbstractFormLoginAuthenticator {
         return $user;
     }
 
-    public function checkCredentials($credentials, UserInterface $user) {
-        return $user instanceof User && $user->isActive() &&
-            $this->encoder->isPasswordValid($user, $credentials["password"]);
+    public function checkCredentials($credentials, UserInterface $user): bool {
+        if($user instanceof User) {
+            $valid = $this->encoder->isPasswordValid($user, $credentials["password"]);
+            if ($valid && !$user->isActive()) {
+                throw new CustomUserMessageAuthenticationException("Votre compte est inactif");
+            }
+
+            return $valid;
+        }
+
+        return false;
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey) {
-        if($token->getUser() instanceof User) {
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey): RedirectResponse {
+        if ($token->getUser() instanceof User) {
             $token->getUser()->setLastLogin(new DateTime());
             $this->entityManager->flush();
 
-            if ($token->getUser()->getRole()->getShowNewOrderOnHome()) {
+            if ($token->getUser()->getRole()->getRedirectNewCounterOrder()) {
                 return new RedirectResponse($this->urlGenerator->generate(self::ORDERS_LIST_ROUTE));
+            } else if ($token->getUser()->getRole()->getShowIndicatorsOnHome()) {
+                return new RedirectResponse($this->urlGenerator->generate(self::INDICATORS_ROUTE));
             }
         }
 
@@ -95,7 +106,7 @@ class Authenticator extends AbstractFormLoginAuthenticator {
         return new RedirectResponse($this->urlGenerator->generate(self::HOME_ROUTE));
     }
 
-    protected function getLoginUrl() {
+    protected function getLoginUrl(): string {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
     }
 

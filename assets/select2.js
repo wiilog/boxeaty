@@ -4,6 +4,9 @@ import 'select2/src/js/select2/i18n/fr';
 
 const ROUTES = {
     box: `ajax_select_boxes`,
+    orderStatus: 'ajax_select_order_status',
+    orderType: 'ajax_select_order_type',
+    depository: `ajax_select_depositories`,
     group: `ajax_select_groups`,
     client: `ajax_select_clients`,
     multiSite: `ajax_select_multi_sites`,
@@ -13,19 +16,29 @@ const ROUTES = {
     location: `ajax_select_locations`,
     type: `ajax_select_type`,
     quality: `ajax_select_quality`,
-    orderBox: `ajax_select_order_boxes`,
-    orderDepositTicket: `ajax_select_order_deposit_tickets`,
-}
+    orderBox: `ajax_select_counter_order_boxes`,
+    orderDepositTicket: `ajax_select_counter_order_deposit_tickets`,
+    deliverer: `ajax_select_deliverers`,
+    deliveryMethod: `ajax_select_delivery_methods`,
+};
 
 const INSTANT_SELECT_TYPES = {
     type: true,
+    orderType: true,
+    orderStatus: true,
     quality: true,
     group: true,
-}
+    depository: true,
+    deliveryMethod: true,
+};
 
 export default class Select2 {
     static init($element) {
         const type = $element.data(`s2`);
+        const icon = $element.is(`[data-icon]`);
+        const disableSearch = $element.is(`[data-no-searching]`);
+        const classes =  $element.attr('class');
+
         if(!$element.find(`option[selected]`).exists() && !type &&
             !$element.is(`[data-no-empty-option]`) && !$element.is(`[data-editable]`)) {
             $element.prepend(`<option selected>`);
@@ -33,7 +46,10 @@ export default class Select2 {
 
         $element.removeAttr(`data-s2`);
         $element.attr(`data-s2-initialized`, ``);
-        $element.wrap(`<div/>`);
+
+        if(!$element.closest(`[data-s2-wrapper]`).exists()) {
+            $element.wrap(`<div data-s2-wrapper style="position: relative"/>`);
+        }
 
         const config = {};
         if(type) {
@@ -48,14 +64,27 @@ export default class Select2 {
             };
         }
 
+        if (icon) {
+            config.templateResult = format;
+            config.templateSelection = format;
+        }
+
+        if (disableSearch) {
+            config.minimumResultsForSearch = -1;
+        }
+
         if(type && !INSTANT_SELECT_TYPES[type]) {
             config.minimumInputLength = 1;
+        }
+
+        if ($element.data('init-data')) {
+            config.data = $element.data('init-data');
         }
 
         $element.select2({
             placeholder: $element.data(`placeholder`),
             tags: $element.is('[data-editable]'),
-            allowClear: !$element.is(`[multiple]`),
+            allowClear: !$element.is(`[data-no-empty-option]` || !$element.is(`[multiple]`)),
             dropdownParent: $element.parent(),
             language: {
                 errorLoading: () => `Une erreur est survenue`,
@@ -68,11 +97,17 @@ export default class Select2 {
             ...config,
         });
 
+        $element.parent().find('.select2-container').addClass(classes
+            .split(' ')
+            .filter(css => css !== 'select2-hidden-accessible')
+            .join(' '));
+
         $element.on('select2:open', function(e) {
             const evt = "scroll.select2";
             $(e.target).parents().off(evt);
             $(window).off(evt);
-            // we hide all other select2 dropdown
+
+            // hide all other select2 dropdown
             $('[data-s2-initialized]').each(function() {
                 const $select2 = $(this);
                 if(!$select2.is($element)) {
@@ -91,7 +126,7 @@ export default class Select2 {
     static includeParams($element, params) {
         if($element.is(`[data-include-params]`)) {
             const selector = $element.data(`include-params`);
-            const closest = $element.data(`[data-include-params-parent]`) || `.modal`;
+            const closest = $element.data(`include-params-parent`) || `.modal`;
             const $fields = $element
                     .closest(closest)
                     .find(selector);
@@ -114,3 +149,7 @@ $(document).ready(() => $(`[data-s2]`).each((id, elem) => Select2.init($(elem)))
 $(document).arrive(`[data-s2]`, function() {
     Select2.init($(this));
 });
+
+function format(state) {
+    return $(`<i class="bxi bxi-${state.id}"></i>`);
+}

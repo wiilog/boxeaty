@@ -8,10 +8,12 @@
     <div class="col-12 toggle">
         <span class="label">Statut</span>
 
-        <input type="radio" id="{{ role.id ? 'edit' : 'new' }}-role-active" name="active" class="data" value="1" {{ role.active ? 'checked' }}/>
+        <input type="radio" id="{{ role.id ? 'edit' : 'new' }}-role-active" name="active" class="data"
+               value="1" {{ role.active ? 'checked' }}/>
         <label for="{{ role.id ? 'edit' : 'new' }}-role-active">Actif</label>
 
-        <input type="radio" id="{{ role.id ? 'edit' : 'new' }}-role-inactive" name="active" class="data" value="0" {{ not role.active ? 'checked' }}/>
+        <input type="radio" id="{{ role.id ? 'edit' : 'new' }}-role-inactive" name="active" class="data"
+               value="0" {{ not role.active ? 'checked' }}/>
         <label for="{{ role.id ? 'edit' : 'new' }}-role-inactive">Inactif</label>
     </div>
 
@@ -28,23 +30,35 @@
                     <label class="form-check-label" for="{{ key }}">{{ label }}</label>
                 </div>
             {% endfor %}
+
             {% if menu == 'Autre' %}
                 <div class="form-check form-switch">
                     <input class="form-check-input data" type="checkbox" name="allowEditOwnGroupOnly"
                            id="allow-edit-own-group-only" {{ role.allowEditOwnGroupOnly ? 'checked' }}>
-                    <label class="form-check-label" for="allow-edit-own-group-only">Autoriser uniquement pour son groupe</label>
+                    <label class="form-check-label" for="allow-edit-own-group-only">Autoriser uniquement pour son
+                        groupe</label>
                 </div>
 
                 <div class="form-check form-switch">
-                    <input class="form-check-input data" type="checkbox" name="showNewOrderOnHome"
-                           id="show-new-order-on-home" {{ role.showNewOrderOnHome ? 'checked' }}>
-                    <label class="form-check-label" for="show-new-order-on-home">Afficher l'écran "Nouvelle commande" sur l'accueil</label>
+                    <input class="form-check-input data unique-choice" type="checkbox" name="redirectNewCounterOrder"
+                           id="redirect-new-order-on-home" {{ role.redirectNewCounterOrder ? 'checked' }}>
+                    <label class="form-check-label" for="redirect-new-order-on-home">
+                        Rediriger vers nouvelle commande comptoir
+                    </label>
+                </div>
+
+                <div class="form-check form-switch">
+                    <input class="form-check-input data unique-choice" type="checkbox" name="showIndicatorsOnHome"
+                           id="show-indicators-on-home" {{ role.showIndicatorsOnHome ? 'checked' }}>
+                    <label class="form-check-label" for="show-indicators-on-home">Rediriger l'utilisateur vers la page
+                        des indicateurs</label>
                 </div>
 
                 <div class="form-check form-switch">
                     <input class="form-check-input data" type="checkbox" name="receiveMailsNewAccounts"
                            id="receive-mails-new-accounts" {{ role.receiveMailsNewAccounts ? 'checked' }}>
-                    <label class="form-check-label" for="receive-mails-new-accounts">Réception mail création compte</label>
+                    <label class="form-check-label" for="receive-mails-new-accounts">Réception mail création
+                        compte</label>
                 </div>
             {% endif %}
         </div>

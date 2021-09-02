@@ -1,0 +1,17 @@
+.delete-box .bxi-trash-circle {
+    width: 40px;
+    height: 40px !important;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.edit-box .bxi-edit-circle {
+    width: 40px;
+    height: 40px !important;
+
+    &:hover {
+        cursor: pointer;
+    }
+}

@@ -1,0 +1,31 @@
+<div class="row">
+    <div class="col-12">
+        <label>Type
+            <select class="data" name="type" data-s2="type" data-no-empty-option required
+                    data-placeholder="Sélectionnez un type de Box..." {{ cratePatternLine is defined and cratePatternLine.boxType ? 'disabled' }}>
+                {% if cratePatternLine is defined and cratePatternLine.boxType %}
+                    <option value="{{ cratePatternLine.boxType.id }}" selected>{{ cratePatternLine.boxType.name }}</option>
+                {% endif %}
+            </select>
+        </label>
+    </div>
+    <div class="col-md-6 col-12">
+        <label>Quantité
+            <input type="number"
+                   class="data"
+                   name="quantity"
+                   value="{{ cratePatternLine is defined ? cratePatternLine.quantity }}"
+                   required
+                   placeholder="Renseignez une quantité..."/>
+        </label>
+    </div>
+    <div class="col-md-6 col-12">
+        <label>Tarif personnalisé
+            <input type="number"
+                   class="data euros"
+                   name="customPrice"
+                   value="{{ cratePatternLine is defined ? cratePatternLine.customUnitPrice }}"
+                   placeholder="Renseignez un tarif..."/>
+        </label>
+    </div>
+</div>

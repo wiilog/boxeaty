@@ -1,0 +1,16 @@
+{% import 'operation/planning/macros.html.twig' as macros %}
+
+<div class="col-md-6 col-12">
+    <label>Livraisons disponibles au lancement</label>
+    <div class="deliveries available-order-to-start">
+        {% for order in orders %}
+            {{ macros.order_card(order, true) }}
+        {% endfor %}
+    </div>
+</div>
+<div class="col-md-6 col-12">
+    <label>Livraisons à lancer</label>
+    <div class="deliveries orders-to-start">
+
+    </div>
+</div>

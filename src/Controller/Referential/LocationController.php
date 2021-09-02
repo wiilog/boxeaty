@@ -3,35 +3,59 @@
 namespace App\Controller\Referential;
 
 use App\Annotation\HasPermission;
+use App\Controller\AbstractController;
 use App\Entity\Box;
-use App\Entity\Client;
+use App\Entity\BoxRecord;
+use App\Entity\Depository;
 use App\Entity\Location;
 use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\LocationRepository;
+use App\Service\BoxStateService;
 use App\Service\ExportService;
+use App\Service\LocationService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use WiiCommon\Helper\Stream;
 
 /**
  * @Route("/referentiel/emplacements")
  */
-class LocationController extends AbstractController {
+class LocationController extends AbstractController
+{
 
     /**
      * @Route("/liste", name="locations_list")
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function list(Request $request, EntityManagerInterface $manager): Response {
+    public function list(Request $request, EntityManagerInterface $manager): Response
+    {
+        $params = json_decode($request->getContent(), true);
+        $filters = $params["filters"] ?? [];
+
+        if (isset($filters["depository"])) {
+            $depositoryId = $manager->find(Depository::class, $filters['depository'])->getId();
+            $boxRepository = $manager->getRepository(Box::class);
+            $stockLocationType = array_search(Location::STOCK, Location::LOCATION_TYPES);
+
+            $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
+            $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0, $depositoryId, $stockLocationType);
+            $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1, $depositoryId);
+            $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1, $depositoryId, $stockLocationType);
+        }
+
         return $this->render("referential/location/index.html.twig", [
             "new_location" => new Location(),
             "initial_locations" => $this->api($request, $manager)->getContent(),
             "locations_order" => LocationRepository::DEFAULT_DATATABLE_ORDER,
+            "crateUnavailable" => $crateUnavailable ?? "--",
+            "crateAvailable" => $crateAvailable ?? "--",
+            "boxUnavailable" => $boxUnavailable ?? "--",
+            "boxAvailable" => $boxAvailable ?? "--",
         ]);
     }
 
@@ -45,17 +69,20 @@ class LocationController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
+        /** @var Location $location */
         foreach ($locations["data"] as $location) {
             $data[] = [
                 "id" => $location->getId(),
                 "kiosk" => $location->isKiosk() ? "Borne" : "Emplacement",
                 "name" => $location->getName(),
+                "depository" => $location->getDepository() ? $location->getDepository()->getName() : '-',
                 "client_name" => FormatHelper::named($location->getClient()),
                 "active" => FormatHelper::bool($location->isActive()),
                 "client" => FormatHelper::named($location->getClient()),
                 "description" => $location->getDescription() ?: "-",
-                "boxes" => $boxRepository->count(["location" => $location]),
                 "capacity" => $location->getCapacity() ?? "-",
+                "location_type" => $location->getType() ? Location::LOCATION_TYPES[$location->getType()] : '-',
+                "container_amount" => $boxRepository->count(["location" => $location]),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "editable" => true,
                     "deletable" => true,
@@ -64,10 +91,91 @@ class LocationController extends AbstractController {
             ];
         }
 
+        $params = json_decode($request->getContent(), true);
+        $filters = $params['filters'] ?? [];
+        $chartLabels = [];
+        $dataCustomerState = [];
+        $dataAvailableState = [];
+        $dataUnavailableState = [];
+        $dataOutState = [];
+
+        if (!empty($filters) && count($filters) == 3) {
+            $depositoryRepository = $manager->getRepository(Depository::class);
+            $filters = $params['filters'];
+            $depository = $depositoryRepository->find($filters['depository']);
+            $locationsId = Stream::from($depository->getLocations())
+                ->map(fn(Location $location) => $location->getId())
+                ->toArray();
+            $startDate = DateTime::createFromFormat("Y-m-d", $filters["from"]);
+            $endDate = DateTime::createFromFormat("Y-m-d", $filters["to"]);
+            $boxRecordRepository = $manager->getRepository(BoxRecord::class);
+
+            for ($i = clone $startDate; $i <= $endDate; $i->modify("+1 day")) {
+                $dateMin = clone $i;
+                $dateMax = clone $i;
+                $dateMin->setTime(0, 0, 0);
+                $dateMax->setTime(23, 59, 59);
+                $chartLabels[] = $i->format("d/m/Y");
+                $dataCustomerState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxStateService::STATE_BOX_CONSUMER, $locationsId);
+                $dataOutState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxStateService::STATE_BOX_OUT, $locationsId);
+                $dataUnavailableState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxStateService::STATE_BOX_UNAVAILABLE, $locationsId);
+                $dataAvailableState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxStateService::STATE_BOX_AVAILABLE, $locationsId);
+            }
+        }
+
+        $config = [
+            'type' => 'line',
+            'data' => [
+                'labels' => $chartLabels,
+                'datasets' => [
+                    [
+                        'label' => "Consommateur",
+                        'data' => $dataCustomerState,
+                        'backgroundColor' => ['#1E1F44'],
+                        'borderColor' => ['#1E1F44'],
+                    ],
+                    [
+                        'label' => "Sorti",
+                        'data' => $dataOutState,
+                        'backgroundColor' => ['#EB611B'],
+                        'borderColor' => ['#EB611B'],
+                    ],
+                    [
+                        'label' => "Indisponible",
+                        'data' => $dataUnavailableState,
+                        'backgroundColor' => ['#890620'],
+                        'borderColor' => ['#890620'],
+                    ],
+                    [
+                        'label' => "Disponible",
+                        'data' => $dataAvailableState,
+                        'backgroundColor' => ['#76B39D'],
+                        'borderColor' => ['#76B39D'],
+                    ],
+                ],
+            ],
+        ];
+        $depositoryRepository = $manager->getRepository(Depository::class);
+        $depository = isset($filters['depository']) ? $depositoryRepository->find($filters['depository']) : null;
+
+        if ($depository) {
+            $depositoryId = $depository->getId();
+            $stockLocationType = array_search(Location::STOCK, Location::LOCATION_TYPES);
+            $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
+            $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0, $depositoryId, $stockLocationType);
+            $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1, $depositoryId);
+            $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1, $depositoryId, $stockLocationType);
+        }
+
         return $this->json([
+            "config" => !empty($config) ? json_encode($config) : [],
             "data" => $data,
             "recordsTotal" => $locations["total"],
-            "recordsFiltered" => $locations["filtered"]
+            "recordsFiltered" => $locations["filtered"],
+            "crateUnavailable" => $crateUnavailable ?? '--',
+            "crateAvailable" => $crateAvailable ?? '--',
+            "boxUnavailable" => $boxUnavailable ?? '--',
+            "boxAvailable" => $boxAvailable ?? '--',
         ]);
     }
 
@@ -75,55 +183,25 @@ class LocationController extends AbstractController {
      * @Route("/nouveau", name="location_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function new(Request $request, EntityManagerInterface $manager): Response {
+    public function new(Request $request, EntityManagerInterface $manager, LocationService $service): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
-        $capacity = $content->capacity ?? null;
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing) {
             $form->addError("name", "Un emplacement avec ce nom existe déjà");
         }
 
-        if ($content->type && (!$capacity || $capacity < Location::MIN_KIOSK_CAPACITY)) {
+        if (!isset($content->client) && ($content->kiosk || $content->type ?? 0 == Location::CLIENT)) {
+            $form->addError("client", "Requis pour les emplacements de type borne ou client");
+        }
+        if ($content->kiosk && (!isset($content->capacity) || $content->capacity < Location::MIN_KIOSK_CAPACITY)) {
             $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
 
         if ($form->isValid()) {
-            $deporte = new Location();
-            $deporte
-                ->setKiosk($content->type)
-                ->setName($content->name . "_deporte")
-                ->setActive($content->active)
-                ->setClient($client)
-                ->setDescription($content->description ?? null)
-                ->setDeposits(0);
-
-            $location = new Location();
-            $location
-                ->setDeporte($deporte)
-                ->setKiosk($content->type)
-                ->setName($content->name)
-                ->setActive($content->active)
-                ->setClient($client)
-                ->setDescription($content->description ?? null)
-                ->setDeposits(0);
-
-            if ((int)$content->type === 1) {
-                $location->setCapacity($capacity)
-                    ->setMessage($content->message ?? null);
-
-                $deporte->setCapacity($capacity)
-                    ->setMessage($content->message ?? null);
-            } else {
-                $location->setCapacity(null)
-                    ->setMessage(null);
-            }
-
-            $manager->persist($location);
-            $manager->persist($deporte);
+            $service->updateLocation(new Location(), $content);
             $manager->flush();
 
             return $this->json([
@@ -153,38 +231,25 @@ class LocationController extends AbstractController {
      * @Route("/modifier/{location}", name="location_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function edit(Request $request, EntityManagerInterface $manager, Location $location): Response {
+    public function edit(Request $request, EntityManagerInterface $manager, LocationService $service, Location $location): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
-        $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
-        $capacity = $content->capacity ?? null;
-
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
         if ($existing !== null && $existing !== $location) {
             $form->addError("label", "Un autre emplacement avec ce nom existe déjà");
         }
 
-        if ($content->type && (!$capacity || $capacity < Location::MIN_KIOSK_CAPACITY)) {
+        if (!isset($content->client) && ($content->kiosk || $content->type ?? 0 == Location::CLIENT)) {
+            $form->addError("client", "Requis pour les emplacements de type borne ou client");
+        }
+
+        if ($content->kiosk && (!isset($content->capacity) || $content->capacity < Location::MIN_KIOSK_CAPACITY)) {
             $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
 
         if ($form->isValid()) {
-            $location
-                ->setKiosk($content->type)
-                ->setName($content->name)
-                ->setClient($client)
-                ->setActive($content->active)
-                ->setDescription($content->description ?? null);
-
-            if ((int)$content->type === 1) {
-                $location->setCapacity($capacity)
-                    ->setMessage($content->message ?? null);
-            } else {
-                $location->setCapacity(null)
-                    ->setMessage($content->message ?? null);
-            }
-
+            $service->updateLocation(new Location(), $content);
             $manager->flush();
 
             return $this->json([
@@ -214,7 +279,7 @@ class LocationController extends AbstractController {
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
     public function delete(EntityManagerInterface $manager, Location $location): Response {
-        if ($location && (!$location->getBoxRecords()->isEmpty() || !$location->getBoxes()->isEmpty())) {
+        if ($location->getOutClient() || !$location->getBoxRecords()->isEmpty() || !$location->getBoxes()->isEmpty()) {
             $location->setActive(false);
             $manager->flush();
 
@@ -222,13 +287,13 @@ class LocationController extends AbstractController {
                 "success" => true,
                 "message" => "Emplacement <strong>{$location->getName()}</strong> désactivé avec succès"
             ]);
-        } else if ($location) {
+        } else {
             $originalLocation = $manager->getRepository(Location::class)->findOneBy([
                 "deporte" => $location
             ]);
 
             if ($originalLocation) {
-                $originalLocation->setDeporte(null);
+                $originalLocation->setOffset(null);
             }
             $manager->remove($location);
             $manager->flush();
@@ -236,12 +301,6 @@ class LocationController extends AbstractController {
             return $this->json([
                 "success" => true,
                 "message" => "Emplacement <strong>{$location->getName()}</strong> supprimé avec succès"
-            ]);
-        } else {
-            return $this->json([
-                "success" => false,
-                "reload" => true,
-                "message" => "L'emplacement n'existe pas"
             ]);
         }
     }
@@ -258,6 +317,7 @@ class LocationController extends AbstractController {
 
         return $exportService->export(function($output) use ($exportService, $locations) {
             foreach ($locations as $location) {
+                $location["locationType"] = $location["locationType"] ? Location::LOCATION_TYPES[$location["locationType"]] : '';
                 $exportService->putLine($output, $location);
             }
         }, "export-emplacement-$today.csv", ExportService::LOCATION_HEADER);

@@ -1,0 +1,14 @@
+{% extends 'filters/template.html.twig' %}
+
+{% block filters %}
+    {% include('filters/filter_items/client_item.html.twig') with {required : true } %}
+    {% include('filters/filter_items/date_item.html.twig') with {required : true } %}
+{% endblock %}
+
+    {% block buttons %}
+        <button class="primary filter">Filtrer</button>
+    {% endblock %}
+
+{% block content %}
+
+{% endblock %}

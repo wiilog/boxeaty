@@ -30,7 +30,10 @@ $(document).ready(() => {
     $(`#modal-new-client input[name="name"]`).on('input', function() {
         let $option = $(`#modal-new-client`).find(`.client-self-name`);
         $option.text($(this).val());
-        Select2.init($option.parent());
+
+        const $select = $option.parent();
+        $select.data(`s2`, `client`);
+        Select2.init($select);
     });
 
     $(document).on(`change`, `[name="isMultiSite"]`, function () {
@@ -53,8 +56,7 @@ $(document).ready(() => {
             {data: `contact`, title: `Contact attribué`},
             {data: `group`, title: `Groupe`},
             {data: `linkedMultiSite`, title: `Multi-site lié`},
-            {data: `multiSite`, title: `Multi-site`},
-            DATATABLE_ACTIONS,
+            {data: `isMultiSite`, title: `Multi-site`},
         ],
         listeners: {
             edit: data => {
@@ -70,6 +72,11 @@ $(document).ready(() => {
                 });
 
                 Modal.load(ajax, {table})
+            },
+            action: data => {
+                window.location.href = Routing.generate(`client_show`, {
+                    client: data.id
+                });
             },
         }
     });

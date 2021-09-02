@@ -1,0 +1,24 @@
+<div id="modal-new-client-order" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h1>Nouvelle commande client</h1>
+
+            <div class="body">
+                {%  include 'operation/client_order/modal/form.html.twig' with {
+                    clientOrder: clientOrder,
+                    orderTypes: orderTypes,
+                    deliveryMethods: deliveryMethods,
+                    workFreeDay: workFreeDay,
+                    cartContent: cartContent is defined ? cartContent : null,
+                    defaultCrateType: defaultCrateType
+                } %}
+            </div>
+
+            <div class="footer {{ not clientOrder.id ? 'd-none' }}">
+                <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="primary">Suivant</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -3,6 +3,10 @@
 {% block menu %}Référentiel{% endblock %}
 {% block page %}Client{% endblock %}
 
+{% block filter_header %}
+    {% include 'filters/client_filters.html.twig' %}
+{% endblock %}
+
 {% block content %}
     <div class="box first-box">
         <div class="content-menu">
@@ -19,7 +23,10 @@
         </table>
     </div>
 
-    {% include 'referential/client/modal/new.html.twig' with {client: new_client} %}
+    {% include 'referential/client/modal/new.html.twig' with {
+        client: new_client,
+        clientOrderInformation: new_client_order_information
+    } %}
 {% endblock %}
 
 {% block javascripts %}

@@ -1,3 +1,5 @@
+import './icons.js';
+
 import './styles/app.scss';
 
 import {Modal as BootstrapModal} from 'bootstrap';
@@ -12,7 +14,10 @@ import Toolbar from 'quill/modules/toolbar';
 import Snow from 'quill/themes/snow';
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 import {createPopper} from '@popperjs/core';
+import Leaflet from "leaflet";
+import Chart from "chart.js/auto";
 
+import './util';
 import './pages/security';
 import './select2';
 import './jquery';
@@ -25,9 +30,15 @@ const routes = require(`../public/generated/routes.json`);
 Routing.setRoutingData(routes);
 global.Routing = Routing;
 
+Leaflet.Icon.Default.imagePath = '/build/vendor/leaflet/images/';
+global.Chart = Chart;
+Chart.defaults.plugins.legend.display = true;
+Chart.defaults.plugins.legend.position = "right";
+
 // make all modals static
 BootstrapModal.Default.backdrop = `static`;
 
+$document.ready(() => $('.show-onload').modal("show"));
 //tooltips
 $document.ready(() => $('[data-toggle="tooltip"]').tooltip())
     .arrive(`[data-toggle="tooltip"]`, function() {
@@ -62,6 +73,12 @@ $document.click(e => {
 
     if(!$target.closest(selector).exists() && !$target.is(selector)) {
         $(`#menu-dropdown, .category-dropdown, .dropdown-menu`).hide();
+    }
+
+    if($target.hasClass('display-profile')) {
+        $('#menu-dropdown').hide();
+    } else if($target.hasClass('display-menu')) {
+        $('.dropdown-menu').hide();
     }
 });
 
@@ -109,7 +126,7 @@ function initializeDropdown() {
         }
 
         createPopper($button[0], $dropdown[0], {
-            placement: `left`,
+            placement: $button.data(`placement`) || `left`,
         });
     })
 }
@@ -130,6 +147,4 @@ $document.ready(() => {
             Modal.load(ajax);
         });
     }
-
-
-})
+});

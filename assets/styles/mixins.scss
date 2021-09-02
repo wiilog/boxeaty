@@ -31,6 +31,7 @@
     text-decoration: none;
     text-align: center;
     transition: all 200ms;
+    white-space: nowrap;
 
     &:not(:disabled), &:not(:disabled:hover) {
         cursor: pointer;
@@ -58,7 +59,7 @@
             border-color: lighten($orange, 15);
         }
     } @else if $type == secondary {
-        background: $orange-lightest;
+        background: white;
         border-color: $orange-lightest;
         color: $orange;
 
