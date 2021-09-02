@@ -31,7 +31,7 @@ class CounterOrderController extends AbstractController {
 
     /**
      * @Route("/liste", name="counter_orders_list")
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
+     * @HasPermission({Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER})
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
         return $this->render("operation/counter_order/index.html.twig", [
@@ -43,7 +43,7 @@ class CounterOrderController extends AbstractController {
 
     /**
      * @Route("/api", name="counter_orders_api", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
+     * @HasPermission({Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER})
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $orders = $manager->getRepository(CounterOrder::class)
@@ -78,7 +78,7 @@ class CounterOrderController extends AbstractController {
 
     /**
      * @Route("/info/{type}/{number}", name="counter_order_info", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
+     * @HasPermission({Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER})
      */
     public function info(EntityManagerInterface $manager, string $type, string $number): Response {
         if ($type === "box") {
@@ -144,7 +144,7 @@ class CounterOrderController extends AbstractController {
 
     /**
      * @Route("/template/box", name="counter_order_boxes_template", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
+     * @HasPermission({Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER})
      */
     public function boxesTemplate(): Response {
         return $this->json($this->service->renderBoxes());
@@ -152,7 +152,7 @@ class CounterOrderController extends AbstractController {
 
     /**
      * @Route("/submit/box", name="counter_order_boxes_submit", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
+     * @HasPermission({Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER})
      */
     public function boxes(): Response {
         $this->service->update(Box::class);
@@ -165,7 +165,7 @@ class CounterOrderController extends AbstractController {
 
     /**
      * @Route("/template/deposit-ticket", name="counter_order_deposit_tickets_template", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
+     * @HasPermission({Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER})
      */
     public function depositTicketsTemplate(): Response {
         return $this->json($this->service->renderDepositTickets());
@@ -173,7 +173,7 @@ class CounterOrderController extends AbstractController {
 
     /**
      * @Route("/submit/deposit-ticket", name="counter_order_deposit_tickets_submit", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
+     * @HasPermission({Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER})
      */
     public function depositTickets(Request $request): Response {
         $this->service->update(DepositTicket::class);
@@ -191,7 +191,7 @@ class CounterOrderController extends AbstractController {
 
     /**
      * @Route("/submit/confirmation", name="counter_order_confirm", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
+     * @HasPermission({Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER})
      */
     public function confirm(Request $request, EntityManagerInterface $manager, BoxRecordService $boxRecordService): Response {
         if ($request->request->get("previous", 0)) {
@@ -250,7 +250,7 @@ class CounterOrderController extends AbstractController {
 
     /**
      * @Route("/supprimer", name="counter_order_delete", options={"expose": true})
-     * @HasPermission(Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER)
+     * @HasPermission({Role::MANAGE_COUNTER_ORDERS, Role::REDIRECT_NEW_COUNTER_ORDER})
      */
     public function delete(Request $request,
                            BoxRecordService $boxRecordService,

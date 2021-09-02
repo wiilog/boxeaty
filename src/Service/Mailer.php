@@ -60,7 +60,7 @@ class Mailer {
             }
 
             $originalRecipients = Stream::from($recipients)
-                ->filter(fn($recipient) => $recipient)
+                ->filter()
                 ->map(fn(User $user) => $user->getEmail())
                 ->toArray();
         }

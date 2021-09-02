@@ -77,7 +77,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/depositories", name="api_mobile_depositories")
-     * @Authenticated()
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function depositories(EntityManagerInterface $manager): JsonResponse {
         return $this->json($manager->getRepository(Depository::class)->getAll());
@@ -85,7 +85,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/delivery-rounds", name="api_mobile_delivery_rounds")
-     * @Authenticated()
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function deliveryRounds(EntityManagerInterface $manager): JsonResponse {
         $now = new DateTime("today midnight");
@@ -159,7 +159,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/deliveries/start", name="api_mobile_deliveries_start")
-     * @Authenticated()
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function deliveryStart(EntityManagerInterface $manager, Request $request, ClientOrderService $clientOrderService): JsonResponse {
         $data = json_decode($request->getContent());
@@ -190,7 +190,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/deliveries/take", name="api_mobile_deliveries_take")
-     * @Authenticated()
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function deliveryTake(EntityManagerInterface $manager, Request $request, BoxRecordService $service): JsonResponse {
         $data = json_decode($request->getContent());
@@ -226,7 +226,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/deliveries/deposit", name="api_mobile_deliveries_deposit")
-     * @Authenticated()
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function deliveryDeposit(EntityManagerInterface $manager, Request $request, BoxRecordService $service): JsonResponse {
         $data = json_decode($request->getContent());
@@ -265,7 +265,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/deliveries/finish", name="api_mobile_deliveries_finish")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function finishDelivery(EntityManagerInterface $manager,
                                    Request                $request,
@@ -321,7 +321,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/preparations", name="api_mobile_preparations")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function preparations(EntityManagerInterface $manager, Request $request): JsonResponse {
         $depositoryRepository = $manager->getRepository(Depository::class);
@@ -349,7 +349,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/locations", name="api_mobile_locations")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function locations(EntityManagerInterface $manager): JsonResponse {
         return $this->json($manager->getRepository(Location::class)->getAll());
@@ -357,7 +357,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/qualities", name="api_mobile_qualities")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function qualities(EntityManagerInterface $manager): JsonResponse {
         return $this->json($manager->getRepository(Quality::class)->getAll());
@@ -365,7 +365,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/crates", name="api_mobile_crates")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function crates(EntityManagerInterface $manager, Request $request): JsonResponse {
         $depository = $manager->getRepository(Depository::class)->find($request->query->get('depository'));
@@ -374,7 +374,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/box", name="api_mobile_box")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function box(EntityManagerInterface $manager, Request $request): JsonResponse {
         return $this->json($manager->getRepository(Box::class)->getByNumber($request->query->get('box')));
@@ -382,7 +382,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/reverse-tracking", name="api_mobile_reverse_tracking")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function reverseTracking(EntityManagerInterface $manager, Request $request, BoxRecordService $boxRecordService): JsonResponse {
         $boxRepository = $manager->getRepository(Box::class);
@@ -423,7 +423,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/preparations/{preparation}", name="api_mobile_get_preparation", methods={"GET"})
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function getPreparation(EntityManagerInterface $entityManager,
                                    ClientOrderService     $clientOrderService,
@@ -463,7 +463,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/preparations/{preparation}", name="api_mobile_patch_preparation", methods={"PATCH"})
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function patchPreparation(Request                $request,
                                      Preparation            $preparation,
@@ -583,7 +583,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/available-crates", name="api_mobile_available_crates")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function availableCrates(EntityManagerInterface $manager, Request $request): JsonResponse {
         $clientRepository = $manager->getRepository(Client::class);
@@ -609,7 +609,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/available-boxes", name="api_mobile_get_boxes")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function availableBoxes(EntityManagerInterface $manager, Request $request): JsonResponse {
         $query = $request->query;
@@ -642,7 +642,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/box-informations", name="api_mobile_box_informations")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function boxInformations(EntityManagerInterface $manager, Request $request): JsonResponse {
         $box = $request->query->get('box');
@@ -682,7 +682,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/moving", name="api_mobile_moving")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function moving(EntityManagerInterface $manager, Request $request, BoxRecordService $boxRecordService): JsonResponse {
         $boxRepository = $manager->getRepository(Box::class);
@@ -719,7 +719,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/collects", name="api_mobile_get_collects", methods={"GET"})
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function collects(EntityManagerInterface $manager): JsonResponse {
         return $this->json($manager->getRepository(Collect::class)->getPendingCollects($this->getUser()));
@@ -727,7 +727,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/collect-crates/{collect}", name="api_mobile_collect_crates")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function collectCrates(Collect $collect): JsonResponse {
         $collectCrates = Stream::from($collect->getCrates()->map(fn(Box $crate) => [
@@ -740,7 +740,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/collects/{collect}", name="api_mobile_patch_collect", methods={"PATCH"})
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function patchCollect(Collect                $collect,
                                  Request                $request,
@@ -792,7 +792,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/location", name="api_mobile_location")
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function location(Request $request, EntityManagerInterface $manager): JsonResponse {
         $location = $manager->getRepository(Location::class)->findOneBy([
@@ -811,7 +811,7 @@ class MobileController extends AbstractController {
 
     /**
      * @Route("/collects", name="api_mobile_post_collect", methods={"POST"})
-     * @Authenticated
+     * @Authenticated(Authenticated::MOBILE)
      */
     public function postCollect(Request                $request,
                                 EntityManagerInterface $manager,
