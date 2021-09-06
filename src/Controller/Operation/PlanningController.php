@@ -42,9 +42,7 @@ class PlanningController extends AbstractController {
      * @HasPermission(Role::MANAGE_PLANNING)
      */
     public function list(Request $request, EntityManagerInterface $manager): Response {
-        $now = date('Y-m-d');
         return $this->render("operation/planning/index.html.twig", [
-            "now" => date('Y-m-d', strtotime($now . '+ 1 days')),
             "content" => $this->content($request, $manager, false)->getContent(),
         ]);
     }
@@ -56,22 +54,12 @@ class PlanningController extends AbstractController {
     public function content(Request $request, EntityManagerInterface $manager, bool $json = true): Response {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
 
-        if ($request->query->has("from")) {
-            $from = DateTime::createFromFormat("Y-m-d", $request->query->get("from"));
-        } else {
-            $from = new DateTime();
-        }
-
-        if ($request->query->has("to")) {
-            $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"))->modify("+1 day");
-        } else {
-            $to = (clone $from)->modify("+20 days");
-        }
-
+        $from = new DateTime($request->query->get("from") ?? "now");
+        $to = new DateTime($request->query->get("to") ?? "+20 days");
         $from->setTime(0, 0);
-        $to->setTime(23, 59);
+        $to->setTime(0, 0);
 
-        if ($from->diff($to, true)->days > 21) {
+        if ($from->diff($to, true)->days > 20) {
             return $this->json([
                 "success" => false,
                 "message" => "La planification ne peut afficher que 20 jours maximum"
@@ -173,7 +161,8 @@ class PlanningController extends AbstractController {
     public function deliveryRound(Request                $request,
                                   DeliveryRoundService   $deliveryRoundService,
                                   UniqueNumberService    $uniqueNumberService,
-                                  EntityManagerInterface $manager): Response {
+                                  EntityManagerInterface $manager,
+                                  Mailer                 $mailer): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
@@ -227,6 +216,16 @@ class PlanningController extends AbstractController {
             $manager->persist($round);
             $manager->flush();
 
+            $deliverer = $round->getDeliverer();
+            $content = $this->renderView("emails/delivery_round.html.twig", [
+                "deliveryRound" => $round,
+                "expectedDelivery" => Stream::from($orders)
+                    ->map(fn(ClientOrder $order) => $order->getExpectedDelivery())
+                    ->min(),
+            ]);
+
+            $mailer->send($deliverer, "BoxEaty - Affectation de tournée", $content);
+
             return $this->json([
                 "success" => true,
                 "message" => "Tournée créée avec succès",
@@ -237,7 +236,7 @@ class PlanningController extends AbstractController {
     }
 
     /**
-     * @Route("/lancement-livraison/template", name="planning_delivery_initialize_template", options={"expose": true})
+     * @Route("/lancement-livraison/template", name="planning_preparation_launch_initialize_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
     public function initializeDeliveryTemplate(Request $request, EntityManagerInterface $manager): Response {
@@ -247,7 +246,7 @@ class PlanningController extends AbstractController {
 
         $now = date('Y-m-d');
         return $this->json([
-            "submit" => $this->generateUrl("planning_delivery_launch"),
+            "submit" => $this->generateUrl("planning_preparation_launch"),
             "template" => $this->renderView("operation/planning/modal/start_delivery.html.twig", [
                 "now" => date('Y-m-d', strtotime($now . '+ 1 days')),
                 "from" => $request->query->get("from"),
@@ -258,7 +257,7 @@ class PlanningController extends AbstractController {
     }
 
     /**
-     * @Route("/lancement-livraison/filtre", name="planning_delivery_launching_filter", options={"expose": true})
+     * @Route("/lancement-livraison/filtre", name="planning_preparation_launching_filter", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
     public function depositoryFilter(EntityManagerInterface $manager, Request $request) {
@@ -284,13 +283,12 @@ class PlanningController extends AbstractController {
     }
 
     /**
-     * @Route("/launch-delivery", name="planning_delivery_launch", options={"expose": true})
+     * @Route("/preparations", name="planning_preparation_launch", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function launchDelivery(Request                $request,
-                                   Mailer                 $mailer,
-                                   ClientOrderService     $clientOrderService,
-                                   EntityManagerInterface $manager): Response {
+    public function launchPreparation(Request                $request,
+                                      ClientOrderService     $clientOrderService,
+                                      EntityManagerInterface $manager): Response {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
         $statusRepository = $manager->getRepository(Status::class);
         $depositoryRepository = $manager->getRepository(Depository::class);
@@ -315,26 +313,18 @@ class PlanningController extends AbstractController {
                 ->setOrder($order);
 
             $manager->persist($preparation);
-
-            $deliverer = $order->getDeliveryRound()->getDeliverer();
-            $content = $this->renderView("emails/delivery_round.html.twig", [
-                "expectedDelivery" => $order->getExpectedDelivery(),
-                "deliveryRound" => $order->getDeliveryRound()
-            ]);
-
-            $mailer->send($deliverer, "BoxEaty - Affectation de tournée", $content);
         }
 
         $manager->flush();
 
         return $this->json([
             "success" => true,
-            "message" => "Lancement effectuée avec succès",
+            "message" => "Lancement des préparations effectuée avec succès",
         ]);
     }
 
     /**
-     * @Route("/delivery_start_check_stock", name="planning_delivery_start_check_stock", options={"expose": true})
+     * @Route("/preparations/stock", name="planning_preparation_launch_check_stock", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
     public function checkStock(Request $request, EntityManagerInterface $manager) {
@@ -444,25 +434,25 @@ class PlanningController extends AbstractController {
     }
 
     /**
-     * @Route("/delivery_validate_template", name="planning_delivery_validate_template", options={"expose": true})
+     * @Route("/preparations/valider/template", name="planning_preparation_launch_validate_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function validateDeliveryTemplate(Request $request, EntityManagerInterface $manager) {
+    public function validatePreparationsTemplate(Request $request) {
         return $this->json([
-            "submit" => $this->generateUrl("planning_delivery_validate", [
+            "template" => $this->renderView("operation/planning/modal/validate_delivery.html.twig"),
+            "submit" => $this->generateUrl("planning_preparation_launch_validate", [
                 "order" => $request->query->get('order')
             ]),
-            "template" => $this->renderView("operation/planning/modal/validate_delivery.html.twig")
         ]);
     }
 
     /**
-     * @Route("/delivery_validate", name="planning_delivery_validate", options={"expose": true})
+     * @Route("/preparations/valider", name="planning_preparation_launch_validate", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function validateDelivery(Request                $request,
-                                     ClientOrderService     $clientOrderService,
-                                     EntityManagerInterface $manager) {
+    public function validatePreparations(Request                $request,
+                                         ClientOrderService     $clientOrderService,
+                                         EntityManagerInterface $manager) {
         $clientOrderRepository = $manager->getRepository(ClientOrder::class);
         $statusRepository = $manager->getRepository(Status::class);
 
@@ -483,7 +473,7 @@ class PlanningController extends AbstractController {
 
         return $this->json([
             "success" => true,
-            "message" => "Lancement effectuée avec succès",
+            "message" => "Lancement des préparations effectuée avec succès",
         ]);
     }
 

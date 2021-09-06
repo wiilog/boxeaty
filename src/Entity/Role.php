@@ -48,14 +48,14 @@ class Role {
     public const TREAT_ALL_COLLECTS = "TREAT_ALL_COLLECTS";
 
     public const ALLOW_EDIT_OWN_GROUP_ONLY = "ALLOW_EDIT_OWN_GROUP_ONLY";
-    public const REDIRECT_NEW_COUNTER_ORDER = "REDIRECT_NEW_COUNTER_ORDER";
-    public const SHOW_INDICATORS_ON_HOME = "SHOW_INDICATORS_ON_HOME";
+    public const DISPLAY_NEW_COUNTER_ORDER = "DISPLAY_NEW_COUNTER_ORDER";
+    public const REDIRECT_INDICATORS = "REDIRECT_INDICATORS";
     public const RECEIVE_MAILS_NEW_ACCOUNTS = "RECEIVE_MAILS_NEW_ACCOUNTS";
 
     public const ADDITIONAL_PERMISSIONS = [
         self::ALLOW_EDIT_OWN_GROUP_ONLY,
-        self::REDIRECT_NEW_COUNTER_ORDER,
-        self::SHOW_INDICATORS_ON_HOME,
+        self::DISPLAY_NEW_COUNTER_ORDER,
+        self::REDIRECT_INDICATORS,
         self::RECEIVE_MAILS_NEW_ACCOUNTS,
     ];
 
@@ -91,12 +91,12 @@ class Role {
     /**
      * @ORM\Column(type="boolean")
      */
-    private ?bool $redirectNewCounterOrder = null;
+    private ?bool $showCounterOrderScreen = null;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private ?bool $showIndicatorsOnHome = null;
+    private ?bool $redirectIndicators = null;
 
     /**
      * @ORM\Column(type="boolean")
@@ -155,21 +155,21 @@ class Role {
         return $this;
     }
 
-    public function getRedirectNewCounterOrder(): ?bool {
-        return $this->redirectNewCounterOrder;
+    public function isShowCounterOrderScreen(): ?bool {
+        return $this->showCounterOrderScreen;
     }
 
-    public function setRedirectNewCounterOrder(?bool $redirectNewCounterOrder): self {
-        $this->redirectNewCounterOrder = $redirectNewCounterOrder;
+    public function setShowCounterOrderScreen(?bool $showCounterOrderScreen): self {
+        $this->showCounterOrderScreen = $showCounterOrderScreen;
         return $this;
     }
 
-    public function getShowIndicatorsOnHome(): ?bool {
-        return $this->showIndicatorsOnHome;
+    public function isRedirectIndicators(): ?bool {
+        return $this->redirectIndicators;
     }
 
-    public function setShowIndicatorsOnHome(?bool $showIndicatorsOnHome): self {
-        $this->showIndicatorsOnHome = $showIndicatorsOnHome;
+    public function setRedirectIndicators(?bool $redirectIndicators): self {
+        $this->redirectIndicators = $redirectIndicators;
         return $this;
     }
 

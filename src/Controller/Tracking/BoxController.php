@@ -305,7 +305,7 @@ class BoxController extends AbstractController {
      */
     public function addBoxToCrate(Request                $request,
                                   EntityManagerInterface $entityManager,
-                                  BoxRecordService       $boxRecordService) {
+                                  BoxRecordService       $boxRecordService): Response {
 
         $boxRepository = $entityManager->getRepository(Box::class);
 
@@ -324,9 +324,9 @@ class BoxController extends AbstractController {
         $box->setCrate($crate)
             ->setLocation($crate->getLocation());
 
-        [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-        $tracking->setState(BoxStateService::STATE_RECORD_PACKING);
-        $record->setState(BoxStateService::STATE_RECORD_PACKING);
+        $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function(BoxRecord $record) {
+            $record->setState(BoxStateService::STATE_RECORD_PACKING);
+        });
 
         $entityManager->flush();
 
@@ -365,9 +365,9 @@ class BoxController extends AbstractController {
         $previous = clone $box;
         $box->setCrate(null);
 
-        [$tracking, $record] = $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-        $tracking->setState(BoxStateService::STATE_RECORD_UNPACKING);
-        $record->setState(BoxStateService::STATE_RECORD_UNPACKING);
+        $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function(BoxRecord $record) {
+            $record->setState(BoxStateService::STATE_RECORD_UNPACKING);
+        });
 
         $entityManager->flush();
 

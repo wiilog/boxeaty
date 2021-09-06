@@ -518,10 +518,6 @@ class ClientController extends AbstractController {
         $clientOrderInformation = $client->getClientOrderInformation() ?? null;
         $orderRecurrence = $clientOrderInformation ? $clientOrderInformation->getOrderRecurrence() : null;
 
-        $crateTypePrice = Stream::from($client->getCratePatternLines())
-            ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
-            ->sum();
-
         return $this->json([
             'success' => true,
             'template' => $this->renderView('referential/client/order_recurrence.html.twig', [
@@ -589,6 +585,7 @@ class ClientController extends AbstractController {
             $crateTypePrice = Stream::from($client->getCratePatternLines())
                 ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
                 ->sum();
+
             $orderRecurrence
                 ->setPeriod($content->period)
                 ->setCrateAmount($content->crateAmount)

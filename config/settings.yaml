@@ -1,12 +1,7 @@
 parameters:
-  web_version: "1.0.7"
+  web_version: "1.0.8"
 
   permissions:
-    Menu Paramétrage:
-      App\Entity\Role::MANAGE_USERS: Gérer les utilisateurs
-      App\Entity\Role::MANAGE_ROLES: Créer, modifier les rôles
-      App\Entity\Role::MANAGE_IMPORTS: Accès à l'import des données
-
     Menu Traçabilité:
       App\Entity\Role::MANAGE_BOXES: Gérer les Box
       App\Entity\Role::EDIT_BOXES: Modifier les Box
@@ -17,10 +12,10 @@ parameters:
 
     Menu Opérations:
       App\Entity\Role::VIEW_ALL_ORDERS: Voir toutes les commandes client
+      App\Entity\Role::MANAGE_CLIENT_ORDERS: Modifier le statut et valider les commandes
       App\Entity\Role::DELETE_CLIENT_ORDERS: Supprimer les commandes client
-      App\Entity\Role::MANAGE_CLIENT_ORDERS: Modifier le statut d'une commande
       App\Entity\Role::MANAGE_COUNTER_ORDERS: Gérer les commandes comptoir
-      App\Entity\Role::MANAGE_PLANNING: Gérer les planifications
+      App\Entity\Role::MANAGE_PLANNING: Gérer la planification
 
     Menu Référentiel:
       App\Entity\Role::MANAGE_CLIENTS: Gérer les clients
@@ -29,10 +24,15 @@ parameters:
       App\Entity\Role::MANAGE_BOX_TYPES: Créer, modifier les types de Box
       App\Entity\Role::MANAGE_DEPOSITORIES: Créer, modifier les dépôts
 
-    Autre:
-      App\Entity\Role::MANAGE_SETTINGS: Paramétrage global
-      App\Entity\Role::MANAGE_EXPORTS: Exports de données
-      App\Entity\Role::MANAGE_QUALITIES: Créer, modifier les qualités
+    Menu Paramétrage:
+        App\Entity\Role::MANAGE_SETTINGS: Paramétrage global
+        App\Entity\Role::MANAGE_USERS: Gérer les utilisateurs
+        App\Entity\Role::MANAGE_ROLES: Créer, modifier les rôles
+        App\Entity\Role::MANAGE_QUALITIES: Créer, modifier les qualités
+        App\Entity\Role::MANAGE_IMPORTS: Import des données
+        App\Entity\Role::MANAGE_EXPORTS: Exports de données
+
+    Autre: {}
 
     Application mobile:
       App\Entity\Role::TREAT_PREPARATIONS: Traiter des préparations
@@ -72,7 +72,6 @@ parameters:
           permission: App\Entity\Role::MANAGE_COUNTER_ORDERS
           route: counter_orders_list
         - name: Commande client
-          permission: App\Entity\Role::MANAGE_CLIENT_ORDERS
           route: client_orders_list
         - name: Planification
           permission: App\Entity\Role::MANAGE_PLANNING

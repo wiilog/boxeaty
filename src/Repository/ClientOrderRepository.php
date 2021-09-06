@@ -35,11 +35,10 @@ class ClientOrderRepository extends EntityRepository {
             ->addSelect('delivery.tokens as deliveryTokens')
             ->addSelect('deliveryRound.cost as deliveryCost')
             ->addSelect('lines.id as lineId')
-            ->addSelect('lines.customUnitPrice as customUnitPrice')
+            ->addSelect('lines.unitPrice as unitPrice')
             ->addSelect('lines.quantity as lineQuantity')
             ->addSelect('boxType.id as boxTypeId')
             ->addSelect('boxType.name as boxTypeName')
-            ->addSelect('boxType.price as boxTypePrice')
             ->addSelect('client.id as clientId')
             ->addSelect('client.prorateAmount as prorateAmount')
             ->addSelect('client.paymentModes as paymentModes')
@@ -168,11 +167,11 @@ class ClientOrderRepository extends EntityRepository {
         foreach ($params["filters"] ?? [] as $name => $value) {
             switch ($name) {
                 case "from":
-                    $qb->andWhere("DATE(clientOrder.expectedDelivery) >= :from")
+                    $qb->andWhere("clientOrder.expectedDelivery >= :from")
                         ->setParameter("from", $value);
                     break;
                 case "to":
-                    $qb->andWhere("DATE(clientOrder.expectedDelivery) <= :to")
+                    $qb->andWhere("clientOrder.expectedDelivery <= :to")
                         ->setParameter("to", $value);
                     break;
                 case "client":

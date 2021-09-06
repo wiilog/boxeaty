@@ -476,35 +476,27 @@ class ClientOrder {
     }
 
     public function getTotalAmount(): float {
-        return Stream::from($this->lines)
-            ->reduce(
-                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getPrice() ?: 0)),
-                0
-            );
+        return Stream::from($this->getLines())
+            ->map(fn(ClientOrderLine $line) => $line->getQuantity() * $line->getUnitPrice())
+            ->sum();
     }
 
     public function getBoxQuantity(): float {
         return Stream::from($this->lines)
-            ->reduce(
-                fn(int $total, ClientOrderLine $line) => $total + $line->getQuantity(),
-                0
-            );
+            ->map(fn(ClientOrderLine $line) => $line->getQuantity())
+            ->sum();
     }
 
     public function getTotalWeight(): float {
         return Stream::from($this->lines)
-            ->reduce(
-                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getWeight() ?: 0)),
-                0
-            );
+            ->map(fn(ClientOrderLine $line) => $line->getQuantity() * $line->getBoxType()->getWeight())
+            ->sum();
     }
 
     public function getTotalVolume(): float {
         return Stream::from($this->lines)
-            ->reduce(
-                fn(int $total, ClientOrderLine $line) => $total + ($line->getQuantity() * ($line->getBoxType()->getVolume() ?: 0)),
-                0
-            );
+            ->map(fn(ClientOrderLine $line) => $line->getQuantity() * $line->getBoxType()->getVolume())
+            ->sum();
     }
 
     public function getCollect(): ?Collect {

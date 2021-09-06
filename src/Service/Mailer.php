@@ -4,13 +4,13 @@ namespace App\Service;
 
 use App\Entity\GlobalSetting;
 use App\Entity\User;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Traversable;
 use WiiCommon\Helper\Stream;
 
 class Mailer {
@@ -55,20 +55,22 @@ class Mailer {
         if(is_string($recipients)) {
             $originalRecipients = [$recipients];
         } else {
-            if (!is_array($recipients) && !($recipients instanceof Collection)) {
+            if (!is_array($recipients) && !($recipients instanceof Traversable)) {
                 $recipients = [$recipients];
             }
 
             $originalRecipients = Stream::from($recipients)
-                ->filter(fn($recipient) => $recipient)
+                ->filter()
                 ->map(fn(User $user) => $user->getEmail())
                 ->toArray();
         }
 
-        if($_SERVER["APP_ENV"] === "prod" && empty($_SERVER["MAILS_REDIRECTION"])) {
-            $emails = $originalRecipients;
-        } else if(!empty($_SERVER["MAILS_REDIRECTION"])) {
+        if(!empty($_SERVER["MAILS_REDIRECTION"])) {
             $emails = explode(";", $_SERVER["MAILS_REDIRECTION"]);
+        } else if($_SERVER["APP_ENV"] === "prod") {
+            $emails = $originalRecipients;
+        } else {
+            $emails = ["test@wiilog.fr"];
         }
 
         if (empty($emails)) {
@@ -76,8 +78,7 @@ class Mailer {
         }
 
         if ($_SERVER["APP_ENV"] !== "prod") {
-            $content .= "<p>DESTINATAIRES : ";
-            $content .= Stream::from($originalRecipients)->join(', ') . "</p>";
+            $content .= "<p>DESTINATAIRES : " . Stream::from($originalRecipients)->join(', ') . "</p>";
         }
 
         $mailer = $this->getMailer();

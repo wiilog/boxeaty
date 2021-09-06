@@ -147,7 +147,7 @@ class ClientOrderService
                 $clientOrderLine
                     ->setBoxType($boxType)
                     ->setQuantity($cartLine['quantity'])
-                    ->setCustomUnitPrice($cartLine['customUnitPrice'])
+                    ->setUnitPrice($cartLine['unitPrice'])
                     ->setClientOrder($clientOrder);
 
                 $entityManager->persist($clientOrderLine);
@@ -192,9 +192,7 @@ class ClientOrderService
                 $boxType = $boxTypeRepository->find($boxTypeIdsArray[$cartLineIndex]);
                 $quantity = (int) $quantitiesArray[$cartLineIndex];
                 $unitPrice = (float) $unitPricesArray[$cartLineIndex];
-                if (!$boxType
-                    || !$quantity
-                    || $quantity < 1) {
+                if (!$boxType || !$quantity || $quantity < 1) {
                     $form->addError("Veuillez saisir une quantité pour toutes les lignes du panier.");
                     $handledCartLines = [];
                     break;
@@ -203,9 +201,7 @@ class ClientOrderService
                 $handledCartLines[] = [
                     'boxType' => $boxType,
                     'quantity' => $quantity,
-                    'customUnitPrice' => $unitPrice !== $boxType->getPrice()
-                        ? $unitPrice
-                        : null
+                    'unitPrice' => $unitPrice ?: $boxType->getPrice(),
                 ];
             }
         }

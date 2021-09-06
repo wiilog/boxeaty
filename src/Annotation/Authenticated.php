@@ -11,4 +11,9 @@ use Doctrine\Common\Annotations\Annotation\Target;
  */
 class Authenticated {
 
+    public const KIOSK = 1;
+    public const MOBILE = 2;
+
+    public int $value;
+
 }

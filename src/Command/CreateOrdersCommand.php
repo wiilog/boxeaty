@@ -100,7 +100,7 @@ class CreateOrdersCommand extends Command {
                     $line = (new ClientOrderLine())
                         ->setBoxType($pattern->getBoxType())
                         ->setQuantity($pattern->getQuantity() * $recurrence->getCrateAmount())
-                        ->setCustomUnitPrice($pattern->getCustomUnitPrice() * $pattern->getQuantity() * $recurrence->getCrateAmount())
+                        ->setUnitPrice($pattern->getUnitPrice())
                         ->setClientOrder($order);
 
                     $order->addLine($line);

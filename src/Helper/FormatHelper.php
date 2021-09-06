@@ -49,12 +49,8 @@ class FormatHelper {
 
     public static function entity($entities, string $field, string $separator = ", ", string $else = "-") {
         return Stream::from($entities)
-            ->filter(function($entity) use ($field) {
-                return $entity !== null && is_array($entity) ? $entity[$field] : $entity->{"get$field"}();
-            })
-            ->map(function($entity) use ($field) {
-                return is_array($entity) ? $entity[$field] : $entity->{"get$field"}();
-            })
+            ->map(fn($entity) => is_array($entity) ? $entity[$field] : $entity->{"get$field"}())
+            ->filter()
             ->join($separator) ?: $else;
     }
 

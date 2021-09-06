@@ -45,18 +45,57 @@ class AnnotationListener {
             throw new RuntimeException("Failed to read annotation");
         }
 
+        $annotation = $reader->getMethodAnnotation($method, Authenticated::class);
+        if ($annotation instanceof Authenticated) {
+            $this->handleAuthenticated($event, $controller, $annotation);
+        }
+
         $annotation = $reader->getMethodAnnotation($method, HasPermission::class);
         if ($annotation instanceof HasPermission) {
             $this->handleHasPermission($event, $annotation);
         }
+    }
 
-        $annotation = $reader->getMethodAnnotation($method, Authenticated::class);
-        if ($annotation instanceof Authenticated) {
-            $this->handleAuthenticated($event, $controller);
+    private function handleAuthenticated(ControllerArgumentsEvent $event, SymfonyAbstractController $controller, Authenticated $annotation) {
+        $request = $event->getRequest();
+
+        if (!($controller instanceof AbstractController)) {
+            throw new RuntimeException("Routes annotated with @Authenticated must extend App\\Controller\\AbstractController");
         }
+
+        $authorization = $request->headers->get("x-authorization", "");
+        preg_match("/Bearer (.*)/i", $authorization, $matches);
+
+        if(count($matches) !== 2) {
+            $this->failAuthentication();
+        }
+
+        if($annotation->value === Authenticated::KIOSK) {
+            if ($_SERVER["KIOSK_AUTHENTICATION_KEY"] == $matches[1]) {
+                $controller->setUser(null);
+            } else {
+                $this->failAuthentication();
+            }
+        } else if($annotation->value === Authenticated::MOBILE) {
+            $userRepository = $this->manager->getRepository(User::class);
+
+            $user = $userRepository->findByApiKey($matches[1]);
+            if ($user) {
+                $controller->setUser($user);
+            } else {
+                $this->failAuthentication();
+            }
+        } else {
+            throw new RuntimeException("Unknown authentication type $annotation->value");
+        }
+
     }
 
     private function handleHasPermission(ControllerArgumentsEvent $event, HasPermission $annotation) {
+        if(!is_array($annotation->value)) {
+            $annotation->value = [$annotation->value];
+        }
+
         if (!$this->roleService->hasPermission(...$annotation->value)) {
             $event->setController(function () use ($annotation) {
                 if ($annotation->mode == HasPermission::IN_JSON) {
@@ -73,24 +112,8 @@ class AnnotationListener {
         }
     }
 
-    private function handleAuthenticated(ControllerArgumentsEvent $event, SymfonyAbstractController $controller) {
-        $request = $event->getRequest();
-
-        if (!($controller instanceof AbstractController)) {
-            throw new RuntimeException("Routes annotated with @Authenticated must extend App\\Controller\\AbstractController");
-        }
-
-        $userRepository = $this->manager->getRepository(User::class);
-
-        $authorization = $request->headers->get("x-authorization", "");
-        preg_match("/Bearer (\w*)/i", $authorization, $matches);
-
-        $user = $matches ? $userRepository->findByApiKey($matches[1]) : null;
-        if ($user) {
-            $controller->setUser($user);
-        } else {
-            throw new UnauthorizedHttpException("no challenge");
-        }
+    private function failAuthentication() {
+        throw new UnauthorizedHttpException("no challenge");
     }
 
 }

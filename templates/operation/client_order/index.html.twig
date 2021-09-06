@@ -14,7 +14,7 @@
 
 {% block content %}
     <div class="box first-box row client-order-container">
-        <input id="starterKit" type="hidden" value="{{ starterKit | json_encode }}">
+        <input id="starterKit" type="hidden" value="{{ starter_kit | json_encode }}">
         <table id="table-client-order" class="orderRow"
                data-initial-data="{{ initial_orders }}"
                data-default-order="{{ orders_order | json_encode }}"></table>
@@ -22,10 +22,10 @@
 
     {% include 'operation/client_order/modal/new.html.twig' with {
         clientOrder: new_client_order,
-        orderTypes: orderTypes,
-        deliveryMethods: deliveryMethods,
-        workFreeDay: workFreeDay,
-        defaultCrateType: defaultCrateType
+        orderTypes: order_types,
+        deliveryMethods: delivery_methods,
+        workFreeDay: work_free_day,
+        defaultCrateType: default_crate_type
     } %}
 {% endblock %}
 

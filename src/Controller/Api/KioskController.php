@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Annotation\Authenticated;
 use App\Controller\AbstractController;
 use App\Entity\Box;
 use App\Entity\Client;
@@ -38,6 +39,7 @@ class KioskController extends AbstractController {
 
     /**
      * @Route("/config", name="api_kiosk_config")
+     * @Authenticated(Authenticated::KIOSK)
      */
     public function config(Request $request, EntityManagerInterface $manager): JsonResponse {
         $content = json_decode($request->getContent());
@@ -66,6 +68,7 @@ class KioskController extends AbstractController {
 
     /**
      * @Route("/kiosks", name="api_kiosk_kiosks")
+     * @Authenticated(Authenticated::KIOSK)
      */
     public function kiosks(EntityManagerInterface $manager): JsonResponse {
         $kiosks = Stream::from($manager->getRepository(Location::class)->findBy(["kiosk" => true]))
@@ -80,6 +83,7 @@ class KioskController extends AbstractController {
 
     /**
      * @Route("/check-code", name="api_kiosk_check_code")
+     * @Authenticated(Authenticated::KIOSK)
      */
     public function checkCode(Request $request, EntityManagerInterface $manager): JsonResponse {
         $content = json_decode($request->getContent());
@@ -99,6 +103,7 @@ class KioskController extends AbstractController {
 
     /**
      * @Route("/kiosks/{kiosk}", name="api_kiosk_get_kiosks", requirements={"kiosk"="\d+"}, methods={"GET"})
+     * @Authenticated(Authenticated::KIOSK)
      */
     public function kiosk(Location $kiosk): JsonResponse {
         if ($kiosk->isKiosk()) {
@@ -127,6 +132,7 @@ class KioskController extends AbstractController {
 
     /**
      * @Route("/kiosks/empty", name="api_kiosk_empty_kiosk", options={"expose": true})
+     * @Authenticated(Authenticated::KIOSK)
      */
     public function emptyKiosk(Request                $request,
                                BoxRecordService       $boxRecordService,
@@ -155,6 +161,7 @@ class KioskController extends AbstractController {
 
     /**
      * @Route("/box/retrieve", name="api_kiosk_retrieve_box")
+     * @Authenticated(Authenticated::KIOSK)
      */
     public function retrieveBox(Request $request, EntityManagerInterface $manager): JsonResponse {
         $content = json_decode($request->getContent());
@@ -181,6 +188,7 @@ class KioskController extends AbstractController {
 
     /**
      * @Route("/box/drop", name="api_kiosk_drop_box")
+     * @Authenticated(Authenticated::KIOSK)
      */
     public function dropBox(Request                $request,
                             BoxRecordService       $boxRecordService,
@@ -226,6 +234,7 @@ class KioskController extends AbstractController {
 
     /**
      * @Route("/deposit-ticket/statistics", name="api_kiosk_deposit_ticket_statistics")
+     * @Authenticated(Authenticated::KIOSK)
      */
     public function depositTicketStatistics(Request $request, EntityManagerInterface $manager): JsonResponse {
         $content = json_decode($request->getContent());
@@ -254,6 +263,7 @@ class KioskController extends AbstractController {
 
     /**
      * @Route("/deposit-ticket/mail", name="api_kiosk_deposit_ticket_mail")
+     * @Authenticated(Authenticated::KIOSK)
      */
     public function mailDepositTicket(Request $request, EntityManagerInterface $manager, Mailer $mailer): JsonResponse {
         $content = json_decode($request->getContent());
@@ -296,6 +306,7 @@ class KioskController extends AbstractController {
 
     /**
      * @Route("/deposit-ticket/print", name="api_kiosk_deposit_ticket_print")
+     * @Authenticated(Authenticated::KIOSK)
      */
     public function depositTicketPrint(Request $request): JsonResponse {
         $ticket = $this->createDepositTicket(json_decode($request->getContent()));
@@ -311,6 +322,7 @@ class KioskController extends AbstractController {
 
     /**
      * @Route("/deposit-ticket/image/{ticket}", name="api_kiosk_deposit_ticket_image")
+     * @Authenticated(Authenticated::KIOSK)
      */
     public function depositTicketImage(Image $snappy, DepositTicket $ticket): SnappyResponse {
         $client = $ticket->getLocation() ? $ticket->getLocation()->getClient() : null;

@@ -1,10 +1,7 @@
 {% extends 'template.html.twig' %}
 
-{% set display_new_client_order = has_permission(constant('App\\Entity\\Role::MANAGE_CLIENT_ORDERS')) %}
-{% set display_new_counter_order = not display_new_client_order and has_permission(
-    constant('App\\Entity\\Role::REDIRECT_NEW_COUNTER_ORDER'),
-    constant('App\\Entity\\Role::MANAGE_COUNTER_ORDERS')
-) %}
+{% set display_new_counter_order = has_permission(constant('App\\Entity\\Role::DISPLAY_NEW_COUNTER_ORDER')) %}
+{% set manage_counter_order = has_permission(constant('App\\Entity\\Role::MANAGE_COUNTER_ORDERS')) %}
 
 {% block menu %}{{ display_new_counter_order ? 'Traçabilité' : 'Accueil' }}{% endblock %}
 {% block page %}{{ display_new_counter_order ? 'Nouvelle commande comptoir' }}{% endblock %}
@@ -21,7 +18,7 @@
     <div class="box home first-box">
         <h1 class="mb-5">Bienvenue !</h1>
 
-        {% if display_new_counter_order  %}
+        {% if display_new_counter_order %}
             <div class="instructions">
                 <div id="scan-box">
                     <img src="{{ asset('images/box.svg') }}" width=200 height=100 alt="Box">
@@ -40,13 +37,16 @@
             </div>
 
             <a href="{{ path('counter_orders_list') }}" class="primary big mt-5">Voir toutes les commandes comptoir</a>
-        {% elseif display_new_client_order %}
+        {% else %}
             <div class="instructions">
-                <div id="new-counter-order">
-                    <img src="{{ asset('images/new-counter-order.svg') }}" width=200 height=100 alt="commande comptoir">
-                    <span>Nouvelle commande comptoir</span>
-                </div>
-                <div id="new-client-order" data-has-default-crate="{{ hasDefaultCrate }}">
+                {% if manage_counter_order %}
+                    <div id="new-counter-order">
+                        <img src="{{ asset('images/new-counter-order.svg') }}" width=200 height=100
+                             alt="commande comptoir">
+                        <span>Nouvelle commande comptoir</span>
+                    </div>
+                {% endif %}
+                <div id="new-client-order" data-has-default-crate="{{ hasDefaultCrate }}>
                     <img src="{{ asset('images/new-client-order.svg') }}" width=200 height=100 alt="commande client">
                     <span>Nouvelle commande client</span>
                 </div>

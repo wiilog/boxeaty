@@ -26,7 +26,7 @@
 {% endmacro %}
 
 {% macro order_card(order, link_new_tab = false) %}
-    {% if order.expectedDelivery < date() %}
+    {% if order.expectedDelivery < date('today midnight') %}
         <div class="order late" {{ _self.order_data(order) }}>
             {{ _self.order_header(order) }}
 

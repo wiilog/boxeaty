@@ -149,14 +149,10 @@ class BoxRecordRepository extends EntityRepository {
             ->leftJoin("join_location.depository", "join_depository")
             ->leftJoin("record.crate", "join_crate")
             ->andWhere("record.box = :box")
-            ->andWhere($exprBuilder->orX(
-                "record.trackingMovement = 0",
-                "record.state IN (:packingStates)"
-            ))
+            ->andWhere("record.trackingMovement = 0")
             ->orderBy("record.date", "DESC")
             ->addOrderBy("record.id", "DESC")
-            ->setParameter("box", $box)
-            ->setParameter("packingStates", [BoxStateService::STATE_RECORD_PACKING, BoxStateService::STATE_RECORD_UNPACKING]);
+            ->setParameter("box", $box);
 
         if($search) {
             $queryBuilder

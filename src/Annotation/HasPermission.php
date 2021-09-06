@@ -14,14 +14,8 @@ class HasPermission {
     public const IN_RENDER = 0;
     public const IN_JSON = 1;
 
-    /**
-     * @var string[]
-     */
     public $value;
 
-    /**
-     * @var integer
-     */
-    public $mode = self::IN_RENDER;
+    public int $mode = self::IN_RENDER;
 
 }
