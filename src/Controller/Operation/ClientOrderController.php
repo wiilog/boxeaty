@@ -49,7 +49,7 @@ class ClientOrderController extends AbstractController {
         $globalSettingRepository = $manager->getRepository(GlobalSetting::class);
 
         $defaultCrateTypeId = $globalSettingRepository->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
-        $defaultCrateType = $boxTypeRepository->find($defaultCrateTypeId);
+        $defaultCrateType = $defaultCrateTypeId ? $boxTypeRepository->find($defaultCrateTypeId) : null;
 
         return $this->render("operation/client_order/index.html.twig", [
             "new_client_order" => new ClientOrder(),
@@ -59,7 +59,7 @@ class ClientOrderController extends AbstractController {
             "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER,
             "starterKit" => $boxTypeRepository->findStarterKit(),
-            "defaultCrateType" => $defaultCrateType->getVolume(),
+            "defaultCrateType" => $defaultCrateType ?? 0,
             "workFreeDay" => Stream::from($manager->getRepository(WorkFreeDay::class)->findAll())
                 ->map(fn(WorkFreeDay $workFreeDay) => [
                     $workFreeDay->getDay(),

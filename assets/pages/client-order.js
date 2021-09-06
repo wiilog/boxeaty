@@ -315,7 +315,7 @@ function getTimeLine($modal, clientOrder) {
 function addSelectedBoxTypeToCart($modal) {
     const $select2 = $modal.find('[name="boxType"]');
     const [typeBoxData] = $select2.select2('data');
-    const defaultCrateType = $('[name=defaultCrateType]').val();
+    const defaultCrateType = $modal.find('[name=defaultCrateType]').val();
     if(typeBoxData.volume > defaultCrateType) {
         Flash.add(`warning`, `Le volume du type de Box <strong>${typeBoxData.name}</strong> est supérieur à celui du type de caisse par défaut`)
     } else {
