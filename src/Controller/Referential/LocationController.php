@@ -249,7 +249,7 @@ class LocationController extends AbstractController
         }
 
         if ($form->isValid()) {
-            $service->updateLocation(new Location(), $content);
+            $service->updateLocation($existing, $content);
             $manager->flush();
 
             return $this->json([
