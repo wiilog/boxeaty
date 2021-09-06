@@ -384,10 +384,10 @@ main:not(.login) {
 
 input[type="date"] {
     position: relative;
-    background-image: url('../images/calendar.svg');
-    background-repeat: no-repeat;
-    background-position: center right 8px;
-    background-size: 16px;
+    background-image: url('../images/calendar.svg') !important;
+    background-repeat: no-repeat !important;
+    background-position: center right 8px !important;
+    background-size: 16px !important;
 }
 
 /* make the native arrow invisible and stretch it over the whole field so you can click anywhere in the input field to trigger the native datepicker*/
