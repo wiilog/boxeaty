@@ -172,11 +172,12 @@ function setupDeliveryRoundSortables(map) {
         const locations = [];
         for(const element of $(`.assigned-deliveries`).find(`.order[data-id]`)) {
             const address = $(element).data(`address`);
+            const client = $(element).data(`client`);
             const coordinates = await findCoordinates(address);
 
             if(coordinates[0]) {
                 locations.push({
-                    title: address,
+                    title: `<span><strong>${client}</strong><br>${address}</span>`,
                     latitude: coordinates[0].lat,
                     longitude: coordinates[0].lon,
                 });
