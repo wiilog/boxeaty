@@ -17,7 +17,7 @@
                         <span class="col-md-8 col-12">{{ clientOrder.client.address }}</span>
                         <span class="col-md-4 col-12 text-end">{{ clientOrder.requester.phone }}</span>
                     </div>
-                    <div class="row justify-content-between align-items-center">
+                    <div class="row justify-content-{{ clientOrder.collectRequired ? 'between' : 'end' }} align-items-center">
                         {% if clientOrder.collectRequired %}
                             <div class="col-md-8 col-12">
                                 <span class="bigTxt">Collecte</span> (Box à nettoyer)&nbsp;:
@@ -98,7 +98,7 @@
                         </div>
                         <div class="row justify-content-between align-items-center">
                             <span class="secondary bigTxtOrange col-auto">MONTANT TOTAL (HT)</span>
-                            <span class="col-auto text-end">{{ (clientOrder.totalAmount + clientOrder.servicePrice + clientOrder.deliveryPrice)|format_helper('price') }} </span>
+                            <span class="col-auto bigTxtOrange text-end">{{ (clientOrder.totalAmount + clientOrder.servicePrice + clientOrder.deliveryPrice)|format_helper('price') }} </span>
                         </div>
                     </div>
                 </div>
