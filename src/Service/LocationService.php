@@ -22,9 +22,7 @@ class LocationService {
             ->setActive($content->active)
             ->setClient($client)
             ->setDescription($content->description ?? null)
-            ->setDeposits(0)
-            ->setType($content->type ?? null)
-            ->setDepository($depository);
+            ->setDeposits(0);
 
         if ((int)$content->kiosk === 1) {
             $location->setCapacity($content->capacity ?? null)
@@ -34,7 +32,7 @@ class LocationService {
         } else {
             $location->setCapacity(null)
                 ->setMessage(null)
-                ->setType(null)
+                ->setType($content->type ?? null)
                 ->setDepository($depository);
         }
 

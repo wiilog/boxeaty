@@ -52,17 +52,13 @@
                    value="{{ location.message }}"/>
         </label>
     </div>
-    <div class="col-12 location-fields">
+    <div class="col-12 toggle location-fields">
         <label>Type d'emplacement</label>
-        <div class="d-flex justify-content-between align-items-center">
-            {% for type, label in constant('App\\Entity\\Location::LOCATION_TYPES') %}
-                <label class="inline">
-                    <input type="radio" class="data no-clear" name="type" value="{{ type }}"
-                            {{ location.type == type ? 'checked' }}>
-                    {{ label }}
-                </label>
-            {% endfor %}
-        </div>
+        {% for type, label in constant('App\\Entity\\Location::LOCATION_TYPES') %}
+            <input type="radio" class="data no-clear" name="type" value="{{ type }}"
+                    {{ location.type == type ? 'checked' }} id="{{ label }}-location-type">
+            <label for="{{ label }}-location-type" class="mb-2">{{ label }}</label>
+        {% endfor %}
     </div>
     <div class="col-12 location-fields">
         <label>
