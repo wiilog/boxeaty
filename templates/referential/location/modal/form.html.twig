@@ -1,14 +1,15 @@
+{% set formMode = location.id ? 'edit' : 'new' %}
 <div class="row">
     <div class="col-12 toggle location-type">
         <span class="label">Type</span>
 
-        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-kiosk" name="kiosk" class="data location-type"
+        <input type="radio" id="{{ formMode }}-location-type-kiosk" name="kiosk" class="data location-type"
                value="1" {{ location.kiosk ? 'checked' }}/>
-        <label for="{{ location.id ? 'edit' : 'new' }}-location-type-kiosk">Borne</label>
+        <label for="{{ formMode }}-location-type-kiosk">Borne</label>
 
-        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-type-location" name="kiosk" class="data location-type"
+        <input type="radio" id="{{ formMode }}-location-type-location" name="kiosk" class="data location-type"
                value="0" {{ not location.kiosk ? 'checked' }}/>
-        <label for="{{ location.id ? 'edit' : 'new' }}-location-type-location">Emplacement</label>
+        <label for="{{ formMode }}-location-type-location">Emplacement</label>
     </div>
     <div class="col-12">
         <label>
@@ -20,13 +21,13 @@
     <div class="col-12 toggle">
         <span class="label">Statut</span>
 
-        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-active" name="active" class="data"
+        <input type="radio" id="{{ formMode }}-location-active" name="active" class="data"
                value="1" {{ location.active ? 'checked' }}/>
-        <label for="{{ location.id ? 'edit' : 'new' }}-location-active">Actif</label>
+        <label for="{{ formMode }}-location-active">Actif</label>
 
-        <input type="radio" id="{{ location.id ? 'edit' : 'new' }}-location-inactive" name="active" class="data"
+        <input type="radio" id="{{ formMode }}-location-inactive" name="active" class="data"
                value="0" {{ not location.active ? 'checked' }}/>
-        <label for="{{ location.id ? 'edit' : 'new' }}-location-inactive">Inactif</label>
+        <label for="{{ formMode }}-location-inactive">Inactif</label>
     </div>
     <div class="col-12">
         <label>
@@ -52,17 +53,15 @@
                    value="{{ location.message }}"/>
         </label>
     </div>
-    <div class="col-12 location-fields">
+    <div class="col-12 toggle location-fields">
         <label>Type d'emplacement</label>
-        <div class="d-flex justify-content-between align-items-center">
-            {% for type, label in constant('App\\Entity\\Location::LOCATION_TYPES') %}
-                <label class="inline">
-                    <input type="radio" class="data no-clear" name="type" value="{{ type }}"
-                            {{ location.type == type ? 'checked' }}>
-                    {{ label }}
-                </label>
-            {% endfor %}
-        </div>
+        {% for type, label in constant('App\\Entity\\Location::LOCATION_TYPES') %}
+            {% set typeId = (formMode ~ '-' ~ label ~ '-location-type') %}
+            <input type="radio" class="data no-clear" name="type" value="{{ type }}"
+                   {{ location.type == type ? 'checked' }}
+                   id="{{ typeId }}">
+            <label for="{{ typeId }}" class="mb-2">{{ label }}</label>
+        {% endfor %}
     </div>
     <div class="col-12 location-fields">
         <label>
