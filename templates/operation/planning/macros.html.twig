@@ -2,6 +2,7 @@
     data-id="{{ order.id }}"
     data-expected-delivery="{{ order.expectedDelivery | date('d/m/Y') }}"
     data-address="{{ order.client.address }}"
+    data-client="{{ order.client.name }}"
     data-delivery-method="{{ order.deliveryMethod.id }}"
 {% endmacro %}
 
