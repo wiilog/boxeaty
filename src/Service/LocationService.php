@@ -16,33 +16,38 @@ class LocationService {
     public function updateLocation(Location $location, StdClass $content): array {
         $client = isset($content->client) ? $this->manager->getRepository(Client::class)->find($content->client) : null;
         $depository = isset($content->depository) ? $this->manager->getRepository(Depository::class)->find($content->depository) : null;
+        $type = $content->type ?? null;
+        $isKiosk = ((int)$content->kiosk) === 1;
 
         $location->setKiosk($content->kiosk)
             ->setName($content->name)
             ->setActive($content->active)
             ->setClient($client)
             ->setDescription($content->description ?? null)
-            ->setDeposits(0)
-            ->setType($content->type ?? null)
-            ->setDepository($depository);
+            ->setDeposits(0);
 
-        if ((int)$content->kiosk === 1) {
-            $location->setCapacity($content->capacity ?? null)
+        if ($isKiosk) {
+            $location
+                ->setCapacity($content->capacity ?? null)
                 ->setMessage($content->message ?? null)
                 ->setType(null)
                 ->setDepository(null);
         } else {
-            $location->setCapacity(null)
+            $location
+                ->setCapacity(null)
                 ->setMessage(null)
-                ->setType(null)
+                ->setType($type)
                 ->setDepository($depository);
         }
 
-        if(!$location->getOutClient() && ($content->kiosk || $content->type ?? null == Location::CLIENT)) {
+        $currentOffset = $location->getOffset();
+        $isClientLocation = ($isKiosk || $type === Location::CLIENT);
+
+        if($isClientLocation && !$currentOffset) {
             $offset = $this->copyOffset($location, new Location());
             $this->manager->persist($offset);
-        } else if($location->getOutClient()) {
-            $this->copyOffset($location, $location->getOffset());
+        } else if($currentOffset) {
+            $this->copyOffset($location, $currentOffset);
         }
 
         $this->manager->persist($location);
