@@ -688,13 +688,13 @@ class MobileController extends AbstractController {
         $locationRepository = $manager->getRepository(Location::class);
         $qualityRepository = $manager->getRepository(Quality::class);
 
-        $content = json_decode($request->getContent());
-        $scannedBoxesAndCrates = Stream::from($content->scannedBoxesAndCrates)
+        $content = json_decode($request->getContent(), true);
+        $scannedBoxesAndCrates = Stream::from($content['scannedBoxesAndCrates'])
             ->map(fn($box) => $box["number"])
             ->toArray();
 
-        $chosenQuality = $qualityRepository->find($content->quality);
-        $chosenLocation = $locationRepository->find($content->location);
+        $chosenQuality = $qualityRepository->find($content['quality']);
+        $chosenLocation = $locationRepository->find($content['location']);
 
         foreach ($scannedBoxesAndCrates as $scannedBoxOrCrate) {
             $box = $boxRepository->findOneBy(['number' => $scannedBoxOrCrate]);
