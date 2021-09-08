@@ -462,7 +462,15 @@ class Client {
 
     public function setClientOrderInformation(?ClientOrderInformation $clientOrderInformation): self
     {
+        if($this->clientOrderInformation && $this->clientOrderInformation->getClient() !== $this) {
+            $oldClientOrderInformation = $this->clientOrderInformation;
+            $this->clientOrderInformation = null;
+            $oldClientOrderInformation->setClient(null);
+        }
         $this->clientOrderInformation = $clientOrderInformation;
+        if($this->clientOrderInformation && $this->clientOrderInformation->getClient() !== $this) {
+            $this->clientOrderInformation->setClient($this);
+        }
 
         return $this;
     }
