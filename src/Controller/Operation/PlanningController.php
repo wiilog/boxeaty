@@ -217,8 +217,15 @@ class PlanningController extends AbstractController {
             $manager->flush();
 
             $deliverer = $round->getDeliverer();
+            $ordersToDeliver = Stream::from($round->getOrder())
+                ->map(fn($value, $key) => [$key, $value])
+                ->sort(fn($a, $b) => $a[1] <=> $b[1])
+                ->map(fn($element) => $manager->find(ClientOrder::class, $element[0]))
+                ->toArray();
+
             $content = $this->renderView("emails/delivery_round.html.twig", [
                 "deliveryRound" => $round,
+                "ordersToDeliver" => $ordersToDeliver,
                 "expectedDelivery" => Stream::from($orders)
                     ->map(fn(ClientOrder $order) => $order->getExpectedDelivery())
                     ->min(),
