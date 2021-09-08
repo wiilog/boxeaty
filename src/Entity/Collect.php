@@ -315,12 +315,14 @@ class Collect {
     }
 
     public function setClientOrder(?ClientOrder $clientOrder): self {
-        if ($this->clientOrder && $this->clientOrder->getCollect() === $this) {
-            $this->clientOrder->setCollect(null);
+        if($this->clientOrder && $this->clientOrder->getCollect() !== $this) {
+            $oldClientOrder = $this->clientOrder;
+            $this->clientOrder = null;
+            $oldClientOrder->setCollect(null);
         }
         $this->clientOrder = $clientOrder;
-        if ($clientOrder) {
-            $clientOrder->setCollect($this);
+        if($this->clientOrder && $this->clientOrder->getCollect() !== $this) {
+            $this->clientOrder->setCollect($this);
         }
 
         return $this;

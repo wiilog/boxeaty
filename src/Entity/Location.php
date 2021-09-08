@@ -183,12 +183,14 @@ class Location {
     }
 
     public function setOutClient(?Client $outClient): self {
-        if($this->outClient && $this->outClient->getOutLocation() === $this) {
-            $this->outClient->setOutLocation(null);
+        if($this->outClient && $this->outClient->getOutLocation() !== $this) {
+            $oldOutClient = $this->outClient;
+            $this->outClient = null;
+            $oldOutClient->setOutLocation(null);
         }
         $this->outClient = $outClient;
-        if($outClient) {
-            $outClient->setOutLocation($this);
+        if($this->outClient && $this->outClient->getOutLocation() !== $this) {
+            $this->outClient->setOutLocation($this);
         }
 
         return $this;

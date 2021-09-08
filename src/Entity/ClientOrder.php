@@ -375,15 +375,18 @@ class ClientOrder {
     }
 
     public function setPreparation(?Preparation $preparation): self {
-        if ($this->preparation && $this->preparation->getOrder() === $this) {
-            $this->preparation->setOrder(null);
+        if($this->preparation && $this->preparation->getOrder() !== $this) {
+            $oldPreparation = $this->preparation;
+            $this->preparation = null;
+            $oldPreparation->setOrder(null);
         }
         $this->preparation = $preparation;
-        if ($preparation) {
-            $preparation->setOrder($this);
+        if($this->preparation && $this->preparation->getOrder() !== $this) {
+            $this->preparation->setOrder($this);
         }
 
         return $this;
+
     }
 
     public function getDelivery(): ?Delivery {
@@ -391,12 +394,14 @@ class ClientOrder {
     }
 
     public function setDelivery(?Delivery $delivery): self {
-        if ($this->delivery && $this->delivery->getOrder() === $this) {
-            $this->delivery->setOrder(null);
+        if($this->delivery && $this->delivery->getOrder() !== $this) {
+            $oldDelivery = $this->delivery;
+            $this->delivery = null;
+            $oldDelivery->setOrder(null);
         }
         $this->delivery = $delivery;
-        if ($delivery) {
-            $delivery->setOrder($this);
+        if($this->delivery && $this->delivery->getOrder() !== $this) {
+            $this->delivery->setOrder($this);
         }
 
         return $this;
@@ -504,12 +509,14 @@ class ClientOrder {
     }
 
     public function setCollect(?Collect $collect): self {
-        if ($this->collect && $this->collect->getClientOrder() === $this) {
-            $this->collect->setClientOrder(null);
+        if($this->collect && $this->collect->getClientOrder() !== $this) {
+            $oldCollect = $this->collect;
+            $this->collect = null;
+            $oldCollect->setClientOrder(null);
         }
         $this->collect = $collect;
-        if ($collect) {
-            $collect->setClientOrder($this);
+        if($this->collect && $this->collect->getClientOrder() !== $this) {
+            $this->collect->setClientOrder($this);
         }
 
         return $this;
