@@ -57,7 +57,7 @@ class PlanningController extends AbstractController {
         $from = new DateTime($request->query->get("from") ?? "now");
         $to = new DateTime($request->query->get("to") ?? "+20 days");
         $from->setTime(0, 0);
-        $to->setTime(0, 0);
+        $to->setTime(23, 59);
 
         if ($from->diff($to, true)->days > 20) {
             return $this->json([
