@@ -108,12 +108,17 @@ class PlanningController extends AbstractController {
      * @Route("/{order}/mail-commande-retard", name="planning_send_late_order_mail", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function lateOrderEmail(ClientOrder $order): Response {
-        //TODO: envoyer le mail, en attente des retours de benoit??
+    public function lateOrderEmail(ClientOrder $order, Mailer $mailer): Response {
+        $content = $this->renderView("emails/mail_delivery_order.html.twig", [
+            "order" => $order,
+            "lateDelivery" => true
+        ]);
+
+        $mailer->send($order->getClient()->getContact(), "Retard de livraison", $content);
 
         return $this->json([
-            "success" => false,
-            "message" => "Aucun mail envoyé : non développé",
+            "success" => true,
+            "message" => "Le mail a bien été envoyé",
         ]);
     }
 

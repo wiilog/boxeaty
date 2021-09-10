@@ -562,6 +562,7 @@ class MobileController extends AbstractController {
                 if ($clientOrder->getClient()->isMailNotificationOrderPreparation()) {
                     $content = $this->renderView("emails/mail_delivery_order.html.twig", [
                         "order" => $clientOrder,
+                        "lateDelivery" => false
                     ]);
 
                     $mailer->send($clientOrder->getClient()->getContact(), "Commande en préparation", $content);
