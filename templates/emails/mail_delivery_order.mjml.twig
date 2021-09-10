@@ -27,7 +27,9 @@
             <mj-column width="100%">
                 <mj-text mj-class="title">{{ order.client.contact.username }}</mj-text>
                 {% if lateDelivery %}
-                    <mj-text mj-class="title">Malgré tous nos efforts, votre commande n'a pas pu être livrée à temps</mj-text>
+                    <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                        Malgré tous nos efforts, votre commande n'a pas pu être livrée à temps
+                    </mj-text>
                 {% endif %}
                 <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
                     Votre commande n° {{ order.number }} vient de {{ lateDelivery ? 'repasser' : 'passer' }} en préparation et sera livrée
