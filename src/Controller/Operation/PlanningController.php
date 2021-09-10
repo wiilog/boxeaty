@@ -169,7 +169,9 @@ class PlanningController extends AbstractController {
         $deliverer = isset($content->deliverer) ? $manager->getRepository(User::class)->find($content->deliverer) : null;
         $method = isset($content->method) ? $manager->getRepository(DeliveryMethod::class)->find($content->method) : null;
         $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
-        $orders = $manager->getRepository(ClientOrder::class)->findBy(["id" => explode(",", $content->assignedForRound)]);
+        $orders = Stream::explode(',', $content->assignedForRound)
+            ->filterMap(fn(int $id) => $manager->find(ClientOrder::class, $id))
+            ->toArray();
 
         if (count($orders) === 0) {
             $form->addError("Vous devez sélectionner au moins une livraison");
@@ -217,15 +219,10 @@ class PlanningController extends AbstractController {
             $manager->flush();
 
             $deliverer = $round->getDeliverer();
-            $ordersToDeliver = Stream::from($round->getOrder())
-                ->map(fn($value, $key) => [$key, $value])
-                ->sort(fn($a, $b) => $a[1] <=> $b[1])
-                ->map(fn($element) => $manager->find(ClientOrder::class, $element[0]))
-                ->toArray();
 
             $content = $this->renderView("emails/delivery_round.html.twig", [
                 "deliveryRound" => $round,
-                "ordersToDeliver" => $ordersToDeliver,
+                "ordersToDeliver" => $round->getSortedOrders(),
                 "expectedDelivery" => Stream::from($orders)
                     ->map(fn(ClientOrder $order) => $order->getExpectedDelivery())
                     ->min(),
