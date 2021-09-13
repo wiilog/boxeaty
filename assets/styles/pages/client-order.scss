@@ -207,13 +207,7 @@ input{
             text-align: right;
         }
 
-        &.client-order-history-finished .client-order-history-status {
-            &:before,
-            &:after {
-                background-color: $grey-order-finished;
-            }
-        }
-        &.client-order-history-transit .client-order-history-status {
+        &:last-child .client-order-history-status {
             &:before,
             &:after {
                 background-color: $green;
