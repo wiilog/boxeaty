@@ -98,7 +98,7 @@ class MobileController extends AbstractController {
                 "number" => $round->getNumber(),
                 "status" => $round->getStatus()->getCode(),
                 "depository" => FormatHelper::named($round->getDepository()),
-                "joined_clients" => Stream::from($round->getOrders())
+                "joined_clients" => Stream::from($round->getSortedOrders())
                     ->map(fn(ClientOrder $order) => $order->getClient()->getName())
                     ->unique()
                     ->join(", "),
@@ -112,36 +112,37 @@ class MobileController extends AbstractController {
                 "token_amount" => Stream::from($round->getOrders())
                     ->map(fn(ClientOrder $order) => $order->getClient()->getClientOrderInformation()->getTokenAmount())
                     ->sum(),
-                "orders" => $round->getOrders()->map(fn(ClientOrder $order) => [
-                    "id" => $order->getId(),
-                    "delivered" => $order->hasStatusCode(Status::CODE_ORDER_FINISHED),
-                    "crate_amount" => $order->getPreparation() ? $order->getPreparation()->getLines()->count() : -1,
-                    "token_amount" => $order->getTokensAmount(),
-                    "collect_required" => $order->isCollectRequired(),
-                    "preparation" => $order->getPreparation() ? [
-                        "id" => $order->getPreparation()->getId(),
-                        "depository" => FormatHelper::named($order->getPreparation()->getDepository()),
-                        "lines" => $order->getPreparation()->getLines()
-                            ->map(fn(PreparationLine $line) => [
-                                "crate" => $line->getCrate()->getNumber(),
-                                "type" => FormatHelper::named($line->getCrate()->getType()),
-                                "taken" => $line->isTaken(),
-                                "deposited" => $line->isDeposited(),
-                            ])
-                            ->toArray(),
-                    ] : null,
-                    "client" => [
-                        "id" => $order->getClient()->getId(),
-                        "name" => FormatHelper::named($order->getClient()),
-                        "address" => $order->getClient()->getAddress(),
-                        "contact" => FormatHelper::user($order->getClient()->getContact()),
-                        "phone" => $order->getClient()->getPhoneNumber(),
-                        "latitude" => $order->getClient()->getLatitude(),
-                        "longitude" => $order->getClient()->getLongitude(),
-                    ],
-                    "comment" => $order->getComment(),
-                ]),
-                "order" => $round->getOrder(),
+                "orders" => Stream::from($round->getSortedOrders())
+                    ->map(fn(ClientOrder $order) => [
+                        "id" => $order->getId(),
+                        "delivered" => $order->hasStatusCode(Status::CODE_ORDER_FINISHED),
+                        "crate_amount" => $order->getPreparation() ? $order->getPreparation()->getLines()->count() : -1,
+                        "token_amount" => $order->getTokensAmount(),
+                        "collect_required" => $order->isCollectRequired(),
+                        "preparation" => $order->getPreparation() ? [
+                            "id" => $order->getPreparation()->getId(),
+                            "depository" => FormatHelper::named($order->getPreparation()->getDepository()),
+                            "lines" => $order->getPreparation()->getLines()
+                                ->map(fn(PreparationLine $line) => [
+                                    "crate" => $line->getCrate()->getNumber(),
+                                    "type" => FormatHelper::named($line->getCrate()->getType()),
+                                    "taken" => $line->isTaken(),
+                                    "deposited" => $line->isDeposited(),
+                                ])
+                                ->toArray(),
+                        ] : null,
+                        "client" => [
+                            "id" => $order->getClient()->getId(),
+                            "name" => FormatHelper::named($order->getClient()),
+                            "address" => $order->getClient()->getAddress(),
+                            "contact" => FormatHelper::user($order->getClient()->getContact()),
+                            "phone" => $order->getClient()->getPhoneNumber(),
+                            "latitude" => $order->getClient()->getLatitude(),
+                            "longitude" => $order->getClient()->getLongitude(),
+                        ],
+                        "comment" => $order->getComment(),
+                    ])
+                    ->toArray(),
             ])
             ->sort(fn(array $a, array $b) => $a["expected_date"] <=> $b["expected_date"])
             ->toArray();
@@ -561,6 +562,7 @@ class MobileController extends AbstractController {
                 if ($clientOrder->getClient()->isMailNotificationOrderPreparation()) {
                     $content = $this->renderView("emails/mail_delivery_order.html.twig", [
                         "order" => $clientOrder,
+                        "lateDelivery" => false
                     ]);
 
                     $mailer->send($clientOrder->getClient()->getContact(), "Commande en préparation", $content);

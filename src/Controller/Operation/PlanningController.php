@@ -57,7 +57,7 @@ class PlanningController extends AbstractController {
         $from = new DateTime($request->query->get("from") ?? "now");
         $to = new DateTime($request->query->get("to") ?? "+20 days");
         $from->setTime(0, 0);
-        $to->setTime(0, 0);
+        $to->setTime(23, 59);
 
         if ($from->diff($to, true)->days > 20) {
             return $this->json([
@@ -108,12 +108,17 @@ class PlanningController extends AbstractController {
      * @Route("/{order}/mail-commande-retard", name="planning_send_late_order_mail", options={"expose": true})
      * @HasPermission(Role::MANAGE_PLANNING)
      */
-    public function lateOrderEmail(ClientOrder $order): Response {
-        //TODO: envoyer le mail, en attente des retours de benoit??
+    public function lateOrderEmail(ClientOrder $order, Mailer $mailer): Response {
+        $content = $this->renderView("emails/mail_delivery_order.html.twig", [
+            "order" => $order,
+            "lateDelivery" => true
+        ]);
+
+        $mailer->send($order->getClient()->getContact(), "Retard de livraison", $content);
 
         return $this->json([
-            "success" => false,
-            "message" => "Aucun mail envoyé : non développé",
+            "success" => true,
+            "message" => "Le mail a bien été envoyé",
         ]);
     }
 
@@ -169,7 +174,9 @@ class PlanningController extends AbstractController {
         $deliverer = isset($content->deliverer) ? $manager->getRepository(User::class)->find($content->deliverer) : null;
         $method = isset($content->method) ? $manager->getRepository(DeliveryMethod::class)->find($content->method) : null;
         $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
-        $orders = $manager->getRepository(ClientOrder::class)->findBy(["id" => explode(",", $content->assignedForRound)]);
+        $orders = Stream::explode(',', $content->assignedForRound)
+            ->filterMap(fn(int $id) => $manager->find(ClientOrder::class, $id))
+            ->toArray();
 
         if (count($orders) === 0) {
             $form->addError("Vous devez sélectionner au moins une livraison");
@@ -217,8 +224,10 @@ class PlanningController extends AbstractController {
             $manager->flush();
 
             $deliverer = $round->getDeliverer();
+
             $content = $this->renderView("emails/delivery_round.html.twig", [
                 "deliveryRound" => $round,
+                "ordersToDeliver" => $round->getSortedOrders(),
                 "expectedDelivery" => Stream::from($orders)
                     ->map(fn(ClientOrder $order) => $order->getExpectedDelivery())
                     ->min(),
