@@ -33,9 +33,7 @@ $(function() {
                         $('.soft-mobility-total-distance').text(result.softMobilityTotalDistance + " KM");
                         $('.motor-vehicles-total-distance').text(result.motorVehiclesTotalDistance + " KM");
                         $('.return-rate').text(result.returnRate + " %");
-                        drawChart(result.chart, params);
-
-                        resolve();
+                        drawChart(result.chart, params, () => resolve());
                     });
             } else {
                 reject();
@@ -43,13 +41,13 @@ $(function() {
         });
     }
 
-    function drawChart(config, params) {
+    function drawChart(config, params, drawCallback) {
         let $container = $('#indicatorsChart');
         const data = typeof params === 'object' ? params.asObject() : {};
 
         if(data.client && data.from && data.to) {
             $container.replaceWith('<canvas id="indicatorsChart" width="400" height="150" data-rendered="1"></canvas>');
-            ChartJS.line($('#indicatorsChart'), JSON.parse(config));
+            ChartJS.line($('#indicatorsChart'), JSON.parse(config), drawCallback);
         } else {
             $container.replaceWith(`
                 <div id="indicatorsChart" class="d-flex flex-column align-items-center h-100 justify-content-center">
