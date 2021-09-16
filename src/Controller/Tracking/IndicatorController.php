@@ -80,7 +80,7 @@ class IndicatorController extends AbstractController {
                 $isMultiSite = $client->isMultiSite();
                 $dateMin = clone $startDate;
                 $dateMax = clone $endDate;
-                $dateMin->setTime(0, 0, 0);
+                $dateMin->setTime(0, 0);
                 $dateMax->setTime(23, 59, 59);
                 $totalQuantityDelivered = $clientOrderRepository->findQuantityDeliveredBetweenDateAndClient($dateMin, $dateMax, $client);
                 $softMobilityTotalDistance = $deliveryRoundsRepository->findDeliveryTotalDistance($dateMin, $dateMax, $client, [DeliveryMethod::BIKE]);

@@ -44,12 +44,7 @@ class DeliveryRoundRepository extends EntityRepository {
             ->getResult();
     }
 
-    public function findDeliveryTotalDistance(
-        DateTime $from,
-        DateTime $to,
-        Client   $client,
-        array    $deliveryMethod)
-    {
+    public function findDeliveryTotalDistance(DateTime $from, DateTime $to, Client $client, array $deliveryMethod) {
         return $this->createQueryBuilder("delivery_round")
             ->select('delivery_round.distance')
             ->leftJoin("delivery_round.orders", "client_orders")
@@ -67,4 +62,5 @@ class DeliveryRoundRepository extends EntityRepository {
             ->getQuery()
             ->getResult();
     }
+
 }
