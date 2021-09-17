@@ -292,7 +292,8 @@ class MobileController extends AbstractController {
             $delivery->setDistance($data->distance)
                 ->setStatus($deliveryStatus)
                 ->setSignature($signature)
-                ->setPhoto($photo);
+                ->setPhoto($photo)
+                ->setDeliveredAt(new DateTime());
 
             $unfinishedDeliveries = $deliveryRound->getOrders()
                 ->filter(fn(ClientOrder $order) => !$order->hasStatusCode(Status::CODE_ORDER_FINISHED))

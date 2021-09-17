@@ -13,20 +13,28 @@
 {% endblock %}
 
 {% block content %}
-    <div class="box first-box row client-order-container">
-        <input id="starterKit" type="hidden" value="{{ starter_kit | json_encode }}">
-        <table id="table-client-order" class="orderRow"
-               data-initial-data="{{ initial_orders }}"
-               data-default-order="{{ orders_order | json_encode }}"></table>
-    </div>
+    {% if no_default_crate_type %}
+        <div class="box first-box row client-order-container">
+            Aucune caisse par défaut paramétrée
+            <a class="w-auto" href="{{ path('settings') }}">cliquez ici</a> pour accéder au
+            paramétrage global et en renseigner une.
+        </div>
+    {% else %}
+        <div class="box first-box row client-order-container">
+            <input id="starterKit" type="hidden" value="{{ starter_kit | json_encode }}">
+            <table id="table-client-order" class="orderRow"
+                   data-initial-data="{{ initial_orders }}"
+                   data-default-order="{{ orders_order | json_encode }}"></table>
+        </div>
 
-    {% include 'operation/client_order/modal/new.html.twig' with {
-        clientOrder: new_client_order,
-        orderTypes: order_types,
-        deliveryMethods: delivery_methods,
-        workFreeDay: work_free_day,
-        defaultCrateType: default_crate_type
-    } %}
+        {% include 'operation/client_order/modal/new.html.twig' with {
+            clientOrder: new_client_order,
+            orderTypes: order_types,
+            deliveryMethods: delivery_methods,
+            workFreeDay: work_free_day,
+            defaultCrateType: default_crate_type
+        } %}
+    {% endif %}
 {% endblock %}
 
 {% block javascripts %}

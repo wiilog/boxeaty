@@ -58,7 +58,8 @@ class ClientOrderController extends AbstractController {
             "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER,
             "starter_kit" => $boxTypeRepository->findStarterKit(),
-            "default_crate_type" => $defaultCrateType->getVolume() ?? 0,
+            "no_default_crate_type" => $defaultCrateType === null,
+            "default_crate_type" => $defaultCrateType ? $defaultCrateType->getVolume() ?? 0 : null,
             "work_free_day" => Stream::from($manager->getRepository(WorkFreeDay::class)->findAll())
                 ->map(fn(WorkFreeDay $workFreeDay) => [$workFreeDay->getDay(), $workFreeDay->getMonth()])
                 ->toArray()

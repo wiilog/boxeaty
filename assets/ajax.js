@@ -12,7 +12,7 @@ export default class AJAX {
     url;
     params;
 
-    static route(method, route, params) {
+    static route(method, route, params = {}) {
         const ajax = new AJAX();
         ajax.method = method;
         ajax.route = route;
@@ -21,7 +21,7 @@ export default class AJAX {
         return ajax;
     }
 
-    static url(method, url, params) {
+    static url(method, url, params = {}) {
         const ajax = new AJAX();
         ajax.method = method;
         ajax.url = url;
@@ -30,7 +30,7 @@ export default class AJAX {
         return ajax;
     }
 
-    json(body) {
+    config(body) {
         if(!(body instanceof FormData) && (typeof body === `object` || Array.isArray(body))) {
             body = JSON.stringify(body);
         }
@@ -39,13 +39,28 @@ export default class AJAX {
         if(this.route) {
             url = Routing.generate(this.route, this.params);
         } else if(this.method === `GET` || this.method === `DELETE`) {
-            url = new URL(this.url);
+            url = this.url;
+            let temporaryPrefix = !this.url.startsWith(`http`);
+            if(temporaryPrefix) {
+                if(url.charAt(0) === `/`) {
+                    url = this.url.substring(1);
+                }
+
+                url = `http://localhost/${url}`;
+            }
+
+            let parser = new URL(url);
             for(let [key, value] of Object.entries(this.params)) {
                 if(Array.isArray(value) || typeof value === 'object') {
                     value = JSON.stringify(value);
                 }
 
-                url.searchParams.set(key, value);
+                parser.searchParams.set(key, value);
+            }
+
+            url = parser.toString();
+            if(temporaryPrefix) {
+                url = url.substring(`http://localhost`.length);
             }
         } else {
             url = this.url;
@@ -55,6 +70,29 @@ export default class AJAX {
             method: this.method,
             body
         };
+
+        return [url, config];
+    }
+
+    raw(body) {
+        const [url, config] = this.config(body);
+
+        return fetch(url, config)
+            .then(response => {
+                if(response.url.endsWith(`/login`)) {
+                    window.location.href = Routing.generate(`login`);
+                } else {
+                    return response;
+                }
+            })
+            .catch(error => {
+                Flash.serverError(error);
+                throw error;
+            });
+    }
+
+    json(body) {
+        const [url, config] = this.config(body);
 
         return fetch(url, config)
             .then(response => {

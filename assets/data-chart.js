@@ -19,7 +19,7 @@ Chart.register(
     PointElement);
 
 export default class ChartJS {
-    static line($canva, config) {
+    static line($canva, config, drawCallback) {
         config.options = {
             elements: {
                 line: {
@@ -38,6 +38,14 @@ export default class ChartJS {
                 x: {
                     grid: {
                         display: false
+                    }
+                }
+            },
+            animation: {
+                duration: 100,
+                onComplete() {
+                    if(drawCallback) {
+                        drawCallback();
                     }
                 }
             }
