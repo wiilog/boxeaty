@@ -22,6 +22,7 @@ class DefaultController extends AbstractController {
      * @Route("/accueil", name="home", options={"expose": true})
      */
     public function home(EntityManagerInterface $manager): Response {
+        dump("test ne devrait pas s'afficher");
         $defaultCrateTypeId = $manager->getRepository(GlobalSetting::class)->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
 
         return $this->render("home.html.twig", [
