@@ -26,7 +26,6 @@ class QueryHelper {
     }
 
     public static function withCurrentGroup(QueryBuilder $query, string $field, ?User $user): QueryBuilder {
-        dump("lol");
         if ($user && $user->getRole()->isAllowEditOwnGroupOnly() && !$user->getGroups()->isEmpty()) {
             $fields = explode(":", $field);
             if(count($fields) === 2) {
@@ -48,7 +47,7 @@ class QueryHelper {
             } else {
                 $field = $join;
             }
-dump($alias, $join, $field, $user->getGroups());
+
             $dot = $field ? "." : "";
             if($multiple) {
                 foreach ($user->getGroups() as $i => $group) {

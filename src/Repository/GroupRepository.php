@@ -32,7 +32,7 @@ class GroupRepository extends EntityRepository {
 
         $qb = $this->createQueryBuilder("g");
         QueryHelper::withCurrentGroup($qb, "g", $user);
-dump($qb->getQuery()->getSQL());
+
         $total = QueryHelper::count($qb, "g");
 
         if ($search) {
