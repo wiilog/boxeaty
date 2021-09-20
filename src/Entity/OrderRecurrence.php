@@ -19,6 +19,11 @@ class OrderRecurrence {
     private ?int $id = null;
 
     /**
+     * @ORM\OneToOne(targetEntity=ClientOrderInformation::class, mappedBy="orderRecurrence")
+     */
+    private ?ClientOrderInformation $clientOrderInformation = null;
+
+    /**
      * @ORM\Column(type="decimal", precision=8, scale=2)
      */
     private ?string $monthlyPrice = null;
@@ -67,18 +72,20 @@ class OrderRecurrence {
         return $this->id;
     }
 
-    /**
-     * @return float
-     */
-    public function getMonthlyPrice() {
+    public function getClientOrderInformation(): ?ClientOrderInformation {
+        return $this->clientOrderInformation;
+    }
+
+    public function setClientOrderInformation(?ClientOrderInformation $clientOrderInformation): self {
+        $this->clientOrderInformation = $clientOrderInformation;
+        return $this;
+    }
+
+    public function getMonthlyPrice(): ?string {
         return $this->monthlyPrice;
     }
 
-    /**
-     * @param float $monthlyPrice
-     * @return self
-     */
-    public function setMonthlyPrice($monthlyPrice): self {
+    public function setMonthlyPrice(?string $monthlyPrice): self {
         $this->monthlyPrice = $monthlyPrice;
         return $this;
     }

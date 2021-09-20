@@ -27,10 +27,12 @@ class GroupRepository extends EntityRepository {
             ->toIterable();
     }
 
-    public function findForDatatable(array $params): array {
+    public function findForDatatable(array $params, ?User $user = null): array {
         $search = $params["search"]["value"] ?? null;
 
         $qb = $this->createQueryBuilder("g");
+        QueryHelper::withCurrentGroup($qb, "g", $user);
+dump($qb->getQuery()->getSQL());
         $total = QueryHelper::count($qb, "g");
 
         if ($search) {
@@ -43,8 +45,7 @@ class GroupRepository extends EntityRepository {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("g.$column", $order["dir"]);
             }
-        }
-        else {
+        } else {
             foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("g.$column", $dir);
             }
@@ -63,23 +64,16 @@ class GroupRepository extends EntityRepository {
     }
 
     public function getForSelect(?string $search, ?User $user) {
-        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
-            return $user->getGroups()
-                ->map(fn(Group $group) => [
-                    "id" => $group->getId(),
-                    "text" => $group->getName(),
-                ])
-                ->toArray();
-        } else {
-            return $this->createQueryBuilder("g")
-                ->select("g.id AS id, g.name AS text")
-                ->andWhere("g.name LIKE :search")
-                ->andWhere("g.active = 1")
-                ->setMaxResults(15)
-                ->setParameter("search", "%$search%")
-                ->getQuery()
-                ->getArrayResult();
-        }
+        $qb = $this->createQueryBuilder("g");
+        QueryHelper::withCurrentGroup($qb, "g", $user);
+
+        return $qb->select("g.id AS id, g.name AS text")
+            ->andWhere("g.name LIKE :search")
+            ->andWhere("g.active = 1")
+            ->setMaxResults(15)
+            ->setParameter("search", "%$search%")
+            ->getQuery()
+            ->getArrayResult();
     }
 
 }

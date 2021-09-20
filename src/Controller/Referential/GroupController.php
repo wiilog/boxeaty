@@ -38,7 +38,7 @@ class GroupController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $groups = $manager->getRepository(Group::class)
-            ->findForDatatable(json_decode($request->getContent(), true) ?? []);
+            ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
         foreach ($groups["data"] as $group) {

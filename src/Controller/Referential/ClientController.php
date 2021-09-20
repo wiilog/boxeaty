@@ -25,6 +25,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use WiiCommon\Helper\Stream;
 
@@ -32,6 +33,19 @@ use WiiCommon\Helper\Stream;
  * @Route("/referentiel/clients")
  */
 class ClientController extends AbstractController {
+
+    private function canSee(?Group $group) {
+        return !$this->getUser()->getRole()->isAllowEditOwnGroupOnly() ||
+            $this->getUser()->getGroups()->contains($group) ||
+            $this->getUser()->getGroups()->isEmpty();
+    }
+
+    private function cantSeeResponse(): Response {
+        return $this->json([
+            "success" => false,
+            "message" => "Vous n'avez pas le droit de voir ou modifier ce client",
+        ]);
+    }
 
     /**
      * @Route("/liste", name="clients_list", options={"expose": true})
@@ -83,6 +97,10 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_BOXES)
      */
     public function show(Client $client): Response {
+        if (!$this->canSee($client->getGroup())) {
+            throw new AccessDeniedHttpException("Vous n'avez pas le droit de voir ou modifier ce client");
+        }
+
         return $this->render('referential/client/show.html.twig', [
             "client" => $client,
         ]);
@@ -183,7 +201,11 @@ class ClientController extends AbstractController {
      * @Route("/modifier/template/{client}", name="client_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function editTemplate(Client $client, EntityManagerInterface $manager): Response {
+    public function editTemplate(EntityManagerInterface $manager, Client $client): Response {
+        if (!$this->canSee($client->getGroup())) {
+            return $this->cantSeeResponse();
+        }
+
         $clientOrderInformation = $client->getClientOrderInformation();
         $paymentModes = $manager->getRepository(GlobalSetting::class)->getValue(GlobalSetting::PAYMENT_MODES);
 
@@ -193,7 +215,7 @@ class ClientController extends AbstractController {
                 "client" => $client,
                 "clientOrderInformation" => $clientOrderInformation,
                 "paymentModes" => explode(',', $paymentModes),
-            ])
+            ]),
         ]);
     }
 
@@ -202,6 +224,10 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function edit(Request $request, EntityManagerInterface $manager, ClientService $service, Client $client): Response {
+        if (!$this->canSee($client->getGroup())) {
+            return $this->cantSeeResponse();
+        }
+
         $form = Form::create();
 
         $clientRepository = $manager->getRepository(Client::class);
@@ -298,11 +324,15 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function deleteTemplate(Client $client): Response {
+        if (!$this->canSee($client->getGroup())) {
+            return $this->cantSeeResponse();
+        }
+
         return $this->json([
             "submit" => $this->generateUrl("client_delete", ["client" => $client->getId()]),
             "template" => $this->renderView("referential/client/modal/delete.html.twig", [
                 "client" => $client,
-            ])
+            ]),
         ]);
     }
 
@@ -311,6 +341,9 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function delete(EntityManagerInterface $manager, Client $client): Response {
+        if (!$this->canSee($client->getGroup())) {
+            return $this->cantSeeResponse();
+        }
 
         if ($client && (!$client->getBoxRecords()->isEmpty() || !$client->getBoxes()->isEmpty() || $client->getOutLocation())) {
             $client->setActive(false);
@@ -318,13 +351,13 @@ class ClientController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "message" => "Client <strong>{$client->getName()}</strong> désactivé avec succès"
+                "message" => "Client <strong>{$client->getName()}</strong> désactivé avec succès",
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "message" => "Le client n'existe pas"
+                "message" => "Le client n'existe pas",
             ]);
         }
     }
@@ -351,15 +384,18 @@ class ClientController extends AbstractController {
      * @Route("/crate-pattern-lines-api", name="crate_pattern_lines_api", options={"expose": true})
      */
     public function boxTypesApi(Request $request, EntityManagerInterface $manager): Response {
-        $id = $request->query->get('id');
+        $id = $request->query->get("id");
         $client = $manager->getRepository(Client::class)->find($id);
+        if (!$this->canSee($client->getGroup())) {
+            return $this->cantSeeResponse();
+        }
 
         return $this->json([
             'success' => true,
             'template' => $this->renderView('referential/client/crate_pattern_lines.html.twig', [
                 'client' => $client,
             ]),
-            'totalCrateTypePrice' => FormatHelper::price($client->getCratePatternAmount())
+            'totalCrateTypePrice' => FormatHelper::price($client->getCratePatternAmount()),
         ]);
     }
 
@@ -367,8 +403,12 @@ class ClientController extends AbstractController {
      * @Route("/{client}/crate-pattern-lines", name="crate_pattern_lines", options={"expose": true})
      */
     public function getBoxTypes(Client $client): Response {
+        if (!$this->canSee($client->getGroup())) {
+            return $this->cantSeeResponse();
+        }
+
         return $this->json([
-            'box-types' => $client->getCratePatternLines()
+            "box-types" => $client->getCratePatternLines()
                 ->map(fn(CratePatternLine $cratePatternLine) => [
                     'id' => $cratePatternLine->getBoxType()->getId(),
                     'unitPrice' => $cratePatternLine->getUnitPrice(),
@@ -377,9 +417,9 @@ class ClientController extends AbstractController {
                     'volume' => $cratePatternLine->getBoxType()->getVolume(),
                     'image' => $cratePatternLine->getBoxType()->getImage()
                         ? $cratePatternLine->getBoxType()->getImage()->getPath()
-                        : null
+                        : null,
                 ])
-                ->toArray()
+                ->toArray(),
         ]);
     }
 
@@ -396,9 +436,13 @@ class ClientController extends AbstractController {
         $boxType = $manager->getRepository(BoxType::class)->find($content->type);
         $cratePatternLines = $client->getCratePatternLines();
 
+        if (!$this->canSee($client->getGroup())) {
+            return $this->cantSeeResponse();
+        }
+
         if ($content->quantity < 1) {
             $form->addError("quantity", "La quantité doit être supérieure ou égale à 1");
-        } elseif (isset($content->customPrice) && $content->customPrice < 0) {
+        } else if (isset($content->customPrice) && $content->customPrice < 0) {
             $form->addError("customPrice", "Le tarif personnalisé doit être supérieur ou égal à 0");
         }
 
@@ -426,35 +470,10 @@ class ClientController extends AbstractController {
 
             return $this->json([
                 'success' => true,
-                'msg' => "Le type de Box ${name} a bien été ajouté au modèle de caisse"
+                'msg' => "Le type de Box ${name} a bien été ajouté au modèle de caisse",
             ]);
         } else {
             return $form->errors();
-        }
-    }
-
-    /**
-     * @Route("/delete-crate-pattern-line", name="delete_crate_pattern_line", options={"expose": true})
-     * @HasPermission(Role::MANAGE_CLIENTS)
-     */
-    public function deleteCratePatternLine(Request $request, EntityManagerInterface $manager): Response {
-
-        $id = $request->query->get('id');
-        $cratePatternLine = $manager->getRepository(CratePatternLine::class)->find($id);
-
-        if ($cratePatternLine) {
-            $manager->remove($cratePatternLine);
-            $manager->flush();
-
-            return $this->json([
-                "success" => true,
-                "message" => "Le type de Box <strong>{$cratePatternLine->getBoxType()->getName()}</strong> a été supprimé"
-            ]);
-        } else {
-            return $this->json([
-                "success" => false,
-                "message" => "Une erreur est survenue"
-            ]);
         }
     }
 
@@ -463,11 +482,15 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function cratePatternLineEditTemplate(CratePatternLine $cratePatternLine): Response {
+        if (!$this->canSee($cratePatternLine->getClient()->getGroup())) {
+            return $this->cantSeeResponse();
+        }
+
         return $this->json([
             "submit" => $this->generateUrl("crate_pattern_line_edit", ["cratePatternLine" => $cratePatternLine->getId()]),
             "template" => $this->renderView("referential/client/modal/edit_crate_pattern_line.html.twig", [
                 "cratePatternLine" => $cratePatternLine,
-            ])
+            ]),
         ]);
     }
 
@@ -478,13 +501,17 @@ class ClientController extends AbstractController {
     public function cratePatternLineEdit(Request                $request,
                                          CratePatternLine       $cratePatternLine,
                                          EntityManagerInterface $manager): Response {
+        if (!$this->canSee($cratePatternLine->getClient()->getGroup())) {
+            return $this->cantSeeResponse();
+        }
+
         $form = Form::create();
 
         $content = (object)$request->request->all();
 
         if ($content->quantity < 1) {
             $form->addError("quantity", "La quantité doit être supérieure ou égale à 1");
-        } elseif (isset($content->customPrice) && $content->customPrice < 0) {
+        } else if (isset($content->customPrice) && $content->customPrice < 0) {
             $form->addError("customPrice", "Le tarif personnalisé doit être supérieur ou égal à 0");
         }
 
@@ -501,7 +528,7 @@ class ClientController extends AbstractController {
 
             return $this->json([
                 'success' => true,
-                'msg' => "Le type de Box ${name} a bien été modifié"
+                'msg' => "Le type de Box ${name} a bien été modifié",
             ]);
         } else {
             return $form->errors();
@@ -512,18 +539,20 @@ class ClientController extends AbstractController {
      * @Route("/order-recurrence-api", name="order_recurrence_api", options={"expose": true})
      */
     public function orderRecurrenceApi(Request $request, EntityManagerInterface $manager): Response {
-        $id = $request->query->get('id');
-        $client = $manager->getRepository(Client::class)->find($id);
+        $client = $manager->getRepository(Client::class)->find($request->query->get('id'));
+        if (!$this->canSee($client->getGroup())) {
+            return $this->cantSeeResponse();
+        }
 
         $clientOrderInformation = $client->getClientOrderInformation() ?? null;
         $orderRecurrence = $clientOrderInformation ? $clientOrderInformation->getOrderRecurrence() : null;
 
         return $this->json([
-            'success' => true,
-            'template' => $this->renderView('referential/client/order_recurrence.html.twig', [
-                'clientOrderInformation' => $client->getClientOrderInformation() ?? null,
+            "success" => true,
+            "template" => $this->renderView('referential/client/order_recurrence.html.twig', [
+                "clientOrderInformation" => $client->getClientOrderInformation() ?? null,
             ]),
-            'orderRecurrencePrice' => $orderRecurrence ? $orderRecurrence->getMonthlyPrice() : 0,
+            "orderRecurrencePrice" => $orderRecurrence ? $orderRecurrence->getMonthlyPrice() : 0,
         ]);
     }
 
@@ -532,11 +561,15 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function cratePatternLineDeleteTemplate(CratePatternLine $cratePatternLine): Response {
+        if (!$this->canSee($cratePatternLine->getClient()->getGroup())) {
+            return $this->cantSeeResponse();
+        }
+
         return $this->json([
             "submit" => $this->generateUrl("crate_pattern_line_delete", ["cratePatternLine" => $cratePatternLine->getId()]),
             "template" => $this->renderView("referential/client/modal/delete_crate_pattern_line.html.twig", [
                 "cratePatternLine" => $cratePatternLine,
-            ])
+            ]),
         ]);
     }
 
@@ -545,13 +578,16 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function cratePatternLineDelete(EntityManagerInterface $manager, CratePatternLine $cratePatternLine): Response {
+        if (!$this->canSee($cratePatternLine->getClient()->getGroup())) {
+            return $this->cantSeeResponse();
+        }
 
         $manager->remove($cratePatternLine);
         $manager->flush();
 
         return $this->json([
             "success" => true,
-            "message" => "Le type de Box <strong>{$cratePatternLine->getBoxType()->getName()}</strong> a été supprimé"
+            "message" => "Le type de Box <strong>{$cratePatternLine->getBoxType()->getName()}</strong> a été supprimé",
         ]);
     }
 
@@ -560,11 +596,15 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function orderRecurrenceEditTemplate(OrderRecurrence $orderRecurrence): Response {
+        if (!$this->canSee($orderRecurrence->getClientOrderInformation()->getClient()->getGroup())) {
+            return $this->cantSeeResponse();
+        }
+
         return $this->json([
             "submit" => $this->generateUrl("order_recurrence_edit", ["orderRecurrence" => $orderRecurrence->getId()]),
             "template" => $this->renderView("referential/client/modal/edit_order_recurrence.html.twig", [
                 "orderRecurrence" => $orderRecurrence,
-            ])
+            ]),
         ]);
     }
 
@@ -573,12 +613,16 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function orderRecurrenceEdit(Request $request, OrderRecurrence $orderRecurrence, EntityManagerInterface $manager): Response {
+        if (!$this->canSee($orderRecurrence->getClientOrderInformation()->getClient()->getGroup())) {
+            return $this->cantSeeResponse();
+        }
+
         $form = Form::create();
         $clientOrderInformationRepository = $manager->getRepository(ClientOrderInformation::class);
         $content = (object)$request->request->all();
         if ($form->isValid()) {
             $clientOrderInformation = $clientOrderInformationRepository->findOneBy([
-                'orderRecurrence' => $orderRecurrence
+                'orderRecurrence' => $orderRecurrence,
             ]);
             $client = $clientOrderInformation->getClient();
 
@@ -618,21 +662,24 @@ class ClientController extends AbstractController {
         $form = Form::create();
 
         $content = (object)$request->request->all();
+        $client = $manager->getRepository(Client::class)->find($content->client);
+        if (!$this->canSee($client->getGroup())) {
+            return $this->cantSeeResponse();
+        }
 
         if ($content->period < 0) {
             $form->addError("period", "La période doit être supérieure ou égale à 0");
-        } elseif ($content->crateAmount < 0) {
+        } else if ($content->crateAmount < 0) {
             $form->addError("crateAmount", "Le nombre de caisses doit être supérieur ou égal à 0");
-        } elseif (new DateTime($content->end) < new DateTime($content->start)) {
+        } else if (new DateTime($content->end) < new DateTime($content->start)) {
             $form->addError("end", "La date de fin doit être supérieure à la date de début");
-        } elseif ($content->deliveryFlatRate < 0) {
+        } else if ($content->deliveryFlatRate < 0) {
             $form->addError("deliveryFlatRate", "Le forfait livraison commande libre doit être supérieur ou égal à 0");
-        } elseif ($content->serviceFlatRate < 0) {
+        } else if ($content->serviceFlatRate < 0) {
             $form->addError("serviceFlatRate", "Le forfait de service à la commande libre doit être supérieur ou égal à 0");
         }
 
         if ($form->isValid()) {
-            $client = $manager->getRepository(Client::class)->find($content->client);
             $clientOrderInformation = $client->getClientOrderInformation();
 
             $crateTypePrice = Stream::from($client->getCratePatternLines())
@@ -671,6 +718,10 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function orderRecurrenceDelete(OrderRecurrence $orderRecurrence, EntityManagerInterface $manager): Response {
+        if (!$this->canSee($orderRecurrence->getClientOrderInformation()->getClient()->getGroup())) {
+            return $this->cantSeeResponse();
+        }
+
         $clientOrderInformation = $manager->getRepository(ClientOrderInformation::class)->findOneBy(["orderRecurrence" => $orderRecurrence]);
 
         $clientOrderInformation->setOrderRecurrence(null);
@@ -679,7 +730,7 @@ class ClientController extends AbstractController {
 
         return $this->json([
             'success' => true,
-            'message' => 'La récurrence a bien été supprimée'
+            'message' => 'La récurrence a bien été supprimée',
         ]);
     }
 

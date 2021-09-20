@@ -72,7 +72,7 @@ class ClientOrderInformation {
     private ?Depository $depository = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=OrderRecurrence::class, cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity=OrderRecurrence::class, inversedBy="clientOrderInformation", cascade={"persist", "remove"})
      */
     private ?OrderRecurrence $orderRecurrence = null;
 

@@ -25,8 +25,9 @@ class QueryHelper {
             ->addOrderBy("__order_{$alias}_{$field}.$joinField", $direction);
     }
 
-    public static function withCurrentGroup(QueryBuilder $query, string $field, User $user): QueryBuilder {
-        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+    public static function withCurrentGroup(QueryBuilder $query, string $field, ?User $user): QueryBuilder {
+        dump("lol");
+        if ($user && $user->getRole()->isAllowEditOwnGroupOnly() && !$user->getGroups()->isEmpty()) {
             $fields = explode(":", $field);
             if(count($fields) === 2) {
                 $fields = $fields[1];
@@ -47,15 +48,16 @@ class QueryHelper {
             } else {
                 $field = $join;
             }
-
+dump($alias, $join, $field, $user->getGroups());
+            $dot = $field ? "." : "";
             if($multiple) {
                 foreach ($user->getGroups() as $i => $group) {
                     $query
-                        ->andWhere("$alias.$field IS EMPTY OR :__group_$i MEMBER OF $alias.$field")
+                        ->andWhere("$alias$dot$field IS EMPTY OR :__group_$i MEMBER OF $alias$dot$field")
                         ->setParameter("__group_$i", $group);
                 }
             } else {
-                $query->andWhere("$alias.$field IS NULL OR $alias.$field IN (:__groups)")
+                $query->andWhere("$alias$dot$field IS NULL OR $alias$dot$field IN (:__groups)")
                     ->setParameter("__groups", $user->getGroups());
             }
         }
