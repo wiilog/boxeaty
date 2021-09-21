@@ -6,14 +6,14 @@
 
     <h3>Type de mobilité</h3>
     <div class="w-75">
-        <div class="inline-form">
+        <div class="d-flex align-items-end justify-content-between">
             <label class="col-5">
                 Libellé
                 <input type="text" name="nameDeliveryMethode" class="add-data" required/>
             </label>
             <label>
                 Icône
-                <select name="icon" class="add-data" data-s2 data-no-empty-option data-no-searching data-icon>
+                <select name="icon" class="add-data center" data-s2 data-no-empty-option data-no-searching data-icon>
                     {% for index, icon in icons %}
                         <option class="w-25" value={{ icon }}></option>
                     {% endfor %}

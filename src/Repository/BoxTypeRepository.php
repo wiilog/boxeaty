@@ -75,7 +75,7 @@ class BoxTypeRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search, $extended = false) {
+    public function getForSelect(?string $search, $extended = false): array {
         $boxTypes = $this->createQueryBuilder("box_type")
             ->andWhere("box_type.name LIKE :search")
             ->andWhere("box_type.active = 1")
@@ -86,18 +86,15 @@ class BoxTypeRepository extends EntityRepository {
 
         return Stream::from($boxTypes)
             ->map(fn(BoxType $boxType) => [
-                'id' => $boxType->getId(),
-                'text' => $extended
-                    ? $boxType->getName() . ' - ' . ($boxType->getVolume()
-                        ? $boxType->getVolume() . 'm³'
-                        : 'N/C') . ' - ' . FormatHelper::price($boxType->getPrice())
-                    : $boxType->getName(),
-                'name' => $boxType->getName(),
-                'price' => $boxType->getPrice(),
-                'volume' => $boxType->getVolume(),
-                'image' => $boxType->getImage()
-                    ? $boxType->getImage()->getPath()
-                    : null,
+                "id" => $boxType->getId(),
+                "text" => !$extended ? $boxType->getName() :
+                    $boxType->getName() . " - " .
+                    ($boxType->getCapacity() ?: 'N/C') . " - " .
+                    FormatHelper::price($boxType->getPrice()),
+                "name" => $boxType->getName(),
+                "price" => $boxType->getPrice(),
+                "volume" => $boxType->getVolume(),
+                "image" => $boxType->getImage() ? $boxType->getImage()->getPath() : null,
             ])
             ->values();
     }

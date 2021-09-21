@@ -51,6 +51,14 @@ export default class Select2 {
             $element.wrap(`<div data-s2-wrapper style="position: relative"/>`);
         }
 
+        //add original classes
+        $element.parent().arrive(`.select2-container`, function() {
+            $(this).addClass(classes
+                .split(' ')
+                .filter(css => css !== 'select2-hidden-accessible')
+                .join(' '));
+        })
+
         const config = {};
         if(type) {
             if(!ROUTES[type]) {
@@ -96,11 +104,6 @@ export default class Select2 {
             },
             ...config,
         });
-
-        $element.parent().find('.select2-container').addClass(classes
-            .split(' ')
-            .filter(css => css !== 'select2-hidden-accessible')
-            .join(' '));
 
         $element.on('select2:open', function(e) {
             const evt = "scroll.select2";
