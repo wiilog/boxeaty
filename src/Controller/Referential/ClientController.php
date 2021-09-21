@@ -626,7 +626,7 @@ class ClientController extends AbstractController {
             ]);
             $client = $clientOrderInformation->getClient();
 
-            $crateTypePrice = Stream::from($client->getCratePatternLines())
+            $cratePrice = Stream::from($client->getCratePatternLines())
                 ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
                 ->sum();
 
@@ -640,8 +640,10 @@ class ClientController extends AbstractController {
                 ->setServiceFlatRate($content->serviceFlatRate);
 
             $diff = $orderRecurrence->getStart()->diff($orderRecurrence->getEnd(), true);
-            $frequency = ($diff->days / 7) / $content->period;
-            $orderRecurrence->setMonthlyPrice(($crateTypePrice * $orderRecurrence->getCrateAmount() + $orderRecurrence->getDeliveryFlatRate() + $orderRecurrence->getServiceFlatRate()) * $frequency);
+            $singleOrderPrice = $cratePrice * $orderRecurrence->getCrateAmount() + $orderRecurrence->getDeliveryFlatRate() + $orderRecurrence->getServiceFlatRate();
+            $totalOrderCount = ($diff->days / 7) / $content->period;
+            $months = $diff->days / 30.5;
+            $orderRecurrence->setMonthlyPrice($singleOrderPrice * $totalOrderCount / $months);
 
             $manager->flush();
 

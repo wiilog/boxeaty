@@ -126,9 +126,12 @@ function getBoxRecurrence() {
     AJAX.route(`GET`, `order_recurrence_api`, {id: $('#client-id').val()})
         .json()
         .then((response) => {
+            let formattedPrice = ``;
+            if(response.orderRecurrencePrice) {
+                formattedPrice = StringHelper.formatPrice(response.orderRecurrencePrice) + `HT/mois`
+            }
+
             $('.order-recurrence-wrapper').empty().append(response.template);
-            $('.order-recurrence-price').text(`${response.orderRecurrencePrice 
-                ? StringHelper.formatPrice(response.orderRecurrencePrice) + 'HT/mois' 
-                : ''} `);
+            $('.order-recurrence-price').text(`${formattedPrice} environ`);
         });
 }
