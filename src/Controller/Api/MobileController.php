@@ -732,10 +732,10 @@ class MobileController extends AbstractController {
      * @Authenticated(Authenticated::MOBILE)
      */
     public function collectCrates(Collect $collect): JsonResponse {
-        $collectCrates = Stream::from($collect->getCrates()->map(fn(Box $crate) => [
+        $collectCrates = $collect->getCrates()->map(fn(Box $crate) => [
             "number" => $crate->getNumber(),
             "type" => $crate->getType()->getName()
-        ]));
+        ]);
 
         return $this->json($collectCrates);
     }

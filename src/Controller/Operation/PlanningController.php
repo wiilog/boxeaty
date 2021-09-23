@@ -174,9 +174,7 @@ class PlanningController extends AbstractController {
         $deliverer = isset($content->deliverer) ? $manager->getRepository(User::class)->find($content->deliverer) : null;
         $method = isset($content->method) ? $manager->getRepository(DeliveryMethod::class)->find($content->method) : null;
         $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
-        $orders = Stream::explode(',', $content->assignedForRound)
-            ->filterMap(fn(int $id) => $manager->find(ClientOrder::class, $id))
-            ->toArray();
+        $orders = $manager->getRepository(ClientOrder::class)->findBy(["id" => explode(",", $content->assignedForRound)]);
 
         if (count($orders) === 0) {
             $form->addError("Vous devez sélectionner au moins une livraison");
