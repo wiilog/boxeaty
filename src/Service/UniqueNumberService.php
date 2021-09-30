@@ -7,17 +7,12 @@ use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
 
-class UniqueNumberService
-{
+class UniqueNumberService {
 
     private const NUMBER_FORMAT = "YmdCCCC";
 
-    private $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
-    }
+    /** @Required */
+    public EntityManagerInterface $entityManager;
 
     public function createUniqueNumber(string $entity, ?EntityManagerInterface $manager = null): string {
         $date = new DateTime("now", new DateTimeZone("Europe/Paris"));
@@ -41,7 +36,7 @@ class UniqueNumberService
 
         $lastCounter = (
         (!empty($lastNumber) && $counterLen <= strlen($lastNumber))
-            ? (int) substr($lastNumber, -$counterLen, $counterLen)
+            ? (int)substr($lastNumber, -$counterLen, $counterLen)
             : 0
         );
         $currentCounterStr = sprintf("%0{$counterLen}u", $lastCounter + 1);
@@ -49,4 +44,5 @@ class UniqueNumberService
 
         return $entity::PREFIX_NUMBER . $dateStr . $currentCounterStr;
     }
+
 }

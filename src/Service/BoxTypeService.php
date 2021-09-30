@@ -12,7 +12,6 @@ class BoxTypeService {
     public AttachmentService $attachmentService;
 
     public function persistBoxType(EntityManagerInterface $manager, BoxType $boxType, $content): void {
-
         if ($boxType->getName() === BoxType::STARTER_KIT) {
             $boxType->setActive(true);
         } else {

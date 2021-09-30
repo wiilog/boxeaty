@@ -27,8 +27,8 @@ use Symfony\Component\Routing\RouterInterface;
 use Twig\Environment;
 use WiiCommon\Helper\Stream;
 
-class ClientOrderService
-{
+class ClientOrderService {
+
     /** @Required */
     public SessionInterface $session;
 

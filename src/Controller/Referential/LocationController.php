@@ -289,7 +289,7 @@ class LocationController extends AbstractController
             ]);
         } else {
             $originalLocation = $manager->getRepository(Location::class)->findOneBy([
-                "deporte" => $location
+                "offset" => $location
             ]);
 
             if ($originalLocation) {

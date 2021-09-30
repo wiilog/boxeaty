@@ -13,36 +13,28 @@ class RoleService {
 
     public function hasPermission(string ...$permissions): bool {
         $user = $this->security->getUser();
-        if ($user && $user instanceof User && $user->isActive()) {
+        if ($user instanceof User && $user->isActive()) {
             $role = $user->getRole();
 
-            $hasPermission = false;
-            $permissionCount = count($permissions);
             $index = 0;
-
-            // if the user has at least one permission we return true
-            while (!$hasPermission
-                   && $index < $permissionCount) {
-                $permission = $permissions[$index];
-                $hasPermission = (
-                    (in_array($permission, $role->getPermissions()))
-                    || (
-                        in_array($permission, Role::ADDITIONAL_PERMISSIONS)
-                        && (
-                            $permission === Role::ALLOW_EDIT_OWN_GROUP_ONLY && $role->isAllowEditOwnGroupOnly()
-                            || $permission === Role::DISPLAY_NEW_COUNTER_ORDER && $role->isShowCounterOrderScreen()
-                            || $permission === Role::REDIRECT_INDICATORS && $role->isRedirectIndicators()
-                            || $permission === Role::RECEIVE_MAILS_NEW_ACCOUNTS && $role->isReceiveMailsNewAccounts()
-                        )
-                    )
-                );
+            $permissionCount = count($permissions);
+            while ($index < $permissionCount && !$this->hasSinglePermission($role, $permissions[$index])) {
                 $index++;
             }
 
-            return $hasPermission;
-        } else {
-            return false;
+            return $index !== $permissionCount;
         }
+
+        return false;
+    }
+
+    private function hasSinglePermission(Role $role, string $permission): bool {
+        return in_array($permission, $role->getPermissions()) || (
+                $permission === Role::ALLOW_EDIT_OWN_GROUP_ONLY && $role->isAllowEditOwnGroupOnly()
+                || $permission === Role::DISPLAY_NEW_COUNTER_ORDER && $role->isShowCounterOrderScreen()
+                || $permission === Role::REDIRECT_INDICATORS && $role->isRedirectIndicators()
+                || $permission === Role::RECEIVE_MAILS_NEW_ACCOUNTS && $role->isReceiveMailsNewAccounts()
+            );
     }
 
 }
