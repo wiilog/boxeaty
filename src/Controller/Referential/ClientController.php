@@ -34,6 +34,9 @@ use WiiCommon\Helper\Stream;
  */
 class ClientController extends AbstractController {
 
+    /** @Required */
+    public ClientService $service;
+
     private function canSee(?Group $group) {
         return !$this->getUser()->getRole()->isAllowEditOwnGroupOnly() ||
             $this->getUser()->getGroups()->contains($group) ||
@@ -183,6 +186,8 @@ class ClientController extends AbstractController {
                 $depositTicketsClients[] = $client;
             }
 
+            $this->service->recalculateMonthlyPrice($client);
+
             $manager->persist($client);
             $manager->persist($clientOrderInformation);
             $manager->persist($out);
@@ -308,6 +313,8 @@ class ClientController extends AbstractController {
                 $client->setClientOrderInformation($clientOrderInformation);
             }
 
+            $this->service->recalculateMonthlyPrice($client);
+
             $manager->flush();
 
             return $this->json([
@@ -384,18 +391,17 @@ class ClientController extends AbstractController {
      * @Route("/crate-pattern-lines-api", name="crate_pattern_lines_api", options={"expose": true})
      */
     public function boxTypesApi(Request $request, EntityManagerInterface $manager): Response {
-        $id = $request->query->get("id");
-        $client = $manager->getRepository(Client::class)->find($id);
+        $client = $manager->getRepository(Client::class)->find($request->query->get("id"));
         if (!$this->canSee($client->getGroup())) {
             return $this->cantSeeResponse();
         }
 
         return $this->json([
-            'success' => true,
-            'template' => $this->renderView('referential/client/crate_pattern_lines.html.twig', [
-                'client' => $client,
+            "success" => true,
+            "template" => $this->renderView('referential/client/crate_pattern_lines.html.twig', [
+                "client" => $client,
             ]),
-            'totalCrateTypePrice' => FormatHelper::price($client->getCratePatternAmount()),
+            "total_crate_type_price" => FormatHelper::price($client->getCratePatternAmount()),
         ]);
     }
 
@@ -408,14 +414,14 @@ class ClientController extends AbstractController {
         }
 
         return $this->json([
-            "box-types" => $client->getCratePatternLines()
+            "box_types" => $client->getCratePatternLines()
                 ->map(fn(CratePatternLine $cratePatternLine) => [
-                    'id' => $cratePatternLine->getBoxType()->getId(),
-                    'unitPrice' => $cratePatternLine->getUnitPrice(),
-                    'quantity' => $cratePatternLine->getQuantity(),
-                    'name' => $cratePatternLine->getBoxType()->getName(),
-                    'volume' => $cratePatternLine->getBoxType()->getVolume(),
-                    'image' => $cratePatternLine->getBoxType()->getImage()
+                    "id" => $cratePatternLine->getBoxType()->getId(),
+                    "unitPrice" => $cratePatternLine->getUnitPrice(),
+                    "quantity" => $cratePatternLine->getQuantity(),
+                    "name" => $cratePatternLine->getBoxType()->getName(),
+                    "volume" => $cratePatternLine->getBoxType()->getVolume(),
+                    "image" => $cratePatternLine->getBoxType()->getImage()
                         ? $cratePatternLine->getBoxType()->getImage()->getPath()
                         : null,
                 ])
@@ -434,7 +440,6 @@ class ClientController extends AbstractController {
 
         $client = $manager->getRepository(Client::class)->find($content->client);
         $boxType = $manager->getRepository(BoxType::class)->find($content->type);
-        $cratePatternLines = $client->getCratePatternLines();
 
         if (!$this->canSee($client->getGroup())) {
             return $this->cantSeeResponse();
@@ -446,31 +451,29 @@ class ClientController extends AbstractController {
             $form->addError("customPrice", "Le tarif personnalisé doit être supérieur ou égal à 0");
         }
 
-        foreach ($cratePatternLines as $cratePatternLine) {
-            if ($cratePatternLine->getBoxType()->getId() === $boxType->getId()) {
-                $form->addError("type", 'Ce type de Box est déjà présent dans le modèle de caisse');
-                break;
-            }
+        $doesntContain = Stream::from($client->getCratePatternLines())
+            ->filter(fn(CratePatternLine $line) => $line->getBoxType()->getId() === $boxType->getId())
+            ->isEmpty();
+
+        if (!$doesntContain) {
+            $form->addError("type", "Ce type de Box est déjà présent dans le modèle de caisse");
         }
 
         if ($form->isValid()) {
-
-            $name = $boxType->getName();
-
-            $customPrice = isset($content->customPrice) ? (float)$content->customPrice : null;
-
             $cratePatternLine = (new CratePatternLine())
                 ->setClient($client)
                 ->setBoxType($boxType)
                 ->setQuantity((int)$content->quantity)
-                ->setCustomUnitPrice($customPrice);
+                ->setCustomUnitPrice(isset($content->customPrice) ? (float)$content->customPrice : null);
+
+            $this->service->recalculateMonthlyPrice($cratePatternLine);
 
             $manager->persist($cratePatternLine);
             $manager->flush();
 
             return $this->json([
                 'success' => true,
-                'msg' => "Le type de Box ${name} a bien été ajouté au modèle de caisse",
+                "message" => "Le type de Box {$boxType->getName()} a bien été ajouté au modèle de caisse",
             ]);
         } else {
             return $form->errors();
@@ -495,7 +498,7 @@ class ClientController extends AbstractController {
     }
 
     /**
-     * @Route("/modifier-crate-pattern-line/{cratePatternLine}", name="crate_pattern_line_edit", options={"expose": true})
+     * @Route("/modifier-modele-caisse/{cratePatternLine}", name="crate_pattern_line_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function cratePatternLineEdit(Request                $request,
@@ -506,7 +509,6 @@ class ClientController extends AbstractController {
         }
 
         $form = Form::create();
-
         $content = (object)$request->request->all();
 
         if ($content->quantity < 1) {
@@ -516,19 +518,17 @@ class ClientController extends AbstractController {
         }
 
         if ($form->isValid()) {
-            $name = $cratePatternLine->getBoxType()->getName();
-
-            $customPrice = isset($content->customPrice) ? (float)$content->customPrice : null;
-
             $cratePatternLine
                 ->setQuantity((int)$content->quantity)
-                ->setCustomUnitPrice($customPrice);
+                ->setCustomUnitPrice(isset($content->customPrice) ? (float)$content->customPrice : null);
+
+            $this->service->recalculateMonthlyPrice($cratePatternLine);
 
             $manager->flush();
 
             return $this->json([
-                'success' => true,
-                'msg' => "Le type de Box ${name} a bien été modifié",
+                "success" => true,
+                "message" => "Le type de Box {$cratePatternLine->getBoxType()->getName()} a bien été modifié",
             ]);
         } else {
             return $form->errors();
@@ -582,6 +582,11 @@ class ClientController extends AbstractController {
             return $this->cantSeeResponse();
         }
 
+        $client = $cratePatternLine->getClient();
+        $cratePatternLine->setClient(null);
+
+        $this->service->recalculateMonthlyPrice($client);
+
         $manager->remove($cratePatternLine);
         $manager->flush();
 
@@ -592,45 +597,36 @@ class ClientController extends AbstractController {
     }
 
     /**
-     * @Route("/modifier-recurrence-commande/template/{orderRecurrence}", name="order_recurrence_edit_template", options={"expose": true})
+     * @Route("/modifier-recurrence-commande/{recurrence}/template", name="order_recurrence_edit_template", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function orderRecurrenceEditTemplate(OrderRecurrence $orderRecurrence): Response {
-        if (!$this->canSee($orderRecurrence->getClientOrderInformation()->getClient()->getGroup())) {
+    public function orderRecurrenceEditTemplate(OrderRecurrence $recurrence): Response {
+        if (!$this->canSee($recurrence->getClientOrderInformation()->getClient()->getGroup())) {
             return $this->cantSeeResponse();
         }
 
         return $this->json([
-            "submit" => $this->generateUrl("order_recurrence_edit", ["orderRecurrence" => $orderRecurrence->getId()]),
+            "submit" => $this->generateUrl("order_recurrence_edit", ["recurrence" => $recurrence->getId()]),
             "template" => $this->renderView("referential/client/modal/edit_order_recurrence.html.twig", [
-                "orderRecurrence" => $orderRecurrence,
+                "orderRecurrence" => $recurrence,
             ]),
         ]);
     }
 
     /**
-     * @Route("/modifier-recurrence-commande/{orderRecurrence}", name="order_recurrence_edit", options={"expose": true})
+     * @Route("/modifier-recurrence-commande/{recurrence}", name="order_recurrence_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function orderRecurrenceEdit(Request $request, OrderRecurrence $orderRecurrence, EntityManagerInterface $manager): Response {
-        if (!$this->canSee($orderRecurrence->getClientOrderInformation()->getClient()->getGroup())) {
+    public function orderRecurrenceEdit(Request $request, EntityManagerInterface $manager, OrderRecurrence $recurrence): Response {
+        if (!$this->canSee($recurrence->getClientOrderInformation()->getClient()->getGroup())) {
             return $this->cantSeeResponse();
         }
 
         $form = Form::create();
-        $clientOrderInformationRepository = $manager->getRepository(ClientOrderInformation::class);
         $content = (object)$request->request->all();
+
         if ($form->isValid()) {
-            $clientOrderInformation = $clientOrderInformationRepository->findOneBy([
-                'orderRecurrence' => $orderRecurrence,
-            ]);
-            $client = $clientOrderInformation->getClient();
-
-            $cratePrice = Stream::from($client->getCratePatternLines())
-                ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
-                ->sum();
-
-            $orderRecurrence
+            $recurrence
                 ->setPeriod($content->period)
                 ->setCrateAmount($content->crateAmount)
                 ->setDay($content->day)
@@ -639,11 +635,7 @@ class ClientController extends AbstractController {
                 ->setDeliveryFlatRate($content->deliveryFlatRate)
                 ->setServiceFlatRate($content->serviceFlatRate);
 
-            $diff = $orderRecurrence->getStart()->diff($orderRecurrence->getEnd(), true);
-            $singleOrderPrice = $cratePrice * $orderRecurrence->getCrateAmount() + $orderRecurrence->getDeliveryFlatRate() + $orderRecurrence->getServiceFlatRate();
-            $totalOrderCount = ($diff->days / 7) / $content->period;
-            $months = $diff->days / 30.5;
-            $orderRecurrence->setMonthlyPrice($singleOrderPrice * $totalOrderCount / $months);
+            $this->service->recalculateMonthlyPrice($recurrence);
 
             $manager->flush();
 
@@ -682,12 +674,6 @@ class ClientController extends AbstractController {
         }
 
         if ($form->isValid()) {
-            $clientOrderInformation = $client->getClientOrderInformation();
-
-            $crateTypePrice = Stream::from($client->getCratePatternLines())
-                ->map(fn(CratePatternLine $cratePatternLine) => $cratePatternLine->getQuantity() * (float)$cratePatternLine->getCustomUnitPrice())
-                ->sum();
-
             $recurrence = (new OrderRecurrence())
                 ->setPeriod($content->period)
                 ->setCrateAmount($content->crateAmount)
@@ -698,10 +684,7 @@ class ClientController extends AbstractController {
                 ->setServiceFlatRate($content->serviceFlatRate)
                 ->setLastEdit(new DateTime());
 
-            $diff = $recurrence->getStart()->diff($recurrence->getEnd(), true);
-            $frequency = ($diff->days / 7) / $content->period;
-            $recurrence->setMonthlyPrice(($crateTypePrice * $recurrence->getCrateAmount() + $recurrence->getDeliveryFlatRate() + $recurrence->getServiceFlatRate()) * $frequency);
-            $clientOrderInformation->setOrderRecurrence($recurrence);
+            $this->service->recalculateMonthlyPrice($recurrence);
 
             $manager->persist($recurrence);
             $manager->flush();
@@ -719,7 +702,7 @@ class ClientController extends AbstractController {
      * @Route("/supprimer-recurrence-commande/{orderRecurrence}", name="order_recurrence_delete", options={"expose": true})
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
-    public function orderRecurrenceDelete(OrderRecurrence $orderRecurrence, EntityManagerInterface $manager): Response {
+    public function orderRecurrenceDelete(EntityManagerInterface $manager, OrderRecurrence $orderRecurrence): Response {
         if (!$this->canSee($orderRecurrence->getClientOrderInformation()->getClient()->getGroup())) {
             return $this->cantSeeResponse();
         }
@@ -731,8 +714,8 @@ class ClientController extends AbstractController {
         $manager->flush();
 
         return $this->json([
-            'success' => true,
-            'message' => 'La récurrence a bien été supprimée',
+            "success" => true,
+            "message" => "La récurrence a bien été supprimée",
         ]);
     }
 

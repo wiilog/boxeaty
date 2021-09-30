@@ -36,7 +36,7 @@
                                 {% if (initialClient is defined and initialClient is not null) %}
                                     data-init-data="{{ [initialClient]|json_encode }}"
                                 {% endif %}
-                                data-include-params="input[name=client-cost-information-needed]"
+                                data-include-params="[name=client-cost-information-needed]"
                                 data-placeholder="Sélectionnez un client"
                                 required>
                         </select>
@@ -82,7 +82,7 @@
                            value="1"
                            type="hidden">
                     <select name="boxType" class="data w-100" data-s2="type"
-                            data-include-params="input[name=extended-type]"
+                            data-include-params="[name=extended-type]"
                             data-placeholder="Type Box - contenance - tarif"></select>
                 </div>
                 <div class="col-md-6 col-12">

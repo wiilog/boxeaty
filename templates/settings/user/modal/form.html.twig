@@ -93,7 +93,7 @@
             <select name="clients"
                     class="data"
                     data-s2="client"
-                    data-include-params="select[name=groups]"
+                    data-include-params="[name=groups]"
                     data-placeholder="Sélectionnez un ou plusieurs clients"
                     multiple
                     {{ user.groups | length > 1 ? 'disabled' }}>

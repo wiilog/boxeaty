@@ -11,6 +11,7 @@ use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\BoxTypeRepository;
 use App\Service\BoxTypeService;
+use App\Service\ClientService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -135,6 +136,7 @@ class BoxTypeController extends AbstractController {
     public function edit(Request $request,
                          EntityManagerInterface $entityManager,
                          BoxTypeService $boxTypeService,
+                         ClientService $clientService,
                          BoxType $boxType): Response {
         $form = Form::create();
 
@@ -148,6 +150,13 @@ class BoxTypeController extends AbstractController {
 
         if ($form->isValid()) {
             $boxTypeService->persistBoxType($entityManager, $boxType, $content);
+
+            foreach($boxType->getCratePatternLines() as $cratePatternLine) {
+                if($cratePatternLine->getCustomUnitPrice() === null) {
+                    $clientService->recalculateMonthlyPrice($cratePatternLine);
+                }
+            }
+
             $entityManager->flush();
 
             return $this->json([

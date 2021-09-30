@@ -280,11 +280,10 @@ function onBoxTypeQuantityChange($input) {
 function addBoxTypeModel($modal) {
     const selectedClientId = $modal.find('[name="client"]').val();
     if (selectedClientId) {
-        AJAX
-            .route(`GET`, `crate_pattern_lines`, {client: selectedClientId})
+        AJAX.route(`GET`, `crate_pattern_lines`, {client: selectedClientId})
             .json()
             .then((res) => {
-                const boxTypes = res['box-types'];
+                const boxTypes = res.box_types;
                 if (boxTypes.length > 0) {
                     for (const boxType of boxTypes) {
                         addBoxTypeToCart($modal, boxType);

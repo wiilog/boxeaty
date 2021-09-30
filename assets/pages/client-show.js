@@ -87,7 +87,7 @@ $(document).ready(() => {
     $(document).arrive(`.edit-order-recurrence`, function () {
         $(this).click(() => {
             const ajax = AJAX.route(`POST`, `order_recurrence_edit_template`, {
-                orderRecurrence: $(this).data('id'),
+                recurrence: $(this).data('id'),
             });
 
             Modal.load(ajax, {
@@ -118,7 +118,7 @@ function getCratePattern() {
         .json()
         .then((response) => {
             $('.box-type-card-wrapper').empty().append(response.template);
-            $('.total-crate-type-price').text(`à ${response.totalCrateTypePrice}`);
+            $('.total-crate-type-price').text(`à ${response.total_crate_type_price}`);
         });
 }
 
