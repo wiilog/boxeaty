@@ -77,7 +77,16 @@ class OrderRecurrence {
     }
 
     public function setClientOrderInformation(?ClientOrderInformation $clientOrderInformation): self {
+        if ($this->clientOrderInformation && $this->clientOrderInformation->getOrderRecurrence() !== $this) {
+            $oldClientOrderInformation = $this->clientOrderInformation;
+            $this->clientOrderInformation = null;
+            $oldClientOrderInformation->setOrderRecurrence(null);
+        }
         $this->clientOrderInformation = $clientOrderInformation;
+        if ($this->clientOrderInformation && $this->clientOrderInformation->getOrderRecurrence() !== $this) {
+            $this->clientOrderInformation->setOrderRecurrence($this);
+        }
+
         return $this;
     }
 

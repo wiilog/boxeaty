@@ -675,6 +675,7 @@ class ClientController extends AbstractController {
 
         if ($form->isValid()) {
             $recurrence = (new OrderRecurrence())
+                ->setClientOrderInformation($client->getClientOrderInformation())
                 ->setPeriod($content->period)
                 ->setCrateAmount($content->crateAmount)
                 ->setDay($content->day)
@@ -685,7 +686,7 @@ class ClientController extends AbstractController {
                 ->setLastEdit(new DateTime());
 
             $this->service->recalculateMonthlyPrice($recurrence);
-
+dump($recurrence);
             $manager->persist($recurrence);
             $manager->flush();
 

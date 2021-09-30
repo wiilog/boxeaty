@@ -111,10 +111,7 @@ class ClientRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search,
-                                 ?string $group,
-                                 ?User $user,
-                                 ?bool $costInformationNeeded = false) {
+    public function getForSelect(?string $search, ?string $group, ?User $user, ?bool $costInformationNeeded = false) {
         $qb = $this->createQueryBuilder("client");
 
         $exprBuilder = $qb->expr();

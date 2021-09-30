@@ -62,7 +62,7 @@ class ClientService {
             $diff = $recurrence->getStart()->diff($recurrence->getEnd(), true);
             $totalOrderCount = floor(($diff->days / 7) / $recurrence->getPeriod());
             $months = $diff->days / 30.5;
-dump($singleOrderPrice, $totalOrderCount, $months);
+
             $recurrence->setMonthlyPrice($singleOrderPrice * $totalOrderCount / $months);
         }
     }

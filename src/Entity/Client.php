@@ -454,7 +454,7 @@ class Client {
     public function getClientOrderInformation(): ?ClientOrderInformation
     {
         if(!$this->clientOrderInformation) {
-            $this->clientOrderInformation = new ClientOrderInformation();
+            $this->setClientOrderInformation(new ClientOrderInformation());
         }
 
         return $this->clientOrderInformation;

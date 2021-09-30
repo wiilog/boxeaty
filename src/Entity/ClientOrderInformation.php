@@ -76,43 +76,36 @@ class ClientOrderInformation {
      */
     private ?OrderRecurrence $orderRecurrence = null;
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getDepositoryDistance(): ?int
-    {
+    public function getDepositoryDistance(): ?int {
         return $this->depositoryDistance;
     }
 
-    public function setDepositoryDistance(?int $depositoryDistance): self
-    {
+    public function setDepositoryDistance(?int $depositoryDistance): self {
         $this->depositoryDistance = $depositoryDistance;
 
         return $this;
     }
 
-    public function getTokenAmount(): ?int
-    {
+    public function getTokenAmount(): ?int {
         return $this->tokenAmount;
     }
 
-    public function setTokenAmount(?int $tokenAmount): self
-    {
+    public function setTokenAmount(?int $tokenAmount): self {
         $this->tokenAmount = $tokenAmount;
 
         return $this;
     }
 
-    public function getOrderTypes(): ?array
-    {
+    public function getOrderTypes(): ?array {
         return $this->orderTypes;
     }
 
-    public function setOrderTypes(?array $orderTypes): self
-    {
-        if(!$orderTypes || $orderTypes[0] == null) {
+    public function setOrderTypes(?array $orderTypes): self {
+        if (!$orderTypes || $orderTypes[0] == null) {
             $this->orderTypes = [];
         } else {
             $this->orderTypes = $orderTypes;
@@ -121,73 +114,61 @@ class ClientOrderInformation {
         return $this;
     }
 
-    public function isClosedParkOrder(): ?bool
-    {
+    public function isClosedParkOrder(): ?bool {
         return $this->isClosedParkOrder;
     }
 
-    public function setIsClosedParkOrder(?bool $isClosedParkOrder): self
-    {
+    public function setIsClosedParkOrder(?bool $isClosedParkOrder): self {
         $this->isClosedParkOrder = $isClosedParkOrder;
 
         return $this;
     }
 
-    public function getWorkingDayDeliveryRate(): ?float
-    {
+    public function getWorkingDayDeliveryRate(): ?float {
         return $this->workingDayDeliveryRate;
     }
 
-    public function setWorkingDayDeliveryRate(?float $workingDayDeliveryRate): self
-    {
+    public function setWorkingDayDeliveryRate(?float $workingDayDeliveryRate): self {
         $this->workingDayDeliveryRate = $workingDayDeliveryRate;
 
         return $this;
     }
 
-    public function getNonWorkingDayDeliveryRate(): ?float
-    {
+    public function getNonWorkingDayDeliveryRate(): ?float {
         return $this->nonWorkingDayDeliveryRate;
     }
 
-    public function setNonWorkingDayDeliveryRate(?float $nonWorkingDayDeliveryRate): self
-    {
+    public function setNonWorkingDayDeliveryRate(?float $nonWorkingDayDeliveryRate): self {
         $this->nonWorkingDayDeliveryRate = $nonWorkingDayDeliveryRate;
 
         return $this;
     }
 
-    public function getServiceCost(): ?float
-    {
+    public function getServiceCost(): ?float {
         return $this->serviceCost;
     }
 
-    public function setServiceCost(?float $serviceCost): self
-    {
+    public function setServiceCost(?float $serviceCost): self {
         $this->serviceCost = $serviceCost;
 
         return $this;
     }
 
-    public function getComment(): ?string
-    {
+    public function getComment(): ?string {
         return $this->comment;
     }
 
-    public function setComment(?string $comment): self
-    {
+    public function setComment(?string $comment): self {
         $this->comment = $comment;
 
         return $this;
     }
 
-    public function getDeliveryMethod(): ?DeliveryMethod
-    {
+    public function getDeliveryMethod(): ?DeliveryMethod {
         return $this->deliveryMethod;
     }
 
-    public function setDeliveryMethod(?DeliveryMethod $deliveryMethod): self
-    {
+    public function setDeliveryMethod(?DeliveryMethod $deliveryMethod): self {
         $this->deliveryMethod = $deliveryMethod;
 
         return $this;
@@ -198,46 +179,51 @@ class ClientOrderInformation {
     }
 
     public function setDepository(?Depository $depository): self {
-        if($this->depository && $this->depository !== $depository) {
+        if ($this->depository && $this->depository !== $depository) {
             $this->depository->removeClientOrderInformation($this);
         }
         $this->depository = $depository;
-        if($depository) {
+        if ($depository) {
             $depository->addClientOrderInformation($this);
         }
 
         return $this;
     }
 
-    public function getClient(): ?Client
-    {
+    public function getClient(): ?Client {
         return $this->client;
     }
 
-    public function setClient(?Client $client): self
-    {
-        if($this->client && $this->client->getClientOrderInformation() !== $this) {
+    public function setClient(?Client $client): self {
+        if ($this->client && $this->client->getClientOrderInformation() !== $this) {
             $oldClient = $this->client;
             $this->client = null;
             $oldClient->setClientOrderInformation(null);
         }
         $this->client = $client;
-        if($this->client && $this->client->getClientOrderInformation() !== $this) {
+        if ($this->client && $this->client->getClientOrderInformation() !== $this) {
             $this->client->setClientOrderInformation($this);
         }
 
         return $this;
     }
 
-    public function getOrderRecurrence(): ?OrderRecurrence
-    {
+    public function getOrderRecurrence(): ?OrderRecurrence {
         return $this->orderRecurrence;
     }
 
-    public function setOrderRecurrence(?OrderRecurrence $orderRecurrence): self
-    {
+    public function setOrderRecurrence(?OrderRecurrence $orderRecurrence): self {
+        if ($this->orderRecurrence && $this->orderRecurrence->getClientOrderInformation() !== $this) {
+            $oldOrderRecurrence = $this->orderRecurrence;
+            $this->orderRecurrence = null;
+            $oldOrderRecurrence->setClientOrderInformation(null);
+        }
         $this->orderRecurrence = $orderRecurrence;
+        if ($this->orderRecurrence && $this->orderRecurrence->getClientOrderInformation() !== $this) {
+            $this->orderRecurrence->setClientOrderInformation($this);
+        }
 
         return $this;
     }
+
 }
