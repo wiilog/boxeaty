@@ -686,7 +686,7 @@ class ClientController extends AbstractController {
                 ->setLastEdit(new DateTime());
 
             $this->service->recalculateMonthlyPrice($recurrence);
-dump($recurrence);
+
             $manager->persist($recurrence);
             $manager->flush();
 

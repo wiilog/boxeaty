@@ -128,10 +128,10 @@ function getBoxRecurrence() {
         .then((response) => {
             let formattedPrice = ``;
             if(response.orderRecurrencePrice) {
-                formattedPrice = StringHelper.formatPrice(response.orderRecurrencePrice) + `HT/mois`
+                formattedPrice = StringHelper.formatPrice(response.orderRecurrencePrice) + `€ HT/mois`
             }
 
             $('.order-recurrence-wrapper').empty().append(response.template);
-            $('.order-recurrence-price').text(`${formattedPrice} environ`);
+            $('.order-recurrence-price').text(formattedPrice !== '' ? formattedPrice + ' environ' : '');
         });
 }
