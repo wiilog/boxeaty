@@ -34,18 +34,18 @@ class RoleRepository extends EntityRepository {
             ->setParameter('no_access', Role::ROLE_NO_ACCESS);;
         $total = QueryHelper::count($qb, "role");
 
-        if ($search) {
+        if($search) {
             $qb->andWhere("role.name LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("role.$column", $order["dir"]);
             }
         } else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("role.$column", $dir);
             }
         }

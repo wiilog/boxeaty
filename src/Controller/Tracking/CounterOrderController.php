@@ -51,7 +51,7 @@ class CounterOrderController extends AbstractController {
 
         $data = [];
         /** @var CounterOrder $order */
-        foreach ($orders["data"] as $order) {
+        foreach($orders["data"] as $order) {
             $data[] = [
                 "id" => $order->getId(),
                 "boxes" => FormatHelper::boxes($order->getBoxes()),
@@ -81,11 +81,11 @@ class CounterOrderController extends AbstractController {
      * @HasPermission({Role::MANAGE_COUNTER_ORDERS, Role::DISPLAY_NEW_COUNTER_ORDER})
      */
     public function info(EntityManagerInterface $manager, string $type, string $number): Response {
-        if ($type === "box") {
+        if($type === "box") {
             $box = $manager->getRepository(Box::class)
                 ->findOneBy(["number" => $number]);
 
-            if (!$box) {
+            if(!$box) {
                 return $this->json([
                     "success" => false,
                     "unique" => true,
@@ -93,7 +93,7 @@ class CounterOrderController extends AbstractController {
                 ]);
             }
 
-            if ($box->getState() !== BoxStateService::STATE_BOX_CLIENT) {
+            if($box->getState() !== BoxStateService::STATE_BOX_CLIENT) {
                 return $this->json([
                     "success" => false,
                     "unique" => true,
@@ -106,11 +106,11 @@ class CounterOrderController extends AbstractController {
                 "number" => $box->getNumber(),
                 "price" => floatval($box->getType()->getPrice()),
             ]);
-        } else if ($type === "ticket") {
+        } else if($type === "ticket") {
             $ticket = $manager->getRepository(DepositTicket::class)
                 ->findOneBy(["number" => $number]);
 
-            if (!$ticket) {
+            if(!$ticket) {
                 return $this->json([
                     "success" => false,
                     "unique" => true,
@@ -119,12 +119,12 @@ class CounterOrderController extends AbstractController {
             }
 
             $now = new DateTime();
-            if ($ticket->getValidityDate() < $now && $ticket->getState() === DepositTicket::VALID) {
+            if($ticket->getValidityDate() < $now && $ticket->getState() === DepositTicket::VALID) {
                 $ticket->setState(DepositTicket::EXPIRED);
                 $manager->flush();
             }
 
-            if ($ticket->getState() !== DepositTicket::VALID) {
+            if($ticket->getState() !== DepositTicket::VALID) {
                 return $this->json([
                     "success" => false,
                     "unique" => true,
@@ -178,7 +178,7 @@ class CounterOrderController extends AbstractController {
     public function depositTickets(Request $request): Response {
         $this->service->update(DepositTicket::class);
 
-        if ($request->request->get("previous", 0)) {
+        if($request->request->get("previous", 0)) {
             $modal = $this->service->renderBoxes();
         } else {
             $modal = $this->service->renderPayment();
@@ -194,7 +194,7 @@ class CounterOrderController extends AbstractController {
      * @HasPermission({Role::MANAGE_COUNTER_ORDERS, Role::DISPLAY_NEW_COUNTER_ORDER})
      */
     public function confirm(Request $request, EntityManagerInterface $manager, BoxRecordService $boxRecordService): Response {
-        if ($request->request->get("previous", 0)) {
+        if($request->request->get("previous", 0)) {
             return $this->json([
                 "success" => true,
                 "modal" => $this->service->renderDepositTickets(),
@@ -204,7 +204,7 @@ class CounterOrderController extends AbstractController {
         $boxes = $this->service->get(Box::class);
         $tickets = $this->service->get(DepositTicket::class);
 
-        if (empty($boxes) && empty($tickets)) {
+        if(empty($boxes) && empty($tickets)) {
             return $this->json([
                 "success" => true,
                 "message" => "La commande comptoir ne peut pas être vide",
@@ -223,7 +223,7 @@ class CounterOrderController extends AbstractController {
             ->setBoxPrice($this->service->getBoxesPrice())
             ->setDepositTicketPrice($this->service->getTicketsPrice());
 
-        foreach ($boxes as $box) {
+        foreach($boxes as $box) {
             $previous = clone $box;
             $box->setLocation($client->getOutLocation())
                 ->setState(BoxStateService::STATE_BOX_CONSUMER);
@@ -231,7 +231,7 @@ class CounterOrderController extends AbstractController {
             $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
         }
 
-        foreach ($tickets as $ticket) {
+        foreach($tickets as $ticket) {
             $ticket->setState(DepositTicket::SPENT)
                 ->setUseDate(new DateTime());
         }
@@ -252,14 +252,14 @@ class CounterOrderController extends AbstractController {
      * @Route("/supprimer", name="counter_order_delete", options={"expose": true})
      * @HasPermission({Role::MANAGE_COUNTER_ORDERS, Role::DISPLAY_NEW_COUNTER_ORDER})
      */
-    public function delete(Request $request,
-                           BoxRecordService $boxRecordService,
+    public function delete(Request                $request,
+                           BoxRecordService       $boxRecordService,
                            EntityManagerInterface $manager): Response {
         $content = (object)$request->request->all();
         $order = $manager->getRepository(CounterOrder::class)->find($content->id);
 
-        if ($order) {
-            foreach ($order->getBoxes() as $box) {
+        if($order) {
+            foreach($order->getBoxes() as $box) {
                 $previousMovement = $manager->getRepository(BoxRecord::class)->findPreviousTrackingMovement($box);
 
                 $previous = clone $box;
@@ -269,7 +269,7 @@ class CounterOrderController extends AbstractController {
                 $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
             }
 
-            foreach ($order->getDepositTickets() as $depositTicket) {
+            foreach($order->getDepositTickets() as $depositTicket) {
                 $depositTicket->setState(DepositTicket::SPENT);
             }
 
@@ -278,13 +278,13 @@ class CounterOrderController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "message" => "Commande comptoir supprimée avec succès"
+                "message" => "Commande comptoir supprimée avec succès",
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "message" => "Cette commande comptoir n'existe pas"
+                "message" => "Cette commande comptoir n'existe pas",
             ]);
         }
     }

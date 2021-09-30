@@ -25,7 +25,7 @@ class Client {
 
     public const NAMES = [
         self::ACTIVE => 'actif',
-        self::INACTIVE => 'inactif'
+        self::INACTIVE => 'inactif',
     ];
 
     /**
@@ -271,7 +271,7 @@ class Client {
     }
 
     public function addUser(User $user): self {
-        if (!$this->users->contains($user)) {
+        if(!$this->users->contains($user)) {
             $this->users[] = $user;
             $user->addClient($this);
         }
@@ -280,7 +280,7 @@ class Client {
     }
 
     public function removeUser(User $user): self {
-        if ($this->users->removeElement($user)) {
+        if($this->users->removeElement($user)) {
             $user->removeClient($this);
         }
 
@@ -295,7 +295,7 @@ class Client {
     }
 
     public function addLocation(Location $kiosk): self {
-        if (!$this->locations->contains($kiosk)) {
+        if(!$this->locations->contains($kiosk)) {
             $this->locations[] = $kiosk;
             $kiosk->setClient($this);
         }
@@ -304,9 +304,9 @@ class Client {
     }
 
     public function removeLocation(Location $kiosk): self {
-        if ($this->locations->removeElement($kiosk)) {
+        if($this->locations->removeElement($kiosk)) {
             // set the owning side to null (unless already changed)
-            if ($kiosk->getClient() === $this) {
+            if($kiosk->getClient() === $this) {
                 $kiosk->setClient(null);
             }
         }
@@ -322,7 +322,7 @@ class Client {
     }
 
     public function addClient(self $client): self {
-        if (!$this->clients->contains($client)) {
+        if(!$this->clients->contains($client)) {
             $this->clients[] = $client;
             $client->setLinkedMultiSite($this);
         }
@@ -331,9 +331,9 @@ class Client {
     }
 
     public function removeClient(self $client): self {
-        if ($this->clients->removeElement($client)) {
+        if($this->clients->removeElement($client)) {
             // set the owning side to null (unless already changed)
-            if ($client->getLinkedMultiSite() === $this) {
+            if($client->getLinkedMultiSite() === $this) {
                 $client->setLinkedMultiSite(null);
             }
         }
@@ -349,7 +349,7 @@ class Client {
     }
 
     public function addBox(Box $box): self {
-        if (!$this->boxes->contains($box)) {
+        if(!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
             $box->setOwner($this);
         }
@@ -358,9 +358,9 @@ class Client {
     }
 
     public function removeBox(Box $box): self {
-        if ($this->boxes->removeElement($box)) {
+        if($this->boxes->removeElement($box)) {
             // set the owning side to null (unless already changed)
-            if ($box->getOwner() === $this) {
+            if($box->getOwner() === $this) {
                 $box->setOwner(null);
             }
         }
@@ -376,7 +376,7 @@ class Client {
     }
 
     public function addBoxRecord(BoxRecord $boxRecord): self {
-        if (!$this->boxRecords->contains($boxRecord)) {
+        if(!$this->boxRecords->contains($boxRecord)) {
             $this->boxRecords[] = $boxRecord;
             $boxRecord->setClient($this);
         }
@@ -385,9 +385,9 @@ class Client {
     }
 
     public function removeBoxRecord(BoxRecord $boxRecord): self {
-        if ($this->boxRecords->removeElement($boxRecord)) {
+        if($this->boxRecords->removeElement($boxRecord)) {
             // set the owning side to null (unless already changed)
-            if ($boxRecord->getClient() === $this) {
+            if($boxRecord->getClient() === $this) {
                 $boxRecord->setClient(null);
             }
         }
@@ -403,7 +403,7 @@ class Client {
     }
 
     public function addDepositTicketsClient(self $depositTicketsClient): self {
-        if (!$this->depositTicketsClients->contains($depositTicketsClient)) {
+        if(!$this->depositTicketsClients->contains($depositTicketsClient)) {
             $this->depositTicketsClients[] = $depositTicketsClient;
         }
 
@@ -439,20 +439,17 @@ class Client {
         return $this;
     }
 
-    public function isMailNotificationOrderPreparation(): ?bool
-    {
+    public function isMailNotificationOrderPreparation(): ?bool {
         return $this->mailNotificationOrderPreparation;
     }
 
-    public function setMailNotificationOrderPreparation(?bool $mailNotificationOrderPreparation): self
-    {
+    public function setMailNotificationOrderPreparation(?bool $mailNotificationOrderPreparation): self {
         $this->mailNotificationOrderPreparation = $mailNotificationOrderPreparation;
 
         return $this;
     }
 
-    public function getClientOrderInformation(): ?ClientOrderInformation
-    {
+    public function getClientOrderInformation(): ?ClientOrderInformation {
         if(!$this->clientOrderInformation) {
             $this->setClientOrderInformation(new ClientOrderInformation());
         }
@@ -460,8 +457,7 @@ class Client {
         return $this->clientOrderInformation;
     }
 
-    public function setClientOrderInformation(?ClientOrderInformation $clientOrderInformation): self
-    {
+    public function setClientOrderInformation(?ClientOrderInformation $clientOrderInformation): self {
         if($this->clientOrderInformation && $this->clientOrderInformation->getClient() !== $this) {
             $oldClientOrderInformation = $this->clientOrderInformation;
             $this->clientOrderInformation = null;
@@ -483,7 +479,7 @@ class Client {
     }
 
     public function addCratePatternLine(CratePatternLine $cratePatternLine): self {
-        if (!$this->cratePatternLines->contains($cratePatternLine)) {
+        if(!$this->cratePatternLines->contains($cratePatternLine)) {
             $this->cratePatternLines[] = $cratePatternLine;
             $cratePatternLine->setClient($this);
         }
@@ -492,8 +488,8 @@ class Client {
     }
 
     public function removeCratePatternLine(CratePatternLine $cratePatternLine): self {
-        if ($this->cratePatternLines->removeElement($cratePatternLine)) {
-            if ($cratePatternLine->getClient() === $this) {
+        if($this->cratePatternLines->removeElement($cratePatternLine)) {
+            if($cratePatternLine->getClient() === $this) {
                 $cratePatternLine->setClient(null);
             }
         }
@@ -514,25 +510,21 @@ class Client {
         return $this;
     }
 
-    public function getProrateAmount(): ?int
-    {
+    public function getProrateAmount(): ?int {
         return $this->prorateAmount;
     }
 
-    public function setProrateAmount(?int $prorateAmount): self
-    {
+    public function setProrateAmount(?int $prorateAmount): self {
         $this->prorateAmount = $prorateAmount;
 
         return $this;
     }
 
-    public function getPaymentModes(): ?string
-    {
+    public function getPaymentModes(): ?string {
         return $this->paymentModes;
     }
 
-    public function setPaymentModes(?string $paymentModes): self
-    {
+    public function setPaymentModes(?string $paymentModes): self {
         $this->paymentModes = $paymentModes;
 
         return $this;
@@ -541,12 +533,11 @@ class Client {
     /**
      * @return float|null
      */
-    public function getCratePatternAmount(): ?float
-    {
+    public function getCratePatternAmount(): ?float {
         return Stream::from($this->getCratePatternLines())
             ->map(fn(CratePatternLine $cratePatternLine) => (
                 $cratePatternLine->getQuantity()
-                * (float) ($cratePatternLine->getCustomUnitPrice() ?: $cratePatternLine->getBoxType()->getPrice())
+                * (float)($cratePatternLine->getCustomUnitPrice() ?: $cratePatternLine->getBoxType()->getPrice())
             ))
             ->sum();
     }
@@ -559,7 +550,7 @@ class Client {
     }
 
     public function addCollect(Collect $collect): self {
-        if (!$this->collects->contains($collect)) {
+        if(!$this->collects->contains($collect)) {
             $this->collects[] = $collect;
             $collect->setClient($this);
         }
@@ -568,8 +559,8 @@ class Client {
     }
 
     public function removeCollect(Collect $collect): self {
-        if ($this->collects->removeElement($collect)) {
-            if ($collect->getClient() === $this) {
+        if($this->collects->removeElement($collect)) {
+            if($collect->getClient() === $this) {
                 $collect->setClient(null);
             }
         }

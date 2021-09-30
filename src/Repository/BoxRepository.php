@@ -46,13 +46,13 @@ class BoxRepository extends EntityRepository {
     public function getForSelect(?string $search, ?bool $notInCrate, ?User $user) {
         $qb = $this->createQueryBuilder("box");
 
-        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
             $qb->join("box.owner", "owner")
                 ->andWhere("owner.group IN (:groups)")
                 ->setParameter("groups", $user->getGroups());
         }
 
-        if ($notInCrate) {
+        if($notInCrate) {
             $qb->andWhere("box.crate IS NULL");
         }
 
@@ -67,12 +67,12 @@ class BoxRepository extends EntityRepository {
     public function getForOrderSelect(?string $search, ?array $exclude, ?User $user) {
         $qb = $this->createQueryBuilder("box");
 
-        if ($exclude) {
+        if($exclude) {
             $qb->andWhere("box.number NOT IN (:excluded)")
                 ->setParameter("excluded", $exclude);
         }
 
-        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
             $qb->join("box.owner", "owner")
                 ->andWhere("owner.group IN (:groups)")
                 ->setParameter("groups", $user->getGroups());
@@ -103,7 +103,7 @@ class BoxRepository extends EntityRepository {
                 "isBox" => $isBox,
             ]);
 
-        if ($locationType) {
+        if($locationType) {
             $query
                 ->andWhere('location.type = :locationType')
                 ->setParameter('locationType', $locationType);
@@ -123,12 +123,12 @@ class BoxRepository extends EntityRepository {
 
         $total = QueryHelper::count($qb, "box");
 
-        if ($search) {
+        if($search) {
             $state = Stream::from(BoxStateService::BOX_STATES)
                 ->filter(fn($value) => strpos(strtolower($value), strtolower($search)) > -1)
                 ->firstKey();
 
-            if (isset($state)) {
+            if(isset($state)) {
                 $qb
                     ->andWhere("box.state LIKE :state")
                     ->setParameter("state", $state + 1);
@@ -151,8 +151,8 @@ class BoxRepository extends EntityRepository {
             }
         }
 
-        foreach ($params["filters"] ?? [] as $name => $value) {
-            switch ($name) {
+        foreach($params["filters"] ?? [] as $name => $value) {
+            switch($name) {
                 case("group"):
                     $qb->leftJoin("box.owner", "filter_client")
                         ->andWhere("filter_client.group = :filter_group")
@@ -172,7 +172,7 @@ class BoxRepository extends EntityRepository {
                         ->setParameter("filter_depository", $value);
                     break;
                 case("box"):
-                    if ($value !== null && $value !== "") {
+                    if($value !== null && $value !== "") {
                         $qb->andWhere("box.isBox IN (:filter_isbox)")
                             ->setParameter("filter_isbox", explode(",", $value));
                     }
@@ -184,19 +184,19 @@ class BoxRepository extends EntityRepository {
             }
         }
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
-                if ($column === "location") {
+                if($column === "location") {
                     $qb->leftJoin("box.location", "order_location")
                         ->addOrderBy("order_location.name", $order["dir"]);
-                } else if ($column === "quality") {
+                } else if($column === "quality") {
                     $qb->leftJoin("box.quality", "order_quality")
                         ->addOrderBy("order_quality.name", $order["dir"]);
-                } else if ($column === "owner") {
+                } else if($column === "owner") {
                     $qb->leftJoin("box.owner", "order_owner")
                         ->addOrderBy("order_owner.name", $order["dir"]);
-                } else if ($column === "type") {
+                } else if($column === "type") {
                     $qb->leftJoin("box.type", "order_type")
                         ->addOrderBy("order_type.name", $order["dir"]);
                 } else {
@@ -204,7 +204,7 @@ class BoxRepository extends EntityRepository {
                 }
             }
         } else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("box.$column", $dir);
             }
         }
@@ -293,7 +293,7 @@ class BoxRepository extends EntityRepository {
             ->setParameter("depository", $preparation->getDepository())
             ->setParameter("finished", Status::CODE_ORDER_FINISHED);
 
-        if ($client) {
+        if($client) {
             $qb->andWhere("box.owner = :client")
                 ->setParameter("client", $client);
         }
@@ -328,7 +328,7 @@ class BoxRepository extends EntityRepository {
             ->setParameter("depository", $preparation->getDepository())
             ->setParameter("finished", Status::CODE_ORDER_FINISHED);
 
-        if ($client) {
+        if($client) {
             $qb->andWhere("box.owner = :client")
                 ->setParameter("client", $client);
         }

@@ -26,7 +26,7 @@ class LocationService {
             ->setDescription($content->description ?? null)
             ->setDeposits(0);
 
-        if ($isKiosk) {
+        if($isKiosk) {
             $location
                 ->setCapacity($content->capacity ?? null)
                 ->setMessage($content->message ?? null)

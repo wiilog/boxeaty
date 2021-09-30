@@ -42,7 +42,7 @@ class BoxTypeRepository extends EntityRepository {
         $qb = $this->createQueryBuilder("box_type");
         $total = QueryHelper::count($qb, "box_type");
 
-        if ($search) {
+        if($search) {
             $qb->andWhere($qb->expr()->orX(
                 "box_type.name LIKE :search",
                 "box_type.price LIKE :search",
@@ -52,13 +52,13 @@ class BoxTypeRepository extends EntityRepository {
         }
 
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("box_type.$column", $order["dir"]);
             }
         } else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("box_type.$column", $dir);
             }
         }
@@ -146,7 +146,7 @@ class BoxTypeRepository extends EntityRepository {
             ->getResult();
 
         $totalAvailable = [];
-        foreach ($totalAvailableResult as $line) {
+        foreach($totalAvailableResult as $line) {
             $totalAvailable[$line["id"]][$line["client"] ?: Box::OWNER_BOXEATY] = $line["count"];
         }
         $inUnpreparedResult = $this->createQueryBuilder("box_type")
@@ -165,7 +165,7 @@ class BoxTypeRepository extends EntityRepository {
             ->getQuery()
             ->getResult();
 
-        if (in_array($defaultCrateType, $types)) {
+        if(in_array($defaultCrateType, $types)) {
             array_push($inUnpreparedResult, ...$this->getEntityManager()
                 ->createQueryBuilder()
                 ->from(ClientOrder::class, "client_order")
@@ -181,12 +181,12 @@ class BoxTypeRepository extends EntityRepository {
                 ->getResult());
         }
         $inUnprepared = [];
-        foreach ($inUnpreparedResult as $line) {
+        foreach($inUnpreparedResult as $line) {
             $owner = $line["client"] ?: Box::OWNER_BOXEATY;
             $inUnprepared[$line["id"]][$owner] = $line["count"];
         }
-        foreach ($totalAvailable as $type => $clients) {
-            foreach ($clients as $client => $count) {
+        foreach($totalAvailable as $type => $clients) {
+            foreach($clients as $client => $count) {
                 $totalAvailable[$type][$client] = $count - ($inUnprepared[$type][$client] ?? 0);
             }
         }

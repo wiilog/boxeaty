@@ -96,11 +96,11 @@ class DeliveryRound {
     }
 
     public function setDeliverer(?User $deliverer): self {
-        if ($this->deliverer && $this->deliverer !== $deliverer) {
+        if($this->deliverer && $this->deliverer !== $deliverer) {
             $this->deliverer->removeDeliveryRound($this);
         }
         $this->deliverer = $deliverer;
-        if ($deliverer) {
+        if($deliverer) {
             $deliverer->addDeliveryRound($this);
         }
 
@@ -121,11 +121,11 @@ class DeliveryRound {
     }
 
     public function setDepository(?Depository $depository): self {
-        if ($this->depository && $this->depository !== $depository) {
+        if($this->depository && $this->depository !== $depository) {
             $this->depository->removeDeliveryRound($this);
         }
         $this->depository = $depository;
-        if ($depository) {
+        if($depository) {
             $depository->addDeliveryRound($this);
         }
 
@@ -178,7 +178,7 @@ class DeliveryRound {
     }
 
     public function addOrder(ClientOrder $order): self {
-        if (!$this->orders->contains($order)) {
+        if(!$this->orders->contains($order)) {
             $this->orders[] = $order;
             $order->setDeliveryRound($this);
         }
@@ -187,8 +187,8 @@ class DeliveryRound {
     }
 
     public function removeOrder(ClientOrder $order): self {
-        if ($this->orders->removeElement($order)) {
-            if ($order->getDeliveryRound() === $this) {
+        if($this->orders->removeElement($order)) {
+            if($order->getDeliveryRound() === $this) {
                 $order->setDeliveryRound(null);
             }
         }
@@ -197,12 +197,12 @@ class DeliveryRound {
     }
 
     public function setOrders(?array $orders): self {
-        foreach ($this->getOrders()->toArray() as $order) {
+        foreach($this->getOrders()->toArray() as $order) {
             $this->removeOrder($order);
         }
 
         $this->orders = new ArrayCollection();
-        foreach ($orders as $order) {
+        foreach($orders as $order) {
             $this->addOrder($order);
         }
 

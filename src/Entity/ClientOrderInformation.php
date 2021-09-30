@@ -105,7 +105,7 @@ class ClientOrderInformation {
     }
 
     public function setOrderTypes(?array $orderTypes): self {
-        if (!$orderTypes || $orderTypes[0] == null) {
+        if(!$orderTypes || $orderTypes[0] == null) {
             $this->orderTypes = [];
         } else {
             $this->orderTypes = $orderTypes;
@@ -179,11 +179,11 @@ class ClientOrderInformation {
     }
 
     public function setDepository(?Depository $depository): self {
-        if ($this->depository && $this->depository !== $depository) {
+        if($this->depository && $this->depository !== $depository) {
             $this->depository->removeClientOrderInformation($this);
         }
         $this->depository = $depository;
-        if ($depository) {
+        if($depository) {
             $depository->addClientOrderInformation($this);
         }
 
@@ -195,13 +195,13 @@ class ClientOrderInformation {
     }
 
     public function setClient(?Client $client): self {
-        if ($this->client && $this->client->getClientOrderInformation() !== $this) {
+        if($this->client && $this->client->getClientOrderInformation() !== $this) {
             $oldClient = $this->client;
             $this->client = null;
             $oldClient->setClientOrderInformation(null);
         }
         $this->client = $client;
-        if ($this->client && $this->client->getClientOrderInformation() !== $this) {
+        if($this->client && $this->client->getClientOrderInformation() !== $this) {
             $this->client->setClientOrderInformation($this);
         }
 
@@ -213,13 +213,13 @@ class ClientOrderInformation {
     }
 
     public function setOrderRecurrence(?OrderRecurrence $orderRecurrence): self {
-        if ($this->orderRecurrence && $this->orderRecurrence->getClientOrderInformation() !== $this) {
+        if($this->orderRecurrence && $this->orderRecurrence->getClientOrderInformation() !== $this) {
             $oldOrderRecurrence = $this->orderRecurrence;
             $this->orderRecurrence = null;
             $oldOrderRecurrence->setClientOrderInformation(null);
         }
         $this->orderRecurrence = $orderRecurrence;
-        if ($this->orderRecurrence && $this->orderRecurrence->getClientOrderInformation() !== $this) {
+        if($this->orderRecurrence && $this->orderRecurrence->getClientOrderInformation() !== $this) {
             $this->orderRecurrence->setClientOrderInformation($this);
         }
 

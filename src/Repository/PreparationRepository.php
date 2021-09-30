@@ -33,7 +33,7 @@ class PreparationRepository extends EntityRepository {
             ->andWhere("join_status.code IN (:status)")
             ->setParameter("status", [Status::CODE_PREPARATION_TO_PREPARE, Status::CODE_PREPARATION_PREPARING]);
 
-        if ($depository) {
+        if($depository) {
             $qb
                 ->andWhere("preparation.depository = :depository")
                 ->setParameter("depository", $depository);

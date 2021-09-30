@@ -11,10 +11,9 @@ use Doctrine\ORM\EntityRepository;
  * @method Delivery[]    findAll()
  * @method Delivery[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class DeliveryRepository extends EntityRepository
-{
-    public function getTotalQuantityByClientAndDeliveredDate($client, $dateMin, $dateMax)
-    {
+class DeliveryRepository extends EntityRepository {
+
+    public function getTotalQuantityByClientAndDeliveredDate($client, $dateMin, $dateMax) {
         $qb = $this->createQueryBuilder('delivery')
             ->select('sum(lines.quantity)')
             ->andWhere('delivery.deliveredAt BETWEEN :dateMin AND :dateMax')

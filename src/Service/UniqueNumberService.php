@@ -18,12 +18,12 @@ class UniqueNumberService {
         $date = new DateTime("now", new DateTimeZone("Europe/Paris"));
         $entityRepository = ($manager ?? $this->entityManager)->getRepository($entity);
 
-        if (!method_exists($entityRepository, "getLastNumberByDate")) {
+        if(!method_exists($entityRepository, "getLastNumberByDate")) {
             throw new RuntimeException("Undefined getLastNumberByDate for $entity repository");
         }
 
         preg_match("/([^C]*)(C+)/", self::NUMBER_FORMAT, $matches);
-        if (empty($matches)) {
+        if(empty($matches)) {
             throw new RuntimeException("Invalid number format");
         }
 

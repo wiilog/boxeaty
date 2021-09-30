@@ -61,12 +61,12 @@ class Authenticator extends AbstractFormLoginAuthenticator {
 
     public function getUser($credentials, UserProviderInterface $userProvider): ?User {
         $token = new CsrfToken("authenticate", $credentials["csrf_token"]);
-        if (!$this->csrfTokenManager->isTokenValid($token)) {
+        if(!$this->csrfTokenManager->isTokenValid($token)) {
             throw new InvalidCsrfTokenException();
         }
 
         $user = $this->entityManager->getRepository(User::class)->findOneBy(["email" => $credentials["email"]]);
-        if (!$user) {
+        if(!$user) {
             throw new CustomUserMessageAuthenticationException(self::LOGIN_ERROR);
         }
 
@@ -76,7 +76,7 @@ class Authenticator extends AbstractFormLoginAuthenticator {
     public function checkCredentials($credentials, UserInterface $user): bool {
         if($user instanceof User) {
             $valid = $this->encoder->isPasswordValid($user, $credentials["password"]);
-            if ($valid && !$user->isActive()) {
+            if($valid && !$user->isActive()) {
                 throw new CustomUserMessageAuthenticationException("Votre compte est inactif");
             }
 
@@ -87,16 +87,16 @@ class Authenticator extends AbstractFormLoginAuthenticator {
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey): RedirectResponse {
-        if ($token->getUser() instanceof User) {
+        if($token->getUser() instanceof User) {
             $token->getUser()->setLastLogin(new DateTime());
             $this->entityManager->flush();
 
-            if ($token->getUser()->getRole()->isRedirectIndicators()) {
+            if($token->getUser()->getRole()->isRedirectIndicators()) {
                 return new RedirectResponse($this->urlGenerator->generate(self::INDICATORS_ROUTE));
             }
         }
 
-        if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
+        if($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
             return new RedirectResponse($targetPath);
         }
 

@@ -1,6 +1,7 @@
 # BoxEaty
 
 ## Installing
+
 Copy the `.env` file as `.env.local` and replace `DATABASE_URL` with the correct URL for your local database server.
 
 ```sh
@@ -11,20 +12,30 @@ yarn watch
 ```
 
 ## Security checker
-The Local PHP Security Checker is a command line tool that checks if your PHP application depends on PHP packages with known security vulnerabilities. It uses the Security Advisories Database behind the scenes.
-Download a binary from the [releases page on Github](https://github.com/fabpot/local-php-security-checker/releases), rename it to local-php-security-checker and make it executable. From the application directory, run the binary without argument or flags to check for known vulnerabilities :
+
+The Local PHP Security Checker is a command line tool that checks if your PHP application depends on PHP packages with
+known security vulnerabilities. It uses the Security Advisories Database behind the scenes. Download a binary from
+the [releases page on Github](https://github.com/fabpot/local-php-security-checker/releases), rename it to
+local-php-security-checker and make it executable. From the application directory, run the binary without argument or
+flags to check for known vulnerabilities :
+
 ```
 local-php-security-checker
 ```
 
 ## Best practices
+
 ### Relations
+
 #### OneToOne
+
 ```php
+use Doctrine\ORM\Mapping as ORM;
+
 class Entity {
 
     /**
-     * @ORM\OneToOne (targetEntity=Example::class, inversedBy="entity")
+     * @ORM\OneToOne(targetEntity=Example::class, inversedBy="entity")
      */
     private ?Example $example = null;
 
@@ -50,13 +61,16 @@ class Entity {
 ```
 
 #### ManyToOne
+
 ```php
+use Doctrine\ORM\Mapping as ORM;
+
 class Entity {
 
     /**
      * @ORM\ManyToOne(targetEntity=Example::class, inversedBy="entities")
      */
-    private Example $example;
+    private ?Example $example = null;
 
     public function getExample(): ?Example {
         return $this->example;
@@ -78,13 +92,20 @@ class Entity {
 ```
 
 #### OneToMany
+
 ```php
+use Doctrine\ORM\Mapping as ORM;
+
 class Entity {
 
     /**
      * @ORM\OneToMany(targetEntity=Example::class, mappedBy="entity")
      */
     private Collection $examples;
+    
+    public function __construct() {
+        $this->examples = new ArrayCollection();
+    }
 
     /**
      * @return Collection|Example[]
@@ -128,7 +149,10 @@ class Entity {
 ```
 
 ### ManyToMany
+
 ```php
+use Doctrine\ORM\Mapping as ORM;
+
 class Entity {
 
     /**

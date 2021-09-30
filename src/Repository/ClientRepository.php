@@ -45,7 +45,7 @@ class ClientRepository extends EntityRepository {
 
         $total = QueryHelper::count($qb, "client");
 
-        if ($search) {
+        if($search) {
             $qb->leftJoin("client.users", "search_user")
                 ->leftJoin("client.group", "search_group")
                 ->leftJoin("client.contact", "search_contact")
@@ -61,8 +61,8 @@ class ClientRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["filters"] ?? [] as $name => $value) {
-            switch ($name) {
+        foreach($params["filters"] ?? [] as $name => $value) {
+            switch($name) {
                 case("client"):
                     $qb
                         ->andWhere("client.id = :filter_client")
@@ -79,22 +79,21 @@ class ClientRepository extends EntityRepository {
             }
         }
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
-                if ($column === "contact") {
+                if($column === "contact") {
                     QueryHelper::order($qb, "client.contact.username", $order["dir"]);
-                } else if ($column === "group") {
+                } else if($column === "group") {
                     QueryHelper::order($qb, "client.group.name", $order["dir"]);
-                } else if ($column === "linkedMultiSite") {
+                } else if($column === "linkedMultiSite") {
                     QueryHelper::order($qb, "client.linkedMultiSite.name", $order["dir"]);
                 } else {
                     $qb->addOrderBy("client.$column", $order["dir"]);
                 }
             }
-        }
-        else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+        } else {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("client.$column", $dir);
             }
         }
@@ -116,10 +115,10 @@ class ClientRepository extends EntityRepository {
 
         $exprBuilder = $qb->expr();
 
-        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
             $userClients = $user->getClients();
 
-            if (!$userClients->isEmpty()) {
+            if(!$userClients->isEmpty()) {
                 $qb
                     ->andWhere($exprBuilder->orX(
                         'client IN (:userClients)',
@@ -154,7 +153,7 @@ class ClientRepository extends EntityRepository {
             ->setMaxResults(15)
             ->setParameter("search", "%$search%");
 
-        if ($costInformationNeeded) {
+        if($costInformationNeeded) {
             $qb
                 ->andWhere("join_information.workingDayDeliveryRate IS NOT NULL")
                 ->andWhere("join_information.nonWorkingDayDeliveryRate IS NOT NULL")
@@ -216,7 +215,7 @@ class ClientRepository extends EntityRepository {
             ->getResult();
 
         return Stream::from($clients)
-            ->keymap(fn (Client $client) => [$client->getId(), $client->getCratePatternAmount()])
+            ->keymap(fn(Client $client) => [$client->getId(), $client->getCratePatternAmount()])
             ->toArray();
     }
 

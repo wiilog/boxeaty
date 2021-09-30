@@ -75,7 +75,7 @@ class ClientController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
-        foreach ($clients["data"] as $client) {
+        foreach($clients["data"] as $client) {
             $data[] = [
                 "id" => $client->getId(),
                 "name" => $client->getName(),
@@ -100,7 +100,7 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_BOXES)
      */
     public function show(Client $client): Response {
-        if (!$this->canSee($client->getGroup())) {
+        if(!$this->canSee($client->getGroup())) {
             throw new AccessDeniedHttpException("Vous n'avez pas le droit de voir ou modifier ce client");
         }
 
@@ -130,17 +130,17 @@ class ClientController extends AbstractController {
         $depositTicketsClients = $clientRepository->findBy(["id" => $depositTicketsClientsIds]);
 
         $existing = $clientRepository->findOneBy(["name" => $content->name]);
-        if ($existing) {
+        if($existing) {
             $form->addError("name", "Ce client existe déjà");
         }
 
         $client = new Client();
 
-        if (!$service->updateCoordinates($client, $content->address)) {
+        if(!$service->updateCoordinates($client, $content->address)) {
             $form->addError("address", "Adresse inconnue");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $client = $client
                 ->setName($content->name)
                 ->setAddress($content->address)
@@ -182,7 +182,7 @@ class ClientController extends AbstractController {
             $client->setClientOrderInformation($clientOrderInformation);
 
             //0 is used to select the client we're creating
-            if (in_array(0, $depositTicketsClientsIds)) {
+            if(in_array(0, $depositTicketsClientsIds)) {
                 $depositTicketsClients[] = $client;
             }
 
@@ -207,7 +207,7 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function editTemplate(EntityManagerInterface $manager, Client $client): Response {
-        if (!$this->canSee($client->getGroup())) {
+        if(!$this->canSee($client->getGroup())) {
             return $this->cantSeeResponse();
         }
 
@@ -229,7 +229,7 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function edit(Request $request, EntityManagerInterface $manager, ClientService $service, Client $client): Response {
-        if (!$this->canSee($client->getGroup())) {
+        if(!$this->canSee($client->getGroup())) {
             return $this->cantSeeResponse();
         }
 
@@ -246,23 +246,23 @@ class ClientController extends AbstractController {
         $depositTicketsClients = $clientRepository->findBy(["id" => $depositTicketsClientsIds]);
 
         $existing = $manager->getRepository(Client::class)->findOneBy(["name" => $content->name]);
-        if (!$client->getClientOrderInformation()) {
+        if(!$client->getClientOrderInformation()) {
             $client->setClientOrderInformation(new ClientOrderInformation());
         }
         $clientOrderInformation = $client->getClientOrderInformation();
 
         $deliveryMethod = isset($content->deliveryMethod) ? $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod) : null;
         $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
-        if ($existing !== null && $existing !== $client) {
+        if($existing !== null && $existing !== $client) {
             $form->addError("name", "Un autre client avec ce nom existe déjà");
         }
 
-        if (!$service->updateCoordinates($client, $content->address)) {
+        if(!$service->updateCoordinates($client, $content->address)) {
             $form->addError("address", "Adresse inconnue");
         }
 
-        if ($form->isValid()) {
-            if ($client->getName() === Client::BOXEATY) {
+        if($form->isValid()) {
+            if($client->getName() === Client::BOXEATY) {
                 $client->setActive(true);
             } else {
                 $client->setName($content->name)
@@ -283,7 +283,7 @@ class ClientController extends AbstractController {
                 ->setProrateAmount($content->prorateAmount ?? null)
                 ->setPaymentModes($content->paymentModes ?? null);
 
-            if (isset($clientOrderInformation)) {
+            if(isset($clientOrderInformation)) {
                 $clientOrderInformation
                     ->setDeliveryMethod($deliveryMethod)
                     ->setDepository($depository)
@@ -331,7 +331,7 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function deleteTemplate(Client $client): Response {
-        if (!$this->canSee($client->getGroup())) {
+        if(!$this->canSee($client->getGroup())) {
             return $this->cantSeeResponse();
         }
 
@@ -348,11 +348,11 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function delete(EntityManagerInterface $manager, Client $client): Response {
-        if (!$this->canSee($client->getGroup())) {
+        if(!$this->canSee($client->getGroup())) {
             return $this->cantSeeResponse();
         }
 
-        if ($client && (!$client->getBoxRecords()->isEmpty() || !$client->getBoxes()->isEmpty() || $client->getOutLocation())) {
+        if($client && (!$client->getBoxRecords()->isEmpty() || !$client->getBoxes()->isEmpty() || $client->getOutLocation())) {
             $client->setActive(false);
             $manager->flush();
 
@@ -379,8 +379,8 @@ class ClientController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function ($output) use ($exportService, $clients) {
-            foreach ($clients as $client) {
+        return $exportService->export(function($output) use ($exportService, $clients) {
+            foreach($clients as $client) {
                 $client["active"] = Client::NAMES[$client["active"]];
                 $exportService->putLine($output, $client);
             }
@@ -392,7 +392,7 @@ class ClientController extends AbstractController {
      */
     public function boxTypesApi(Request $request, EntityManagerInterface $manager): Response {
         $client = $manager->getRepository(Client::class)->find($request->query->get("id"));
-        if (!$this->canSee($client->getGroup())) {
+        if(!$this->canSee($client->getGroup())) {
             return $this->cantSeeResponse();
         }
 
@@ -409,7 +409,7 @@ class ClientController extends AbstractController {
      * @Route("/{client}/crate-pattern-lines", name="crate_pattern_lines", options={"expose": true})
      */
     public function getBoxTypes(Client $client): Response {
-        if (!$this->canSee($client->getGroup())) {
+        if(!$this->canSee($client->getGroup())) {
             return $this->cantSeeResponse();
         }
 
@@ -441,13 +441,13 @@ class ClientController extends AbstractController {
         $client = $manager->getRepository(Client::class)->find($content->client);
         $boxType = $manager->getRepository(BoxType::class)->find($content->type);
 
-        if (!$this->canSee($client->getGroup())) {
+        if(!$this->canSee($client->getGroup())) {
             return $this->cantSeeResponse();
         }
 
-        if ($content->quantity < 1) {
+        if($content->quantity < 1) {
             $form->addError("quantity", "La quantité doit être supérieure ou égale à 1");
-        } else if (isset($content->customPrice) && $content->customPrice < 0) {
+        } else if(isset($content->customPrice) && $content->customPrice < 0) {
             $form->addError("customPrice", "Le tarif personnalisé doit être supérieur ou égal à 0");
         }
 
@@ -455,11 +455,11 @@ class ClientController extends AbstractController {
             ->filter(fn(CratePatternLine $line) => $line->getBoxType()->getId() === $boxType->getId())
             ->isEmpty();
 
-        if (!$doesntContain) {
+        if(!$doesntContain) {
             $form->addError("type", "Ce type de Box est déjà présent dans le modèle de caisse");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $cratePatternLine = (new CratePatternLine())
                 ->setClient($client)
                 ->setBoxType($boxType)
@@ -485,7 +485,7 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function cratePatternLineEditTemplate(CratePatternLine $cratePatternLine): Response {
-        if (!$this->canSee($cratePatternLine->getClient()->getGroup())) {
+        if(!$this->canSee($cratePatternLine->getClient()->getGroup())) {
             return $this->cantSeeResponse();
         }
 
@@ -504,20 +504,20 @@ class ClientController extends AbstractController {
     public function cratePatternLineEdit(Request                $request,
                                          CratePatternLine       $cratePatternLine,
                                          EntityManagerInterface $manager): Response {
-        if (!$this->canSee($cratePatternLine->getClient()->getGroup())) {
+        if(!$this->canSee($cratePatternLine->getClient()->getGroup())) {
             return $this->cantSeeResponse();
         }
 
         $form = Form::create();
         $content = (object)$request->request->all();
 
-        if ($content->quantity < 1) {
+        if($content->quantity < 1) {
             $form->addError("quantity", "La quantité doit être supérieure ou égale à 1");
-        } else if (isset($content->customPrice) && $content->customPrice < 0) {
+        } else if(isset($content->customPrice) && $content->customPrice < 0) {
             $form->addError("customPrice", "Le tarif personnalisé doit être supérieur ou égal à 0");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $cratePatternLine
                 ->setQuantity((int)$content->quantity)
                 ->setCustomUnitPrice(isset($content->customPrice) ? (float)$content->customPrice : null);
@@ -540,7 +540,7 @@ class ClientController extends AbstractController {
      */
     public function orderRecurrenceApi(Request $request, EntityManagerInterface $manager): Response {
         $client = $manager->getRepository(Client::class)->find($request->query->get('id'));
-        if (!$this->canSee($client->getGroup())) {
+        if(!$this->canSee($client->getGroup())) {
             return $this->cantSeeResponse();
         }
 
@@ -561,7 +561,7 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function cratePatternLineDeleteTemplate(CratePatternLine $cratePatternLine): Response {
-        if (!$this->canSee($cratePatternLine->getClient()->getGroup())) {
+        if(!$this->canSee($cratePatternLine->getClient()->getGroup())) {
             return $this->cantSeeResponse();
         }
 
@@ -578,7 +578,7 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function cratePatternLineDelete(EntityManagerInterface $manager, CratePatternLine $cratePatternLine): Response {
-        if (!$this->canSee($cratePatternLine->getClient()->getGroup())) {
+        if(!$this->canSee($cratePatternLine->getClient()->getGroup())) {
             return $this->cantSeeResponse();
         }
 
@@ -601,7 +601,7 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function orderRecurrenceEditTemplate(OrderRecurrence $recurrence): Response {
-        if (!$this->canSee($recurrence->getClientOrderInformation()->getClient()->getGroup())) {
+        if(!$this->canSee($recurrence->getClientOrderInformation()->getClient()->getGroup())) {
             return $this->cantSeeResponse();
         }
 
@@ -618,14 +618,14 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function orderRecurrenceEdit(Request $request, EntityManagerInterface $manager, OrderRecurrence $recurrence): Response {
-        if (!$this->canSee($recurrence->getClientOrderInformation()->getClient()->getGroup())) {
+        if(!$this->canSee($recurrence->getClientOrderInformation()->getClient()->getGroup())) {
             return $this->cantSeeResponse();
         }
 
         $form = Form::create();
         $content = (object)$request->request->all();
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $recurrence
                 ->setPeriod($content->period)
                 ->setCrateAmount($content->crateAmount)
@@ -657,23 +657,23 @@ class ClientController extends AbstractController {
 
         $content = (object)$request->request->all();
         $client = $manager->getRepository(Client::class)->find($content->client);
-        if (!$this->canSee($client->getGroup())) {
+        if(!$this->canSee($client->getGroup())) {
             return $this->cantSeeResponse();
         }
 
-        if ($content->period < 0) {
+        if($content->period < 0) {
             $form->addError("period", "La période doit être supérieure ou égale à 0");
-        } else if ($content->crateAmount < 0) {
+        } else if($content->crateAmount < 0) {
             $form->addError("crateAmount", "Le nombre de caisses doit être supérieur ou égal à 0");
-        } else if (new DateTime($content->end) < new DateTime($content->start)) {
+        } else if(new DateTime($content->end) < new DateTime($content->start)) {
             $form->addError("end", "La date de fin doit être supérieure à la date de début");
-        } else if ($content->deliveryFlatRate < 0) {
+        } else if($content->deliveryFlatRate < 0) {
             $form->addError("deliveryFlatRate", "Le forfait livraison commande libre doit être supérieur ou égal à 0");
-        } else if ($content->serviceFlatRate < 0) {
+        } else if($content->serviceFlatRate < 0) {
             $form->addError("serviceFlatRate", "Le forfait de service à la commande libre doit être supérieur ou égal à 0");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $recurrence = (new OrderRecurrence())
                 ->setClientOrderInformation($client->getClientOrderInformation())
                 ->setPeriod($content->period)
@@ -704,7 +704,7 @@ class ClientController extends AbstractController {
      * @HasPermission(Role::MANAGE_CLIENTS)
      */
     public function orderRecurrenceDelete(EntityManagerInterface $manager, OrderRecurrence $orderRecurrence): Response {
-        if (!$this->canSee($orderRecurrence->getClientOrderInformation()->getClient()->getGroup())) {
+        if(!$this->canSee($orderRecurrence->getClientOrderInformation()->getClient()->getGroup())) {
             return $this->cantSeeResponse();
         }
 

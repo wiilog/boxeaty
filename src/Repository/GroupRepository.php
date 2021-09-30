@@ -35,18 +35,18 @@ class GroupRepository extends EntityRepository {
 
         $total = QueryHelper::count($qb, "g");
 
-        if ($search) {
+        if($search) {
             $qb->andWhere("g.name LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("g.$column", $order["dir"]);
             }
         } else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("g.$column", $dir);
             }
         }

@@ -51,7 +51,7 @@ class BoxRecordRepository extends EntityRepository {
 
         $total = QueryHelper::count($qb, "record");
 
-        if ($search) {
+        if($search) {
             $qb->leftJoin("record.box", "search_box")
                 ->leftJoin("record.client", "search_client")
                 ->leftJoin("record.quality", "search_quality")
@@ -65,8 +65,8 @@ class BoxRecordRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["filters"] ?? [] as $name => $value) {
-            switch ($name) {
+        foreach($params["filters"] ?? [] as $name => $value) {
+            switch($name) {
                 case "from":
                     $qb->andWhere("DATE(record.date) >= :from")
                         ->setParameter("from", $value);
@@ -92,14 +92,13 @@ class BoxRecordRepository extends EntityRepository {
             }
         }
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("record.$column", $order["dir"]);
             }
-        }
-        else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+        } else {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("record.$column", $dir);
             }
         }
@@ -172,13 +171,13 @@ class BoxRecordRepository extends EntityRepository {
                 ->setMaxResults($length)
                 ->setFirstResult($start)
                 ->getQuery()
-                ->getResult()
+                ->getResult(),
         ];
     }
 
     public function findNewerTrackingMovement(BoxRecord $record): ?BoxRecord {
         $box = $record->getBox();
-        if ($box && $record->getId() && $record->getDate()) {
+        if($box && $record->getId() && $record->getDate()) {
             return $this->createQueryBuilder("record")
                 ->andWhere("record.box = :box")
                 ->andWhere("record.id != :movement")
@@ -197,7 +196,7 @@ class BoxRecordRepository extends EntityRepository {
         return null;
     }
 
-    public function getNumberBoxByStateAndDate( \DateTime $startDate, \DateTime $endDate, int $state, array $clients) {
+    public function getNumberBoxByStateAndDate(\DateTime $startDate, \DateTime $endDate, int $state, array $clients) {
         return $this->createQueryBuilder("record")
             ->select("COUNT(DISTINCT record.id) AS result")
             ->andWhere("record.date BETWEEN :dateMin AND :dateMax")
@@ -221,7 +220,7 @@ class BoxRecordRepository extends EntityRepository {
             ->setParameter("box", $box)
             ->setParameter("packingStates", [
                 BoxStateService::STATE_RECORD_PACKING,
-                BoxStateService::STATE_RECORD_UNPACKING
+                BoxStateService::STATE_RECORD_UNPACKING,
             ])
             ->getQuery()
             ->getOneOrNullResult();

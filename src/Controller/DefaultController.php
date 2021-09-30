@@ -25,7 +25,7 @@ class DefaultController extends AbstractController {
         $defaultCrateTypeId = $manager->getRepository(GlobalSetting::class)->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
 
         return $this->render("home.html.twig", [
-            'hasDefaultCrate' => $defaultCrateTypeId ? 1 : 0
+            'hasDefaultCrate' => $defaultCrateTypeId ? 1 : 0,
         ]);
     }
 

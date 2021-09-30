@@ -26,7 +26,7 @@ class QueryHelper {
     }
 
     public static function withCurrentGroup(QueryBuilder $query, string $field, ?User $user): QueryBuilder {
-        if ($user && $user->getRole()->isAllowEditOwnGroupOnly() && !$user->getGroups()->isEmpty()) {
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly() && !$user->getGroups()->isEmpty()) {
             $fields = explode(":", $field);
             if(count($fields) === 2) {
                 $fields = $fields[1];
@@ -41,7 +41,7 @@ class QueryHelper {
             $join = $fields[1] ?? null;
             $field = $fields[2] ?? null;
 
-            if ($field) {
+            if($field) {
                 $query->leftJoin("$alias.$join", "__entity_with_group");
                 $alias = "__entity_with_group";
             } else {
@@ -50,7 +50,7 @@ class QueryHelper {
 
             $dot = $field ? "." : "";
             if($multiple) {
-                foreach ($user->getGroups() as $i => $group) {
+                foreach($user->getGroups() as $i => $group) {
                     $query
                         ->andWhere("$alias$dot$field IS EMPTY OR :__group_$i MEMBER OF $alias$dot$field")
                         ->setParameter("__group_$i", $group);

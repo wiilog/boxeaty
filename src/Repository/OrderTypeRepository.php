@@ -21,7 +21,7 @@ class OrderTypeRepository extends EntityRepository {
             ->getResult();
     }
 
-    public function getForSelect(?string $search){
+    public function getForSelect(?string $search) {
         return $this->createQueryBuilder("order_type")
             ->select("order_type.id AS id, order_type.name AS text")
             ->andWhere("order_type.name LIKE :search")
@@ -30,4 +30,5 @@ class OrderTypeRepository extends EntityRepository {
             ->getQuery()
             ->getArrayResult();
     }
+
 }

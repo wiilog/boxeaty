@@ -130,11 +130,11 @@ class Collect {
     }
 
     public function setPickLocation(?Location $pickLocation): self {
-        if ($this->pickLocation && $this->pickLocation !== $pickLocation) {
+        if($this->pickLocation && $this->pickLocation !== $pickLocation) {
             $this->pickLocation->removePickedCollect($this);
         }
         $this->pickLocation = $pickLocation;
-        if ($pickLocation) {
+        if($pickLocation) {
             $pickLocation->addPickedCollect($this);
         }
 
@@ -146,11 +146,11 @@ class Collect {
     }
 
     public function setDropLocation(?Location $dropLocation): self {
-        if ($this->dropLocation && $this->dropLocation !== $dropLocation) {
+        if($this->dropLocation && $this->dropLocation !== $dropLocation) {
             $this->dropLocation->removeDroppedCollect($this);
         }
         $this->dropLocation = $dropLocation;
-        if ($dropLocation) {
+        if($dropLocation) {
             $dropLocation->addDroppedCollect($this);
         }
 
@@ -165,7 +165,7 @@ class Collect {
     }
 
     public function addCrate(Box $crate): self {
-        if (!$this->crates->contains($crate)) {
+        if(!$this->crates->contains($crate)) {
             $this->crates[] = $crate;
             $crate->addCollect($this);
         }
@@ -174,7 +174,7 @@ class Collect {
     }
 
     public function removeCrate(Box $crate): self {
-        if ($this->crates->removeElement($crate)) {
+        if($this->crates->removeElement($crate)) {
             $crate->removeCollect($this);
         }
 
@@ -182,12 +182,12 @@ class Collect {
     }
 
     public function setCrates(?array $crates): self {
-        foreach ($this->getCrates()->toArray() as $crate) {
+        foreach($this->getCrates()->toArray() as $crate) {
             $this->removeCrate($crate);
         }
 
         $this->crates = new ArrayCollection();
-        foreach ($crates as $crate) {
+        foreach($crates as $crate) {
             $this->addCrate($crate);
         }
 
@@ -230,49 +230,41 @@ class Collect {
         return $this;
     }
 
-    public function getCreatedAt(): ?DateTimeInterface
-    {
+    public function getCreatedAt(): ?DateTimeInterface {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(?DateTimeInterface $createdAt): self
-    {
+    public function setCreatedAt(?DateTimeInterface $createdAt): self {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getNumber(): ?string
-    {
+    public function getNumber(): ?string {
         return $this->number;
     }
 
-    public function setNumber(string $number): self
-    {
+    public function setNumber(string $number): self {
         $this->number = $number;
 
         return $this;
     }
 
-    public function getTreatedAt(): ?\DateTimeInterface
-    {
+    public function getTreatedAt(): ?\DateTimeInterface {
         return $this->treatedAt;
     }
 
-    public function setTreatedAt(?\DateTimeInterface $treatedAt): self
-    {
+    public function setTreatedAt(?\DateTimeInterface $treatedAt): self {
         $this->treatedAt = $treatedAt;
 
         return $this;
     }
 
-    public function getOperator(): ?User
-    {
+    public function getOperator(): ?User {
         return $this->operator;
     }
 
-    public function setOperator(?User $operator): self
-    {
+    public function setOperator(?User $operator): self {
         $this->operator = $operator;
 
         return $this;
@@ -298,13 +290,11 @@ class Collect {
         return $this;
     }
 
-    public function getClient(): ?Client
-    {
+    public function getClient(): ?Client {
         return $this->client;
     }
 
-    public function setClient(?Client $client): self
-    {
+    public function setClient(?Client $client): self {
         $this->client = $client;
 
         return $this;
@@ -327,4 +317,5 @@ class Collect {
 
         return $this;
     }
+
 }

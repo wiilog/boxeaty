@@ -187,7 +187,7 @@ class BoxRecord {
 
     public function copyBox(?Box $from = null): self {
         $box = $from ?? $this->box ?? null;
-        if ($box) {
+        if($box) {
             $this->setCrate($box->getCrate())
                 ->setLocation($box->getLocation())
                 ->setClient($box->getOwner())

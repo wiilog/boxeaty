@@ -21,7 +21,7 @@ class DeliveryMethod {
         self::LIGHT_TRUCK => "light-truck",
         self::HEAVY_TRUCK => "heavy-truck",
     ];
-    const DEFAULT_DATATABLE_ORDER = [["name", "asc"]] ;
+    const DEFAULT_DATATABLE_ORDER = [["name", "asc"]];
 
     /**
      * @ORM\Id
@@ -55,8 +55,7 @@ class DeliveryMethod {
      */
     private $type;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->clientOrderInformation = new ArrayCollection();
     }
 
@@ -97,14 +96,12 @@ class DeliveryMethod {
     /**
      * @return Collection|ClientOrderInformation[]
      */
-    public function getClientOrderInformation(): Collection
-    {
+    public function getClientOrderInformation(): Collection {
         return $this->clientOrderInformation;
     }
 
-    public function addClientOrderInformation(ClientOrderInformation $clientOrderInformation): self
-    {
-        if (!$this->clientOrderInformation->contains($clientOrderInformation)) {
+    public function addClientOrderInformation(ClientOrderInformation $clientOrderInformation): self {
+        if(!$this->clientOrderInformation->contains($clientOrderInformation)) {
             $this->clientOrderInformation[] = $clientOrderInformation;
             $clientOrderInformation->setDeliveryMethod($this);
         }
@@ -112,11 +109,10 @@ class DeliveryMethod {
         return $this;
     }
 
-    public function removeClientOrderInformation(ClientOrderInformation $clientOrderInformation): self
-    {
-        if ($this->clientOrderInformation->removeElement($clientOrderInformation)) {
+    public function removeClientOrderInformation(ClientOrderInformation $clientOrderInformation): self {
+        if($this->clientOrderInformation->removeElement($clientOrderInformation)) {
             // set the owning side to null (unless already changed)
-            if ($clientOrderInformation->getDeliveryMethod() === $this) {
+            if($clientOrderInformation->getDeliveryMethod() === $this) {
                 $clientOrderInformation->setDeliveryMethod(null);
             }
         }
@@ -124,13 +120,11 @@ class DeliveryMethod {
         return $this;
     }
 
-    public function getType(): ?int
-    {
+    public function getType(): ?int {
         return $this->type;
     }
 
-    public function setType(int $type): self
-    {
+    public function setType(int $type): self {
         $this->type = $type;
 
         return $this;

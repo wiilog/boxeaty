@@ -94,7 +94,7 @@ class PreparationLine {
     }
 
     public function addBox(Box $box): self {
-        if (!$this->boxes->contains($box)) {
+        if(!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
             $box->addBoxPreparationLine($this);
         }
@@ -103,7 +103,7 @@ class PreparationLine {
     }
 
     public function removeBox(Box $box): self {
-        if ($this->boxes->removeElement($box)) {
+        if($this->boxes->removeElement($box)) {
             $box->removeBoxPreparationLine($this);
         }
 

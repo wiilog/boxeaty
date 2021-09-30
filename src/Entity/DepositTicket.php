@@ -166,7 +166,7 @@ class DepositTicket {
     }
 
     public function addCounterOrder(CounterOrder $order): self {
-        if (!$this->counterOrders->contains($order)) {
+        if(!$this->counterOrders->contains($order)) {
             $this->counterOrders[] = $order;
             $order->addDepositTicket($this);
         }
@@ -175,7 +175,7 @@ class DepositTicket {
     }
 
     public function removeCounterOrder(CounterOrder $order): self {
-        if ($this->counterOrders->removeElement($order)) {
+        if($this->counterOrders->removeElement($order)) {
             $order->removeDepositTicket($this);
         }
 
@@ -193,12 +193,12 @@ class DepositTicket {
     }
 
     public function setOrderUser(?User $orderUser): self {
-        if ($this->getOrderUser()
+        if($this->getOrderUser()
             && $this->getOrderUser() !== $orderUser) {
             $this->getOrderUser()->removeOrderDepositTicket($this);
         }
         $this->orderUser = $orderUser;
-        if ($this->orderUser) {
+        if($this->orderUser) {
             $this->orderUser->addOrderDepositTicket($this);
         }
         return $this;

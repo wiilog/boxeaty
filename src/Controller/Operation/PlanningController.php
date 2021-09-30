@@ -59,16 +59,16 @@ class PlanningController extends AbstractController {
         $from->setTime(0, 0);
         $to->setTime(23, 59);
 
-        if ($from->diff($to, true)->days > 20) {
+        if($from->diff($to, true)->days > 20) {
             return $this->json([
                 "success" => false,
-                "message" => "La planification ne peut afficher que 20 jours maximum"
+                "message" => "La planification ne peut afficher que 20 jours maximum",
             ]);
         }
 
         //group orders by date
         $ordersByDate = [];
-        foreach ($clientOrderRepository->findBetween($this->getUser(), $from, $to, $request->query->all()) as $order) {
+        foreach($clientOrderRepository->findBetween($this->getUser(), $from, $to, $request->query->all()) as $order) {
             $ordersByDate[FormatHelper::date($order->getExpectedDelivery(), "Ymd")][] = $order;
         }
 
@@ -77,7 +77,7 @@ class PlanningController extends AbstractController {
         //generate cards configuration for twig
         $planning = [];
         $period = new DatePeriod($from, new DateInterval("P1D"), $to);
-        foreach ($period as $date) {
+        foreach($period as $date) {
             $orders = $ordersByDate[$date->format(FormatHelper::DATE_COMPACT)] ?? [];
 
             $column = [
@@ -91,11 +91,11 @@ class PlanningController extends AbstractController {
             $planning[] = $column;
         }
 
-        if ($json) {
+        if($json) {
             return $this->json([
                 "planning" => $this->renderView("operation/planning/content.html.twig", [
                     "planning" => $planning,
-                ])
+                ]),
             ]);
         } else {
             return $this->render("operation/planning/content.html.twig", [
@@ -111,7 +111,7 @@ class PlanningController extends AbstractController {
     public function lateOrderEmail(ClientOrder $order, Mailer $mailer): Response {
         $content = $this->renderView("emails/mail_delivery_order.html.twig", [
             "order" => $order,
-            "lateDelivery" => true
+            "lateDelivery" => true,
         ]);
 
         $mailer->send($order->getClient()->getContact(), "Retard de livraison", $content);
@@ -155,7 +155,7 @@ class PlanningController extends AbstractController {
             "submit" => $this->generateUrl("planning_delivery_round"),
             "template" => $this->renderView("operation/planning/modal/new_delivery_round.html.twig", [
                 "orders" => $clientOrderRepository->findDeliveriesBetween($this->getUser(), $from, $to, $request->query->all()),
-            ])
+            ]),
         ]);
     }
 
@@ -176,24 +176,24 @@ class PlanningController extends AbstractController {
         $depository = isset($content->depository) ? $manager->getRepository(Depository::class)->find($content->depository) : null;
         $orders = $manager->getRepository(ClientOrder::class)->findBy(["id" => explode(",", $content->assignedForRound)]);
 
-        if (count($orders) === 0) {
+        if(count($orders) === 0) {
             $form->addError("Vous devez sélectionner au moins une livraison");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $statusRepository = $manager->getRepository(Status::class);
 
             $orderAwaitingDeliverer = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_AWAITING_DELIVERER]);
             $deliveryAwaitingDeliverer = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_AWAITING_DELIVERER]);
             $deliveryPreparing = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_PREPARING]);
 
-            foreach ($orders as $order) {
+            foreach($orders as $order) {
                 $delivery = (new Delivery())
                     ->setOrder($order)
                     ->setTokens($order->getClient()->getClientOrderInformation()->getTokenAmount() ?? 0)
                     ->setDistance(0.0);
 
-                if ($order->hasStatusCode(Status::CODE_ORDER_PREPARED)) {
+                if($order->hasStatusCode(Status::CODE_ORDER_PREPARED)) {
                     $order->setStatus($orderAwaitingDeliverer);
                     $delivery->setStatus($deliveryAwaitingDeliverer);
                 } else {
@@ -247,7 +247,7 @@ class PlanningController extends AbstractController {
      * @HasPermission(Role::MANAGE_PLANNING)
      */
     public function initializeDeliveryTemplate(Request $request, EntityManagerInterface $manager): Response {
-        if ($request->query->get("depository")) {
+        if($request->query->get("depository")) {
             $depository = $manager->find(Depository::class, $request->query->get("depository"));
         }
 
@@ -259,7 +259,7 @@ class PlanningController extends AbstractController {
                 "from" => $request->query->get("from"),
                 "to" => $request->query->get("to"),
                 "depository" => $depository ?? null,
-            ])
+            ]),
         ]);
     }
 
@@ -275,7 +275,7 @@ class PlanningController extends AbstractController {
         $from = DateTime::createFromFormat("Y-m-d", $request->query->get("from"));
         $to = DateTime::createFromFormat("Y-m-d", $request->query->get("to"));
 
-        if (!$depository || !$from || !$to) {
+        if(!$depository || !$from || !$to) {
             return $this->json([
                 "success" => false,
             ]);
@@ -284,7 +284,7 @@ class PlanningController extends AbstractController {
                 "success" => true,
                 "template" => $this->renderView('operation/planning/modal/deliveries_container.html.twig', [
                     "orders" => $clientOrderRepository->findLaunchableOrders($this->getUser(), $depository, $from, $to),
-                ])
+                ]),
             ]);
         }
     }
@@ -309,7 +309,7 @@ class PlanningController extends AbstractController {
         /** @var User $user */
         $user = $this->getUser();
 
-        foreach ($ordersToStart as $order) {
+        foreach($ordersToStart as $order) {
             $order = $clientOrderRepository->find($order);
 
             $clientOrderService->updateClientOrderStatus($order, $statusOrder, $user);
@@ -346,7 +346,7 @@ class PlanningController extends AbstractController {
         $globalSettingRepository = $manager->getRepository(GlobalSetting::class);
         $defaultCrateTypeId = $globalSettingRepository->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
 
-        if (!isset($defaultCrateTypeId)) {
+        if(!isset($defaultCrateTypeId)) {
             return $this->json([
                 "success" => false,
                 "message" => "Vous devez renseigner une caisse par défaut dans le paramétrage global",
@@ -359,12 +359,12 @@ class PlanningController extends AbstractController {
         // add all the ordered boxes (and crates) to the array
         // with the total quantity
         $orderedBoxTypes = [];
-        foreach ($ordersToStart as $orderToStart) {
+        foreach($ordersToStart as $orderToStart) {
             $order = $clientOrderRepository->find($orderToStart);
             $closed = $order->getClient()->getClientOrderInformation()->isClosedParkOrder();
             $owner = $closed ? $order->getClient()->getId() : $boxeaty->getId();
 
-            if (!isset($orderedBoxTypes[$defaultCrateType->getId()][$owner])) {
+            if(!isset($orderedBoxTypes[$defaultCrateType->getId()][$owner])) {
                 $orderedBoxTypes[$defaultCrateType->getId()][$owner] = [
                     'quantity' => 0,
                     'orders' => [],
@@ -378,15 +378,15 @@ class PlanningController extends AbstractController {
             $orderedBoxTypes[$defaultCrateType->getId()][$owner]['quantity'] += $order->getCratesAmount();
 
             $lines = $order->getLines();
-            foreach ($lines as $line) {
+            foreach($lines as $line) {
                 $boxType = $line->getBoxType();
-                if ($boxType->getName() === BoxType::STARTER_KIT) {
+                if($boxType->getName() === BoxType::STARTER_KIT) {
                     continue;
                 }
 
                 $boxTypeId = $boxType->getId();
                 $quantity = $line->getQuantity();
-                if (!isset($orderedBoxTypes[$boxTypeId][$owner])) {
+                if(!isset($orderedBoxTypes[$boxTypeId][$owner])) {
                     $orderedBoxTypes[$boxTypeId][$owner] = [
                         'quantity' => 0,
                         'orders' => [],
@@ -399,7 +399,7 @@ class PlanningController extends AbstractController {
 
                 $orderedBoxTypes[$boxTypeId][$owner]['quantity'] += $quantity;
 
-                if (!in_array($order->getId(), $orderedBoxTypes[$boxTypeId][$owner]['orders'])) {
+                if(!in_array($order->getId(), $orderedBoxTypes[$boxTypeId][$owner]['orders'])) {
                     $orderedBoxTypes[$boxTypeId][$owner]['orders'][] = $order->getId();
                 }
             }
@@ -409,16 +409,16 @@ class PlanningController extends AbstractController {
 
         $unavailableOrders = [];
         $availableBoxTypes = [];
-        foreach ($orderedBoxTypes as $boxTypeId => $clients) {
-            foreach ($clients as $client => $ordered) {
+        foreach($orderedBoxTypes as $boxTypeId => $clients) {
+            foreach($clients as $client => $ordered) {
                 $orderedQuantity = $ordered['quantity'];
                 $orders = $ordered['orders'];
                 $name = $ordered['name'];
 
                 $availableQuantity = $availableInDepository[$boxTypeId][$client] ?? 0;
-                if ($orderedQuantity > $availableQuantity) {
-                    foreach ($orders as $order) {
-                        if (!in_array($order, $unavailableOrders)) {
+                if($orderedQuantity > $availableQuantity) {
+                    foreach($orders as $order) {
+                        if(!in_array($order, $unavailableOrders)) {
                             $unavailableOrders[] = $order;
                         }
                     }
@@ -448,7 +448,7 @@ class PlanningController extends AbstractController {
         return $this->json([
             "template" => $this->renderView("operation/planning/modal/validate_delivery.html.twig"),
             "submit" => $this->generateUrl("planning_preparation_launch_validate", [
-                "order" => $request->query->get('order')
+                "order" => $request->query->get('order'),
             ]),
         ]);
     }

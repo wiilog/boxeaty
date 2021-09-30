@@ -59,11 +59,11 @@ class ClientOrderService {
         return $history;
     }
 
-    public function updateClientOrder(Request $request,
+    public function updateClientOrder(Request                $request,
                                       EntityManagerInterface $entityManager,
-                                      Form $form,
-                                      ClientOrder $clientOrder): void {
-        $content = (object) $request->request->all();
+                                      Form                   $form,
+                                      ClientOrder            $clientOrder): void {
+        $content = (object)$request->request->all();
         $typeRepository = $entityManager->getRepository(OrderType::class);
         $clientRepository = $entityManager->getRepository(Client::class);
         $deliveryMethodRepository = $entityManager->getRepository(DeliveryMethod::class);
@@ -73,7 +73,7 @@ class ClientOrderService {
         $deliveryMethod = $deliveryMethodId
             ? $deliveryMethodRepository->find($deliveryMethodId)
             : null;
-        if (!$deliveryMethod) {
+        if(!$deliveryMethod) {
             $form->addError('Vous devez sélectionner au moins un moyen de transport');
         }
 
@@ -81,7 +81,7 @@ class ClientOrderService {
         $type = $typeId
             ? $typeRepository->find($typeId)
             : null;
-        if (!$type) {
+        if(!$type) {
             $form->addError('Vous devez sélectionner au moins un type de commande');
         }
 
@@ -89,17 +89,17 @@ class ClientOrderService {
         $client = $clientId
             ? $clientRepository->find($clientId)
             : null;
-        if (!$client) {
+        if(!$client) {
             $form->addError('client', 'Ce champ est requis');
         }
 
         $information = $client->getClientOrderInformation();
         $expectedDelivery = DateTime::createFromFormat('Y-m-d', $content->date ?? null);
-        if (isset($information)) {
+        if(isset($information)) {
 
-            $worFreeDay= $worFreeDayRepository->findDayAndMonth($expectedDelivery->format('j'), $expectedDelivery->format('n'));
+            $worFreeDay = $worFreeDayRepository->findDayAndMonth($expectedDelivery->format('j'), $expectedDelivery->format('n'));
             // check if it's the weekend
-            $deliveryRate = ((!in_array($expectedDelivery->format('N'), [6, 7])) && !count($worFreeDay) != 0 )
+            $deliveryRate = ((!in_array($expectedDelivery->format('N'), [6, 7])) && !count($worFreeDay) != 0)
                 ? $information->getWorkingDayDeliveryRate()
                 : $information->getNonWorkingDayDeliveryRate();
             $serviceCost = $information->getServiceCost();
@@ -108,10 +108,10 @@ class ClientOrderService {
             $serviceCost = null;
         }
 
-        if ($type && $type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
+        if($type && $type->getCode() == OrderType::AUTONOMOUS_MANAGEMENT) {
             $collectRequired = (bool)($content->collectRequired ?? false);
-            if ($collectRequired) {
-                if (!isset($content->cratesAmountToCollect)
+            if($collectRequired) {
+                if(!isset($content->cratesAmountToCollect)
                     || $content->cratesAmountToCollect < 1) {
                     $form->addError('cratesAmountToCollect', 'Le nombre de caisses à collecter est invalide');
                 }
@@ -119,7 +119,7 @@ class ClientOrderService {
         }
 
         $handledCartLines = $this->handleCartLines($entityManager, $form, $content);
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $clientOrderInformation = $client->getClientOrderInformation();
             $clientOrder = $clientOrder
                 ->setExpectedDelivery($expectedDelivery)
@@ -134,13 +134,13 @@ class ClientOrderService {
                 ->setDeliveryMethod($deliveryMethod)
                 ->setTokensAmount(($clientOrderInformation ? $clientOrderInformation->getTokenAmount() : null) ?: 0);
 
-            foreach ($clientOrder->getLines()->toArray() as $line) {
+            foreach($clientOrder->getLines()->toArray() as $line) {
                 $clientOrder->removeLine($line);
                 $entityManager->remove($line);
             }
 
             $cartVolume = 0;
-            foreach ($handledCartLines as $cartLine) {
+            foreach($handledCartLines as $cartLine) {
                 $boxType = $cartLine['boxType'];
                 $quantity = $cartLine['quantity'];
                 $clientOrderLine = new ClientOrderLine();
@@ -152,12 +152,12 @@ class ClientOrderService {
 
                 $entityManager->persist($clientOrderLine);
 
-                if ($boxType && $boxType->getVolume()) {
+                if($boxType && $boxType->getVolume()) {
                     $cartVolume += $quantity * $boxType->getVolume();
                 }
             }
 
-            if (!$cartVolume) {
+            if(!$cartVolume) {
                 $form->addError('Le volume total du panier doit être supérieur à 0. Vous devez définir un volume pour les types de box renseignés.');
             } else {
                 $cratesAmount = $this->getCartSplitting($entityManager, $client, $handledCartLines);
@@ -169,8 +169,8 @@ class ClientOrderService {
     }
 
     private function handleCartLines(EntityManagerInterface $entityManager,
-                                    Form $form,
-                                    object $formContent): ? array {
+                                     Form                   $form,
+                                     object                 $formContent): ?array {
 
         $quantities = Stream::explode(',', $formContent->quantity ?? "")->filter(fn($e) => $e);
         $boxTypeIds = Stream::explode(',', $formContent->boxTypeId ?? "")->filter(fn($e) => $e);
@@ -179,20 +179,20 @@ class ClientOrderService {
         $boxTypeRepository = $entityManager->getRepository(BoxType::class);
 
         $quantitiesCount = $quantities->count();
-        if ($quantitiesCount > 0
+        if($quantitiesCount > 0
             && $quantitiesCount === $boxTypeIds->count()
-            && $quantitiesCount === $unitPrices->count()){
+            && $quantitiesCount === $unitPrices->count()) {
             $quantitiesArray = $quantities->values();
             $boxTypeIdsArray = $boxTypeIds->values();
             $unitPricesArray = $unitPrices->values();
 
             $handledCartLines = [];
 
-            for ($cartLineIndex = 0; $cartLineIndex < $quantitiesCount; $cartLineIndex++) {
+            for($cartLineIndex = 0; $cartLineIndex < $quantitiesCount; $cartLineIndex++) {
                 $boxType = $boxTypeRepository->find($boxTypeIdsArray[$cartLineIndex]);
-                $quantity = (int) $quantitiesArray[$cartLineIndex];
-                $unitPrice = (float) $unitPricesArray[$cartLineIndex];
-                if (!$boxType || !$quantity || $quantity < 1) {
+                $quantity = (int)$quantitiesArray[$cartLineIndex];
+                $unitPrice = (float)$unitPricesArray[$cartLineIndex];
+                if(!$boxType || !$quantity || $quantity < 1) {
                     $form->addError("Veuillez saisir une quantité pour toutes les lignes du panier.");
                     $handledCartLines = [];
                     break;
@@ -204,8 +204,7 @@ class ClientOrderService {
                     'unitPrice' => $unitPrice ?: $boxType->getPrice(),
                 ];
             }
-        }
-        else {
+        } else {
             $form->addError("Le panier est invalide");
         }
 
@@ -228,10 +227,10 @@ class ClientOrderService {
     }
 
     public function getToken(): ?string {
-        if (!$this->token) {
+        if(!$this->token) {
             $this->token = $this->request->getCurrentRequest()->get("session");
 
-            if (!preg_match("/^[A-Z0-9]{8,32}$/i", $this->token)) {
+            if(!preg_match("/^[A-Z0-9]{8,32}$/i", $this->token)) {
                 throw new BadRequestHttpException("Invalid client order session token");
             }
         }
@@ -240,11 +239,11 @@ class ClientOrderService {
     }
 
     private function updateCratesAmount(EntityManagerInterface $entityManager,
-                                        ClientOrder $clientOrder,
-                                        array $cart): void {
+                                        ClientOrder            $clientOrder,
+                                        array                  $cart): void {
         $splitting = $this->getCartSplitting($entityManager, $clientOrder->getClient(), $cart);
         $cratesAmount = count($splitting) ?: 1;
-        if($cratesAmount){
+        if($cratesAmount) {
             $clientOrder->setCratesAmount($cratesAmount);
         }
     }
@@ -253,16 +252,16 @@ class ClientOrderService {
      * @param ['boxType' => BoxType, 'quantity' => int][] $cart
      * @return
      *     [
-                'type' => string,
-                'boxes' => [
-                    'type' => string,
-                    'quantity' => number
-                ][]
-            ][]
+     * 'type' => string,
+     * 'boxes' => [
+     * 'type' => string,
+     * 'quantity' => number
+     * ][]
+     * ][]
      */
     public function getCartSplitting(EntityManagerInterface $entityManager,
-                                     Client $client,
-                                     array $cart): array {
+                                     Client                 $client,
+                                     array                  $cart): array {
         $boxTypeRepository = $entityManager->getRepository(BoxType::class);
         $globalSettingRepository = $entityManager->getRepository(GlobalSetting::class);
 
@@ -280,14 +279,14 @@ class ClientOrderService {
         $cartSplitting = [];
         $defaultCrateVolume = $defaultCrateType ? $defaultCrateType->getVolume() : null;
 
-        if ($defaultCrateType && $defaultCrateVolume) {
-            $serializeCrate = fn (BoxType $crateType, array $boxes = []) => [
+        if($defaultCrateType && $defaultCrateVolume) {
+            $serializeCrate = fn(BoxType $crateType, array $boxes = []) => [
                 'type' => $crateType->getName(),
-                'boxes' => $boxes
+                'boxes' => $boxes,
             ];
-            $serializeBox = fn (BoxType $boxType, int $quantity) => [
+            $serializeBox = fn(BoxType $boxType, int $quantity) => [
                 'type' => $boxType->getName(),
-                'quantity' => $quantity
+                'quantity' => $quantity,
             ];
 
             $cartTypeToQuantities = Stream::from($cart)
@@ -295,8 +294,8 @@ class ClientOrderService {
                     $line['boxType']->getId(),
                     [
                         'quantity' => (int)$line['quantity'],
-                        'boxType' => $line['boxType']
-                    ]
+                        'boxType' => $line['boxType'],
+                    ],
                 ])
                 ->toArray();
 
@@ -306,29 +305,28 @@ class ClientOrderService {
 
             // first part: with client crate pattern
             $cartPatternTakeIntoAccount = false;
-            if (!empty($cratePatternLines)) {
-                while (!$cartPatternTakeIntoAccount) {
+            if(!empty($cratePatternLines)) {
+                while(!$cartPatternTakeIntoAccount) {
                     $cartContainsPattern = true;
-                    foreach ($cratePatternLines as $cratePatternLine) {
+                    foreach($cratePatternLines as $cratePatternLine) {
                         $type = $cratePatternLine['type'];
-                        if (!isset($cartTypeToQuantities[$type])
+                        if(!isset($cartTypeToQuantities[$type])
                             || $cartTypeToQuantities[$type]['quantity'] < $cratePatternLine['quantity']) {
                             $cartContainsPattern = false;
                             break;
                         }
                     }
 
-                    if ($cartContainsPattern) {
-                        foreach ($cratePatternLines as $cratePatternLine) {
+                    if($cartContainsPattern) {
+                        foreach($cratePatternLines as $cratePatternLine) {
                             $type = $cratePatternLine['type'];
                             $cartTypeToQuantities[$type]['quantity'] -= $cratePatternLine['quantity'];
-                            if (!$cartTypeToQuantities[$type]['quantity']) {
+                            if(!$cartTypeToQuantities[$type]['quantity']) {
                                 unset($cartTypeToQuantities[$type]);
                             }
                         }
                         $cartSplitting[] = $serializeCrate($defaultCrateType, $cratePatternLines);
-                    }
-                    else {
+                    } else {
                         $cartPatternTakeIntoAccount = true;
                     }
                 }
@@ -339,20 +337,20 @@ class ClientOrderService {
 
             $splittingLineVolume = 0;
 
-            foreach ($cartTypeToQuantities as $cartLine) {
+            foreach($cartTypeToQuantities as $cartLine) {
                 $quantity = $cartLine['quantity'];
                 $boxType = $cartLine['boxType'];
                 $currentBoxVolume = $boxType->getVolume();
 
                 do {
-                    if ($currentBoxVolume) {
+                    if($currentBoxVolume) {
                         $remainingVolumeInCurrentCrate = ($defaultCrateVolume - $splittingLineVolume);
                         $availableQuantityOfCurrentBox = floor($remainingVolumeInCurrentCrate / $currentBoxVolume);
 
                         // IF crate is full
                         // OR we can't put any box of this type
                         // THEN we get another crate
-                        if ($remainingVolumeInCurrentCrate <= 0
+                        if($remainingVolumeInCurrentCrate <= 0
                             || $availableQuantityOfCurrentBox <= 0) {
                             $cartSplitting[] = $cartSplittingLine;
 
@@ -363,8 +361,7 @@ class ClientOrderService {
 
                         // we put selected quantity of the current box into current crate
                         $boxQuantitySelected = min($quantity, $availableQuantityOfCurrentBox);
-                    }
-                    else {
+                    } else {
                         $boxQuantitySelected = $quantity;
                     }
 
@@ -372,11 +369,10 @@ class ClientOrderService {
                     $cartSplittingLine['boxes'][] = $serializeBox($boxType, $boxQuantitySelected);
 
                     $quantity -= $boxQuantitySelected;
-                }
-                while ($quantity > 0);
+                } while($quantity > 0);
             }
 
-            if (!empty($cartSplittingLine['boxes'])) {
+            if(!empty($cartSplittingLine['boxes'])) {
                 $cartSplitting[] = $cartSplittingLine;
                 $cartSplittingLine = null;
             }

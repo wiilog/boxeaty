@@ -31,7 +31,7 @@ class AnnotationListener {
     public EntityManagerInterface $manager;
 
     public function onRequest(ControllerArgumentsEvent $event) {
-        if (!$event->isMainRequest() || !is_array($event->getController())) {
+        if(!$event->isMainRequest() || !is_array($event->getController())) {
             return;
         }
 
@@ -41,17 +41,17 @@ class AnnotationListener {
         try {
             $class = new ReflectionClass($controller);
             $method = $class->getMethod($method);
-        } catch (ReflectionException $e) {
+        } catch(ReflectionException $e) {
             throw new RuntimeException("Failed to read annotation");
         }
 
         $annotation = $reader->getMethodAnnotation($method, Authenticated::class);
-        if ($annotation instanceof Authenticated) {
+        if($annotation instanceof Authenticated) {
             $this->handleAuthenticated($event, $controller, $annotation);
         }
 
         $annotation = $reader->getMethodAnnotation($method, HasPermission::class);
-        if ($annotation instanceof HasPermission) {
+        if($annotation instanceof HasPermission) {
             $this->handleHasPermission($event, $annotation);
         }
     }
@@ -59,7 +59,7 @@ class AnnotationListener {
     private function handleAuthenticated(ControllerArgumentsEvent $event, SymfonyAbstractController $controller, Authenticated $annotation) {
         $request = $event->getRequest();
 
-        if (!($controller instanceof AbstractController)) {
+        if(!($controller instanceof AbstractController)) {
             throw new RuntimeException("Routes annotated with @Authenticated must extend App\\Controller\\AbstractController");
         }
 
@@ -71,7 +71,7 @@ class AnnotationListener {
         }
 
         if($annotation->value === Authenticated::KIOSK) {
-            if ($_SERVER["KIOSK_AUTHENTICATION_KEY"] == $matches[1]) {
+            if($_SERVER["KIOSK_AUTHENTICATION_KEY"] == $matches[1]) {
                 $controller->setUser(null);
             } else {
                 $this->failAuthentication();
@@ -80,7 +80,7 @@ class AnnotationListener {
             $userRepository = $this->manager->getRepository(User::class);
 
             $user = $userRepository->findByApiKey($matches[1]);
-            if ($user) {
+            if($user) {
                 $controller->setUser($user);
             } else {
                 $this->failAuthentication();
@@ -96,14 +96,14 @@ class AnnotationListener {
             $annotation->value = [$annotation->value];
         }
 
-        if (!$this->roleService->hasPermission(...$annotation->value)) {
-            $event->setController(function () use ($annotation) {
-                if ($annotation->mode == HasPermission::IN_JSON) {
+        if(!$this->roleService->hasPermission(...$annotation->value)) {
+            $event->setController(function() use ($annotation) {
+                if($annotation->mode == HasPermission::IN_JSON) {
                     return new JsonResponse([
                         "success" => false,
                         "message" => "Vous n'avez pas les permissions nécessaires",
                     ]);
-                } else if ($annotation->mode == HasPermission::IN_RENDER) {
+                } else if($annotation->mode == HasPermission::IN_RENDER) {
                     return new Response($this->templating->render("security/access_denied.html.twig"));
                 } else {
                     throw new RuntimeException("Unknown mode $annotation->mode");

@@ -65,8 +65,7 @@ class Depository {
         $this->clientOrders = new ArrayCollection();
     }
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
@@ -98,7 +97,7 @@ class Depository {
     }
 
     public function addPreparation(Preparation $preparation): self {
-        if (!$this->preparations->contains($preparation)) {
+        if(!$this->preparations->contains($preparation)) {
             $this->preparations[] = $preparation;
             $preparation->setDepository($this);
         }
@@ -107,8 +106,8 @@ class Depository {
     }
 
     public function removePreparation(Preparation $preparation): self {
-        if ($this->preparations->removeElement($preparation)) {
-            if ($preparation->getDepository() === $this) {
+        if($this->preparations->removeElement($preparation)) {
+            if($preparation->getDepository() === $this) {
                 $preparation->setDepository(null);
             }
         }
@@ -117,12 +116,12 @@ class Depository {
     }
 
     public function setPreparations(?array $preparations): self {
-        foreach ($this->getPreparations()->toArray() as $preparation) {
+        foreach($this->getPreparations()->toArray() as $preparation) {
             $this->removePreparation($preparation);
         }
 
         $this->preparations = new ArrayCollection();
-        foreach ($preparations as $preparation) {
+        foreach($preparations as $preparation) {
             $this->addPreparation($preparation);
         }
 
@@ -137,7 +136,7 @@ class Depository {
     }
 
     public function addDeliveryRound(DeliveryRound $deliveryRound): self {
-        if (!$this->deliveryRounds->contains($deliveryRound)) {
+        if(!$this->deliveryRounds->contains($deliveryRound)) {
             $this->deliveryRounds[] = $deliveryRound;
             $deliveryRound->setDepository($this);
         }
@@ -146,8 +145,8 @@ class Depository {
     }
 
     public function removeDeliveryRound(DeliveryRound $deliveryRound): self {
-        if ($this->deliveryRounds->removeElement($deliveryRound)) {
-            if ($deliveryRound->getDepository() === $this) {
+        if($this->deliveryRounds->removeElement($deliveryRound)) {
+            if($deliveryRound->getDepository() === $this) {
                 $deliveryRound->setDepository(null);
             }
         }
@@ -156,12 +155,12 @@ class Depository {
     }
 
     public function setDeliveryRounds(?array $deliveryRounds): self {
-        foreach ($this->getDeliveryRounds()->toArray() as $deliveryRound) {
+        foreach($this->getDeliveryRounds()->toArray() as $deliveryRound) {
             $this->removeDeliveryRound($deliveryRound);
         }
 
         $this->deliveryRounds = new ArrayCollection();
-        foreach ($deliveryRounds as $deliveryRound) {
+        foreach($deliveryRounds as $deliveryRound) {
             $this->addDeliveryRound($deliveryRound);
         }
 
@@ -171,13 +170,12 @@ class Depository {
     /**
      * @return Collection|Location[]
      */
-    public function getLocations(): Collection
-    {
+    public function getLocations(): Collection {
         return $this->locations;
     }
 
     public function addLocation(Location $location): self {
-        if (!$this->locations->contains($location)) {
+        if(!$this->locations->contains($location)) {
             $this->locations[] = $location;
             $location->setDepository($this);
         }
@@ -186,8 +184,8 @@ class Depository {
     }
 
     public function removeLocation(Location $location): self {
-        if ($this->locations->removeElement($location)) {
-            if ($location->getDepository() === $this) {
+        if($this->locations->removeElement($location)) {
+            if($location->getDepository() === $this) {
                 $location->setDepository(null);
             }
         }
@@ -195,8 +193,7 @@ class Depository {
         return $this;
     }
 
-    public function setLocations(?array $locations): self
-    {
+    public function setLocations(?array $locations): self {
         foreach($this->getLocations()->toArray() as $location) {
             $this->removeLocation($location);
         }
@@ -212,14 +209,12 @@ class Depository {
     /**
      * @return Collection|ClientOrderInformation[]
      */
-    public function getClientOrderInformation(): Collection
-    {
+    public function getClientOrderInformation(): Collection {
         return $this->clientOrderInformation;
     }
 
-    public function addClientOrderInformation(ClientOrderInformation $clientOrderInformation): self
-    {
-        if (!$this->clientOrderInformation->contains($clientOrderInformation)) {
+    public function addClientOrderInformation(ClientOrderInformation $clientOrderInformation): self {
+        if(!$this->clientOrderInformation->contains($clientOrderInformation)) {
             $this->clientOrderInformation[] = $clientOrderInformation;
             $clientOrderInformation->setDepository($this);
         }
@@ -227,11 +222,10 @@ class Depository {
         return $this;
     }
 
-    public function removeClientOrderInformation(ClientOrderInformation $clientOrderInformation): self
-    {
-        if ($this->clientOrderInformation->removeElement($clientOrderInformation)) {
+    public function removeClientOrderInformation(ClientOrderInformation $clientOrderInformation): self {
+        if($this->clientOrderInformation->removeElement($clientOrderInformation)) {
             // set the owning side to null (unless already changed)
-            if ($clientOrderInformation->getDepository() === $this) {
+            if($clientOrderInformation->getDepository() === $this) {
                 $clientOrderInformation->setDepository(null);
             }
         }
@@ -247,7 +241,7 @@ class Depository {
     }
 
     public function addClientOrder(ClientOrder $clientOrder): self {
-        if (!$this->clientOrders->contains($clientOrder)) {
+        if(!$this->clientOrders->contains($clientOrder)) {
             $this->clientOrders[] = $clientOrder;
             $clientOrder->setDepository($this);
         }
@@ -256,8 +250,8 @@ class Depository {
     }
 
     public function removeClientOrder(ClientOrder $clientOrder): self {
-        if ($this->clientOrders->removeElement($clientOrder)) {
-            if ($clientOrder->getDepository() === $this) {
+        if($this->clientOrders->removeElement($clientOrder)) {
+            if($clientOrder->getDepository() === $this) {
                 $clientOrder->setDepository(null);
             }
         }

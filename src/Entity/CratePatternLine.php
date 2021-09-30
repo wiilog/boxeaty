@@ -8,8 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=CratePatternLineRepository::class)
  */
-class CratePatternLine
-{
+class CratePatternLine {
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -37,37 +37,31 @@ class CratePatternLine
      */
     private ?BoxType $boxType = null;
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getCustomUnitPrice(): ?float
-    {
+    public function getCustomUnitPrice(): ?float {
         return $this->customUnitPrice;
     }
 
-    public function setCustomUnitPrice(?float $customUnitPrice): self
-    {
+    public function setCustomUnitPrice(?float $customUnitPrice): self {
         $this->customUnitPrice = $customUnitPrice;
 
         return $this;
     }
 
-    public function getQuantity(): ?float
-    {
+    public function getQuantity(): ?float {
         return $this->quantity;
     }
 
-    public function setQuantity(int $quantity): self
-    {
+    public function setQuantity(int $quantity): self {
         $this->quantity = $quantity;
 
         return $this;
     }
 
-    public function getClient(): ?Client
-    {
+    public function getClient(): ?Client {
         return $this->client;
     }
 
@@ -83,8 +77,7 @@ class CratePatternLine
         return $this;
     }
 
-    public function getBoxType(): ?BoxType
-    {
+    public function getBoxType(): ?BoxType {
         return $this->boxType;
     }
 
@@ -96,4 +89,5 @@ class CratePatternLine
     public function getUnitPrice(): ?float {
         return $this->getCustomUnitPrice() ?: ($this->getBoxType() ? $this->getBoxType()->getPrice() : null);
     }
+
 }

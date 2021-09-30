@@ -56,7 +56,7 @@ class GlobalSettingController extends AbstractController {
             ],
             'default_crate_type' => !empty($crateTypeId)
                 ? $boxTypeRepository->find($crateTypeId)
-                : null
+                : null,
         ]);
     }
 
@@ -68,7 +68,7 @@ class GlobalSettingController extends AbstractController {
         $content = $request->request->all();
 
         $settings = $manager->getRepository(GlobalSetting::class)->getAll();
-        foreach ($settings as $setting) {
+        foreach($settings as $setting) {
             $setting->setValue($content[$setting->getName()] ?? null);
         }
 
@@ -90,7 +90,7 @@ class GlobalSettingController extends AbstractController {
 
         $data = [];
         /** @var WorkFreeDay $day */
-        foreach ($days["data"] as $day) {
+        foreach($days["data"] as $day) {
             $data[] = [
                 "id" => $day->getId(),
                 "day" => $day->getDay() . " " . FormatHelper::MONTHS[$day->getMonth()],
@@ -115,17 +115,17 @@ class GlobalSettingController extends AbstractController {
         $content = (object)$request->request->all();
         $existing = $manager->getRepository(WorkFreeDay::class)->findOneBy([
             "day" => $content->day,
-            "month" => $content->month
+            "month" => $content->month,
         ]);
 
         // TODO Gérer la validation les derniers jours du mois
 
-        if ($existing) {
+        if($existing) {
             $form->addError("day", "Ce jour ferié existe déjà");
             $form->addError("month", "Ce jour ferié existe déjà");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $day = new WorkFreeDay();
             $day->setDay($content->day)
                 ->setMonth($content->month);
@@ -169,15 +169,14 @@ class GlobalSettingController extends AbstractController {
      * @Route("/mode-transport/api", name="delivery_method_api", options={"expose": true})
      * @HasPermission(Role::MANAGE_SETTINGS)
      */
-    public function transportModeApi(Request $request, EntityManagerInterface $manager): Response
-    {
+    public function transportModeApi(Request $request, EntityManagerInterface $manager): Response {
         $transportModes["data"] = $manager->getRepository(DeliveryMethod::class)
             ->findForDatatable(json_decode($request->getContent(), true) ?? []);
 
         $data = [];
 
         /** @var DeliveryMethod $transportMode */
-        foreach ($transportModes["data"]["data"] as $transportMode) {
+        foreach($transportModes["data"]["data"] as $transportMode) {
             $icon = $transportMode->getIcon();
             $data[] = [
                 "id" => $transportMode->getId(),
@@ -198,8 +197,7 @@ class GlobalSettingController extends AbstractController {
      * @Route("/methode-livraison/ajouter", name="delivery_mode_add", options={"expose": true})
      * @HasPermission(Role::MANAGE_SETTINGS)
      */
-    public function addDeliveryMethod(Request $request, EntityManagerInterface $manager): Response
-    {
+    public function addDeliveryMethod(Request $request, EntityManagerInterface $manager): Response {
         $content = (object)$request->request->all();
 
         $name = $content->nameDeliveryMethode;
@@ -209,16 +207,16 @@ class GlobalSettingController extends AbstractController {
             "name" => $name,
         ]);
 
-        if ($existing && $existing->getDeleted() && $existing->getIcon() === $icon) {
+        if($existing && $existing->getDeleted() && $existing->getIcon() === $icon) {
             $existing->setDeleted(false);
             $response = [
                 "success" => true,
-                "message" => "Le type de mobilité ${name} a bien été réactivé"
+                "message" => "Le type de mobilité ${name} a bien été réactivé",
             ];
         } else if($existing && !$existing->getDeleted()) {
             $response = [
                 "success" => false,
-                "message" => "Ce type de mobilité existe déjà"
+                "message" => "Ce type de mobilité existe déjà",
             ];
         } else {
             $deliveryMethod = (new DeliveryMethod())
@@ -229,7 +227,7 @@ class GlobalSettingController extends AbstractController {
             $manager->persist($deliveryMethod);
             $response = [
                 "success" => true,
-                "message" => "Le type de mobilité ${name} a bien été créé"
+                "message" => "Le type de mobilité ${name} a bien été créé",
             ];
         }
         $manager->flush();
@@ -241,8 +239,7 @@ class GlobalSettingController extends AbstractController {
      * @Route("/delivery-method/supprimer/{deliveryMethod}", name="delivery_methode_delete", options={"expose": true})
      * @HasPermission(Role::MANAGE_SETTINGS)
      */
-    public function deleteDeliveryMethod(EntityManagerInterface $manager, DeliveryMethod $deliveryMethod): Response
-    {
+    public function deleteDeliveryMethod(EntityManagerInterface $manager, DeliveryMethod $deliveryMethod): Response {
         $deliveryMethod->setDeleted(true);
         $manager->flush();
 
@@ -251,4 +248,5 @@ class GlobalSettingController extends AbstractController {
             "message" => "Type de mobilité supprimé",
         ]);
     }
+
 }

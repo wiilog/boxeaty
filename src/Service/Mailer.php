@@ -48,14 +48,14 @@ class Mailer {
     }
 
     public function send($recipients, string $subject, string $content) {
-        if (empty($recipients)) {
+        if(empty($recipients)) {
             return;
         }
 
         if(is_string($recipients)) {
             $originalRecipients = [$recipients];
         } else {
-            if (!is_array($recipients) && !($recipients instanceof Traversable)) {
+            if(!is_array($recipients) && !($recipients instanceof Traversable)) {
                 $recipients = [$recipients];
             }
 
@@ -73,11 +73,11 @@ class Mailer {
             $emails = ["test@wiilog.fr"];
         }
 
-        if (empty($emails)) {
+        if(empty($emails)) {
             return;
         }
 
-        if ($_SERVER["APP_ENV"] !== "prod") {
+        if($_SERVER["APP_ENV"] !== "prod") {
             $content .= "<p>DESTINATAIRES : " . Stream::from($originalRecipients)->join(', ') . "</p>";
         }
 

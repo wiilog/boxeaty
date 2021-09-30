@@ -233,7 +233,7 @@ class Location {
     }
 
     public function addBox(Box $box): self {
-        if (!$this->boxes->contains($box)) {
+        if(!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
             $box->setLocation($this);
         }
@@ -242,9 +242,9 @@ class Location {
     }
 
     public function removeBox(Box $box): self {
-        if ($this->boxes->removeElement($box)) {
+        if($this->boxes->removeElement($box)) {
             // set the owning side to null (unless already changed)
-            if ($box->getLocation() === $this) {
+            if($box->getLocation() === $this) {
                 $box->setLocation(null);
             }
         }
@@ -260,7 +260,7 @@ class Location {
     }
 
     public function addBoxRecord(BoxRecord $boxRecord): self {
-        if (!$this->boxRecords->contains($boxRecord)) {
+        if(!$this->boxRecords->contains($boxRecord)) {
             $this->boxRecords[] = $boxRecord;
             $boxRecord->setLocation($this);
         }
@@ -269,9 +269,9 @@ class Location {
     }
 
     public function removeBoxRecord(BoxRecord $boxRecord): self {
-        if ($this->boxRecords->removeElement($boxRecord)) {
+        if($this->boxRecords->removeElement($boxRecord)) {
             // set the owning side to null (unless already changed)
-            if ($boxRecord->getLocation() === $this) {
+            if($boxRecord->getLocation() === $this) {
                 $boxRecord->setLocation(null);
             }
         }
@@ -287,7 +287,7 @@ class Location {
     }
 
     public function addDepositTicket(DepositTicket $depositTicket): self {
-        if (!$this->depositTickets->contains($depositTicket)) {
+        if(!$this->depositTickets->contains($depositTicket)) {
             $this->depositTickets[] = $depositTicket;
             $depositTicket->setLocation($this);
         }
@@ -296,9 +296,9 @@ class Location {
     }
 
     public function removeDepositTicket(DepositTicket $depositTicket): self {
-        if ($this->depositTickets->removeElement($depositTicket)) {
+        if($this->depositTickets->removeElement($depositTicket)) {
             // set the owning side to null (unless already changed)
-            if ($depositTicket->getLocation() === $this) {
+            if($depositTicket->getLocation() === $this) {
                 $depositTicket->setLocation(null);
             }
         }
@@ -317,7 +317,7 @@ class Location {
                     "id" => $box->getId(),
                     "number" => $box->getNumber(),
                 ])
-                ->toArray()
+                ->toArray(),
         ];
     }
 
@@ -329,7 +329,7 @@ class Location {
     }
 
     public function addPickedCollect(Collect $pickedCollect): self {
-        if (!$this->pickedCollects->contains($pickedCollect)) {
+        if(!$this->pickedCollects->contains($pickedCollect)) {
             $this->pickedCollects[] = $pickedCollect;
             $pickedCollect->setPickLocation($this);
         }
@@ -338,9 +338,9 @@ class Location {
     }
 
     public function removePickedCollect(Collect $pickedCollects): self {
-        if ($this->pickedCollects->removeElement($pickedCollects)) {
+        if($this->pickedCollects->removeElement($pickedCollects)) {
             // set the owning side to null (unless already changed)
-            if ($pickedCollects->getPickLocation() === $this) {
+            if($pickedCollects->getPickLocation() === $this) {
                 $pickedCollects->setPickLocation(null);
             }
         }
@@ -349,12 +349,12 @@ class Location {
     }
 
     public function setPickedCollect(?array $pickedCollects): self {
-        foreach ($this->getPickedCollects()->toArray() as $pickedCollect) {
+        foreach($this->getPickedCollects()->toArray() as $pickedCollect) {
             $this->removePickedCollect($pickedCollect);
         }
 
         $this->pickedCollects = new ArrayCollection();
-        foreach ($pickedCollects as $pickedCollect) {
+        foreach($pickedCollects as $pickedCollect) {
             $this->addPickedCollect($pickedCollect);
         }
 
@@ -369,7 +369,7 @@ class Location {
     }
 
     public function addDroppedCollect(Collect $droppedCollect): self {
-        if (!$this->droppedCollects->contains($droppedCollect)) {
+        if(!$this->droppedCollects->contains($droppedCollect)) {
             $this->droppedCollects[] = $droppedCollect;
             $droppedCollect->setDropLocation($this);
         }
@@ -378,9 +378,9 @@ class Location {
     }
 
     public function removeDroppedCollect(Collect $droppedCollect): self {
-        if ($this->droppedCollects->removeElement($droppedCollect)) {
+        if($this->droppedCollects->removeElement($droppedCollect)) {
             // set the owning side to null (unless already changed)
-            if ($droppedCollect->getDropLocation() === $this) {
+            if($droppedCollect->getDropLocation() === $this) {
                 $droppedCollect->setDropLocation(null);
             }
         }
@@ -389,12 +389,12 @@ class Location {
     }
 
     public function setDroppedCollects(?array $droppedCollects): self {
-        foreach ($this->getDroppedCollects()->toArray() as $droppedCollect) {
+        foreach($this->getDroppedCollects()->toArray() as $droppedCollect) {
             $this->removeDroppedCollect($droppedCollect);
         }
 
         $this->droppedCollects = new ArrayCollection();
-        foreach ($droppedCollects as $droppedCollect) {
+        foreach($droppedCollects as $droppedCollect) {
             $this->addDroppedCollect($droppedCollect);
         }
 
@@ -402,20 +402,17 @@ class Location {
     }
 
 
-    public function getType(): ?int
-    {
+    public function getType(): ?int {
         return $this->type;
     }
 
-    public function setType(?int $type): self
-    {
+    public function setType(?int $type): self {
         $this->type = $type;
 
         return $this;
     }
 
-    public function getDepository(): ?Depository
-    {
+    public function getDepository(): ?Depository {
         return $this->depository;
     }
 

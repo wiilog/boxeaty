@@ -40,7 +40,7 @@ class TrackingMovementController extends AbstractController {
             "initial_movements" => $this->api($request, $manager)->getContent(),
             "movements_order" => BoxRecordRepository::DEFAULT_DATATABLE_ORDER,
             "qualities" => $qualities,
-            "states" => BoxStateService::RECORD_STATES
+            "states" => BoxStateService::RECORD_STATES,
         ]);
     }
 
@@ -59,7 +59,7 @@ class TrackingMovementController extends AbstractController {
 
         $data = [];
         /** @var BoxRecord $movement */
-        foreach ($movements["data"] as $movement) {
+        foreach($movements["data"] as $movement) {
             $data[] = [
                 "id" => $movement->getId(),
                 "date" => FormatHelper::datetime($movement->getDate()),
@@ -85,21 +85,21 @@ class TrackingMovementController extends AbstractController {
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      * @throws Exception
      */
-    public function new(Request $request,
-                        BoxRecordService $boxRecordService,
+    public function new(Request                $request,
+                        BoxRecordService       $boxRecordService,
                         EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $trackingMovementRepository = $manager->getRepository(BoxRecord::class);
 
         /** @var Box $box */
         $box = $manager->getRepository(Box::class)->find($content->box);
-        if (!$box) {
+        if(!$box) {
             $form->addError("box", "Cette Box n'existe pas ou a changé de numéro");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $oldState = $box->getState();
             $oldComment = $box->getComment();
 
@@ -122,7 +122,7 @@ class TrackingMovementController extends AbstractController {
             $manager->flush();
 
             $newerMovement = $trackingMovementRepository->findNewerTrackingMovement($movement);
-            if (!$newerMovement) {
+            if(!$newerMovement) {
                 $previous = clone $box;
                 $box->fromRecord($movement);
 
@@ -155,7 +155,7 @@ class TrackingMovementController extends AbstractController {
                 "movement" => $movement,
                 "qualities" => $qualities,
                 "states" => BoxStateService::RECORD_STATES,
-            ])
+            ]),
         ]);
     }
 
@@ -163,15 +163,15 @@ class TrackingMovementController extends AbstractController {
      * @Route("/modifier/{movement}", name="tracking_movement_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
-    public function edit(Request $request,
-                         BoxRecordService $boxRecordService,
+    public function edit(Request                $request,
+                         BoxRecordService       $boxRecordService,
                          EntityManagerInterface $manager,
-                         BoxRecord $movement): Response {
+                         BoxRecord              $movement): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $box = $manager->getRepository(Box::class)->find($content->box);
-        if (!$box) {
+        if(!$box) {
             $form->addError("box", "Cette Box n'existe pas ou a changé de numéro");
         }
 
@@ -180,7 +180,7 @@ class TrackingMovementController extends AbstractController {
         $client = isset($content->client) ? $manager->getRepository(Client::class)->find($content->client) : null;
         $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $movement->setDate(new DateTime($content->date))
                 ->setQuality($quality)
                 ->setState($content->state ?? null)
@@ -191,7 +191,7 @@ class TrackingMovementController extends AbstractController {
             $manager->flush();
 
             $newerMovement = $trackingMovementRepository->findNewerTrackingMovement($movement);
-            if (!$newerMovement) {
+            if(!$newerMovement) {
                 $previous = clone $box;
                 $box->fromRecord($movement);
 
@@ -215,16 +215,16 @@ class TrackingMovementController extends AbstractController {
      * @HasPermission(Role::MANAGE_MOVEMENTS)
      */
     public function delete(Request $request, EntityManagerInterface $manager): Response {
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $movement = $manager->getRepository(BoxRecord::class)->find($content->id);
 
-        if ($movement) {
+        if($movement) {
             $manager->remove($movement);
             $manager->flush();
 
             return $this->json([
                 "success" => true,
-                "message" => "Mouvement de traçabilité supprimé avec succès"
+                "message" => "Mouvement de traçabilité supprimé avec succès",
             ]);
         } else {
             return $this->json([
@@ -245,7 +245,7 @@ class TrackingMovementController extends AbstractController {
         $today = $today->format("d-m-Y-H-i-s");
 
         return $exportService->export(function($output) use ($exportService, $movements) {
-            foreach ($movements as $movement) {
+            foreach($movements as $movement) {
                 $movement["state"] = BoxStateService::RECORD_STATES[$movement["state"]] ?? "Inconnu";
                 $exportService->putLine($output, $movement);
             }

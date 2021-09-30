@@ -57,13 +57,13 @@ class Preparation {
     }
 
     public function setOrder(?ClientOrder $order): self {
-        if ($this->order && $this->order->getPreparation() !== $this) {
+        if($this->order && $this->order->getPreparation() !== $this) {
             $oldPreparation = $this->order;
             $this->order = null;
             $oldPreparation->setPreparation(null);
         }
         $this->order = $order;
-        if ($this->order && $this->order->getPreparation() !== $this) {
+        if($this->order && $this->order->getPreparation() !== $this) {
             $this->order->setPreparation($this);
         }
 
@@ -75,11 +75,11 @@ class Preparation {
     }
 
     public function setDepository(?Depository $depository): self {
-        if ($this->depository && $this->depository !== $depository) {
+        if($this->depository && $this->depository !== $depository) {
             $this->depository->removePreparation($this);
         }
         $this->depository = $depository;
-        if ($depository) {
+        if($depository) {
             $depository->addPreparation($this);
         }
 
@@ -94,7 +94,7 @@ class Preparation {
     }
 
     public function addLine(PreparationLine $line): self {
-        if (!$this->lines->contains($line)) {
+        if(!$this->lines->contains($line)) {
             $this->lines[] = $line;
             $line->setPreparation($this);
         }
@@ -103,8 +103,8 @@ class Preparation {
     }
 
     public function removeLine(PreparationLine $line): self {
-        if ($this->lines->removeElement($line)) {
-            if ($line->getPreparation() === $this) {
+        if($this->lines->removeElement($line)) {
+            if($line->getPreparation() === $this) {
                 $line->setPreparation(null);
             }
         }

@@ -46,7 +46,7 @@ class DepositTicketRepository extends EntityRepository {
 
         $qb = $this->createQueryBuilder("deposit_ticket");
 
-        if ($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
+        if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
             $qb->join("deposit_ticket.location", "current_group_location")
                 ->join("current_group_location.client", "current_group_client")
                 ->andWhere("current_group_client.group IN (:current_groups)")
@@ -55,7 +55,7 @@ class DepositTicketRepository extends EntityRepository {
 
         $total = QueryHelper::count($qb, "deposit_ticket");
 
-        if ($search) {
+        if($search) {
             $qb
                 ->leftJoin("deposit_ticket.location", "search_kiosk")
                 ->leftJoin("search_kiosk.client", "search_client")
@@ -74,8 +74,8 @@ class DepositTicketRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        foreach ($params["filters"] ?? [] as $name => $value) {
-            switch ($name) {
+        foreach($params["filters"] ?? [] as $name => $value) {
+            switch($name) {
                 case "from":
                     $qb->andWhere("DATE(deposit_ticket.creationDate) >= :from")
                         ->setParameter("from", $value);
@@ -99,32 +99,31 @@ class DepositTicketRepository extends EntityRepository {
             }
         }
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
-                if ($column === "kiosk") {
+                if($column === "kiosk") {
                     $qb->leftJoin("deposit_ticket.location", "order_location")
                         ->addOrderBy("order_location.name", $order["dir"]);
-                } else if ($column === "client") {
+                } else if($column === "client") {
                     $qb->leftJoin("deposit_ticket.location", "order_client_location")
                         ->leftJoin("order_client_location.client", "order_client")
                         ->addOrderBy("order_client.name", $order["dir"]);
-                } else if ($column === 'orderUser') {
+                } else if($column === 'orderUser') {
                     $qb
                         ->leftJoin('deposit_ticket.orderUser', 'order_orderUser')
                         ->addOrderBy('order_orderUser.username', $order["dir"]);
-                } else if ($column === 'depositAmount') {
+                } else if($column === 'depositAmount') {
                     $qb
                         ->leftJoin('deposit_ticket.box', 'order_box')
                         ->leftJoin('order_box.type', 'order_box_type')
                         ->addOrderBy('order_box_type.price', $order["dir"]);
-                } else if (property_exists(DepositTicket::class, $column)) {
+                } else if(property_exists(DepositTicket::class, $column)) {
                     $qb->addOrderBy("deposit_ticket.$column", $order["dir"]);
                 }
             }
-        }
-        else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+        } else {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("deposit_ticket.$column", $dir);
             }
         }
@@ -183,7 +182,7 @@ class DepositTicketRepository extends EntityRepository {
             ->getResult();
 
         return Stream::from($res)
-            ->keymap(fn (array $line) => [$line['type'], $line['count']])
+            ->keymap(fn(array $line) => [$line['type'], $line['count']])
             ->toArray();
     }
 

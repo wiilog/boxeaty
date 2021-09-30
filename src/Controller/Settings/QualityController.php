@@ -41,7 +41,7 @@ class QualityController extends AbstractController {
         $qualities = $qualityRepository->findForDatatable(json_decode($request->getContent(), true) ?? []);
 
         $data = [];
-        foreach ($qualities["data"] as $quality) {
+        foreach($qualities["data"] as $quality) {
             $data[] = [
                 "id" => $quality->getId(),
                 "name" => $quality->getName(),
@@ -68,11 +68,11 @@ class QualityController extends AbstractController {
 
         $content = (object)$request->request->all();
         $existing = $manager->getRepository(Quality::class)->findOneBy(["name" => $content->name]);
-        if ($existing) {
+        if($existing) {
             $form->addError("name", "Une qualité avec ce nom existe déjà");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $quality = new Quality();
             $quality
                 ->setName($content->name)
@@ -101,7 +101,7 @@ class QualityController extends AbstractController {
             "submit" => $this->generateUrl("quality_edit", ["quality" => $quality->getId()]),
             "template" => $this->renderView("settings/quality/modal/edit.html.twig", [
                 "quality" => $quality,
-            ])
+            ]),
         ]);
     }
 
@@ -114,11 +114,11 @@ class QualityController extends AbstractController {
 
         $content = (object)$request->request->all();
         $existing = $manager->getRepository(Quality::class)->findOneBy(["name" => $content->name]);
-        if ($existing !== null && $existing !== $quality) {
+        if($existing !== null && $existing !== $quality) {
             $form->addError("name", "Une autre qualité avec ce nom existe déjà");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $quality
                 ->setName($content->name)
                 ->setActive($content->active)
@@ -145,7 +145,7 @@ class QualityController extends AbstractController {
             "submit" => $this->generateUrl("quality_delete", ["quality" => $quality->getId()]),
             "template" => $this->renderView("settings/quality/modal/delete.html.twig", [
                 "quality" => $quality,
-            ])
+            ]),
         ]);
     }
 
@@ -154,27 +154,27 @@ class QualityController extends AbstractController {
      * @HasPermission(Role::MANAGE_QUALITIES)
      */
     public function delete(EntityManagerInterface $manager, Quality $quality): Response {
-        if (!$quality->getBoxes()->isEmpty() || !$quality->getRecords()->isEmpty()) {
+        if(!$quality->getBoxes()->isEmpty() || !$quality->getRecords()->isEmpty()) {
             $quality->setActive(false);
             $manager->flush();
 
             return $this->json([
                 "success" => true,
-                "message" => "Qualité <strong>{$quality->getName()}</strong> désactivée avec succès"
+                "message" => "Qualité <strong>{$quality->getName()}</strong> désactivée avec succès",
             ]);
-        } else if ($quality) {
+        } else if($quality) {
             $manager->remove($quality);
             $manager->flush();
 
             return $this->json([
                 "success" => true,
-                "message" => "Qualité <strong>{$quality->getName()}</strong> supprimée avec succès"
+                "message" => "Qualité <strong>{$quality->getName()}</strong> supprimée avec succès",
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "message" => "La qualité n'existe pas"
+                "message" => "La qualité n'existe pas",
             ]);
         }
     }
@@ -190,7 +190,7 @@ class QualityController extends AbstractController {
         $today = $today->format("d-m-Y-H-i-s");
 
         return $exportService->export(function($output) use ($exportService, $qualities) {
-            foreach ($qualities as $quality) {
+            foreach($qualities as $quality) {
                 $exportService->putLine($output, $quality);
             }
         }, "export-qualites-$today.csv", ExportService::QUALITY_HEADER);

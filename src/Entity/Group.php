@@ -65,7 +65,7 @@ class Group {
     }
 
     public function addClient(Client $client): self {
-        if (!$this->clients->contains($client)) {
+        if(!$this->clients->contains($client)) {
             $this->clients[] = $client;
             $client->setGroup($this);
         }
@@ -74,9 +74,9 @@ class Group {
     }
 
     public function removeClient(Client $client): self {
-        if ($this->clients->removeElement($client)) {
+        if($this->clients->removeElement($client)) {
             // set the owning side to null (unless already changed)
-            if ($client->getGroup() === $this) {
+            if($client->getGroup() === $this) {
                 $client->setGroup(null);
             }
         }
@@ -92,7 +92,7 @@ class Group {
     }
 
     public function addUser(User $user): self {
-        if (!$this->users->contains($user)) {
+        if(!$this->users->contains($user)) {
             $this->users[] = $user;
             $user->addGroup($this);
         }
@@ -101,7 +101,7 @@ class Group {
     }
 
     public function removeUser(User $user): self {
-        if ($this->users->removeElement($user)) {
+        if($this->users->removeElement($user)) {
             $user->removeGroup($this);
         }
 

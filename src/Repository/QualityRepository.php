@@ -12,8 +12,8 @@ use Doctrine\ORM\EntityRepository;
  * @method Quality[]    findAll()
  * @method Quality[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class QualityRepository extends EntityRepository
-{
+class QualityRepository extends EntityRepository {
+
     public const DEFAULT_DATATABLE_ORDER = [['name', 'asc']];
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
@@ -48,18 +48,18 @@ class QualityRepository extends EntityRepository
         $qb = $this->createQueryBuilder("quality");
         $total = QueryHelper::count($qb, "quality");
 
-        if ($search) {
+        if($search) {
             $qb->andWhere("quality.name LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("quality.$column", $order["dir"]);
             }
         } else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("quality.$column", $dir);
             }
         }

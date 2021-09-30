@@ -24,7 +24,7 @@ class BoxRecordService {
         $currentValues = $this->extract($box);
         $previousValues = $this->extract($previous);
 
-        if ($this->isDifferent($currentValues, $previousValues, self::TRACKING_MOVEMENT_FIELDS)) {
+        if($this->isDifferent($currentValues, $previousValues, self::TRACKING_MOVEMENT_FIELDS)) {
             $tracking = $this->createBoxRecord($box, true, $user, $date);
             $this->persist($box, $tracking);
 
@@ -33,7 +33,7 @@ class BoxRecordService {
             }
         }
 
-        if ($this->isDifferent($currentValues, $previousValues, self::BOX_HISTORY_FIELDS)) {
+        if($this->isDifferent($currentValues, $previousValues, self::BOX_HISTORY_FIELDS)) {
             $record = $this->createBoxRecord($box, false, $user, $date);
             $this->persist($box, $record);
 
@@ -46,14 +46,14 @@ class BoxRecordService {
     }
 
     public function persist(Box $box, ?BoxRecord $record, EntityManagerInterface $manager = null) {
-        if ($record) {
+        if($record) {
             $record->setBox($box);
             ($manager ?? $this->manager)->persist($record);
         }
     }
 
     public function remove(?BoxRecord $record, EntityManagerInterface $manager = null) {
-        if ($record) {
+        if($record) {
             $record->setBox(null);
             ($manager ?? $this->manager)->remove($record);
         }

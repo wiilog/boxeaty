@@ -13,12 +13,12 @@ class RoleService {
 
     public function hasPermission(string ...$permissions): bool {
         $user = $this->security->getUser();
-        if ($user instanceof User && $user->isActive()) {
+        if($user instanceof User && $user->isActive()) {
             $role = $user->getRole();
 
             $index = 0;
             $permissionCount = count($permissions);
-            while ($index < $permissionCount && !$this->hasSinglePermission($role, $permissions[$index])) {
+            while($index < $permissionCount && !$this->hasSinglePermission($role, $permissions[$index])) {
                 $index++;
             }
 

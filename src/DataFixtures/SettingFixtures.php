@@ -38,8 +38,8 @@ class SettingFixtures extends Fixture implements FixtureGroupInterface {
 
         $settingRepository = $manager->getRepository(GlobalSetting::class);
 
-        foreach (self::DEFAULTS as $name => $default) {
-            if ($settingRepository->findOneBy(["name" => $name]) === null) {
+        foreach(self::DEFAULTS as $name => $default) {
+            if($settingRepository->findOneBy(["name" => $name]) === null) {
                 $setting = (new GlobalSetting())
                     ->setName($name)
                     ->setValue($default);

@@ -31,7 +31,7 @@ class ImportCommand extends Command {
         $upcoming = $this->manager->getRepository(Import::class)->findUpcoming();
 
         /** @var Import $import */
-        foreach ($upcoming as $import) {
+        foreach($upcoming as $import) {
             $import->setStatus(Import::RUNNING)
                 ->setCreations(0)
                 ->setUpdates(0)

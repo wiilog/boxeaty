@@ -160,10 +160,10 @@ class ExportService {
     public function export(callable $generator, string $name, ?array $headers = null): StreamedResponse {
         $response = new StreamedResponse(function() use ($generator, $headers) {
             $output = fopen("php://output", "wb");
-            if ($headers) {
+            if($headers) {
                 $firstCell = $headers[0] ?? null;
-                if (is_array($firstCell)) {
-                    foreach ($headers as $headerLine) {
+                if(is_array($firstCell)) {
+                    foreach($headers as $headerLine) {
                         $this->putLine($output, $headerLine);
                     }
                 } else {
@@ -211,9 +211,9 @@ class ExportService {
 
     public function stringify(array $row) {
         return array_map(function($cell) {
-            if ($cell instanceof DateTime) {
+            if($cell instanceof DateTime) {
                 return $cell->format("d/m/Y H:i:s");
-            } else if (is_bool($cell)) {
+            } else if(is_bool($cell)) {
                 return $cell ? 'oui' : 'non';
             } else {
                 return $cell;

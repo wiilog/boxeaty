@@ -25,19 +25,17 @@ use WiiCommon\Helper\Stream;
 /**
  * @Route("/referentiel/emplacements")
  */
-class LocationController extends AbstractController
-{
+class LocationController extends AbstractController {
 
     /**
      * @Route("/liste", name="locations_list")
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
-    public function list(Request $request, EntityManagerInterface $manager): Response
-    {
+    public function list(Request $request, EntityManagerInterface $manager): Response {
         $params = json_decode($request->getContent(), true);
         $filters = $params["filters"] ?? [];
 
-        if (isset($filters["depository"])) {
+        if(isset($filters["depository"])) {
             $depositoryId = $manager->find(Depository::class, $filters['depository'])->getId();
             $boxRepository = $manager->getRepository(Box::class);
             $stockLocationType = array_search(Location::STOCK, Location::LOCATION_TYPES);
@@ -70,7 +68,7 @@ class LocationController extends AbstractController
 
         $data = [];
         /** @var Location $location */
-        foreach ($locations["data"] as $location) {
+        foreach($locations["data"] as $location) {
             $data[] = [
                 "id" => $location->getId(),
                 "kiosk" => $location->isKiosk() ? "Borne" : "Emplacement",
@@ -99,7 +97,7 @@ class LocationController extends AbstractController
         $dataUnavailableState = [];
         $dataOutState = [];
 
-        if (!empty($filters) && count($filters) == 3) {
+        if(!empty($filters) && count($filters) == 3) {
             $depositoryRepository = $manager->getRepository(Depository::class);
             $filters = $params['filters'];
             $depository = $depositoryRepository->find($filters['depository']);
@@ -110,7 +108,7 @@ class LocationController extends AbstractController
             $endDate = DateTime::createFromFormat("Y-m-d", $filters["to"]);
             $boxRecordRepository = $manager->getRepository(BoxRecord::class);
 
-            for ($i = clone $startDate; $i <= $endDate; $i->modify("+1 day")) {
+            for($i = clone $startDate; $i <= $endDate; $i->modify("+1 day")) {
                 $dateMin = clone $i;
                 $dateMax = clone $i;
                 $dateMin->setTime(0, 0, 0);
@@ -158,7 +156,7 @@ class LocationController extends AbstractController
         $depositoryRepository = $manager->getRepository(Depository::class);
         $depository = isset($filters['depository']) ? $depositoryRepository->find($filters['depository']) : null;
 
-        if ($depository) {
+        if($depository) {
             $depositoryId = $depository->getId();
             $stockLocationType = array_search(Location::STOCK, Location::LOCATION_TYPES);
             $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
@@ -189,18 +187,18 @@ class LocationController extends AbstractController
         $content = (object)$request->request->all();
 
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
-        if ($existing) {
+        if($existing) {
             $form->addError("name", "Un emplacement avec ce nom existe déjà");
         }
 
-        if (!isset($content->client) && ($content->kiosk || $content->type ?? 0 == Location::CLIENT)) {
+        if(!isset($content->client) && ($content->kiosk || $content->type ?? 0 == Location::CLIENT)) {
             $form->addError("client", "Requis pour les emplacements de type borne ou client");
         }
-        if ($content->kiosk && (!isset($content->capacity) || $content->capacity < Location::MIN_KIOSK_CAPACITY)) {
+        if($content->kiosk && (!isset($content->capacity) || $content->capacity < Location::MIN_KIOSK_CAPACITY)) {
             $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $service->updateLocation(new Location(), $content);
             $manager->flush();
 
@@ -223,7 +221,7 @@ class LocationController extends AbstractController
             "template" => $this->renderView("referential/location/modal/edit.html.twig", [
                 "location" => $location,
             ]),
-            "success" => true
+            "success" => true,
         ]);
     }
 
@@ -236,19 +234,19 @@ class LocationController extends AbstractController
 
         $content = (object)$request->request->all();
         $existing = $manager->getRepository(Location::class)->findOneBy(["name" => $content->name]);
-        if ($existing !== null && $existing !== $location) {
+        if($existing !== null && $existing !== $location) {
             $form->addError("label", "Un autre emplacement avec ce nom existe déjà");
         }
 
-        if (!isset($content->client) && ($content->kiosk || $content->type ?? 0 == Location::CLIENT)) {
+        if(!isset($content->client) && ($content->kiosk || $content->type ?? 0 == Location::CLIENT)) {
             $form->addError("client", "Requis pour les emplacements de type borne ou client");
         }
 
-        if ($content->kiosk && (!isset($content->capacity) || $content->capacity < Location::MIN_KIOSK_CAPACITY)) {
+        if($content->kiosk && (!isset($content->capacity) || $content->capacity < Location::MIN_KIOSK_CAPACITY)) {
             $form->addError("capacity", "La capacité ne peut être inférieure à " . Location::MIN_KIOSK_CAPACITY);
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $service->updateLocation($existing, $content);
             $manager->flush();
 
@@ -270,7 +268,7 @@ class LocationController extends AbstractController
             "submit" => $this->generateUrl("location_delete", ["location" => $location->getId()]),
             "template" => $this->renderView("referential/location/modal/delete.html.twig", [
                 "location" => $location,
-            ])
+            ]),
         ]);
     }
 
@@ -279,20 +277,20 @@ class LocationController extends AbstractController
      * @HasPermission(Role::MANAGE_LOCATIONS)
      */
     public function delete(EntityManagerInterface $manager, Location $location): Response {
-        if ($location->getOutClient() || !$location->getBoxRecords()->isEmpty() || !$location->getBoxes()->isEmpty()) {
+        if($location->getOutClient() || !$location->getBoxRecords()->isEmpty() || !$location->getBoxes()->isEmpty()) {
             $location->setActive(false);
             $manager->flush();
 
             return $this->json([
                 "success" => true,
-                "message" => "Emplacement <strong>{$location->getName()}</strong> désactivé avec succès"
+                "message" => "Emplacement <strong>{$location->getName()}</strong> désactivé avec succès",
             ]);
         } else {
             $originalLocation = $manager->getRepository(Location::class)->findOneBy([
-                "offset" => $location
+                "offset" => $location,
             ]);
 
-            if ($originalLocation) {
+            if($originalLocation) {
                 $originalLocation->setOffset(null);
             }
             $manager->remove($location);
@@ -300,7 +298,7 @@ class LocationController extends AbstractController
 
             return $this->json([
                 "success" => true,
-                "message" => "Emplacement <strong>{$location->getName()}</strong> supprimé avec succès"
+                "message" => "Emplacement <strong>{$location->getName()}</strong> supprimé avec succès",
             ]);
         }
     }
@@ -316,7 +314,7 @@ class LocationController extends AbstractController
         $today = $today->format("d-m-Y-H-i-s");
 
         return $exportService->export(function($output) use ($exportService, $locations) {
-            foreach ($locations as $location) {
+            foreach($locations as $location) {
                 $location["locationType"] = $location["locationType"] ? Location::LOCATION_TYPES[$location["locationType"]] : '';
                 $exportService->putLine($output, $location);
             }

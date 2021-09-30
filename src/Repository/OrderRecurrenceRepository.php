@@ -12,4 +12,5 @@ use Doctrine\ORM\EntityRepository;
  * @method OrderRecurrence[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class OrderRecurrenceRepository extends EntityRepository {
+
 }

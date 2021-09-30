@@ -48,7 +48,7 @@ class LocationRepository extends EntityRepository {
 
         $total = QueryHelper::count($qb, "location");
 
-        if ($search) {
+        if($search) {
             $qb->leftJoin("location.client", "client")
                 ->andWhere($qb->expr()->orX(
                     "location.name LIKE :search",
@@ -60,8 +60,8 @@ class LocationRepository extends EntityRepository {
                 ->setParameter("exact_search", $search);
         }
 
-        foreach ($params["filters"] ?? [] as $name => $value) {
-            switch ($name) {
+        foreach($params["filters"] ?? [] as $name => $value) {
+            switch($name) {
                 case "depository":
                     $qb->andWhere("location.depository = :raw_value")
                         ->setParameter("raw_value", $value);
@@ -69,25 +69,25 @@ class LocationRepository extends EntityRepository {
             }
         }
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
-                if ($column === "client_name") {
+                if($column === "client_name") {
                     $qb->leftJoin("location.client", "location_client")
                         ->addOrderBy("location_client.name", $order["dir"]);
-                } else if ($column === "container_amount") {
+                } else if($column === "container_amount") {
                     $qb
                         ->leftJoin('location.boxes', 'box')
                         ->groupBy('location')
                         ->addOrderBy("COUNT(box)", $order["dir"]);
-                } else if ($column === "location_type") {
+                } else if($column === "location_type") {
                     $qb->addOrderBy('location.type', $order["dir"]);
                 } else {
                     $qb->addOrderBy("location.$column", $order["dir"]);
                 }
             }
         } else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("location.$column", $dir);
             }
         }

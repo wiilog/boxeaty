@@ -15,8 +15,8 @@ class OrderFixtures extends Fixture implements FixtureGroupInterface {
 
         $orderTypeRepository = $manager->getRepository(OrderType::class);
 
-        foreach (OrderType::LABELS as $code => $name) {
-            if ($orderTypeRepository->findOneBy(["code" => $code]) === null) {
+        foreach(OrderType::LABELS as $code => $name) {
+            if($orderTypeRepository->findOneBy(["code" => $code]) === null) {
                 $type = (new OrderType())
                     ->setCode($code)
                     ->setName($name);

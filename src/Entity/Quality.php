@@ -54,8 +54,7 @@ class Quality {
     /**
      * @return bool|null
      */
-    public function getBroken(): ?bool
-    {
+    public function getBroken(): ?bool {
         return $this->broken;
     }
 
@@ -63,8 +62,7 @@ class Quality {
      * @param bool|null $broken
      * @return self
      */
-    public function setBroken(?bool $broken): self
-    {
+    public function setBroken(?bool $broken): self {
         $this->broken = $broken;
         return $this;
     }
@@ -91,7 +89,7 @@ class Quality {
     }
 
     public function addBox(Box $box): self {
-        if (!$this->boxes->contains($box)) {
+        if(!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
             $box->setQuality($this);
         }
@@ -100,9 +98,9 @@ class Quality {
     }
 
     public function removeBox(Box $box): self {
-        if ($this->boxes->removeElement($box)) {
+        if($this->boxes->removeElement($box)) {
             // set the owning side to null (unless already changed)
-            if ($box->getQuality() === $this) {
+            if($box->getQuality() === $this) {
                 $box->setQuality(null);
             }
         }
@@ -118,7 +116,7 @@ class Quality {
     }
 
     public function addRecord(BoxRecord $record): self {
-        if (!$this->records->contains($record)) {
+        if(!$this->records->contains($record)) {
             $this->records[] = $record;
             $record->setQuality($this);
         }
@@ -127,9 +125,9 @@ class Quality {
     }
 
     public function removeRecord(BoxRecord $record): self {
-        if ($this->records->removeElement($record)) {
+        if($this->records->removeElement($record)) {
             // set the owning side to null (unless already changed)
-            if ($record->getQuality() === $this) {
+            if($record->getQuality() === $this) {
                 $record->setQuality(null);
             }
         }
@@ -137,13 +135,11 @@ class Quality {
         return $this;
     }
 
-    public function isClean(): ?bool
-    {
+    public function isClean(): ?bool {
         return $this->clean;
     }
 
-    public function setClean(bool $clean): self
-    {
+    public function setClean(bool $clean): self {
         $this->clean = $clean;
 
         return $this;

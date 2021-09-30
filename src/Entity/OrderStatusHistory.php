@@ -55,11 +55,11 @@ class OrderStatusHistory {
     }
 
     public function setOrder(?ClientOrder $order): self {
-        if ($this->order && $this->order !== $order) {
+        if($this->order && $this->order !== $order) {
             $this->order->removeOrderStatusHistory($this);
         }
         $this->order = $order;
-        if ($order) {
+        if($order) {
             $order->addOrderStatusHistory($this);
         }
 

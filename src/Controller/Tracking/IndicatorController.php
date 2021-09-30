@@ -28,15 +28,15 @@ class IndicatorController extends AbstractController {
      * @Route("/index", name="indicators_index")
      * @HasPermission(Role::VIEW_INDICATORS)
      */
-    public function index(): Response   {
+    public function index(): Response {
         return $this->render("tracking/indicators/index.html.twig");
     }
 
     /**
      * @Route("/api", name="indicators_api", options={"expose": true})
      */
-    public function api(Request $request, EntityManagerInterface $manager): Response
-    {   $params = $request->query->all();
+    public function api(Request $request, EntityManagerInterface $manager): Response {
+        $params = $request->query->all();
         $totalQuantityDelivered = 0;
         $softMobilityTotalDistance = 0;
         $motorVehiclesTotalDistance = 0;
@@ -45,11 +45,11 @@ class IndicatorController extends AbstractController {
         $dataDeliveredBoxs = [];
         $dataCollectedBoxs = [];
 
-        if (!empty($params)) {
-            if (count($params) < 3) {
+        if(!empty($params)) {
+            if(count($params) < 3) {
                 return $this->json([
                     "success" => false,
-                    "message" => "Vous devez renseigner les 3 filtres"
+                    "message" => "Vous devez renseigner les 3 filtres",
                 ]);
             } else {
                 $deliveryRepository = $manager->getRepository(Delivery::class);
@@ -62,7 +62,7 @@ class IndicatorController extends AbstractController {
                 $startDate = DateTime::createFromFormat("Y-m-d", $params["from"]);
                 $endDate = DateTime::createFromFormat("Y-m-d", $params["to"]);
 
-                for ($i = clone $startDate; $i <= $endDate; $i->modify("+1 day")) {
+                for($i = clone $startDate; $i <= $endDate; $i->modify("+1 day")) {
                     $chartLabels[] = $i->format("d/m/Y");
                     $dateMin = clone $i;
                     $dateMax = clone $i;
@@ -92,13 +92,13 @@ class IndicatorController extends AbstractController {
                     ->map(fn(array $distance) => intval($distance["distance"]))
                     ->sum();
 
-                if ($isMultiSite) {
+                if($isMultiSite) {
 
                     $group = $client->getGroup();
                     $clients = $clientRepository->findBy(['group' => $group]);
 
-                    foreach ($clients as $subClient) {
-                        if ($client->getId() !== $subClient->getId()) {
+                    foreach($clients as $subClient) {
+                        if($client->getId() !== $subClient->getId()) {
                             $totalQuantityDelivered += $clientOrderRepository->findQuantityDeliveredBetweenDateAndClient($dateMin, $dateMax, $subClient);
                             $subClientSoftMobilityTotalDistance = $deliveryRoundsRepository->findDeliveryTotalDistance($dateMin, $dateMax, $subClient, [DeliveryMethod::BIKE]);
                             $subClientMotorVehiclesTotalDistance = $deliveryRoundsRepository->findDeliveryTotalDistance($dateMin, $dateMax, $subClient, [DeliveryMethod::LIGHT_TRUCK, DeliveryMethod::HEAVY_TRUCK]);
@@ -135,8 +135,8 @@ class IndicatorController extends AbstractController {
                 'scales' => [
                     'y' => [
                         'beginAtZero' => false,
-                    ]
-                ]
+                    ],
+                ],
             ],
         ];
 
@@ -150,4 +150,5 @@ class IndicatorController extends AbstractController {
             "chart" => json_encode($config),
         ]);
     }
+
 }

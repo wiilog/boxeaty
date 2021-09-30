@@ -261,7 +261,7 @@ class User implements UserInterface {
     }
 
     public function addBoxRecord(BoxRecord $boxRecord): self {
-        if (!$this->boxRecords->contains($boxRecord)) {
+        if(!$this->boxRecords->contains($boxRecord)) {
             $this->boxRecords[] = $boxRecord;
             $boxRecord->setUser($this);
         }
@@ -270,9 +270,9 @@ class User implements UserInterface {
     }
 
     public function removeBoxRecord(BoxRecord $boxRecord): self {
-        if ($this->boxRecords->removeElement($boxRecord)) {
+        if($this->boxRecords->removeElement($boxRecord)) {
             // set the owning side to null (unless already changed)
-            if ($boxRecord->getUser() === $this) {
+            if($boxRecord->getUser() === $this) {
                 $boxRecord->setUser(null);
             }
         }
@@ -288,7 +288,7 @@ class User implements UserInterface {
     }
 
     public function addClient(Client $client): self {
-        if (!$this->clients->contains($client)) {
+        if(!$this->clients->contains($client)) {
             $this->clients[] = $client;
         }
 
@@ -302,14 +302,14 @@ class User implements UserInterface {
     }
 
     public function setClients(array $clients): self {
-        if ($this->clients) {
-            foreach ($this->clients as $client) {
+        if($this->clients) {
+            foreach($this->clients as $client) {
                 $client->removeUser($this);
             }
         }
 
         $this->clients = new ArrayCollection($clients);
-        foreach ($this->clients as $client) {
+        foreach($this->clients as $client) {
             $client->addUser($this);
         }
 
@@ -324,7 +324,7 @@ class User implements UserInterface {
     }
 
     public function addContactOf(Client $contactOf): self {
-        if (!$this->contactOf->contains($contactOf)) {
+        if(!$this->contactOf->contains($contactOf)) {
             $this->contactOf[] = $contactOf;
             $contactOf->setContact($this);
         }
@@ -333,8 +333,8 @@ class User implements UserInterface {
     }
 
     public function removeContactOf(Client $contactOf): self {
-        if ($this->contactOf->removeElement($contactOf)) {
-            if ($contactOf->getContact() === $this) {
+        if($this->contactOf->removeElement($contactOf)) {
+            if($contactOf->getContact() === $this) {
                 $contactOf->setContact(null);
             }
         }
@@ -343,12 +343,12 @@ class User implements UserInterface {
     }
 
     public function setContactOf(?array $contactOfs): self {
-        foreach ($this->getContactOf()->toArray() as $contactOf) {
+        foreach($this->getContactOf()->toArray() as $contactOf) {
             $this->removeContactOf($contactOf);
         }
 
         $this->contactOf = new ArrayCollection();
-        foreach ($contactOfs as $contactOf) {
+        foreach($contactOfs as $contactOf) {
             $this->addContactOf($contactOf);
         }
 
@@ -363,7 +363,7 @@ class User implements UserInterface {
     }
 
     public function addGroup(Group $group): self {
-        if (!$this->groups->contains($group)) {
+        if(!$this->groups->contains($group)) {
             $this->groups[] = $group;
         }
 
@@ -377,14 +377,14 @@ class User implements UserInterface {
     }
 
     public function setGroups(array $groups): self {
-        if ($this->groups) {
-            foreach ($this->groups as $group) {
+        if($this->groups) {
+            foreach($this->groups as $group) {
                 $group->removeUser($this);
             }
         }
 
         $this->groups = new ArrayCollection($groups);
-        foreach ($this->groups as $group) {
+        foreach($this->groups as $group) {
             $group->addUser($this);
         }
 
@@ -464,7 +464,7 @@ class User implements UserInterface {
     }
 
     public function addOrderDepositTicket(DepositTicket $depositTicket): self {
-        if (!$this->orderDepositTickets->contains($depositTicket)) {
+        if(!$this->orderDepositTickets->contains($depositTicket)) {
             $this->orderDepositTickets[] = $depositTicket;
             $depositTicket->setOrderUser($this);
         }
@@ -473,9 +473,9 @@ class User implements UserInterface {
     }
 
     public function removeOrderDepositTicket(DepositTicket $depositTicket): self {
-        if ($this->orderDepositTickets->removeElement($depositTicket)) {
+        if($this->orderDepositTickets->removeElement($depositTicket)) {
             // set the owning side to null (unless already changed)
-            if ($depositTicket->getOrderUser() === $this) {
+            if($depositTicket->getOrderUser() === $this) {
                 $depositTicket->setOrderUser(null);
             }
         }
@@ -491,7 +491,7 @@ class User implements UserInterface {
     }
 
     public function addDeliveryRound(DeliveryRound $deliveryRound): self {
-        if (!$this->deliveryRounds->contains($deliveryRound)) {
+        if(!$this->deliveryRounds->contains($deliveryRound)) {
             $this->deliveryRounds[] = $deliveryRound;
             $deliveryRound->setDeliverer($this);
         }
@@ -500,9 +500,9 @@ class User implements UserInterface {
     }
 
     public function removeDeliveryRound(DeliveryRound $deliveryRound): self {
-        if ($this->deliveryRounds->removeElement($deliveryRound)) {
+        if($this->deliveryRounds->removeElement($deliveryRound)) {
             // set the owning side to null (unless already changed)
-            if ($deliveryRound->getDeliverer() === $this) {
+            if($deliveryRound->getDeliverer() === $this) {
                 $deliveryRound->setDeliverer(null);
             }
         }
@@ -511,12 +511,12 @@ class User implements UserInterface {
     }
 
     public function setDeliveryRounds(?array $deliveryRounds): self {
-        foreach ($this->getDeliveryRounds()->toArray() as $deliveryRound) {
+        foreach($this->getDeliveryRounds()->toArray() as $deliveryRound) {
             $this->removeDeliveryRound($deliveryRound);
         }
 
         $this->deliveryRounds = new ArrayCollection();
-        foreach ($deliveryRounds as $deliveryRound) {
+        foreach($deliveryRounds as $deliveryRound) {
             $this->addDeliveryRound($deliveryRound);
         }
 
@@ -531,7 +531,7 @@ class User implements UserInterface {
     }
 
     public function addOrderStatusHistory(OrderStatusHistory $orderStatusHistory): self {
-        if (!$this->orderStatusHistories->contains($orderStatusHistory)) {
+        if(!$this->orderStatusHistories->contains($orderStatusHistory)) {
             $this->orderStatusHistories[] = $orderStatusHistory;
             $orderStatusHistory->setUser($this);
         }
@@ -540,9 +540,9 @@ class User implements UserInterface {
     }
 
     public function removeOrderStatusHistory(OrderStatusHistory $orderStatusHistory): self {
-        if ($this->orderStatusHistories->removeElement($orderStatusHistory)) {
+        if($this->orderStatusHistories->removeElement($orderStatusHistory)) {
             // set the owning side to null (unless already changed)
-            if ($orderStatusHistory->getUser() === $this) {
+            if($orderStatusHistory->getUser() === $this) {
                 $orderStatusHistory->setUser(null);
             }
         }
@@ -551,12 +551,12 @@ class User implements UserInterface {
     }
 
     public function setOrderStatusHistories(?array $orderStatusHistories): self {
-        foreach ($this->getOrderStatusHistories()->toArray() as $orderStatusHistory) {
+        foreach($this->getOrderStatusHistories()->toArray() as $orderStatusHistory) {
             $this->removeOrderStatusHistory($orderStatusHistory);
         }
 
         $this->orderStatusHistories = new ArrayCollection();
-        foreach ($orderStatusHistories as $orderStatusHistory) {
+        foreach($orderStatusHistories as $orderStatusHistory) {
             $this->addOrderStatusHistory($orderStatusHistory);
         }
 
@@ -571,7 +571,7 @@ class User implements UserInterface {
     }
 
     public function addClientOrder(ClientOrder $order): self {
-        if (!$this->clientOrders->contains($order)) {
+        if(!$this->clientOrders->contains($order)) {
             $this->clientOrders[] = $order;
             $order->setRequester($this);
         }
@@ -580,8 +580,8 @@ class User implements UserInterface {
     }
 
     public function removeClientOrder(ClientOrder $order): self {
-        if ($this->clientOrders->removeElement($order)) {
-            if ($order->getRequester() === $this) {
+        if($this->clientOrders->removeElement($order)) {
+            if($order->getRequester() === $this) {
                 $order->setRequester(null);
             }
         }
@@ -590,12 +590,12 @@ class User implements UserInterface {
     }
 
     public function setClientOrders(?array $clientOrders): self {
-        foreach ($this->getClientOrders()->toArray() as $order) {
+        foreach($this->getClientOrders()->toArray() as $order) {
             $this->removeClientOrder($order);
         }
 
         $this->clientOrders = new ArrayCollection();
-        foreach ($clientOrders as $order) {
+        foreach($clientOrders as $order) {
             $this->addClientOrder($order);
         }
 
@@ -610,7 +610,7 @@ class User implements UserInterface {
     }
 
     public function addCounterOrder(CounterOrder $order): self {
-        if (!$this->counterOrders->contains($order)) {
+        if(!$this->counterOrders->contains($order)) {
             $this->counterOrders[] = $order;
             $order->setUser($this);
         }
@@ -619,8 +619,8 @@ class User implements UserInterface {
     }
 
     public function removeCounterOrder(CounterOrder $order): self {
-        if ($this->counterOrders->removeElement($order)) {
-            if ($order->getUser() === $this) {
+        if($this->counterOrders->removeElement($order)) {
+            if($order->getUser() === $this) {
                 $order->setUser(null);
             }
         }
@@ -629,12 +629,12 @@ class User implements UserInterface {
     }
 
     public function setCounterOrders(?array $counterOrders): self {
-        foreach ($this->getCounterOrders()->toArray() as $order) {
+        foreach($this->getCounterOrders()->toArray() as $order) {
             $this->removeCounterOrder($order);
         }
 
         $this->counterOrders = new ArrayCollection();
-        foreach ($counterOrders as $order) {
+        foreach($counterOrders as $order) {
             $this->addCounterOrder($order);
         }
 
@@ -649,7 +649,7 @@ class User implements UserInterface {
     }
 
     public function addCollect(Collect $collect): self {
-        if (!$this->collects->contains($collect)) {
+        if(!$this->collects->contains($collect)) {
             $this->collects[] = $collect;
             $collect->setOperator($this);
         }
@@ -658,8 +658,8 @@ class User implements UserInterface {
     }
 
     public function removeCollect(Collect $collect): self {
-        if ($this->collects->removeElement($collect)) {
-            if ($collect->getClient() === $this) {
+        if($this->collects->removeElement($collect)) {
+            if($collect->getClient() === $this) {
                 $collect->setOperator(null);
             }
         }
@@ -688,7 +688,7 @@ class User implements UserInterface {
     }
 
     public function addPreparation(Preparation $preparation): self {
-        if (!$this->preparations->contains($preparation)) {
+        if(!$this->preparations->contains($preparation)) {
             $this->preparations[] = $preparation;
             $preparation->setOperator($this);
         }
@@ -697,8 +697,8 @@ class User implements UserInterface {
     }
 
     public function removePreparation(Preparation $preparation): self {
-        if ($this->preparations->removeElement($preparation)) {
-            if ($preparation->getOperator() === $this) {
+        if($this->preparations->removeElement($preparation)) {
+            if($preparation->getOperator() === $this) {
                 $preparation->setOperator(null);
             }
         }

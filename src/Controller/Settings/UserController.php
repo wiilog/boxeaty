@@ -53,7 +53,7 @@ class UserController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true) ?? [], $loggedUser);
 
         $data = [];
-        foreach ($users["data"] as $user) {
+        foreach($users["data"] as $user) {
             $data[] = [
                 "id" => $user->getId(),
                 "username" => $user->getUsername(),
@@ -85,16 +85,16 @@ class UserController extends AbstractController {
 
         $content = (object)$request->request->all();
         $existing = $manager->getRepository(User::class)->findOneBy(["email" => $content->email]);
-        if ($existing) {
+        if($existing) {
             $form->addError("email", "L'adresse email est déjà utilisée par un autre utilisateur");
         }
 
         $role = $manager->getRepository(Role::class)->find($content->role);
-        if (!$role) {
+        if(!$role) {
             $form->addError("role", "Le rôle sélectionné n'existe plus, merci de rafraichir la page");
         }
 
-        if (!Authenticator::isPasswordSecure($content->password)) {
+        if(!Authenticator::isPasswordSecure($content->password)) {
             $form->addError("password", Authenticator::PASSWORD_ERROR);
         }
 
@@ -102,11 +102,11 @@ class UserController extends AbstractController {
         $groups = $manager->getRepository(Group::class)->findBy(["id" => explode(",", $content->groups)]);
 
         $deliveryMethod = null;
-        if(isset($content->deliveryMethod)){
+        if(isset($content->deliveryMethod)) {
             $deliveryMethod = $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod);
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $user = new User();
             $user->setUsername($content->username)
                 ->setEmail($content->email)
@@ -145,7 +145,7 @@ class UserController extends AbstractController {
             "template" => $this->renderView("settings/user/modal/edit.html.twig", [
                 "user" => $user,
                 "roles" => $roles,
-            ])
+            ]),
         ]);
     }
 
@@ -158,23 +158,23 @@ class UserController extends AbstractController {
 
         $content = (object)$request->request->all();
         $existing = $manager->getRepository(User::class)->findOneBy(["email" => $content->email]);
-        if ($existing !== null && $existing !== $user) {
+        if($existing !== null && $existing !== $user) {
             $form->addError("email", "L'adresse email est déjà utilisée par un autre utilisateur");
         }
 
         $role = $manager->getRepository(Role::class)->find($content->role);
-        if (!$role) {
+        if(!$role) {
             $form->addError("role", "Le rôle sélectionné n'existe plus, merci de rafraichir la page");
         }
 
-        if (isset($content->password)) {
-            if ($user == $this->getUser() && !isset($content->currentPassword)) {
+        if(isset($content->password)) {
+            if($user == $this->getUser() && !isset($content->currentPassword)) {
                 $form->addError("currentPassword", "Ce champ est requis pour changer le mot de passe");
-            } else if (isset($content->currentPassword) && !$encoder->isPasswordValid($user, $content->currentPassword)) {
+            } else if(isset($content->currentPassword) && !$encoder->isPasswordValid($user, $content->currentPassword)) {
                 $form->addError("currentPassword", "Ce champ ne correspond pas au mot de passe actuel");
             }
 
-            if (!Authenticator::isPasswordSecure($content->password)) {
+            if(!Authenticator::isPasswordSecure($content->password)) {
                 $form->addError("password", Authenticator::PASSWORD_ERROR);
             }
         }
@@ -182,24 +182,24 @@ class UserController extends AbstractController {
         /** @var User $loggedUser */
         $loggedUser = $this->getUser();
 
-        if ($loggedUser->getRole()->getCode() !== Role::ROLE_ADMIN
+        if($loggedUser->getRole()->getCode() !== Role::ROLE_ADMIN
             && $user->getRole()->getCode() === Role::ROLE_ADMIN) {
 
             return $this->json([
                 "success" => false,
-                "message" => "Vous n'avez pas les permissions nécessaires"
+                "message" => "Vous n'avez pas les permissions nécessaires",
             ]);
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(",", $content->clients)]);
             $groups = $manager->getRepository(Group::class)->findBy(["id" => explode(",", $content->groups)]);
 
-                if (isset($content->deliveryMethod)) {
-                    $deliveryMethod = $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod);
-                } else {
-                    $deliveryMethod = null;
-                }
+            if(isset($content->deliveryMethod)) {
+                $deliveryMethod = $manager->getRepository(DeliveryMethod::class)->find($content->deliveryMethod);
+            } else {
+                $deliveryMethod = null;
+            }
 
             $user->setUsername($content->username)
                 ->setEmail($content->email)
@@ -213,7 +213,7 @@ class UserController extends AbstractController {
                 ->setDeliveryMethod($deliveryMethod)
                 ->setCreationDate(new DateTime());
 
-            if (isset($content->password)) {
+            if(isset($content->password)) {
                 $user->setPassword($encoder->encodePassword($user, $content->password));
             }
 
@@ -223,7 +223,7 @@ class UserController extends AbstractController {
                 "success" => true,
                 "message" => "Utilisateur modifié avec succès",
                 "menu" => $this->getUser() === $user ? $this->renderView("menu.html.twig", [
-                    "current_route" => "users_list"
+                    "current_route" => "users_list",
                 ]) : null,
             ]);
         } else {
@@ -240,7 +240,7 @@ class UserController extends AbstractController {
             "submit" => $this->generateUrl("user_delete", ["user" => $user->getId()]),
             "template" => $this->renderView("settings/user/modal/delete.html.twig", [
                 "user" => $user,
-            ])
+            ]),
         ]);
     }
 
@@ -249,12 +249,12 @@ class UserController extends AbstractController {
      * @HasPermission(Role::MANAGE_USERS)
      */
     public function delete(EntityManagerInterface $manager, User $user): Response {
-        if ($user === $this->getUser()) {
+        if($user === $this->getUser()) {
             return $this->json([
                 "success" => false,
-                "message" => "Vous ne pouvez pas supprimer votre propre compte utilisateur"
+                "message" => "Vous ne pouvez pas supprimer votre propre compte utilisateur",
             ]);
-        } else if ($user
+        } else if($user
             && (
                 !$user->getBoxRecords()->isEmpty()
                 || !$user->getOrderDepositTickets()->isEmpty()
@@ -267,7 +267,7 @@ class UserController extends AbstractController {
                 "success" => true,
                 "message" => "Utilisateur <strong>{$user->getUsername()}</strong> désactivé avec succès",
             ]);
-        } else if ($user) {
+        } else if($user) {
             $manager->remove($user);
             $manager->flush();
 
@@ -294,7 +294,7 @@ class UserController extends AbstractController {
         $today = $today->format("d-m-Y-H-i-s");
 
         return $exportService->export(function($output) use ($exportService, $users) {
-            foreach ($users as $user) {
+            foreach($users as $user) {
                 $exportService->putLine($output, $user);
             }
         }, "export-utilisateurs-$today.csv", ExportService::USER_HEADER);

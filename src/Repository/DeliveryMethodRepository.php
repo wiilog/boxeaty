@@ -29,20 +29,19 @@ class DeliveryMethodRepository extends EntityRepository {
             ->getArrayResult();
     }
 
-    public function findForDatatable(array $params): array
-    {
+    public function findForDatatable(array $params): array {
         $qb = $this->createQueryBuilder("dm")
             ->andWhere("dm.deleted = 0");
 
         $total = QueryHelper::count($qb, "dm");
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("dm.$column", $order["dir"]);
             }
         } else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("dm.$column", $dir);
             }
         }

@@ -24,7 +24,7 @@ class ImportRepository extends EntityRepository {
         $qb = $this->createQueryBuilder("import");
         $total = QueryHelper::count($qb, "import");
 
-        if ($search) {
+        if($search) {
             $qb->andWhere("import.name LIKE :search")
                 ->orWhere("search_user.username LIKE :search")
                 ->join("import.user", "search_user")
@@ -48,18 +48,17 @@ class ImportRepository extends EntityRepository {
             }
         }
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
-                if ($column === "user") {
+                if($column === "user") {
                     QueryHelper::order($qb, "import.user.username", $order["dir"]);
                 } else {
                     $qb->addOrderBy("import.$column", $order["dir"]);
                 }
             }
-        }
-        else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+        } else {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("import.$column", $dir);
             }
         }

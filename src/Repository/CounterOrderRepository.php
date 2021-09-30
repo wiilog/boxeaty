@@ -27,7 +27,7 @@ class CounterOrderRepository extends EntityRepository {
 
         $total = QueryHelper::count($qb, "ord");
 
-        if ($search) {
+        if($search) {
             $qb->leftJoin("ord.location", "search_location")
                 ->leftJoin("ord.client", "search_client")
                 ->leftJoin("ord.boxes", "search_box")
@@ -39,19 +39,19 @@ class CounterOrderRepository extends EntityRepository {
                 ->setParameter("search", "%$search%");
         }
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
-                if ($column === "location") {
+                if($column === "location") {
                     $qb->leftJoin("ord.location", "order_location")
                         ->addOrderBy("order_location.name", $order["dir"]);
-                } else if ($column === "user") {
+                } else if($column === "user") {
                     $qb->leftJoin("ord.user", "order_user")
                         ->addOrderBy("order_user.username", $order["dir"]);
-                } else if ($column === "client") {
+                } else if($column === "client") {
                     $qb->leftJoin("ord.client", "order_client")
                         ->addOrderBy("order_client.name", $order["dir"]);
-                } else if ($column === "totalCost") {
+                } else if($column === "totalCost") {
                     $qb->addOrderBy("ord.boxPrice - ord.depositTicketPrice", $order["dir"]);
                 } else if($column === "boxes") {
                     $qb->leftJoin("ord.boxes", "order_boxes")
@@ -65,7 +65,7 @@ class CounterOrderRepository extends EntityRepository {
             }
         } else {
 
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
 
                 $qb->addOrderBy("ord.$column", $dir);
             }

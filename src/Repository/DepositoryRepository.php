@@ -35,7 +35,7 @@ class DepositoryRepository extends EntityRepository {
         $qb = $this->createQueryBuilder("depository");
         $total = QueryHelper::count($qb, "depository");
 
-        if ($search) {
+        if($search) {
             $qb->andWhere($qb->expr()->orX(
                 "depository.name LIKE :search",
                 "depository.description LIKE :search",
@@ -43,14 +43,13 @@ class DepositoryRepository extends EntityRepository {
         }
 
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("depository.$column", $order["dir"]);
             }
-        }
-        else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+        } else {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("depository.$column", $dir);
             }
         }

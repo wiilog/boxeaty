@@ -163,10 +163,10 @@ class Box {
     }
 
     public function addBoxRecord(BoxRecord $boxRecord): self {
-        if (!$this->boxRecords->contains($boxRecord)) {
+        if(!$this->boxRecords->contains($boxRecord)) {
             $this->boxRecords[] = $boxRecord;
 
-            if ($boxRecord->getBox() !== $this) {
+            if($boxRecord->getBox() !== $this) {
                 $boxRecord->setBox($this);
             }
         }
@@ -175,9 +175,9 @@ class Box {
     }
 
     public function removeBoxRecord(BoxRecord $boxRecord): self {
-        if ($this->boxRecords->removeElement($boxRecord)) {
+        if($this->boxRecords->removeElement($boxRecord)) {
             // set the owning side to null (unless already changed)
-            if ($boxRecord->getBox() === $this) {
+            if($boxRecord->getBox() === $this) {
                 $boxRecord->setBox(null);
             }
         }
@@ -190,14 +190,14 @@ class Box {
     }
 
     public function setLocation(?Location $location): self {
-        if ($this->getLocation()
+        if($this->getLocation()
             && $location !== $this->getLocation()) {
             $this->getLocation()->removeBox($this);
         }
 
         $this->location = $location;
 
-        if ($this->location) {
+        if($this->location) {
             $this->location->addBox($this);
         }
 
@@ -280,7 +280,7 @@ class Box {
     }
 
     public function addDepositTicket(DepositTicket $depositTicket): self {
-        if (!$this->depositTickets->contains($depositTicket)) {
+        if(!$this->depositTickets->contains($depositTicket)) {
             $this->depositTickets[] = $depositTicket;
             $depositTicket->setBox($this);
         }
@@ -289,8 +289,8 @@ class Box {
     }
 
     public function removeDepositTicket(DepositTicket $depositTicket): self {
-        if ($this->depositTickets->removeElement($depositTicket)) {
-            if ($depositTicket->getBox() === $this) {
+        if($this->depositTickets->removeElement($depositTicket)) {
+            if($depositTicket->getBox() === $this) {
                 $depositTicket->setBox(null);
             }
         }
@@ -299,12 +299,12 @@ class Box {
     }
 
     public function setDepositTickets(?array $depositTickets): self {
-        foreach ($this->getDepositTickets()->toArray() as $depositTicket) {
+        foreach($this->getDepositTickets()->toArray() as $depositTicket) {
             $this->removeDepositTicket($depositTicket);
         }
 
         $this->depositTickets = new ArrayCollection();
-        foreach ($depositTickets as $depositTicket) {
+        foreach($depositTickets as $depositTicket) {
             $this->addDepositTicket($depositTicket);
         }
 
@@ -319,7 +319,7 @@ class Box {
     }
 
     public function addCounterOrder(CounterOrder $order): self {
-        if (!$this->counterOrders->contains($order)) {
+        if(!$this->counterOrders->contains($order)) {
             $this->counterOrders[] = $order;
             $order->addBox($this);
         }
@@ -328,7 +328,7 @@ class Box {
     }
 
     public function removeCounterOrder(CounterOrder $order): self {
-        if ($this->counterOrders->removeElement($order)) {
+        if($this->counterOrders->removeElement($order)) {
             $order->removeBox($this);
         }
 
@@ -354,7 +354,7 @@ class Box {
     }
 
     public function addCollect(Collect $collect): self {
-        if (!$this->collects->contains($collect)) {
+        if(!$this->collects->contains($collect)) {
             $this->collects[] = $collect;
             $collect->addCrate($this);
         }
@@ -363,7 +363,7 @@ class Box {
     }
 
     public function removeCollect(Collect $collect): self {
-        if ($this->collects->removeElement($collect)) {
+        if($this->collects->removeElement($collect)) {
             $collect->removeCrate($this);
         }
 
@@ -371,12 +371,12 @@ class Box {
     }
 
     public function setCollect(?array $collects): self {
-        foreach ($this->getCollects()->toArray() as $collect) {
+        foreach($this->getCollects()->toArray() as $collect) {
             $this->removeCollect($collect);
         }
 
         $this->collects = new ArrayCollection();
-        foreach ($collects as $collect) {
+        foreach($collects as $collect) {
             $this->addCollect($collect);
         }
 
@@ -393,7 +393,7 @@ class Box {
         return $this;
     }
 
-    public function getCrate(): ?Box{
+    public function getCrate(): ?Box {
         return $this->crate;
     }
 
@@ -417,7 +417,7 @@ class Box {
     }
 
     public function addContainedBox(Box $containedBox): self {
-        if (!$this->containedBoxes->contains($containedBox)) {
+        if(!$this->containedBoxes->contains($containedBox)) {
             $this->containedBoxes[] = $containedBox;
             $containedBox->setCrate($this);
         }
@@ -426,8 +426,8 @@ class Box {
     }
 
     public function removeContainedBox(Box $containedBox): self {
-        if ($this->containedBoxes->removeElement($containedBox)) {
-            if ($containedBox->getCrate() === $this) {
+        if($this->containedBoxes->removeElement($containedBox)) {
+            if($containedBox->getCrate() === $this) {
                 $containedBox->setCrate(null);
             }
         }
@@ -456,7 +456,7 @@ class Box {
     }
 
     public function addCratePreparationLine(PreparationLine $line): self {
-        if (!$this->cratePreparationLines->contains($line)) {
+        if(!$this->cratePreparationLines->contains($line)) {
             $this->cratePreparationLines[] = $line;
             $line->setCrate($this);
         }
@@ -465,8 +465,8 @@ class Box {
     }
 
     public function removeCratePreparationLine(PreparationLine $line): self {
-        if ($this->cratePreparationLines->removeElement($line)) {
-            if ($line->getCrate() === $this) {
+        if($this->cratePreparationLines->removeElement($line)) {
+            if($line->getCrate() === $this) {
                 $line->setCrate(null);
             }
         }
@@ -495,7 +495,7 @@ class Box {
     }
 
     public function addBoxPreparationLine(PreparationLine $line): self {
-        if (!$this->boxPreparationLines->contains($line)) {
+        if(!$this->boxPreparationLines->contains($line)) {
             $this->boxPreparationLines[] = $line;
             $line->addBox($this);
         }
@@ -504,7 +504,7 @@ class Box {
     }
 
     public function removeBoxPreparationLine(PreparationLine $line): self {
-        if ($this->boxPreparationLines->removeElement($line)) {
+        if($this->boxPreparationLines->removeElement($line)) {
             $line->removeBox($this);
         }
 
@@ -532,7 +532,7 @@ class Box {
     }
 
     public function addCratePackingRecord(BoxRecord $boxRecord): self {
-        if (!$this->cratePackingRecords->contains($boxRecord)) {
+        if(!$this->cratePackingRecords->contains($boxRecord)) {
             $this->cratePackingRecords[] = $boxRecord;
             $boxRecord->setCrate($this);
         }
@@ -541,8 +541,8 @@ class Box {
     }
 
     public function removeCratePackingRecord(BoxRecord $boxRecord): self {
-        if ($this->cratePackingRecords->removeElement($boxRecord)) {
-            if ($boxRecord->getCrate() === $this) {
+        if($this->cratePackingRecords->removeElement($boxRecord)) {
+            if($boxRecord->getCrate() === $this) {
                 $boxRecord->setCrate(null);
             }
         }

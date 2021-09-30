@@ -26,7 +26,7 @@ class ClientOrderRepository extends EntityRepository {
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
-    public function findByType(string $type, DateTime $dateMin, DateTime $dateMax){
+    public function findByType(string $type, DateTime $dateMin, DateTime $dateMax) {
         return $this->createQueryBuilder("client_order")
             ->select('client_order.number as number')
             ->addSelect('client_order.automatic as automatic')
@@ -126,7 +126,7 @@ class ClientOrderRepository extends EntityRepository {
      * @return ClientOrder[]
      */
     public function findLaunchableOrders(?User $user, Depository $depository, DateTime $from = null, DateTime $to = null): array {
-        if($from == null && $to == null){
+        if($from == null && $to == null) {
             $returnOrderBetween = $this->createQueryBuilder('client_order');
         } else {
             $returnOrderBetween = $this->createBetween($user, $from, $to);
@@ -164,8 +164,8 @@ class ClientOrderRepository extends EntityRepository {
 
         $total = QueryHelper::count($qb, "clientOrder");
 
-        foreach ($params["filters"] ?? [] as $name => $value) {
-            switch ($name) {
+        foreach($params["filters"] ?? [] as $name => $value) {
+            switch($name) {
                 case "from":
                     $qb->andWhere("clientOrder.expectedDelivery >= :from")
                         ->setParameter("from", $value);
@@ -251,11 +251,11 @@ class ClientOrderRepository extends EntityRepository {
 
     public function findQuantityDeliveredBetweenDateAndClient(DateTime $from,
                                                               DateTime $to,
-                                                              Client $client): int {
+                                                              Client   $client): int {
         $result = $this->createQueryBuilder("client_order")
             ->select('SUM(lines.quantity)')
             ->leftJoin("client_order.delivery", "delivery")
-            ->leftJoin('client_order.lines','lines')
+            ->leftJoin('client_order.lines', 'lines')
             ->andWhere("delivery.deliveredAt BETWEEN :from AND :to")
             ->andWhere("client_order.client = :client")
             ->setParameter("client", $client)
@@ -266,14 +266,15 @@ class ClientOrderRepository extends EntityRepository {
         return $result ? intval($result) : 0;
     }
 
-    public function getTotalBox($clientOrder){
+    public function getTotalBox($clientOrder) {
         $result = $this->createQueryBuilder("clientOrder")
             ->select('SUM(lines.quantity)')
-            ->leftJoin('clientOrder.lines','lines')
+            ->leftJoin('clientOrder.lines', 'lines')
             ->andWhere("clientOrder.id = :clientOrder")
             ->setParameter("clientOrder", $clientOrder)
             ->getQuery()
             ->getSingleScalarResult();
         return $result ? intval($result) : 0;
     }
+
 }

@@ -149,7 +149,7 @@ class ClientOrder {
      */
     private ?Depository $depository = null;
 
-    public function __construct(){
+    public function __construct() {
         $this->lines = new ArrayCollection();
         $this->orderStatusHistory = new ArrayCollection();
     }
@@ -209,10 +209,10 @@ class ClientOrder {
         $statuses = [];
 
         $history = array_reverse($this->getOrderStatusHistory()->toArray());
-        foreach ($history as $status) {
+        foreach($history as $status) {
             $hierarchy = array_search($status->getStatus()->getCode(), Status::ORDER_STATUS_HIERARCHY);
 
-            if ($previousStatus !== null && $hierarchy > $previousStatus) {
+            if($previousStatus !== null && $hierarchy > $previousStatus) {
                 break;
             }
 
@@ -227,7 +227,7 @@ class ClientOrder {
     }
 
     public function addOrderStatusHistory(OrderStatusHistory $orderStatusHistory): self {
-        if (!$this->orderStatusHistory->contains($orderStatusHistory)) {
+        if(!$this->orderStatusHistory->contains($orderStatusHistory)) {
             $this->orderStatusHistory[] = $orderStatusHistory;
             $orderStatusHistory->setOrder($this);
         }
@@ -236,8 +236,8 @@ class ClientOrder {
     }
 
     public function removeOrderStatusHistory(OrderStatusHistory $orderStatusHistory): self {
-        if ($this->orderStatusHistory->removeElement($orderStatusHistory)) {
-            if ($orderStatusHistory->getOrder() === $this) {
+        if($this->orderStatusHistory->removeElement($orderStatusHistory)) {
+            if($orderStatusHistory->getOrder() === $this) {
                 $orderStatusHistory->setOrder(null);
             }
         }
@@ -246,12 +246,12 @@ class ClientOrder {
     }
 
     public function setOrderStatusHistory(?array $orderStatusHistory): self {
-        foreach ($this->getOrderStatusHistory()->toArray() as $item) {
+        foreach($this->getOrderStatusHistory()->toArray() as $item) {
             $this->removeOrderStatusHistory($item);
         }
 
         $this->orderStatusHistory = new ArrayCollection();
-        foreach ($orderStatusHistory as $item) {
+        foreach($orderStatusHistory as $item) {
             $this->addOrderStatusHistory($item);
         }
 
@@ -349,11 +349,11 @@ class ClientOrder {
     }
 
     public function setRequester(?User $requester): self {
-        if ($this->requester && $this->requester !== $requester) {
+        if($this->requester && $this->requester !== $requester) {
             $this->requester->removeClientOrder($this);
         }
         $this->requester = $requester;
-        if ($requester) {
+        if($requester) {
             $requester->addClientOrder($this);
         }
 
@@ -412,11 +412,11 @@ class ClientOrder {
     }
 
     public function setDeliveryRound(?DeliveryRound $deliveryRound): self {
-        if ($this->deliveryRound && $this->deliveryRound !== $deliveryRound) {
+        if($this->deliveryRound && $this->deliveryRound !== $deliveryRound) {
             $this->deliveryRound->removeOrder($this);
         }
         $this->deliveryRound = $deliveryRound;
-        if ($deliveryRound) {
+        if($deliveryRound) {
             $deliveryRound->addOrder($this);
         }
 
@@ -431,7 +431,7 @@ class ClientOrder {
     }
 
     public function addLine(ClientOrderLine $line): self {
-        if (!$this->lines->contains($line)) {
+        if(!$this->lines->contains($line)) {
             $this->lines[] = $line;
             $line->setClientOrder($this);
         }
@@ -440,8 +440,8 @@ class ClientOrder {
     }
 
     public function removeLine(ClientOrderLine $line): self {
-        if ($this->lines->removeElement($line)) {
-            if ($line->getClientOrder() === $this) {
+        if($this->lines->removeElement($line)) {
+            if($line->getClientOrder() === $this) {
                 $line->setClientOrder(null);
             }
         }
@@ -546,4 +546,5 @@ class ClientOrder {
 
         return $client;
     }
+
 }

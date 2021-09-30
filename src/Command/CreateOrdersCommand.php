@@ -43,7 +43,7 @@ class CreateOrdersCommand extends Command {
         $days = FormatHelper::ENGLISH_WEEK_DAYS;
 
         $clients = $this->manager->getRepository(Client::class)->findActiveRecurrence();
-        if (!$clients) {
+        if(!$clients) {
             $output->writeln("No orders to create for the {$now->format('d/m/Y')}");
             return 0;
         }
@@ -51,7 +51,7 @@ class CreateOrdersCommand extends Command {
         $planned = $this->manager->getRepository(Status::class)->findOneByCode(Status::CODE_DELIVERY_PLANNED);
 
         /** @var Client $client */
-        foreach ($clients as $client) {
+        foreach($clients as $client) {
             $recurrence = $client->getClientOrderInformation()->getOrderRecurrence();
 
             $start = clone $recurrence->getStart();
@@ -59,21 +59,21 @@ class CreateOrdersCommand extends Command {
 
             $end = clone $recurrence->getEnd();
             $end->setTime(0, 0);
-            if ($end > $max) {
+            if($end > $max) {
                 $end = $max;
             }
 
             $date = clone $start;
             $date->modify("{$days[$recurrence->getDay() + 1]} this week");
-            if ($date < $start) {
+            if($date < $start) {
                 $date = clone $start;
             }
 
-            while ($date != $now && $date <= $end) {
+            while($date != $now && $date <= $end) {
                 $date->modify("{$days[$recurrence->getDay() + 1]} this week +{$recurrence->getPeriod()} weeks");
             }
 
-            if ($date <= $end) {
+            if($date <= $end) {
                 $type = $this->manager->getRepository(OrderType::class)->findOneByCode(OrderType::AUTONOMOUS_MANAGEMENT);
 
                 $order = (new ClientOrder())
@@ -96,7 +96,7 @@ class CreateOrdersCommand extends Command {
                     ->setCreatedAt(new DateTime())
                     ->setComment($client->getClientOrderInformation()->getComment());
 
-                foreach ($client->getCratePatternLines() as $pattern) {
+                foreach($client->getCratePatternLines() as $pattern) {
                     $line = (new ClientOrderLine())
                         ->setBoxType($pattern->getBoxType())
                         ->setQuantity($pattern->getQuantity() * $recurrence->getCrateAmount())

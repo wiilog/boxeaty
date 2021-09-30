@@ -35,7 +35,7 @@ class Form {
             return new JsonResponse([
                 "success" => false,
                 "errors" => [
-                    "fields" => $this->errors
+                    "fields" => $this->errors,
                 ],
             ]);
         } else if($default) {

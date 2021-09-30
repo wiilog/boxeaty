@@ -38,7 +38,7 @@ class BoxController extends AbstractController {
         return $this->render("tracking/box/index.html.twig", [
             "new_box" => new Box(),
             "initial_boxes" => $this->api($request, $manager)->getContent(),
-            "boxes_order" => BoxRepository::DEFAULT_DATATABLE_ORDER
+            "boxes_order" => BoxRepository::DEFAULT_DATATABLE_ORDER,
         ]);
     }
 
@@ -52,7 +52,7 @@ class BoxController extends AbstractController {
 
         $data = [];
         /** @var Box $box */
-        foreach ($boxes["data"] as $box) {
+        foreach($boxes["data"] as $box) {
             $data[] = [
                 "id" => $box->getId(),
                 "number" => $box->getNumber(),
@@ -90,15 +90,15 @@ class BoxController extends AbstractController {
         $type = isset($content->type) ? $manager->getRepository(BoxType::class)->find($content->type) : null;
         $existing = $manager->getRepository(Box::class)->findOneBy(["number" => $content->number]);
 
-        if ($existing) {
+        if($existing) {
             $form->addError("number", "Ce numéro de Box existe déjà");
-        } else if (strlen($content->number) > 50) {
+        } else if(strlen($content->number) > 50) {
             $form->addError("number", "Le numéro de Box ne peut excéder 50 caractères");
-        } else if (!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
+        } else if(!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
             $form->addError("number", "Le numéro de Box ne peut contenir que des lettres, chiffres, tirets et underscores");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $box = (new Box())
                 ->setNumber($content->number)
                 ->setType($type)
@@ -136,7 +136,7 @@ class BoxController extends AbstractController {
 
         return $this->render('tracking/box/show.html.twig', [
             "box" => $box,
-            "clientOrderInProgress" => $clientOrderInProgress
+            "clientOrderInProgress" => $clientOrderInProgress,
         ]);
     }
 
@@ -149,7 +149,7 @@ class BoxController extends AbstractController {
             "submit" => $this->generateUrl("box_edit", ["box" => $box->getId()]),
             "template" => $this->renderView("tracking/box/modal/edit.html.twig", [
                 "box" => $box,
-            ])
+            ]),
         ]);
     }
 
@@ -166,15 +166,15 @@ class BoxController extends AbstractController {
         $content = (object)$request->request->all();
         $existing = $manager->getRepository(Box::class)->findOneBy(["number" => $content->number]);
 
-        if ($existing !== null && $existing !== $box) {
+        if($existing !== null && $existing !== $box) {
             $form->addError("name", "Une autre Box avec ce numéro existe déjà");
-        } else if (strlen($content->number) > 50) {
+        } else if(strlen($content->number) > 50) {
             $form->addError("number", "Le numéro de Box ne peut excéder 50 caractères");
-        } else if (!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
+        } else if(!preg_match("/^[a-z0-9-_]{1,50}$/i", $content->number)) {
             $form->addError("number", "Le numéro de Box ne peut contenir que des lettres, chiffres, tirets et underscores");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $location = isset($content->location) ? $manager->getRepository(Location::class)->find($content->location) : null;
             $owner = isset($content->owner) ? $manager->getRepository(Client::class)->find($content->owner) : null;
             $quality = isset($content->quality) ? $manager->getRepository(Quality::class)->find($content->quality) : null;
@@ -212,7 +212,7 @@ class BoxController extends AbstractController {
             "submit" => $this->generateUrl("box_delete", ["box" => $box->getId()]),
             "template" => $this->renderView("tracking/box/modal/delete.html.twig", [
                 "box" => $box,
-            ])
+            ]),
         ]);
     }
 
@@ -221,19 +221,19 @@ class BoxController extends AbstractController {
      * @HasPermission(Role::MANAGE_BOXES)
      */
     public function delete(EntityManagerInterface $manager, Box $box): Response {
-        if ($box) {
+        if($box) {
             $manager->remove($box);
             $manager->flush();
 
             return $this->json([
                 "success" => true,
-                "message" => "Box <strong>{$box->getNumber()}</strong> supprimée avec succès"
+                "message" => "Box <strong>{$box->getNumber()}</strong> supprimée avec succès",
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "message" => "La Box n'existe pas"
+                "message" => "La Box n'existe pas",
             ]);
         }
     }
@@ -249,8 +249,8 @@ class BoxController extends AbstractController {
         $today = new DateTime();
         $today = $today->format("d-m-Y-H-i-s");
 
-        return $exportService->export(function ($output) use ($exportService, $boxes) {
-            foreach ($boxes as $box) {
+        return $exportService->export(function($output) use ($exportService, $boxes) {
+            foreach($boxes as $box) {
                 $box["state"] = BoxStateService::BOX_STATES[$box["state"]] ?? '';
                 $exportService->putLine($output, $box);
             }
@@ -289,7 +289,7 @@ class BoxController extends AbstractController {
                     'crate' => !empty($movement['crateId'])
                         ? [
                             'number' => $movement['crateNumber'],
-                            'id' => $movement['crateId']
+                            'id' => $movement['crateId'],
                         ]
                         : null,
                     'operator' => $movement['operator'] ?? "",
@@ -312,7 +312,7 @@ class BoxController extends AbstractController {
         $crate = $boxRepository->find($request->query->get("crate"));
         $box = $boxRepository->find($request->query->get("box"));
 
-        if ($box->getCrate()) {
+        if($box->getCrate()) {
             return $this->json([
                 "success" => false,
                 "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $crate]),
@@ -346,7 +346,7 @@ class BoxController extends AbstractController {
             "submit" => $this->generateUrl("box_remove_crate", ["box" => $box->getId()]),
             "template" => $this->renderView("tracking/box/modal/delete_box_in_crate.html.twig", [
                 "box" => $box,
-            ])
+            ]),
         ]);
     }
 
@@ -374,7 +374,7 @@ class BoxController extends AbstractController {
         return $this->json([
             "success" => true,
             "template" => $this->renderView("tracking/box/box_in_crate.html.twig", ["box" => $oldCrate]),
-            "message" => "Box <strong>{$box->getNumber()}</strong> supprimée avec succès"
+            "message" => "Box <strong>{$box->getNumber()}</strong> supprimée avec succès",
         ]);
     }
 

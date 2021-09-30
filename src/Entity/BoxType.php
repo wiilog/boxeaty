@@ -142,7 +142,7 @@ class BoxType {
     }
 
     public function addBox(Box $box): self {
-        if (!$this->boxes->contains($box)) {
+        if(!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
             $box->setType($this);
         }
@@ -151,9 +151,9 @@ class BoxType {
     }
 
     public function removeBox(Box $box): self {
-        if ($this->boxes->removeElement($box)) {
+        if($this->boxes->removeElement($box)) {
             // set the owning side to null (unless already changed)
-            if ($box->getType() === $this) {
+            if($box->getType() === $this) {
                 $box->setType(null);
             }
         }
@@ -164,14 +164,12 @@ class BoxType {
     /**
      * @return Collection|CratePatternLine[]
      */
-    public function getCratePatternLines(): Collection
-    {
+    public function getCratePatternLines(): Collection {
         return $this->cratePatternLines;
     }
 
-    public function addCratePatternLine(CratePatternLine $cratePatternLine): self
-    {
-        if (!$this->cratePatternLines->contains($cratePatternLine)) {
+    public function addCratePatternLine(CratePatternLine $cratePatternLine): self {
+        if(!$this->cratePatternLines->contains($cratePatternLine)) {
             $this->cratePatternLines[] = $cratePatternLine;
             $cratePatternLine->setBoxType($this);
         }
@@ -179,11 +177,10 @@ class BoxType {
         return $this;
     }
 
-    public function removeCratePatternLine(CratePatternLine $cratePatternLine): self
-    {
-        if ($this->cratePatternLines->removeElement($cratePatternLine)) {
+    public function removeCratePatternLine(CratePatternLine $cratePatternLine): self {
+        if($this->cratePatternLines->removeElement($cratePatternLine)) {
             // set the owning side to null (unless already changed)
-            if ($cratePatternLine->getBoxType() === $this) {
+            if($cratePatternLine->getBoxType() === $this) {
                 $cratePatternLine->setBoxType(null);
             }
         }
@@ -191,25 +188,21 @@ class BoxType {
         return $this;
     }
 
-    public function getVolume(): ?float
-    {
+    public function getVolume(): ?float {
         return $this->volume;
     }
 
-    public function setVolume(?float $volume): self
-    {
+    public function setVolume(?float $volume): self {
         $this->volume = $volume;
 
         return $this;
     }
 
-    public function getWeight(): ?float
-    {
+    public function getWeight(): ?float {
         return $this->weight;
     }
 
-    public function setWeight(?float $weight): self
-    {
+    public function setWeight(?float $weight): self {
         $this->weight = $weight;
 
         return $this;
@@ -232,7 +225,7 @@ class BoxType {
     }
 
     public function addClientOrderLine(ClientOrderLine $clientOrderLine): self {
-        if (!$this->clientOrderLines->contains($clientOrderLine)) {
+        if(!$this->clientOrderLines->contains($clientOrderLine)) {
             $this->clientOrderLines[] = $clientOrderLine;
             $clientOrderLine->setBoxType($this);
         }
@@ -241,8 +234,8 @@ class BoxType {
     }
 
     public function removeClientOrderLine(ClientOrderLine $clientOrderLine): self {
-        if ($this->clientOrderLines->removeElement($clientOrderLine)) {
-            if ($clientOrderLine->getBoxType() === $this) {
+        if($this->clientOrderLines->removeElement($clientOrderLine)) {
+            if($clientOrderLine->getBoxType() === $this) {
                 $clientOrderLine->setBoxType(null);
             }
         }
@@ -260,4 +253,5 @@ class BoxType {
         }
         return $this;
     }
+
 }

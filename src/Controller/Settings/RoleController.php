@@ -38,7 +38,7 @@ class RoleController extends AbstractController {
      * @Route("/api", name="roles_api", options={"expose": true})
      * @HasPermission(Role::MANAGE_ROLES)
      */
-    public function api(Request $request,
+    public function api(Request                $request,
                         EntityManagerInterface $manager): Response {
         $roleRepository = $manager->getRepository(Role::class);
         $roles = $roleRepository->findForDatatable(json_decode($request->getContent(), true) ?? []);
@@ -53,7 +53,7 @@ class RoleController extends AbstractController {
 
         $data = [];
         /** @var Role $role */
-        foreach ($roles["data"] as $role) {
+        foreach($roles["data"] as $role) {
             $editable = $currentUser->getRole()->getCode() === Role::ROLE_ADMIN
                 || ($role->getCode() !== Role::ROLE_ADMIN && $role->getId() !== $currentUser->getRole()->getId());
 
@@ -79,13 +79,13 @@ class RoleController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $existing = $manager->getRepository(Role::class)->findOneBy(["name" => $content->name]);
-        if ($existing) {
+        if($existing) {
             $form->addError("name", "Un rôle avec ce nom existe déjà");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $role = new Role();
             $role->setCode(strtoupper(StringHelper::slugify($content->name)))
                 ->setName($content->name)
@@ -127,7 +127,7 @@ class RoleController extends AbstractController {
             "template" => $this->renderView("settings/role/modal/edit.html.twig", [
                 "role" => $role,
                 "roles" => $roles,
-            ])
+            ]),
         ]);
     }
 
@@ -138,18 +138,18 @@ class RoleController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Role $role): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $existing = $manager->getRepository(Role::class)->findOneBy(["name" => $content->name]);
-        if ($existing !== null && $existing !== $role) {
+        if($existing !== null && $existing !== $role) {
             $form->addError("name", "Un autre rôle avec ce nom existe déjà");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
 
             /** @var User $currentUser */
             $currentUser = $this->getUser();
 
-            if ($role->getCode() === Role::ROLE_ADMIN &&
+            if($role->getCode() === Role::ROLE_ADMIN &&
                 $currentUser->getRole()->getCode() !== Role::ROLE_ADMIN) {
                 return $this->json([
                     "success" => false,
@@ -183,7 +183,7 @@ class RoleController extends AbstractController {
                 "success" => true,
                 "message" => "Rôle modifié avec succès",
                 "menu" => $this->getUser()->getRole() === $role ? $this->renderView("menu.html.twig", [
-                    "current_route" => "roles_list"
+                    "current_route" => "roles_list",
                 ]) : null,
             ]);
         } else {
@@ -200,7 +200,7 @@ class RoleController extends AbstractController {
             "submit" => $this->generateUrl("role_delete", ["role" => $role->getId()]),
             "template" => $this->renderView("settings/role/modal/delete.html.twig", [
                 "role" => $role,
-            ])
+            ]),
         ]);
     }
 
@@ -215,21 +215,21 @@ class RoleController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "message" => "Rôle <strong>{$role->getName()}</strong> désactivé avec succès"
+                "message" => "Rôle <strong>{$role->getName()}</strong> désactivé avec succès",
             ]);
-        } else if ($role) {
+        } else if($role) {
             $manager->remove($role);
             $manager->flush();
 
             return $this->json([
                 "success" => true,
-                "message" => "Rôle <strong>{$role->getName()}</strong> supprimé avec succès"
+                "message" => "Rôle <strong>{$role->getName()}</strong> supprimé avec succès",
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "message" => "Le rôle n'existe pas"
+                "message" => "Le rôle n'existe pas",
             ]);
         }
     }
@@ -245,7 +245,7 @@ class RoleController extends AbstractController {
         $today = $today->format("d-m-Y-H-i-s");
 
         return $exportService->export(function($output) use ($exportService, $roles) {
-            foreach ($roles as $role) {
+            foreach($roles as $role) {
                 $exportService->putLine($output, $role);
             }
         }, "export-role-$today.csv", ExportService::ROLE_HEADER);

@@ -37,7 +37,7 @@ class CollectRepository extends EntityRepository {
     public function getPendingCollects(?User $user) {
         $qb = $this->createQueryBuilder("collect");
 
-        if (!$user->hasRight(Role::TREAT_ALL_COLLECTS)) {
+        if(!$user->hasRight(Role::TREAT_ALL_COLLECTS)) {
             $qb->andWhere("collect.operator = :operator")
                 ->setParameter("operator", $user);
         }

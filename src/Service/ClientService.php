@@ -14,13 +14,13 @@ class ClientService {
     /** @Required */
     public HttpClientInterface $client;
 
-    public function updateCoordinates(Client $client, $address): bool {
+    public function updateCoordinates(Client $client, string $address): bool {
         $address = urlencode($address);
         $response = $this->client->request("GET", "https://nominatim.openstreetmap.org/search?format=json&q=$address");
 
         try {
             $content = json_decode($response->getContent());
-            if (count($content) === 0) {
+            if(count($content) === 0) {
                 return false;
             }
 
@@ -28,7 +28,7 @@ class ClientService {
                 ->setLongitude($content[0]->lon);
 
             return true;
-        } catch (Exception $ignored) {
+        } catch(Exception $ignored) {
             return false;
         }
     }
@@ -37,7 +37,7 @@ class ClientService {
         if($entity instanceof OrderRecurrence) {
             $client = $entity->getClientOrderInformation()->getClient();
             $recurrence = $entity;
-        } else if($entity instanceof Client){
+        } else if($entity instanceof Client) {
             $client = $entity;
             $recurrence = $client->getClientOrderInformation()->getOrderRecurrence();
         } else if($entity instanceof CratePatternLine) {

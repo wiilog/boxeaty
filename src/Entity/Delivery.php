@@ -61,13 +61,13 @@ class Delivery {
     }
 
     public function setOrder(?ClientOrder $order): self {
-        if ($this->order && $this->order->getDelivery() !== $this) {
+        if($this->order && $this->order->getDelivery() !== $this) {
             $oldPreparation = $this->order;
             $this->order = null;
             $oldPreparation->setDelivery(null);
         }
         $this->order = $order;
-        if ($this->order && $this->order->getDelivery() !== $this) {
+        if($this->order && $this->order->getDelivery() !== $this) {
             $this->order->setDelivery($this);
         }
 
@@ -111,13 +111,11 @@ class Delivery {
         return $this;
     }
 
-    public function getDeliveredAt(): ?DateTimeInterface
-    {
+    public function getDeliveredAt(): ?DateTimeInterface {
         return $this->deliveredAt;
     }
 
-    public function setDeliveredAt(?DateTimeInterface $deliveredAt): self
-    {
+    public function setDeliveredAt(?DateTimeInterface $deliveredAt): self {
         $this->deliveredAt = $deliveredAt;
 
         return $this;

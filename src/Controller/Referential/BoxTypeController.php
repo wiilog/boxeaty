@@ -53,7 +53,7 @@ class BoxTypeController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true) ?? []);
 
         $data = [];
-        foreach ($boxTypes["data"] as $boxType) {
+        foreach($boxTypes["data"] as $boxType) {
             $data[] = [
                 "id" => $boxType->getId(),
                 "name" => $boxType->getName(),
@@ -78,24 +78,24 @@ class BoxTypeController extends AbstractController {
      * @Route("/nouveau", name="box_type_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOX_TYPES)
      */
-    public function new(Request $request,
+    public function new(Request                $request,
                         EntityManagerInterface $entityManager,
-                        BoxTypeService $boxTypeService): Response {
+                        BoxTypeService         $boxTypeService): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
         $content->image = $request->files->get('image');
 
         $existing = $entityManager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
-        if ($existing) {
+        if($existing) {
             $form->addError("name", "Ce type de Box / Caisse existe déjà");
         }
 
-        if ($content->price < 0) {
+        if($content->price < 0) {
             $form->addError("price", "Le prix doit être supérieur ou égal à 0");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $boxType = new BoxType();
             $boxTypeService->persistBoxType($entityManager, $boxType, $content);
             $entityManager->flush();
@@ -125,7 +125,7 @@ class BoxTypeController extends AbstractController {
                 "capacities" => $capacities ?: [],
                 "starterKit" => $boxTypeRepository->findStarterKit(),
                 "shapes" => $shapes ?: [],
-            ])
+            ]),
         ]);
     }
 
@@ -133,22 +133,22 @@ class BoxTypeController extends AbstractController {
      * @Route("/modifier/{boxType}", name="box_type_edit", options={"expose": true})
      * @HasPermission(Role::MANAGE_BOX_TYPES)
      */
-    public function edit(Request $request,
+    public function edit(Request                $request,
                          EntityManagerInterface $entityManager,
-                         BoxTypeService $boxTypeService,
-                         ClientService $clientService,
-                         BoxType $boxType): Response {
+                         BoxTypeService         $boxTypeService,
+                         ClientService          $clientService,
+                         BoxType                $boxType): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
         $content->image = $request->files->get('image');
 
         $existing = $entityManager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
-        if ($existing !== null && $existing !== $boxType) {
+        if($existing !== null && $existing !== $boxType) {
             $form->addError("name", "Un autre type de Box / Caisse avec ce nom existe déjà");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $boxTypeService->persistBoxType($entityManager, $boxType, $content);
 
             foreach($boxType->getCratePatternLines() as $cratePatternLine) {
@@ -179,7 +179,7 @@ class BoxTypeController extends AbstractController {
         $today = $today->format("d-m-Y-H-i-s");
 
         return $exportService->export(function($output) use ($exportService, $boxTypes) {
-            foreach ($boxTypes as $boxType) {
+            foreach($boxTypes as $boxType) {
                 $exportService->putLine($output, $boxType);
             }
         }, "export-type-de-box-$today.csv", ExportService::BOX_TYPE_HEADER);

@@ -34,7 +34,7 @@ class DepositTicketController extends AbstractController {
         return $this->render("tracking/deposit_ticket/index.html.twig", [
             "new_deposit_ticket" => (new DepositTicket())->setNumber(StringHelper::random(5)),
             "initial_deposit_tickets" => $this->api($request, $manager)->getContent(),
-            "deposit_tickets_order" => DepositTicketRepository::DEFAULT_DATATABLE_ORDER
+            "deposit_tickets_order" => DepositTicketRepository::DEFAULT_DATATABLE_ORDER,
         ]);
     }
 
@@ -49,7 +49,7 @@ class DepositTicketController extends AbstractController {
         $data = [];
 
         /** @var DepositTicket $depositTicket */
-        foreach ($depositTickets["data"] as $depositTicket) {
+        foreach($depositTickets["data"] as $depositTicket) {
             $box = $depositTicket->getBox();
             $boxType = $box ? $box->getType() : null;
             $totalAmount = $boxType ? $boxType->getPrice() : null;
@@ -85,9 +85,9 @@ class DepositTicketController extends AbstractController {
      * @param Mailer $mailer
      * @return Response
      */
-    public function new(Request $request,
+    public function new(Request                $request,
                         EntityManagerInterface $manager,
-                        Mailer $mailer): Response {
+                        Mailer                 $mailer): Response {
         $form = Form::create();
 
         $depositTicketRepository = $manager->getRepository(DepositTicket::class);
@@ -106,15 +106,15 @@ class DepositTicketController extends AbstractController {
             : Client::DEFAULT_TICKET_VALIDITY;
         $depositTicketValidityDate = new DateTime("+{$depositTicketValidity}month");
 
-        if (((int) $content->state === DepositTicket::VALID) && $alreadyValidTicketOnBoxCount > 0) {
+        if(((int)$content->state === DepositTicket::VALID) && $alreadyValidTicketOnBoxCount > 0) {
             $form->addError("state", "Un ticket‑consigne valide existe déjà pour la Box " . "<strong>" . $box->getNumber() . "</strong>");
         }
 
-        if ($existing) {
+        if($existing) {
             $form->addError("number", "Ce ticket‑consigne existe déjà");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $depositTicket = new DepositTicket();
             $depositTicket
                 ->setBox($box)
@@ -125,7 +125,7 @@ class DepositTicketController extends AbstractController {
                 ->setState($content->state)
                 ->setConsumerEmail($content->emailConsumer ?? null);
 
-            if ($content->state == DepositTicket::SPENT) {
+            if($content->state == DepositTicket::SPENT) {
                 $depositTicket->setUseDate(new DateTime());
             }
 
@@ -144,7 +144,7 @@ class DepositTicketController extends AbstractController {
             $mailer->send(
                 $depositTicket->getConsumerEmail(),
                 "Création d'un ticket‑consigne",
-                $this->renderView("emails/deposit_ticket.html.twig",[
+                $this->renderView("emails/deposit_ticket.html.twig", [
                     "ticket" => $depositTicket,
                     "usable" => $usable,
                 ])
@@ -167,19 +167,19 @@ class DepositTicketController extends AbstractController {
         $content = (object)$request->request->all();
         $depositTicket = $manager->getRepository(DepositTicket::class)->find($content->id);
 
-        if ($depositTicket) {
+        if($depositTicket) {
             $manager->remove($depositTicket);
             $manager->flush();
 
             return $this->json([
                 "success" => true,
-                "message" => "Ticket‑consigne <strong>{$depositTicket->getNumber()}</strong> supprimé avec succès"
+                "message" => "Ticket‑consigne <strong>{$depositTicket->getNumber()}</strong> supprimé avec succès",
             ]);
         } else {
             return $this->json([
                 "success" => false,
                 "reload" => true,
-                "message" => "Le ticket‑consigne n'existe pas"
+                "message" => "Le ticket‑consigne n'existe pas",
             ]);
         }
     }
@@ -195,7 +195,7 @@ class DepositTicketController extends AbstractController {
         $today = $today->format("d-m-Y-H-i-s");
 
         return $exportService->export(function($output) use ($exportService, $depositTickets) {
-            foreach ($depositTickets as $depositTicket) {
+            foreach($depositTickets as $depositTicket) {
                 $depositTicket["state"] = DepositTicket::NAMES[$depositTicket["state"]];
                 $exportService->putLine($output, $depositTicket);
             }

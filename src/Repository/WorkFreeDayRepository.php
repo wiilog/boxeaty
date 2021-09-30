@@ -23,13 +23,13 @@ class WorkFreeDayRepository extends EntityRepository {
 
         $total = QueryHelper::count($qb, "work_free_day");
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
                 $qb->addOrderBy("work_free_day.$column", $order["dir"]);
             }
         } else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("work_free_day.$column", $dir);
             }
         }
@@ -46,7 +46,7 @@ class WorkFreeDayRepository extends EntityRepository {
         ];
     }
 
-    public function findDayAndMonth($day, $month){
+    public function findDayAndMonth($day, $month) {
         return $this->createQueryBuilder("work_free_day")
             ->select('work_free_day.day')
             ->addSelect('work_free_day.month')
@@ -54,7 +54,7 @@ class WorkFreeDayRepository extends EntityRepository {
             ->andWhere('work_free_day.month =:month')
             ->setParameters([
                 'day' => $day,
-                'month' => $month
+                'month' => $month,
             ])
             ->getQuery()
             ->getResult();

@@ -28,7 +28,7 @@ class GlobalSettingRepository extends EntityRepository {
                 ->andWhere("setting.name = '$key'")
                 ->getQuery()
                 ->getSingleResult()["value"];
-        } catch (NoResultException $ignored) {
+        } catch(NoResultException $ignored) {
             return null;
         }
     }
@@ -45,7 +45,7 @@ class GlobalSettingRepository extends EntityRepository {
                 ->setParameter("code", $code)
                 ->getQuery()
                 ->getSingleResult()["name"];
-        } catch (NoResultException $ignored) {
+        } catch(NoResultException $ignored) {
             return null;
         }
     }

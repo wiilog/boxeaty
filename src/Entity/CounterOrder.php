@@ -113,7 +113,7 @@ class CounterOrder {
     }
 
     public function addBox(Box $box): self {
-        if (!$this->boxes->contains($box)) {
+        if(!$this->boxes->contains($box)) {
             $this->boxes[] = $box;
             $box->addCounterOrder($this);
         }
@@ -122,7 +122,7 @@ class CounterOrder {
     }
 
     public function removeBox(Box $box): self {
-        if ($this->boxes->removeElement($box)) {
+        if($this->boxes->removeElement($box)) {
             $box->removeCounterOrder($this);
         }
 
@@ -130,12 +130,12 @@ class CounterOrder {
     }
 
     public function setBoxes(?array $boxes): self {
-        foreach ($this->getBoxes()->toArray() as $box) {
+        foreach($this->getBoxes()->toArray() as $box) {
             $this->removeBox($box);
         }
 
         $this->boxes = new ArrayCollection();
-        foreach ($boxes as $box) {
+        foreach($boxes as $box) {
             $this->addBox($box);
         }
 
@@ -150,7 +150,7 @@ class CounterOrder {
     }
 
     public function addDepositTicket(DepositTicket $depositTicket): self {
-        if (!$this->depositTickets->contains($depositTicket)) {
+        if(!$this->depositTickets->contains($depositTicket)) {
             $this->depositTickets[] = $depositTicket;
             $depositTicket->addCounterOrder($this);
         }
@@ -159,7 +159,7 @@ class CounterOrder {
     }
 
     public function removeDepositTicket(DepositTicket $depositTicket): self {
-        if ($this->depositTickets->removeElement($depositTicket)) {
+        if($this->depositTickets->removeElement($depositTicket)) {
             $depositTicket->removeCounterOrder($this);
         }
 
@@ -167,12 +167,12 @@ class CounterOrder {
     }
 
     public function setDepositTickets(?array $depositTickets): self {
-        foreach ($this->getDepositTickets()->toArray() as $depositTicket) {
+        foreach($this->getDepositTickets()->toArray() as $depositTicket) {
             $this->removeDepositTicket($depositTicket);
         }
 
         $this->depositTickets = new ArrayCollection();
-        foreach ($depositTickets as $depositTicket) {
+        foreach($depositTickets as $depositTicket) {
             $this->addDepositTicket($depositTicket);
         }
 

@@ -50,10 +50,10 @@ class StatusFixtures extends Fixture implements FixtureGroupInterface {
 
         $statusRepository = $manager->getRepository(Status::class);
 
-        foreach (self::STATUSES as $category => $statuses) {
-            foreach ($statuses as $code => $name) {
+        foreach(self::STATUSES as $category => $statuses) {
+            foreach($statuses as $code => $name) {
                 $status = $statusRepository->findOneBy(["code" => $code]);
-                if ($status === null) {
+                if($status === null) {
                     $status = new Status();
 
                     $output->writeln("Created status \"$name\"");

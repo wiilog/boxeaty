@@ -28,7 +28,7 @@ class GroupController extends AbstractController {
         return $this->render("referential/group/index.html.twig", [
             "new_group" => new Group(),
             "initial_groups" => $this->api($request, $manager)->getContent(),
-            "groups_order" => GroupRepository::DEFAULT_DATATABLE_ORDER
+            "groups_order" => GroupRepository::DEFAULT_DATATABLE_ORDER,
         ]);
     }
 
@@ -41,7 +41,7 @@ class GroupController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true) ?? [], $this->getUser());
 
         $data = [];
-        foreach ($groups["data"] as $group) {
+        foreach($groups["data"] as $group) {
             $data[] = [
                 "id" => $group->getId(),
                 "name" => $group->getName(),
@@ -66,9 +66,9 @@ class GroupController extends AbstractController {
     public function new(Request $request, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $existing = $manager->getRepository(Group::class)->findOneBy(["name" => $content->name]);
-        if ($existing) {
+        if($existing) {
             $form->addError("email", "Ce groupe existe déjà");
         }
 
@@ -98,7 +98,7 @@ class GroupController extends AbstractController {
             "submit" => $this->generateUrl("group_edit", ["group" => $group->getId()]),
             "template" => $this->renderView("referential/group/modal/edit.html.twig", [
                 "group" => $group,
-            ])
+            ]),
         ]);
     }
 
@@ -109,9 +109,9 @@ class GroupController extends AbstractController {
     public function edit(Request $request, EntityManagerInterface $manager, Group $group): Response {
         $form = Form::create();
 
-        $content = (object) $request->request->all();
+        $content = (object)$request->request->all();
         $existing = $manager->getRepository(Group::class)->findOneBy(["name" => $content->name]);
-        if ($existing !== null && $existing !== $group) {
+        if($existing !== null && $existing !== $group) {
             $form->addError("email", "Un autre groupe avec ce nom existe déjà");
         }
 
@@ -141,7 +141,7 @@ class GroupController extends AbstractController {
         $today = $today->format("d-m-Y-H-i-s");
 
         return $exportService->export(function($output) use ($exportService, $groups) {
-            foreach ($groups as $group) {
+            foreach($groups as $group) {
                 $exportService->putLine($output, $group);
             }
         }, "export-groupes-$today.csv", ExportService::GROUP_HEADER);

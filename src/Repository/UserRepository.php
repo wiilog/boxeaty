@@ -38,24 +38,23 @@ class UserRepository extends EntityRepository {
 
         $total = QueryHelper::count($qb, "user");
 
-        if ($search) {
+        if($search) {
             $qb->andWhere("user.username LIKE :search OR user.email LIKE :search")
                 ->setParameter("search", "%$search%");
         }
 
-        if (!empty($params["order"])) {
-            foreach ($params["order"] ?? [] as $order) {
+        if(!empty($params["order"])) {
+            foreach($params["order"] ?? [] as $order) {
                 $column = $params["columns"][$order["column"]]["data"];
-                if ($column === "role") {
+                if($column === "role") {
                     $qb->join("user.role", "role")
                         ->addOrderBy("role.name", $order["dir"]);
                 } else {
                     $qb->addOrderBy("user.$column", $order["dir"]);
                 }
             }
-        }
-        else {
-            foreach (self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
+        } else {
+            foreach(self::DEFAULT_DATATABLE_ORDER as [$column, $dir]) {
                 $qb->addOrderBy("user.$column", $dir);
             }
         }

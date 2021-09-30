@@ -42,7 +42,7 @@ class DepositoryController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true) ?? []);
 
         $data = [];
-        foreach ($depositories["data"] as $depository) {
+        foreach($depositories["data"] as $depository) {
             $data[] = [
                 "id" => $depository->getId(),
                 "name" => $depository->getName(),
@@ -71,11 +71,11 @@ class DepositoryController extends AbstractController {
 
         $content = (object)$request->request->all();
         $existing = $manager->getRepository(Depository::class)->findOneBy(["name" => $content->name]);
-        if ($existing) {
+        if($existing) {
             $form->addError("name", "Ce dépôt existe déjà");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $depository = new Depository();
             $depository
                 ->setName($content->name)
@@ -104,7 +104,7 @@ class DepositoryController extends AbstractController {
             "submit" => $this->generateUrl("depository_edit", ["depository" => $depository->getId()]),
             "template" => $this->renderView("referential/depository/modal/edit.html.twig", [
                 "depository" => $depository,
-            ])
+            ]),
         ]);
     }
 
@@ -117,11 +117,11 @@ class DepositoryController extends AbstractController {
 
         $content = (object)$request->request->all();
         $existing = $manager->getRepository(Depository::class)->findOneBy(["name" => $content->name]);
-        if ($existing !== null && $existing !== $depository) {
+        if($existing !== null && $existing !== $depository) {
             $form->addError("name", "Un autre dépôt avec ce nom existe déjà");
         }
 
-        if ($form->isValid()) {
+        if($form->isValid()) {
             $depository
                 ->setName($content->name)
                 ->setActive($content->active)
@@ -147,7 +147,7 @@ class DepositoryController extends AbstractController {
             "submit" => $this->generateUrl("depository_delete", ["depository" => $depository->getId()]),
             "template" => $this->renderView("referential/depository/modal/delete.html.twig", [
                 "depository" => $depository,
-            ])
+            ]),
         ]);
     }
 
@@ -156,7 +156,7 @@ class DepositoryController extends AbstractController {
      * @HasPermission(Role::MANAGE_DEPOSITORIES)
      */
     public function delete(EntityManagerInterface $manager, Depository $depository): Response {
-        if ($depository
+        if($depository
             && (!$depository->getPreparations()->isEmpty()
                 || !$depository->getLocations()->isEmpty()
                 || !$depository->getClientOrderInformation()->isEmpty())
@@ -168,7 +168,7 @@ class DepositoryController extends AbstractController {
                 "success" => true,
                 "message" => "Dépôt <strong>{$depository->getName()}</strong> désactivé avec succès",
             ]);
-        } else if ($depository) {
+        } else if($depository) {
             $manager->remove($depository);
             $manager->flush();
 
@@ -195,7 +195,7 @@ class DepositoryController extends AbstractController {
         $today = $today->format("d-m-Y-H-i-s");
 
         return $exportService->export(function($output) use ($exportService, $depositories) {
-            foreach ($depositories as $depository) {
+            foreach($depositories as $depository) {
                 $exportService->putLine($output, $depository);
             }
         }, "export-depot-$today.csv", ExportService::DEPOSITORY_HEADER);

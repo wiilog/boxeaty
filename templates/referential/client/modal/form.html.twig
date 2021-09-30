@@ -248,14 +248,15 @@
             <div class="col-12 col-sm-6 pe-0 pe-sm-3">
                 <label>
                     Tarif livraison jour ouvré
-                    <input type="number" name="workingDayDeliveryRate" class="data" placeholder="Renseignez un tarif..."
+                    <input type="number" name="workingDayDeliveryRate" class="data" required
+                           placeholder="Renseignez un tarif..."
                            value="{{ clientOrderInformation ? clientOrderInformation.workingDayDeliveryRate }}"/>
                 </label>
             </div>
             <div class="col-12 col-sm-6 ps-0 ps-sm-3">
                 <label>
                     Tarif livraison jour non ouvré
-                    <input type="number" name="nonWorkingDayDeliveryRate" class="data"
+                    <input type="number" name="nonWorkingDayDeliveryRate" class="data" required
                            placeholder="Renseignez un tarif..."
                            value="{{ clientOrderInformation ? clientOrderInformation.nonWorkingDayDeliveryRate }}"/>
                 </label>
@@ -264,7 +265,7 @@
         <div class="col-12 col-sm-6 mt-3 pe-3">
             <label>
                 Frais de service
-                <input type="number" name="serviceCost" class="data" placeholder="Frais de service"
+                <input type="number" name="serviceCost" class="data" required placeholder="Frais de service"
                        value="{{ clientOrderInformation ? clientOrderInformation.serviceCost }}"/>
             </label>
         </div>

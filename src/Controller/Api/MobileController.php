@@ -51,7 +51,7 @@ class MobileController extends AbstractController {
         $content = json_decode($request->getContent());
 
         $user = $manager->getRepository(User::class)->findOneBy(["email" => $content->email]);
-        if ($user && $hasher->isPasswordValid($user, $content->password)) {
+        if($user && $hasher->isPasswordValid($user, $content->password)) {
             $user->setApiKey(bin2hex(random_bytes(16)));
             $manager->flush();
 
@@ -72,7 +72,7 @@ class MobileController extends AbstractController {
 
         return $this->json([
             "success" => false,
-            "message" => "Identifiants invalides"
+            "message" => "Identifiants invalides",
         ]);
     }
 
@@ -148,8 +148,8 @@ class MobileController extends AbstractController {
             ->toArray();
 
         $result = [];
-        foreach ($serialized as $round) {
-            if ($round["expected_date"] < $now) {
+        foreach($serialized as $round) {
+            if($round["expected_date"] < $now) {
                 $result[$now->format("Y-m-d")][] = $round;
             } else {
                 $result[$round["expected_date"]->format("Y-m-d")][] = $round;
@@ -167,14 +167,14 @@ class MobileController extends AbstractController {
         $data = json_decode($request->getContent());
         $order = $manager->getRepository(ClientOrder::class)->find($data->order);
 
-        if ($order) {
+        if($order) {
             $statusRepository = $manager->getRepository(Status::class);
 
             $orderTransitStatus = $statusRepository->findOneBy(["code" => Status::CODE_ORDER_TRANSIT]);
             $deliveryTransitStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_TRANSIT]);
 
-            foreach ($order->getDeliveryRound()->getOrders() as $o) {
-                if ($o->hasStatusCode(Status::CODE_ORDER_AWAITING_DELIVERER)) {
+            foreach($order->getDeliveryRound()->getOrders() as $o) {
+                if($o->hasStatusCode(Status::CODE_ORDER_AWAITING_DELIVERER)) {
                     $clientOrderService->updateClientOrderStatus($o, $orderTransitStatus, $this->getUser());
                     $o->getDelivery()->setStatus($deliveryTransitStatus);
                 }
@@ -199,7 +199,7 @@ class MobileController extends AbstractController {
         $order = $manager->getRepository(ClientOrder::class)->find($data->order);
         $crate = $manager->getRepository(Box::class)->findOneBy(["number" => $data->crate]);
 
-        if ($crate) {
+        if($crate) {
             $line = $order->getPreparation()
                 ->getLines()
                 ->filter(fn(PreparationLine $line) => $line->getCrate()->getNumber() === $crate->getNumber())
@@ -209,7 +209,7 @@ class MobileController extends AbstractController {
 
             $offset = $crate->getLocation() ? $crate->getLocation()->getOffset() : null;
 
-            foreach (Stream::from([$crate], $crate->getContainedBoxes()) as $box) {
+            foreach(Stream::from([$crate], $crate->getContainedBoxes()) as $box) {
                 $previous = clone $box;
                 $box->setLocation($offset);
 
@@ -235,7 +235,7 @@ class MobileController extends AbstractController {
         $order = $manager->getRepository(ClientOrder::class)->find($data->order);
         $crate = $manager->getRepository(Box::class)->findOneBy(["number" => $data->crate]);
 
-        if ($crate) {
+        if($crate) {
             $line = Stream::from($order->getPreparation()->getLines())
                 ->filter(fn(PreparationLine $line) => $line->getCrate()->getNumber() === $crate->getNumber())
                 ->first();
@@ -246,7 +246,7 @@ class MobileController extends AbstractController {
                 ->filter(fn(Location $location) => $location->getType() === Location::RECEPTION)
                 ->first();
 
-            foreach (Stream::from([$crate], $crate->getContainedBoxes()) as $box) {
+            foreach(Stream::from([$crate], $crate->getContainedBoxes()) as $box) {
                 $previous = clone $box;
                 $box->setLocation($location)
                     ->setState(BoxStateService::STATE_BOX_CLIENT);
@@ -276,7 +276,7 @@ class MobileController extends AbstractController {
         $data = json_decode($request->getContent());
         $order = $manager->getRepository(ClientOrder::class)->find($data->order);
 
-        if ($order) {
+        if($order) {
             $deliveryRound = $order->getDeliveryRound();
             $delivery = $order->getDelivery();
 
@@ -299,7 +299,7 @@ class MobileController extends AbstractController {
                 ->filter(fn(ClientOrder $order) => !$order->hasStatusCode(Status::CODE_ORDER_FINISHED))
                 ->count();
 
-            if ($unfinishedDeliveries === 0) {
+            if($unfinishedDeliveries === 0) {
                 $status = $manager->getRepository(Status::class)->findOneBy(["code" => Status::CODE_ROUND_FINISHED]);
                 $distance = Stream::from($deliveryRound->getOrders())
                     ->map(fn(ClientOrder $order) => $order->getDelivery()->getDistance())
@@ -345,7 +345,7 @@ class MobileController extends AbstractController {
 
         return $this->json([
             'toPrepare' => $toPrepare,
-            'preparing' => $preparing
+            'preparing' => $preparing,
         ]);
     }
 
@@ -400,18 +400,18 @@ class MobileController extends AbstractController {
         $boxes = [];
 
         $boxes[] = $boxRepository->findOneBy(["number" => $content->crate]);
-        foreach ($content->boxes as $box) {
+        foreach($content->boxes as $box) {
             $boxes[] = $boxRepository->find($box);
         }
 
         $chosenQuality = $qualityRepository->find($content->quality);
         $chosenLocation = $locationRepository->find($content->location);
-        foreach ($boxes as $box) {
+        foreach($boxes as $box) {
             $previous = clone $box;
             $box->setLocation($chosenLocation)
                 ->setQuality($chosenQuality);
 
-            $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function (BoxRecord $record) {
+            $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function(BoxRecord $record) {
                 $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
             });
         }
@@ -430,7 +430,7 @@ class MobileController extends AbstractController {
     public function getPreparation(EntityManagerInterface $entityManager,
                                    ClientOrderService     $clientOrderService,
                                    Preparation            $preparation): JsonResponse {
-        if ((
+        if((
                 !$preparation->hasStatusCode(Status::CODE_PREPARATION_TO_PREPARE)
                 && !$preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
             )
@@ -441,7 +441,7 @@ class MobileController extends AbstractController {
             )) {
             return $this->json([
                 'success' => false,
-                'message' => 'Préparation non trouvée'
+                'message' => 'Préparation non trouvée',
             ]);
         }
 
@@ -451,7 +451,7 @@ class MobileController extends AbstractController {
         $cart = $clientOrder->getLines()
             ->map(fn(ClientOrderLine $line) => [
                 'boxType' => $line->getBoxType(),
-                'quantity' => $line->getQuantity()
+                'quantity' => $line->getQuantity(),
             ])
             ->toArray();
 
@@ -459,7 +459,7 @@ class MobileController extends AbstractController {
 
         return $this->json([
             'success' => true,
-            'crates' => $crates
+            'crates' => $crates,
         ]);
     }
 
@@ -481,8 +481,8 @@ class MobileController extends AbstractController {
         $preparing = $content['preparing'] ?? false;
         $statusRepository = $entityManager->getRepository(Status::class);
 
-        if ($preparing) {
-            if ($preparation->hasStatusCode(Status::CODE_PREPARATION_TO_PREPARE)) {
+        if($preparing) {
+            if($preparation->hasStatusCode(Status::CODE_PREPARATION_TO_PREPARE)) {
                 $preparationStatus = $statusRepository->findOneBy(['code' => Status::CODE_PREPARATION_PREPARING]);
                 $orderStatus = $statusRepository->findOneBy(['code' => Status::CODE_ORDER_PREPARING]);
 
@@ -495,21 +495,21 @@ class MobileController extends AbstractController {
                 return $this->json([
                     "success" => true,
                 ]);
-            } else if (!$preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
+            } else if(!$preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
                 || $this->getUser() !== $preparation->getOperator()) {
                 return $this->json([
                     'success' => false,
-                    'message' => 'La préparation est en cours de préparation par un autre utilisateur'
+                    'message' => 'La préparation est en cours de préparation par un autre utilisateur',
                 ]);
             } else {
                 // $preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
                 // AND $this->getUser() === $preparation->getOperator()
                 return $this->json([
-                    'success' => true
+                    'success' => true,
                 ]);
             }
 
-        } else if ($preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
+        } else if($preparation->hasStatusCode(Status::CODE_PREPARATION_PREPARING)
             && $this->getUser() === $preparation->getOperator()) {
             $preparedStatus = $statusRepository->findOneBy(["code" => Status::CODE_PREPARATION_PREPARED]);
             $preparedDeliveryStatus = $statusRepository->findOneBy(["code" => Status::CODE_DELIVERY_AWAITING_DELIVERER]);
@@ -523,14 +523,14 @@ class MobileController extends AbstractController {
 
             $user = $this->getUser();
 
-            if ($result['success']) {
-                foreach ($result['entities'] as $crateData) {
+            if($result['success']) {
+                foreach($result['entities'] as $crateData) {
                     $preparationLine = (new PreparationLine())
                         ->setPreparation($preparation)
                         ->setCrate($crateData['crate']);
                     $entityManager->persist($preparationLine);
 
-                    foreach (Stream::from([$crateData['crate']], $crateData['boxes']) as $box) {
+                    foreach(Stream::from([$crateData['crate']], $crateData['boxes']) as $box) {
                         $previous = clone $box;
                         $box->setCrate($crateData['crate']->getId() !== $box->getId() ? $crateData['crate'] : null)
                             ->setLocation($box->getLocation()->getOffset())
@@ -545,7 +545,7 @@ class MobileController extends AbstractController {
                 $preparation->setStatus($preparedStatus);
 
                 $delivery = $clientOrder->getDelivery();
-                if ($delivery) {
+                if($delivery) {
                     $delivery->setStatus($preparedDeliveryStatus);
 
                     $clientOrderService->updateClientOrderStatus($clientOrder, $awaitingDelivererStatus, $this->getUser());
@@ -554,16 +554,16 @@ class MobileController extends AbstractController {
                 }
 
                 $deliveryRound = $clientOrder->getDeliveryRound();
-                if ($deliveryRound) {
+                if($deliveryRound) {
                     $deliveryRoundService->updateDeliveryRound($entityManager, $deliveryRound);
                 }
 
                 $entityManager->flush();
 
-                if ($clientOrder->getClient()->isMailNotificationOrderPreparation()) {
+                if($clientOrder->getClient()->isMailNotificationOrderPreparation()) {
                     $content = $this->renderView("emails/mail_delivery_order.html.twig", [
                         "order" => $clientOrder,
-                        "lateDelivery" => false
+                        "lateDelivery" => false,
                     ]);
 
                     $mailer->send($clientOrder->getClient()->getContact(), "Commande en préparation", $content);
@@ -575,7 +575,7 @@ class MobileController extends AbstractController {
             } else {
                 return $this->json([
                     "success" => false,
-                    "message" => $result["message"]
+                    "message" => $result["message"],
                 ]);
             }
         }
@@ -598,7 +598,7 @@ class MobileController extends AbstractController {
             ->getOrder()
             ->getClientClosedPark();
 
-        if (!$clientFilter) {
+        if(!$clientFilter) {
             $clientFilter = $clientRepository->findOneBy(["name" => Client::BOXEATY]);
         }
 
@@ -624,7 +624,7 @@ class MobileController extends AbstractController {
         $boxTypes = $preparation
             ? Stream::from($preparation->getOrder()->getLines())
                 ->map(fn(ClientOrderLine $line) => [
-                    $line->getBoxType()->getId()
+                    $line->getBoxType()->getId(),
                 ])
                 ->toArray()
             : [];
@@ -633,7 +633,7 @@ class MobileController extends AbstractController {
             ->getOrder()
             ->getClientClosedPark();
 
-        if (!$clientFilter) {
+        if(!$clientFilter) {
             $clientFilter = $clientRepository->findOneBy(["name" => Client::BOXEATY]);
         }
 
@@ -651,17 +651,17 @@ class MobileController extends AbstractController {
         $isCrate = $request->query->get('isCrate');
         $crate = $request->query->get('crate');
 
-        if ($isCrate) {
+        if($isCrate) {
             $box = $manager->getRepository(Box::class)->findOneBy(['number' => $box, 'isBox' => 0]);
         } else {
             $box = $manager->getRepository(Box::class)->findOneBy(['number' => $box]);
         }
 
-        if ($crate) {
+        if($crate) {
             $crate = $manager->getRepository(Box::class)->findOneBy(['number' => $crate, 'isBox' => 0]);
         }
 
-        if ($box) {
+        if($box) {
             $type = $box->getType()->getName();
             $volume = $box->getType()->getVolume();
             $number = $box->getNumber();
@@ -672,8 +672,8 @@ class MobileController extends AbstractController {
                     "number" => $number,
                     "type" => $type,
                     "volume" => $volume,
-                    "crateVolume" => $crate ? $crate->getType()->getVolume() : 0
-                ]
+                    "crateVolume" => $crate ? $crate->getType()->getVolume() : 0,
+                ],
             ]);
         }
 
@@ -699,14 +699,14 @@ class MobileController extends AbstractController {
         $chosenQuality = $qualityRepository->find($content['quality']);
         $chosenLocation = $locationRepository->find($content['location']);
 
-        foreach ($scannedBoxesAndCrates as $scannedBoxOrCrate) {
+        foreach($scannedBoxesAndCrates as $scannedBoxOrCrate) {
             $box = $boxRepository->findOneBy(['number' => $scannedBoxOrCrate]);
-            if ($box) {
+            if($box) {
                 $previous = clone $box;
                 $box->setLocation($chosenLocation)
                     ->setQuality($chosenQuality);
 
-                $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function (BoxRecord $record) {
+                $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function(BoxRecord $record) {
                     $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
                 });
             }
@@ -734,7 +734,7 @@ class MobileController extends AbstractController {
     public function collectCrates(Collect $collect): JsonResponse {
         $collectCrates = $collect->getCrates()->map(fn(Box $crate) => [
             "number" => $crate->getNumber(),
-            "type" => $crate->getType()->getName()
+            "type" => $crate->getType()->getName(),
         ]);
 
         return $this->json($collectCrates);
@@ -746,7 +746,7 @@ class MobileController extends AbstractController {
      */
     public function location(Request $request, EntityManagerInterface $manager): JsonResponse {
         $location = $manager->getRepository(Location::class)->findOneBy([
-            'name' => $request->query->get('location')
+            'name' => $request->query->get('location'),
         ]);
         $client = $location->getClient();
 
@@ -782,7 +782,7 @@ class MobileController extends AbstractController {
         $number = $uniqueNumberService->createUniqueNumber(Collect::class);
 
         $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
-        if ($data->data->photo) {
+        if($data->data->photo) {
             $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
         }
 
@@ -802,7 +802,7 @@ class MobileController extends AbstractController {
             ->setOperator($this->getUser())
             ->setCrates($crates);
 
-        if (isset($data->clientOrder)) {
+        if(isset($data->clientOrder)) {
             $collect->setClientOrder($clientOrderRepository->find($data->clientOrder));
         }
 
@@ -810,7 +810,7 @@ class MobileController extends AbstractController {
         $manager->flush();
 
         return $this->json([
-            "success" => true
+            "success" => true,
         ]);
     }
 
@@ -828,7 +828,7 @@ class MobileController extends AbstractController {
         $dropLocation = $manager->find(Location::class, $data->drop_location);
         $crates = $collect->getCrates();
 
-        foreach ($crates as $crate) {
+        foreach($crates as $crate) {
             $previous = clone $crate;
             $crate->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
                 ->setLocation($dropLocation);
@@ -839,7 +839,7 @@ class MobileController extends AbstractController {
         $collectStatus = $manager->getRepository(Status::class)->findOneBy(["code" => Status::CODE_COLLECT_FINISHED]);
 
         $signature = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_SIGNATURE, ["signature", $data->data->signature]);
-        if ($data->data->photo) {
+        if($data->data->photo) {
             $photo = $attachmentService->createAttachment(Attachment::TYPE_COLLECT_PHOTO, ["photo", $data->data->photo]);
         }
 
@@ -853,7 +853,7 @@ class MobileController extends AbstractController {
         $manager->flush();
 
         return $this->json([
-            "success" => true
+            "success" => true,
         ]);
     }
 

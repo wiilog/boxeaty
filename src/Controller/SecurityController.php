@@ -25,7 +25,7 @@ class SecurityController extends AbstractController {
      * @Route("/", name="default")
      */
     public function default(): Response {
-        if ($this->getUser()) {
+        if($this->getUser()) {
             return $this->redirectToRoute(Authenticator::HOME_ROUTE);
         } else {
             return $this->redirectToRoute(Authenticator::LOGIN_ROUTE);
@@ -36,7 +36,7 @@ class SecurityController extends AbstractController {
      * @Route("/login", name="login", options={"expose": true})
      */
     public function login(AuthenticationUtils $authenticationUtils): Response {
-        if ($this->getUser()) {
+        if($this->getUser()) {
             return $this->redirectToRoute("home");
         }
 
@@ -45,7 +45,7 @@ class SecurityController extends AbstractController {
 
         return $this->render("security/login.html.twig", [
             "last_username" => $lastUsername,
-            "error" => $error
+            "error" => $error,
         ]);
     }
 
@@ -53,13 +53,13 @@ class SecurityController extends AbstractController {
      * @Route("/register", name="register")
      */
     public function register(Request $request, Mailer $mailer, UserPasswordHasherInterface $encoder): Response {
-        if ($this->getUser()) {
+        if($this->getUser()) {
             return $this->redirectToRoute(Authenticator::HOME_ROUTE);
         }
 
         $user = new User();
 
-        if ($request->getMethod() === "POST") {
+        if($request->getMethod() === "POST") {
             $em = $this->getDoctrine()->getManager();
             $userRepository = $em->getRepository(User::class);
 
@@ -75,25 +75,25 @@ class SecurityController extends AbstractController {
                 ->setDeliveryAssignmentPreparationMail(false)
                 ->addGroup($em->getRepository(Group::class)->find($request->request->get("group")));
 
-            if ($existing) {
+            if($existing) {
                 $this->addFlash("danger", "Un utilisateur existe déjà avec cet email");
                 $valid = false;
             }
 
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $this->addFlash("danger", "L'adresse email n'est pas valide");
                 $valid = false;
             }
 
-            if ($password !== $request->request->get("password-repeat")) {
+            if($password !== $request->request->get("password-repeat")) {
                 $this->addFlash("danger", "Les mots de passe sont différents");
                 $valid = false;
-            } else if (!Authenticator::isPasswordSecure($password)) {
+            } else if(!Authenticator::isPasswordSecure($password)) {
                 $this->addFlash("danger", Authenticator::PASSWORD_ERROR);
                 $valid = false;
             }
 
-            if ($valid) {
+            if($valid) {
                 $noAccess = $em->getRepository(Role::class)->findOneBy(["code" => Role::ROLE_NO_ACCESS]);
 
                 $user->setPassword($encoder->hashPassword($user, $password))
@@ -136,12 +136,12 @@ class SecurityController extends AbstractController {
      */
     public function passwordForgotten(Request $request, Mailer $mailer) {
         $form = $this->createForm(PasswordForgottenType::class, [
-            "email" => $request->query->get("email")
+            "email" => $request->query->get("email"),
         ]);
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if($form->isSubmitted() && $form->isValid()) {
             $forgotten = $form->getData();
 
             $manager = $this->getDoctrine()->getManager();
@@ -149,7 +149,7 @@ class SecurityController extends AbstractController {
 
             $user = $ur->findOneBy(["email" => $forgotten["email"]]);
 
-            if ($user != null) {
+            if($user != null) {
                 $token = bin2hex(random_bytes(16));
                 $time = (new DateTime())->modify("+12 hours");
 
@@ -171,7 +171,7 @@ class SecurityController extends AbstractController {
         }
 
         return $this->render("security/password_forgotten.html.twig", [
-            "form" => $form->createView()
+            "form" => $form->createView(),
         ]);
     }
 
@@ -186,19 +186,19 @@ class SecurityController extends AbstractController {
      * @Route("/mot-de-passe/reinitialiser/{user}", name="reset_password")
      */
     public function resetPassword(Request $request, UserPasswordEncoderInterface $encoder, User $user) {
-        if (!$request->query->has("token")) {
+        if(!$request->query->has("token")) {
             $this->addFlash("danger", "Lien de réinitialisation de mot de passe invalide");
             $this->redirectToRoute("login");
         }
 
         $token = $request->query->get("token");
-        if (!$user->getResetToken() || !$user->getResetTokenExpiration() || $user->getResetTokenExpiration() < new DateTime()) {
+        if(!$user->getResetToken() || !$user->getResetTokenExpiration() || $user->getResetTokenExpiration() < new DateTime()) {
             $this->addFlash("warning", "Le lien a expiré, merci de recommencer la procédure de réinitialisation de mot de passe");
             $this->redirectToRoute("password_forgotten");
         }
 
         $tokenEncoder = new NativePasswordEncoder();
-        if (!$tokenEncoder->isPasswordValid($user->getResetToken(), $token, $user->getResetTokenExpiration()->getTimestamp())) {
+        if(!$tokenEncoder->isPasswordValid($user->getResetToken(), $token, $user->getResetTokenExpiration()->getTimestamp())) {
             $this->addFlash("danger", "Le token de réinitialisation ne correspond pas");
             $this->redirectToRoute("login");
         }
@@ -206,12 +206,12 @@ class SecurityController extends AbstractController {
         $form = $this->createForm(PasswordResetType::class);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if($form->isSubmitted() && $form->isValid()) {
             $result = $form->getData();
 
-            if ($result["password"] != $result["confirmation"]) {
+            if($result["password"] != $result["confirmation"]) {
                 $this->addFlash("danger", "Les mots de passe ne correspondent pas");
-            } else if (!Authenticator::isPasswordSecure($result["password"])) {
+            } else if(!Authenticator::isPasswordSecure($result["password"])) {
                 $this->addFlash("danger", Authenticator::PASSWORD_ERROR);
             } else {
                 $manager = $this->getDoctrine()->getManager();
@@ -228,7 +228,7 @@ class SecurityController extends AbstractController {
         }
 
         return $this->render("security/reset_password.html.twig", [
-            "form" => $form->createView()
+            "form" => $form->createView(),
         ]);
     }
 

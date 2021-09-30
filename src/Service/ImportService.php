@@ -58,14 +58,14 @@ class ImportService {
         $header[] = "Erreurs";
         $this->trace[] = $header;
 
-        while ($this->nextLine($handle)) {
-            if ($import->getDataType() === Import::TYPE_BOX) {
+        while($this->nextLine($handle)) {
+            if($import->getDataType() === Import::TYPE_BOX) {
                 $this->importBox($import);
-            } else if ($import->getDataType() === Import::TYPE_LOCATION) {
+            } else if($import->getDataType() === Import::TYPE_LOCATION) {
                 $this->importLocation($import);
             }
 
-            if ($this->creations % 500 == 0) {
+            if($this->creations % 500 == 0) {
                 $this->manager->flush();
             }
         }
@@ -91,16 +91,16 @@ class ImportService {
         $number = $this->value(Import::NUMBER, true);
 
         $box = $boxRepository->findOneBy(["number" => $number]);
-        if (!$box) {
+        if(!$box) {
             $box = new Box();
             $box->setNumber($number);
         }
 
         $boxOrCrate = $this->value(Import::BOX_OR_CRATE, true, $box->isBox());
         $boxOrCrate = strtolower($boxOrCrate);
-        if ($boxOrCrate === "box") {
+        if($boxOrCrate === "box") {
             $isBox = true;
-        } else if ($boxOrCrate === "caisse") {
+        } else if($boxOrCrate === "caisse") {
             $isBox = false;
         } else {
             $this->addError("Le champ \"box ou caisse\" doit valoir \"box\" ou \"caisse\"");
@@ -108,39 +108,39 @@ class ImportService {
 
         $stateValue = $this->value(Import::STATE);
         $state = array_search(strtolower($stateValue), $this->boxStatesLower);
-        if ($stateValue && $state === false) {
+        if($stateValue && $state === false) {
             $this->addError("Etat de Box inconnu \"$state\"");
         }
 
         $ownerValue = $this->value(Import::OWNER);
         $owner = $clientRepository->findOneBy(["name" => $ownerValue]);
-        if ($ownerValue && !$owner) {
+        if($ownerValue && !$owner) {
             $this->addError("Aucun client correspondant au propriétaire \"$ownerValue\"");
         }
 
         $qualityValue = $this->value(Import::QUALITY, true);
         $quality = $qualityRepository->findOneBy(["name" => $qualityValue]);
-        if ($qualityValue && !$quality) {
+        if($qualityValue && !$quality) {
             $this->addError("Aucune qualité correspondant à \"$qualityValue\"");
         }
 
         $typeValue = $this->value(Import::TYPE, true);
         $type = $typeRepository->findOneBy(["name" => $typeValue]);
-        if ($typeValue && !$type) {
+        if($typeValue && !$type) {
             $this->addError("Aucun type correspondant à \"$typeValue\"");
         }
 
         $locationValue = $this->value(Import::LOCATION, true);
         $location = $locationRepository->findOneBy(["name" => $locationValue]);
-        if ($locationValue && !$location) {
+        if($locationValue && !$location) {
             $this->addError("Aucun emplacement correspondant à \"$locationValue\"");
         }
 
         /** @var Client $owner */
-        if ($import->getUser()->getRole()->isAllowEditOwnGroupOnly()) {
+        if($import->getUser()->getRole()->isAllowEditOwnGroupOnly()) {
             $groups = $import->getUser()->getGroups();
 
-            if ($groups->contains($location->getClient()->getGroup())) {
+            if($groups->contains($location->getClient()->getGroup())) {
                 $this->addError(
                     "Vous ne pouvez pas importer des Box dans " .
                     "l'emplacement \"$locationValue\" car il appartient au " .
@@ -148,7 +148,7 @@ class ImportService {
                 );
             }
 
-            if (!$groups->contains($owner->getGroup())) {
+            if(!$groups->contains($owner->getGroup())) {
                 $this->addError(
                     "Vous ne pouvez pas importer des Box du " .
                     "client \"$ownerValue\" car il est dans le " .
@@ -157,7 +157,7 @@ class ImportService {
             }
         }
 
-        if (!$this->hasError()) {
+        if(!$this->hasError()) {
             $box->setIsBox($isBox)
                 ->setType($type)
                 ->setUses(0)
@@ -170,7 +170,7 @@ class ImportService {
 
             $this->boxRecordService->generateBoxRecords($box, null, $import->getUser());
 
-            if (!$box->getId()) {
+            if(!$box->getId()) {
                 $this->manager->persist($box);
                 $this->creations++;
             } else {
@@ -187,22 +187,22 @@ class ImportService {
         $name = $this->value(Import::NAME, true);
 
         $location = $locationRepository->findOneBy(["name" => $name]);
-        if (!$location) {
+        if(!$location) {
             $location = new Location();
             $location->setName($name);
         }
 
         $locationOrKiosk = $this->value(Import::LOCATION_OR_KIOSK, false, $location->isKiosk());
         $locationOrKiosk = strtolower($locationOrKiosk);
-        if ($locationOrKiosk === "emplacement") {
+        if($locationOrKiosk === "emplacement") {
             $kiosk = false;
-        } else if ($locationOrKiosk === "borne") {
+        } else if($locationOrKiosk === "borne") {
             $kiosk = true;
         } else {
             $this->addError("Le champ \"emplacement ou borne\" doit valoir \"emplacement\" ou \"borne\"");
         }
 
-        if (isset($kiosk)) {
+        if(isset($kiosk)) {
             $activeValue = $this->value(Import::ACTIVE, false, $location->isActive());
             $activeValue = strtolower($activeValue);
             if(in_array($activeValue, ["actif", "active", "oui", "1"])) {
@@ -218,31 +218,31 @@ class ImportService {
             $defaultClient = $location->getClient() ? $location->getClient()->getName() : null;
             $clientValue = $this->value(Import::CLIENT, false, $defaultClient);
             $client = $clientRepository->findOneBy(["name" => $clientValue]);
-            if ($clientValue && !$client) {
+            if($clientValue && !$client) {
                 $this->addError("Aucun client correspondant à \"$clientValue\"");
             }
 
-            if ($kiosk) {
+            if($kiosk) {
                 $capacity = $this->value(Import::CAPACITY, false, $location->getCapacity());
                 $message = $this->value(Import::MESSAGE, false, $location->getMessage());
             } else {
                 $typeValue = $this->value(Import::TYPE);
                 $type = array_search($typeValue, Location::LOCATION_TYPES);
-                if ($typeValue && $type === false) {
+                if($typeValue && $type === false) {
                     $this->addError("Type d'emplacement inconnu \"$typeValue\"");
                 }
 
                 $depositoryValue = $this->value(Import::DEPOSITORY, true);
                 $depository = $depositoryRepository->findOneBy(["name" => $depositoryValue]);
-                if ($depositoryValue && !$depository) {
+                if($depositoryValue && !$depository) {
                     $this->addError("Aucun dépôt ne correspond à \"$depository\"");
                 }
             }
 
-            if ($import->getUser()->getRole()->isAllowEditOwnGroupOnly()) {
+            if($import->getUser()->getRole()->isAllowEditOwnGroupOnly()) {
                 $groups = $import->getUser()->getGroups();
 
-                if ($groups->contains($location->getClient()->getGroup())) {
+                if($groups->contains($location->getClient()->getGroup())) {
                     $this->addError(
                         "Vous ne pouvez pas importer l'emplacement " .
                         "\"$name\" car il appartient au groupe " .
@@ -250,7 +250,7 @@ class ImportService {
                     );
                 }
 
-                if (!$groups->contains($location->getClient()->getGroup())) {
+                if(!$groups->contains($location->getClient()->getGroup())) {
                     $this->addError(
                         "Vous ne pouvez pas importer l'emplacement" .
                         "\"$name\" car il est dans le groupe " .
@@ -259,12 +259,12 @@ class ImportService {
                 }
             }
 
-            if (!$this->hasError()) {
+            if(!$this->hasError()) {
                 $location->setKiosk($kiosk)
                     ->setDescription($description)
                     ->setActive($active);
 
-                if ($kiosk) {
+                if($kiosk) {
                     $location
                         ->setCapacity($capacity)
                         ->setMessage($message);
@@ -274,7 +274,7 @@ class ImportService {
                         ->setType($type);
                 }
 
-                if (!$location->getId()) {
+                if(!$location->getId()) {
                     $this->manager->persist($location);
                     $this->creations++;
                 } else {
@@ -285,12 +285,12 @@ class ImportService {
     }
 
     private function value(string $column, bool $required = false, $default = self::NOT_SELECTED): ?string {
-        if (!isset($this->import->getFieldsAssociation()[$column]) && !$required) {
+        if(!isset($this->import->getFieldsAssociation()[$column]) && !$required) {
             return $default !== self::NOT_SELECTED ? $default : null;
         }
 
         $value = $this->data[$this->import->getFieldsAssociation()[$column] ?? null] ?? null;
-        if ($required && !$value) {
+        if($required && !$value) {
             $this->addError("Le champ " . Import::FIELDS[$this->import->getDataType()][$column]["name"] . " est requis");
         }
 
@@ -298,14 +298,14 @@ class ImportService {
     }
 
     private function nextLine($handle): bool {
-        if ($this->data) {
+        if($this->data) {
             $this->trace[] = $this->data;
         }
 
         $this->data = fgetcsv($handle, 0, ";");
         $this->hasError = false;
 
-        if ($this->data && $this->exportService->getEncoding() === ExportService::ENCODING_UTF8) {
+        if($this->data && $this->exportService->getEncoding() === ExportService::ENCODING_UTF8) {
             $this->data = array_map("utf8_encode", $this->data);
         }
 
@@ -323,20 +323,20 @@ class ImportService {
     }
 
     private function saveTrace(): ?string {
-        if (empty($this->trace)) {
+        if(empty($this->trace)) {
             return null;
         }
 
         $name = bin2hex(random_bytes(6)) . ".csv";
         $tracesDirectory = $this->kernel->getProjectDir() . "/public/persistent/traces";
-        if (!is_dir($tracesDirectory)) {
+        if(!is_dir($tracesDirectory)) {
             mkdir($tracesDirectory);
         }
 
         $path = $tracesDirectory . '/' . $name;
 
         $file = fopen($path, "w");
-        foreach ($this->trace as $line) {
+        foreach($this->trace as $line) {
             $this->exportService->putLine($file, $line);
         }
         fclose($file);

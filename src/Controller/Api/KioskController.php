@@ -44,15 +44,15 @@ class KioskController extends AbstractController {
     public function config(Request $request, EntityManagerInterface $manager): JsonResponse {
         $content = json_decode($request->getContent());
 
-        if (isset($content->id)) {
+        if(isset($content->id)) {
             $kiosk = $manager->getRepository(Location::class)->find($content->id);
 
-            if ($kiosk) {
-                if ($kiosk->getMessage()) {
+            if($kiosk) {
+                if($kiosk->getMessage()) {
                     $message = $kiosk->getMessage();
                 } else {
                     $client = $kiosk->getClient();
-                    if ($client && !$client->isMultiSite() && $client->getLinkedMultiSite()) {
+                    if($client && !$client->isMultiSite() && $client->getLinkedMultiSite()) {
                         $client = $client->getLinkedMultiSite();
                     }
 
@@ -89,7 +89,7 @@ class KioskController extends AbstractController {
         $content = json_decode($request->getContent());
         $page = $manager->getRepository(GlobalSetting::class)->getCorrespondingCode($content->code);
 
-        if ($page) {
+        if($page) {
             return $this->json([
                 "success" => true,
                 "page" => $page,
@@ -106,7 +106,7 @@ class KioskController extends AbstractController {
      * @Authenticated(Authenticated::KIOSK)
      */
     public function kiosk(Location $kiosk): JsonResponse {
-        if ($kiosk->isKiosk()) {
+        if($kiosk->isKiosk()) {
             return $this->json([
                 "success" => true,
                 "kiosk" => [
@@ -120,7 +120,7 @@ class KioskController extends AbstractController {
                             "number" => $box->getNumber(),
                         ])
                         ->toArray(),
-                ]
+                ],
             ]);
         } else {
             return $this->json([
@@ -141,7 +141,7 @@ class KioskController extends AbstractController {
 
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk ?? $request->request->get("id"));
 
-        foreach ($kiosk->getBoxes() as $box) {
+        foreach($kiosk->getBoxes() as $box) {
             $previous = clone $box;
 
             $box->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
@@ -155,7 +155,7 @@ class KioskController extends AbstractController {
 
         return $this->json([
             "success" => true,
-            "kiosk" => $kiosk->serialize()
+            "kiosk" => $kiosk->serialize(),
         ]);
     }
 
@@ -171,7 +171,7 @@ class KioskController extends AbstractController {
             "state" => BoxStateService::STATE_BOX_CONSUMER,
         ]);
 
-        if ($box && $box->getType() && $box->getOwner()) {
+        if($box && $box->getType() && $box->getOwner()) {
             return $this->json([
                 "success" => true,
                 "box" => [
@@ -201,7 +201,7 @@ class KioskController extends AbstractController {
             "state" => BoxStateService::STATE_BOX_CONSUMER,
         ]);
 
-        if ($box && $box->getType() && $box->getOwner()) {
+        if($box && $box->getType() && $box->getOwner()) {
             $previous = clone $box;
 
             $kiosk->setDeposits($kiosk->getDeposits() + 1);
@@ -222,7 +222,7 @@ class KioskController extends AbstractController {
                     "id" => $box->getId(),
                     "number" => $box->getNumber(),
                 ],
-                'kiosk' => $kiosk->serialize()
+                'kiosk' => $kiosk->serialize(),
             ]);
         } else {
             return $this->json([
@@ -244,10 +244,10 @@ class KioskController extends AbstractController {
         $totalDeposits = $locationRepository->getTotalDeposits();
 
         $lessWaste = $kiosk->getDeposits() * 32;
-        if ($lessWaste > 1000) {
+        if($lessWaste > 1000) {
             $prefix = "kg";
             $lessWaste = round($lessWaste / 1000);
-        } else if ($lessWaste > 1000000) {
+        } else if($lessWaste > 1000000) {
             $prefix = "t";
             $lessWaste = round($lessWaste / 1000000);
         } else {
@@ -269,16 +269,16 @@ class KioskController extends AbstractController {
         $content = json_decode($request->getContent());
 
         $ticket = $this->createDepositTicket($content);
-        if ($ticket instanceof Response) {
+        if($ticket instanceof Response) {
             return $ticket;
         }
 
         $client = $ticket->getLocation() ? $ticket->getLocation()->getClient() : null;
         $clients = $client ? $client->getDepositTicketsClients() : [];
 
-        if (count($clients) === 0) {
+        if(count($clients) === 0) {
             $usable = "tout le réseau BoxEaty";
-        } else if (count($clients) === 1) {
+        } else if(count($clients) === 1) {
             $usable = "le restaurant <span class='no-wrap'>{$clients[0]->getName()}</span>";
         } else {
             $usable = "les restaurants " . Stream::from($clients)
@@ -310,7 +310,7 @@ class KioskController extends AbstractController {
      */
     public function depositTicketPrint(Request $request): JsonResponse {
         $ticket = $this->createDepositTicket(json_decode($request->getContent()));
-        if ($ticket instanceof Response) {
+        if($ticket instanceof Response) {
             return $ticket;
         }
 
@@ -328,9 +328,9 @@ class KioskController extends AbstractController {
         $client = $ticket->getLocation() ? $ticket->getLocation()->getClient() : null;
         $clients = $client ? $client->getDepositTicketsClients() : [];
 
-        if (count($clients) === 0) {
+        if(count($clients) === 0) {
             $usable = "tout le réseau BoxEaty";
-        } else if (count($clients) === 1) {
+        } else if(count($clients) === 1) {
             $usable = "le restaurant <span class='no-wrap'>{$clients[0]->getName()}</span>";
         } else {
             $usable = "les restaurants " . Stream::from($clients)
@@ -362,7 +362,7 @@ class KioskController extends AbstractController {
             ->getClient()
             ->getDepositTicketValidity();
 
-        if (!$box->getCanGenerateDepositTicket()) {
+        if(!$box->getCanGenerateDepositTicket()) {
             return $this->json([
                 "success" => false,
                 "message" => "Cette Box n'a pas été déposée",

@@ -17,7 +17,7 @@ class OrderType {
     public const SELECTABLE = [
         self::PURCHASE_TRADE,
         self::AUTONOMOUS_MANAGEMENT,
-        self::ONE_TIME_SERVICE
+        self::ONE_TIME_SERVICE,
     ];
 
     public const LABELS = [
@@ -43,8 +43,7 @@ class OrderType {
      */
     private ?string $name = null;
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 

@@ -25,14 +25,14 @@ class PreparationService {
      *      ][]
      */
     public function handlePreparedCrates(EntityManagerInterface $entityManager,
-                                         ClientOrder $clientOrder,
-                                         array $crates): array {
+                                         ClientOrder            $clientOrder,
+                                         array                  $crates): array {
 
         $client = $clientOrder->getClient();
         $cart = $clientOrder->getLines()
             ->map(fn(ClientOrderLine $line) => [
                 'boxType' => $line->getBoxType(),
-                'quantity' => $line->getQuantity()
+                'quantity' => $line->getQuantity(),
             ])
             ->toArray();
 
@@ -41,7 +41,7 @@ class PreparationService {
 
         $comparisonResult = $this->comparePreparedCratesAndSplitting($preparedCrates, $cartSplitting);
 
-        if ($comparisonResult['success']) {
+        if($comparisonResult['success']) {
             $comparisonResult['entities'] = $preparedCrates;
         }
 
@@ -58,25 +58,25 @@ class PreparationService {
      *      ][]
      */
     private function unserializePreparedCrates(EntityManagerInterface $entityManager,
-                                              array $crates): array {
+                                               array                  $crates): array {
         $boxRepository = $entityManager->getRepository(Box::class);
 
         $preparedCrates = [];
 
-        foreach ($crates as $serializedCrate) {
+        foreach($crates as $serializedCrate) {
             $crateNumber = $serializedCrate['number'];
             $crate = $boxRepository->findOneBy(['number' => $crateNumber]);
 
-            if ($crate) {
+            if($crate) {
                 $cartSplittingPreparedLine = [];
                 $cartSplittingPreparedLine['crate'] = $crate;
                 $cartSplittingPreparedLine['boxes'] = [];
-                if (!empty($serializedCrate['boxes'])) {
-                    foreach ($serializedCrate['boxes'] as $serializedBoxes) {
-                        if (!empty($serializedBoxes['selected'])) {
-                            foreach ($serializedBoxes['selected'] as $selectedNumber) {
+                if(!empty($serializedCrate['boxes'])) {
+                    foreach($serializedCrate['boxes'] as $serializedBoxes) {
+                        if(!empty($serializedBoxes['selected'])) {
+                            foreach($serializedBoxes['selected'] as $selectedNumber) {
                                 $box = $boxRepository->findOneBy(['number' => $selectedNumber]);
-                                if ($box) {
+                                if($box) {
                                     $cartSplittingPreparedLine['boxes'][] = $box;
                                 }
                             }
@@ -97,54 +97,52 @@ class PreparationService {
      *      ][]
      * @param array $cartSplitting
      *      [
-                'type' => string,
-                'boxes' => [
-                    'type' => string,
-                    'quantity' => number
-                ][]
-            ][]
+     * 'type' => string,
+     * 'boxes' => [
+     * 'type' => string,
+     * 'quantity' => number
+     * ][]
+     * ][]
      */
     private function comparePreparedCratesAndSplitting(array $preparedCrates,
                                                        array $cartSplitting): array {
         $result = [];
-        if (count($preparedCrates) !== count($cartSplitting)) {
+        if(count($preparedCrates) !== count($cartSplitting)) {
             $result['error'] = 'Le nombre de caisse ne correspond pas à celui attendu';
-        }
-        else {
+        } else {
             try {
                 /** @var Box $preparedCrate */
-                foreach ($preparedCrates as $preparedCrate) {
-                    if ($preparedCrate->isBox()
+                foreach($preparedCrates as $preparedCrate) {
+                    if($preparedCrate->isBox()
                         || $preparedCrate->getState() !== BoxStateService::STATE_BOX_AVAILABLE) {
                         throw new Exception('Une des caisses préparée est invalide', 1000);
                     }
 
                     $respectiveSplittingLine = null;
                     $respectiveSplittingIndex = null;
-                    foreach ($cartSplitting as $splittingIndex => $splittingLine) {
-                        if ($preparedCrate->getType()
+                    foreach($cartSplitting as $splittingIndex => $splittingLine) {
+                        if($preparedCrate->getType()
                             && $splittingLine['type'] === $preparedCrate->getType()->getName()) {
                             $respectiveSplittingLine = $splittingLine;
                             $respectiveSplittingIndex = $splittingIndex;
                             break;
                         }
                     }
-                    if (!$respectiveSplittingLine) {
+                    if(!$respectiveSplittingLine) {
                         throw new Exception('Une des caisses préparée est invalide', 1000);
-                    }
-                    else {
+                    } else {
                         $groupedBoxes = [];
 
                         // we group boxes by type name and we check box validity
                         /** @var Box $box */
-                        foreach ($preparedCrate['boxes'] as $box) {
+                        foreach($preparedCrate['boxes'] as $box) {
                             $key = $box->getType() ? $box->getType()->getName() : 0;
-                            if (!isset($groupedBoxes[$key])) {
+                            if(!isset($groupedBoxes[$key])) {
                                 $groupedBoxes[$key] = [];
                             }
                             $groupedBoxes[$key][] = $box;
 
-                            if (!$box->isBox()
+                            if(!$box->isBox()
                                 || $box->getState() !== BoxStateService::STATE_BOX_AVAILABLE
                                 || !$box->getQuality()
                                 || !$box->getQuality()->isClean()) {
@@ -153,34 +151,33 @@ class PreparationService {
                         }
 
                         $groupedSplittingBoxes = Stream::from($respectiveSplittingLine['boxes'])
-                            ->reduce(function (array $acc, array $splittingBoxes) {
+                            ->reduce(function(array $acc, array $splittingBoxes) {
                                 $type = $splittingBoxes['type'];
                                 $quantity = $splittingBoxes['quantity'];
-                                if (!isset($acc[$type])) {
+                                if(!isset($acc[$type])) {
                                     $acc[$type] = 0;
                                 }
                                 $acc[$type] += $quantity;
                             }, []);
 
-                        foreach ($groupedBoxes as $typeName => $boxes) {
-                            if (!isset($groupedSplittingBoxes[$typeName])
+                        foreach($groupedBoxes as $typeName => $boxes) {
+                            if(!isset($groupedSplittingBoxes[$typeName])
                                 || $groupedSplittingBoxes[$typeName] !== count($boxes)) {
                                 throw new Exception("Le contenu d'une caisse ne correspond pas à celui attendu", 1000);
                             }
                             unset($groupedSplittingBoxes[$typeName]);
                         }
 
-                        if (!empty($groupedSplittingBoxes)) {
+                        if(!empty($groupedSplittingBoxes)) {
                             throw new Exception("Le contenu d'une caisse ne correspond pas à celui attendu", 1000);
                         }
 
                         array_splice($cartSplitting, $respectiveSplittingIndex, 1);
                     }
                 }
-            }
-            catch (Throwable $throwable) {
+            } catch(Throwable $throwable) {
                 // check if it is our exception
-                if ($throwable->getFile() === __FILE__
+                if($throwable->getFile() === __FILE__
                     && $throwable->getCode() === 1000) {
                     $result['error'] = $throwable->getMessage();
                 }

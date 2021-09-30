@@ -20,7 +20,7 @@ class DeliveryRoundService {
             ->isEmpty();
 
         $deliveryRound->setStatus($statusRepository->findOneBy([
-            "code" => $ready ? Status::CODE_ROUND_AWAITING_DELIVERER : Status::CODE_ROUND_CREATED
+            "code" => $ready ? Status::CODE_ROUND_AWAITING_DELIVERER : Status::CODE_ROUND_CREATED,
         ]));
     }
 

@@ -59,8 +59,8 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface {
 
         $roleRepository = $manager->getRepository(Role::class);
 
-        foreach (self::ROLES as $code => $config) {
-            if ($roleRepository->findOneBy(["code" => $code]) === null) {
+        foreach(self::ROLES as $code => $config) {
+            if($roleRepository->findOneBy(["code" => $code]) === null) {
                 $role = (new Role())
                     ->setCode($code)
                     ->setName($config["name"])

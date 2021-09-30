@@ -33,10 +33,10 @@ class CounterOrderService {
     private ?string $token = null;
 
     public function getToken(): ?string {
-        if (!$this->token) {
+        if(!$this->token) {
             $this->token = $this->request->getCurrentRequest()->get("session");
 
-            if (!preg_match("/^[A-Z0-9]{8,32}$/i", $this->token)) {
+            if(!preg_match("/^[A-Z0-9]{8,32}$/i", $this->token)) {
                 throw new BadRequestHttpException("Invalid counter order session token");
             }
         }
@@ -51,7 +51,7 @@ class CounterOrderService {
                 "session" => $this->getToken(),
                 "boxes" => $this->get(Box::class),
                 "price" => $this->getBoxesPrice(),
-            ])
+            ]),
         ];
     }
 
@@ -62,7 +62,7 @@ class CounterOrderService {
                 "session" => $this->getToken(),
                 "tickets" => $this->get(DepositTicket::class),
                 "price" => $this->getTicketsPrice(),
-            ])
+            ]),
         ];
     }
 
@@ -74,7 +74,7 @@ class CounterOrderService {
                 "boxes" => $this->get(Box::class),
                 "tickets" => $this->get(DepositTicket::class),
                 "total_price" => $this->getBoxesPrice() - $this->getTicketsPrice(),
-            ])
+            ]),
         ];
     }
 
@@ -121,21 +121,21 @@ class CounterOrderService {
 
     public function clear($current = false) {
         //remove current counter order
-        if ($current) {
+        if($current) {
             $id = $this->getToken();
 
             $this->session->remove("counter_order.$id");
-            foreach ([Box::class, DepositTicket::class] as $class) {
+            foreach([Box::class, DepositTicket::class] as $class) {
                 $this->session->remove("counter_order.$id.$class");
             }
         }
 
         //clear previous unfinished orders
         $expiry = new DateTime("-1 day");
-        foreach ($this->session->all() as $key => $value) {
-            if (preg_match("/^counter_order\.[A-Z0-9]{8,32}$/i", $key)) {
+        foreach($this->session->all() as $key => $value) {
+            if(preg_match("/^counter_order\.[A-Z0-9]{8,32}$/i", $key)) {
                 [$id, $date] = $value;
-                if ($date < $expiry) {
+                if($date < $expiry) {
                     $this->session->remove("counter_order.$id");
                     $this->session->remove("counter_order.$id.boxes");
                     $this->session->remove("counter_order.$id.tickets");

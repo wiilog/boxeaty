@@ -62,13 +62,13 @@ class AppExtension extends AbstractExtension {
     public function menuConfiguration(): array {
         $config = [];
 
-        foreach ($this->config as $item) {
-            if ($this->shouldAddItem($item)) {
-                if (isset($item["items"])) {
+        foreach($this->config as $item) {
+            if($this->shouldAddItem($item)) {
+                if(isset($item["items"])) {
                     $item["items"] = array_filter($item["items"], fn($subitem) => $this->shouldAddItem($subitem));
                 }
 
-                if (!isset($item["items"]) || count($item["items"]) !== 0) {
+                if(!isset($item["items"]) || count($item["items"]) !== 0) {
                     $config[] = $item;
                 }
             }
@@ -79,7 +79,7 @@ class AppExtension extends AbstractExtension {
 
     private function shouldAddItem(array $item): bool {
         if(isset($item["permission"])) {
-            if (is_array($item["permission"])) {
+            if(is_array($item["permission"])) {
                 return $this->hasPermission(...array_map("constant", $item["permission"]));
             } else {
                 return $this->hasPermission(constant($item["permission"]));
@@ -111,14 +111,14 @@ class AppExtension extends AbstractExtension {
     }
 
     public function getFolder(string $folder) {
-        foreach ($this->twig->getLoader()->getPaths() as $path) {
-            if (is_dir("$path/$folder")) {
+        foreach($this->twig->getLoader()->getPaths() as $path) {
+            if(is_dir("$path/$folder")) {
                 $location = "$path/$folder";
                 break;
             }
         }
 
-        if (isset($location)) {
+        if(isset($location)) {
             $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($location, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
             $files = array_keys(iterator_to_array($files));
 

@@ -36,7 +36,8 @@ class PreparationLineRepository extends EntityRepository {
             ->getResult();
 
         return Stream::from($res)
-            ->keymap(fn (array $line) => [$line['type'], $line['count']])
+            ->keymap(fn(array $line) => [$line['type'], $line['count']])
             ->toArray();
     }
+
 }

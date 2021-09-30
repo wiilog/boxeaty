@@ -24,4 +24,5 @@ class StatusRepository extends EntityRepository {
             ->getQuery()
             ->getArrayResult();
     }
+
 }
