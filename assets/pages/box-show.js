@@ -2,7 +2,7 @@ import '../app';
 
 import $ from "jquery";
 import AJAX from "../ajax";
-import Flash from "../flash";
+import Flash, {ERROR} from "../flash";
 
 import "../styles/pages/box-show.scss";
 import Modal from "../modal";
@@ -165,7 +165,7 @@ function getBoxTrackingMovements(start = 0) {
                     $historyWrapper.removeClass(customWrapperClass);
                 }
             } else {
-                Flash.add('danger', `L'historique de la Box n'a pas pu être récupéré`);
+                Flash.add(ERROR, `L'historique de la Box n'a pas pu être récupéré`);
                 $showMoreWrapper.remove();
             }
         })

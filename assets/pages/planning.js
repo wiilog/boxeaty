@@ -4,7 +4,7 @@ import Modal, {clearForm, processForm} from "../modal";
 import "../styles/pages/planning.scss";
 import AJAX from "../ajax";
 import {findCoordinates, Map} from "../maps";
-import Flash from "../flash";
+import Flash, {WARNING} from "../flash";
 import Sortable from "../sortable";
 
 $document.ready(() => {
@@ -58,7 +58,7 @@ $document.ready(() => {
                 success: () => reloadPlanning(),
             });
         } else {
-            Flash.add(`warning`, `Les dates sont obligatoires pour affecter une tournée`);
+            Flash.add(WARNING, `Les dates sont obligatoires pour affecter une tournée`);
         }
     });
 

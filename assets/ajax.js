@@ -1,4 +1,4 @@
-import Flash from "./flash";
+import Flash, {ERROR, SUCCESS} from "./flash";
 
 export const GET = `POST`;
 export const POST = `POST`;
@@ -121,9 +121,9 @@ function treatFetchCallback(json) {
     }
 
     if(json.success === false && json.message) {
-        Flash.add("danger", json.message);
+        Flash.add(ERROR, json.message);
     } else if(json.success === true && json.message) {
-        Flash.add("success", json.message);
+        Flash.add(SUCCESS, json.message);
     }
 
     if(json.reload === true) {

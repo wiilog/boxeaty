@@ -7,7 +7,7 @@ import Scan from "../scan";
 import {SECONDS, StringHelper, Time} from "../util";
 
 import "../styles/pages/counter-order.scss";
-import Flash from "../flash";
+import Flash, {ERROR} from "../flash";
 
 $document.ready(() => {
     $(`#scan-box, #new-counter-order`).click(() => openBoxesModal());
@@ -89,9 +89,9 @@ function addInput(element, code) {
             });
     } else {
         if(type === `box`) {
-            Flash.add(`danger`, `Cette Box a déjà été scannée`, true);
+            Flash.add(ERROR, `Cette Box a déjà été scannée`, true);
         } else {
-            Flash.add(`danger`, `Ce ticket‑consigne a déjà été scanné`, true);
+            Flash.add(ERROR, `Ce ticket‑consigne a déjà été scanné`, true);
         }
     }
 

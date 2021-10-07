@@ -1,5 +1,7 @@
-import $ from "jquery";
-import Flash from "./flash";
+import jQuery from "jquery";
+import Flash, {WARNING} from "./flash";
+
+const $ = jQuery;
 
 export const SPINNER_WRAPPER_CLASS = `spinner-border-container`;
 export const LOADING_CLASS = `loading`;
@@ -59,11 +61,15 @@ jQuery.fn.keymap = function(callable, grouping = NO_GROUPING) {
     return values;
 }
 
+/**
+ * Adds a loader to an element and remove it when the
+ * given callback succeeds.
+ */
 jQuery.fn.load = function(callback, size = `small`) {
     const $element = $(this[0]); //the element on which the function was called
 
     if($element.hasClass(LOADING_CLASS)) {
-        Flash.add(Flash.WARNING, `Opération en cours d'exécution`, true);
+        Flash.add(WARNING, `Opération en cours d'exécution`, true);
     } else {
         $element.pushLoader(size);
 
@@ -96,6 +102,7 @@ jQuery.fn.pushLoader = function(size = `small`) {
 
 /**
  * Remove the loader from the element
+ *
  * @returns {jQuery}
  */
 jQuery.fn.popLoader = function() {
@@ -110,26 +117,56 @@ jQuery.fn.popLoader = function() {
     return this;
 };
 
+/**
+ * Slide toggle on smaller screens and regular
+ * toggle on bigger screens.
+ *
+ * @returns {jQuery}
+ */
 jQuery.fn.mobileSlideToggle = function() {
+    const $this = $(this);
+
     if(window.screen.width <= 768) {
-        $(this).slideToggle();
+        $this.slideToggle();
     } else {
-        $(this).toggle();
+        $this.toggle();
     }
+
+    return $this;
 }
 
+/**
+ * Slide up on smaller screens and regular
+ * hide on bigger screens.
+ *
+ * @returns {jQuery}
+ */
 jQuery.fn.mobileSlideUp = function() {
+    const $this = $(this);
+
     if(window.screen.width <= 768) {
-        $(this).slideUp();
+        $this.slideUp();
     } else {
-        $(this).hide();
+        $this.hide();
     }
+
+    return $this;
 }
 
+/**
+ * Slide down on smaller screens and regular
+ * show on bigger screens.
+ *
+ * @returns {jQuery}
+ */
 jQuery.fn.mobileSlideDown = function() {
+    const $this = $(this);
+
     if(window.screen.width <= 768) {
-        $(this).slideDown();
+        $this.slideDown();
     } else {
-        $(this).show();
+        $this.show();
     }
+
+    return $this;
 }

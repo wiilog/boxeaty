@@ -2,7 +2,18 @@
 
 namespace App\Service;
 
+use App\Entity\Box;
+use App\Entity\BoxRecord;
+use App\Entity\BoxType;
+use App\Entity\Client;
+use App\Entity\Depository;
+use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
+use App\Entity\Group;
+use App\Entity\Location;
+use App\Entity\Quality;
+use App\Entity\Role;
+use App\Entity\User;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -12,6 +23,20 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use WiiCommon\Helper\Stream;
 
 class ExportService {
+
+    public const ENTITY_NAME = [
+        Box::class => "Box",
+        BoxRecord::class => "Mouvements",
+        DepositTicket::class => "Tickets-consigne",
+        Client::class => "Clients",
+        Group::class => "Groupes",
+        Location::class => "Emplacements",
+        BoxType::class => "Types de Box",
+        Depository::class => "Dépôts",
+        User::class => "Utilisateurs",
+        Role::class => "Rôles",
+        Quality::class => "Qualités",
+    ];
 
     public const USER_HEADER = [
         "Nom d'utilisateur",
@@ -118,7 +143,7 @@ class ExportService {
         "Commande automatique",
     ];
 
-    public const DEPOSIT_TICKET_HEADER = [
+    public const TICKET_HEADER = [
         "Date de création",
         "Lieu de création",
         "Date de validité",
@@ -192,8 +217,8 @@ class ExportService {
         fputcsv($handle, $encodedRow, ";");
     }
 
-    public function createWorksheet(Spreadsheet $spreadsheet, string $name, $class, array $header, callable $transformer = null): Worksheet {
-        $sheet = new Worksheet(null, $name);
+    public function addWorksheet(Spreadsheet $spreadsheet, string $class, array $header, callable $transformer = null): Worksheet {
+        $sheet = new Worksheet(null, self::ENTITY_NAME[$class]);
         $export = Stream::from(is_string($class) ? $this->manager->getRepository($class)->iterateAll() : $class)
             ->map(function($row) use ($transformer) {
                 if($transformer) {
@@ -207,6 +232,13 @@ class ExportService {
         $sheet->fromArray($export);
         $spreadsheet->addSheet($sheet);
         return $sheet;
+    }
+
+    public function stateMapper(?array $labels): callable {
+        return function(array $row) use ($labels) {
+            $row["state"] = isset($row["state"]) ? ($labels[$row["state"]] ?? "") : "";
+            return $row;
+        };
     }
 
     public function stringify(array $row) {

@@ -170,32 +170,23 @@ class ExportController extends AbstractController {
      * @Route("/global", name="global_export", options={"expose": true})
      * @HasPermission(Role::MANAGE_EXPORTS)
      */
-    public function export(ExportService $exportService): Response {
+    public function export(ExportService $service): Response {
         $spreadsheet = new Spreadsheet();
         $spreadsheet->disconnectWorksheets();
 
-        $exportService->createWorksheet($spreadsheet, "Box", Box::class, ExportService::BOX_HEADER, function(array $row) {
-            $row["state"] = isset($row["state"]) ? (BoxStateService::BOX_STATES[$row["state"]] ?? '') : '';
-            return $row;
-        });
-        $exportService->createWorksheet($spreadsheet, "Mouvements", BoxRecord::class, ExportService::MOVEMENT_HEADER, function(array $row) {
-            $row["state"] = isset($row["state"]) ? (BoxStateService::RECORD_STATES[$row["state"]] ?? '') : '';
-            return $row;
-        });
-        $exportService->createWorksheet($spreadsheet, "Tickets-consigne", DepositTicket::class, ExportService::DEPOSIT_TICKET_HEADER, function(array $row) {
-            $row["state"] = isset($row["state"]) ? (DepositTicket::NAMES[$row["state"]] ?? '') : '';
-            return $row;
-        });
+        $service->addWorksheet($spreadsheet, Box::class, ExportService::BOX_HEADER, $service->stateMapper(BoxStateService::BOX_STATES));
+        $service->addWorksheet($spreadsheet, BoxRecord::class, ExportService::MOVEMENT_HEADER, $service->stateMapper(BoxStateService::RECORD_STATES));
+        $service->addWorksheet($spreadsheet, DepositTicket::class, ExportService::TICKET_HEADER, $service->stateMapper(DepositTicket::NAMES));
 
-        $exportService->createWorksheet($spreadsheet, "Clients", Client::class, ExportService::CLIENT_HEADER);
-        $exportService->createWorksheet($spreadsheet, "Groupes", Group::class, ExportService::GROUP_HEADER);
-        $exportService->createWorksheet($spreadsheet, "Emplacements", Location::class, ExportService::LOCATION_HEADER);
-        $exportService->createWorksheet($spreadsheet, "Types de Box", BoxType::class, ExportService::BOX_TYPE_HEADER);
-        $exportService->createWorksheet($spreadsheet, "Dépôt", Depository::class, ExportService::DEPOSITORY_HEADER);
+        $service->addWorksheet($spreadsheet, Client::class, ExportService::CLIENT_HEADER);
+        $service->addWorksheet($spreadsheet, Group::class, ExportService::GROUP_HEADER);
+        $service->addWorksheet($spreadsheet, Location::class, ExportService::LOCATION_HEADER);
+        $service->addWorksheet($spreadsheet, BoxType::class, ExportService::BOX_TYPE_HEADER);
+        $service->addWorksheet($spreadsheet, Depository::class, ExportService::DEPOSITORY_HEADER);
 
-        $exportService->createWorksheet($spreadsheet, "Utilisateurs", User::class, ExportService::USER_HEADER);
-        $exportService->createWorksheet($spreadsheet, "Rôles", Role::class, ExportService::ROLE_HEADER);
-        $exportService->createWorksheet($spreadsheet, "Qualités", Quality::class, ExportService::QUALITY_HEADER);
+        $service->addWorksheet($spreadsheet, User::class, ExportService::USER_HEADER);
+        $service->addWorksheet($spreadsheet, Role::class, ExportService::ROLE_HEADER);
+        $service->addWorksheet($spreadsheet, Quality::class, ExportService::QUALITY_HEADER);
 
         $file = "exports/export-general-" . bin2hex(random_bytes(8)) . ".xlsx";
 

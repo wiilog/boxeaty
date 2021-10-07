@@ -5,7 +5,7 @@ import {initDatatable} from "../datatable";
 import Modal from "../modal";
 import {StringHelper, URL} from "../util";
 import $ from "jquery";
-import Flash from "../flash";
+import Flash, {SUCCESS, WARNING} from "../flash";
 
 $(function() {
     initOrderDatatable();
@@ -289,15 +289,15 @@ function addBoxTypeModel($modal) {
                         addBoxTypeToCart($modal, boxType);
                     }
                     updateCrateNumberAverage($modal);
-                    Flash.add('success', 'Le modèle de caisse a bien été ajouté au panier.');
+                    Flash.add(SUCCESS, 'Le modèle de caisse a bien été ajouté au panier.');
                 }
                 else {
-                    Flash.add('warning', 'Le modèle de caisse du client sélectionné est vide.');
+                    Flash.add(WARNING, 'Le modèle de caisse du client sélectionné est vide.');
                 }
             });
     }
     else {
-        Flash.add('warning', `Le client de la commande n'est pas sélectionné.`);
+        Flash.add(WARNING, `Le client de la commande n'est pas sélectionné.`);
     }
 }
 
@@ -312,7 +312,7 @@ function addSelectedBoxTypeToCart($modal) {
     const [typeBoxData] = $select2.select2('data');
     const defaultCrateType = $modal.find('[name=defaultCrateType]').val();
     if(typeBoxData.volume > defaultCrateType) {
-        Flash.add(`warning`, `Le volume du type de Box <strong>${typeBoxData.name}</strong> est supérieur à celui du type de caisse par défaut`)
+        Flash.add(WARNING, `Le volume du type de Box <strong>${typeBoxData.name}</strong> est supérieur à celui du type de caisse par défaut`)
     } else {
         if (typeBoxData && !$modal.find(`.cart-container > [data-id=${typeBoxData.id}]`).exists()) {
             addBoxTypeToCart($modal, typeBoxData, true);
@@ -486,8 +486,10 @@ function onTypeChange($modal) {
     $modal.find('.cratesAmountToCollect').prop('required', false);
     $modal.find('.crates-amount-to-collect-container').hide();
     if(type === 'AUTONOMOUS_MANAGEMENT'){
+        const $collect = $modal.find('[name="collect"]');
         $autonomousManagement.removeClass('d-none');
-        if($modal.find('[name="collect"]') && $modal.find('[name="collect"]').val() == 1){
+
+        if($collect && $collect.val() === "1"){
             $modal.find('[name="collectRequired"]').prop('checked', true);
             $modal.find('.crates-amount-to-collect-container').show();
         }

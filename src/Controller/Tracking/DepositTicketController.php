@@ -199,7 +199,7 @@ class DepositTicketController extends AbstractController {
                 $depositTicket["state"] = DepositTicket::NAMES[$depositTicket["state"]];
                 $exportService->putLine($output, $depositTicket);
             }
-        }, "export-tickets-consigne-$today.csv", ExportService::DEPOSIT_TICKET_HEADER);
+        }, "export-tickets-consigne-$today.csv", ExportService::TICKET_HEADER);
     }
 
 }
