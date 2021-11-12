@@ -26,17 +26,15 @@
             <span class="bigTxt">Veuillez selectionner le site que vous voulez approvisionner</span>
             <div class="row">
                 <div class="select">
-                    <input name="client-cost-information-needed"
-                           value="1"
-                           type="hidden">
+                    <input name="client-with-information" value="1" type="hidden">
                     <label>
                         <select name="client"
                                 class="data"
                                 data-s2="client"
-                                {% if (initialClient is defined and initialClient is not null) %}
-                                    data-init-data="{{ [initialClient]|json_encode }}"
+                                {% if initialClient is defined and initialClient is not null %}
+                                    data-init-data="{{ [initialClient] | json_encode }}"
                                 {% endif %}
-                                data-include-params="[name=client-cost-information-needed]"
+                                data-include-params="[name=client-with-information]"
                                 data-placeholder="Sélectionnez un client"
                                 required>
                         </select>

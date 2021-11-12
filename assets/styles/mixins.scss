@@ -19,6 +19,10 @@
         background: $invalid-lighter;
         border-bottom-color: $invalid;
     }
+
+    &:disabled {
+        border-radius: 4px;
+    }
 }
 
 @mixin button($type: primary) {

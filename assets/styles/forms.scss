@@ -431,6 +431,10 @@ input[type=checkbox].radio-like + label.radio-like {
     &:not(.free-radio-button) {
         min-width: 200px;
     }
+
+    &:not(:first-child) {
+        margin-left: 3px;
+    }
 }
 
 input[type=checkbox].radio-like:checked + label.radio-like {

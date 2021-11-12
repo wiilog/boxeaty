@@ -550,7 +550,8 @@ class ClientController extends AbstractController {
         return $this->json([
             "success" => true,
             "template" => $this->renderView('referential/client/order_recurrence.html.twig', [
-                "clientOrderInformation" => $client->getClientOrderInformation() ?? null,
+                "client" => $client,
+                "recurrence" => $orderRecurrence,
             ]),
             "orderRecurrencePrice" => $orderRecurrence ? $orderRecurrence->getMonthlyPrice() : 0,
         ]);

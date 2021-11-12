@@ -110,26 +110,23 @@ class ClientRepository extends EntityRepository {
         ];
     }
 
-    public function getForSelect(?string $search, ?string $group, ?User $user, ?bool $costInformationNeeded = false) {
+    public function getForSelect(?string $search, ?string $group, ?User $user, ?bool $clientWithInformation = false) {
         $qb = $this->createQueryBuilder("client");
-
-        $exprBuilder = $qb->expr();
+        $expr = $qb->expr();
 
         if($user && $user->getRole()->isAllowEditOwnGroupOnly()) {
             $userClients = $user->getClients();
 
             if(!$userClients->isEmpty()) {
-                $qb
-                    ->andWhere($exprBuilder->orX(
-                        'client IN (:userClients)',
-                        'linkedMultiSite IN (:userClients)'
+                $qb->leftJoin("client.linkedMultiSite", "linkedMultiSite")
+                    ->andWhere($expr->orX(
+                        "client IN (:userClients)",
+                        "linkedMultiSite IN (:userClients)"
                     ))
-                    ->leftJoin('client.linkedMultiSite', 'linkedMultiSite')
                     ->setParameter('userClients', $userClients);
             }
 
-            $qb
-                ->andWhere("client.group IN (:groups)")
+            $qb->andWhere("client.group IN (:groups)")
                 ->setParameter("groups", $user->getGroups());
         }
 
@@ -138,8 +135,7 @@ class ClientRepository extends EntityRepository {
                 ->setParameter("group", $group);
         }
 
-        $qb
-            ->select("client.id AS id")
+        $qb->select("client.id AS id")
             ->addSelect("client.name AS text")
             ->addSelect("join_information.workingDayDeliveryRate AS workingRate")
             ->addSelect("join_information.nonWorkingDayDeliveryRate AS nonWorkingRate")
@@ -153,16 +149,14 @@ class ClientRepository extends EntityRepository {
             ->setMaxResults(15)
             ->setParameter("search", "%$search%");
 
-        if($costInformationNeeded) {
-            $qb
+        if($clientWithInformation) {
+            $qb->andWhere("client.isMultiSite = 0")
                 ->andWhere("join_information.workingDayDeliveryRate IS NOT NULL")
                 ->andWhere("join_information.nonWorkingDayDeliveryRate IS NOT NULL")
                 ->andWhere("join_information.serviceCost IS NOT NULL");
         }
 
-        return $qb
-            ->getQuery()
-            ->getArrayResult();
+        return $qb->getQuery()->getArrayResult();
     }
 
     public function getMultiSiteForSelect(?string $search, ?User $user) {

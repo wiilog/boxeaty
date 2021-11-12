@@ -105,25 +105,14 @@ class SelectController extends AbstractController {
     public function clients(Request $request, EntityManagerInterface $manager): Response {
         $clientRepository = $manager->getRepository(Client::class);
 
-        $clientCostInformationNeeded = $request->query->getBoolean("client-cost-information-needed");
+        $clientWithInformation = $request->query->getBoolean("client-with-information");
 
         $results = $clientRepository->getForSelect(
             $request->query->get("term"),
             $request->query->get("groups"),
             $this->getUser(),
-            $clientCostInformationNeeded
+            $clientWithInformation
         );
-
-        return $this->json([
-            "results" => $results,
-        ]);
-    }
-
-    /**
-     * @Route("/select/depository", name="ajax_select_depositories", options={"expose": true})
-     */
-    public function depositories(Request $request, EntityManagerInterface $manager): Response {
-        $results = $manager->getRepository(Depository::class)->getForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,
@@ -135,6 +124,17 @@ class SelectController extends AbstractController {
      */
     public function multiSite(Request $request, EntityManagerInterface $manager): Response {
         $results = $manager->getRepository(Client::class)->getMultiSiteForSelect($request->query->get("term"), $this->getUser());
+
+        return $this->json([
+            "results" => $results,
+        ]);
+    }
+
+    /**
+     * @Route("/select/depository", name="ajax_select_depositories", options={"expose": true})
+     */
+    public function depositories(Request $request, EntityManagerInterface $manager): Response {
+        $results = $manager->getRepository(Depository::class)->getForSelect($request->query->get("term"));
 
         return $this->json([
             "results" => $results,

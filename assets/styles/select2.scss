@@ -139,3 +139,7 @@
 .select2-container.center .select2-results__options {
     text-align: center;
 }
+
+.select2-container--disabled .select2-selection {
+    border-radius: 4px !important;
+}
