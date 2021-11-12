@@ -201,30 +201,28 @@ input[type=number] {
     }
 }
 
-.bigTxt{
+.text-big{
     color: #1E1F44;
     font-size: 22px;
     font-weight: bold;
 }
 
-.bigTxtOrange{
+.text-big-orange{
     color: $orange;
     font-size: 25px;
     font-weight: bold;
 }
 
-.smallTxt{
+.text-small{
     color: #6D757D;
     font-size: 14px;
     padding-top: 10px;
 }
 
-.clientOrderType {
-    margin-left: auto;
-    margin-right: auto;
+.client-order-type {
+    margin: 0 auto;
     width: 650px;
 }
-
 
 .radio {
     display: flex;

@@ -10,7 +10,7 @@
                         <h2 class="header-section-label">Information</h2>
                     </div>
                     <div class="row justify-content-between">
-                        <span class="bigTxt col-md-8 col-12">{{ clientOrder.client.name }}</span>
+                        <span class="text-big col-md-8 col-12">{{ clientOrder.client.name }}</span>
                         <span class="col-md-4 col-12 text-end">{{ clientOrder.requester.username }}</span>
                     </div>
                     <div class="row justify-content-between">
@@ -20,7 +20,7 @@
                     <div class="row justify-content-{{ clientOrder.collectRequired ? 'between' : 'end' }} align-items-center">
                         {% if clientOrder.collectRequired %}
                             <div class="col-md-8 col-12">
-                                <span class="bigTxt">Collecte</span> (Box à nettoyer)&nbsp;:
+                                <span class="text-big">Collecte</span> (Box à nettoyer)&nbsp;:
                                 {{ clientOrder.cratesAmountToCollect }}
                                 caisse{{ clientOrder.cratesAmountToCollect > 1 ? 's' }}
                             </div>
@@ -33,13 +33,13 @@
                         </span>
                     </div>
 
-                    <span class="bigTxt">Commentaire pour le livreur <br></span>
+                    <span class="text-big">Commentaire pour le livreur <br></span>
                     <div class="comment-container">{{ clientOrder.comment|raw }}</div>
 
                     <div class="header-section mt-4 mb-4">
                         <h2 class="header-section-label">Livraison</h2>
                     </div>
-                    <span class="bigTxt"> Date de livraison : {{ clientOrder.expectedDelivery|format_helper('dateMonth') }}</span>
+                    <span class="text-big"> Date de livraison : {{ clientOrder.expectedDelivery|format_helper('dateMonth') }}</span>
 
                     <div class="details-content body">
                         {% if clientOrder.lines|length > 0 %}
@@ -75,7 +75,7 @@
                             <h2 class="header-section-label">Montant de la commande</h2>
                         </div>
 
-                        <span class="bigTxt">Récapitulatif de commande</span>
+                        <span class="text-big">Récapitulatif de commande</span>
                         <div class="row justify-content-between align-items-center">
                             <span class="col-auto">Box</span>
                             <div class="col dotted mt-1"></div>
@@ -97,8 +97,8 @@
                             <span class="col-auto text-end">Inclus</span>
                         </div>
                         <div class="row justify-content-between align-items-center">
-                            <span class="secondary bigTxtOrange col-auto">MONTANT TOTAL (HT)</span>
-                            <span class="col-auto bigTxtOrange text-end">{{ (clientOrder.totalAmount + clientOrder.servicePrice + clientOrder.deliveryPrice)|format_helper('price') }} </span>
+                            <span class="secondary text-big-orange col-auto">MONTANT TOTAL (HT)</span>
+                            <span class="col-auto text-big-orange text-end">{{ (clientOrder.totalAmount + clientOrder.servicePrice + clientOrder.deliveryPrice)|format_helper('price') }} </span>
                         </div>
                     </div>
                 </div>

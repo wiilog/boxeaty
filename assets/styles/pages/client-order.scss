@@ -14,11 +14,14 @@
 }
 
 .type-box-input {
+    min-width: 150px;
+    max-width: 150px;
+
     button {
         padding: 0 5px;
     }
 
-    .cartBoxNumber {
+    .cart-box-number {
         min-width: initial !important;
         text-align: center;
         background-color: white;
@@ -33,26 +36,26 @@
     padding-left: 0;
 }
 
-.select{
+.select {
     font-size: 18px;
 }
 
-input{
+input {
     background-color: $grey;
 }
 
-.empty-cart{
+.empty-cart {
     justify-content: center;
     margin-left: auto;
     margin-right: auto;
     width: 175px;
 }
 
-.boxTypeNumber{
+.box-type-number {
     width: 50px !important;
 }
 
-.cart-box{
+.cart-box {
     background-color: #F8F8F8;
     color: #1E1F44;
     align-items: center;
@@ -69,23 +72,23 @@ input{
     width: auto;
 }
 
-.bxi-trash-circle{
+.bxi-trash-circle {
     width: 25px;
     height: 25px;
 }
 
-.remove{
+.remove {
     border: none;
     background-color: $grey;
     width: 50px;
 }
 
-.deliveryMethodIcon{
+.deliveryMethodIcon {
     width: 25px;
     height: 25px;
 }
 
-.dotted{
+.dotted {
     border-bottom: 2px dotted #1E1F44;
 }
 
@@ -208,8 +211,7 @@ input{
         }
 
         &:last-child .client-order-history-status {
-            &:before,
-            &:after {
+            &:before, &:after {
                 background-color: $green;
             }
         }

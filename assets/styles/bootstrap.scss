@@ -159,13 +159,14 @@ body.modal-open {
 }
 
 .modal {
-    overflow-y: auto !important;
+    .modal-content {
+        overflow-y: auto !important;
+    }
 
     @media (max-width: $mobile-breakpoint) {
         .modal-dialog {
             width: 100vw;
             max-width: none;
-            height: auto;
             margin: 0;
 
             .modal-content {

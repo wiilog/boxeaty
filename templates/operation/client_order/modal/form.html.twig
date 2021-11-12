@@ -1,6 +1,6 @@
 <div class="newClientOrder">
     <div class="row">
-        <div class="clientOrderType orange-toggle">
+        <div class="client-order-type orange-toggle">
             {% for orderType in orderTypes %}
                 {% set inputId = 'order-type-' ~ (clientOrder.id ? 'edit-': 'new-' ) ~ orderType.id %}
                 <input type="radio"
@@ -22,8 +22,8 @@
             <h2 class="header-section-label">Information</h2>
         </div>
         <div class="content-section">
-            <label>Demandeur&nbsp;: {{ clientOrder.requester ? clientOrder.requester.username }}</label>
-            <span class="bigTxt">Veuillez selectionner le site que vous voulez approvisionner</span>
+            <label>Demandeur&nbsp;: {{ (clientOrder.requester ?? app.user).username }}</label>
+            <span class="text-big">Veuillez selectionner le site que vous voulez approvisionner</span>
             <div class="row">
                 <div class="select">
                     <input name="client-with-information" value="1" type="hidden">
@@ -40,12 +40,12 @@
                         </select>
                     </label>
                 </div>
-                <span class="smallTxt col-6 client-address"></span>
+                <span class="text-small col-6 client-address"></span>
             </div>
             <div class="row form-switch autonomous-management d-none">
-                <label class="form-check-label bigTxt col-8" for="{{ clientOrder.id ? 'edit' : 'new' }}-collect">
+                <label class="form-check-label text-big col" for="{{ clientOrder.id ? 'edit' : 'new' }}-collect">
                     Avez-vous besoin de faire une collecte ?
-                    <span class="smallTxt">(Box à nettoyer)</span>
+                    <span class="text-small">(Box à nettoyer)</span>
                 </label>
                 <input class="form-check-input data col-4"
                        type="checkbox"
@@ -110,7 +110,7 @@
         <div class="cart-container content-section">
             <div class="empty-cart justify-content-center">
                 <img src="{{ asset('images/double-boxes.svg') }}" alt="Panier vide">
-                <p class="bigTxt">Votre panier est vide</p>
+                <p class="text-big">Votre panier est vide</p>
             </div>
         </div>
 
@@ -122,7 +122,7 @@
         </div>
         <div class="row content-section">
             <div class="orange-toggle transport col-md-7 col-12">
-                <p class="bigTxt col-12">Transport</p>
+                <p class="text-big col-12">Transport</p>
                 {% for deliveryMethod in deliveryMethods %}
                     {% set inputId = 'delivery-method-' ~ (clientOrder.id ? 'edit-' : 'new-') ~ deliveryMethod.name %}
                     <input type="radio"
@@ -139,7 +139,7 @@
                 {% endfor %}
             </div>
             <div class="col-md-5 col-12">
-                <p class="bigTxt">Date de livraison souhaitée</p>
+                <p class="text-big">Date de livraison souhaitée</p>
                 <input type="date" name="date" class="data"
                        placeholder="Date de livraison"
                        value="{{ clientOrder.expectedDelivery ? clientOrder.expectedDelivery|date('Y-m-d\\TH:i') }}"
@@ -148,10 +148,10 @@
             <input name="workFreeDay"
                    value="{{ workFreeDay|json_encode }}"
                    type="hidden">
-            <span class="bigTxt col-12 deliveryPrice"></span>
-            <span class="bigTxt col-12 servicePrice"></span>
+            <span class="text-big col-12 deliveryPrice"></span>
+            <span class="text-big col-12 servicePrice"></span>
         </div>
-        <label class="bigTxt">
+        <label class="text-big">
             Commentaire sur la livraison
             <textarea name="comment" class="data">{{ clientOrder.comment }}</textarea>
         </label>

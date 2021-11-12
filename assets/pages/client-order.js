@@ -353,18 +353,18 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
                 <span class="col-auto">
                     <div class="box-type-image">${boxTypeImage}</div>
                 </span>
-                <div class="col-2">
+                <div class="col">
                 <div class="row type-box-input">
                     <button class="col-3 secondary decrease">-</button>
-                    <input type="number" name="quantity" value="${initialQuantity}" min="1" max="9999" class="data-array col-6 cartBoxNumber">
+                    <input type="number" name="quantity" value="${initialQuantity}" min="1" max="9999" class="data-array col-6 cart-box-number">
                     <button class="col-3 secondary increase">+</button>
                 </div>
                 </div>
-                <span class="col bigTxt">${typeBoxData.name}</span>
+                <span class="col text-big">${typeBoxData.name}</span>
                 <input name="unitPrice" class="data-array" value="${unitPrice} " type="hidden"/>
                 <input name="volume" value="${volume}" type="hidden"/>
                 <span class="col-2 unit-price-item">T.U. ${unitPriceStr} €</span>
-                <span class="totalPrice col-auto bigTxt"></span>
+                <span class="totalPrice col-auto text-big"></span>
                 <button class="remove d-inline-flex" value="${typeBoxData.id}"><i class="bxi bxi-trash-circle col"></i></button>
                 <input type="hidden" name="boxTypeId" class="data-array" value="${typeBoxData.id}">
             </div>

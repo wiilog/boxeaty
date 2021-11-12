@@ -10,7 +10,7 @@
                         <span class="header-section-label">Liste des Box</span>
                     </div>
 
-                    {% include 'operation/client_order/modal/boxList.html.twig' %}
+                    {% include 'operation/client_order/modal/box_list.html.twig' %}
 
                     <div class="row">
                         <div class="col-auto">
@@ -43,7 +43,7 @@
                     </div>
                     <div class="details-content body row">
                         <div class="col-12">
-                            <span class="bigTxtOrange">Livré à</span>
+                            <span class="text-big-orange">Livré à</span>
                             <div class="row ">
                                 <div class="col-12">
                                     <b>{{ clientOrder.client.name }}</b>
@@ -53,7 +53,7 @@
                                 </div>
                             </div>
                             <p></p>
-                            <span class="bigTxtOrange mt-3">Contenu</span>
+                            <span class="text-big-orange mt-3">Contenu</span>
                             <div class="row">
                                 <div class="col-12">
                                     <b>{{ clientOrder.cratesAmount }} Caisse{{ clientOrder.cratesAmount > 1 ? 's' }}</b>
@@ -63,7 +63,7 @@
                                 </div>
                             </div>
                             {% if clientOrder.delivery.signature is not null or clientOrder.delivery.signature is not null %}
-                                <span class="bigTxtOrange mt-3">Pièce(s) jointe(s)</span>
+                                <span class="text-big-orange mt-3">Pièce(s) jointe(s)</span>
                             {% endif %}
                             <div class="row">
                                 {% if clientOrder.delivery.signature is not null %}
@@ -91,7 +91,7 @@
                     </div>
                     <div class="details-content body row">
                         <div class="col-6 mt-3">
-                            <span class="bigTxtOrange">Collecté à</span>
+                            <span class="text-big-orange">Collecté à</span>
                             <div class="row">
                                 <div class="col-12">
                                     <b>{{ clientOrder.client.name }}</b>
@@ -100,7 +100,7 @@
                                     <span class="subtitle">{{ clientOrder.client.address }}</span>
                                 </div>
                             </div>
-                            <span class="bigTxtOrange mt-3">Contenu</span>
+                            <span class="text-big-orange mt-3">Contenu</span>
                             <div class="row">
                                 <div class="col-12">
                                     {% set cratesCollectedLength = clientOrder.collect.crates|length %}
@@ -111,7 +111,7 @@
                                 </div>
                             </div>
                             {% if clientOrder.collect.pickSignature is not null or clientOrder.collect.pickPhoto is not null %}
-                                <span class="bigTxtOrange mt-3">Pièce(s) jointe(s)</span>
+                                <span class="text-big-orange mt-3">Pièce(s) jointe(s)</span>
                             {% endif %}
                             <div class="row">
                                 {% if clientOrder.collect.pickSignature is not null %}
@@ -128,12 +128,12 @@
                         </div>
                         {% if isCollectDropped %}
                             <div class="col-6 mt-3">
-                                <span class="bigTxtOrange">Collecte déposée à</span>
+                                <span class="text-big-orange">Collecte déposée à</span>
                                 <div class="row">
                                     <b>{{ clientOrder.depository ? clientOrder.depository.name : '-'  }}</b>
                                 </div>
                                 {% if clientOrder.collect.dropSignature is not null or clientOrder.collect.dropPhoto is not null %}
-                                    <span class="bigTxtOrange mt-3">Pièce(s) jointe(s)</span>
+                                    <span class="text-big-orange mt-3">Pièce(s) jointe(s)</span>
                                 {% endif %}
                                 <div class="row">
                                     {% if clientOrder.collect.dropSignature is not null %}
