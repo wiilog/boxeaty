@@ -6,7 +6,8 @@ Copy the `.env` file as `.env.local` and replace `DATABASE_URL` with the correct
 
 ```sh
 composer install
-php bin/console d:s:u --force
+php bin/console doctrine:schema:update --force
+php bin/console doctrine:fixtures:load --group=fixtures --append
 yarn install
 yarn watch
 ```

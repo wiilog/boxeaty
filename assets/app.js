@@ -91,16 +91,16 @@ const QUILL_CONFIG = {
     modules: {
         toolbar: [
             [{header: [1, 2, 3, false]}],
-            ['bold', 'italic', 'underline', 'image'],
-            [{'list': 'ordered'}, {'list': 'bullet'}]
+            [`bold`, `italic`, `underline`, `image`],
+            [{list: `ordered`}, {list: `bullet`}]
         ]
     },
     formats: [
-        'header',
-        'bold', 'italic', 'underline', 'strike', 'blockquote',
-        'list', 'bullet', 'indent', 'link', 'image'
+        `header`,
+        `bold`, `italic`, `underline`, `strike`, `blockquote`,
+        `list`, `bullet`, `indent`, `link`, `image`
     ],
-    theme: 'snow',
+    theme: `snow`,
 };
 
 $document.ready(() => $(`[data-wysiwyg]`).each(initializeWYSIWYG))

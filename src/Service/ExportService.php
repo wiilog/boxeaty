@@ -18,6 +18,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use WiiCommon\Helper\Stream;
@@ -210,20 +211,30 @@ class ExportService {
     public function putLine($handle, array $row) {
         $row = $this->stringify($row);
 
-        $encodedRow = $this->encoding === self::ENCODING_UTF8
-            ? array_map("utf8_decode", $row)
-            : $row;
+        if($this->encoding === self::ENCODING_UTF8) {
+            $encodedRow = array_map("utf8_decode", $row);
+        } else if($this->encoding === self::ENCODING_WINDOWS) {
+            $encodedRow = $row;
+        } else {
+            throw new RuntimeException("Unknown encoding \"$this->encoding\"");
+        }
 
         fputcsv($handle, $encodedRow, ";");
     }
 
     public function addWorksheet(Spreadsheet $spreadsheet, string $class, array $header, callable $transformer = null): Worksheet {
         $sheet = new Worksheet(null, self::ENTITY_NAME[$class]);
-        $export = Stream::from(is_string($class) ? $this->manager->getRepository($class)->iterateAll() : $class)
+        $repository = $this->manager->getRepository($class);
+        if(!method_exists($repository, "iterateAll")) {
+            throw new RuntimeException("The $class repository must have an iterateAll method to be exported");
+        }
+
+        $export = Stream::from($repository->iterateAll())
             ->map(function($row) use ($transformer) {
                 if($transformer) {
                     $row = $transformer($row);
                 }
+
                 return $this->stringify($row);
             })
             ->prepend($header)
@@ -241,7 +252,7 @@ class ExportService {
         };
     }
 
-    public function stringify(array $row) {
+    public function stringify(array $row): array {
         return array_map(function($cell) {
             if($cell instanceof DateTime) {
                 return $cell->format("d/m/Y H:i:s");

@@ -18,10 +18,10 @@ class Location {
 
     public const MIN_KIOSK_CAPACITY = 1;
 
-    const RECEPTION = "Reception";
-    const EXPEDITION = "Expedition";
+    const RECEPTION = "Réception";
+    const EXPEDITION = "Expédition";
     const STOCK = "Stock";
-    const QUALITY = "Qualite";
+    const QUALITY = "Qualité";
     const CLIENT = "Client";
 
     const LOCATION_TYPES = [

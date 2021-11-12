@@ -3,20 +3,6 @@ import $ from "jquery";
 
 const uploads = {};
 
-function addUpload(modal, name, file) {
-    if(uploads[modal.id] === undefined) {
-        uploads[modal.id] = {};
-    }
-
-    uploads[modal.id][name] = file;
-}
-
-function deleteUpload(modal, name) {
-    if(uploads[modal.id] && uploads[modal.id][name]) {
-        delete uploads[modal.id][name];
-    }
-}
-
 export default class Modal {
     static isTemplateLoading = false;
     id;
@@ -537,5 +523,19 @@ function initializeModal(modal, {clearModal}) {
         modal.element.find(`button[name="previous"]`).on('click', function () {
             config.onPrevious(modal);
         });
+    }
+}
+
+function addUpload(modal, name, file) {
+    if(uploads[modal.id] === undefined) {
+        uploads[modal.id] = {};
+    }
+
+    uploads[modal.id][name] = file;
+}
+
+function deleteUpload(modal, name) {
+    if(uploads[modal.id] && uploads[modal.id][name]) {
+        delete uploads[modal.id][name];
     }
 }
