@@ -24,6 +24,7 @@ if ($debug) {
     Debug::enable();
 } else {
     umask(0002);
+    VarDumper::setHandler(fn($var) => null);
 }
 
 date_default_timezone_set('Europe/Paris');
