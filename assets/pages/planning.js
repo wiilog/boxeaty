@@ -29,28 +29,7 @@ $document.ready(() => {
 
                     setupDeliveryRoundSortables(map);
 
-                    modal.element.find(`[name="method"]`).on(`change`, function() {
-                        const value = Number($(this).val());
-
-                        if(value) {
-                            for(const element of modal.element.find(`.order[data-id]`)) {
-                                const $element = $(element);
-                                if($element.data(`delivery-method`) === value) {
-                                    $element.removeClass(`d-none`);
-                                } else {
-                                    if($element.closest(`.assigned-deliveries`).exists()) {
-                                        $element.detach();
-                                        modal.element.find(`.available-deliveries`).append($element);
-                                    }
-
-                                    $element.addClass(`d-none`);
-                                }
-                            }
-                        } else {
-                            modal.element.find(`.order[data-id]`).removeClass(`d-none`);
-                        }
-                    });
-
+                    modal.element.find(`[name="method"], [name="depository"]`).on(`change`, updateDeliveryRoundDeliveries);
                     modal.element.find(`[name="cost"], [name="distance"]`).on(`keyup`, function() {
                         updateAverage($(this));
                     });
@@ -319,4 +298,25 @@ function loadDeliveryLaunching(modal) {
                 })
             }
         });
+}
+
+function updateDeliveryRoundDeliveries() {
+    const $modal = $(`#modal-new-delivery-round`);
+    const method = Number($modal.find(`[name="method"]`).val());
+    const depository = Number($modal.find(`[name="depository"]`).val());
+
+    for(const element of $modal.find(`.order[data-id]`)) {
+        const $element = $(element);
+        if((!method || $element.data(`delivery-method`) === method) &&
+            (!depository || !$element.is(`[data-depository]`) || $element.data(`depository`) === depository)) {
+            $element.removeClass(`d-none`);
+        } else {
+            if($element.closest(`.assigned-deliveries`).exists()) {
+                $element.detach();
+                $modal.find(`.available-deliveries`).append($element);
+            }
+
+            $element.addClass(`d-none`);
+        }
+    }
 }

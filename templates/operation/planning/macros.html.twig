@@ -4,6 +4,7 @@
     data-address="{{ order.client.address }}"
     data-client="{{ order.client.name }}"
     data-delivery-method="{{ order.deliveryMethod.id }}"
+    {% if order.depository %}data-depository="{{ order.depository.id }}"{% endif %}
 {% endmacro %}
 
 {% macro order_link(order, link_new_tab) %}
