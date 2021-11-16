@@ -14,6 +14,8 @@ use App\Entity\DeliveryRound;
 use App\Entity\Role;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
+use Knp\Snappy\Pdf;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -37,6 +39,61 @@ class IndicatorController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $params = $request->query->all();
+        $values = self::getIndicatorsValues($params, $manager);
+
+        if(!$values['success']) {
+            return $this->json([
+                'success' => false,
+                'message' => $values['message']
+            ]);
+        }
+
+        return $this->json($values);
+    }
+
+    /**
+     * @Route("/print-indicators", name="print_indicators", options={"expose": true})
+     */
+    public function print(Pdf $snappy, Request $request, EntityManagerInterface $manager): PdfResponse {
+        $params = $request->query->all();
+        $boxesHistoryChartBase64 = $params['boxesHistoryChartBase64'] ?? null;
+        $date = (new DateTime())->format('d-m-Y');
+
+        $startDate = DateTime::createFromFormat("Y-m-d", $params["from"])->format('d/m/Y');
+        $endDate = DateTime::createFromFormat("Y-m-d", $params["to"])->format('d/m/Y');
+        $client = $manager->getRepository(Client::class)->findOneBy(['id' => $params['client']]);
+        $clientName = strtolower($client->getName());
+
+        $values = self::getIndicatorsValues($params, $manager);
+
+        $html = $this->renderView("print/indicators/base.html.twig", [
+            'values' => $values,
+            'from_print' => true,
+            'print_details' => [
+                'startDate' => $startDate,
+                'endDate' => $endDate,
+                'client' => $client->getName()
+            ],
+            'boxesHistoryChartBase64' => $boxesHistoryChartBase64,
+            'title' => "Indicateurs $clientName du $date"
+        ]);
+
+        return new PdfResponse(
+            $snappy->getOutputFromHtml($html, [
+                'orientation' => 'Landscape',
+                'enable-local-file-access' => true,
+                'margin-top' => 0,
+                'margin-right' => 0,
+                'margin-bottom' => 0,
+                'margin-left' => 0,
+                'page-size' => 'A4',
+                'zoom' => '1.30'
+            ]),
+            "export-indicateurs-$clientName-$date.pdf"
+        );
+    }
+
+    private static function getIndicatorsValues(array $params, EntityManagerInterface $manager): array {
         $totalQuantityDelivered = 0;
         $softMobilityTotalDistance = 0;
         $motorVehiclesTotalDistance = 0;
@@ -47,10 +104,10 @@ class IndicatorController extends AbstractController {
 
         if(!empty($params)) {
             if(count($params) < 3) {
-                return $this->json([
+                return [
                     "success" => false,
                     "message" => "Vous devez renseigner les 3 filtres",
-                ]);
+                ];
             } else {
                 $deliveryRepository = $manager->getRepository(Delivery::class);
                 $deliveryRoundsRepository = $manager->getRepository(DeliveryRound::class);
@@ -126,7 +183,7 @@ class IndicatorController extends AbstractController {
                         'borderColor' => ['#EB611B'],
                     ],
                     [
-                        'label' => "Box colléctées",
+                        'label' => "Box collectées",
                         'data' => $dataCollectedBoxs,
                         'backgroundColor' => ['#76B39D'],
                         'borderColor' => ['#76B39D'],
@@ -140,7 +197,7 @@ class IndicatorController extends AbstractController {
             ],
         ];
 
-        return $this->json([
+        return [
             "success" => true,
             "containersUsed" => !empty($params) ? $totalQuantityDelivered : '--',
             "wasteAvoided" => !empty($params) ? (($totalQuantityDelivered * 35) / 1000) : '--',
@@ -148,7 +205,6 @@ class IndicatorController extends AbstractController {
             "motorVehiclesTotalDistance" => !empty($params) ? $motorVehiclesTotalDistance : '--',
             "returnRate" => !empty($params) ? $returnRate : '--',
             "chart" => json_encode($config),
-        ]);
+        ];
     }
-
 }

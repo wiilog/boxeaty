@@ -12,52 +12,23 @@ $(function() {
     toDataUrl(`/images/logo.png`, data => LOGO_PNG = data);
 
     getIndicatorsValues(true);
-    $('button.filter').on('click', function() {
-        getIndicatorsValues(false);
-    })
 
-    $('.exportPDF').click(function() {
-        getIndicatorsValues().then(() => printPDF());
+    $('.filters button.filter').on('click', () => {
+        getIndicatorsValues(false);
     });
 
-    function getIndicatorsValues(isFirstLoad) {
-        const $filters = $('.filters');
-        const params = !isFirstLoad ? processForm($filters) : true;
+    $('button.print-indicators').on('click', function() {
+        getIndicatorsValues(false).then(() => {
+            const $filters = $('.filters');
+            const params = processForm($filters);
+            const boxesHistoryChartBase64 = $('#indicatorsChart').data('chart').toBase64Image();
+            const data = params.asObject();
+            data.boxesHistoryChartBase64 = boxesHistoryChartBase64;
 
-        return new Promise((resolve, reject) => {
-            if(params) {
-                AJAX.route(`GET`, `indicators_api`, isFirstLoad ? {} : params.asObject()).json()
-                    .then((result) => {
-                        $('.total-boxes').text(result.containersUsed);
-                        $('.waste-avoided').text(result.wasteAvoided + " KG");
-                        $('.soft-mobility-total-distance').text(result.softMobilityTotalDistance + " KM");
-                        $('.motor-vehicles-total-distance').text(result.motorVehiclesTotalDistance + " KM");
-                        $('.return-rate').text(result.returnRate + " %");
-                        drawChart(result.chart, params, () => resolve());
-                    });
-            } else {
-                reject();
-            }
+            window.location.href = Routing.generate(`print_indicators`, data);
         });
-    }
-
-    function drawChart(config, params, drawCallback) {
-        let $container = $('#indicatorsChart');
-        const data = typeof params === 'object' ? params.asObject() : {};
-
-        if(data.client && data.from && data.to) {
-            $container.replaceWith('<canvas id="indicatorsChart" width="400" height="150" data-rendered="1"></canvas>');
-            ChartJS.line($('#indicatorsChart'), JSON.parse(config), drawCallback);
-        } else {
-            $container.replaceWith(`
-                <div id="indicatorsChart" class="d-flex flex-column align-items-center h-100 justify-content-center">
-                    <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
-                    <span>Un couple de filtres client/dates est nécessaire afin d'afficher le graphique</span>
-                </div>
-            `);
-        }
-    }
-})
+    });
+});
 
 function printPDF() {
     let client = $('select[name="client"]').text().trim();
@@ -70,7 +41,6 @@ function printPDF() {
         filename: fileName,
         image: {type: 'jpeg', quality: 1},
         jsPDF: {unit: 'mm', format: [240, 400], orientation: 'landscape'},
-
     };
 
     html2pdf().from(element).set(opt).toPdf().get('pdf').then(function(pdf) {
@@ -86,7 +56,7 @@ function printPDF() {
 function convertDateToFrenchFormat(date) {
     let dateToConvert = new Date(date);
     const options = {day: 'numeric', month: 'numeric', year: 'numeric'};
-    return (dateToConvert.toLocaleDateString('fr-FR', options))
+    return (dateToConvert.toLocaleDateString('fr-FR', options));
 }
 
 function toDataUrl(url, callback) {
@@ -97,5 +67,43 @@ function toDataUrl(url, callback) {
         };
 
         response.blob().then(blob => reader.readAsDataURL(blob));
-    })
+    });
+}
+
+function getIndicatorsValues(isFirstLoad) {
+    const $filters = $('.filters');
+    const params = !isFirstLoad ? processForm($filters) : true;
+
+    return new Promise((resolve, reject) => {
+        if(params) {
+            AJAX.route(`GET`, `indicators_api`, isFirstLoad ? {} : params.asObject()).json()
+                .then((result) => {
+                    $('.total-boxes').text(result.containersUsed);
+                    $('.waste-avoided').text(result.wasteAvoided + " KG");
+                    $('.soft-mobility-total-distance').text(result.softMobilityTotalDistance + " KM");
+                    $('.motor-vehicles-total-distance').text(result.motorVehiclesTotalDistance + " KM");
+                    $('.return-rate').text(result.returnRate + " %");
+                    drawChart(result.chart, params, () => resolve());
+                });
+        } else {
+            reject();
+        }
+    });
+}
+
+function drawChart(config, params, drawCallback) {
+    let $container = $('#indicatorsChart');
+    const data = typeof params === 'object' ? params.asObject() : {};
+
+    if(data.client && data.from && data.to) {
+        $container.replaceWith('<canvas id="indicatorsChart" width="400" height="150" data-rendered="1"></canvas>');
+        ChartJS.line($('#indicatorsChart'), JSON.parse(config), drawCallback);
+    } else {
+        $container.replaceWith(`
+                <div id="indicatorsChart" class="d-flex flex-column align-items-center h-100 justify-content-center">
+                    <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
+                    <span>Un couple de filtres client/dates est nécessaire afin d'afficher le graphique</span>
+                </div>
+            `);
+    }
 }

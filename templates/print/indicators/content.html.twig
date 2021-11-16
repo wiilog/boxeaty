@@ -1,0 +1,91 @@
+{% set values = values is defined and values is not empty ? values : [] %}
+{% set from_print = from_print is defined and from_print %}
+<div class="box first-box" style="{{ from_print ? 'border-radius: 0; border:none; background-color: #FFFFFF; box-shadow: none;' }}">
+    {% if print_details is defined and print_details is not empty %}
+        <div class="print-header">
+            <img src="{{ base64('images/logo.png') }}" alt="Logo BoxEaty" width="150px">
+            <div class="informations">
+                <div>Du {{ print_details['startDate'] }} au {{ print_details['endDate'] }}</div>
+                <div><strong>{{ print_details['client'] }}</strong></div>
+            </div>
+        </div>
+    {% endif %}
+    <div id="indicators">
+        <div class="row">
+            <div class="col-6">
+                <div class="header-section header-section-rounded">
+                    <h2 class="header-section-label">Indicateurs d'impact</h2>
+                </div>
+                <div class="row justify-content-evenly text-center indicator-wrapper">
+                    <div class="col-3">
+                        <img class="indicator-img" src="{{ base64('images/trash.png') }}"
+                             alt="Image de poubelle">
+                        <p class="indicator-value">
+                            <strong
+                                class="waste-avoided">{{ values is not empty ? values['wasteAvoided'] ~ ' KG' }}</strong>
+                        </p>
+                        <p class="text-big">de déchets évités</p>
+                    </div>
+                    <div class="col-3">
+                        <img class="indicator-img" src="{{ base64('images/double-boxes.png') }}" alt="Image de Box">
+                        <p class="indicator-value">
+                            <strong
+                                class="total-boxes">{{ values is not empty ? values['containersUsed'] }}</strong>
+                        </p>
+                        <p class="text-big">Contenants utilisés</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="header-section header-section-rounded">
+                    <h2 class="header-section-label">Indicateurs carbone</h2>
+                </div>
+                <div class="row justify-content-evenly text-center indicator-wrapper">
+                    <div class="col-3">
+                        <img class="indicator-img" src="{{ base64('images/delivery-bike.png') }}"
+                             alt="Image de vélo">
+                        <p class="indicator-value">
+                            <strong
+                                class="soft-mobility-total-distance">{{ values is not empty ? values['softMobilityTotalDistance'] ~ ' KM' }}</strong>
+                        </p>
+                        <p class="text-big">En mobilité douce</p>
+                    </div>
+                    <div class="col-3">
+                        <img class="indicator-img" src="{{ base64('images/light-truck.png') }}"
+                             alt="Image de camion">
+                        <p class="indicator-value">
+                            <strong
+                                class="motor-vehicles-total-distance">{{ values is not empty ? values['motorVehiclesTotalDistance'] ~ ' KM' }}</strong>
+                        </p>
+                        <p class="text-big">En véhicule à moteur</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-6 mb-3 pt-3 pb-3">
+                <h3 class="text-big"> Historique des contenants</h3>
+                {% if boxesHistoryChartBase64 is defined and boxesHistoryChartBase64 %}
+                    <img src="{{ boxesHistoryChartBase64 }}" alt="Historique des contenants" class="chart-image">
+                {% else %}
+                    <canvas id="indicatorsChart"></canvas>
+                {% endif %}
+            </div>
+            <div class="col-6">
+                <div class="header-section header-section-rounded mb-5">
+                    <h2 class="header-section-label">Taux de retour</h2>
+                </div>
+                <div class="row justify-content-center text-center indicator-wrapper">
+                    <div class="col-3">
+                        <img class="indicator-img" src="{{ base64('images/return-rate.png') }} "
+                             alt="Image taux de retour">
+                        <p class="indicator-value return-rate">
+                            <strong>{{ values is not empty ? values['returnRate'] ~ ' %' }}</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="primary filter print-indicators float-end {{ from_print ? 'd-none' }}">Exporter PDF</button>
+</div>

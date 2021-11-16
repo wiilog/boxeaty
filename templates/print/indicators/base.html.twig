@@ -1,0 +1,18 @@
+{% extends 'print/base.html.twig' %}
+
+{% block stylesheets %}
+    {% set app_style_files = encore_entry_css_files('app_style') %}
+    {% set forms_style_files = encore_entry_css_files('forms_style') %}
+    {% set indicators_style_files = encore_entry_css_files('indicators_style') %}
+    {% set styles = ((app_style_files | merge(forms_style_files)) | merge(indicators_style_files)) %}
+
+    {% for style in styles %}
+        {% include '@public' ~ style %}
+    {% endfor %}
+{% endblock %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    {% include ('print/indicators/content.html.twig') %}
+{% endblock %}
