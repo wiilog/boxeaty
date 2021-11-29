@@ -65,7 +65,7 @@ $(function() {
         }
     });
 
-    $document.on(`change`, `[name="client"]`, function(){
+    $document.on(`change`, `#modal-new-client-order select[name="client"]`, function(){
         const $modal = $(this).closest(`.modal`);
         updateModalFees($modal);
     });
