@@ -73,7 +73,7 @@ class ClientOrderController extends AbstractController {
 
         $from = new DateTime($params["filters"]["from"] ?? "now");
         $to = new DateTime($params["filters"]["to"] ?? "+30 days");
-        if($from->diff($to, true)->days > 30) {
+        if((date_diff($to,$from)->format('%R%a')) > +30) {
             return $this->json([
                 "success" => false,
                 "message" => "Le filtre sur les dates ne doit pas dépasser 30 jours",
