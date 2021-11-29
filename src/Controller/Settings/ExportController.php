@@ -167,6 +167,41 @@ class ExportController extends AbstractController {
     }
 
     /**
+     * @Route("/client-recurrent-order", name="client_order_export_recurrent", options={"expose": true})
+     */
+    public function exportRecurrent(EntityManagerInterface $manager, ExportService $exportService, Request $request): Response {
+        $query = $request->query;
+        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
+
+        $from = new DateTime($query->get('from'));
+        $to = new DateTime($query->get('to'));
+
+        $clientOrderLines = $clientOrderRepository->findByType(OrderType::RECURRENT, $from, $to);
+        $starterKit = $manager->getRepository(BoxType::class)->findOneBy(['name' => BoxType::STARTER_KIT]);
+
+        $clientOrderLinesData = Stream::from($clientOrderLines)
+            ->map(fn(array $clientOrderLine) => [
+                "clientOrder" => $clientOrderLine['number'],
+                "boxTypeName" => $clientOrderLine['boxTypeName'],
+                "boxAmount" => $clientOrderLine['lineQuantity'],
+                "unitPrice" => $clientOrderLine['unitPrice'],
+                "starterKitAmount" => FormatHelper::price($starterKit->getPrice()),
+                "deliveryPrice" => $clientOrderLine['deliveryPrice'],
+                "automatic" => $clientOrderLine['automatic'],
+            ])
+            ->toArray();
+
+        $today = new DateTime();
+        $today = $today->format("d-m-Y-H-i-s");
+
+        return $exportService->export(function($output) use ($exportService, $clientOrderLinesData) {
+            foreach($clientOrderLinesData as $array) {
+                $exportService->putLine($output, $array);
+            }
+        }, "export-commandes-recurrent-$today.csv", ExportService::CLIENT_ORDER_TRADE);
+    }
+
+    /**
      * @Route("/global", name="global_export", options={"expose": true})
      * @HasPermission(Role::MANAGE_EXPORTS)
      */
