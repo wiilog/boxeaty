@@ -35,6 +35,11 @@ Encore
     .addEntry("client_order", "./assets/pages/client-order.js")
     .addEntry("export", "./assets/pages/export-index.js")
     .addEntry("indicators","./assets/pages/indicators.js")
+
+    .addStyleEntry("forms_style","./assets/styles/forms.scss")
+    .addStyleEntry("app_style","./assets/styles/app.scss")
+    .addStyleEntry("indicators_style","./assets/styles/indicators.scss")
+
     .autoProvidejQuery()
 
     .addPlugin(new CopyPlugin({

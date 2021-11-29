@@ -14,6 +14,7 @@ use App\Entity\DeliveryRound;
 use App\Entity\Role;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Snappy\Pdf;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,12 +25,22 @@ use WiiCommon\Helper\Stream;
  */
 class IndicatorController extends AbstractController {
 
+    private const FORBIDDEN_FILE_CHARACTERS = [" ", "_", ".", "/", "\\", "?", ":", "\"", "*", "|", "<", ">"];
+
     /**
      * @Route("/index", name="indicators_index")
      * @HasPermission(Role::VIEW_INDICATORS)
      */
-    public function index(): Response {
-        return $this->render("tracking/indicators/index.html.twig");
+    public function index(Request $request, EntityManagerInterface $manager): Response {
+        if($request->query->has("client")) {
+            $client = $manager->find(Client::class, $request->query->get("client"));
+        }
+
+        return $this->render("tracking/indicators/index.html.twig", [
+            "client" => $client ?? null,
+            "from" => $request->query->get("from"),
+            "to" => $request->query->get("to"),
+        ]);
     }
 
     /**
@@ -37,6 +48,69 @@ class IndicatorController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $params = $request->query->all();
+        $values = self::getIndicatorsValues($params, $manager);
+
+        if(!$values['success']) {
+            return $this->json([
+                'success' => false,
+                'message' => $values['message'],
+            ]);
+        }
+
+        return $this->json($values);
+    }
+
+    /**
+     * @Route("/print-indicators", name="print_indicators", options={"expose": true})
+     */
+    public function print(Pdf $snappy, Request $request, EntityManagerInterface $manager) {
+        $params = $request->request->all();
+        $boxesHistoryChartBase64 = $params["boxesHistoryChartBase64"] ?? null;
+        $date = (new DateTime())->format('d-m-Y');
+
+        $startDate = DateTime::createFromFormat("Y-m-d", $params["from"])->format('d/m/Y');
+        $endDate = DateTime::createFromFormat("Y-m-d", $params["to"])->format('d/m/Y');
+        $client = $manager->getRepository(Client::class)->findOneBy(['id' => $params['client']]);
+        $clientName = preg_replace("/(-){2,}/", "$1", str_replace(self::FORBIDDEN_FILE_CHARACTERS, "-", strtolower($client->getName())));
+
+        $values = self::getIndicatorsValues($params, $manager);
+
+        $html = $this->renderView("print/indicators/base.html.twig", [
+            'values' => $values,
+            'from_print' => true,
+            'print_details' => [
+                'startDate' => $startDate,
+                'endDate' => $endDate,
+                'client' => $client->getName(),
+            ],
+            'boxesHistoryChartBase64' => $boxesHistoryChartBase64,
+            'title' => "Indicateurs $clientName du $date",
+        ]);
+
+        $pdf = $snappy->getOutputFromHtml($html, [
+            "orientation" => "Landscape",
+            "enable-local-file-access" => true,
+            "margin-top" => 0,
+            "margin-right" => 0,
+            "margin-bottom" => 0,
+            "margin-left" => 0,
+            "page-size" => "A4",
+            "zoom" => "1.30",
+        ]);
+
+        $response = new Response();
+        $response->headers->set("Cache-Control", "private");
+        $response->headers->set("Content-type", "application/pdf");
+        $response->headers->set("Content-length",  strlen($pdf));
+        $response->headers->set("X-Filename", "export-indicateurs-$clientName-$date.pdf");
+
+        $response->sendHeaders();
+        $response->setContent($pdf);
+
+        return $response;
+    }
+
+    private static function getIndicatorsValues(array $params, EntityManagerInterface $manager): array {
         $totalQuantityDelivered = 0;
         $softMobilityTotalDistance = 0;
         $motorVehiclesTotalDistance = 0;
@@ -47,10 +121,10 @@ class IndicatorController extends AbstractController {
 
         if(!empty($params)) {
             if(count($params) < 3) {
-                return $this->json([
+                return [
                     "success" => false,
                     "message" => "Vous devez renseigner les 3 filtres",
-                ]);
+                ];
             } else {
                 $deliveryRepository = $manager->getRepository(Delivery::class);
                 $deliveryRoundsRepository = $manager->getRepository(DeliveryRound::class);
@@ -126,7 +200,7 @@ class IndicatorController extends AbstractController {
                         'borderColor' => ['#EB611B'],
                     ],
                     [
-                        'label' => "Box colléctées",
+                        'label' => "Box collectées",
                         'data' => $dataCollectedBoxs,
                         'backgroundColor' => ['#76B39D'],
                         'borderColor' => ['#76B39D'],
@@ -140,7 +214,7 @@ class IndicatorController extends AbstractController {
             ],
         ];
 
-        return $this->json([
+        return [
             "success" => true,
             "containersUsed" => !empty($params) ? $totalQuantityDelivered : '--',
             "wasteAvoided" => !empty($params) ? (($totalQuantityDelivered * 35) / 1000) : '--',
@@ -148,7 +222,7 @@ class IndicatorController extends AbstractController {
             "motorVehiclesTotalDistance" => !empty($params) ? $motorVehiclesTotalDistance : '--',
             "returnRate" => !empty($params) ? $returnRate : '--',
             "chart" => json_encode($config),
-        ]);
+        ];
     }
 
 }

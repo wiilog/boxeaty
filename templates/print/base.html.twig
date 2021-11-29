@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Impression</title>
+    <base href="{{ app.request.schemeAndHttpHost }}">
+    <title>
+        {% if block('title') is defined %}
+            {% block title %}{% endblock %}
+        {% else %}
+            Impression
+        {% endif %}
+    </title>
 
     <style>
         @font-face {
@@ -28,7 +35,6 @@
             src: url({{ base64('../assets/fonts/retroyal/retroyal-medium.otf') }}) format('opentype');
         }
     </style>
-
     <style>
         {% include 'print/style/base.css' %}
         {% block stylesheets %}{% endblock %}

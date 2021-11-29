@@ -16,3 +16,45 @@
 .indicator-img {
   height: 150px;
 }
+
+.print-header {
+    display: -webkit-box !important;
+    -webkit-box-pack: justify !important;
+    margin-bottom: 10px;
+
+    .informations {
+        text-align: right;
+    }
+}
+
+#indicators {
+    .row {
+        display: -webkit-box !important;
+    }
+
+    .col-6 {
+        padding: 0 10px 0 10px !important;
+    }
+
+    .col-3 {
+        width: 50%;
+    }
+
+    .header-section-rounded {
+        text-align: center !important;
+    }
+
+    .indicator-wrapper {
+        -webkit-box-pack: center !important;
+    }
+
+    .chart-image {
+        width: 100%;
+    }
+
+    img {
+        display: block;
+        margin-right: auto;
+        margin-left: auto;
+    }
+}

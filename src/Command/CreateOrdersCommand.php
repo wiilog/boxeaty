@@ -69,6 +69,7 @@ class CreateOrdersCommand extends Command {
                 $date = clone $start;
             }
 
+            //récupère la date de la prochaine commande
             while($date != $now && $date <= $end) {
                 $date->modify("{$days[$recurrence->getDay() + 1]} this week +{$recurrence->getPeriod()} weeks");
             }

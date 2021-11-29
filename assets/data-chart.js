@@ -51,6 +51,9 @@ export default class ChartJS {
             }
         };
 
-        return new Chart($canva, config);
+        const chartJS = new Chart($canva, config);
+
+        $canva.data('chart', chartJS);
+        return chartJS;
     }
 }
