@@ -118,7 +118,7 @@ class BoxController extends AbstractController {
 
             return $this->json([
                 "success" => true,
-                "message" => "Box créée avec succès",
+                "message" => "Box/Caisse créée avec succès",
             ]);
         } else {
             return $form->errors();
