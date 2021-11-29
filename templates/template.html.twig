@@ -31,10 +31,12 @@
                         {{ app.user.username }}
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <a class="dropdown-item current-user" href="#">
-                            <i class="bxi bxi-user icon"></i>
-                            Profil
-                        </a>
+                        {% if has_permission(constant('App\\Entity\\Role::MANAGE_USERS')) %}
+                            <a class="dropdown-item current-user" href="#">
+                                <i class="bxi bxi-user icon"></i>
+                                Profil
+                            </a>
+                        {% endif %}
                         <a class="dropdown-item" href="{{ path('logout') }}" >
                             <i class="bxi bxi-logout icon"></i>
                             Déconnexion</a>
