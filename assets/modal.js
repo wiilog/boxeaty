@@ -241,7 +241,7 @@ export function clearForm($elem) {
     $elem.find(`[contenteditable="true"]`).html(``);
 }
 
-export function processForm($parent, $button = null, classes = {data: `data`, array: `data-array`}) {
+export function processForm($parent, $button = null, classes = {data: `data`, array: `data-array`}, ignoreErrors = false) {
     let modal = null;
     if($parent instanceof Modal) {
         modal = $parent;
@@ -363,6 +363,10 @@ export function processForm($parent, $button = null, classes = {data: `data`, ar
 
     if(modal && modal.config.processor) {
         modal.config.processor(data, errors, modal);
+    }
+
+    if(ignoreErrors) {
+        return data;
     }
 
     // display errors under each field

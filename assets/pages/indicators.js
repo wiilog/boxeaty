@@ -5,29 +5,51 @@ import AJAX from "../ajax";
 import {processForm} from "../modal";
 import ChartJS from "../data-chart";
 import html2pdf from "html2pdf.js";
+import {URL} from "../util";
 
 let LOGO_PNG = null;
 
 $(function() {
+    const $filter = $(`.filters button.filter`);
+
     toDataUrl(`/images/logo.png`, data => LOGO_PNG = data);
 
-    getIndicatorsValues(true);
-
-    $('.filters button.filter').on('click', () => {
+    $filter.on('click', () => {
         getIndicatorsValues(false);
     });
 
-    $('button.print-indicators').on('click', function() {
+    $(`button.print-indicators`).on('click', function() {
         getIndicatorsValues(false).then(() => {
             const $filters = $('.filters');
             const params = processForm($filters);
             const boxesHistoryChartBase64 = $('#indicatorsChart').data('chart').toBase64Image();
-            const data = params.asObject();
-            data.boxesHistoryChartBase64 = boxesHistoryChartBase64;
+            params.set(`boxesHistoryChartBase64`, boxesHistoryChartBase64)
 
-            window.location.href = Routing.generate(`print_indicators`, data);
+            fetch(Routing.generate(`print_indicators`), {method: `POST`, body: params})
+                .then(async response => {
+                    const url = window.URL.createObjectURL(await response.blob());
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = response.headers.get(`X-Filename`).split(`,`)[0];
+
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                });
         });
     });
+
+    $(`.filters`).on(`change`, function() {
+        const data = processForm($(this), null, {data: `data`, array: `data-array`}, true).asObject();
+        URL.replaceState(document.title, URL.createRequestQuery(data));
+    });
+
+    const initialData =  processForm($(this), null, {data: `data`, array: `data-array`}, true).asObject();
+    if(initialData.client && initialData.from && initialData.to) {
+        $filter.trigger(`click`);
+    } else {
+        getIndicatorsValues(true);
+    }
 });
 
 function printPDF() {

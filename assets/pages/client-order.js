@@ -250,8 +250,8 @@ function setOrderRequestInURL(action, order) {
         && getParams['action-data'] !== `${order}`) {
         getParams.action = action;
         getParams['action-data'] = order;
-        const newUrl = URL.createRequestQuery(getParams);
-        URL.pushState(document.title, newUrl);
+
+        URL.pushState(document.title, URL.createRequestQuery(getParams));
     }
 }
 
@@ -261,8 +261,8 @@ function removeActionRequestInURL() {
         || getParams.hasOwnProperty('action-data')) {
         delete getParams.action;
         delete getParams['action-data'];
-        const newUrl = URL.createRequestQuery(getParams);
-        URL.replaceState(document.title, newUrl);
+
+        URL.replaceState(document.title, URL.createRequestQuery(getParams));
     }
 }
 
