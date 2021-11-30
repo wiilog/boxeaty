@@ -33,7 +33,7 @@
             {{ _self.order_header(order) }}
 
             {% if order.deliveryRound %}
-                <label class="inline">Tournée <strong>N°{{ order.deliveryRound.number }}</strong></label>
+                <a class="inline delivery-round" href="#">Tournée <strong>N°{{ order.deliveryRound.number }}</strong></a>
                 <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
             {% endif %}
 
@@ -70,10 +70,10 @@
     {% elseif order.deliveryRound and order.status.code in [constant('App\\Entity\\Status::CODE_ORDER_AWAITING_DELIVERER'), constant('App\\Entity\\Status::CODE_ORDER_TRANSIT')] %}
         <div class="order delivering" {{ _self.order_data(order) }}>
             {{ _self.order_header(order) }}
-            <label class="inline">Tournée <strong>N°{{ order.deliveryRound.number }}</strong></label>
-            <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
+            <a class="inline delivery-round" href="#">Tournée <strong>N°{{ order.deliveryRound.number }}</strong></a>
+            <span class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></span>
             <span class="muted">Livraison {{ order.deliveryRound.deliveryMethod.name | lower }}</span>
-
+            <input type="hidden" value="{{ order.deliveryRound.id }}" name="deliveryRound"/>
             {% if order.status.code == constant('App\\Entity\\Status::CODE_ORDER_AWAITING_DELIVERER') %}
                 <span class="status"><i class="bxi bxi-awaiting-deliverer"></i> {{ order.status.name }}</span>
             {% else %}
@@ -86,7 +86,7 @@
             {{ _self.order_header(order) }}
 
             {% if order.deliveryRound %}
-                <label class="inline">Tournée <strong>N°238961</strong></label>
+                <a class="inline delivery-round" href="#">Tournée <strong>N°238961</strong></a>
                 <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
                 <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
 

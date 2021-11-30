@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Box;
 use App\Entity\Client;
 use App\Entity\ClientOrder;
+use App\Entity\DeliveryRound;
 use App\Entity\Depository;
 use App\Entity\Role;
 use App\Entity\Status;
@@ -111,14 +112,24 @@ class ClientOrderRepository extends EntityRepository {
     /**
      * @return ClientOrder[]
      */
-    public function findDeliveriesBetween(?User $user, DateTime $from, DateTime $to, array $params): array {
-        return $this->createBetween($user, $from, $to, $params)
+    public function findDeliveriesBetween(?User $user, DateTime $from, DateTime $to, array $params, DeliveryRound $deliveryRound = null): array {
+        $qb = $this->createBetween($user, $from, $to, $params)
             ->leftJoin("client_order.status", "status")
             ->leftJoin("client_order.deliveryRound", "delivery_round")
             ->andWhere("status.code NOT IN (:statuses)")
-            ->andWhere("delivery_round.id IS NULL")
-            ->setParameter("statuses", [Status::CODE_ORDER_TO_VALIDATE_CLIENT, Status::CODE_ORDER_TO_VALIDATE_BOXEATY])
-            ->getQuery()
+            ->setParameter("statuses", [Status::CODE_ORDER_TO_VALIDATE_CLIENT, Status::CODE_ORDER_TO_VALIDATE_BOXEATY]);
+
+
+        if(isset($deliveryRound)){
+            $qb->andWhere("delivery_round = :round")
+                ->setParameter("round", $deliveryRound);
+        }
+        else {
+            $qb->andWhere("delivery_round.id IS NULL");
+        }
+
+
+        return $qb->getQuery()
             ->getResult();
     }
 

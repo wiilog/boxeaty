@@ -94,6 +94,30 @@ $document.ready(() => {
         });
     });
 
+    $(document).on('click', '.delivery-round', function(){
+        const params = processForm($filters).asObject();
+        const ajax = AJAX.route(`POST`, `planning_delivery_round_template`, {
+            order: $(this).closest(`.order`).data(`id`),
+            from: params.from,
+            to: params.to
+        });
+
+        Modal.load(ajax, {
+            processor: processSortables,
+            afterOpen: modal => {
+                const map = Map.create(`delivery-round-map`);
+
+                setupDeliveryRoundSortables(map);
+
+                modal.element.find(`[name="method"], [name="depository"]`).on(`change`, updateDeliveryRoundDeliveries);
+                modal.element.find(`[name="cost"], [name="distance"]`).on(`keyup`, function() {
+                    updateAverage($(this));
+                });
+            },
+            success: () => reloadPlanning()
+        });
+    })
+
 
     $(document).on('click', `.validate`, function() {
         const ajax = AJAX.route(`POST`, `planning_preparation_launch_validate_template`, {
@@ -181,9 +205,14 @@ function processSortables(data, errors, modal) {
     const ready = $modal.find(`.orders-to-start .order[data-id]:not(.d-none)`).map(function() {
         return $(this).data(`id`);
     });
+    const notAssignedForRound = $modal.find(`.available-deliveries .order[data-id]:not(.d-none)`).map(function() {
+        return $(this).data(`id`);
+    });
 
+    data.append(`notAssignedForRound`, notAssignedForRound.toArray());
     data.append(`assignedForRound`, assigned.toArray());
     data.append(`assignedForStart`, ready.toArray());
+    data.append(`deliveryRound`, $('input[name="deliveryRound"]').val());
 }
 
 async function changePlannedDate(detail) {

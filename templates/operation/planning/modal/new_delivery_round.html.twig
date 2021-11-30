@@ -12,18 +12,27 @@
                         Livreur
                         <select name="deliverer" data-s2="deliverer" class="data"
                                 data-placeholder="Sélectionnez le livreur" required>
+                            {% if deliverer %}
+                                <option value="{{ deliverer.id }}" selected>{{ deliverer.username }}</option>
+                            {% endif %}
                         </select>
                     </label>
                     <label class="inline">
                         Mobilité
                         <select name="method" data-s2="deliveryMethod" class="data"
                                 data-placeholder="Sélectionnez la mobilité" required>
+                            {% if method %}
+                                <option value="{{ method.id }}" selected>{{ method.name }}</option>
+                            {% endif %}
                         </select>
                     </label>
                     <label class="inline">
                         Dépôt
                         <select name="depository" data-s2="depository" class="data"
                                 data-placeholder="Sélectionnez le dépôt" required>
+                            {% if depository %}
+                                <option value="{{ depository.id }}" selected>{{ depository.name }}</option>
+                            {% endif %}
                         </select>
                     </label>
                 </div>
@@ -50,7 +59,7 @@
                 <label>
                     Frais de livraison transporteur
                     <span class="text-form-wrapper">
-                        <input type="number" name="cost" class="data euros" min="0" placeholder="6€" required/>
+                        <input type="number" name="cost" class="data euros" min="0" placeholder="6€" required value="{{ cost ?? " " }}"/>
                         <span>HT pour la tournée soit</span>
                         <input type="number" class="data-divided euros" readonly/>
                         <span>HT par livraison</span>
@@ -59,7 +68,7 @@
                 <label>
                     Distance du parcours (km)
                     <span class="text-form-wrapper">
-                        <input type="number" name="distance" class="data" min="0" placeholder="160km" required/>
+                        <input type="number" name="distance" class="data" min="0" placeholder="160km" required value="{{ distance ?? " " }}"/>
                         <span>km, soit</span>
                         <input type="number" class="data-divided" readonly/>
                         <span>km par livraison</span>
