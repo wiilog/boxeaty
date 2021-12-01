@@ -102,6 +102,18 @@ $(function() {
         $modal.find('.client-order-container').removeClass('d-none');
         $modal.find('.footer').removeClass('d-none');
     });
+
+    console.log('huh');
+    $(`.filters [name="from"]`).on(`change`, function() {
+        let date = new Date(this.value);
+        date.setDate(date.getDate() - 30);
+        date = date.toISOString().substring(0, 10);
+
+        $(`.filters [name="to"]`)
+            .attr(`min`, date)
+            .attr(`max`, this.value)
+            .val(date);
+    })
 });
 
 function openEditStatusModal(clientOrderId, editModal){
