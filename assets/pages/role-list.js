@@ -26,12 +26,7 @@ $(document).ready(() => {
                     role: data.id
                 });
 
-                Modal.load(ajax, {
-                    success: () => {
-                        window.location.reload();
-                    },
-                    table
-                })
+                Modal.load(ajax, {table})
             },
             delete: data => {
                 const ajax = AJAX.route(`POST`, `role_delete_template`, {
