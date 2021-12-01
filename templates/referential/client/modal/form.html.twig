@@ -177,7 +177,7 @@
                 <label>
                     Dépôt affecté
                     <select class="data" name="depository" data-s2="depository"
-                            data-placeholder="Sélectionnez un dépôt...">
+                            data-placeholder="Sélectionnez un dépôt..." required>
                         {% if clientOrderInformation ? clientOrderInformation.depository %}
                             <option value="{{ clientOrderInformation.depository.id }}" selected>
                                 {{ clientOrderInformation.depository.name }}
