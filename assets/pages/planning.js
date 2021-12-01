@@ -286,6 +286,7 @@ function loadDeliveryLaunching(modal) {
         .then((response) => {
             modal.element.find('.deliveries-container').empty()
             modal.element.find('.deliveries-container').addClass('d-none');
+            modal.element.find('.quantities-information-container').addClass('d-none');
 
             if(response.success) {
                 modal.element.find('.deliveries-container').removeClass('d-none');
