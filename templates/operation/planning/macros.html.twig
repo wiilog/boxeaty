@@ -34,7 +34,7 @@
 
             {% if order.deliveryRound %}
                 <label class="inline">Tournée <strong>N°{{ order.deliveryRound.number }}</strong></label>
-                <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
+                <label class="inline">Livreur <strong title="{{ order.deliveryRound.deliverer.username }}" class="text-ellipsis">{{ order.deliveryRound.deliverer.username }}</strong></label>
             {% endif %}
 
             <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
@@ -71,7 +71,7 @@
         <div class="order delivering" {{ _self.order_data(order) }}>
             {{ _self.order_header(order) }}
             <label class="inline">Tournée <strong>N°{{ order.deliveryRound.number }}</strong></label>
-            <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
+            <label class="inline">Livreur <strong title="{{ order.deliveryRound.deliverer.username }}" class="text-ellipsis">{{ order.deliveryRound.deliverer.username }}</strong></label>
             <span class="muted">Livraison {{ order.deliveryRound.deliveryMethod.name | lower }}</span>
 
             {% if order.status.code == constant('App\\Entity\\Status::CODE_ORDER_AWAITING_DELIVERER') %}
@@ -87,7 +87,7 @@
 
             {% if order.deliveryRound %}
                 <label class="inline">Tournée <strong>N°238961</strong></label>
-                <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
+                <label class="inline">Livreur <strong title="{{ order.deliveryRound.deliverer.username }}" class="text-ellipsis">{{ order.deliveryRound.deliverer.username }}</strong></label>
                 <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
 
                 <span class="status" title="Affecté à la tournée N°{{ order.deliveryRound.number }}">
