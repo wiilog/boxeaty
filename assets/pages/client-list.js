@@ -3,7 +3,7 @@ import '../app';
 import $ from "jquery";
 import Modal from "../modal";
 import AJAX from "../ajax";
-import {DATATABLE_ACTIONS, initDatatable} from "../datatable";
+import {initDatatable} from "../datatable";
 import Select2 from "../select2";
 
 $(document).ready(() => {

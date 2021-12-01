@@ -36,10 +36,8 @@ export function initDatatable(table, config) {
     const $table = $(table);
     $table.addClass(`w-100`);
 
-    const orderConfig = $table.data('default-order');
-    config.order = (orderConfig && Array.isArray(orderConfig))
-        ? orderConfig
-        : [];
+    const orderConfig = $table.data(`default-order`);
+    config.order = Array.isArray(orderConfig) ? orderConfig : [];
 
     for(const [id, column] of Object.entries(config.columns)) {
         if(!column.name) {
@@ -85,10 +83,11 @@ export function initDatatable(table, config) {
 
     const initial = $table.data(`initial-data`);
     if(initial && typeof initial === `object`) {
+        console.log(initial.recordsFiltered, initial.recordsTotal);
         config = {
             ...config,
             data: initial.data,
-            deferLoading: [initial.recordsFiltered, initial.recordsTotal],
+            deferLoading: [initial.recordsFiltered || 0, initial.recordsTotal || 0],
         };
     }
 

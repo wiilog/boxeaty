@@ -7,8 +7,11 @@
     <label class="dates">
         {{ not unique_date ? 'Du' }}
         <input {{ required }} type="date" name="{{ name }}" class="data from"
-            {% if min %}
-                min="{{ min }}"
+            {% if fromMin ?? min ?? null %}
+                min="{{ (fromMin ?? min) | date('Y-m-d') }}"
+            {% endif %}
+            {% if fromMax ?? max ?? null %}
+                max="{{ (fromMax ?? max) | date('Y-m-d') }}"
             {% endif %}
             {% if from is defined and from %}
             value="{{ from | date('Y-m-d') }}"
@@ -18,8 +21,11 @@
         <label class="dates">
             au
             <input {{ required }} type="date" name="to" class="data"
-                {% if min %}
-                    min="{{ min }}"
+                {% if toMin ?? min ?? null %}
+                    min="{{ (toMin ?? min) | date('Y-m-d') }}"
+                {% endif %}
+                {% if toMax ?? max ?? null %}
+                    max="{{ (toMax ?? max) | date('Y-m-d') }}"
                 {% endif %}
                 {% if to is defined and to %}
                 value="{{ to | date('Y-m-d') }}"
