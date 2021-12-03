@@ -44,4 +44,16 @@ $(document).ready(() => {
             $('.error').text('Veuillez renseigner une date de début et une date de fin');
         }
     });
+
+    $('.export-recurrent-order').on('click', function () {
+        if ($from.val() !== "" && $to.val() !== "") {
+            window.location.href = Routing.generate('client_order_export_recurrent', {
+                from: $("input[name=from]").val(),
+                to: $("input[name=to]").val()
+            });
+            $('.error').text('');
+        } else {
+            $('.error').text('Veuillez renseigner une date de début et une date de fin');
+        }
+    });
 });

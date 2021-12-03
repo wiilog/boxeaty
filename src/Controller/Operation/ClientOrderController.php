@@ -45,20 +45,24 @@ class ClientOrderController extends AbstractController {
         $orderTypeRepository = $manager->getRepository(OrderType::class);
         $boxTypeRepository = $manager->getRepository(BoxType::class);
         $globalSettingRepository = $manager->getRepository(GlobalSetting::class);
+        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
 
         $defaultCrateTypeId = $globalSettingRepository->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
         $defaultCrateType = $defaultCrateTypeId ? $boxTypeRepository->find($defaultCrateTypeId) : null;
 
+        $draftClientOrder = $clientOrderRepository->findLatestDraft($this->getUser());
+
         return $this->render("operation/client_order/index.html.twig", [
             "new_client_order" => new ClientOrder(),
+            "initial_orders" => $this->api($request, $manager)->getContent(),
             "requester" => $this->getUser(),
             "delivery_methods" => $deliveryMethod->findBy(["deleted" => false], ["name" => "ASC"]),
             "order_types" => $orderTypeRepository->findSelectable(),
-            "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER,
             "starter_kit" => $boxTypeRepository->findStarterKit(),
             "no_default_crate_type" => $defaultCrateType === null,
             "default_crate_type" => $defaultCrateType ? $defaultCrateType->getVolume() ?? 0 : null,
+            "draft_client_order" => $draftClientOrder,
             "work_free_day" => Stream::from($manager->getRepository(WorkFreeDay::class)->findAll())
                 ->map(fn(WorkFreeDay $workFreeDay) => [$workFreeDay->getDay(), $workFreeDay->getMonth()])
                 ->toArray(),
@@ -73,11 +77,18 @@ class ClientOrderController extends AbstractController {
 
         $from = new DateTime($params["filters"]["from"] ?? "now");
         $to = new DateTime($params["filters"]["to"] ?? "+30 days");
-        if($from->diff($to, true)->days > 30) {
+        if($from > $to) {
             return $this->json([
                 "success" => false,
-                "message" => "Le filtre sur les dates ne doit pas dépasser 30 jours",
+                "message" => "Le champ <u>du</u> doir être supérieur au champ <u>au</u>",
             ]);
+        }
+
+        if(!isset($params["filters"])) {
+            $params["filters"] = [
+                "from" => new DateTime("now"),
+                "to" => new DateTime("+30 days"),
+            ];
         }
 
         $orders = $manager->getRepository(ClientOrder::class)->findForDatatable($params, $this->getUser());
@@ -360,6 +371,8 @@ class ClientOrderController extends AbstractController {
 
         $orderTypeRepository = $entityManager->getRepository(OrderType::class);
         $deliveryMethodRepository = $entityManager->getRepository(DeliveryMethod::class);
+        $globalSettingRepository = $entityManager->getRepository(GlobalSetting::class);
+        $boxTypeRepository = $entityManager->getRepository(BoxType::class);
 
         $cartContent = $clientOrder->getLines()
             ->map(fn(ClientOrderLine $line) => [
@@ -395,6 +408,10 @@ class ClientOrderController extends AbstractController {
                 "serviceCost" => $serviceCost ?? null,
             ];
         }
+
+        $defaultCrateTypeId = $globalSettingRepository->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
+        $defaultCrateType = $defaultCrateTypeId ? $boxTypeRepository->find($defaultCrateTypeId) : null;
+
         return $this->json([
             "submit" => $this->generateUrl("client_order_edit", ["clientOrder" => $clientOrder->getId()]),
             "template" => $this->renderView("operation/client_order/modal/new.html.twig", [
@@ -402,7 +419,8 @@ class ClientOrderController extends AbstractController {
                 "initialClient" => $initialClient ?? null,
                 "orderTypes" => $orderTypeRepository->findSelectable(),
                 "deliveryMethods" => $deliveryMethodRepository->findBy(["deleted" => false], ["name" => "ASC"]),
-                'cartContent' => $cartContent,
+                "cartContent" => $cartContent,
+                "defaultCrateType" => $defaultCrateType ? $defaultCrateType->getVolume() ?? 0 : null,
                 "workFreeDay" => Stream::from($entityManager->getRepository(WorkFreeDay::class)->findAll())
                     ->map(fn(WorkFreeDay $workFreeDay) => [
                         $workFreeDay->getDay(),

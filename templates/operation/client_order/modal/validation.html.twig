@@ -1,10 +1,12 @@
-<div id="modal-validation-client-order" class="modal fade">
+<div id="{{ id ?? 'modal-validation-client-order' }}" class="modal fade" data-id="{{ clientOrder.id }}">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
             <h1>Validation de votre commande</h1>
-            <input type="hidden" name="clientOrder" value="{{ clientOrder.id }}"/>
+
             <div class="body">
+                <input type="hidden" name="clientOrder" value="{{ clientOrder.id }}"/>
+
                 <div class="validationClientOrder">
                     <div class="header-section mt-2 mb-4">
                         <h2 class="header-section-label">Information</h2>

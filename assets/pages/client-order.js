@@ -8,11 +8,23 @@ import $ from "jquery";
 import Flash, {SUCCESS, WARNING} from "../flash";
 
 $(function() {
-    initOrderDatatable();
+    const table = initOrderDatatable();
 
     const params = URL.getRequestQuery()
     if (params.action === 'new') {
-        openOrderNewModal();
+        const $draftModal = $(`#modal-validation-client-order-draft`);
+        if($draftModal.exists()) {
+            Modal.static(`#modal-validation-client-order-draft`, {
+                table,
+                ajax: AJAX.route(`POST`, `client_order_validation`, {
+                    clientOrder: $draftModal.data(`id`)
+                }),
+            });
+
+            $draftModal.modal(`show`);
+        } else {
+            openOrderNewModal();
+        }
     }
     else if (params.action === 'show'
              && params['action-data']) {
@@ -65,7 +77,7 @@ $(function() {
         }
     });
 
-    $document.on(`change`, `[name="client"]`, function(){
+    $document.on(`change`, `#modal-new-client-order select[name="client"]`, function(){
         const $modal = $(this).closest(`.modal`);
         updateModalFees($modal);
     });
@@ -102,6 +114,17 @@ $(function() {
         $modal.find('.client-order-container').removeClass('d-none');
         $modal.find('.footer').removeClass('d-none');
     });
+
+    $(`.filters [name="from"]`).on(`change`, function() {
+        let date = new Date(this.value);
+        date.setDate(date.getDate() + 30);
+        date = date.toISOString().substring(0, 10);
+
+        $(`.filters [name="to"]`)
+            .attr(`min`, date)
+            .attr(`max`, this.value)
+            .val(date);
+    })
 });
 
 function openEditStatusModal(clientOrderId, editModal){
@@ -241,6 +264,7 @@ function initOrderDatatable() {
             },
         }
     });
+
     return table;
 }
 

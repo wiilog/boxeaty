@@ -305,7 +305,7 @@ class ImportService {
         $this->data = fgetcsv($handle, 0, ";");
         $this->hasError = false;
 
-        if($this->data && $this->exportService->getEncoding() === ExportService::ENCODING_UTF8) {
+        if($this->data && $this->exportService->getEncoding() === ExportService::ENCODING_WINDOWS) {
             $this->data = array_map("utf8_encode", $this->data);
         }
 

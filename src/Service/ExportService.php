@@ -212,9 +212,9 @@ class ExportService {
         $row = $this->stringify($row);
 
         if($this->encoding === self::ENCODING_UTF8) {
-            $encodedRow = array_map("utf8_decode", $row);
-        } else if($this->encoding === self::ENCODING_WINDOWS) {
             $encodedRow = $row;
+        } else if($this->encoding === self::ENCODING_WINDOWS) {
+            $encodedRow = array_map("utf8_decode", $row);
         } else {
             throw new RuntimeException("Unknown encoding \"$this->encoding\"");
         }
