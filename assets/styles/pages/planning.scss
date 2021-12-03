@@ -162,12 +162,11 @@
     .deliveries {
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
         background-color: $grey;
         border-radius: 8px;
         padding: 4px;
         min-height: 180px;
-        overflow-x: auto;
-        flex: 1 1 auto;
 
         .order {
             margin-top: 5px;
