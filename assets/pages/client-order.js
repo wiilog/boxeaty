@@ -106,7 +106,7 @@ $(function() {
     console.log('huh');
     $(`.filters [name="from"]`).on(`change`, function() {
         let date = new Date(this.value);
-        date.setDate(date.getDate() - 30);
+        date.setDate(date.getDate() + 30);
         date = date.toISOString().substring(0, 10);
 
         $(`.filters [name="to"]`)

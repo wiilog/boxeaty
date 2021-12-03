@@ -167,11 +167,11 @@ class ClientOrderRepository extends EntityRepository {
         foreach($params["filters"] ?? [] as $name => $value) {
             switch($name) {
                 case "from":
-                    $qb->andWhere("clientOrder.expectedDelivery <= :from")
+                    $qb->andWhere("clientOrder.expectedDelivery >= :from")
                         ->setParameter("from", $value);
                     break;
                 case "to":
-                    $qb->andWhere("clientOrder.expectedDelivery >= :to")
+                    $qb->andWhere("clientOrder.expectedDelivery <= :to")
                         ->setParameter("to", $value);
                     break;
                 case "client":

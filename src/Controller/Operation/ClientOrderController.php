@@ -51,10 +51,10 @@ class ClientOrderController extends AbstractController {
 
         return $this->render("operation/client_order/index.html.twig", [
             "new_client_order" => new ClientOrder(),
+            "initial_orders" => $this->api($request, $manager)->getContent(),
             "requester" => $this->getUser(),
             "delivery_methods" => $deliveryMethod->findBy(["deleted" => false], ["name" => "ASC"]),
             "order_types" => $orderTypeRepository->findSelectable(),
-            "initial_orders" => $this->api($request, $manager)->getContent(),
             "orders_order" => ClientOrderRepository::DEFAULT_DATATABLE_ORDER,
             "starter_kit" => $boxTypeRepository->findStarterKit(),
             "no_default_crate_type" => $defaultCrateType === null,
@@ -73,11 +73,18 @@ class ClientOrderController extends AbstractController {
 
         $from = new DateTime($params["filters"]["from"] ?? "now");
         $to = new DateTime($params["filters"]["to"] ?? "+30 days");
-        if($from < $to) {
+        if($from > $to) {
             return $this->json([
                 "success" => false,
-                "message" => "Le champ <u>du</u> doir être inferieur au champ <u>au</u>",
+                "message" => "Le champ <u>du</u> doir être supérieur au champ <u>au</u>",
             ]);
+        }
+
+        if(!isset($params["filters"])) {
+            $params["filters"] = [
+                "from" => new DateTime("now"),
+                "to" => new DateTime("+30 days"),
+            ];
         }
 
         $orders = $manager->getRepository(ClientOrder::class)->findForDatatable($params, $this->getUser());

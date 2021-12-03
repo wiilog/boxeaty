@@ -4,9 +4,9 @@
 
     {% include 'filters/filter_items/date_item.html.twig' with {
         from: date(),
-        to: date('-30 days'),
-        toMin: date('-30 days'),
-        toMax: date(),
+        to: date('+30 days'),
+        toMin: date(),
+        toMax: date('+30 days'),
     } %}
     {% include('filters/filter_items/status_item.html.twig') with {
         name: 'status',
