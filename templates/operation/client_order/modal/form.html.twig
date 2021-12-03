@@ -145,7 +145,6 @@
                        value="{{ clientOrder.expectedDelivery ? clientOrder.expectedDelivery | date('Y-m-d') }}"
                        min="{{ 'now + 1 days' | date('Y-m-d') }}" required/>
             </div>
-            {{ dump(clientOrder) }}
             <input name="workFreeDay"
                    value="{{ workFreeDay|json_encode }}"
                    type="hidden">
