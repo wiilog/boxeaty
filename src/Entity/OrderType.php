@@ -19,14 +19,13 @@ class OrderType {
         self::PURCHASE_TRADE,
         self::AUTONOMOUS_MANAGEMENT,
         self::ONE_TIME_SERVICE,
-        self::RECURRENT
     ];
 
     public const LABELS = [
         self::PURCHASE_TRADE => "Achat/négoce",
         self::AUTONOMOUS_MANAGEMENT => "Gestion autonome",
         self::ONE_TIME_SERVICE => "Prestation ponctuelle",
-        self::RECURRENT => "Récurrent"
+        self::RECURRENT => "Récurrent",
     ];
 
     /**
