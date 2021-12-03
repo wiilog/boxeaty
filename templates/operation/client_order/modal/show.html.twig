@@ -62,6 +62,14 @@
                                     <b>{{ clientOrder.delivery.tokens }} Jeton{{ clientOrder.delivery.tokens > 1 ? 's' }}</b>
                                 </div>
                             </div>
+                            <span class="text-big-orange">Commentaire</span>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="comment-container">
+                                        {{ clientOrder.comment }}
+                                    </div>
+                                </div>
+                            </div>
                             {% if clientOrder.delivery.signature is not null or clientOrder.delivery.signature is not null %}
                                 <span class="text-big-orange mt-3">Pièce(s) jointe(s)</span>
                             {% endif %}
