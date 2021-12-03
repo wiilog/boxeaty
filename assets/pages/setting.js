@@ -41,7 +41,7 @@ $document.ready(() => {
     });
 
     $(`#add-transport-mode`).click(function () {
-        const $form = $(this).closest(`.new-delivery-method`);
+        const $form = $(this).closest(`.transport-mode-form`);
         if (processForm($form)) {
             AJAX.route(`POST`, `delivery_mode_add`)
                 .json(processForm($form, null, {data: `add-data`}))
