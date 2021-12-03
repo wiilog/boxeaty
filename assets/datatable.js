@@ -83,7 +83,6 @@ export function initDatatable(table, config) {
 
     const initial = $table.data(`initial-data`);
     if(initial && typeof initial === `object`) {
-        console.log(initial.recordsFiltered, initial.recordsTotal);
         config = {
             ...config,
             data: initial.data,

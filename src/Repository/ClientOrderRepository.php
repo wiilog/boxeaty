@@ -209,6 +209,19 @@ class ClientOrderRepository extends EntityRepository {
         ];
     }
 
+    public function findLatestDraft(User $user) {
+        return $this->createQueryBuilder("client_order")
+            ->join("client_order.status","status")
+            ->andWhere("status.code = :draft")
+            ->andWhere("client_order.requester = :requester")
+            ->orderBy("client_order.createdAt", "DESC")
+            ->setMaxResults(1)
+            ->setParameter("draft", Status::CODE_ORDER_TO_VALIDATE_CLIENT)
+            ->setParameter("requester", $user)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     public function findLastInProgressFor(Box $crateOrBox): ?ClientOrder {
         $queryBuilder = $this->createQueryBuilder('clientOrder');
 

@@ -34,6 +34,13 @@
             workFreeDay: work_free_day,
             defaultCrateType: default_crate_type
         } %}
+
+        {% if draft_client_order %}
+            {% include 'operation/client_order/modal/validation.html.twig' with {
+                id: 'modal-validation-client-order-draft',
+                clientOrder: draft_client_order,
+            } %}
+        {% endif %}
     {% endif %}
 {% endblock %}
 

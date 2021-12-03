@@ -45,9 +45,12 @@ class ClientOrderController extends AbstractController {
         $orderTypeRepository = $manager->getRepository(OrderType::class);
         $boxTypeRepository = $manager->getRepository(BoxType::class);
         $globalSettingRepository = $manager->getRepository(GlobalSetting::class);
+        $clientOrderRepository = $manager->getRepository(ClientOrder::class);
 
         $defaultCrateTypeId = $globalSettingRepository->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
         $defaultCrateType = $defaultCrateTypeId ? $boxTypeRepository->find($defaultCrateTypeId) : null;
+
+        $draftClientOrder = $clientOrderRepository->findLatestDraft($this->getUser());
 
         return $this->render("operation/client_order/index.html.twig", [
             "new_client_order" => new ClientOrder(),
@@ -59,6 +62,7 @@ class ClientOrderController extends AbstractController {
             "starter_kit" => $boxTypeRepository->findStarterKit(),
             "no_default_crate_type" => $defaultCrateType === null,
             "default_crate_type" => $defaultCrateType ? $defaultCrateType->getVolume() ?? 0 : null,
+            "draft_client_order" => $draftClientOrder,
             "work_free_day" => Stream::from($manager->getRepository(WorkFreeDay::class)->findAll())
                 ->map(fn(WorkFreeDay $workFreeDay) => [$workFreeDay->getDay(), $workFreeDay->getMonth()])
                 ->toArray(),
@@ -367,6 +371,8 @@ class ClientOrderController extends AbstractController {
 
         $orderTypeRepository = $entityManager->getRepository(OrderType::class);
         $deliveryMethodRepository = $entityManager->getRepository(DeliveryMethod::class);
+        $globalSettingRepository = $entityManager->getRepository(GlobalSetting::class);
+        $boxTypeRepository = $entityManager->getRepository(BoxType::class);
 
         $cartContent = $clientOrder->getLines()
             ->map(fn(ClientOrderLine $line) => [
@@ -402,6 +408,10 @@ class ClientOrderController extends AbstractController {
                 "serviceCost" => $serviceCost ?? null,
             ];
         }
+
+        $defaultCrateTypeId = $globalSettingRepository->getValue(GlobalSetting::DEFAULT_CRATE_TYPE);
+        $defaultCrateType = $defaultCrateTypeId ? $boxTypeRepository->find($defaultCrateTypeId) : null;
+
         return $this->json([
             "submit" => $this->generateUrl("client_order_edit", ["clientOrder" => $clientOrder->getId()]),
             "template" => $this->renderView("operation/client_order/modal/new.html.twig", [
@@ -409,7 +419,8 @@ class ClientOrderController extends AbstractController {
                 "initialClient" => $initialClient ?? null,
                 "orderTypes" => $orderTypeRepository->findSelectable(),
                 "deliveryMethods" => $deliveryMethodRepository->findBy(["deleted" => false], ["name" => "ASC"]),
-                'cartContent' => $cartContent,
+                "cartContent" => $cartContent,
+                "defaultCrateType" => $defaultCrateType ? $defaultCrateType->getVolume() ?? 0 : null,
                 "workFreeDay" => Stream::from($entityManager->getRepository(WorkFreeDay::class)->findAll())
                     ->map(fn(WorkFreeDay $workFreeDay) => [
                         $workFreeDay->getDay(),

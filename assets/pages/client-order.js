@@ -8,11 +8,23 @@ import $ from "jquery";
 import Flash, {SUCCESS, WARNING} from "../flash";
 
 $(function() {
-    initOrderDatatable();
+    const table = initOrderDatatable();
 
     const params = URL.getRequestQuery()
     if (params.action === 'new') {
-        openOrderNewModal();
+        const $draftModal = $(`#modal-validation-client-order-draft`);
+        if($draftModal.exists()) {
+            Modal.static(`#modal-validation-client-order-draft`, {
+                table,
+                ajax: AJAX.route(`POST`, `client_order_validation`, {
+                    clientOrder: $draftModal.data(`id`)
+                }),
+            });
+
+            $draftModal.modal(`show`);
+        } else {
+            openOrderNewModal();
+        }
     }
     else if (params.action === 'show'
              && params['action-data']) {
@@ -103,7 +115,6 @@ $(function() {
         $modal.find('.footer').removeClass('d-none');
     });
 
-    console.log('huh');
     $(`.filters [name="from"]`).on(`change`, function() {
         let date = new Date(this.value);
         date.setDate(date.getDate() + 30);
@@ -253,6 +264,7 @@ function initOrderDatatable() {
             },
         }
     });
+
     return table;
 }
 
