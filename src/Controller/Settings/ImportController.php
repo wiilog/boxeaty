@@ -4,11 +4,13 @@ namespace App\Controller\Settings;
 
 use App\Annotation\HasPermission;
 use App\Controller\AbstractController;
+use App\Entity\GlobalSetting;
 use App\Entity\Import;
 use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\ImportRepository;
+use App\Service\ExportService;
 use App\Service\ImportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -77,7 +79,7 @@ class ImportController extends AbstractController {
      * @Route("/nouveau", name="import_new", options={"expose": true})
      * @HasPermission(Role::MANAGE_IMPORTS)
      */
-    public function new(Request $request, SessionInterface $session, KernelInterface $kernel): Response {
+    public function new(Request $request, SessionInterface $session, KernelInterface $kernel, EntityManagerInterface $manager): Response {
         $form = Form::create();
 
         $content = (object)$request->request->all();
@@ -127,17 +129,29 @@ class ImportController extends AbstractController {
                 }
             }
 
+            $encoding = $manager->getRepository(GlobalSetting::class)->getValue(GlobalSetting::CSV_EXPORTS_ENCODING);
+
             return $this->json([
                 "success" => true,
                 "next" => $this->renderView("settings/import/modal/fields_association.html.twig", [
                     "fields" => Import::FIELDS[$content->type],
                     "pre_assignments" => $preAssignments,
                     "file_fields" => Stream::from($fields)
-                        ->map(fn($field, $id) => [
-                            "name" => utf8_encode(trim($field)),
-                            "value" => utf8_encode(trim($values[$id] ?? "")),
-                            "closest" => $preAssignments[$field] ?? null,
-                        ])
+                        ->map(function($field, $id) use ($encoding) {
+                            $field = trim($field);
+                            $value = trim($values[$id] ?? "");
+
+                            if($encoding === ExportService::ENCODING_WINDOWS) {
+                                $field = utf8_encode($field);
+                                $value = utf8_encode($value);
+                            }
+
+                            return [
+                                "name" => $field,
+                                "value" => $value,
+                                "closest" => $preAssignments[$field] ?? null,
+                            ];
+                        })
                         ->toArray(),
                 ]),
             ]);
