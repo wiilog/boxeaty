@@ -187,7 +187,7 @@ class BoxTypeRepository extends EntityRepository {
         }
         foreach($totalAvailable as $type => $clients) {
             foreach($clients as $client => $count) {
-                $totalAvailable[$type][$client] = $count - ($inUnprepared[$type][$client] ?? 0);
+                $totalAvailable[$type][$client] = ($count - ($inUnprepared[$type][$client] ?? 0)) < 0 ? 0 : ($count - ($inUnprepared[$type][$client] ?? 0));
             }
         }
         return $totalAvailable;
