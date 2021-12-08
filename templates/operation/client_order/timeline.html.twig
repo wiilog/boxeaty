@@ -1,5 +1,6 @@
 {% if clientOrder.orderStatusHistory|length > 0 %}
     {% for history in clientOrder.orderStatusHistory %}
+        {% set status_code = history.status.code %}
         <div class="client-order-history-line">
             <div class="client-order-history-date">
                 <div class="title">{{ history.changedAt|date('d/m/Y') }}</div>
@@ -9,9 +10,18 @@
                 {% if history.status %}
                     <div class="title">{{ history.status.name }}</div>
                 {% endif %}
-                {% if history.justification is not empty %}
-                    <div class="subtitle">{{ history.justification|raw }}</div>
-                {% endif %}
+                    <div class="subtitle d-flex flex-column">
+                        {% if history.justification is not empty %}
+                            <p>{{ history.justification|raw }}</p>
+                        {% endif %}
+                        {% if status_code == constant('App\\Entity\\Status::CODE_ORDER_PREPARED') %}
+                            <span>Préparée par : {{ history.order.preparation.operator.username }}</span>
+                        {% endif %}
+                        {% if status_code == constant('App\\Entity\\Status::CODE_DELIVERY_DELIVERED') %}
+                            <span>Distance parcourue : {{ history.order.delivery.distance }}km</span>
+                            <span>Livrée par : {{ history.order.deliveryRound.deliverer.username }}</span>
+                        {% endif %}
+                    </div>
             </div>
         </div>
     {% endfor %}
