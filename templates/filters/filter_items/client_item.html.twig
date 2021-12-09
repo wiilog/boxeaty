@@ -2,7 +2,7 @@
 <select {{ required }} name="{{ name ?? 'client' }}"
                        class="data" data-s2="client"
                        data-placeholder="{{ placeholder ?? 'Client' }}">
-    {% if client is defined and client %}
+    {% if client is defined and client%}
         <option value="{{ client.id }}" selected>{{ client.name }}</option>
     {% endif %}
 </select>

@@ -97,8 +97,12 @@ class AppExtension extends AbstractExtension {
         return $this->permissions;
     }
 
-    public function base64(string $path) {
-        $absolutePath = $this->kernel->getProjectDir() . "/public/$path";
+    public function base64(string $path): ?string {
+        $absolutePath = "{$this->kernel->getProjectDir()}/public/$path";
+        if(!file_exists($absolutePath)) {
+            return null;
+        }
+
         $extension = pathinfo($absolutePath, PATHINFO_EXTENSION);
         $content = base64_encode(file_get_contents($absolutePath));
 

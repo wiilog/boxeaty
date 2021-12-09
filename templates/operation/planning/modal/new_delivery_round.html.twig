@@ -1,6 +1,6 @@
 {% import 'operation/planning/macros.html.twig' as macros %}
 
-<div id="modal-new-delivery-round" class="modal ade">
+<div id="modal-new-delivery-round" class="modal fade">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -12,18 +12,27 @@
                         Livreur
                         <select name="deliverer" data-s2="deliverer" class="data"
                                 data-placeholder="Sélectionnez le livreur" required>
+                            {% if deliveryRound and deliveryRound.deliverer %}
+                                <option value="{{ deliveryRound.deliverer.id }}" selected>{{ deliveryRound.deliverer.username }}</option>
+                            {% endif %}
                         </select>
                     </label>
                     <label class="inline">
                         Mobilité
                         <select name="method" data-s2="deliveryMethod" class="data"
                                 data-placeholder="Sélectionnez la mobilité" required>
+                            {% if deliveryRound and deliveryRound.deliveryMethod %}
+                                <option value="{{ deliveryRound.deliveryMethod.id }}" selected>{{ deliveryRound.deliveryMethod.name }}</option>
+                            {% endif %}
                         </select>
                     </label>
                     <label class="inline">
                         Dépôt
                         <select name="depository" data-s2="depository" class="data"
                                 data-placeholder="Sélectionnez le dépôt" required>
+                            {% if deliveryRound and deliveryRound.depository %}
+                                <option value="{{ deliveryRound.depository.id }}" selected>{{ deliveryRound.depository.name }}</option>
+                            {% endif %}
                         </select>
                     </label>
                 </div>
@@ -34,7 +43,7 @@
                     <div class="col-md-6 col-12">
                         <label>Livraisons disponibles</label>
                         <div class="deliveries available-deliveries">
-                            {% for order in orders %}
+                            {% for order in orders | filter(order => not deliveryRound or order not in deliveryRound.orders)%}
                                 {{ macros.order_card(order, true) }}
                             {% endfor %}
                         </div>
@@ -42,7 +51,11 @@
                     <div class="col-md-6 col-12">
                         <label>Livraisons affectées</label>
                         <div class="deliveries assigned-deliveries">
-
+                            {% if deliveryRound %}
+                                {% for order in deliveryRound.orders %}
+                                    {{ macros.order_card(order, true) }}
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -50,21 +63,37 @@
                 <label>
                     Frais de livraison transporteur
                     <span class="text-form-wrapper">
-                        <input type="number" name="cost" class="data euros" min="0" placeholder="6€" required/>
+                        <input type="number" name="cost" class="data euros" min="0"
+                               placeholder="6€"
+                               value="{{ deliveryRound ? deliveryRound.cost }}"
+                               required/>
                         <span>HT pour la tournée soit</span>
-                        <input type="number" class="data-divided euros" readonly/>
+                        <input type="number"
+                               class="data-divided euros"
+                               value="{{ deliveryRound ? (deliveryRound.cost / deliveryRound.orders.count) | round(2) }}"
+                               tabindex="-1" readonly/>
                         <span>HT par livraison</span>
                     </span>
                 </label>
                 <label>
                     Distance du parcours (km)
                     <span class="text-form-wrapper">
-                        <input type="number" name="distance" class="data" min="0" placeholder="160km" required/>
+                        <input type="number" name="distance" class="data" min="0"
+                               placeholder="160km"
+                               value="{{ deliveryRound ? deliveryRound.distance }}"
+                               required/>
                         <span>km, soit</span>
-                        <input type="number" class="data-divided" readonly/>
+                        <input type="number"
+                               class="data-divided"
+                               value="{{ deliveryRound ? (deliveryRound.distance / deliveryRound.orders.count) | round(2) }}"
+                               tabindex="-1" readonly/>
                         <span>km par livraison</span>
                     </span>
                 </label>
+
+                {% if deliveryRound %}
+                    <input type="hidden" name="deliveryRound" class="data" value="{{ deliveryRound.id }}"/>
+                {% endif %}
             </div>
 
             <div class="footer">
