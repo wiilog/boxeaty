@@ -33,7 +33,9 @@
             {{ _self.order_header(order) }}
 
             {% if order.deliveryRound %}
-                <a class="inline delivery-round" href="#">Tournée <strong>N°{{ order.deliveryRound.number }}</strong></a>
+                <a class="inline delivery-round" href="#">
+                    Tournée <strong>N°{{ order.deliveryRound.number }}</strong>
+                </a>
                 <label class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></label>
             {% endif %}
 
@@ -48,6 +50,7 @@
     {% elseif order.status.code == constant('App\\Entity\\Status::CODE_ORDER_TO_VALIDATE_BOXEATY') %}
         <div class="order to-validate" {{ _self.order_data(order) }}>
             {{ _self.order_header(order) }}
+
             <label>Commande <strong>N°{{ order.number }}</strong></label>
             <label>Livraison souhaitée <strong>{{ order.expectedDelivery | date('d/m/Y') }}</strong></label>
 
@@ -61,6 +64,12 @@
     {% elseif order.status.code == constant('App\\Entity\\Status::CODE_ORDER_PLANNED') %}
         <div class="order planned" {{ _self.order_data(order) }}>
             {{ _self.order_header(order) }}
+
+            {% if order.deliveryRound %}
+                <a class="inline delivery-round" href="#">
+                    Tournée <strong>N°{{ order.deliveryRound.number }}</strong>
+                </a>
+            {% endif %}
             <span class="muted">Livraison {{ order.deliveryMethod.name | lower }}</span>
             <span>Validée par <strong>{{ order.validator ? order.validator.username }}</strong></span>
 
@@ -70,10 +79,11 @@
     {% elseif order.deliveryRound and order.status.code in [constant('App\\Entity\\Status::CODE_ORDER_AWAITING_DELIVERER'), constant('App\\Entity\\Status::CODE_ORDER_TRANSIT')] %}
         <div class="order delivering" {{ _self.order_data(order) }}>
             {{ _self.order_header(order) }}
+
             <a class="inline delivery-round" href="#">Tournée <strong>N°{{ order.deliveryRound.number }}</strong></a>
             <span class="inline">Livreur <strong>{{ order.deliveryRound.deliverer.username }}</strong></span>
             <span class="muted">Livraison {{ order.deliveryRound.deliveryMethod.name | lower }}</span>
-            <input type="hidden" value="{{ order.deliveryRound.id }}" name="deliveryRound"/>
+
             {% if order.status.code == constant('App\\Entity\\Status::CODE_ORDER_AWAITING_DELIVERER') %}
                 <span class="status"><i class="bxi bxi-awaiting-deliverer"></i> {{ order.status.name }}</span>
             {% else %}

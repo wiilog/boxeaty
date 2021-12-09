@@ -201,6 +201,28 @@ class ClientOrder {
         return $this->orderStatusHistory;
     }
 
+    public function getStatusBefore($codes): ?Status {
+        if(!is_array($codes)) {
+            $codes = [$codes];
+        }
+
+        $history = $this->getOrderStatusHistory();
+        $returnNext = false;
+
+        for ($i = $history->count() - 1; $i >= 0; $i--) {
+            $item = $history->get($i);
+            if($returnNext) {
+                return $item->getStatus();
+            }
+
+            if(array_search($item->getStatus()->getCode(), $codes)) {
+                $returnNext = true;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * @return OrderStatusHistory[]
      */
