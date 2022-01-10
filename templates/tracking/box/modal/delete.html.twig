@@ -10,14 +10,14 @@
                 and box.cratePreparationLines|length == 0
             ) %}
             {% if not cantDelete %}
-                <h1>Vous ne pouvez pas supprimer cette Box</h1>
+                <h1>Vous ne pouvez pas supprimer cette Box/caisse</h1>
                 <p class="text-center">
-                    Cette Box / caisse est liée à un ou plusieurs tickets-dépose, commandes comptoir ou client.<br>
+                    Cette Box/caisse est liée à un ou plusieurs tickets-dépose, commandes comptoir ou client.<br>
                     Vous ne pouvez pas la supprimer.
                 </p>
             {% else %}
-                <h1>Voulez-vous réellement<br>supprimer cette Box ?</h1>
-                <p class="text-center">Cette action supprimera la Box et son historique</p>
+                <h1>Voulez-vous réellement<br>supprimer cette Box/caisse ?</h1>
+                <p class="text-center">Cette action supprimera la Box/caisse et son historique</p>
             {% endif %}
             <input type="hidden" name="id" class="data">
 
