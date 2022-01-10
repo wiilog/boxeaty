@@ -473,7 +473,7 @@ class ClientController extends AbstractController {
 
             return $this->json([
                 'success' => true,
-                "message" => "Le type de Box {$boxType->getName()} a bien été ajouté au modèle de caisse",
+                "message" => "Le type de Box {$boxType->getName()} a bien été ajouté au contenu de la commande",
             ]);
         } else {
             return $form->errors();
