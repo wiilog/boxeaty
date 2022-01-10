@@ -6,7 +6,9 @@
                 {% if line.boxType.image %}
                     <img src="{{ asset(line.boxType.image.path) }}"
                          class="box-type-image"
-                         alt="image"/>
+                         alt="image"
+                         data-toggle="popover-hover"
+                         data-img="{{ asset(line.boxType.image.path) }}"/>
                 {% else %}
                     <span class="box-type-image"></span>
                 {% endif %}

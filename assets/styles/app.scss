@@ -524,3 +524,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     overflow: hidden;
     width: 100px;
 }
+
+[data-toggle=popover-hover] {
+    cursor: zoom-in;
+}

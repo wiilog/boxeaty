@@ -6,6 +6,7 @@ import Modal from "../modal";
 import {StringHelper, URL} from "../util";
 import $ from "jquery";
 import Flash, {SUCCESS, WARNING} from "../flash";
+import {Popover} from "../popover";
 
 $(function() {
     const table = initOrderDatatable();
@@ -92,7 +93,8 @@ $(function() {
 
     $document.on(`click`, `.add-box-to-cart-button`, function(){
         addSelectedBoxTypeToCart($(this).closest(`.modal`));
-    })
+        Popover.initImage();
+    });
 
     $document.on(`click`, `.cart-container .increase, .cart-container .decrease` , function(){
         updateInputValue($(this));
@@ -103,7 +105,7 @@ $(function() {
 
         onBoxTypeQuantityChange($input);
         updateCrateNumberAverage($input.closest(`.modal`));
-    })
+    });
 
     $document.on('click', `.add-box-type-model-button`, function () {
         addBoxTypeModel($(this).closest(`.modal`));
@@ -124,7 +126,7 @@ $(function() {
             .attr(`min`, date)
             .attr(`max`, this.value)
             .val(date);
-    })
+    });
 });
 
 function openEditStatusModal(clientOrderId, editModal){
@@ -162,6 +164,7 @@ function openOrderShowModal(clientOrderId) {
             $statusEditButton.on('click', () => {
                 openEditStatusModal(clientOrderId, modal);
             });
+            Popover.initImage();
         },
         afterHidden: () => {
             removeActionRequestInURL();
@@ -189,6 +192,7 @@ function openOrderEditModal(clientOrderId) {
 
             updateModalFees(modal.element);
             onTypeChange(modal.element);
+            Popover.initImage();
 
             const newUrl = URL.createRequestQuery({
                 action: 'edit',
@@ -215,6 +219,7 @@ function openOrderValidationModal(clientOrderId, modalContent = null) {
         submit: Routing.generate(`client_order_validation`, {clientOrder: clientOrderId}),
         table: '#table-client-order',
         afterOpen: () => {
+            Popover.initImage();
             const newUrl = URL.createRequestQuery({
                 action: 'validation',
                 'action-data': clientOrderId
@@ -367,7 +372,9 @@ function addBoxTypeToCart($modal, typeBoxData, calculateAverageCrateNumber = fal
             ? `
                 <img src="/${typeBoxData.image}"
                      class="box-type-image"
-                     alt="image"/>
+                     alt="image"
+                     data-toggle="popover-hover"
+                     data-img="/${typeBoxData.image}"/>
             `
             : '<span class="box-type-image"></span>';
         const initialQuantity = typeBoxData.quantity || 1;
