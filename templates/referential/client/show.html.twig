@@ -81,9 +81,6 @@
                             {% endif %}
                         </div>
                     </div>
-                    <div class="row mt-4">
-                        <span class="body-text">Montant prorata (HT): <strong>{{ client.prorateAmount|format_helper('price') }}</strong></span>
-                    </div>
                     <div class="d-flex mt-4">
                         <div class="circle {{ client.mailNotificationOrderPreparation ? 'checked' }} pe-2"></div>
                         <span class="body-text-semi-bold ps-2">Notification mail à la préparation de la commande</span>

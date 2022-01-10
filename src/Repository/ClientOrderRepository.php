@@ -41,7 +41,6 @@ class ClientOrderRepository extends EntityRepository {
             ->addSelect('boxType.id as boxTypeId')
             ->addSelect('boxType.name as boxTypeName')
             ->addSelect('client.id as clientId')
-            ->addSelect('client.prorateAmount as prorateAmount')
             ->addSelect('client.paymentModes as paymentModes')
             ->addSelect('orderRecurrence.monthlyPrice as monthlyPrice')
             ->addSelect('orderRecurrence.crateAmount as crateAmount')

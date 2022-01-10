@@ -113,7 +113,6 @@ class ExportController extends AbstractController {
                 "monthlyPrice" => $clientOrderLine['monthlyPrice'],
                 "deliveryCost" => $clientOrderLine['deliveryCost'],
                 "paymentMode" => $clientOrderLine['paymentModes'],
-                "prorateAmount" => $clientOrderLine['prorateAmount'],
                 "tokenDelivered" => $clientOrderLine['deliveryTokens'],
                 "crateAmount" => $clientOrderLine['crateAmount'],
                 "cratePrice" => $cratePatternAmounts[$clientOrderLine['clientId']] ?? null,

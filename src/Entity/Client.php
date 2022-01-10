@@ -125,7 +125,7 @@ class Client {
     /**
      * @ORM\Column(type="boolean", nullable=true)
      */
-    private $mailNotificationOrderPreparation;
+    private ?bool $mailNotificationOrderPreparation = null;
 
     /**
      * @ORM\OneToOne(targetEntity=ClientOrderInformation::class, inversedBy="client", cascade={"persist", "remove"})
@@ -138,14 +138,9 @@ class Client {
     private Collection $cratePatternLines;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $prorateAmount;
-
-    /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $paymentModes;
+    private ?string $paymentModes = null;
 
     /**
      * @ORM\OneToMany(targetEntity=Collect::class, mappedBy="client")
@@ -506,16 +501,6 @@ class Client {
         foreach($cratePatternLines as $cratePatternLine) {
             $this->addCratePatternLine($cratePatternLine);
         }
-
-        return $this;
-    }
-
-    public function getProrateAmount(): ?int {
-        return $this->prorateAmount;
-    }
-
-    public function setProrateAmount(?int $prorateAmount): self {
-        $this->prorateAmount = $prorateAmount;
 
         return $this;
     }

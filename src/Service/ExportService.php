@@ -127,7 +127,6 @@ class ExportService {
         "Coût abonnement mensuel",
         "Frais de livraison",
         "Moyen de paiement",
-        "Prorata client",
         "Nombre de jetons livrés",
         "Nombre de caisses",
         "Montant de la caisse",

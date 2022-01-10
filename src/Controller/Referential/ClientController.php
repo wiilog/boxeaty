@@ -153,7 +153,6 @@ class ClientController extends AbstractController {
                 ->setDepositTicketClients($depositTicketsClients)
                 ->setDepositTicketValidity($content->depositTicketValidity)
                 ->setMailNotificationOrderPreparation((bool)$content->mailNotificationOrderPreparation)
-                ->setProrateAmount($content->prorateAmount ?? null)
                 ->setPaymentModes($content->paymentModes ?? null);
 
             $clientOrderInformation = (new ClientOrderInformation())
@@ -280,7 +279,6 @@ class ClientController extends AbstractController {
                 ->setDepositTicketClients($depositTicketsClients)
                 ->setDepositTicketValidity($content->depositTicketValidity)
                 ->setMailNotificationOrderPreparation((bool)$content->mailNotificationOrderPreparation)
-                ->setProrateAmount($content->prorateAmount ?? null)
                 ->setPaymentModes($content->paymentModes ?? null);
 
             if(isset($clientOrderInformation)) {
