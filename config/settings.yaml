@@ -1,5 +1,5 @@
 parameters:
-  web_version: "1.0.16"
+  web_version: "1.0.17"
 
   permissions:
     Menu Traçabilité:
