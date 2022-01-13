@@ -114,4 +114,9 @@ class FormatHelper {
             : $else;
     }
 
+    public static function truncate($number, $precision = 0) {
+        $shift = pow(10, $precision);
+        return intval($number * $shift) / $shift;
+    }
+
 }

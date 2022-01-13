@@ -95,6 +95,16 @@ class BoxTypeController extends AbstractController {
             $form->addError("price", "Le prix doit être supérieur ou égal à 0");
         }
 
+        if ($content->volume > 9
+            && FormatHelper::truncate($content->volume, BoxType::VOLUME_SCALE) !== $content->volume) {
+            $form->addError("volume", "Le volume doit être au format X.XXXX");
+        }
+
+        if($content->weight > 999
+            && FormatHelper::truncate($content->weight, BoxType::WEIGHT_SCALE) !== $content->weight) {
+            $form->addError("weight", "Le poids doit être au format XXX.XX");
+        }
+
         if($form->isValid()) {
             $boxType = new BoxType();
             $boxTypeService->persistBoxType($entityManager, $boxType, $content);
@@ -146,6 +156,16 @@ class BoxTypeController extends AbstractController {
         $existing = $entityManager->getRepository(BoxType::class)->findOneBy(["name" => $content->name]);
         if($existing !== null && $existing !== $boxType) {
             $form->addError("name", "Un autre type de Box / Caisse avec ce nom existe déjà");
+        }
+
+        if ($content->volume > 9
+            && FormatHelper::truncate($content->volume, BoxType::VOLUME_SCALE) !== $content->volume) {
+            $form->addError("volume", "Le volume doit être au format X.XXXX");
+        }
+
+        if($content->weight > 999
+            && FormatHelper::truncate($content->weight, BoxType::WEIGHT_SCALE) !== $content->weight) {
+            $form->addError("weight", "Le poids doit être au format XXX.XX");
         }
 
         if($form->isValid()) {

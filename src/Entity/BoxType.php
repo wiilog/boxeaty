@@ -17,6 +17,9 @@ class BoxType {
     public const DEFAULT_VOLUME = 0.0005;
     public const STARTER_KIT = 'Kit de démarrage';
 
+    public const VOLUME_SCALE = 4;
+    public const WEIGHT_SCALE = 2;
+
     use ActiveTrait;
 
     /**
@@ -62,12 +65,12 @@ class BoxType {
     private Collection $clientOrderLines;
 
     /**
-     * @ORM\Column(type="decimal", precision=5, scale=4, nullable=true)
+     * @ORM\Column(type="decimal", precision=5, scale=BoxType::VOLUME_SCALE, nullable=true)
      */
     private ?float $volume = null;
 
     /**
-     * @ORM\Column(type="decimal", precision=5, scale=2, nullable=true)
+     * @ORM\Column(type="decimal", precision=5, scale=BoxType::WEIGHT_SCALE, nullable=true)
      */
     private ?float $weight = null;
 
@@ -253,5 +256,4 @@ class BoxType {
         }
         return $this;
     }
-
 }
