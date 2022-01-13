@@ -32,6 +32,10 @@
             font-size: 18pt;
             margin-right: 15px;
         }
+
+        span {
+            font-size: 1.25rem;
+        }
     }
 
     &:not(:last-child) .timeline-line-marker::before{

@@ -295,6 +295,7 @@ class BoxController extends AbstractController {
                     'operator' => $movement['operator'] ?? "",
                     'location' => $movement['location'] ?? "",
                     'depository' => $movement['depository'] ?? "",
+                    'client' => $movement['client'] ?? "",
                 ])
                 ->toArray(),
         ]);
