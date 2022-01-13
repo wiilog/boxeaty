@@ -127,10 +127,14 @@
                         <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.tokenAmount ? clientOrderInformation.tokenAmount : 'aucun ' }}</strong> jeton{{ clientOrderInformation and clientOrderInformation.tokenAmount > 1 ? 's' : '' }} par commande</span>
                     </div>
                     <div class="row mt-4">
-                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.workingDayDeliveryRate ? clientOrderInformation.workingDayDeliveryRate|format_helper('price') : '- €' }}</strong> en forfait livraison jour ouvré</span>
+                        <span class="body-text">
+                            <strong>{{ clientOrderInformation and clientOrderInformation.workingDayDeliveryRate ? clientOrderInformation.workingDayDeliveryRate|format_helper('price') : '- €' }}</strong> en frais de livraison client jour ouvré
+                        </span>
                     </div>
                     <div class="row mt-4">
-                        <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.nonWorkingDayDeliveryRate ? clientOrderInformation.nonWorkingDayDeliveryRate|format_helper('price') : '- €' }}</strong> en forfait livraison jour non ouvré</span>
+                        <span class="body-text">
+                            <strong>{{ clientOrderInformation and clientOrderInformation.nonWorkingDayDeliveryRate ? clientOrderInformation.nonWorkingDayDeliveryRate|format_helper('price') : '- €' }}</strong> en frais de livraison client jour non ouvré
+                        </span>
                     </div>
                     <div class="row mt-4">
                         <span class="body-text"><strong>{{ clientOrderInformation and clientOrderInformation.serviceCost ? clientOrderInformation.serviceCost|format_helper('price') : '- €' }}</strong> en frais de service</span>

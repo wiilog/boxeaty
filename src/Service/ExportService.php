@@ -116,7 +116,9 @@ class ExportService {
         "Nombre de Box cassées",
         "Coût unitaire",
         "Moyen de paiement",
-        "Montant facturé par livraison",
+        "Montant facturé par livraison jour ouvré",
+        "Montant facturé par livraison jour non ouvré",
+        "Frais livraison transporteur",
         "Nombre de consignes utilisées",
         "Commande automatique",
     ];
@@ -125,7 +127,9 @@ class ExportService {
         "Numéro de commande",
         "Nombre de Box mis à disposition",
         "Coût abonnement mensuel",
-        "Frais de livraison",
+        "Montant facturé par livraison jour ouvré",
+        "Montant facturé par livraison jour non ouvré",
+        "Frais livraison transporteur",
         "Moyen de paiement",
         "Nombre de jetons livrés",
         "Nombre de caisses",
@@ -139,7 +143,9 @@ class ExportService {
         "Nombre de Box",
         "Tarif unitaire",
         "Montant kit de démarrage",
-        "Frais de livraison",
+        "Montant facturé par livraison jour ouvré",
+        "Montant facturé par livraison jour non ouvré",
+        "Frais livraison transporteur",
         "Commande automatique",
     ];
 

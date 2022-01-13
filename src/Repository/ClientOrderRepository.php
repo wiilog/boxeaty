@@ -44,6 +44,8 @@ class ClientOrderRepository extends EntityRepository {
             ->addSelect('client.paymentModes as paymentModes')
             ->addSelect('orderRecurrence.monthlyPrice as monthlyPrice')
             ->addSelect('orderRecurrence.crateAmount as crateAmount')
+            ->addSelect('information.workingDayDeliveryRate as workingDayDeliveryRate')
+            ->addSelect('information.nonWorkingDayDeliveryRate as nonWorkingDayDeliveryRate')
             ->leftJoin('client_order.client', 'client')
             ->leftJoin('client_order.deliveryRound', 'deliveryRound')
             ->leftJoin('client_order.delivery', 'delivery')
