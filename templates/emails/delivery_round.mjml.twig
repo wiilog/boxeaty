@@ -5,7 +5,7 @@
             <mj-body background-color="#F9F9EC"></mj-body>
             <mj-text font-family="helvetica"></mj-text>
             <mj-class name="title" line-height="300%" font-size="20px" align="left" font-family="helvetica"></mj-class>
-            <mj-class name="border" background-color="white" border-radius="10px"></mj-class>
+            <mj-class name="border" background-color="#F9F9EC" border-radius="10px"></mj-class>
             <mj-class name="my-auto" padding-bottom="20px" padding-top="20px"></mj-class>
         </mj-attributes>
         <mj-style>
@@ -18,8 +18,7 @@
     <mj-body>
         <mj-section full-width="full-width" padding-bottom="20px" padding-top="30px">
             <mj-column>
-                <mj-image width="300px" height="150px" src="{{ base64('images/email/logo.png') }}">
-                </mj-image>
+                <mj-image width="260px" height="130px" src="{{ base64('images/email/logo_SansBaseLine.png') }}"></mj-image>
             </mj-column>
         </mj-section>
         <mj-section>
@@ -41,12 +40,12 @@
         <mj-raw>{% for order in ordersToDeliver %}</mj-raw>
         <mj-section mj-class="border">
             <mj-column width="60%">
-                <mj-text align="left" mj-class="my-auto" font-size="16px" padding-left="16px">
+                <mj-text align="left" mj-class="my-auto" font-size="15px" padding-left="16px">
                     {{ loop.index }}. <strong>{{ order.client.name }}</strong><br>{{ order.client.address }}
                 </mj-text>
             </mj-column>
             <mj-column width="40%">
-                <mj-text align="left" mj-class="my-auto" font-size="16px">
+                <mj-text align="left" mj-class="my-auto" font-size="15px">
                     Poids total&nbsp;: <strong>{{ order.totalWeight }} kg</strong><br/>Volume total&nbsp;: <strong>{{ order.totalVolume }} m³</strong>
                 </mj-text>
             </mj-column>
@@ -62,17 +61,17 @@
                 <mj-text font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
                     Retrouvez la tournée sur l'application mobile Android BoxEaty
                 </mj-text>
-                <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
-                    Une question, un besoin particulier ? Nous restons disponible au 05.05.05.05.05 ou par email à
-                    mail@mail.fr
+                <mj-text font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    Une question, un besoin particulier ? Nous restons disponibles au 06.31.53.61.03 ou par email à
+                    contact@boxeaty.fr
                 </mj-text>
-                <mj-text line-height="3" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                <mj-text padding-top="20px" line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
                     Cordialement
                 </mj-text>
                 <mj-text font-size="20px" align="left" color="#1E1F44" line-height="2" font-family="helvetica">
                     L'équipe BoxEaty
                 </mj-text>
-                <mj-image align="left" width="200px" src="{{ base64('images/email/eat-consigned.png') }}">
+                <mj-image align="left" width="200px" height="20px" src="{{ base64('images/email/eat-consigned.png') }}">
                 </mj-image>
             </mj-column>
         </mj-section>
