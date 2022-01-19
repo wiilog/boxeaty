@@ -114,7 +114,7 @@ class PlanningController extends AbstractController {
             "lateDelivery" => true,
         ]);
 
-        $mailer->send($order->getClient()->getContact(), "Retard de livraison", $content);
+        $mailer->send($order->getClient()->getContact(), "BoxEaty - Retard de livraison", $content);
 
         return $this->json([
             "success" => true,

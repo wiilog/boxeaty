@@ -9,7 +9,7 @@
                     padding="0px">
             <mj-section>
                 <mj-column>
-                    <mj-image width="300px" height="150px" src="{{ base64('images/email/logo.png') }}"></mj-image>
+                    <mj-image width="260px" height="91px" src="{{ base64('images/email/logo_SansBaseLine.png') }}"></mj-image>
                     <mj-text font-size="20px" align="center" font-family="helvetica" text-transform="uppercase"
                              font-weight="bold" color="#1E1F44">Création d'un nouvel utilisateur
                     </mj-text>
@@ -21,10 +21,10 @@
             <mj-section padding="0px">
                 <mj-column width="80%" background-color="white" padding-bottom="20px" padding-top="20px" padding="0px">
                     <mj-text align="center" font-size="20px" line-height="25px" color="#1E1F44">
-                        L'utilisateur <strong>{{ user.username }}</strong> vient de procéder à la création d'un compte sur
+                        L'utilisateur  <strong>{{ user.username }}</strong>  vient de procéder à la création d'un compte sur
                         l'application BoxEaty.
                         Ce compte est rattaché à l'adresse mail <a href="{{ 'mailto:' ~ user.email }}"
-                                                                   style="text-decoration:none; color:#747373; font-weight: bold;">{{ user.email }}</a>
+                                                                   style="text-decoration:underline; color:#747373; font-weight: bold;">{{ user.email }}</a>
                         et au
                         groupe <strong>{{ user.groups | map(g => g.name) | join(', ') }}</strong>.
                     </mj-text>
@@ -34,7 +34,7 @@
                         dans l'application BoxEaty en vous rendant dans le menu <i>Paramétrage/Utilisateurs</i>.
                     </mj-text>
                     <mj-button background-color="#EB611B" width="90%">
-                        <a href="{{ url('users_list') }}" target="_blank" style="color: white;">
+                        <a href="{{ url('users_list') }}" target="_blank"  style="color: white; font-size: 18px ; text-decoration:underline;">
                             Cliquez ici pour accéder à l'application
                         </a>
                     </mj-button>

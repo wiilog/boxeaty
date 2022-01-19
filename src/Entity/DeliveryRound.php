@@ -211,6 +211,7 @@ class DeliveryRound {
 
     public function getSortedOrders(): array {
         $order = $this->getOrder();
+
         return Stream::from($this->getOrders())
             ->keymap(function(ClientOrder $clientOrder) use ($order) {
                 $key = $order[$clientOrder->getId()] ?? null;

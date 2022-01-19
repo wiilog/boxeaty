@@ -19,8 +19,7 @@
 
         <mj-section full-width="full-width" padding-bottom="20px" padding-top="30px">
             <mj-column>
-                <mj-image width="300px" height="150px" src="{{ base64('images/email/logo.png') }}">
-                </mj-image>
+                <mj-image  width="260px" height="91px" src="{{ base64('images/email/logo_SansBaseLine.png') }}"></mj-image>
             </mj-column>
         </mj-section>
         <mj-section>
@@ -28,15 +27,15 @@
                 <mj-text mj-class="title">{{ order.client.contact.username }}</mj-text>
                 {% if lateDelivery %}
                     <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
-                        Malgré tous nos efforts, votre commande n'a pas pu être livrée à temps
+                        Malgré tous nos efforts, votre commande n'a pas pu être livrée à temps.
                     </mj-text>
                 {% endif %}
                 <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
                     Votre commande n° {{ order.number }} vient de {{ lateDelivery ? 'repasser' : 'passer' }} en préparation et sera livrée
                     le {{ order.expectedDelivery | date('d/m/Y') }}
-                    {% if order.deliveryRound %}
+                    {%- if order.deliveryRound -%}
                         par {{ order.deliveryRound.deliverer.username }} en {{ order.deliveryMethod.name }}
-                    {% endif %}
+                    {%- endif -%}.
                 </mj-text>
                 <mj-text mj-class="title">
                     Récapitulatif de la commande :
@@ -69,7 +68,7 @@
                 </mj-column>
                 <mj-column width="15%">
                     <mj-text align="center" mj-class="my-auto">
-                        {{ line.quantity * line.boxType.price }} €
+                        Total : {{ line.quantity * line.boxType.price }} € TTC
                     </mj-text>
                 </mj-column>
             </mj-section>
@@ -92,21 +91,24 @@
         </mj-section>
         <mj-section>
             <mj-column>
-                <mj-text font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
                     Retrouvez le suivi en temps réel sur votre espace client sur <a href="https://app.boxeaty.fr">app.boxeaty.fr</a>
                 </mj-text>
                 <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
-                    Une question, un besoin particulier ? Nous restons disponible au <a href="tel:05.05.05.05">05.05.05.05</a>
+                    Une question, un besoin particulier ? Nous restons disponible au <a href="tel:06.31.53.61.035">06.31.53.61.03</a>
                     ou par email à <a href="mailto:contact@boxeaty.fr">contact@boxeaty.fr</a>
                 </mj-text>
                 <mj-text line-height="3" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
-                    Cordialement
+                    Cordialement,
                 </mj-text>
                 <mj-text font-size="20px" align="left" color="#1E1F44" line-height="2" font-family="helvetica">
                     L'équipe BoxEaty
                 </mj-text>
-                <mj-image align="left" width="200px" src="{{ base64('images/email/eat-consigned.png') }}">
-                </mj-image>
+                <mj-raw>
+                    {% if not lateDelivery %}
+                        <mj-image align="left" width="200px" src="{{ base64('images/email/eat-consigned.png') }}"></mj-image>
+                    {% endif %}
+                </mj-raw>
             </mj-column>
         </mj-section>
 
