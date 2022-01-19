@@ -344,10 +344,19 @@ class ClientOrderController extends AbstractController {
     public function showTemplate(EntityManagerInterface $entityManager, ClientOrder $clientOrder): Response {
         $roles = $entityManager->getRepository(Role::class)->findBy(["active" => true]);
 
+        $expectedDelivery = $clientOrder->getExpectedDelivery();
+        $worFreeDay = $entityManager->getRepository(WorkFreeDay::class)
+            ->findDayAndMonth($expectedDelivery
+                ->format('j'), $expectedDelivery
+                ->format('n')
+            );
+        $isWorkingDay = ((!in_array($expectedDelivery->format('N'), [6, 7])) && !count($worFreeDay) != 0);
+
         return $this->json([
             "template" => $this->renderView("operation/client_order/modal/show.html.twig", [
                 "clientOrder" => $clientOrder,
                 "roles" => $roles,
+                "isWorkingDay" => $isWorkingDay
             ]),
         ]);
     }

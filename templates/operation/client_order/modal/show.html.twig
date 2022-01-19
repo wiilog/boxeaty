@@ -15,7 +15,7 @@
                     <div class="row">
                         <div class="col-auto">
                             {% if clientOrder.deliveryPrice %}
-                                Livraison <b>{{ clientOrder.deliveryPrice|format_helper('price') }}</b>
+                                Livraison jour {{ isWorkingDay ? 'ouvré' : 'non ouvré' }} <b>{{ clientOrder.deliveryPrice|format_helper('price') }}</b>
                             {% endif %}
                         </div>
                         <div class="col-auto ml-4">
