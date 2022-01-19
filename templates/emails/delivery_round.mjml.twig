@@ -18,17 +18,18 @@
     <mj-body>
         <mj-section full-width="full-width" padding-bottom="20px" padding-top="30px">
             <mj-column>
-                <mj-image width="260px" height="130px" src="{{ base64('images/email/logo_SansBaseLine.png') }}"></mj-image>
+                <mj-image width="260px" height="91px"
+                          src="{{ base64('images/email/logo_SansBaseLine.png') }}"></mj-image>
             </mj-column>
         </mj-section>
         <mj-section>
             <mj-column width="100%">
-                <mj-text font-size="15px" font-family="helvetica" color="#1E1F44">Bonjour {{ deliveryRound.deliverer.username }},
+                <mj-text font-size="15px" font-family="helvetica" color="#1E1F44">
+                    Bonjour {{ deliveryRound.deliverer.username }},
                 </mj-text>
-                <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">La
-                    tournée <strong>N°{{ deliveryRound.number }}</strong> vient de vous être affectée. Elle est prévue
-                    pour
-                    le <strong>{{ expectedDelivery|date('d/m/Y') }}</strong> avec un départ du
+                <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                    La tournée <strong>N°{{ deliveryRound.number }}</strong> vient de vous être affectée.
+                    Elle est prévue pour le <strong>{{ expectedDelivery|date('d/m/Y') }}</strong> avec un départ du
                     dépôt <strong>{{ deliveryRound.depository.name }}</strong>
                 </mj-text>
                 <mj-text mj-class="title">
@@ -46,7 +47,8 @@
             </mj-column>
             <mj-column width="40%">
                 <mj-text align="left" mj-class="my-auto" font-size="15px">
-                    Poids total&nbsp;: <strong>{{ order.totalWeight }} kg</strong><br/>Volume total&nbsp;: <strong>{{ order.totalVolume }} m³</strong>
+                    Poids total&nbsp;: <strong>{{ order.totalWeight }} kg</strong><br/>Volume total&nbsp;:
+                    <strong>{{ order.totalVolume }} m³</strong>
                 </mj-text>
             </mj-column>
         </mj-section>
@@ -55,8 +57,9 @@
                 <mj-divider border-width="1px" border-style="none" border-color="black" padding-top="20px"/>
             </mj-column>
         </mj-section>
-        <mj-section>
         <mj-raw>{% endfor %}</mj-raw>
+
+        <mj-section>
             <mj-column>
                 <mj-text font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
                     Retrouvez la tournée sur l'application mobile Android BoxEaty
@@ -65,7 +68,8 @@
                     Une question, un besoin particulier ? Nous restons disponibles au 06.31.53.61.03 ou par email à
                     contact@boxeaty.fr
                 </mj-text>
-                <mj-text padding-top="20px" line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
+                <mj-text padding-top="20px" line-height="2" font-size="15px" align="left" font-family="helvetica"
+                         color="#1E1F44">
                     Cordialement
                 </mj-text>
                 <mj-text font-size="20px" align="left" color="#1E1F44" line-height="2" font-family="helvetica">
@@ -75,6 +79,5 @@
                 </mj-image>
             </mj-column>
         </mj-section>
-
     </mj-body>
 </mjml>

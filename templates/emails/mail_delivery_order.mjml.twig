@@ -19,7 +19,7 @@
 
         <mj-section full-width="full-width" padding-bottom="20px" padding-top="30px">
             <mj-column>
-                <mj-image  width="260px" height="130px" src="{{ base64('images/email/logo_SansBaseLine.png') }}"></mj-image>
+                <mj-image  width="260px" height="91px" src="{{ base64('images/email/logo_SansBaseLine.png') }}"></mj-image>
             </mj-column>
         </mj-section>
         <mj-section>
@@ -33,9 +33,9 @@
                 <mj-text line-height="2" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
                     Votre commande n° {{ order.number }} vient de {{ lateDelivery ? 'repasser' : 'passer' }} en préparation et sera livrée
                     le {{ order.expectedDelivery | date('d/m/Y') }}
-                    {% if order.deliveryRound %}
+                    {%- if order.deliveryRound -%}
                         par {{ order.deliveryRound.deliverer.username }} en {{ order.deliveryMethod.name }}
-                    {% endif %}
+                    {%- endif -%}.
                 </mj-text>
                 <mj-text mj-class="title">
                     Récapitulatif de la commande :
@@ -68,7 +68,7 @@
                 </mj-column>
                 <mj-column width="15%">
                     <mj-text align="center" mj-class="my-auto">
-                        Total : {{ line.quantity * line.boxType.price }} €
+                        Total : {{ line.quantity * line.boxType.price }} € TTC
                     </mj-text>
                 </mj-column>
             </mj-section>
@@ -99,7 +99,7 @@
                     ou par email à <a href="mailto:contact@boxeaty.fr">contact@boxeaty.fr</a>
                 </mj-text>
                 <mj-text line-height="3" font-size="15px" align="left" font-family="helvetica" color="#1E1F44">
-                    Cordialement
+                    Cordialement,
                 </mj-text>
                 <mj-text font-size="20px" align="left" color="#1E1F44" line-height="2" font-family="helvetica">
                     L'équipe BoxEaty

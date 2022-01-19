@@ -6,14 +6,13 @@ use App\Entity\User;
 use App\Service\Mailer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Twig\Environment as Twig_Environment;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Twig\Environment as Twig_Environment;
 
-class sendNewUserMail extends Command
-{
+class DebugNewUser extends Command {
 
-    private const COMMAND_NAME = "app:send:newusermail";
+    private const COMMAND_NAME = "debug:mail:new-user";
 
     /** @Required */
     public Twig_Environment $templating;
@@ -24,8 +23,7 @@ class sendNewUserMail extends Command
     /** @Required */
     public EntityManagerInterface $manager;
 
-    public function __construct(string $name = null)
-    {
+    public function __construct() {
         parent::__construct(self::COMMAND_NAME);
     }
 
@@ -33,11 +31,11 @@ class sendNewUserMail extends Command
         $this->setDescription("Send new user mail");
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
+    protected function execute(InputInterface $input, OutputInterface $output) {
         $userRepository = $this->manager->getRepository(User::class);
         $user = $userRepository->find(10);
         $recipients = $userRepository->findNewUserRecipients($user->getGroups()->first());
+
         $this->mailer->send(
             $recipients,
             "BoxEaty - Nouvel utilisateur",
@@ -45,6 +43,8 @@ class sendNewUserMail extends Command
                 "user" => $user,
             ])
         );
+
         return 0;
     }
+
 }
