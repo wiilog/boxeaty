@@ -100,7 +100,7 @@ function getBoxTrackingMovements(start = 0) {
                     $('.history-wrapper').empty();
                 }
                 const data = (result.data || []);
-                const historyLines = data.map(({isCurrentRecord, state, crate, quality, date, time, operator, location, depository}) => {
+                const historyLines = data.map(({isCurrentRecord, state, crate, quality, date, time, operator, location, depository, client}) => {
                     const $rawQuality = $($.parseHTML(quality));
                     const trimmedQuality = $rawQuality.text().trim();
 
@@ -110,6 +110,7 @@ function getBoxTrackingMovements(start = 0) {
                     }
 
                     let subtitle;
+                    let clientLine;
                     if(operator){
                         subtitle = `Opérateur : ${operator}`;
                     }
@@ -121,6 +122,9 @@ function getBoxTrackingMovements(start = 0) {
                         subtitle = subtitle ? `${subtitle} - ` : '';
                         subtitle += location;
                     }
+                    if (client) {
+                        clientLine = `Client : ${client}`;
+                    }
 
                     if (crate) {
                         state += ` dans la caisse <a href="${Routing.generate('box_show', {box: crate.id})}">${crate.number}</a>`;
@@ -131,7 +135,10 @@ function getBoxTrackingMovements(start = 0) {
                             <span class="timeline-line-marker"><strong>${date}</strong><p>${time}</p></span>
                             <div class="timeline-line-title ml-3">
                                 <div class="d-flex"><strong>${state}</strong>${$quality}</div>
-                                <p>${subtitle}</p>
+                                <div class="d-flex flex-column">
+                                    <span>${subtitle}</span>
+                                    <span>${clientLine}</span>
+                                </div>
                             </div>
                         </div>
                     `;
