@@ -71,7 +71,9 @@ class IndicatorController extends AbstractController {
             $values['containersUsed'] = $containersUsed;
             $values['motorVehiclesTotalDistance'] = $motorVehiclesTotalDistance;
             $values['softMobilityTotalDistance'] = $softMobilityTotalDistance;
-            $values['returnRate'] = round(($returnRateNumerator * 100) / $returnRateDenominator, 2);
+            $values['returnRate'] = $returnRateNumerator && $returnRateDenominator
+                ? round(($returnRateNumerator * 100) / $returnRateDenominator, 2)
+                : 0;
         } else {
             $values['wasteAvoided'] = '--';
             $values['containersUsed'] = '--';
