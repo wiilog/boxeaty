@@ -48,7 +48,40 @@ class IndicatorController extends AbstractController {
      */
     public function api(Request $request, EntityManagerInterface $manager): Response {
         $params = $request->query->all();
-        $values = self::getIndicatorsValues($params, $manager);
+        $values = [];
+        $containersUsed = 0;
+        $wasteAvoided = 0;
+        $softMobilityTotalDistance = 0;
+        $motorVehiclesTotalDistance = 0;
+        $returnRateNumerator = 0;
+        $returnRateDenominator = 0;
+        if(isset($params['client'])) {
+            $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(',',$params['client'])]);
+            foreach ($clients as $client) {
+                $values = self::getIndicatorsValues($params, $manager, $client);
+                $returnRateNumerator += $values['returnRateNumerator'];
+                $returnRateDenominator += $values['returnRateDenominator'];
+                $containersUsed += $values['containersUsed'];
+                $wasteAvoided += $values['wasteAvoided'];
+                $softMobilityTotalDistance += $values['softMobilityTotalDistance'];
+                $motorVehiclesTotalDistance += $values['motorVehiclesTotalDistance'];
+            }
+
+            $values['wasteAvoided'] = $wasteAvoided;
+            $values['containersUsed'] = $containersUsed;
+            $values['motorVehiclesTotalDistance'] = $motorVehiclesTotalDistance;
+            $values['softMobilityTotalDistance'] = $softMobilityTotalDistance;
+            $values['returnRate'] = $returnRateNumerator && $returnRateDenominator
+                ? round(($returnRateNumerator * 100) / $returnRateDenominator, 2)
+                : 0;
+        } else {
+            $values['wasteAvoided'] = '--';
+            $values['containersUsed'] = '--';
+            $values['motorVehiclesTotalDistance'] = '--';
+            $values['softMobilityTotalDistance'] = '--';
+            $values['returnRate'] = '--';
+            $values['success'] = true;
+        }
 
         if(!$values['success']) {
             return $this->json([
@@ -67,13 +100,41 @@ class IndicatorController extends AbstractController {
         $params = $request->request->all();
         $boxesHistoryChartBase64 = $params["boxesHistoryChartBase64"] ?? null;
         $date = (new DateTime())->format('d-m-Y');
-
         $startDate = DateTime::createFromFormat("Y-m-d", $params["from"])->format('d/m/Y');
         $endDate = DateTime::createFromFormat("Y-m-d", $params["to"])->format('d/m/Y');
-        $client = $manager->getRepository(Client::class)->findOneBy(['id' => $params['client']]);
-        $clientName = preg_replace("/(-){2,}/", "$1", str_replace(self::FORBIDDEN_FILE_CHARACTERS, "-", strtolower($client->getName())));
+        $values = [];
+        $containersUsed = 0;
+        $wasteAvoided = 0;
+        $softMobilityTotalDistance = 0;
+        $motorVehiclesTotalDistance = 0;
+        $returnRateNumerator = 0;
+        $returnRateDenominator = 0;
+        if(isset($params['client'])) {
+            $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(',',$params['client'])]);
+            $clientName = Stream::from($clients)->map(fn(Client $client) => $client->getName())->join(",");
+            foreach ($clients as $client) {
+                $values = self::getIndicatorsValues($params, $manager, $client);
+                $returnRateNumerator += $values['returnRateNumerator'];
+                $returnRateDenominator += $values['returnRateDenominator'];
+                $containersUsed += $values['containersUsed'];
+                $wasteAvoided += $values['wasteAvoided'];
+                $softMobilityTotalDistance += $values['softMobilityTotalDistance'];
+                $motorVehiclesTotalDistance += $values['motorVehiclesTotalDistance'];
+            }
 
-        $values = self::getIndicatorsValues($params, $manager);
+            $values['wasteAvoided'] = $wasteAvoided;
+            $values['containersUsed'] = $containersUsed;
+            $values['motorVehiclesTotalDistance'] = $motorVehiclesTotalDistance;
+            $values['softMobilityTotalDistance'] = $softMobilityTotalDistance;
+            $values['returnRate'] = round(($returnRateNumerator * 100) / $returnRateDenominator, 2);
+        } else {
+            $values['wasteAvoided'] = '--';
+            $values['containersUsed'] = '--';
+            $values['motorVehiclesTotalDistance'] = '--';
+            $values['softMobilityTotalDistance'] = '--';
+            $values['returnRate'] = '--';
+            $values['success'] = true;
+        }
 
         $html = $this->renderView("print/indicators/base.html.twig", [
             'values' => $values,
@@ -81,7 +142,7 @@ class IndicatorController extends AbstractController {
             'print_details' => [
                 'startDate' => $startDate,
                 'endDate' => $endDate,
-                'client' => $client->getName(),
+                'client' => $clientName,
             ],
             'boxesHistoryChartBase64' => $boxesHistoryChartBase64,
             'title' => "Indicateurs $clientName du $date",
@@ -110,11 +171,12 @@ class IndicatorController extends AbstractController {
         return $response;
     }
 
-    private static function getIndicatorsValues(array $params, EntityManagerInterface $manager): array {
+    private static function getIndicatorsValues(array $params, EntityManagerInterface $manager, Client $client): array {
         $totalQuantityDelivered = 0;
         $softMobilityTotalDistance = 0;
         $motorVehiclesTotalDistance = 0;
-        $returnRate = 0;
+        $returnRateNumerator = 0;
+        $returnRateDenominator = 0;
         $chartLabels = [];
         $dataDeliveredBoxs = [];
         $dataCollectedBoxs = [];
@@ -130,7 +192,6 @@ class IndicatorController extends AbstractController {
                 $deliveryRoundsRepository = $manager->getRepository(DeliveryRound::class);
                 $collectRepository = $manager->getRepository(Collect::class);
                 $clientRepository = $manager->getRepository(Client::class);
-                $client = $clientRepository->findOneBy(['id' => $params['client']]);
                 $clientOrderRepository = $manager->getRepository(ClientOrder::class);
 
                 $startDate = DateTime::createFromFormat("Y-m-d", $params["from"]);
@@ -143,12 +204,13 @@ class IndicatorController extends AbstractController {
                     $dateMin->setTime(0, 0, 0);
                     $dateMax->setTime(23, 59, 59);
 
-                    $dataDeliveredBoxs[] = $deliveryRepository->getTotalQuantityByClientAndDeliveredDate($params['client'], $dateMin, $dateMax) ?? 0;
-                    $dataCollectedBoxs[] = $collectRepository->getTotalQuantityByClientAndCollectedDate($params['client'], $dateMin, $dateMax) ?? 0;
+                    $dataDeliveredBoxs[] = $deliveryRepository->getTotalQuantityByClientAndDeliveredDate($client, $dateMin, $dateMax) ?? 0;
+                    $dataCollectedBoxs[] = $collectRepository->getTotalQuantityByClientAndCollectedDate($client, $dateMin, $dateMax) ?? 0;
                 }
 
                 if(array_sum($dataDeliveredBoxs)) {
-                    $returnRate = round((array_sum($dataCollectedBoxs) * 100) / array_sum($dataDeliveredBoxs), 2);
+                    $returnRateNumerator += array_sum($dataCollectedBoxs);
+                    $returnRateDenominator += array_sum($dataDeliveredBoxs);
                 }
 
                 $isMultiSite = $client->isMultiSite();
@@ -220,7 +282,8 @@ class IndicatorController extends AbstractController {
             "wasteAvoided" => !empty($params) ? (($totalQuantityDelivered * 35) / 1000) : '--',
             "softMobilityTotalDistance" => !empty($params) ? $softMobilityTotalDistance : '--',
             "motorVehiclesTotalDistance" => !empty($params) ? $motorVehiclesTotalDistance : '--',
-            "returnRate" => !empty($params) ? $returnRate : '--',
+            "returnRateNumerator" => !empty($params) ? $returnRateNumerator : '--',
+            "returnRateDenominator" => !empty($params) ? $returnRateDenominator : '--',
             "chart" => json_encode($config),
         ];
     }
