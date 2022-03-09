@@ -1,8 +1,9 @@
 {% set required = required is defined and required ? "required" %}
 {% set multiple = multiple is defined and multiple ? "multiple" %}
-<select {{ required }} name="{{ name ?? 'client' }}"
-                       class="data" data-s2="client"
-                       data-placeholder="{{ placeholder ?? 'Client' }}" {{ multiple }}>
+
+<select name="{{ name ?? 'client' }}" {{ required }}
+        class="data" data-s2="client"
+        data-placeholder="{{ placeholder ?? 'Client' }}">
     {% if client is defined and client %}
         <option value="{{ client.id }}" selected>{{ client.name }}</option>
     {% endif %}
