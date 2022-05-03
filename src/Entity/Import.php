@@ -146,7 +146,7 @@ class Import {
     /**
      * @ORM\Column(type="json")
      */
-    private $fieldsAssociation = null;
+    private ?array $fieldsAssociation = null;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)

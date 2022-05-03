@@ -49,6 +49,7 @@ class ImportController extends AbstractController {
             ->findForDatatable(json_decode($request->getContent(), true) ?? []);
 
         $data = [];
+        /** @var Import $import */
         foreach($imports["data"] as $import) {
             $data[] = [
                 "id" => $import->getId(),
@@ -62,7 +63,7 @@ class ImportController extends AbstractController {
                 "user" => $import->getUser()->getUsername(),
                 "actions" => $this->renderView("datatable_actions.html.twig", [
                     "cancellable" => $import->getStatus() === Import::UPCOMING,
-                    "trace" => true,
+                    "trace" => $import->getTrace(),
                     "import" => $import,
                 ]),
             ];
