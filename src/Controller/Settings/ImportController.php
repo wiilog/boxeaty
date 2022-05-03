@@ -211,7 +211,7 @@ class ImportController extends AbstractController {
      * @HasPermission(Role::MANAGE_IMPORTS)
      */
     public function cancel(Request $request, EntityManagerInterface $manager): Response {
-        $content = (object)$request->request->all();
+        $content = json_decode($request->getContent());
         $import = $manager->getRepository(Import::class)->find($content->import);
         if(!$import) {
             return $this->json([
