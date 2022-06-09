@@ -16,6 +16,9 @@
             <button data-listener="empty"><i class="icon fas fa-times"></i> Vider la borne</button>
         {% endif %}
         {% if trace ?? false %}
+            <a href="/persistent/imports/{{ import.file }}" target="_blank">
+                <i class="icon fas fa-clipboard-list"></i> Fichier importé
+            </a>
             <a href="/persistent/traces/{{ import.trace }}" target="_blank">
                 <i class="icon fas fa-clipboard-list"></i> Fichier trace
             </a>

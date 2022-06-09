@@ -19,6 +19,7 @@ class Import {
     public const RUNNING = 3;
     public const COMPLETED = 4;
     public const CANCELLED = 5;
+    public const FAILED = 6;
 
     public const NAMES = [
         self::UPCOMING => "Planifié",
@@ -26,6 +27,7 @@ class Import {
         self::RUNNING => "En cours",
         self::COMPLETED => "Terminé",
         self::CANCELLED => "Annulé",
+        self::FAILED => "Erreur",
     ];
 
     public const BOX_OR_CRATE = "box_crate";

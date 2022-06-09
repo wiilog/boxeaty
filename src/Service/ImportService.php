@@ -50,7 +50,15 @@ class ImportService {
             ->setUpdates(0)
             ->setErrors(0);
 
-        $handle = fopen("{$this->kernel->getProjectDir()}/public/persistent/imports/{$import->getFile()}", "r");
+        $file = "{$this->kernel->getProjectDir()}/public/persistent/imports/{$import->getFile()}";
+        if(!file_exists($file)) {
+            $import->setStatus(Import::COMPLETED);
+            $this->manager->flush();
+
+            return;
+        }
+
+        $handle = fopen($file, "r");
         $this->creations = 0;
         $this->updates = 0;
 
@@ -294,7 +302,7 @@ class ImportService {
             $this->addError("Le champ " . Import::FIELDS[$this->import->getDataType()][$column]["name"] . " est requis");
         }
 
-        return $value;
+        return trim($value);
     }
 
     private function nextLine($handle): bool {
