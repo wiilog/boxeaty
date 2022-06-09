@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\Entity\ClientOrder;
-use App\Entity\User;
 use App\Service\Mailer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;

@@ -126,7 +126,7 @@ class ImportController extends AbstractController {
                 }
 
                 if($closest) {
-                    $preAssignments[$closest] = $code;
+                    $preAssignments[trim($closest)] = $code;
                 }
             }
 
@@ -138,7 +138,7 @@ class ImportController extends AbstractController {
                     "fields" => Import::FIELDS[$content->type],
                     "pre_assignments" => $preAssignments,
                     "file_fields" => Stream::from($fields)
-                        ->map(function($field, $id) use ($encoding) {
+                        ->map(function($field, $id) use ($encoding, $preAssignments) {
                             $field = trim($field);
                             $value = trim($values[$id] ?? "");
 
@@ -150,7 +150,7 @@ class ImportController extends AbstractController {
                             return [
                                 "name" => $field,
                                 "value" => $value,
-                                "closest" => $preAssignments[$field] ?? null,
+                                "closest" => $preAssignments[trim($field)] ?? null,
                             ];
                         })
                         ->toArray(),

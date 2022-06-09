@@ -33,7 +33,7 @@ class ImportService {
     /** @Required */
     public BoxRecordService $boxRecordService;
 
-    private $data = null;
+    private array|bool|null $data = null;
     private array $trace = [];
     private ?bool $hasError = null;
     private ?Import $import = null;
@@ -45,7 +45,8 @@ class ImportService {
     public function execute(Import $import) {
         $this->boxStatesLower = array_map("strtolower", BoxStateService::BOX_STATES);
 
-        $this->import = $import;
+        $this->reset($import);
+
         $import->setCreations(0)
             ->setUpdates(0)
             ->setErrors(0);
@@ -59,8 +60,6 @@ class ImportService {
         }
 
         $handle = fopen($file, "r");
-        $this->creations = 0;
-        $this->updates = 0;
 
         $header = fgetcsv($handle, 0, ";");
         $header[] = "Erreurs";
@@ -310,14 +309,20 @@ class ImportService {
             $this->trace[] = $this->data;
         }
 
-        $this->data = fgetcsv($handle, 0, ";");
-        $this->hasError = false;
+        do {
+            $this->data = fgetcsv($handle, 0, ";");
+            $this->hasError = false;
 
-        if($this->data && $this->exportService->getEncoding() === ExportService::ENCODING_WINDOWS) {
-            $this->data = array_map("utf8_encode", $this->data);
-        }
+            if($this->data && $this->exportService->getEncoding() === ExportService::ENCODING_WINDOWS) {
+                $this->data = array_map("utf8_encode", $this->data);
+            }
 
-        return $this->data !== false;
+            if($this->data === false) {
+                return false;
+            }
+        } while(!array_filter($this->data));
+
+        return true;
     }
 
     private function hasError(): bool {
@@ -350,6 +355,15 @@ class ImportService {
         fclose($file);
 
         return $name;
+    }
+
+    private function reset(Import $import) {
+        $this->import = $import;
+        $this->data = null;
+        $this->trace = [];
+        $this->hasError = false;
+        $this->creations = 0;
+        $this->updates = 0;
     }
 
 }
