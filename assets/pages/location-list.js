@@ -14,7 +14,7 @@ $document.ready(() => {
     });
 
     const emptyLocationModal = Modal.static(`#modal-empty-location`, {
-        ajax: AJAX.route(`POST`, `api_kiosk_empty_kiosk`),
+        ajax: AJAX.route(`POST`, `location_empty_kiosk`),
         table: `#table-locations`,
     });
 

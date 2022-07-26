@@ -10,7 +10,8 @@ use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\Location;
 use App\Service\BoxRecordService;
-use App\Service\BoxStateService;
+use App\Service\BoxService;
+use App\Service\LocationService;
 use App\Service\Mailer;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -135,21 +136,12 @@ class KioskController extends AbstractController {
      * @Authenticated(Authenticated::KIOSK)
      */
     public function emptyKiosk(Request                $request,
-                               BoxRecordService       $boxRecordService,
+                               LocationService        $locationService,
                                EntityManagerInterface $manager): JsonResponse {
         $content = json_decode($request->getContent());
 
-        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk ?? $request->request->get("id"));
-
-        foreach($kiosk->getBoxes() as $box) {
-            $previous = clone $box;
-
-            $box->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
-                ->setLocation($kiosk->getOffset())
-                ->setComment($content->comment ?? null);
-
-            $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
-        }
+        $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
+        $locationService->emptyKiosk($kiosk, $this->getUser());
 
         $manager->flush();
 
@@ -168,7 +160,7 @@ class KioskController extends AbstractController {
 
         $box = $manager->getRepository(Box::class)->findOneBy([
             "number" => $content->number,
-            "state" => BoxStateService::STATE_BOX_CONSUMER,
+            "state" => BoxService::STATE_BOX_CONSUMER,
         ]);
 
         if($box && $box->getType() && $box->getOwner()) {
@@ -198,7 +190,7 @@ class KioskController extends AbstractController {
         $kiosk = $manager->getRepository(Location::class)->find($content->kiosk);
         $box = $manager->getRepository(Box::class)->findOneBy([
             "number" => $content->number,
-            "state" => BoxStateService::STATE_BOX_CONSUMER,
+            "state" => BoxService::STATE_BOX_CONSUMER,
         ]);
 
         if($box && $box->getType() && $box->getOwner()) {
@@ -208,7 +200,7 @@ class KioskController extends AbstractController {
 
             $box->setCanGenerateDepositTicket(true)
                 ->setUses($box->getUses() + 1)
-                ->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
+                ->setState(BoxService::STATE_BOX_UNAVAILABLE)
                 ->setLocation($kiosk)
                 ->setComment($content->comment ?? null);
 

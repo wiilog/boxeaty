@@ -114,7 +114,7 @@ class PreparationService {
                 /** @var Box $preparedCrate */
                 foreach($preparedCrates as $preparedCrate) {
                     if($preparedCrate->isBox()
-                        || $preparedCrate->getState() !== BoxStateService::STATE_BOX_AVAILABLE) {
+                        || $preparedCrate->getState() !== BoxService::STATE_BOX_AVAILABLE) {
                         throw new Exception('Une des caisses préparée est invalide', 1000);
                     }
 
@@ -143,7 +143,7 @@ class PreparationService {
                             $groupedBoxes[$key][] = $box;
 
                             if(!$box->isBox()
-                                || $box->getState() !== BoxStateService::STATE_BOX_AVAILABLE
+                                || $box->getState() !== BoxService::STATE_BOX_AVAILABLE
                                 || !$box->getQuality()
                                 || !$box->getQuality()->isClean()) {
                                 throw new Exception('Une des Box préparée est invalide', 1000);

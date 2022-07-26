@@ -12,11 +12,12 @@ use App\Entity\Role;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\LocationRepository;
-use App\Service\BoxStateService;
+use App\Service\BoxService;
 use App\Service\ExportService;
 use App\Service\LocationService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -40,10 +41,10 @@ class LocationController extends AbstractController {
             $boxRepository = $manager->getRepository(Box::class);
             $stockLocationType = array_search(Location::STOCK, Location::LOCATION_TYPES);
 
-            $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
-            $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0, $depositoryId, $stockLocationType);
-            $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1, $depositoryId);
-            $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1, $depositoryId, $stockLocationType);
+            $crateUnavailable = $boxRepository->getLocationData(BoxService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
+            $crateAvailable = $boxRepository->getLocationData(BoxService::STATE_BOX_AVAILABLE, 0, $depositoryId, $stockLocationType);
+            $boxUnavailable = $boxRepository->getLocationData(BoxService::STATE_BOX_UNAVAILABLE, 1, $depositoryId);
+            $boxAvailable = $boxRepository->getLocationData(BoxService::STATE_BOX_AVAILABLE, 1, $depositoryId, $stockLocationType);
         }
 
         return $this->render("referential/location/index.html.twig", [
@@ -114,10 +115,10 @@ class LocationController extends AbstractController {
                 $dateMin->setTime(0, 0, 0);
                 $dateMax->setTime(23, 59, 59);
                 $chartLabels[] = $i->format("d/m/Y");
-                $dataCustomerState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxStateService::STATE_BOX_CONSUMER, $locationsId);
-                $dataOutState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxStateService::STATE_BOX_OUT, $locationsId);
-                $dataUnavailableState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxStateService::STATE_BOX_UNAVAILABLE, $locationsId);
-                $dataAvailableState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxStateService::STATE_BOX_AVAILABLE, $locationsId);
+                $dataCustomerState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxService::STATE_BOX_CONSUMER, $locationsId);
+                $dataOutState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxService::STATE_BOX_OUT, $locationsId);
+                $dataUnavailableState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxService::STATE_BOX_UNAVAILABLE, $locationsId);
+                $dataAvailableState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxService::STATE_BOX_AVAILABLE, $locationsId);
             }
         }
 
@@ -159,10 +160,10 @@ class LocationController extends AbstractController {
         if($depository) {
             $depositoryId = $depository->getId();
             $stockLocationType = array_search(Location::STOCK, Location::LOCATION_TYPES);
-            $crateUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
-            $crateAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 0, $depositoryId, $stockLocationType);
-            $boxUnavailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_UNAVAILABLE, 1, $depositoryId);
-            $boxAvailable = $boxRepository->getLocationData(BoxStateService::STATE_BOX_AVAILABLE, 1, $depositoryId, $stockLocationType);
+            $crateUnavailable = $boxRepository->getLocationData(BoxService::STATE_BOX_UNAVAILABLE, 0, $depositoryId);
+            $crateAvailable = $boxRepository->getLocationData(BoxService::STATE_BOX_AVAILABLE, 0, $depositoryId, $stockLocationType);
+            $boxUnavailable = $boxRepository->getLocationData(BoxService::STATE_BOX_UNAVAILABLE, 1, $depositoryId);
+            $boxAvailable = $boxRepository->getLocationData(BoxService::STATE_BOX_AVAILABLE, 1, $depositoryId, $stockLocationType);
         }
 
         return $this->json([
@@ -174,6 +175,24 @@ class LocationController extends AbstractController {
             "crateAvailable" => $crateAvailable ?? '--',
             "boxUnavailable" => $boxUnavailable ?? '--',
             "boxAvailable" => $boxAvailable ?? '--',
+        ]);
+    }
+
+    /**
+     * @Route("/borne/vider", name="location_empty_kiosk", options={"expose": true})
+     * @HasPermission(Role::MANAGE_LOCATIONS)
+     */
+    public function emptyKiosk(Request                $request,
+                               LocationService        $locationService,
+                               EntityManagerInterface $manager): JsonResponse {
+        $kiosk = $manager->getRepository(Location::class)->find($request->request->get("id"));
+        $locationService->emptyKiosk($kiosk, $this->getUser());
+
+        $manager->flush();
+
+        return $this->json([
+            "success" => true,
+            "message" => "Borne vidée avec succès",
         ]);
     }
 

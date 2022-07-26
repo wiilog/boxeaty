@@ -5,13 +5,18 @@ namespace App\Service;
 use App\Entity\Client;
 use App\Entity\Depository;
 use App\Entity\Location;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use RuntimeException;
 use stdClass;
 
 class LocationService {
 
     /** @Required */
     public EntityManagerInterface $manager;
+
+    /** @Required */
+    public BoxRecordService $boxRecordService;
 
     public function updateLocation(Location $location, StdClass $content): array {
         $client = isset($content->client) ? $this->manager->getRepository(Client::class)->find($content->client) : null;
@@ -66,6 +71,22 @@ class LocationService {
             ->setMessage(null)
             ->setType($from->getType())
             ->setKiosk($from->isKiosk());
+    }
+
+    public function emptyKiosk(Location $kiosk, User $user): void {
+        if(!$kiosk->isKiosk()) {
+            throw new RuntimeException("L'emplacement n'est pas une borne");
+        }
+
+        foreach($kiosk->getBoxes() as $box) {
+            $previous = clone $box;
+
+            $box->setState(BoxService::STATE_BOX_UNAVAILABLE)
+                ->setLocation($kiosk->getOffset())
+                ->setComment($content->comment ?? null);
+
+            $this->boxRecordService->generateBoxRecords($box, $previous, $user);
+        }
     }
 
 }

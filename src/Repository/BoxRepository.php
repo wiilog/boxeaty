@@ -9,7 +9,7 @@ use App\Entity\Preparation;
 use App\Entity\Status;
 use App\Entity\User;
 use App\Helper\QueryHelper;
-use App\Service\BoxStateService;
+use App\Service\BoxService;
 use Doctrine\ORM\EntityRepository;
 use WiiCommon\Helper\Stream;
 
@@ -81,7 +81,7 @@ class BoxRepository extends EntityRepository {
         return $qb->select("box.id AS id, box.number AS text, type.price AS price")
             ->join("box.type", "type")
             ->andWhere("box.number LIKE :search")
-            ->andWhere("box.state = '" . BoxStateService::STATE_BOX_CLIENT . "'")
+            ->andWhere("box.state = '" . BoxService::STATE_BOX_CLIENT . "'")
             ->setMaxResults(15)
             ->setParameter("search", "%$search%")
             ->getQuery()
@@ -124,7 +124,7 @@ class BoxRepository extends EntityRepository {
         $total = QueryHelper::count($qb, "box");
 
         if($search) {
-            $state = Stream::from(BoxStateService::BOX_STATES)
+            $state = Stream::from(BoxService::BOX_STATES)
                 ->filter(fn($value) => strpos(strtolower($value), strtolower($search)) > -1)
                 ->firstKey();
 
@@ -289,7 +289,7 @@ class BoxRepository extends EntityRepository {
             ->andWhere("box_location.depository = :depository")
             ->andWhere("order_status.id IS NULL OR order_status.code = :finished")
             ->setParameter("box_types", $boxTypes)
-            ->setParameter("state", BoxStateService::STATE_BOX_AVAILABLE)
+            ->setParameter("state", BoxService::STATE_BOX_AVAILABLE)
             ->setParameter("depository", $preparation->getDepository())
             ->setParameter("finished", Status::CODE_ORDER_FINISHED);
 
@@ -323,7 +323,7 @@ class BoxRepository extends EntityRepository {
             ->andWhere("box_type.name LIKE :type")
             ->andWhere("box_location.depository = :depository")
             ->andWhere("order_status.id IS NULL OR order_status.code = :finished")
-            ->setParameter("available", BoxStateService::STATE_BOX_AVAILABLE)
+            ->setParameter("available", BoxService::STATE_BOX_AVAILABLE)
             ->setParameter("type", $type)
             ->setParameter("depository", $preparation->getDepository())
             ->setParameter("finished", Status::CODE_ORDER_FINISHED);

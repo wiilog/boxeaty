@@ -19,7 +19,7 @@ use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\FormatHelper;
-use App\Service\BoxStateService;
+use App\Service\BoxService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -216,8 +216,8 @@ class ExportController extends AbstractController {
         $spreadsheet = new Spreadsheet();
         $spreadsheet->disconnectWorksheets();
 
-        $service->addWorksheet($spreadsheet, Box::class, ExportService::BOX_HEADER, $service->stateMapper(BoxStateService::BOX_STATES));
-        $service->addWorksheet($spreadsheet, BoxRecord::class, ExportService::MOVEMENT_HEADER, $service->stateMapper(BoxStateService::RECORD_STATES));
+        $service->addWorksheet($spreadsheet, Box::class, ExportService::BOX_HEADER, $service->stateMapper(BoxService::BOX_STATES));
+        $service->addWorksheet($spreadsheet, BoxRecord::class, ExportService::MOVEMENT_HEADER, $service->stateMapper(BoxService::RECORD_STATES));
         $service->addWorksheet($spreadsheet, DepositTicket::class, ExportService::TICKET_HEADER, $service->stateMapper(DepositTicket::NAMES));
 
         $service->addWorksheet($spreadsheet, Client::class, ExportService::CLIENT_HEADER);

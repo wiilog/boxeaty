@@ -16,7 +16,7 @@ use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\BoxRepository;
 use App\Service\BoxRecordService;
-use App\Service\BoxStateService;
+use App\Service\BoxService;
 use App\Service\ExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -59,7 +59,7 @@ class BoxController extends AbstractController {
                 "creationDate" => FormatHelper::datetime($box->getCreationDate()),
                 "isBox" => $box->isBox() ? 'Oui' : 'Non',
                 "location" => FormatHelper::named($box->getLocation()),
-                "state" => BoxStateService::BOX_STATES[$box->getState()] ?? "-",
+                "state" => BoxService::BOX_STATES[$box->getState()] ?? "-",
                 "quality" => FormatHelper::named($box->getQuality()),
                 "owner" => FormatHelper::named($box->getOwner()),
                 "type" => FormatHelper::named($box->getType()),
@@ -251,7 +251,7 @@ class BoxController extends AbstractController {
 
         return $exportService->export(function($output) use ($exportService, $boxes) {
             foreach($boxes as $box) {
-                $box["state"] = BoxStateService::BOX_STATES[$box["state"]] ?? '';
+                $box["state"] = BoxService::BOX_STATES[$box["state"]] ?? '';
                 $exportService->putLine($output, $box);
             }
         }, "export-box-$today.csv", ExportService::BOX_HEADER);
@@ -276,15 +276,15 @@ class BoxController extends AbstractController {
                 ->map(fn(array $movement) => [
                     'quality' => $movement['quality'] ?? "",
                     'isCurrentRecord' => $currentRecord && $currentRecord->getId() === $movement['id'],
-                    'color' => (isset($movement['state']) && isset(BoxStateService::LINKED_COLORS[$movement['state']]))
-                        ? BoxStateService::LINKED_COLORS[$movement['state']]
-                        : BoxStateService::DEFAULT_COLOR,
+                    'color' => (isset($movement['state']) && isset(BoxService::LINKED_COLORS[$movement['state']]))
+                        ? BoxService::LINKED_COLORS[$movement['state']]
+                        : BoxService::DEFAULT_COLOR,
                     'date' => isset($movement['date'])
                         ? ($movement['date']->format("d") . ' ' . FormatHelper::MONTHS[$movement['date']->format('n')] . ' ' . $movement['date']->format("Y"))
                         : '',
                     'time' => isset($movement['date']) ? $movement['date']->format('H:i') : 'Non définie',
-                    'state' => (isset($movement['state']) && isset(BoxStateService::RECORD_STATES[$movement['state']]))
-                        ? BoxStateService::RECORD_STATES[$movement['state']]
+                    'state' => (isset($movement['state']) && isset(BoxService::RECORD_STATES[$movement['state']]))
+                        ? BoxService::RECORD_STATES[$movement['state']]
                         : '-',
                     'crate' => !empty($movement['crateId'])
                         ? [
@@ -326,7 +326,7 @@ class BoxController extends AbstractController {
             ->setLocation($crate->getLocation());
 
         $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function(BoxRecord $record) {
-            $record->setState(BoxStateService::STATE_RECORD_PACKING);
+            $record->setState(BoxService::STATE_RECORD_PACKING);
         });
 
         $entityManager->flush();
@@ -367,7 +367,7 @@ class BoxController extends AbstractController {
         $box->setCrate(null);
 
         $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function(BoxRecord $record) {
-            $record->setState(BoxStateService::STATE_RECORD_UNPACKING);
+            $record->setState(BoxService::STATE_RECORD_UNPACKING);
         });
 
         $entityManager->flush();

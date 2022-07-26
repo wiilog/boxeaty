@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-class BoxStateService {
+class BoxService {
 
     public const STATE_BOX_AVAILABLE = 1;
     public const STATE_BOX_UNAVAILABLE = 2;

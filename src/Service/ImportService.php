@@ -43,7 +43,7 @@ class ImportService {
     private array $boxStatesLower;
 
     public function execute(Import $import) {
-        $this->boxStatesLower = array_map("strtolower", BoxStateService::BOX_STATES);
+        $this->boxStatesLower = array_map("strtolower", BoxService::BOX_STATES);
 
         $this->reset($import);
 

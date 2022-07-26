@@ -12,7 +12,7 @@ use App\Entity\Role;
 use App\Helper\FormatHelper;
 use App\Repository\CounterOrderRepository;
 use App\Service\BoxRecordService;
-use App\Service\BoxStateService;
+use App\Service\BoxService;
 use App\Service\CounterOrderService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -93,7 +93,7 @@ class CounterOrderController extends AbstractController {
                 ]);
             }
 
-            if($box->getState() !== BoxStateService::STATE_BOX_CLIENT) {
+            if($box->getState() !== BoxService::STATE_BOX_CLIENT) {
                 return $this->json([
                     "success" => false,
                     "unique" => true,
@@ -226,7 +226,7 @@ class CounterOrderController extends AbstractController {
         foreach($boxes as $box) {
             $previous = clone $box;
             $box->setLocation($client->getOutLocation())
-                ->setState(BoxStateService::STATE_BOX_CONSUMER);
+                ->setState(BoxService::STATE_BOX_CONSUMER);
 
             $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());
         }
@@ -263,7 +263,7 @@ class CounterOrderController extends AbstractController {
                 $previousMovement = $manager->getRepository(BoxRecord::class)->findPreviousTrackingMovement($box);
 
                 $previous = clone $box;
-                $box->setState(BoxStateService::STATE_BOX_CLIENT)
+                $box->setState(BoxService::STATE_BOX_CLIENT)
                     ->setLocation($previousMovement ? $previousMovement->getLocation() : null);
 
                 $boxRecordService->generateBoxRecords($box, $previous, $this->getUser());

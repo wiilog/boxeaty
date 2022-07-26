@@ -9,7 +9,7 @@ use App\Entity\Depository;
 use App\Entity\Status;
 use App\Helper\FormatHelper;
 use App\Helper\QueryHelper;
-use App\Service\BoxStateService;
+use App\Service\BoxService;
 use Doctrine\ORM\EntityRepository;
 use WiiCommon\Helper\Stream;
 
@@ -139,7 +139,7 @@ class BoxTypeRepository extends EntityRepository {
             ->andWhere("quality.clean = 1")
             ->andWhere("box_type IN (:types)")
             ->setParameter("types", $types)
-            ->setParameter("availableState", BoxStateService::STATE_BOX_AVAILABLE)
+            ->setParameter("availableState", BoxService::STATE_BOX_AVAILABLE)
             ->setParameter("depository", $depository)
             ->groupBy("box_type.id, owner.id")
             ->getQuery()

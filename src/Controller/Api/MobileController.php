@@ -23,7 +23,7 @@ use App\Entity\User;
 use App\Helper\FormatHelper;
 use App\Service\AttachmentService;
 use App\Service\BoxRecordService;
-use App\Service\BoxStateService;
+use App\Service\BoxService;
 use App\Service\ClientOrderService;
 use App\Service\DeliveryRoundService;
 use App\Service\Mailer;
@@ -249,7 +249,7 @@ class MobileController extends AbstractController {
             foreach(Stream::from([$crate], $crate->getContainedBoxes()) as $box) {
                 $previous = clone $box;
                 $box->setLocation($location)
-                    ->setState(BoxStateService::STATE_BOX_CLIENT);
+                    ->setState(BoxService::STATE_BOX_CLIENT);
 
                 $service->generateBoxRecords($box, $previous, $this->getUser());
             }
@@ -412,7 +412,7 @@ class MobileController extends AbstractController {
                 ->setQuality($chosenQuality);
 
             $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function(BoxRecord $record) {
-                $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
+                $record->setState(BoxService::STATE_RECORD_IDENTIFIED);
             });
         }
 
@@ -534,7 +534,7 @@ class MobileController extends AbstractController {
                         $previous = clone $box;
                         $box->setCrate($crateData['crate']->getId() !== $box->getId() ? $crateData['crate'] : null)
                             ->setLocation($box->getLocation()->getOffset())
-                            ->setState(BoxStateService::STATE_BOX_UNAVAILABLE);
+                            ->setState(BoxService::STATE_BOX_UNAVAILABLE);
 
                         $boxRecordService->generateBoxRecords($box, $previous, $user);
 
@@ -707,7 +707,7 @@ class MobileController extends AbstractController {
                     ->setQuality($chosenQuality);
 
                 $boxRecordService->generateBoxRecords($box, $previous, $this->getUser(), function(BoxRecord $record) {
-                    $record->setState(BoxStateService::STATE_RECORD_IDENTIFIED);
+                    $record->setState(BoxService::STATE_RECORD_IDENTIFIED);
                 });
             }
         }
@@ -830,7 +830,7 @@ class MobileController extends AbstractController {
 
         foreach($crates as $crate) {
             $previous = clone $crate;
-            $crate->setState(BoxStateService::STATE_BOX_UNAVAILABLE)
+            $crate->setState(BoxService::STATE_BOX_UNAVAILABLE)
                 ->setLocation($dropLocation);
 
             $boxRecordService->generateBoxRecords($crate, $previous, $this->getUser());

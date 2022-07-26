@@ -6,7 +6,7 @@ use App\Entity\Box;
 use App\Entity\BoxRecord;
 use App\Entity\User;
 use App\Helper\QueryHelper;
-use App\Service\BoxStateService;
+use App\Service\BoxService;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityRepository;
 
@@ -221,8 +221,8 @@ class BoxRecordRepository extends EntityRepository {
             ->setMaxResults(1)
             ->setParameter("box", $box)
             ->setParameter("packingStates", [
-                BoxStateService::STATE_RECORD_PACKING,
-                BoxStateService::STATE_RECORD_UNPACKING,
+                BoxService::STATE_RECORD_PACKING,
+                BoxService::STATE_RECORD_UNPACKING,
             ])
             ->getQuery()
             ->getOneOrNullResult();
