@@ -4,10 +4,15 @@
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
             <div class="delete-image"></div>
             <h1>
-                {% if location.outClient or location.boxes | length > 0 or location.boxRecords | length > 0 %}
-                    Cet emplacement est l'emplacement de sortie d'un client ou est lié à un(e) ou plusieurs Box, mouvements.<br>
+                {% if location.outClient or location.boxes | length > 0 or location.boxRecords | length > 0
+                    or location.droppedCollects | length > 0 or location.pickedCollects | length > 0 %}
+                    Cet emplacement est l'emplacement de sortie d'un client ou est lié à un(e) ou plusieurs Box, mouvements ou collectes.<br>
                     Vous ne pouvez pas le supprimer.<br>
                     Voulez-vous le désactiver ?
+                {% elseif location.depositTickets | length > 0 %}
+                    Cette borne est lié à un ou plusieurs ticket-consignes.<br>
+                    Vous ne pouvez pas le supprimer.<br>
+                    Voulez-vous la désactiver ?
                 {% else %}
                     Voulez-vous vraiment supprimer cet emplacement ?
                 {% endif %}
