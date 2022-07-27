@@ -147,6 +147,11 @@ class Client {
      */
     private Collection $collects;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ClientOrder::class, mappedBy="client")
+     */
+    private ?Collection $orders;
+
     public function __construct() {
         $this->users = new ArrayCollection();
         $this->locations = new ArrayCollection();
@@ -155,6 +160,7 @@ class Client {
         $this->depositTicketsClients = new ArrayCollection();
         $this->cratePatternLines = new ArrayCollection();
         $this->collects = new ArrayCollection();
+        $this->orders = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -561,6 +567,45 @@ class Client {
         $this->collects = new ArrayCollection();
         foreach($collects as $collect) {
             $this->addCollect($collect);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ClientOrder[]
+     */
+    public function getOrders(): Collection|array {
+        return $this->orders;
+    }
+
+    public function addOrder(ClientOrder $order): self {
+        if(!$this->orders->contains($order)) {
+            $this->orders[] = $order;
+            $order->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(ClientOrder $order): self {
+        if($this->orders->removeElement($order)) {
+            if($order->getClient() === $this) {
+                $order->setClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function setOrders(?array $orders): self {
+        foreach($this->getOrders()->toArray() as $order) {
+            $this->removeOrder($order);
+        }
+
+        $this->orders = new ArrayCollection();
+        foreach($orders as $order) {
+            $this->addOrder($order);
         }
 
         return $this;

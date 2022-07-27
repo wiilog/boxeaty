@@ -350,19 +350,25 @@ class ClientController extends AbstractController {
             return $this->cantSeeResponse();
         }
 
-        if($client && (!$client->getBoxRecords()->isEmpty() || !$client->getBoxes()->isEmpty() || $client->getOutLocation())) {
+        if($client->getBoxRecords()->isEmpty() && $client->getOrders()->isEmpty()
+            && $client->getBoxes()->isEmpty() && !$client->getOutLocation()
+            && $client->getClients()->isEmpty()) {
+            $manager->remove($client);
+            $manager->flush();
+
+            return $this->json([
+                "success" => true,
+                "message" => "Client <strong>{$client->getName()}</strong> supprimé avec succès",
+                "redirect" => $this->generateUrl("clients_list"),
+            ]);
+        } else {
             $client->setActive(false);
             $manager->flush();
 
             return $this->json([
                 "success" => true,
                 "message" => "Client <strong>{$client->getName()}</strong> désactivé avec succès",
-            ]);
-        } else {
-            return $this->json([
-                "success" => false,
-                "reload" => true,
-                "message" => "Le client n'existe pas",
+                "redirect" => $this->generateUrl("clients_list"),
             ]);
         }
     }

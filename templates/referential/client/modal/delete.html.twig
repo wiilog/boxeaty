@@ -3,13 +3,17 @@
         <div class="modal-content">
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
             <div class="delete-image"></div>
-            {% if client.boxes | length > 0 or client.boxRecords | length > 0 or client.outLocation %}
-                <h1>Ce client est lié à un ou plusieurs mouvements ou Box</h1>
+            {% if client.boxes | length > 0 or client.boxRecords | length > 0 or client.orders | length > 0 or client.outLocation %}
+                {% set delete = false %}
+
+                <h1>Ce client est lié à un ou plusieurs mouvements, Box, emplacements ou commandes client</h1>
                 <p class="text-center">
                     Vous ne pouvez pas le supprimer.<br>
                     Voulez-vous le désactiver ?
                 </p>
             {% elseif client.clients | length > 0 %}
+                {% set delete = false %}
+
                 <h1>Ce client est un client multi-site et est lié à d'autres clients</h1>
                 <p class="text-center">
                     Vous ne pouvez pas le supprimer.<br>
@@ -23,7 +27,7 @@
 
             <div class="footer">
                 <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="submit" class="primary">{{ (client.boxes | length > 0 or client.boxRecords | length > 0 or client.outLocation) ? 'Désactiver' : 'Supprimer' }}</button>
+                <button type="submit" class="primary">{{ delete ?? true ? 'Supprimer' : 'Désactiver' }}</button>
             </div>
         </div>
     </div>

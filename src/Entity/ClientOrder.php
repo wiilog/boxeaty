@@ -48,7 +48,7 @@ class ClientOrder {
     private ?Collection $lines;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Client::class)
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="orders")
      */
     private ?Client $client = null;
 
@@ -181,7 +181,12 @@ class ClientOrder {
     }
 
     public function setClient(?Client $client): self {
+        if($this->client && $this->client !== $client) {
+            $this->client->removeOrder($this);
+        }
         $this->client = $client;
+        $client?->addOrder($this);
+
         return $this;
     }
 
@@ -197,7 +202,7 @@ class ClientOrder {
     /**
      * @return Collection|OrderStatusHistory[]
      */
-    public function getOrderStatusHistory(): Collection {
+    public function getOrderStatusHistory(): Collection|array {
         return $this->orderStatusHistory;
     }
 

@@ -120,6 +120,10 @@ function treatFetchCallback(json) {
         return;
     }
 
+    if(json.redirect) {
+        window.location.href = json.redirect;
+    }
+
     if(json.success === false && json.message) {
         Flash.add(ERROR, json.message);
     } else if(json.success === true && json.message) {
