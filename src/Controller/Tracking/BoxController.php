@@ -57,7 +57,7 @@ class BoxController extends AbstractController {
                 "id" => $box->getId(),
                 "number" => $box->getNumber(),
                 "creationDate" => FormatHelper::datetime($box->getCreationDate()),
-                "isBox" => $box->isBox() ? 'Oui' : 'Non',
+                "isBox" => $box->isBox() ? 'Box' : 'Caisse',
                 "location" => FormatHelper::named($box->getLocation()),
                 "state" => BoxService::BOX_STATES[$box->getState()] ?? "-",
                 "quality" => FormatHelper::named($box->getQuality()),
