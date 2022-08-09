@@ -11,7 +11,7 @@
     } %}
     {% include('filters/filter_items/any_location_item.html.twig') %}
     {% include('filters/filter_items/list_item.html.twig') with {
-        elements: constant('App\\Service\\BoxStateService::BOX_STATES'),
+        elements: constant('App\\Service\\BoxService::BOX_STATES'),
         name: 'state',
         placeholder: 'Etat'
     } %}

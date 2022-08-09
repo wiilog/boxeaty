@@ -164,7 +164,7 @@ class ExportService {
     public const BOX_HEADER = [
         "Code",
         "Date de création",
-        "Box",
+        "Box ou caisse",
         "Emplacement",
         "Etat",
         "Qualité",

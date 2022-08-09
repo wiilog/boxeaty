@@ -19,7 +19,7 @@ $(document).ready(() => {
             {data: `id`, class: `d-none`},
             {data: `number`, title: `Code`},
             {data: `creationDate`, title: `Date de création`},
-            {data: `isBox`, title: `Box`},
+            {data: `isBox`, title: `Box ou caisse`},
             {data: `location`, title: `Emplacement`},
             {data: `state`, title: `Etat`},
             {data: `quality`, title: `Qualité`},
