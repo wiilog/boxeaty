@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Box;
 use App\Entity\BoxRecord;
+use App\Entity\Client;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use App\Service\BoxService;
@@ -22,8 +23,8 @@ class BoxRecordRepository extends EntityRepository {
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
-    public function iterateAll() {
-        return $this->createQueryBuilder("record")
+    public function iterateAll(Client $client = null): iterable {
+        $qb = $this->createQueryBuilder("record")
             ->select("record.date AS date")
             ->addSelect("location.name AS location_name")
             ->addSelect("box.number AS box_number")
@@ -36,7 +37,14 @@ class BoxRecordRepository extends EntityRepository {
             ->leftJoin("record.box", "box")
             ->leftJoin("record.quality", "quality")
             ->leftJoin("record.client", "client")
-            ->leftJoin("record.user", "user")
+            ->leftJoin("record.user", "user");
+
+        if ($client) {
+            $qb->where("client = :client")
+                ->setParameter("client", $client);
+        }
+
+        return $qb
             ->getQuery()
             ->toIterable();
     }

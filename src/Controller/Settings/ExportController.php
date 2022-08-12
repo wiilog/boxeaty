@@ -56,7 +56,7 @@ class ExportController extends AbstractController {
         $to = new DateTime($query->get('to'));
 
         $clientOrderOneTimeServiceArray = [];
-        $clientOrderLines = $clientOrderRepository->findByType(OrderType::ONE_TIME_SERVICE, $from, $to);
+        $clientOrderLines = $clientOrderRepository->iterateAll(OrderType::ONE_TIME_SERVICE, $from, $to);
 
         $brokenBoxGroupedByType = $boxRepository->countBrokenGroupedByType();
         $depositoryValidGroupedByType = $depositTicketRepository->countByStatusGroupedByType(DepositTicket::VALID);
@@ -103,7 +103,7 @@ class ExportController extends AbstractController {
         $from = new DateTime($query->get('from'));
         $to = new DateTime($query->get('to'));
 
-        $clientOrderLines = $clientOrderRepository->findByType(OrderType::AUTONOMOUS_MANAGEMENT, $from, $to);
+        $clientOrderLines = $clientOrderRepository->iterateAll(OrderType::AUTONOMOUS_MANAGEMENT, $from, $to);
         $cratePatternAmounts = $clientRepository->getCratePatternAmountGroupedByClient();
 
         $preparationLines = $preparationLineRepository->countDeliveredByType($from, $to);
@@ -144,7 +144,7 @@ class ExportController extends AbstractController {
         $from = new DateTime($query->get('from'));
         $to = new DateTime($query->get('to'));
 
-        $clientOrderLines = $clientOrderRepository->findByType(OrderType::PURCHASE_TRADE, $from, $to);
+        $clientOrderLines = $clientOrderRepository->iterateAll(OrderType::PURCHASE_TRADE, $from, $to);
         $starterKit = $manager->getRepository(BoxType::class)->findOneBy(['name' => BoxType::STARTER_KIT]);
 
         $clientOrderLinesData = Stream::from($clientOrderLines)
@@ -181,7 +181,7 @@ class ExportController extends AbstractController {
         $from = new DateTime($query->get('from'));
         $to = new DateTime($query->get('to'));
 
-        $clientOrderLines = $clientOrderRepository->findByType(OrderType::RECURRENT, $from, $to);
+        $clientOrderLines = $clientOrderRepository->iterateAll(OrderType::RECURRENT, $from, $to);
         $starterKit = $manager->getRepository(BoxType::class)->findOneBy(['name' => BoxType::STARTER_KIT]);
 
         $clientOrderLinesData = Stream::from($clientOrderLines)

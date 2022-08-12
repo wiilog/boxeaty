@@ -19,7 +19,7 @@
         <div class="col-6">
             <div class="row w-100">
                 <div class="row contact-information p-3">
-                    <div class="row col-8">
+                    <div class="row col-7">
                         <div class="d-flex">
                             <span class="subtitle text-uppercase pe-3">{{ client.name }}</span>
                             {% if client.multiSite %}
@@ -31,13 +31,19 @@
                         <span class="body-text mt-2">{{ client.contact ? client.contact.username : 'Aucun contact' }} - {{ client.phoneNumber }}</span>
                         <span class="font-italic">Droits indicateurs: {{ client.contact and constant('App\\Entity\\Role::VIEW_INDICATORS') in client.contact.role.permissions ? 'oui' : 'non' }}</span>
                     </div>
-                    <div class="col-4 p-0 d-flex justify-content-end">
-                    <span class="edit-client round" data-id="{{ client.id }}">
-                        <i class="icon bxi bxi-edit-circle cursor-pointer"></i>
-                    </span>
-                        <span class="delete-client round" data-id="{{ client.id }}">
-                        <i class="icon bxi bxi-trash-circle cursor-pointer"></i>
-                    </span>
+                    <div class="col-5 p-0 d-flex flex-column">
+                        <div class="d-flex align-self-end mb-3 mt-auto">
+                            <span class="edit-client round" data-id="{{ client.id }}">
+                                <i class="icon bxi bxi-edit-circle cursor-pointer"></i>
+                            </span>
+                            <span class="delete-client round" data-id="{{ client.id }}">
+                                <i class="icon bxi bxi-trash-circle cursor-pointer"></i>
+                            </span>
+                        </div>
+                        <div class="export-client align-self-end">
+                            <a href="{{ path('export_client_details', {client: client.id}) }}" class="outline"><i class="icon fas fa-download"></i> Export au
+                                format XLS</a>
+                        </div>
                     </div>
                 </div>
                 <div class="col-8">

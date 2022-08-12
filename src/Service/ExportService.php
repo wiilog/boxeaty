@@ -6,6 +6,7 @@ use App\Entity\Box;
 use App\Entity\BoxRecord;
 use App\Entity\BoxType;
 use App\Entity\Client;
+use App\Entity\ClientOrder;
 use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
@@ -29,6 +30,12 @@ class ExportService {
         Box::class => "Box",
         BoxRecord::class => "Mouvements",
         DepositTicket::class => "Tickets-consigne",
+        "OneClient" => "Client",
+        "ClientOrderHeaderOneTime" => "Commandes prestation ponctuelle",
+        "ClientOrderHeaderAutonomousManagement" => "Commandes prestation autonome",
+        "ClientOrderTrade" => "Commandes d'achat négoce",
+        "ClientOrderRecurrent" => "Commandes récurrentes",
+        "Indicator" => "Indicateurs",
         Client::class => "Clients",
         Group::class => "Groupes",
         Location::class => "Emplacements",
@@ -37,6 +44,13 @@ class ExportService {
         User::class => "Utilisateurs",
         Role::class => "Rôles",
         Quality::class => "Qualités",
+    ];
+
+    public const CLIENT_ORDER_MATCHES = [
+        "ClientOrderHeaderOneTime",
+        "ClientOrderHeaderAutonomousManagement",
+        "ClientOrderTrade",
+        "ClientOrderRecurrent",
     ];
 
     public const USER_HEADER = [
@@ -172,6 +186,14 @@ class ExportService {
         "Type",
     ];
 
+    public const INDICATOR_HEADER = [
+        "Quantité de déchets évités",
+        "Nombre de contenants utilisés",
+        "Distance parcourue en mobilité douce",
+        "Distance parcourue en véhicule à moteur",
+        "Taux de retour",
+    ];
+
     public const ENCODING_UTF8 = "UTF8";
     public const ENCODING_WINDOWS = "WINDOWS";
 
@@ -227,23 +249,30 @@ class ExportService {
         fputcsv($handle, $encodedRow, ";");
     }
 
-    public function addWorksheet(Spreadsheet $spreadsheet, string $class, array $header, callable $transformer = null): Worksheet {
-        $sheet = new Worksheet(null, self::ENTITY_NAME[$class]);
-        $repository = $this->manager->getRepository($class);
-        if(!method_exists($repository, "iterateAll")) {
-            throw new RuntimeException("The $class repository must have an iterateAll method to be exported");
+    public function addWorksheet(Spreadsheet $spreadsheet, string $class, array $header, callable $transformer = null, array $options = [], bool $fromClient = false): Worksheet {
+        $sheet = new Worksheet(null, $fromClient ? self::ENTITY_NAME["OneClient"] : self::ENTITY_NAME[$class]);
+        $class = in_array($class, self::CLIENT_ORDER_MATCHES) ? ClientOrder::class : $class;
+        if (class_exists($class)) {
+            $repository = $this->manager->getRepository($class);
+            if(!method_exists($repository, "iterateAll")) {
+                throw new RuntimeException("The $class repository must have an iterateAll method to be exported");
+            }
+            $export = Stream::from($repository->iterateAll(...$options))
+                ->map(function($row) use ($transformer) {
+                    if($transformer) {
+                        $row = $transformer($row);
+                    }
+
+                    return $this->stringify($row);
+                })
+                ->prepend($header)
+                ->toArray();
         }
-
-        $export = Stream::from($repository->iterateAll())
-            ->map(function($row) use ($transformer) {
-                if($transformer) {
-                    $row = $transformer($row);
-                }
-
-                return $this->stringify($row);
-            })
-            ->prepend($header)
-            ->toArray();
+        else {
+            $export = Stream::from(...$options)
+                ->prepend($header)
+                ->toArray();
+        }
 
         $sheet->fromArray($export);
         $spreadsheet->addSheet($sheet);

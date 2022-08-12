@@ -21,8 +21,8 @@ class ClientRepository extends EntityRepository {
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
-    public function iterateAll() {
-        return $this->createQueryBuilder("client")
+    public function iterateAll(Client $client = null): iterable {
+        $qb = $this->createQueryBuilder("client")
             ->select("client.name AS name")
             ->addSelect("client.active AS active")
             ->addSelect("client.address AS address")
@@ -32,8 +32,14 @@ class ClientRepository extends EntityRepository {
             ->addSelect("client.isMultiSite AS isMultiSite")
             ->leftJoin("client.group", "join_group")
             ->leftJoin("client.linkedMultiSite", "join_linkedMultiSite")
-            ->leftJoin("client.contact", "join_contact")
-            ->getQuery()
+            ->leftJoin("client.contact", "join_contact");
+
+        if ($client) {
+            $qb->where("client = :client")
+                ->setParameter("client", $client);
+        }
+
+        return $qb->getQuery()
             ->toIterable();
     }
 

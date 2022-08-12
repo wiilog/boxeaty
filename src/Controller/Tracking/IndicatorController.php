@@ -12,6 +12,7 @@ use App\Entity\Delivery;
 use App\Entity\DeliveryMethod;
 use App\Entity\DeliveryRound;
 use App\Entity\Role;
+use App\Service\IndicatorService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Snappy\Pdf;
@@ -46,7 +47,7 @@ class IndicatorController extends AbstractController {
     /**
      * @Route("/api", name="indicators_api", options={"expose": true})
      */
-    public function api(Request $request, EntityManagerInterface $manager): Response {
+    public function api(Request $request, EntityManagerInterface $manager, IndicatorService $indicatorService): Response {
         $params = $request->query->all();
         $values = [];
         $containersUsed = 0;
@@ -58,7 +59,7 @@ class IndicatorController extends AbstractController {
         if(isset($params['client'])) {
             $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(',',$params['client'])]);
             foreach ($clients as $client) {
-                $values = self::getIndicatorsValues($params, $manager, $client);
+                $values = $indicatorService->getIndicatorsValues($params, $manager, $client);
                 $returnRateNumerator += $values['returnRateNumerator'];
                 $returnRateDenominator += $values['returnRateDenominator'];
                 $containersUsed += $values['containersUsed'];
@@ -96,7 +97,7 @@ class IndicatorController extends AbstractController {
     /**
      * @Route("/print-indicators", name="print_indicators", options={"expose": true})
      */
-    public function print(Pdf $snappy, Request $request, EntityManagerInterface $manager) {
+    public function print(Pdf $snappy, Request $request, EntityManagerInterface $manager, IndicatorService $indicatorService) {
         $params = $request->request->all();
         $boxesHistoryChartBase64 = $params["boxesHistoryChartBase64"] ?? null;
         $date = (new DateTime())->format('d-m-Y');
@@ -113,7 +114,7 @@ class IndicatorController extends AbstractController {
             $clients = $manager->getRepository(Client::class)->findBy(["id" => explode(',',$params['client'])]);
             $clientName = Stream::from($clients)->map(fn(Client $client) => $client->getName())->join(",");
             foreach ($clients as $client) {
-                $values = self::getIndicatorsValues($params, $manager, $client);
+                $values = $indicatorService->getIndicatorsValues($params, $manager, $client);
                 $returnRateNumerator += $values['returnRateNumerator'];
                 $returnRateDenominator += $values['returnRateDenominator'];
                 $containersUsed += $values['containersUsed'];
@@ -126,7 +127,7 @@ class IndicatorController extends AbstractController {
             $values['containersUsed'] = $containersUsed;
             $values['motorVehiclesTotalDistance'] = $motorVehiclesTotalDistance;
             $values['softMobilityTotalDistance'] = $softMobilityTotalDistance;
-            $values['returnRate'] = round(($returnRateNumerator * 100) / $returnRateDenominator, 2);
+            $values['returnRate'] = $returnRateDenominator !== 0 ? round(($returnRateNumerator * 100) / $returnRateDenominator, 2) : 0;
         } else {
             $values['wasteAvoided'] = '--';
             $values['containersUsed'] = '--';
@@ -169,123 +170,6 @@ class IndicatorController extends AbstractController {
         $response->setContent($pdf);
 
         return $response;
-    }
-
-    private static function getIndicatorsValues(array $params, EntityManagerInterface $manager, Client $client): array {
-        $totalQuantityDelivered = 0;
-        $softMobilityTotalDistance = 0;
-        $motorVehiclesTotalDistance = 0;
-        $returnRateNumerator = 0;
-        $returnRateDenominator = 0;
-        $chartLabels = [];
-        $dataDeliveredBoxs = [];
-        $dataCollectedBoxs = [];
-
-        if(!empty($params)) {
-            if(count($params) < 3) {
-                return [
-                    "success" => false,
-                    "message" => "Vous devez renseigner les 3 filtres",
-                ];
-            } else {
-                $deliveryRepository = $manager->getRepository(Delivery::class);
-                $deliveryRoundsRepository = $manager->getRepository(DeliveryRound::class);
-                $collectRepository = $manager->getRepository(Collect::class);
-                $clientRepository = $manager->getRepository(Client::class);
-                $clientOrderRepository = $manager->getRepository(ClientOrder::class);
-
-                $startDate = DateTime::createFromFormat("Y-m-d", $params["from"]);
-                $endDate = DateTime::createFromFormat("Y-m-d", $params["to"]);
-
-                for($i = clone $startDate; $i <= $endDate; $i->modify("+1 day")) {
-                    $chartLabels[] = $i->format("d/m/Y");
-                    $dateMin = clone $i;
-                    $dateMax = clone $i;
-                    $dateMin->setTime(0, 0, 0);
-                    $dateMax->setTime(23, 59, 59);
-
-                    $dataDeliveredBoxs[] = $deliveryRepository->getTotalQuantityByClientAndDeliveredDate($client, $dateMin, $dateMax) ?? 0;
-                    $dataCollectedBoxs[] = $collectRepository->getTotalQuantityByClientAndCollectedDate($client, $dateMin, $dateMax) ?? 0;
-                }
-
-                if(array_sum($dataDeliveredBoxs)) {
-                    $returnRateNumerator += array_sum($dataCollectedBoxs);
-                    $returnRateDenominator += array_sum($dataDeliveredBoxs);
-                }
-
-                $isMultiSite = $client->isMultiSite();
-                $dateMin = clone $startDate;
-                $dateMax = clone $endDate;
-                $dateMin->setTime(0, 0);
-                $dateMax->setTime(23, 59, 59);
-                $totalQuantityDelivered = $clientOrderRepository->findQuantityDeliveredBetweenDateAndClient($dateMin, $dateMax, $client);
-                $softMobilityTotalDistance = $deliveryRoundsRepository->findDeliveryTotalDistance($dateMin, $dateMax, $client, [DeliveryMethod::BIKE]);
-                $motorVehiclesTotalDistance = $deliveryRoundsRepository->findDeliveryTotalDistance($dateMin, $dateMax, $client, [DeliveryMethod::LIGHT_TRUCK, DeliveryMethod::HEAVY_TRUCK]);
-                $softMobilityTotalDistance = Stream::from($softMobilityTotalDistance)
-                    ->map(fn(array $distance) => intval($distance["distance"]))
-                    ->sum();
-                $motorVehiclesTotalDistance = Stream::from($motorVehiclesTotalDistance)
-                    ->map(fn(array $distance) => intval($distance["distance"]))
-                    ->sum();
-
-                if($isMultiSite) {
-
-                    $group = $client->getGroup();
-                    $clients = $clientRepository->findBy(['group' => $group]);
-
-                    foreach($clients as $subClient) {
-                        if($client->getId() !== $subClient->getId()) {
-                            $totalQuantityDelivered += $clientOrderRepository->findQuantityDeliveredBetweenDateAndClient($dateMin, $dateMax, $subClient);
-                            $subClientSoftMobilityTotalDistance = $deliveryRoundsRepository->findDeliveryTotalDistance($dateMin, $dateMax, $subClient, [DeliveryMethod::BIKE]);
-                            $subClientMotorVehiclesTotalDistance = $deliveryRoundsRepository->findDeliveryTotalDistance($dateMin, $dateMax, $subClient, [DeliveryMethod::LIGHT_TRUCK, DeliveryMethod::HEAVY_TRUCK]);
-                            $softMobilityTotalDistance += Stream::from($subClientSoftMobilityTotalDistance)
-                                ->map(fn(array $distance) => intval($distance["distance"]))
-                                ->sum();
-                            $motorVehiclesTotalDistance += Stream::from($subClientMotorVehiclesTotalDistance)
-                                ->map(fn(array $distance) => intval($distance["distance"]))
-                                ->sum();
-                        }
-                    }
-                }
-            }
-        }
-
-        $config = [
-            'type' => 'line',
-            'data' => [
-                'labels' => $chartLabels,
-                'datasets' => [
-                    [
-                        'label' => "Box livrées",
-                        'data' => $dataDeliveredBoxs,
-                        'backgroundColor' => ['#EB611B'],
-                        'borderColor' => ['#EB611B'],
-                    ],
-                    [
-                        'label' => "Box collectées",
-                        'data' => $dataCollectedBoxs,
-                        'backgroundColor' => ['#76B39D'],
-                        'borderColor' => ['#76B39D'],
-                    ],
-                ],
-                'scales' => [
-                    'y' => [
-                        'beginAtZero' => false,
-                    ],
-                ],
-            ],
-        ];
-
-        return [
-            "success" => true,
-            "containersUsed" => !empty($params) ? $totalQuantityDelivered : '--',
-            "wasteAvoided" => !empty($params) ? (($totalQuantityDelivered * 35) / 1000) : '--',
-            "softMobilityTotalDistance" => !empty($params) ? $softMobilityTotalDistance : '--',
-            "motorVehiclesTotalDistance" => !empty($params) ? $motorVehiclesTotalDistance : '--',
-            "returnRateNumerator" => !empty($params) ? $returnRateNumerator : '--',
-            "returnRateDenominator" => !empty($params) ? $returnRateDenominator : '--',
-            "chart" => json_encode($config),
-        ];
     }
 
 }
