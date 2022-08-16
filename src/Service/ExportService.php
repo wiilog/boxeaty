@@ -6,6 +6,7 @@ use App\Entity\Box;
 use App\Entity\BoxRecord;
 use App\Entity\BoxType;
 use App\Entity\Client;
+use App\Entity\ClientOrder;
 use App\Entity\Depository;
 use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
@@ -15,6 +16,7 @@ use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\User;
 use DateTime;
+use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -29,6 +31,8 @@ class ExportService {
         Box::class => "Box",
         BoxRecord::class => "Mouvements",
         DepositTicket::class => "Tickets-consigne",
+        "OneClient" => "Client",
+        "Indicator" => "Indicateurs",
         Client::class => "Clients",
         Group::class => "Groupes",
         Location::class => "Emplacements",
@@ -172,11 +176,22 @@ class ExportService {
         "Type",
     ];
 
+    public const INDICATOR_HEADER = [
+        "Quantité de déchets évités",
+        "Nombre de contenants utilisés",
+        "Distance parcourue en mobilité douce",
+        "Distance parcourue en véhicule à moteur",
+        "Taux de retour",
+    ];
+
     public const ENCODING_UTF8 = "UTF8";
     public const ENCODING_WINDOWS = "WINDOWS";
 
     private EntityManagerInterface $manager;
     private ?string $encoding;
+
+    /** @Required */
+    public ClientOrderService $clientOrderService;
 
     public function __construct(EntityManagerInterface $manager) {
         $this->manager = $manager;
@@ -227,21 +242,44 @@ class ExportService {
         fputcsv($handle, $encodedRow, ";");
     }
 
-    public function addWorksheet(Spreadsheet $spreadsheet, string $class, array $header, callable $transformer = null): Worksheet {
+    public function addWorksheet(Spreadsheet $spreadsheet, string $class, array $header, callable $transformer = null, array $options = []): Worksheet {
         $sheet = new Worksheet(null, self::ENTITY_NAME[$class]);
-        $repository = $this->manager->getRepository($class);
-        if(!method_exists($repository, "iterateAll")) {
-            throw new RuntimeException("The $class repository must have an iterateAll method to be exported");
+        if (class_exists($class)) {
+            $repository = $this->manager->getRepository($class);
+            if(!method_exists($repository, "iterateAll")) {
+                throw new RuntimeException("The $class repository must have an iterateAll method to be exported");
+            }
+            $export = Stream::from($repository->iterateAll(...$options))
+                ->map(function($row) use ($transformer) {
+                    if($transformer) {
+                        $row = $transformer($row);
+                    }
+
+                    return $this->stringify($row);
+                })
+                ->prepend($header)
+                ->toArray();
+        }
+        else {
+            $export = Stream::from(...$options)
+                ->prepend($header)
+                ->toArray();
         }
 
-        $export = Stream::from($repository->iterateAll())
-            ->map(function($row) use ($transformer) {
-                if($transformer) {
-                    $row = $transformer($row);
-                }
+        $sheet->fromArray($export);
+        $spreadsheet->addSheet($sheet);
+        return $sheet;
+    }
 
-                return $this->stringify($row);
-            })
+    public function addClientOrderWorksheet(Spreadsheet $spreadsheet, string $name, array $header, string $type, Client $client): Worksheet {
+        $sheet = new Worksheet(null, $name);
+        $now = new DateTime();
+
+        $clientOrderRepository = $this->manager->getRepository(ClientOrder::class);
+        $clientOrderLines = $clientOrderRepository->findByType($type, $now, null, $client);
+        $mappedClientOrderLines = $this->clientOrderService->clientOrderLinesMapper($type, $clientOrderLines);
+
+        $export = Stream::from($mappedClientOrderLines)
             ->prepend($header)
             ->toArray();
 

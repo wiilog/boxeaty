@@ -25,8 +25,8 @@ class BoxRepository extends EntityRepository {
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
-    public function iterateAll() {
-        return $this->createQueryBuilder("box")
+    public function iterateAll(Client $client = null): iterable {
+        $qb = $this->createQueryBuilder("box")
             ->select("box.number AS number")
             ->addSelect("box.creationDate AS creationDate")
             ->addSelect("IF(box.isBox = 1, 'Box', 'Caisse') AS isBox")
@@ -38,7 +38,14 @@ class BoxRepository extends EntityRepository {
             ->leftJoin("box.location", "join_location")
             ->leftJoin("box.quality", "join_quality")
             ->leftJoin("box.owner", "join_owner")
-            ->leftJoin("box.type", "join_type")
+            ->leftJoin("box.type", "join_type");
+
+        if ($client) {
+            $qb->where("join_owner = :client")
+                ->setParameter("client", $client);
+        }
+
+        return $qb
             ->getQuery()
             ->toIterable();
     }

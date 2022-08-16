@@ -44,21 +44,30 @@ class DeliveryRoundRepository extends EntityRepository {
             ->getResult();
     }
 
-    public function findDeliveryTotalDistance(DateTime $from, DateTime $to, Client $client, array $deliveryMethod) {
-        return $this->createQueryBuilder("delivery_round")
+    public function findDeliveryTotalDistance(DateTime $to, Client $client, array $deliveryMethod, DateTime $from = null) {
+        $qb = $this->createQueryBuilder("delivery_round")
             ->select('delivery_round.distance')
             ->leftJoin("delivery_round.orders", "client_orders")
             ->leftJoin("client_orders.client", "client")
             ->leftJoin("client_orders.delivery", "delivery")
             ->leftJoin("delivery_round.deliveryMethod", "delivery_method")
-            ->andWhere("delivery.deliveredAt BETWEEN :from AND :to")
+            ->andWhere($from
+                ? 'delivery.deliveredAt BETWEEN :from AND :to'
+                : 'delivery.deliveredAt <= :to')
             ->andWhere("client_orders.client = :client")
             ->andWhere("delivery_method.type IN (:type)")
-            ->setParameter("from", $from)
-            ->setParameter("to", $to)
-            ->setParameter("client", $client)
-            ->setParameter("type", $deliveryMethod)
-            ->groupBy("delivery_round.id")
+            ->setParameters([
+                "to" => $to,
+                "client" => $client,
+                "type" => $deliveryMethod
+            ])
+            ->groupBy("delivery_round.id");
+
+        if ($from) {
+            $qb->setParameter("from", $from);
+        }
+
+        return $qb
             ->getQuery()
             ->getResult();
     }

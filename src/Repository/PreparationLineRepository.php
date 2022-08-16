@@ -16,7 +16,7 @@ use WiiCommon\Helper\Stream;
  */
 class PreparationLineRepository extends EntityRepository {
 
-    public function countDeliveredByType(DateTime $from, DateTime $to): array {
+    public function countDeliveredByType(DateTime $to, DateTime $from = null): array {
         $res = $this->createQueryBuilder('line')
             ->select('COUNT(line.id) AS count')
             ->addSelect('join_type.id AS type')
@@ -26,14 +26,19 @@ class PreparationLineRepository extends EntityRepository {
             ->join('join_preparation.order', 'join_order')
             ->join('join_order.delivery', 'join_delivery')
             ->join('join_delivery.status', 'join_status')
-            ->andWhere('join_delivery.deliveredAt BETWEEN :from AND :to')
+            ->andWhere($from
+                   ? 'join_delivery.deliveredAt BETWEEN :from AND :to'
+                   : 'join_delivery.deliveredAt <= :to')
             ->andWhere('join_status.code = :delivered_status')
             ->groupBy('join_type.id')
-            ->setParameter('from', $from)
             ->setParameter('to', $to)
             ->setParameter('delivered_status', Status::CODE_DELIVERY_DELIVERED)
             ->getQuery()
             ->getResult();
+
+        if($from) {
+            $res->setParameter('from', $from);
+        }
 
         return Stream::from($res)
             ->keymap(fn(array $line) => [$line['type'], $line['count']])

@@ -4,8 +4,10 @@ namespace App\Controller\Referential;
 
 use App\Annotation\HasPermission;
 use App\Controller\AbstractController;
+use App\Entity\Box;
 use App\Entity\BoxType;
 use App\Entity\Client;
+use App\Entity\ClientOrder;
 use App\Entity\ClientOrderInformation;
 use App\Entity\CratePatternLine;
 use App\Entity\DeliveryMethod;
@@ -14,15 +16,20 @@ use App\Entity\GlobalSetting;
 use App\Entity\Group;
 use App\Entity\Location;
 use App\Entity\OrderRecurrence;
+use App\Entity\OrderType;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Helper\Form;
 use App\Helper\FormatHelper;
 use App\Repository\ClientRepository;
+use App\Service\BoxService;
 use App\Service\ClientService;
 use App\Service\ExportService;
+use App\Service\IndicatorService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -389,6 +396,34 @@ class ClientController extends AbstractController {
                 $exportService->putLine($output, $client);
             }
         }, "export-clients-$today.csv", ExportService::CLIENT_HEADER);
+    }
+
+    /**
+     * @Route("/export/{client}", name="export_client_details")
+     * @HasPermission(Role::MANAGE_CLIENTS)
+     */
+    public function exportClientDetails(EntityManagerInterface $manager, ExportService $service, Client $client, IndicatorService $indicatorService): Response {
+
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->disconnectWorksheets();
+
+        $now = new DateTime();
+        $values = $indicatorService->getIndicatorsValues(["from" => $now, "to" => $now], $manager, $client, true);
+
+        $service->addWorksheet($spreadsheet, Client::class, ExportService::CLIENT_HEADER, null, [$client]);
+        $service->addWorksheet($spreadsheet, Box::class, ExportService::BOX_HEADER, $service->stateMapper(BoxService::BOX_STATES), [$client]);
+        $service->addClientOrderWorksheet($spreadsheet, "Commandes prestation ponctuelle", ExportService::CLIENT_ORDER_HEADER_ONE_TIME, OrderType::ONE_TIME_SERVICE, $client);
+        $service->addClientOrderWorksheet($spreadsheet, "Commandes prestation autonome", ExportService::CLIENT_ORDER_HEADER_AUTONOMOUS_MANAGEMENT, OrderType::AUTONOMOUS_MANAGEMENT, $client);
+        $service->addClientOrderWorksheet($spreadsheet, "Commandes d'achat négoce", ExportService::CLIENT_ORDER_TRADE, OrderType::PURCHASE_TRADE, $client);
+        $service->addClientOrderWorksheet($spreadsheet, "Commandes récurrentes", ExportService::CLIENT_ORDER_TRADE, OrderType::RECURRENT, $client);
+        $service->addWorksheet($spreadsheet, "Indicator", ExportService::INDICATOR_HEADER, null, [[$values]]);
+
+        $file = "exports/export-client-" . bin2hex(random_bytes(8)) . ".xlsx";
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($file);
+
+        return $this->redirect("/$file");
     }
 
     /**
