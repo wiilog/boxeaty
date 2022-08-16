@@ -404,15 +404,15 @@ class ClientController extends AbstractController {
         $now = new DateTime();
         $values = $indicatorService->getIndicatorsValues(["from" => $now, "to" => $now], $manager, $client, true);
 
-        $service->addWorksheet($spreadsheet, Client::class, ExportService::CLIENT_HEADER, null, [$client], true);
+        $service->addWorksheet($spreadsheet, Client::class, ExportService::CLIENT_HEADER, null, [$client]);
         $service->addWorksheet($spreadsheet, Box::class, ExportService::BOX_HEADER, $service->stateMapper(BoxService::BOX_STATES), [$client]);
-        $service->addWorksheet($spreadsheet, "ClientOrderHeaderOneTime", ExportService::CLIENT_ORDER_HEADER_ONE_TIME, null, [OrderType::ONE_TIME_SERVICE, $now, null, $client]);
-        $service->addWorksheet($spreadsheet, "ClientOrderHeaderAutonomousManagement", ExportService::CLIENT_ORDER_HEADER_AUTONOMOUS_MANAGEMENT, null, [OrderType::AUTONOMOUS_MANAGEMENT, $now, null, $client]);
-        $service->addWorksheet($spreadsheet, "ClientOrderTrade", ExportService::CLIENT_ORDER_TRADE, null, [OrderType::PURCHASE_TRADE, $now, null, $client]);
-        $service->addWorksheet($spreadsheet, "ClientOrderRecurrent", ExportService::CLIENT_ORDER_TRADE, null, [OrderType::PURCHASE_TRADE, $now, null, $client]);
+        $service->addClientOrderWorksheet($spreadsheet, "Commandes prestation ponctuelle", ExportService::CLIENT_ORDER_HEADER_ONE_TIME, OrderType::ONE_TIME_SERVICE, $client);
+        $service->addClientOrderWorksheet($spreadsheet, "Commandes prestation autonome", ExportService::CLIENT_ORDER_HEADER_AUTONOMOUS_MANAGEMENT, OrderType::AUTONOMOUS_MANAGEMENT, $client);
+        $service->addClientOrderWorksheet($spreadsheet, "Commandes d'achat négoce", ExportService::CLIENT_ORDER_TRADE, OrderType::PURCHASE_TRADE, $client);
+        $service->addClientOrderWorksheet($spreadsheet, "Commandes récurrentes", ExportService::CLIENT_ORDER_TRADE, OrderType::RECURRENT, $client);
         $service->addWorksheet($spreadsheet, "Indicator", ExportService::INDICATOR_HEADER, null, [[$values]]);
 
-        $file = "exports/export-general-" . bin2hex(random_bytes(8)) . ".xlsx";
+        $file = "exports/export-client-" . bin2hex(random_bytes(8)) . ".xlsx";
 
         $writer = new Xlsx($spreadsheet);
         $writer->save($file);

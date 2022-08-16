@@ -67,7 +67,8 @@ class DeliveryRoundRepository extends EntityRepository {
             $qb->setParameter("from", $from);
         }
 
-        return $qb->getQuery()
+        return $qb
+            ->getQuery()
             ->getResult();
     }
 

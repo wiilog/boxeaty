@@ -34,6 +34,7 @@ class DeliveryRepository extends EntityRepository {
         $result = $qb
             ->getQuery()
             ->getSingleScalarResult();
+
         return $result ? intval($result) : 0;
     }
 

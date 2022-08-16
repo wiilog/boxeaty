@@ -26,7 +26,7 @@ class ClientOrderRepository extends EntityRepository {
     private const DEFAULT_DATATABLE_START = 0;
     private const DEFAULT_DATATABLE_LENGTH = 10;
 
-    public function iterateAll(string $type, DateTime $dateMax, DateTime $dateMin = null, Client $client = null) {
+    public function findByType(string $type, DateTime $dateMax, DateTime $dateMin = null, Client $client = null) {
         $qb = $this->createQueryBuilder("client_order")
             ->select('client_order.number as number')
             ->addSelect('client_order.automatic as automatic')
@@ -46,6 +46,7 @@ class ClientOrderRepository extends EntityRepository {
             ->addSelect('information.workingDayDeliveryRate as workingDayDeliveryRate')
             ->addSelect('information.nonWorkingDayDeliveryRate as nonWorkingDayDeliveryRate')
             ->leftJoin('client_order.client', 'client')
+            ->leftJoin('client_order.type', 'type')
             ->leftJoin('client_order.deliveryRound', 'deliveryRound')
             ->leftJoin('client_order.delivery', 'delivery')
             ->leftJoin('client.clientOrderInformation', 'information')
@@ -55,16 +56,12 @@ class ClientOrderRepository extends EntityRepository {
             ->andWhere($dateMin
                 ? 'client_order.createdAt BETWEEN :dateMin AND :dateMax'
                 : 'client_order.createdAt <= :dateMax')
+            ->andWhere("type.code = :typeCode")
+            ->setParameter("typeCode", $type)
             ->setParameter('dateMax', $dateMax);
 
         if ($dateMin) {
             $qb->setParameter('dateMin', $dateMin);
-        }
-
-        if ($type) {
-            $qb->leftJoin('client_order.type', 'type')
-                ->andWhere("type.code = :typeCode")
-                ->setParameter("typeCode", $type);
         }
 
         if ($client) {

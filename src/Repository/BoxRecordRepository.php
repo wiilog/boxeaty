@@ -40,7 +40,7 @@ class BoxRecordRepository extends EntityRepository {
             ->leftJoin("record.user", "user");
 
         if ($client) {
-            $qb->where("client = :client")
+            $qb->andWhere("client = :client")
                 ->setParameter("client", $client);
         }
 

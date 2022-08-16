@@ -16,6 +16,7 @@ use App\Entity\Quality;
 use App\Entity\Role;
 use App\Entity\User;
 use DateTime;
+use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -31,10 +32,6 @@ class ExportService {
         BoxRecord::class => "Mouvements",
         DepositTicket::class => "Tickets-consigne",
         "OneClient" => "Client",
-        "ClientOrderHeaderOneTime" => "Commandes prestation ponctuelle",
-        "ClientOrderHeaderAutonomousManagement" => "Commandes prestation autonome",
-        "ClientOrderTrade" => "Commandes d'achat négoce",
-        "ClientOrderRecurrent" => "Commandes récurrentes",
         "Indicator" => "Indicateurs",
         Client::class => "Clients",
         Group::class => "Groupes",
@@ -44,13 +41,6 @@ class ExportService {
         User::class => "Utilisateurs",
         Role::class => "Rôles",
         Quality::class => "Qualités",
-    ];
-
-    public const CLIENT_ORDER_MATCHES = [
-        "ClientOrderHeaderOneTime",
-        "ClientOrderHeaderAutonomousManagement",
-        "ClientOrderTrade",
-        "ClientOrderRecurrent",
     ];
 
     public const USER_HEADER = [
@@ -200,6 +190,9 @@ class ExportService {
     private EntityManagerInterface $manager;
     private ?string $encoding;
 
+    /** @Required */
+    public ClientOrderService $clientOrderService;
+
     public function __construct(EntityManagerInterface $manager) {
         $this->manager = $manager;
         $this->encoding = $manager->getRepository(GlobalSetting::class)
@@ -249,9 +242,8 @@ class ExportService {
         fputcsv($handle, $encodedRow, ";");
     }
 
-    public function addWorksheet(Spreadsheet $spreadsheet, string $class, array $header, callable $transformer = null, array $options = [], bool $fromClient = false): Worksheet {
-        $sheet = new Worksheet(null, $fromClient ? self::ENTITY_NAME["OneClient"] : self::ENTITY_NAME[$class]);
-        $class = in_array($class, self::CLIENT_ORDER_MATCHES) ? ClientOrder::class : $class;
+    public function addWorksheet(Spreadsheet $spreadsheet, string $class, array $header, callable $transformer = null, array $options = []): Worksheet {
+        $sheet = new Worksheet(null, self::ENTITY_NAME[$class]);
         if (class_exists($class)) {
             $repository = $this->manager->getRepository($class);
             if(!method_exists($repository, "iterateAll")) {
@@ -273,6 +265,23 @@ class ExportService {
                 ->prepend($header)
                 ->toArray();
         }
+
+        $sheet->fromArray($export);
+        $spreadsheet->addSheet($sheet);
+        return $sheet;
+    }
+
+    public function addClientOrderWorksheet(Spreadsheet $spreadsheet, string $name, array $header, string $type, Client $client): Worksheet {
+        $sheet = new Worksheet(null, $name);
+        $now = new DateTime();
+
+        $clientOrderRepository = $this->manager->getRepository(ClientOrder::class);
+        $clientOrderLines = $clientOrderRepository->findByType($type, $now, null, $client);
+        $mappedClientOrderLines = $this->clientOrderService->clientOrderLinesMapper($type, $clientOrderLines);
+
+        $export = Stream::from($mappedClientOrderLines)
+            ->prepend($header)
+            ->toArray();
 
         $sheet->fromArray($export);
         $spreadsheet->addSheet($sheet);

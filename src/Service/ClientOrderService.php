@@ -13,10 +13,12 @@ use App\Entity\DepositTicket;
 use App\Entity\GlobalSetting;
 use App\Entity\OrderStatusHistory;
 use App\Entity\OrderType;
+use App\Entity\PreparationLine;
 use App\Entity\Status;
 use App\Entity\User;
 use App\Entity\WorkFreeDay;
 use App\Helper\Form;
+use App\Helper\FormatHelper;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -379,6 +381,82 @@ class ClientOrderService {
         }
 
         return $cartSplitting;
+    }
+
+    public function clientOrderLinesMapper(string $type, array $clientOrderLines, DateTime $from = null): array {
+        $boxRepository = $this->entityManager->getRepository(Box::class);
+        $boxTypeRepository = $this->entityManager->getRepository(BoxType::class);
+        $depositTicketRepository = $this->entityManager->getRepository(DepositTicket::class);
+        $clientRepository = $this->entityManager->getRepository(Client::class);
+        $preparationLineRepository = $this->entityManager->getRepository(PreparationLine::class);
+
+        $starterKit = $boxTypeRepository->findOneBy(['name' => BoxType::STARTER_KIT]);
+        $now = new DateTime();
+        $clientOrderLinesData = [];
+        switch ($type) {
+            case OrderType::RECURRENT:
+            case OrderType::PURCHASE_TRADE:
+                $clientOrderLinesData = Stream::from($clientOrderLines)
+                    ->map(fn(array $clientOrderLine) => [
+                        "clientOrder" => $clientOrderLine['number'],
+                        "boxTypeName" => $clientOrderLine['boxTypeName'],
+                        "boxAmount" => $clientOrderLine['lineQuantity'],
+                        "unitPrice" => FormatHelper::price($clientOrderLine['unitPrice']),
+                        "starterKitAmount" => FormatHelper::price($starterKit->getPrice()),
+                        "workingDayDeliveryRate" => FormatHelper::price($clientOrderLine['workingDayDeliveryRate']),
+                        "nonWorkingDayDeliveryRate" => FormatHelper::price($clientOrderLine['nonWorkingDayDeliveryRate']),
+                        "deliveryPrice" => FormatHelper::price($clientOrderLine['deliveryPrice']),
+                        "automatic" => FormatHelper::bool($clientOrderLine['automatic']),
+                    ])
+                    ->toArray();
+                break;
+            case OrderType::AUTONOMOUS_MANAGEMENT:
+                $cratePatternAmounts = $clientRepository->getCratePatternAmountGroupedByClient();
+
+                $preparationLines = $preparationLineRepository->countDeliveredByType($now, $from);
+                $clientOrderLinesData = Stream::from($clientOrderLines)
+                    ->map(fn(array $clientOrderLine) => [
+                        "clientOrder" => $clientOrderLine['number'],
+                        "deliveredBoxes" => $preparationLines[$clientOrderLine['boxTypeId']] ?? 0,
+                        "monthlyPrice" => FormatHelper::price($clientOrderLine['monthlyPrice']),
+                        "workingDayDeliveryRate" => FormatHelper::price($clientOrderLine['workingDayDeliveryRate']),
+                        "nonWorkingDayDeliveryRate" => FormatHelper::price($clientOrderLine['nonWorkingDayDeliveryRate']),
+                        "deliveryCost" => FormatHelper::price($clientOrderLine['deliveryCost']),
+                        "paymentMode" => $clientOrderLine['paymentModes'],
+                        "tokenDelivered" => $clientOrderLine['deliveryTokens'],
+                        "crateAmount" => $clientOrderLine['crateAmount'],
+                        "cratePrice" => $cratePatternAmounts[$clientOrderLine['clientId']] ?? null,
+                        "automatic" => FormatHelper::bool($clientOrderLine['automatic']),
+                    ])
+                    ->toArray();
+                break;
+            case OrderType::ONE_TIME_SERVICE:
+                $brokenBoxGroupedByType = $boxRepository->countBrokenGroupedByType();
+                $depositoryValidGroupedByType = $depositTicketRepository->countByStatusGroupedByType(DepositTicket::VALID);
+                $depositorySpentGroupedByType = $depositTicketRepository->countByStatusGroupedByType(DepositTicket::SPENT);
+
+                $clientOrderLinesData = Stream::from($clientOrderLines)
+                    ->map(function(array $clientOrderLine) use ($brokenBoxGroupedByType, $depositoryValidGroupedByType, $depositorySpentGroupedByType) {
+                        $boxType = $clientOrderLine['boxTypeId'];
+                        return [
+                            "clientOrder" => $clientOrderLine['number'],
+                            "boxTypeName" => $clientOrderLine['boxTypeName'],
+                            "boxDelivered" => $clientOrderLine['lineQuantity'],
+                            "tokenDelivered" => $clientOrderLine['deliveryTokens'],
+                            "brokenBoxes" => $brokenBoxGroupedByType[$boxType] ?? 0,
+                            "unitPrice" => FormatHelper::price($clientOrderLine['unitPrice']),
+                            "paymentMode" => $clientOrderLine['paymentModes'],
+                            "workingDayDeliveryRate" => FormatHelper::price($clientOrderLine['workingDayDeliveryRate']),
+                            "nonWorkingDayDeliveryRate" => FormatHelper::price($clientOrderLine['nonWorkingDayDeliveryRate']),
+                            "deliveryPrice" => FormatHelper::price(intval($clientOrderLine['lineQuantity']) * floatval($clientOrderLine['unitPrice'])),
+                            "depositTicketUsed" => ($depositoryValidGroupedByType[$boxType] ?? 0) - ($depositorySpentGroupedByType[$boxType] ?? 0),
+                            "automatic" => FormatHelper::bool($clientOrderLine['automatic']),
+                        ];
+                    })->toArray();
+                break;
+        }
+
+        return $clientOrderLinesData;
     }
 
 }

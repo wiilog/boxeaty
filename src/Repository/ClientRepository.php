@@ -35,11 +35,12 @@ class ClientRepository extends EntityRepository {
             ->leftJoin("client.contact", "join_contact");
 
         if ($client) {
-            $qb->where("client = :client")
+            $qb->andWhere("client = :client")
                 ->setParameter("client", $client);
         }
 
-        return $qb->getQuery()
+        return $qb
+            ->getQuery()
             ->toIterable();
     }
 
