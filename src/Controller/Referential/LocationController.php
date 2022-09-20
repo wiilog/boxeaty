@@ -93,7 +93,7 @@ class LocationController extends AbstractController {
         $params = json_decode($request->getContent(), true);
         $filters = $params['filters'] ?? [];
         $chartLabels = [];
-        $dataCustomerState = [];
+        $dataConsumerState = [];
         $dataAvailableState = [];
         $dataUnavailableState = [];
         $dataOutState = [];
@@ -102,9 +102,7 @@ class LocationController extends AbstractController {
             $depositoryRepository = $manager->getRepository(Depository::class);
             $filters = $params['filters'];
             $depository = $depositoryRepository->find($filters['depository']);
-            $locationsId = Stream::from($depository->getLocations())
-                ->map(fn(Location $location) => $location->getId())
-                ->toArray();
+
             $startDate = DateTime::createFromFormat("Y-m-d", $filters["from"]);
             $endDate = DateTime::createFromFormat("Y-m-d", $filters["to"]);
             $boxRecordRepository = $manager->getRepository(BoxRecord::class);
@@ -115,45 +113,46 @@ class LocationController extends AbstractController {
                 $dateMin->setTime(0, 0, 0);
                 $dateMax->setTime(23, 59, 59);
                 $chartLabels[] = $i->format("d/m/Y");
-                $dataCustomerState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxService::STATE_BOX_CONSUMER, $locationsId);
-                $dataOutState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxService::STATE_BOX_OUT, $locationsId);
-                $dataUnavailableState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxService::STATE_BOX_UNAVAILABLE, $locationsId);
-                $dataAvailableState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxService::STATE_BOX_AVAILABLE, $locationsId);
+                $dataConsumerState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxService::STATE_BOX_CONSUMER, $depository);
+                $dataOutState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxService::STATE_BOX_OUT, $depository);
+                $dataUnavailableState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxService::STATE_BOX_UNAVAILABLE, $depository);
+                $dataAvailableState[] = $boxRecordRepository->getNumberBoxByStateAndDate($dateMin, $dateMax, BoxService::STATE_BOX_AVAILABLE, $depository);
             }
         }
 
         $config = [
-            'type' => 'line',
-            'data' => [
-                'labels' => $chartLabels,
-                'datasets' => [
+            "type" => "line",
+            "data" => [
+                "labels" => $chartLabels,
+                "datasets" => [
                     [
-                        'label' => "Consommateur",
-                        'data' => $dataCustomerState,
-                        'backgroundColor' => ['#1E1F44'],
-                        'borderColor' => ['#1E1F44'],
+                        "label" => "Consommateur",
+                        "data" => $dataConsumerState,
+                        "backgroundColor" => ["#1E1F44"],
+                        "borderColor" => ["#1E1F44"],
                     ],
                     [
-                        'label' => "Sorti",
-                        'data' => $dataOutState,
-                        'backgroundColor' => ['#EB611B'],
-                        'borderColor' => ['#EB611B'],
+                        "label" => "Sorti",
+                        "data" => $dataOutState,
+                        "backgroundColor" => ["#EB611B"],
+                        "borderColor" => ["#EB611B"],
                     ],
                     [
-                        'label' => "Indisponible",
-                        'data' => $dataUnavailableState,
-                        'backgroundColor' => ['#890620'],
-                        'borderColor' => ['#890620'],
+                        "label" => "Indisponible",
+                        "data" => $dataUnavailableState,
+                        "backgroundColor" => ["#890620"],
+                        "borderColor" => ["#890620"],
                     ],
                     [
-                        'label' => "Disponible",
-                        'data' => $dataAvailableState,
-                        'backgroundColor' => ['#76B39D'],
-                        'borderColor' => ['#76B39D'],
+                        "label" => "Disponible",
+                        "data" => $dataAvailableState,
+                        "backgroundColor" => ["#76B39D"],
+                        "borderColor" => ["#76B39D"],
                     ],
                 ],
             ],
         ];
+
         $depositoryRepository = $manager->getRepository(Depository::class);
         $depository = isset($filters['depository']) ? $depositoryRepository->find($filters['depository']) : null;
 

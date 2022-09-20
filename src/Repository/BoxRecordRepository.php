@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Box;
 use App\Entity\BoxRecord;
 use App\Entity\Client;
+use App\Entity\Depository;
 use App\Entity\User;
 use App\Helper\QueryHelper;
 use App\Service\BoxService;
@@ -206,16 +207,17 @@ class BoxRecordRepository extends EntityRepository {
         return null;
     }
 
-    public function getNumberBoxByStateAndDate(\DateTime $startDate, \DateTime $endDate, int $state, array $clients) {
+    public function getNumberBoxByStateAndDate(\DateTime $startDate, \DateTime $endDate, int $state, Depository $depository) {
         return $this->createQueryBuilder("record")
             ->select("COUNT(DISTINCT record.id) AS result")
+            ->join("record.location", "location")
             ->andWhere("record.date BETWEEN :dateMin AND :dateMax")
             ->andWhere("record.state = :state")
-            ->andWhere("record.client in (:clients)")
+            ->andWhere("location.depository = :depository")
             ->setParameter("dateMin", $startDate)
             ->setParameter("dateMax", $endDate)
             ->setParameter("state", $state)
-            ->setParameter("clients", $clients)
+            ->setParameter("depository", $depository)
             ->getQuery()
             ->getSingleScalarResult();
     }
