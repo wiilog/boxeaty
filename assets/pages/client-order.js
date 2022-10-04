@@ -117,6 +117,14 @@ $(function() {
         $modal.find('.footer').removeClass('d-none');
     });
 
+    $document.on(`change`, `.statuses-container input[name=status]`, function () {
+        const $disclaimer = $(`#modal-edit-status-client-order`).find(`.disclaimer`);
+        const resetWorkflowStatuses = JSON.parse($(`input[name=resetWorkflowStatuses]`).val());
+        const value = parseInt($(this).val());
+
+        $disclaimer.toggleClass(`d-none`, !resetWorkflowStatuses.includes(value));
+    });
+
     $(`.filters [name="from"]`).on(`change`, function() {
         let date = new Date(this.value);
         date.setDate(date.getDate() + 30);

@@ -3,7 +3,7 @@
         <div class="modal-content">
             <button type="button" class="close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
             <h1>Modifier le statut</h1>
-            <div class="body">
+            <div class="body statuses-container">
                 {% for history in clientOrder.editableStatusHistory %}
                     <div class="row orange-toggle">
                         {% if history.status %}
@@ -28,6 +28,10 @@
                     <div class="data" data-wysiwyg="justification" data-required></div>
                 </div>
             </div>
+            <div class="mt-2 disclaimer d-none">
+                <strong>Attention :</strong> Tout changement à ce statut entrainera la suppression de la préparation liée à la commande. Si la commande est la seule de la tournée, cette dernière sera également supprimée. Cette action est irréversible.
+            </div>
+            <input type="hidden" name="resetWorkflowStatuses" value="{{ resetWorkflowStatusIndexes|json_encode }}">
             <div class="footer">
                 <button type="button" class="secondary" data-bs-dismiss="modal">Annuler</button>
                 <button type="submit" class="primary">Valider</button>

@@ -19,6 +19,12 @@ class ClientOrder {
 
     public const PREFIX_NUMBER = "CO";
 
+    public const RESET_WORKFLOW_STATUSES = [
+        Status::CODE_ORDER_TO_VALIDATE_CLIENT => 1,
+        Status::CODE_ORDER_TO_VALIDATE_BOXEATY => 2,
+        Status::CODE_ORDER_PLANNED => 3,
+    ];
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

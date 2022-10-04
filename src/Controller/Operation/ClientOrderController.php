@@ -271,6 +271,7 @@ class ClientOrderController extends AbstractController {
             "submit" => $this->generateUrl("client_order_edit_status", ["clientOrder" => $clientOrder->getId()]),
             "template" => $this->renderView("operation/client_order/modal/edit_status.html.twig", [
                 "clientOrder" => $clientOrder,
+                "resetWorkflowStatusIndexes" => array_values(ClientOrder::RESET_WORKFLOW_STATUSES),
             ]),
         ]);
     }
@@ -291,9 +292,36 @@ class ClientOrderController extends AbstractController {
         $status = $statusRepository->findOneBy(['id' => $content->status]);
 
         if($form->isValid()) {
+            $previousClientOrderStatus = $clientOrder->getStatus();
             $history = $clientOrderService->updateClientOrderStatus($clientOrder, $status, $this->getUser());
             $history->setJustification($content->justification);
             $entityManager->persist($history);
+
+            if($previousClientOrderStatus->getCode() !== $status->getCode()) {
+                if (in_array($status->getCode(), ClientOrder::RESET_WORKFLOW_STATUSES)) {
+                    if ($clientOrder->getPreparation()) {
+                        $preparationToRemove = $clientOrder->getPreparation();
+                        $clientOrder->setPreparation(null);
+                        $entityManager->remove($preparationToRemove);
+                    }
+
+                    if ($clientOrder->getDeliveryRound()) {
+                        $roundToRemove = $clientOrder->getDeliveryRound();
+                        $clientOrder->setDeliveryRound(null);
+
+                        if($roundToRemove->getOrders()->count() === 0) {
+                            $entityManager->remove($roundToRemove);
+                        }
+                    }
+                }
+
+                if($status->getCode() === Status::CODE_ORDER_TO_VALIDATE_CLIENT) {
+                    $clientOrder
+                        ->setValidator(null)
+                        ->setValidatedAt(null);
+                }
+            }
+
             $entityManager->flush();
 
             return $this->json([
